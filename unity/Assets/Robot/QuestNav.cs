@@ -508,6 +508,18 @@ public class QuestNav : MonoBehaviour
     }
     #endregion
 
+    private double getSyncedTimestamp()
+    {
+        long? timestamp = frcDataSink.Client.GetServerTimeUs();
+        if (timestamp == null)
+        {
+            return 0.0;
+        } else
+        {
+            return timestamp.Value / 1e6; // Convert from nanoseconds to seconds timestamp
+        }
+    }
+
     #region Data Publishing Methods
     /// <summary>
     /// Publishes current frame data to NetworkTables
@@ -522,7 +534,7 @@ public class QuestNav : MonoBehaviour
         batteryPercent = SystemInfo.batteryLevel * 100;
 
         frcDataSink.PublishValue("/questnav/frameCount", frameIndex);
-        frcDataSink.PublishValue("/questnav/timestamp", timeStamp);
+        frcDataSink.PublishValue("/questnav/timestamp", getSyncedTimestamp());
         frcDataSink.PublishValue("/questnav/position", position.ToArray());
         frcDataSink.PublishValue("/questnav/quaternion", rotation.ToArray());
         frcDataSink.PublishValue("/questnav/eulerAngles", eulerAngles.ToArray());

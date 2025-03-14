@@ -365,7 +365,7 @@ void WsSendBinary(byte[] data)
             return timestamp * 1000;
         }
         
-        private long? GetServerTimeUs() {
+        public long? GetServerTimeUs() {
             if (_serverTimeOffsetUs == null) return null;
             return GetClientTimeUs() + _serverTimeOffsetUs;
         }

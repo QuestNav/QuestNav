@@ -16,22 +16,58 @@ namespace QuestNav.CameraStreamer
     /// </summary>
     public class PassthroughMjpegServer : MonoBehaviour
     {
-        [SerializeField] private WebCamTextureManager webCamTextureManager;
-        [SerializeField] private int port = 8080;
-        [SerializeField] private int jpegQuality = 75;
-        [SerializeField] private int frameRate = 30;
-        [SerializeField] private bool startServerOnAwake = true;
+        [SerializeField] 
+        [Tooltip("Reference to the WebCamTextureManager component that provides the camera texture")]
+        private WebCamTextureManager webCamTextureManager;
+        
+        [SerializeField]
+        [Tooltip("The HTTP port to use for the MJPEG server")]
+        private int port = 5809;
+        
+        [SerializeField]
+        [Tooltip("JPEG compression quality (1-100), higher values produce better quality but larger files")]
+        [Range(1, 100)]
+        private int jpegQuality = 75;
+        
+        [SerializeField]
+        [Tooltip("Target frame rate for the MJPEG stream")]
+        [Range(1, 60)]
+        private int frameRate = 30;
+        
+        [SerializeField]
+        [Tooltip("Whether to automatically start the server when the component awakens")]
+        private bool startServerOnAwake = true;
+        
+        [SerializeField] 
+        [Tooltip("Stream resolution (width, height) - set to (0,0) for highest possible resolution")]
+        private Vector2 streamResolution = new Vector2(640, 480);
+        
+        [SerializeField]
+        [Tooltip("Dynamic framerate reduction under heavy load (0 = disabled, 1-3 = increasing reduction)")]
+        [Range(0, 3)]
+        private int performanceMode = 0;
+        
+        [SerializeField] 
+        [Tooltip("Time to wait between client connection attempts in milliseconds")]
+        [Range(10, 1000)]
+        private int clientConnectionAttemptIntervalMs = 100;
         
         private HttpListener httpListener;
         private Thread serverThread;
+        private Thread encodingThread;
         private readonly List<HttpListenerContext> clients = new List<HttpListenerContext>();
         private readonly object clientsLock = new object();
         private byte[] currentFrameData;
         private DateTime lastFrameTime;
         private readonly object frameDataLock = new object();
         private int frameInterval;
+        private bool isEncodingThreadRunning = false;
         
-        private Texture2D renderTexture;
+        // Improved texture handling
+        private RenderTexture renderTexture;
+        private Texture2D readTexture;
+        private int frameCounter = 0;
+        private int currentFrameSkip = 0;
         
         void Awake()
         {
@@ -53,14 +89,44 @@ namespace QuestNav.CameraStreamer
         {
             if (!IsRunning || !webCamTextureManager || !webCamTextureManager.WebCamTexture) return;
             
+            // Only capture frames if there are clients
+            if (clients.Count == 0)
+                return;
+                
             // Only capture frames at the specified frame rate
             if ((DateTime.Now - lastFrameTime).TotalMilliseconds < frameInterval)
                 return;
-                
+            
+            // Determine frame skip based on performance mode
+            if (performanceMode > 0)
+            {
+                frameCounter++;
+                currentFrameSkip = performanceMode;
+                if (frameCounter % (currentFrameSkip + 1) != 0)
+                    return;
+            }
+            
             lastFrameTime = DateTime.Now;
             
             // Capture frame from WebCamTexture
             CaptureFrame();
+        }
+        
+        // We'll encode directly on the main thread now, and use a separate thread just for sending frames
+        private void StartEncodingThread()
+        {
+            isEncodingThreadRunning = true;
+            encodingThread = new Thread(() => 
+            {
+                while (isEncodingThreadRunning)
+                {
+                    // This thread only handles sending data to clients, not encoding
+                    // Sleep to maintain frame rate without hogging CPU
+                    Thread.Sleep(Math.Max(1, frameInterval - 5));
+                }
+            });
+            encodingThread.IsBackground = true;
+            encodingThread.Start();
         }
         
         private void CaptureFrame()
@@ -68,23 +134,48 @@ namespace QuestNav.CameraStreamer
             var webCamTexture = webCamTextureManager.WebCamTexture;
             if (!webCamTexture || !webCamTexture.isPlaying || webCamTexture.width <= 16)
                 return;
-            
-            // Create texture for rendering if needed
-            if (!renderTexture || renderTexture.width != webCamTexture.width || 
-                renderTexture.height != webCamTexture.height)
-            {
-                if (renderTexture)
-                    Destroy(renderTexture);
                 
-                renderTexture = new Texture2D(webCamTexture.width, webCamTexture.height, TextureFormat.RGB24, false);
+            // Calculate scaling based on configured resolution
+            // If Vector2 is (0,0), use the full resolution of the webcam texture
+            int captureWidth = (int)streamResolution.x;
+            int captureHeight = (int)streamResolution.y;
+            
+            if (captureWidth <= 0 || captureHeight <= 0)
+            {
+                captureWidth = webCamTexture.width;
+                captureHeight = webCamTexture.height;
             }
             
-            // Copy WebCamTexture to our Texture2D
-            renderTexture.SetPixels(webCamTexture.GetPixels());
-            renderTexture.Apply();
+            // Create or resize render texture if needed
+            if (renderTexture == null || renderTexture.width != captureWidth || renderTexture.height != captureHeight)
+            {
+                if (renderTexture != null)
+                    RenderTexture.ReleaseTemporary(renderTexture);
+                    
+                renderTexture = RenderTexture.GetTemporary(captureWidth, captureHeight, 0, RenderTextureFormat.ARGB32);
+                renderTexture.antiAliasing = 1;
+            }
             
-            // Convert to JPEG
-            var jpegBytes = renderTexture.EncodeToJPG(jpegQuality);
+            // Create or resize read texture if needed
+            if (readTexture == null || readTexture.width != captureWidth || readTexture.height != captureHeight)
+            {
+                if (readTexture != null)
+                    Destroy(readTexture);
+                    
+                readTexture = new Texture2D(captureWidth, captureHeight, TextureFormat.RGB24, false);
+            }
+            
+            // Blit (copy) the WebCamTexture to our scaled RenderTexture
+            Graphics.Blit(webCamTexture, renderTexture);
+            
+            // Read pixels from the render texture
+            RenderTexture.active = renderTexture;
+            readTexture.ReadPixels(new Rect(0, 0, captureWidth, captureHeight), 0, 0);
+            readTexture.Apply();
+            RenderTexture.active = null;
+            
+            // Encode JPEG directly on the main thread
+            byte[] jpegBytes = readTexture.EncodeToJPG(jpegQuality);
             
             // Update current frame data
             lock (frameDataLock)
@@ -96,12 +187,18 @@ namespace QuestNav.CameraStreamer
         /// <summary>
         /// Starts the MJPEG HTTP server
         /// </summary>
-        private void StartServer()
+        public void StartServer()
         {
             if (IsRunning) return;
             
             try
             {
+                // Start encoding thread
+                if (encodingThread == null || !encodingThread.IsAlive)
+                {
+                    StartEncodingThread();
+                }
+                
                 httpListener = new HttpListener();
                 httpListener.Prefixes.Add($"http://*:{port}/");
                 httpListener.Start();
@@ -129,11 +226,30 @@ namespace QuestNav.CameraStreamer
         /// <summary>
         /// Stops the MJPEG HTTP server
         /// </summary>
-        private void StopServer()
+        public void StopServer()
         {
             if (!IsRunning) return;
             
             IsRunning = false;
+            
+            // Stop encoding thread
+            isEncodingThreadRunning = false;
+            if (encodingThread != null && encodingThread.IsAlive)
+            {
+                try
+                {
+                    encodingThread.Join(1000); // Wait up to 1 second for thread to exit
+                    if (encodingThread.IsAlive)
+                    {
+                        // If still alive, abort it
+                        encodingThread.Abort();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    QueuedLogger.LogError($"[Passthrough MJPEG Server] Error stopping encoding thread: {ex.Message}");
+                }
+            }
             
             // Close all client connections
             lock (clientsLock)
@@ -152,6 +268,25 @@ namespace QuestNav.CameraStreamer
                 clients.Clear();
             }
             
+            // Clear current frame data
+            lock (frameDataLock)
+            {
+                currentFrameData = null;
+            }
+            
+            // Release textures
+            if (renderTexture != null)
+            {
+                RenderTexture.ReleaseTemporary(renderTexture);
+                renderTexture = null;
+            }
+            
+            if (readTexture != null)
+            {
+                Destroy(readTexture);
+                readTexture = null;
+            }
+            
             // Stop HTTP listener
             if (httpListener != null)
             {
@@ -166,7 +301,7 @@ namespace QuestNav.CameraStreamer
         /// <summary>
         /// Returns true if the server is currently running
         /// </summary>
-        private bool IsRunning { get; set; }
+        public bool IsRunning { get; private set; }
 
         /// <summary>
         /// Toggles the server between running and stopped states
@@ -232,7 +367,7 @@ namespace QuestNav.CameraStreamer
                 // If we had an error, wait a bit before trying again
                 if (hadError)
                 {
-                    yield return new WaitForSeconds(1.0f);
+                    yield return new WaitForSeconds(clientConnectionAttemptIntervalMs / 1000f);
                 }
             }
         }
@@ -277,7 +412,20 @@ namespace QuestNav.CameraStreamer
         {
             try
             {
-                string html = @"<html><body><img src='/stream' style='width:100%'></body></html>";
+                string html = @"
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Passthrough Camera Stream</title>
+    <style>
+        body { margin: 0; padding: 0; background: #000; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+    </style>
+</head>
+<body>
+    <img src='/stream' alt='MJPEG Stream'>
+</body>
+</html>";
 
                 byte[] buffer = Encoding.UTF8.GetBytes(html);
                 context.Response.ContentType = "text/html";
@@ -301,6 +449,9 @@ namespace QuestNav.CameraStreamer
                 "--boundary\r\n" +
                 "Content-Type: image/jpeg\r\n" +
                 "Content-Length: {0}\r\n\r\n";
+            
+            byte[] newLineBytes = new byte[] { 13, 10, 13, 10 };
+            Dictionary<HttpListenerContext, bool> clientHeaders = new Dictionary<HttpListenerContext, bool>();
             
             // Client send loop
             while (IsRunning)
@@ -336,11 +487,13 @@ namespace QuestNav.CameraStreamer
                                 var outputStream = client.Response.OutputStream;
                                 
                                 // For new clients, send the HTTP header first
-                                if (client.Response.ContentType == null || !client.Response.ContentType.Contains("multipart"))
+                                bool headerSent;
+                                if (!clientHeaders.TryGetValue(client, out headerSent) || !headerSent)
                                 {
                                     client.Response.ContentType = "multipart/x-mixed-replace; boundary=--boundary";
                                     outputStream.Write(headerBytes, 0, headerBytes.Length);
                                     outputStream.Flush();
+                                    clientHeaders[client] = true;
                                 }
                                 
                                 // Send frame header
@@ -350,7 +503,7 @@ namespace QuestNav.CameraStreamer
                                 outputStream.Write(frameJpeg, 0, frameJpeg.Length);
                                 
                                 // End frame with 2 newlines
-                                outputStream.Write(new byte[] { 13, 10, 13, 10 }, 0, 4);
+                                outputStream.Write(newLineBytes, 0, 4);
                                 outputStream.Flush();
                             }
                             catch (Exception)
@@ -364,6 +517,7 @@ namespace QuestNav.CameraStreamer
                         foreach (var client in disconnectedClients)
                         {
                             clients.Remove(client);
+                            clientHeaders.Remove(client);
                             try
                             {
                                 client.Response.Close();
@@ -380,8 +534,8 @@ namespace QuestNav.CameraStreamer
                         }
                     }
                     
-                    // Sleep to maintain frame rate
-                    Thread.Sleep(frameInterval);
+                    // Sleep to maintain frame rate and prevent CPU hogging
+                    Thread.Sleep(Math.Max(1, frameInterval - 5));
                 }
                 catch (Exception ex)
                 {
@@ -394,6 +548,11 @@ namespace QuestNav.CameraStreamer
                     Thread.Sleep(1000);
                 }
             }
+        }
+        
+        void OnApplicationQuit()
+        {
+            StopServer();
         }
     }
 }

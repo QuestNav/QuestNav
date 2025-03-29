@@ -431,11 +431,13 @@ MonoBehaviour:
   webCamTextureManager: {fileID: 676828822}
   port: 5809
   jpegQuality: 75
-  frameRate: 30
+  frameRate: 20
   startServerOnAwake: 1
-  streamResolution: {x: 540, y: 360}
-  performanceMode: 3
+  streamResolution: {x: 360, y: 240}
+  performanceMode: 1
   clientConnectionAttemptIntervalMs: 100
+  maxEncodingThreads: 2
+  maxQueuedFrames: 3
 --- !u!1 &336191857
 GameObject:
   m_ObjectHideFlags: 0

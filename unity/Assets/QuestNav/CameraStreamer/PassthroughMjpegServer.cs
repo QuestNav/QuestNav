@@ -4,15 +4,19 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using LibJpegTurboUnity;
 using QuestNav.Passthrough;
 using QuestNav.Utils;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 
 namespace QuestNav.CameraStreamer
 {
     /// <summary>
     /// Serves the passthrough camera stream as an MJPEG stream over HTTP
+    /// with optimized LibJpeg-Turbo encoding and improved threading
     /// </summary>
     public class PassthroughMjpegServer : MonoBehaviour
     {
@@ -51,26 +55,67 @@ namespace QuestNav.CameraStreamer
         [Tooltip("Time to wait between client connection attempts in milliseconds")]
         [Range(10, 1000)]
         private int clientConnectionAttemptIntervalMs = 100;
+
+        [SerializeField]
+        [Tooltip("Maximum number of encoding threads to use")]
+        [Range(1, 4)]
+        private int maxEncodingThreads = 2;
+        
+        [SerializeField]
+        [Tooltip("Maximum frames to queue for encoding")]
+        [Range(1, 10)]
+        private int maxQueuedFrames = 3;
         
         private HttpListener httpListener;
         private Thread serverThread;
-        private Thread encodingThread;
         private readonly List<HttpListenerContext> clients = new List<HttpListenerContext>();
         private readonly object clientsLock = new object();
         private byte[] currentFrameData;
         private DateTime lastFrameTime;
         private readonly object frameDataLock = new object();
         private int frameInterval;
-        private bool isEncodingThreadRunning = false;
         
         // Improved texture handling
         private RenderTexture renderTexture;
-        private Texture2D readTexture;
         private int frameCounter = 0;
         private int currentFrameSkip = 0;
         
+        // LibJpegTurbo encoder
+        private LJTCompressor jpegTurboCompressor;
+        
+        // Thread pool for encoding
+        private SemaphoreSlim encodingSemaphore;
+        private bool isServerRunning = false;
+        
+        // Frame queue to store pending frames to be encoded
+        private readonly Queue<RenderTextureData> frameQueue = new Queue<RenderTextureData>();
+        private readonly object frameQueueLock = new object();
+        
+        // Task management
+        private CancellationTokenSource serverCancellationTokenSource;
+        private int activeEncodingTasks = 0;
+        private readonly object taskCountLock = new object();
+        private int droppedFrameCount = 0;
+        private int lastDropReport = 0;
+        private DateTime serverStartTime;
+        
+        // Struct to hold render texture data
+        private struct RenderTextureData
+        {
+            public byte[] PixelData;
+            public int Width;
+            public int Height;
+            public DateTime CaptureTime;
+        }
+        
         void Awake()
         {
+            // Initialize LibJpegTurbo compressor
+            jpegTurboCompressor = new LJTCompressor();
+            
+            // Initialize semaphore for encoding thread control
+            encodingSemaphore = new SemaphoreSlim(maxEncodingThreads, maxEncodingThreads);
+            
             if (startServerOnAwake)
             {
                 StartServer();
@@ -83,11 +128,25 @@ namespace QuestNav.CameraStreamer
         void OnDestroy()
         {
             StopServer();
+            
+            // Dispose LibJpegTurbo compressor
+            if (jpegTurboCompressor != null)
+            {
+                jpegTurboCompressor.Dispose();
+                jpegTurboCompressor = null;
+            }
+            
+            // Dispose semaphore
+            if (encodingSemaphore != null)
+            {
+                encodingSemaphore.Dispose();
+                encodingSemaphore = null;
+            }
         }
         
         void Update()
         {
-            if (!IsRunning || !webCamTextureManager || !webCamTextureManager.WebCamTexture) return;
+            if (!isServerRunning || !webCamTextureManager || !webCamTextureManager.WebCamTexture) return;
             
             // Only capture frames if there are clients
             if (clients.Count == 0)
@@ -108,35 +167,36 @@ namespace QuestNav.CameraStreamer
             
             lastFrameTime = DateTime.Now;
             
-            // Capture frame from WebCamTexture
-            CaptureFrame();
-        }
-        
-        // We'll encode directly on the main thread now, and use a separate thread just for sending frames
-        private void StartEncodingThread()
-        {
-            isEncodingThreadRunning = true;
-            encodingThread = new Thread(() => 
+            // Check if frame queue is too large (indicates encoding can't keep up)
+            lock (frameQueueLock)
             {
-                while (isEncodingThreadRunning)
+                if (frameQueue.Count >= maxQueuedFrames)
                 {
-                    // This thread only handles sending data to clients, not encoding
-                    // Sleep to maintain frame rate without hogging CPU
-                    Thread.Sleep(Math.Max(1, frameInterval - 5));
+                    // Skip this frame to prevent backlog
+                    droppedFrameCount++;
+                    return;
                 }
-            });
-            encodingThread.IsBackground = true;
-            encodingThread.Start();
+            }
+            
+            // Dynamically adjust JPEG quality under heavy load
+            int dynamicQuality = jpegQuality;
+            if (activeEncodingTasks >= maxEncodingThreads)
+            {
+                // Reduce quality temporarily to ease CPU load
+                dynamicQuality = Math.Max(30, jpegQuality - 20);
+            }
+            
+            // Capture frame from WebCamTexture using AsyncGPUReadback for better performance
+            CaptureFrameAsync();
         }
         
-        private void CaptureFrame()
+        private void CaptureFrameAsync()
         {
             var webCamTexture = webCamTextureManager.WebCamTexture;
             if (!webCamTexture || !webCamTexture.isPlaying || webCamTexture.width <= 16)
                 return;
                 
             // Calculate scaling based on configured resolution
-            // If Vector2 is (0,0), use the full resolution of the webcam texture
             int captureWidth = (int)streamResolution.x;
             int captureHeight = (int)streamResolution.y;
             
@@ -156,31 +216,215 @@ namespace QuestNav.CameraStreamer
                 renderTexture.antiAliasing = 1;
             }
             
-            // Create or resize read texture if needed
-            if (readTexture == null || readTexture.width != captureWidth || readTexture.height != captureHeight)
-            {
-                if (readTexture != null)
-                    Destroy(readTexture);
-                    
-                readTexture = new Texture2D(captureWidth, captureHeight, TextureFormat.RGB24, false);
-            }
-            
             // Blit (copy) the WebCamTexture to our scaled RenderTexture
             Graphics.Blit(webCamTexture, renderTexture);
             
-            // Read pixels from the render texture
-            RenderTexture.active = renderTexture;
-            readTexture.ReadPixels(new Rect(0, 0, captureWidth, captureHeight), 0, 0);
-            readTexture.Apply();
-            RenderTexture.active = null;
-            
-            // Encode JPEG directly on the main thread
-            byte[] jpegBytes = readTexture.EncodeToJPG(jpegQuality);
-            
-            // Update current frame data
-            lock (frameDataLock)
+            // Use AsyncGPUReadback for better performance
+            AsyncGPUReadback.Request(renderTexture, 0, AsyncGPUReadbackCallback);
+        }
+        
+        private void AsyncGPUReadbackCallback(AsyncGPUReadbackRequest request)
+        {
+            if (request.hasError)
             {
-                currentFrameData = jpegBytes;
+                QueuedLogger.LogError("[Passthrough MJPEG Server] Error during AsyncGPUReadback");
+                return;
+            }
+            
+            if (!isServerRunning || serverCancellationTokenSource == null || serverCancellationTokenSource.IsCancellationRequested)
+                return;
+                
+            // Check if we have too many active encoding tasks
+            lock (taskCountLock)
+            {
+                if (activeEncodingTasks >= maxEncodingThreads * 2)
+                {
+                    // Drop frame if we're overloaded
+                    droppedFrameCount++;
+                    
+                    // Report dropped frames periodically
+                    if (droppedFrameCount % 10 == 0 && droppedFrameCount != lastDropReport)
+                    {
+                        lastDropReport = droppedFrameCount;
+                        QueuedLogger.LogWarning($"[Passthrough MJPEG Server] Dropped {droppedFrameCount} frames due to encoding backlog");
+                    }
+                    
+                    return;
+                }
+            }
+            
+            try
+            {
+                // Get pixel data with minimal copying
+                var pixelData = request.GetData<byte>().ToArray();
+                
+                // Create frame data
+                var frameData = new RenderTextureData
+                {
+                    PixelData = pixelData,
+                    Width = renderTexture.width,
+                    Height = renderTexture.height,
+                    CaptureTime = DateTime.Now
+                };
+                
+                // Check frame queue size before adding
+                lock (frameQueueLock)
+                {
+                    if (frameQueue.Count >= maxQueuedFrames)
+                    {
+                        // Remove oldest frame to make room
+                        frameQueue.Dequeue();
+                        droppedFrameCount++;
+                    }
+                    
+                    frameQueue.Enqueue(frameData);
+                }
+                
+                // Start a task to process the frame queue
+                ProcessFrameQueueAsync();
+            }
+            catch (Exception ex)
+            {
+                QueuedLogger.LogError($"[Passthrough MJPEG Server] Error processing GPU readback: {ex.Message}");
+            }
+        }
+        
+        private async void ProcessFrameQueueAsync()
+        {
+            // Try to acquire a semaphore slot for encoding
+            if (!await encodingSemaphore.WaitAsync(0))
+            {
+                // If no slot is available, return (another thread will handle it)
+                return;
+            }
+            
+            // Increment active task count
+            lock (taskCountLock)
+            {
+                activeEncodingTasks++;
+            }
+            
+            try
+            {
+                // Check if server is still running
+                if (!isServerRunning || serverCancellationTokenSource == null)
+                    return;
+                    
+                // Get a local copy of the cancellation token
+                CancellationToken cancellationToken = serverCancellationTokenSource.Token;
+                
+                // Process all frames in the queue
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    RenderTextureData frameData;
+                    
+                    // Try to get a frame from the queue
+                    lock (frameQueueLock)
+                    {
+                        if (frameQueue.Count == 0)
+                            break;
+                            
+                        frameData = frameQueue.Dequeue();
+                    }
+                    
+                    // Check if this frame is too old (more than 500ms old)
+                    if ((DateTime.Now - frameData.CaptureTime).TotalMilliseconds > 500)
+                    {
+                        droppedFrameCount++;
+                        continue; // Skip old frames
+                    }
+                    
+                    // Encode the frame using LibJpegTurbo in a separate thread
+                    try
+                    {
+                        // Use Task.Run with cancellation token and timeout
+                        var encodingTask = Task.Run(() => EncodeFrameWithLibJpegTurbo(frameData), cancellationToken);
+                        
+                        // Wait for encoding with timeout
+                        if (!await TaskExtensions.WaitAsync(encodingTask, TimeSpan.FromMilliseconds(500), cancellationToken))
+                        {
+                            QueuedLogger.LogWarning("[Passthrough MJPEG Server] Encoding task timed out");
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Server was stopped, exit gracefully
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        QueuedLogger.LogError($"[Passthrough MJPEG Server] Error in encoding task: {ex.Message}");
+                        
+                        // Brief pause after error to prevent CPU spinning
+                        await Task.Delay(50, cancellationToken);
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Server was stopped, exit gracefully
+            }
+            catch (Exception ex)
+            {
+                QueuedLogger.LogError($"[Passthrough MJPEG Server] Error processing frame queue: {ex.Message}");
+            }
+            finally
+            {
+                // Decrement active task count
+                lock (taskCountLock)
+                {
+                    activeEncodingTasks--;
+                }
+                
+                // Release the semaphore slot
+                encodingSemaphore.Release();
+            }
+        }
+        
+        private void EncodeFrameWithLibJpegTurbo(RenderTextureData frameData)
+        {
+            if (!isServerRunning)
+                return;
+                
+            try
+            {
+                // LibJpegTurbo encoding
+                LJTPixelFormat pixelFormat = LJTPixelFormat.RGBA; // Assuming RGBA data from Unity
+                
+                // Dynamically adjust quality based on system load
+                int dynamicQuality = jpegQuality;
+                lock (taskCountLock)
+                {
+                    if (activeEncodingTasks > maxEncodingThreads)
+                    {
+                        // Reduce quality under heavy load
+                        dynamicQuality = Math.Max(30, jpegQuality - 15);
+                    }
+                }
+                
+                // Encode with LibJpegTurbo
+                byte[] jpegData = jpegTurboCompressor.EncodeJPG(
+                    frameData.PixelData, 
+                    frameData.Width, 
+                    frameData.Height, 
+                    pixelFormat, 
+                    dynamicQuality
+                );
+                
+                // Update current frame data
+                lock (frameDataLock)
+                {
+                    currentFrameData = jpegData;
+                }
+            }
+            catch (Exception ex)
+            {
+                QueuedLogger.LogError($"[Passthrough MJPEG Server] Error encoding frame: {ex.Message}");
+            }
+            finally
+            {
+                // Help the garbage collector by explicitly releasing the reference
+                frameData.PixelData = null;
             }
         }
         
@@ -189,27 +433,43 @@ namespace QuestNav.CameraStreamer
         /// </summary>
         public void StartServer()
         {
-            if (IsRunning) return;
+            if (isServerRunning) return;
             
             try
             {
-                // Start encoding thread
-                if (encodingThread == null || !encodingThread.IsAlive)
+                // Create a new cancellation token source for this server session
+                serverCancellationTokenSource = new CancellationTokenSource();
+                
+                // Clear counters
+                activeEncodingTasks = 0;
+                droppedFrameCount = 0;
+                lastDropReport = 0;
+                serverStartTime = DateTime.Now;
+                
+                // Reset frame queue
+                lock (frameQueueLock)
                 {
-                    StartEncodingThread();
+                    frameQueue.Clear();
+                }
+                
+                // Reset current frame data
+                lock (frameDataLock)
+                {
+                    currentFrameData = null;
                 }
                 
                 httpListener = new HttpListener();
                 httpListener.Prefixes.Add($"http://*:{port}/");
                 httpListener.Start();
                 
-                IsRunning = true;
+                isServerRunning = true;
                 QueuedLogger.Log($"[Passthrough MJPEG Server] MJPEG Server started on port {port}");
                 
                 // Start server thread
                 serverThread = new Thread(ServerThreadMethod)
                 {
-                    IsBackground = true
+                    IsBackground = true,
+                    Priority = System.Threading.ThreadPriority.AboveNormal
                 };
                 serverThread.Start();
                 
@@ -219,7 +479,29 @@ namespace QuestNav.CameraStreamer
             catch (Exception ex)
             {
                 QueuedLogger.LogError($"[Passthrough MJPEG Server] Failed to start MJPEG server: {ex.Message}");
-                IsRunning = false;
+                isServerRunning = false;
+                
+                // Clean up resources
+                if (serverCancellationTokenSource != null)
+                {
+                    serverCancellationTokenSource.Cancel();
+                    serverCancellationTokenSource.Dispose();
+                    serverCancellationTokenSource = null;
+                }
+                
+                if (httpListener != null)
+                {
+                    try
+                    {
+                        httpListener.Stop();
+                        httpListener.Close();
+                    }
+                    catch
+                    {
+                        // Ignore cleanup errors
+                    }
+                    httpListener = null;
+                }
             }
         }
         
@@ -228,27 +510,24 @@ namespace QuestNav.CameraStreamer
         /// </summary>
         public void StopServer()
         {
-            if (!IsRunning) return;
+            if (!isServerRunning) return;
             
-            IsRunning = false;
+            isServerRunning = false;
             
-            // Stop encoding thread
-            isEncodingThreadRunning = false;
-            if (encodingThread != null && encodingThread.IsAlive)
+            // Cancel all pending tasks
+            if (serverCancellationTokenSource != null)
             {
-                try
-                {
-                    encodingThread.Join(1000); // Wait up to 1 second for thread to exit
-                    if (encodingThread.IsAlive)
-                    {
-                        // If still alive, abort it
-                        encodingThread.Abort();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    QueuedLogger.LogError($"[Passthrough MJPEG Server] Error stopping encoding thread: {ex.Message}");
-                }
+                serverCancellationTokenSource.Cancel();
+                serverCancellationTokenSource.Dispose();
+                serverCancellationTokenSource = null;
+            }
+            
+            // Wait for encoding tasks to complete (with timeout)
+            int waitTime = 0;
+            while (activeEncodingTasks > 0 && waitTime < 1000)
+            {
+                Thread.Sleep(10);
+                waitTime += 10;
             }
             
             // Close all client connections
@@ -268,6 +547,12 @@ namespace QuestNav.CameraStreamer
                 clients.Clear();
             }
             
+            // Clear frame queue
+            lock (frameQueueLock)
+            {
+                frameQueue.Clear();
+            }
+            
             // Clear current frame data
             lock (frameDataLock)
             {
@@ -281,34 +566,38 @@ namespace QuestNav.CameraStreamer
                 renderTexture = null;
             }
             
-            if (readTexture != null)
-            {
-                Destroy(readTexture);
-                readTexture = null;
-            }
-            
             // Stop HTTP listener
             if (httpListener != null)
             {
-                httpListener.Stop();
-                httpListener.Close();
+                try
+                {
+                    httpListener.Stop();
+                    httpListener.Close();
+                }
+                catch (Exception ex)
+                {
+                    QueuedLogger.LogError($"[Passthrough MJPEG Server] Error stopping HTTP listener: {ex.Message}");
+                }
                 httpListener = null;
             }
             
             QueuedLogger.Log("[Passthrough MJPEG Server] MJPEG Server stopped");
+            
+            // Force a GC collection to clean up any lingering resources
+            GC.Collect();
         }
         
         /// <summary>
         /// Returns true if the server is currently running
         /// </summary>
-        public bool IsRunning { get; private set; }
+        public bool IsRunning => isServerRunning;
 
         /// <summary>
         /// Toggles the server between running and stopped states
         /// </summary>
         public void ToggleServer()
         {
-            if (IsRunning)
+            if (isServerRunning)
                 StopServer();
             else
                 StartServer();
@@ -316,7 +605,7 @@ namespace QuestNav.CameraStreamer
         
         private IEnumerator AcceptClientConnections()
         {
-            while (IsRunning)
+            while (isServerRunning && serverCancellationTokenSource != null && !serverCancellationTokenSource.IsCancellationRequested)
             {
                 var hadError = false;
                 IAsyncResult asyncResult = null;
@@ -329,7 +618,7 @@ namespace QuestNav.CameraStreamer
                 catch (Exception ex)
                 {
                     hadError = true;
-                    if (IsRunning)
+                    if (isServerRunning)
                     {
                         QueuedLogger.LogError($"[Passthrough MJPEG Server] Error starting MJPEG BeginGetContext: {ex.Message}");
                     }
@@ -338,12 +627,13 @@ namespace QuestNav.CameraStreamer
                 if (!hadError)
                 {
                     // Wait for the connection without blocking the main thread
-                    while (!asyncResult.IsCompleted && IsRunning)
+                    while (!asyncResult.IsCompleted && isServerRunning && 
+                           serverCancellationTokenSource != null && !serverCancellationTokenSource.IsCancellationRequested)
                     {
                         yield return null;
                     }
                     
-                    if (IsRunning)
+                    if (isServerRunning && serverCancellationTokenSource != null && !serverCancellationTokenSource.IsCancellationRequested)
                     {
                         try
                         {
@@ -355,7 +645,7 @@ namespace QuestNav.CameraStreamer
                         }
                         catch (Exception ex)
                         {
-                            if (IsRunning)
+                            if (isServerRunning)
                             {
                                 QueuedLogger.LogError($"[Passthrough MJPEG Server] Error accepting MJPEG client connection: {ex.Message}");
                             }
@@ -380,9 +670,20 @@ namespace QuestNav.CameraStreamer
                 
                 if (url == "/stream")
                 {
-                    // Add the client to our list for the MJPEG stream
+                    // Check if we already have too many clients (limit to 5 concurrent clients)
                     lock (clientsLock)
                     {
+                        if (clients.Count >= 5)
+                        {
+                            // Too many clients, send 503 Service Unavailable
+                            context.Response.StatusCode = 503;
+                            context.Response.StatusDescription = "Service Unavailable - Too many concurrent clients";
+                            context.Response.Close();
+                            QueuedLogger.LogWarning($"[Passthrough MJPEG Server] Rejected client from {context.Request.RemoteEndPoint} - too many connections");
+                            return;
+                        }
+                        
+                        // Add the client to our list for the MJPEG stream
                         clients.Add(context);
                     }
                     
@@ -417,13 +718,32 @@ namespace QuestNav.CameraStreamer
 <html>
 <head>
     <title>Passthrough Camera Stream</title>
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
     <style>
         body { margin: 0; padding: 0; background: #000; height: 100vh; display: flex; justify-content: center; align-items: center; }
         img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+        .status { color: white; font-family: Arial, sans-serif; text-align: center; position: absolute; bottom: 10px; left: 0; right: 0; }
     </style>
+    <script>
+        // Auto-reconnect if stream fails
+        function setupStream() {
+            const img = document.getElementById('stream');
+            img.onerror = function() {
+                document.getElementById('status').textContent = 'Stream disconnected. Reconnecting...';
+                setTimeout(() => {
+                    img.src = 'stream?' + new Date().getTime();
+                }, 1000);
+            };
+            img.onload = function() {
+                document.getElementById('status').textContent = 'Connected';
+            };
+        }
+        window.onload = setupStream;
+    </script>
 </head>
 <body>
-    <img src='/stream' alt='MJPEG Stream'>
+    <img id=""stream"" src=""/stream"" alt=""MJPEG Stream"">
+    <div id=""status"" class=""status"">Connecting...</div>
 </body>
 </html>";
 
@@ -452,12 +772,55 @@ namespace QuestNav.CameraStreamer
             
             byte[] newLineBytes = new byte[] { 13, 10, 13, 10 };
             Dictionary<HttpListenerContext, bool> clientHeaders = new Dictionary<HttpListenerContext, bool>();
+            Dictionary<HttpListenerContext, DateTime> clientLastActivity = new Dictionary<HttpListenerContext, DateTime>();
+            
+            // Server health monitoring
+            DateTime lastHealthReport = DateTime.Now;
+            int consecutiveErrorCount = 0;
             
             // Client send loop
-            while (IsRunning)
+            while (isServerRunning && serverCancellationTokenSource != null && !serverCancellationTokenSource.IsCancellationRequested)
             {
                 try
                 {
+                    // Server health reporting (every 5 seconds)
+                    if ((DateTime.Now - lastHealthReport).TotalSeconds >= 5)
+                    {
+                        lastHealthReport = DateTime.Now;
+                        TimeSpan uptime = DateTime.Now - serverStartTime;
+                        QueuedLogger.Log($"[Passthrough MJPEG Server] Health: Up {(int)uptime.TotalMinutes}m, Clients: {clients.Count}, Dropped: {droppedFrameCount}, Tasks: {activeEncodingTasks}");
+                        
+                        // Check for inactive clients (30 seconds timeout)
+                        List<HttpListenerContext> timeoutClients = new List<HttpListenerContext>();
+                        lock (clientsLock)
+                        {
+                            foreach (var clientEntry in clientLastActivity)
+                            {
+                                if ((DateTime.Now - clientEntry.Value).TotalSeconds > 30)
+                                {
+                                    timeoutClients.Add(clientEntry.Key);
+                                }
+                            }
+                            
+                            // Remove timed-out clients
+                            foreach (var client in timeoutClients)
+                            {
+                                clients.Remove(client);
+                                clientHeaders.Remove(client);
+                                clientLastActivity.Remove(client);
+                                try { client.Response.Close(); } catch { }
+                            }
+                            
+                            if (timeoutClients.Count > 0)
+                            {
+                                QueuedLogger.Log($"[Passthrough MJPEG Server] Removed {timeoutClients.Count} timed-out clients");
+                            }
+                        }
+                        
+                        // Reset consecutive error count during health check
+                        consecutiveErrorCount = 0;
+                    }
+                    
                     // Get current frame
                     byte[] frameJpeg;
                     lock (frameDataLock)
@@ -505,6 +868,9 @@ namespace QuestNav.CameraStreamer
                                 // End frame with 2 newlines
                                 outputStream.Write(newLineBytes, 0, 4);
                                 outputStream.Flush();
+                                
+                                // Update client activity timestamp
+                                clientLastActivity[client] = DateTime.Now;
                             }
                             catch (Exception)
                             {
@@ -518,14 +884,8 @@ namespace QuestNav.CameraStreamer
                         {
                             clients.Remove(client);
                             clientHeaders.Remove(client);
-                            try
-                            {
-                                client.Response.Close();
-                            }
-                            catch
-                            {
-                                // Ignore errors on cleanup
-                            }
+                            clientLastActivity.Remove(client);
+                            try { client.Response.Close(); } catch { }
                         }
                         
                         if (disconnectedClients.Count > 0)
@@ -534,25 +894,75 @@ namespace QuestNav.CameraStreamer
                         }
                     }
                     
-                    // Sleep to maintain frame rate and prevent CPU hogging
-                    Thread.Sleep(Math.Max(1, frameInterval - 5));
+                    // Reset consecutive error count on success
+                    consecutiveErrorCount = 0;
+                    
+                    // Use adaptive sleep to control frame rate
+                    int sleepTime = frameInterval - 5;
+                    if (clients.Count == 0)
+                    {
+                        // Sleep longer if no clients
+                        sleepTime = 100;
+                    }
+                    else if (droppedFrameCount > 0 && droppedFrameCount % 10 == 0)
+                    {
+                        // Increase sleep time under load
+                        sleepTime += 5;
+                    }
+                    
+                    Thread.Sleep(Math.Max(1, sleepTime));
+                }
+                catch (OperationCanceledException)
+                {
+                    // Server stopped, exit gracefully
+                    break;
                 }
                 catch (Exception ex)
                 {
-                    if (IsRunning)
+                    consecutiveErrorCount++;
+                    
+                    if (isServerRunning && serverCancellationTokenSource != null && !serverCancellationTokenSource.IsCancellationRequested)
                     {
                         QueuedLogger.LogError($"[Passthrough MJPEG Server] Error in MJPEG server thread: {ex.Message}");
+                        
+                        // If we get many consecutive errors, restart the server
+                        if (consecutiveErrorCount > 10)
+                        {
+                            QueuedLogger.LogError("[Passthrough MJPEG Server] Too many consecutive errors, restarting server");
+                            
+                            // Set a flag to restart server after this thread exits
+                            isServerRunning = false;
+                            break;
+                        }
                     }
                     
                     // Don't spam errors
                     Thread.Sleep(1000);
                 }
             }
+            
+            // If we exited due to too many errors, restart
+            if (consecutiveErrorCount > 10)
+            {
+                StopServer();
+                StartServer();
+            }
         }
         
         void OnApplicationQuit()
         {
             StopServer();
+        }
+    }
+    
+    // Extension method for Task timeout
+    public static class TaskExtensions
+    {
+        public static async Task<bool> WaitAsync(this Task task, TimeSpan timeout, CancellationToken cancellationToken = default)
+        {
+            var timeoutTask = Task.Delay(timeout, cancellationToken);
+            var completedTask = await Task.WhenAny(task, timeoutTask);
+            return completedTask == task;
         }
     }
 }

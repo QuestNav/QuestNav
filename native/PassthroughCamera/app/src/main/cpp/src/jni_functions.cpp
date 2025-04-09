@@ -14,7 +14,7 @@ extern "C" {
   };
 
   JNIEXPORT void JNICALL
-  Java_com_questnav_passthroughcamera_MainActivity_start(JNIEnv* env, jobject, jobject surface);
+  Java_com_questnav_passthroughcamera_MainActivity_start(JNIEnv* env, jobject);
 
   JNIEXPORT void JNICALL
   Java_com_questnav_passthroughcamera_MainActivity_stop(JNIEnv* env, jobject);
@@ -22,12 +22,12 @@ extern "C" {
 
 
 
-JNIEXPORT void JNICALL Java_com_questnav_passthroughcamera_MainActivity_start(JNIEnv* env, jobject, jobject surface) {
+JNIEXPORT void JNICALL Java_com_questnav_passthroughcamera_MainActivity_start(JNIEnv* env, jobject) {
   camera = CameraInterface::create();
-  camera->startJni(env, surface);
+  camera->startJni(env);
 }
 
-JNIEXPORT void JNICALL Java_org_freedesktop_nativecamera2_NativeCamera2_stop(JNIEnv *env, jobject) {
+JNIEXPORT void JNICALL Java_com_questnav_passthroughcamera_MainActivity_stop(JNIEnv *env, jobject) {
     if (camera) {
       camera->stop();
     }

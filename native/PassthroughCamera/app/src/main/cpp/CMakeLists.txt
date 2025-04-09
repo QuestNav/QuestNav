@@ -30,12 +30,15 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         src/jni_functions.cpp)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE include)
-
+add_subdirectory(external/apriltag)
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE external/apriltag/common)
 # Specifies libraries CMake should link to your target library. You
 # can link libraries from various origins, such as libraries defined in this
 # build script, prebuilt third-party libraries, or Android system libraries.
 target_link_libraries(${CMAKE_PROJECT_NAME}
         # List libraries link to the target library
         android
+        apriltag
         camera2ndk
-        log)
+        log
+        mediandk)

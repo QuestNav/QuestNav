@@ -326,6 +326,7 @@ namespace QuestNav.Network
             {
                 generateIP(),
                 "172.22.11.2",
+                "127.0.0.1",
                 $"roboRIO-{teamNumber}-FRC.local",
                 $"roboRIO-{teamNumber}-FRC.lan",
                 $"roboRIO-{teamNumber}-FRC.frc-field.local"
@@ -333,14 +334,6 @@ namespace QuestNav.Network
 
             while (!connectionEstablished)
             {
-                // Check if the network is reachable.
-                if (Application.internetReachability == NetworkReachability.NotReachable)
-                {
-                    Log($"Network not reachable. Waiting {QuestNavConstants.Network.UNREACHABLE_NETWORK_DELAY} seconds before reattempting.", QueuedLogger.LogLevel.Warning);
-                    await Task.Delay(QuestNavConstants.Network.UNREACHABLE_NETWORK_DELAY * 1000);
-                    continue;
-                }
-
                 Log("Starting NT4 connection attempt cycle");
 
                 foreach (string candidate in candidateAddresses)

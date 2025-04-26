@@ -1,0 +1,57 @@
+name: Deploy Docusaurus to GitHub Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main  # You can add more branches here as needed
+      # - develop
+      # - staging
+    paths:
+      - 'docs/**'  # Only trigger when files in the docs directory change
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for deployment to GitHub Pages
+      pages: write     # Required for deployment to GitHub Pages
+      id-token: write  # Required for deployment verification
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper versioning
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'  # Using Node.js 22 LTS (Jod)
+          cache: 'npm'
+          cache-dependency-path: 'docs/package-lock.json'
+          
+      - name: Install dependencies
+        working-directory: ./docs
+        run: npm ci
+        
+      - name: Build website
+        working-directory: ./docs
+        run: npm run build
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs/build
+          name: github-pages-${{ github.run_id }} # Appends the run ID to make the artifact unique
+          
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        id: deployment
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifact_name: github-pages-${{ github.run_id }}

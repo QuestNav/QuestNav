@@ -1,0 +1,68 @@
+/* Slideshow background container */
+.slideshowBackground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -2;
+}
+
+/* Individual slide */
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    background-position: center;
+    background-size: cover;
+    z-index: -2;
+}
+
+/* Active slide */
+.slideActive {
+    opacity: 1;
+    z-index: -2;
+}
+
+/* Video slide */
+.videoSlide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    z-index: -2;
+}
+
+/* Active video slide */
+.videoSlideActive {
+    opacity: 1;
+    z-index: -2;
+}
+
+/* Overlay to darken the background and improve text visibility */
+.slideOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    /* Adjust the overlay opacity for better mobile text contrast */
+    .slideOverlay {
+        background: rgba(0, 0, 0, 0.6);
+    }
+}

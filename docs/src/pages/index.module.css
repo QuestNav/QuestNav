@@ -1,0 +1,168 @@
+/**
+ * index.module.css
+ * Styles for the QuestNav homepage
+ */
+
+/* Hero section with slideshow background */
+.heroContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    color: white;
+    text-align: center;
+    min-height: 85vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Container for text scroller */
+.textScrollerWrapper {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 2rem;
+    font-size: 3rem;
+    font-weight: 700;
+}
+
+/* Welcome title */
+.heroTitle {
+    font-size: 5rem;
+    font-weight: 1100;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.5px;
+    z-index: 1;
+    color: transparent;
+    -webkit-text-stroke: 3px white;
+}
+
+/* Subtitle text */
+.heroSubtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+    max-width: 600px;
+    z-index: 1;
+}
+
+/* Call to action button */
+.ctaButton {
+    background-color: white;
+    color: var(--ifm-color-primary-darkest);
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 0.75rem 2rem;
+    border-radius: 4rem;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    z-index: 1;
+}
+
+.ctaButton:hover {
+    background-color: transparent;
+    color: white;
+    border-color: white;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+/* Features section */
+.featuresSection {
+    padding: 4rem 2rem;
+    background-color: var(--ifm-background-color);
+}
+
+.featuresContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.featuresHeading {
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.featuresGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.featureCard {
+    background-color: var(--ifm-background-surface-color);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.featureCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.featureIcon {
+    font-size: 2.5rem;
+    color: var(--ifm-color-primary);
+    margin-bottom: 1rem;
+}
+
+.featureTitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.featureDescription {
+    color: var(--ifm-color-gray-700);
+    line-height: 1.6;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .heroTitle {
+        font-size: 2.5rem;
+    }
+
+    .textScrollerWrapper {
+        font-size: 2rem;
+    }
+
+    .heroSubtitle {
+        font-size: 1.2rem;
+    }
+
+    .featuresHeading {
+        font-size: 2rem;
+    }
+
+    /* Adjust video sizing for mobile */
+    .videoBackground {
+        display: block;
+    }
+
+    .videoBackground iframe {
+        width: 300%; /* Wider to ensure coverage on mobile */
+        height: 100%;
+    }
+}
+
+/* Handle different aspect ratios for the video */
+@media (min-aspect-ratio: 16/9) {
+    .videoBackground iframe {
+        /* Taller height when the screen is wider than 16:9 */
+        height: 300%;
+        width: 100%;
+    }
+}
+
+@media (max-aspect-ratio: 16/9) {
+    .videoBackground iframe {
+        /* Wider width when the screen is taller than 16:9 */
+        width: 300%;
+        height: 100%;
+    }
+}

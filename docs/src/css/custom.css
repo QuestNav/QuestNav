@@ -1,0 +1,98 @@
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #33A1FD;
+  --ifm-color-primary-dark: #1E92F6;
+  --ifm-color-primary-darker: #0C87F2;
+  --ifm-color-primary-darkest: #086AC8;
+  --ifm-color-primary-light: #4EAEFE;
+  --ifm-color-primary-lighter: #69BCFE;
+  --ifm-color-primary-lightest: #8FCFFF;
+  --ifm-background-color: #F4F4F9;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  /* Additional colors for features grid */
+  --ifm-color-teal: #00BCD4;
+  --ifm-color-teal-dark: #0097A7;
+  --ifm-color-teal-darker: #00838F;
+  --ifm-color-teal-darkest: #006064;
+  --ifm-color-teal-light: #26C6DA;
+  --ifm-color-teal-lighter: #4DD0E1;
+  --ifm-color-teal-lightest: #80DEEA;
+
+  --ifm-color-purple: #5E35B1;
+  --ifm-color-purple-dark: #512DA8;
+  --ifm-color-purple-darker: #4527A0;
+  --ifm-color-purple-darkest: #311B92;
+  --ifm-color-purple-light: #673AB7;
+  --ifm-color-purple-lighter: #7E57C2;
+  --ifm-color-purple-lightest: #9575CD;
+
+  --ifm-color-amber: #FFC107;
+  --ifm-color-amber-dark: #FFB300;
+  --ifm-color-amber-darker: #FFA000;
+  --ifm-color-amber-darkest: #FF8F00;
+  --ifm-color-amber-light: #FFCA28;
+  --ifm-color-amber-lighter: #FFD54F;
+  --ifm-color-amber-lightest: #FFE082;
+
+  /* Trophy Brown colors */
+  --ifm-color-brown: #8D6E63;
+  --ifm-color-brown-dark: #795548;
+  --ifm-color-brown-darker: #6D4C41;
+  --ifm-color-brown-darkest: #5D4037;
+  --ifm-color-brown-light: #A1887F;
+  --ifm-color-brown-lighter: #BCAAA4;
+  --ifm-color-brown-lightest: #D7CCC8;
+
+  --ifm-color-success: #4CAF50;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #4EAEFE;
+  --ifm-color-primary-dark: #33A1FD;
+  --ifm-color-primary-darker: #1E92F6;
+  --ifm-color-primary-darkest: #0C87F2;
+  --ifm-color-primary-light: #69BCFE;
+  --ifm-color-primary-lighter: #8FCFFF;
+  --ifm-color-primary-lightest: #B5DFFF;
+  --ifm-background-color: #31393C;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  /* Additional colors for features grid (dark mode) */
+  --ifm-color-teal: #26C6DA;
+  --ifm-color-teal-dark: #00BCD4;
+  --ifm-color-teal-darker: #0097A7;
+  --ifm-color-teal-darkest: #00838F;
+  --ifm-color-teal-light: #4DD0E1;
+  --ifm-color-teal-lighter: #80DEEA;
+  --ifm-color-teal-lightest: #B2EBF2;
+
+  --ifm-color-purple: #7E57C2;
+  --ifm-color-purple-dark: #673AB7;
+  --ifm-color-purple-darker: #5E35B1;
+  --ifm-color-purple-darkest: #512DA8;
+  --ifm-color-purple-light: #9575CD;
+  --ifm-color-purple-lighter: #B39DDB;
+  --ifm-color-purple-lightest: #D1C4E9;
+
+  --ifm-color-amber: #FFCA28;
+  --ifm-color-amber-dark: #FFC107;
+  --ifm-color-amber-darker: #FFB300;
+  --ifm-color-amber-darkest: #FFA000;
+  --ifm-color-amber-light: #FFD54F;
+  --ifm-color-amber-lighter: #FFE082;
+  --ifm-color-amber-lightest: #FFECB3;
+
+  /* Trophy Brown colors (dark mode) */
+  --ifm-color-brown: #A1887F;
+  --ifm-color-brown-dark: #8D6E63;
+  --ifm-color-brown-darker: #795548;
+  --ifm-color-brown-darkest: #6D4C41;
+  --ifm-color-brown-light: #BCAAA4;
+  --ifm-color-brown-lighter: #D7CCC8;
+  --ifm-color-brown-lightest: #EFEBE9;
+
+  --ifm-color-success: #66BB6A;
+}

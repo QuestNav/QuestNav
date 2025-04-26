@@ -1,0 +1,198 @@
+---
+title: Robot Code Setup
+---
+
+# Robot Code Setup
+
+This guide explains how to integrate QuestNav into your robot code to provide accurate position tracking for your FRC robot.
+
+## Verifying Setup
+:::note
+Before proceeding with integration, it is **highly** recommended that you verify that QuestNav is correctly
+communicating with your robot
+:::
+
+### Checking NetworkTables Communication
+
+Use AdvantageScope to verify that QuestNav data is being published to NetworkTables:
+
+1. Launch AdvantageScope
+2. Connect to NetworkTables using your robot's IP address
+3. Look for the "questnav" table in the NetworkTables view
+4. Verify that you see values updating for:
+    - `position` (array of 3 floats)
+    - `quaternion` (array of 4 floats)
+    - `eulerAngles` (array of 3 floats)
+    - `device/isTracking` (boolean)
+    - `device/batteryPercent` (number)
+
+If these values are updating, QuestNav is successfully communicating with your robot.
+
+## Adding QuestNav to Your Project
+
+:::note
+The QuestNav project only **officially** supports Java as a language. However, as the system is built on top of
+NetworkTables, any language that supports NT4 can be used!
+:::
+The QuestNav library is provided as a single Java file that you can add to your robot project. This approach makes it easy to integrate without complex dependencies.
+
+### Installation Steps
+
+1. Download the `QuestNav.java` file from the [QuestNav GitHub repository](https://github.com/QuestNav/QuestNav/blob/main/robot/QuestNav.java)
+2. Add this file to your robot project in the appropriate package (usually `frc.robot`)
+
+:::note
+A VendorDep (vendor dependency) for QuestNav is planned for the upcoming rewrite. This will make installation even simpler in the future.
+:::
+
+## Basic Usage
+
+QuestNav communicates with your robot through NetworkTables. The class provides methods to access pose data from the Quest headset. The majority of the code
+controlling the quest **should not** be contained within the `QuestNav.java` file. The `QuestNav.java` file is only designed to
+facilitate communication between the robot code and the Quest. We recommend you call these methods from a subsystem if possible.
+
+### Prerequisites
+:::danger
+v0.9 **REQUIRES** the following methods from the `QuestNav` file to be called periodically. Without this, the system
+will not function correctly.
+:::
+
+Call this in *any* periodic method run by the CommandScheduler.
+```java title="e.g. QuestNavSubsystem.java"
+QuestNav questNav = new QuestNav();
+
+@Override
+public void periodic() {
+   questNav.cleanupResponses();
+   questNav.processHeartbeat();
+}
+```
+
+### Getting Robot Pose
+The `QuestNav` file provides a method for getting the pose of the Quest itself. In order to estimate the position of the
+robot, we need to transform the Quest's pose to the robot's center.
+
+```java title="e.g. QuestNavSubsystem.java"
+QuestNav questNav = new QuestNav();
+
+// First, Declare our geometrical transform from the Quest to the robot center
+Transform2d QUEST_TO_ROBOT = new Transform2d( /*TODO: Put your x, y, rotational offsets here!*/ )
+
+// Get the Quest pose
+Pose2d questPose = questNav.getPose();
+
+// Transform by the offset to get your final pose!
+Pose2d robotPose = questPose.transformBy(QUEST_TO_ROBOT.inverse());
+```
+
+### Setting Robot Pose
+:::note
+An upcoming release of QuestNav will include AprilTag detection to periodically and automatically reset the pose to
+a field relative position, potentially making this method unnecessary. However, it may still be used to provide
+positional updates from other systems (auto start positions, PhotonVision, etc.)
+:::
+:::info
+As of v0.9, QuestNav uses [dead reckoning](https://en.wikipedia.org/wiki/Dead_reckoning) to estimate the headset's
+position, so it's important to reset it at an accurate, known location on the field.
+:::
+Likewise, in order to set the pose of QuestNav, we need to transform that pose back from the robot centric pose to
+the frame of the Quest.
+```java title="e.g. QuestNavSubsystem.java"
+QuestNav questNav = new QuestNav();
+
+// Assume this is the requested reset pose
+Pose2d robotPose = new Pose2d( /* Some pose data */ );
+
+// Transform by the offset to get the Quest pose
+Pose2d questPose = questPose.transformBy(QUEST_TO_ROBOT);
+
+// Send the reset operation
+questNav.setPose(questPose);
+```
+:::note
+Notice how when transforming back to the Quest pose from the robot pose, we **don't** use the inverse translation.
+:::
+
+### Updating Swerve Drive Pose
+The most common use case is to utilize the pose data from QuestNav with a SwerveDrivePoseEstimator for vision
+correction. Most swerve libraries have a method to accomplish this.
+
+
+:::danger
+The last published value to NetworkTables will persist even if QuestNav disconnects. It is **imperative** you ensure
+the Quest is connected and is tracking before using its pose data!
+:::
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+    <TabItem value="CTRE" label="CTRE Swerve Generator">
+
+        :::warning
+        CTRE does not utilize the `SwerveDrivePoseEstimator` class directly, and uses their own timestamp system.
+        If you do not convert the Quest's timestamp to CTRE's current time, it will not function correctly!
+        :::
+        ```java title="e.g. QuestNavSubsystem.java"
+        QuestNav questNav = new QuestNav();
+
+        SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
+        Matrix<N3, N1> QUESTNAV_STD_DEVS =
+            VecBuilder.fill(
+                0.02, // Trust down to 2cm in X direction
+                0.02, // Trust down to 2cm in Y direction
+                0.035 // Trust down to 2 degrees rotational
+            );
+
+        if (questNav.getConnected() && questNav.getTrackingStatus()) {
+            // Get pose with the method outlined above
+            Pose2d pose = getPose();
+            // Get timestamp from the QuestNav instance
+            double timestamp = questNav.getTimestamp();
+
+            // Convert FPGA timestamp to CTRE's time domain using Phoenix 6 utility
+            double ctreTimestamp = Utils.fpgaToCurrentTime(timestamp);
+
+            // You can put some sort of filtering here if you would like!
+
+            // Add the measurement to our estimator
+            swerveDriveSubsystem.addVisionMeasurement(pose, ctreTimestamp, QUESTNAV_STD_DEVS);
+        }
+        ```
+
+    </TabItem>
+    <TabItem value="AdvantageKit-YAGSL" label="AdvantageKit/YAGSL">
+
+        :::tip
+        This example works for ANY library that utilizes the `SwerveDrivePoseEstimator` class. The most common examples
+        are YAGSL and the AdvantageKit template.
+        :::
+        ```java title="e.g. QuestNavSubsystem.java"
+        QuestNav questNav = new QuestNav();
+        SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
+        Matrix<N3, N1> QUESTNAV_STD_DEVS =
+            VecBuilder.fill(
+                0.02, // Trust down to 2cm in X direction
+                0.02, // Trust down to 2cm in Y direction
+                0.035 // Trust down to 2 degrees rotational
+            );
+
+        if (questNav.getConnected() && questNav.getTrackingStatus()) {
+            // Get pose with the method outlined above
+            Pose2d pose = getPose();
+            // Get timestamp from the QuestNav instance
+            double timestamp = questNav.getTimestamp();
+
+            // You can put some sort of filtering here if you would like!
+
+            // Add the measurement to our estimator
+            swerveDriveSubsystem.addVisionMeasurement(pose, timestamp, QUESTNAV_STD_DEVS);
+        }
+    ```
+
+    </TabItem>
+</Tabs>
+
+:::note
+The above examples should be called in a **periodic loop** to ensure vision measurements are always being added!
+:::

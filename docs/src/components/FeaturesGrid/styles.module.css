@@ -1,0 +1,463 @@
+/**
+ * styles.module.css
+ * Styles for the FeaturesGrid component with fixed heights
+ */
+
+/* Features Section styles */
+.featuresSection {
+    padding: 4rem 2rem;
+    background-color: var(--ifm-background-color);
+}
+
+.featuresContainer {
+    max-width: 1400px; /* Increased from 1200px to 1400px */
+    margin: 0 auto;
+}
+
+.featuresHeading {
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 3.5rem;
+    font-weight: 1000;
+    color:  var(--ifm-color-primary-darkest);
+}
+
+.featuresGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Back to 3 columns but with flatter boxes */
+    gap: 1rem; /* Reduced from 1.5rem to 1rem */
+}
+
+.featureNoteContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.featureNote {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+}
+
+.timestampPill {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    color: #666;
+}
+
+.liveIndicator {
+    width: 6px;
+    height: 6px;
+    background: var(--ifm-color-success);
+    border-radius: 50%;
+    margin-right: 6px;
+    position: relative;
+    animation: pulseDot 1.5s infinite;
+}
+
+/* Feature Showcase styles */
+.featureShowcaseWrapper {
+    position: relative;
+    width: 100%;
+}
+
+.featureShowcaseContainer {
+    background: linear-gradient(135deg, var(--ifm-color-primary-darker), var(--ifm-color-primary));
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    color: white;
+    overflow: hidden;
+    padding: 1rem 1.5rem; /* Further reduced top/bottom padding to 1rem */
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    height: auto;
+    min-height: 250px; /* Reduced from 300px to 250px */
+    display: flex;
+    flex-direction: column;
+}
+
+.featureShowcaseContainer.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.diagonalLines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.diagonalLines::before {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    right: -100%;
+    bottom: -100%;
+    background: repeating-linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.05) 0px,
+            rgba(255, 255, 255, 0.05) 2px,
+            transparent 2px,
+            transparent 12px
+    );
+    z-index: 1;
+}
+
+.featureHeader {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0.5rem; /* Reduced from 1rem to 0.5rem */
+    min-height: 70px; /* Further reduced from 90px to 70px */
+    justify-content: center;
+}
+
+.featureIconCircle {
+    width: 50px; /* Reduced from 60px to 50px */
+    height: 50px; /* Reduced from 60px to 50px */
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem; /* Reduced from 0.75rem to 0.5rem */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.featureIcon {
+    font-size: 2rem;
+}
+
+.featureTitle {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+    letter-spacing: 0.5px;
+}
+
+.featureSubtitle {
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+.featureStatsContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 2;
+}
+
+.featureStatBox {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 0.75rem; /* Reduced from 1.25rem to 0.75rem */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+}
+
+.statValue {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    margin-bottom: 0.25rem; /* Reduced from 0.5rem to 0.25rem */
+    min-height: 2.5rem; /* Further reduced from 3rem to 2.5rem */
+}
+
+.statCount {
+    font-size: 2.5rem; /* Reduced from 3rem to 2.5rem */
+    font-weight: 800;
+    line-height: 1;
+    position: relative;
+}
+
+.statSuffix {
+    font-size: 1.1rem; /* Reduced from 1.3rem to 1.1rem */
+    font-weight: 600;
+    margin-left: 0.25rem;
+}
+
+.visible .statCount {
+    animation: pulsate 1s ease-in-out 1;
+    animation-delay: 2s;
+}
+
+.statDescription {
+    font-size: 0.85rem; /* Reduced from 0.9rem to 0.85rem */
+    opacity: 0.8;
+    margin-bottom: 0.5rem; /* Reduced from 1rem to 0.5rem */
+    text-align: center;
+    min-height: 1.5rem; /* Further reduced from 2rem to 1.5rem */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scrollingContainer {
+    position: relative;
+    width: 100%;
+    height: 85px; /* Further reduced from 100px to 80px */
+    overflow: hidden;
+    margin-top: auto;
+    border-radius: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 0.5rem;
+}
+
+/* This class will be applied to make scrolling work consistently */
+.scroll-animation {
+    animation: scrollItems var(--scroll-duration, 20s) linear infinite;
+}
+
+@keyframes scrollItems {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.scrollTrack {
+    display: flex;
+    position: absolute;
+    width: max-content;
+}
+
+/* Feature detail items */
+.featureDetailItem {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 0.5rem; /* Reduced from 0.75rem to 0.5rem */
+    margin: 0 10px;
+    width: 220px; /* Changed back to original 200px */
+    height: 75px; /* Further reduced from 85px to 70px */
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.featureDetailItem:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.featureDetailIcon {
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.featureDetailContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
+    flex: 1;
+}
+
+.featureDetailText {
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+}
+
+/* Pulse Wave Effects */
+.pulseWaves {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.featureWaves {
+    top: 30%;
+    right: 20%;
+}
+
+.wave {
+    position: absolute;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    opacity: 0;
+    transform-origin: center;
+    animation: pulseWave 3s ease-out infinite;
+}
+
+.wave1 {
+    width: 60px;
+    height: 60px;
+    animation-delay: 0s;
+}
+
+.wave2 {
+    width: 80px;
+    height: 80px;
+    animation-delay: 0.3s;
+}
+
+.wave3 {
+    width: 100px;
+    height: 100px;
+    animation-delay: 0.6s;
+}
+
+@keyframes pulseWave {
+    0% {
+        transform: scale(0);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+/* Dynamic shadow effects */
+.shadowAnimator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.3;
+    animation: moveShadow 15s infinite alternate ease-in-out;
+}
+
+.featureShadow {
+    background: radial-gradient(circle at 70% 30%, rgba(0, 0, 0, 0.3) 0%, transparent 60%);
+    animation-delay: -5s;
+}
+
+@keyframes moveShadow {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 100% 100%;
+    }
+}
+
+/* Micro-interactions for milestone numbers */
+.milestone {
+    animation: milestonePop 0.5s ease-out;
+}
+
+.milestone .statCount {
+    color: var(--ifm-color-amber);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+@keyframes milestonePop {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes pulsate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes pulseDot {
+    0% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 4px rgba(76, 175, 80, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+/* Responsive styles */
+@media (max-width: 1280px) {
+    .featuresGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .featureHeader {
+        min-height: 70px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .featuresGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .featureHeader {
+        min-height: 65px;
+    }
+}
+
+@media (max-width: 768px) {
+    .featuresHeading {
+        font-size: 2rem;
+    }
+
+    .featuresGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .featureShowcaseContainer {
+        padding: 1.5rem 1rem;
+    }
+
+    .featureHeader {
+        min-height: 70px; /* Further reduced for mobile */
+    }
+
+    .featureTitle {
+        font-size: 1.4rem;
+    }
+
+    .statCount {
+        font-size: 2.5rem;
+    }
+
+    .statSuffix {
+        font-size: 1.1rem;
+    }
+
+    .featureNoteContainer {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}

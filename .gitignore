@@ -4,3 +4,5 @@ oculus-frc-streamer_*/
 # Ignore .apk and .zip files
 *.apk
 *.zip
+
+.idea/

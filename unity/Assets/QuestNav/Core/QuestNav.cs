@@ -119,26 +119,17 @@ namespace QuestNav.Core
         /// <summary>
         /// Reference to the network table connection component
         /// </summary>
-        [SerializeField]
-        private NetworkTableConnection networkConnection;
-
-        /// <summary>
-        /// Reference to the heartbeat manager component
-        /// </summary>
-        [SerializeField]
-        private HeartbeatManager heartbeatManager;
+        private readonly NetworkTableConnection networkConnection = new();
 
         /// <summary>
         /// Reference to the command processor component
         /// </summary>
-        [SerializeField]
-        private CommandProcessor commandProcessor;
+        private CommandProcessor commandProcessor  = new();
 
         /// <summary>
         /// Reference to the UI manager component
         /// </summary>
-        [SerializeField]
-        private UIManager uiManager;
+        private UIManager uiManager = new();
         #endregion
         #endregion
 
@@ -156,12 +147,6 @@ namespace QuestNav.Core
             
             // Initialize command processor
             commandProcessor.Initialize(networkConnection, vrCamera, vrCameraRoot, resetTransform);
-            
-            // Initialize heartbeat manager
-            heartbeatManager.Initialize(networkConnection);
-            
-            // Start connection to robot
-            networkConnection.ConnectToRobot();
         }
 
         /// <summary>
@@ -170,49 +155,29 @@ namespace QuestNav.Core
         void LateUpdate()
         {
             // Update UI periodically
-            if (delayCounter >= (int)QuestNavConstants.Display.DISPLAY_FREQUENCY)
-            {
-                uiManager.UpdateIPAddressText();
-                uiManager.UpdateConStateText();
-                delayCounter = 0;
-            }
-            else
-            {
-                delayCounter++;
-            }
-            
-            // Check for connection attempt timeout to prevent zombie state
-            if (!networkConnection.IsConnected)
-            {
-                // Only start a new connection attempt if not already trying
-                if (!networkConnection.IsConnectionAttemptInProgress)
-                {
-                    networkConnection.HandleDisconnectedState();
-                }
-                return;
-            }
-
+            uiManager.UpdateIPAddressText();
+            uiManager.UpdateConStateText();
+        }
+        
+        /// <summary>
+        /// Handles frame updates for data publishing and command processing
+        /// </summary>
+        void FixedUpdate()
+        {
             // Connected - manage heartbeat, publish data, and process commands
-            if (networkConnection.IsConnected)
-            {
-                // Manage heartbeat to detect zombie connections
-                heartbeatManager.ManageHeartbeat();
-                
-                // Collect and publish current frame data
-                UpdateFrameData();
-                networkConnection.PublishFrameData(frameIndex, timeStamp, position, rotation, eulerAngles);
-                
-                // Collect and publish current device data
-                UpdateDeviceData();
-                networkConnection.PublishDeviceData(currentlyTracking, trackingLostEvents, batteryPercent);
-                
-                // Process robot commands
-                commandProcessor.ProcessCommands();
-            }
+            if (!networkConnection.IsConnected) return;
             
             
-            // Check for tracking loss
-            
+            // Collect and publish current frame data
+            UpdateFrameData();
+            networkConnection.PublishFrameData(frameIndex, timeStamp, position, rotation, eulerAngles);
+                
+            // Collect and publish current device data
+            UpdateDeviceData();
+            networkConnection.PublishDeviceData(currentlyTracking, trackingLostEvents, batteryPercent);
+                
+            // Process robot commands
+            commandProcessor.ProcessCommands();
         }
         #endregion
 

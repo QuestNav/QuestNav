@@ -1,4 +1,6 @@
-﻿namespace QuestNav.Core
+﻿using QuestNav.Native.NTCore;
+
+namespace QuestNav.Core
 {
     /// <summary>
     /// Contains all constants used by the QuestNav application.
@@ -15,6 +17,8 @@
             /// Application name for NetworkTables connection
             /// </summary>
             public const string APP_NAME = "QuestNav";
+
+            public static PubSubOptions NT_PUBLISHER_SETTINGS = PubSubOptions.AllDefault;
 
             /// <summary>
             /// Server address format for NetworkTables connection
@@ -65,28 +69,7 @@
             /// <summary>
             /// Default team number when none is provided
             /// </summary>
-            public const string DEFAULT_TEAM_NUMBER = "9999";
-        }
-
-        /// <summary>
-        /// Constants related to the heartbeat system for connection monitoring.
-        /// </summary>
-        public static class Heartbeat
-        {
-            /// <summary>
-            /// Maximum number of consecutive heartbeat failures before forcing reconnection
-            /// </summary>
-            public const int MAX_FAILED_HEARTBEATS = 3;
-
-            /// <summary>
-            /// Time interval between heartbeat checks (seconds)
-            /// </summary>
-            public const float HEARTBEAT_INTERVAL = 1.0f;
-
-            /// <summary>
-            /// Maximum time to wait for a heartbeat response before considering it failed (seconds)
-            /// </summary>
-            public const float HEARTBEAT_TIMEOUT = 3.0f;
+            public const int DEFAULT_TEAM_NUMBER = 9999;
         }
 
         /// <summary>
@@ -102,12 +85,12 @@
             /// <summary>
             /// Command response topic (Quest to robot)
             /// </summary>
-            public const string MISO = BASE_PATH + "/miso";
+            public const string COMMAND_RESPONSE = BASE_PATH + "/miso";
 
             /// <summary>
             /// Command request topic (robot to Quest)
             /// </summary>
-            public const string MOSI = BASE_PATH + "/mosi";
+            public const string COMMAND_REQUEST = BASE_PATH + "/mosi";
 
             /// <summary>
             /// Frame count topic
@@ -180,6 +163,11 @@
         /// </summary>
         public static class Commands
         {
+            /// <summary>
+            /// Command code for no request/response
+            /// </summary>
+            public const int IDLE = 0;
+            
             /// <summary>
             /// Command code for heading reset request
             /// </summary>

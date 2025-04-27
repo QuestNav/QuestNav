@@ -305,11 +305,6 @@ GameObject:
   - component: {fileID: 336173539}
   - component: {fileID: 336173540}
   - component: {fileID: 336173545}
-  - component: {fileID: 336173544}
-  - component: {fileID: 336173543}
-  - component: {fileID: 336173542}
-  - component: {fileID: 336173541}
-  - component: {fileID: 336173546}
   m_Layer: 0
   m_Name: QuestNavCore
   m_TagString: Untagged
@@ -344,54 +339,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3279de15e6065941a9310672ef31109, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &336173541
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 336173537}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84aa431546284adea2793a13d73b0c75, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &336173542
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 336173537}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8526f30383ef4210a330c000d7177b65, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &336173543
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 336173537}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5c6424f09ef44f7b1c36ad0851e4905, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &336173544
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 336173537}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c93185ac1dea41aa85732d36d4432424, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &336173545
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -412,32 +359,6 @@ MonoBehaviour:
   vrCamera: {fileID: 1567031735}
   vrCameraRoot: {fileID: 1567031736}
   resetTransform: {fileID: 336173539}
-  networkConnection: {fileID: 336173544}
-  heartbeatManager: {fileID: 336173543}
-  commandProcessor: {fileID: 336173542}
-  uiManager: {fileID: 336173541}
---- !u!114 &336173546
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 336173537}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 96c444e444ef492390ac951ad21693e8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  webCamTextureManager: {fileID: 676828822}
-  port: 5809
-  jpegQuality: 75
-  frameRate: 20
-  startServerOnAwake: 1
-  streamResolution: {x: 360, y: 240}
-  performanceMode: 1
-  clientConnectionAttemptIntervalMs: 100
-  maxEncodingThreads: 2
-  maxQueuedFrames: 3
 --- !u!1 &336191857
 GameObject:
   m_ObjectHideFlags: 0
@@ -948,17 +869,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 671004110}
   m_CullTransparentMesh: 1
---- !u!114 &676828822 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1748868316715821956, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-  m_PrefabInstance: {fileID: 1375737368}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef9a7893e57c04c0db4114c70954b915, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &773190229
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using QuestNav.Core;
 using QuestNav.Network;
@@ -17,7 +18,7 @@ namespace QuestNav.UI
         /// <summary>
         /// Gets the current team number.
         /// </summary>
-        string TeamNumber { get; }
+        int TeamNumber { get; }
 
         /// <summary>
         /// Initializes the UI manager with required UI components.
@@ -43,8 +44,8 @@ namespace QuestNav.UI
         /// <summary>
         /// Sets the input box placeholder text with the current team number.
         /// </summary>
-        /// <param name="team">The team number to display</param>
-        void SetInputBox(string team);
+        /// <param name="teamNumber">The team number to display</param>
+        void SetInputBox(int teamNumber);
 
         /// <summary>
         /// Updates the team number based on user input.
@@ -86,7 +87,7 @@ namespace QuestNav.UI
         /// <summary>
         /// Current team number
         /// </summary>
-        private string teamNumber = "";
+        private int teamNumber ;
 
         /// <summary>
         /// Holds the detected local IP address of the HMD
@@ -98,7 +99,7 @@ namespace QuestNav.UI
         /// <summary>
         /// Gets the current team number.
         /// </summary>
-        public string TeamNumber => teamNumber;
+        public int TeamNumber => teamNumber;
         #endregion
 
         #region Public Methods
@@ -120,7 +121,7 @@ namespace QuestNav.UI
             this.teamUpdateButton = teamUpdateButton;
             this.networkConnection = networkConnection;
 
-            teamNumber = PlayerPrefs.GetString("TeamNumber", QuestNavConstants.Network.DEFAULT_TEAM_NUMBER);
+            teamNumber = PlayerPrefs.GetInt("TeamNumber", QuestNavConstants.Network.DEFAULT_TEAM_NUMBER);
             SetInputBox(teamNumber);
             teamInput.Select();
             
@@ -138,8 +139,8 @@ namespace QuestNav.UI
         public void UpdateTeamNumber()
         {
             QueuedLogger.Log("[UI Manager] Updating Team Number");
-            teamNumber = teamInput.text;
-            PlayerPrefs.SetString("TeamNumber", teamNumber);
+            teamNumber = Int32.Parse(teamInput.text);
+            PlayerPrefs.SetInt("TeamNumber", teamNumber);
             PlayerPrefs.Save();
             SetInputBox(teamNumber);
 
@@ -179,22 +180,22 @@ namespace QuestNav.UI
         /// </summary>
         public void UpdateConStateText()
         {
-            // QueuedLogger.Log("[UI Manager] Updating Connection State Text");
             TextMeshProUGUI conText = conStateText as TextMeshProUGUI;
-            conText.text = networkConnection.ConnectionStateMessage;
+            // conText.text = networkConnection.ConnectionState;
+            // TODO: reimplement connection state status text
         }
 
         /// <summary>
         /// Sets the input box placeholder text with the current team number.
         /// </summary>
-        /// <param name="team">The team number to display</param>
-        public void SetInputBox(string team)
+        /// <param name="teamNumber">The team number to display</param>
+        public void SetInputBox(int teamNumber)
         {
             teamInput.text = "";
             TextMeshProUGUI placeholderText = teamInput.placeholder as TextMeshProUGUI;
             if (placeholderText != null)
             {
-                placeholderText.text = "Current: " + team;
+                placeholderText.text = "Current: " + teamNumber;
             }
             else
             {

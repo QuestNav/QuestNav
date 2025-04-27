@@ -1,3 +1,19 @@
-﻿fileFormatVersion: 2
+fileFormatVersion: 2
 guid: 46e114ad2017402f9883d5d44dca7901
-timeCreated: 1745090740
+PluginImporter:
+  externalObjects: {}
+  serializedVersion: 3
+  iconMap: {}
+  executionOrder: {}
+  defineConstraints: []
+  isPreloaded: 0
+  isOverridable: 0
+  isExplicitlyReferenced: 0
+  validateReferences: 1
+  platformData:
+    Any:
+      enabled: 1
+      settings: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

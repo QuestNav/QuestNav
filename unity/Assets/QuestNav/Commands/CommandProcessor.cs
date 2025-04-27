@@ -101,7 +101,7 @@ namespace QuestNav.Commands
         /// </summary>
         public void ProcessCommands()
         {
-            command = networkConnection.GetLong(QuestNavConstants.Topics.MOSI);
+            command = networkConnection.GetCommandRequest();
 
             if (resetInProgress && command == 0)
             {
@@ -131,12 +131,12 @@ namespace QuestNav.Commands
                     break;
                 case QuestNavConstants.Commands.PING:
                     QueuedLogger.Log("[QuestNav] Ping received, responding...");
-                    networkConnection.PublishValue(QuestNavConstants.Topics.MISO, QuestNavConstants.Commands.PING_RESPONSE);
+                    networkConnection.SetCommandResponse(QuestNavConstants.Commands.PING_RESPONSE);
                     break;
                 default:
                     if (!resetInProgress)
                     {
-                        networkConnection.PublishValue(QuestNavConstants.Topics.MISO, 0);
+                        networkConnection.SetCommandResponse(QuestNavConstants.Commands.IDLE);
                     }
                     break;
             }
@@ -152,7 +152,7 @@ namespace QuestNav.Commands
             try {
                 // Use constants for retry logic and field dimensions from QuestNavConstants
 
-                double[] resetPose = null;
+                float[] resetPose = null;
                 bool success = false;
                 int attemptCount = 0;
 
@@ -170,7 +170,7 @@ namespace QuestNav.Commands
 
                     // Read the pose array from NetworkTables
                     // Format: [X, Y, Rotation] in FRC field coordinates
-                    resetPose = networkConnection.GetDoubleArray(QuestNavConstants.Topics.RESET_POSE);
+                    resetPose = networkConnection.GetPoseResetPosition();
 
                     // Validate pose data format and field boundaries
                     if (resetPose != null && resetPose.Length == 3) {
@@ -268,13 +268,12 @@ namespace QuestNav.Commands
                 if (posError > QuestNavConstants.Field.POSITION_ERROR_THRESHOLD) {
                     QueuedLogger.LogWarning($"[QuestNav] Large position error detected!");
                 }
-
-                networkConnection.PublishValue(QuestNavConstants.Topics.MISO, QuestNavConstants.Commands.POSE_RESET_SUCCESS);
+                networkConnection.SetCommandResponse(QuestNavConstants.Commands.POSE_RESET_SUCCESS);
             }
             catch (Exception e) {
                 QueuedLogger.LogError($"[QuestNav] Error during pose reset: {e.Message}");
                 QueuedLogger.LogException(e);
-                networkConnection.PublishValue(QuestNavConstants.Topics.MISO, 0);
+                networkConnection.SetCommandResponse(QuestNavConstants.Commands.IDLE);
                 resetInProgress = false;
             }
         }
@@ -292,13 +291,13 @@ namespace QuestNav.Commands
 
                 Vector3 distanceDiff = resetTransform.position - vrCamera.position;
                 vrCameraRoot.transform.position += distanceDiff;
-
-                networkConnection.PublishValue(QuestNavConstants.Topics.MISO, QuestNavConstants.Commands.HEADING_RESET_SUCCESS);
+                
+                networkConnection.SetCommandResponse(QuestNavConstants.Commands.HEADING_RESET_SUCCESS);
             }
             catch (Exception e) {
                 QueuedLogger.LogError($"[QuestNav] Error during recenter: {e.Message}");
                 QueuedLogger.LogException(e);
-                networkConnection.PublishValue(QuestNavConstants.Topics.MISO, 0);
+                networkConnection.SetCommandResponse(QuestNavConstants.Commands.IDLE);
                 resetInProgress = false;
             }
         }

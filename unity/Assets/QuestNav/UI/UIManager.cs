@@ -163,7 +163,7 @@ namespace QuestNav.UI
                     TextMeshProUGUI ipText = ipAddressText as TextMeshProUGUI;
                     if (myAddressLocal == "127.0.0.1")
                     {
-                        ipText.text = "No Adapter Found";
+                        ipText.text = "USB";
                     }
                     else
                     {

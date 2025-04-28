@@ -13,58 +13,18 @@ namespace QuestNav.Core
         /// </summary>
         public static class Network
         {
-            /// <summary>
-            /// Application name for NetworkTables connection
-            /// </summary>
-            public const string APP_NAME = "QuestNav";
 
             public static PubSubOptions NT_PUBLISHER_SETTINGS = PubSubOptions.AllDefault;
-
+            
             /// <summary>
-            /// Server address format for NetworkTables connection
-            /// Pattern replaces TE with team number prefix and AM with team number suffix
+            /// Tells NT4 to connect to this IP instead of via team number if not empty. DEBUGGING PURPOSES ONLY!
             /// </summary>
-            public const string SERVER_ADDRESS_FORMAT = "10.TE.AM.2";
-
-            /// <summary>
-            /// Alternate roboRIO network address that may be available
-            /// </summary>
-            public const string ALTERNATE_ADDRESS = "172.22.11.2";
+            public const string DEBUG_NT_SERVER_ADDRESS_OVERRIDE = "";
 
             /// <summary>
             /// NetworkTables server port
             /// </summary>
-            public const int SERVER_PORT = 5810;
-
-            /// <summary>
-            /// Default reconnect delay for failed connection attempts (seconds)
-            /// </summary>
-            public const float DEFAULT_RECONNECT_DELAY = 3.0f;
-
-            /// <summary>
-            /// Maximum reconnection delay (seconds)
-            /// </summary>
-            public const float MAX_RECONNECT_DELAY = 5.0f;
-
-            /// <summary>
-            /// Cooldown before trying candidates that have failed previously (seconds)
-            /// </summary>
-            public const float CANDIDATE_FAILURE_COOLDOWN = 5.0f;
-
-            /// <summary>
-            /// Delay before retrying when network is unreachable (seconds)
-            /// </summary>
-            public const int UNREACHABLE_NETWORK_DELAY = 3;
-
-            /// <summary>
-            /// Timeout for WebSocket connection in seconds
-            /// </summary>
-            public const int WEBSOCKET_CONNECTION_TIMEOUT = 3;
-            
-            /// <summary>
-            /// Maximum time to wait for a connection attempt before resetting state (seconds)
-            /// </summary>
-            public const float CONNECTION_ATTEMPT_TIMEOUT = 5.0f;
+            public const int NT_SERVER_PORT = 5810;
 
             /// <summary>
             /// Default team number when none is provided
@@ -80,82 +40,62 @@ namespace QuestNav.Core
             /// <summary>
             /// Base path for all QuestNav topics
             /// </summary>
-            private const string BASE_PATH = "/questnav";
+            public const string NT_BASE_PATH = "/QuestNav";
 
             /// <summary>
             /// Command response topic (Quest to robot)
             /// </summary>
-            public const string COMMAND_RESPONSE = BASE_PATH + "/miso";
+            public const string COMMAND_RESPONSE = NT_BASE_PATH + "/miso";
 
             /// <summary>
             /// Command request topic (robot to Quest)
             /// </summary>
-            public const string COMMAND_REQUEST = BASE_PATH + "/mosi";
+            public const string COMMAND_REQUEST = NT_BASE_PATH + "/mosi";
 
             /// <summary>
             /// Frame count topic
             /// </summary>
-            public const string FRAME_COUNT = BASE_PATH + "/frameCount";
+            public const string FRAME_COUNT = NT_BASE_PATH + "/frameCount";
 
             /// <summary>
             /// Timestamp topic
             /// </summary>
-            public const string TIMESTAMP = BASE_PATH + "/timestamp";
+            public const string TIMESTAMP = NT_BASE_PATH + "/timestamp";
 
             /// <summary>
             /// Position topic
             /// </summary>
-            public const string POSITION = BASE_PATH + "/position";
+            public const string POSITION = NT_BASE_PATH + "/position";
 
             /// <summary>
             /// Quaternion rotation topic
             /// </summary>
-            public const string QUATERNION = BASE_PATH + "/quaternion";
+            public const string QUATERNION = NT_BASE_PATH + "/quaternion";
 
             /// <summary>
             /// Euler angles topic
             /// </summary>
-            public const string EULER_ANGLES = BASE_PATH + "/eulerAngles";
-
-            /// <summary>
-            /// Initial position topic
-            /// </summary>
-            public const string INIT_POSITION = BASE_PATH + "/init/position";
-
-            /// <summary>
-            /// Initial euler angles topic
-            /// </summary>
-            public const string INIT_EULER_ANGLES = BASE_PATH + "/init/eulerAngles";
+            public const string EULER_ANGLES = NT_BASE_PATH + "/eulerAngles";
 
             /// <summary>
             /// Reset pose topic
             /// </summary>
-            public const string RESET_POSE = BASE_PATH + "/resetpose";
-
-            /// <summary>
-            /// Heartbeat topic (Quest to robot)
-            /// </summary>
-            public const string HEARTBEAT_TO_ROBOT = BASE_PATH + "/heartbeat/quest_to_robot";
-
-            /// <summary>
-            /// Heartbeat topic (robot to Quest)
-            /// </summary>
-            public const string HEARTBEAT_FROM_ROBOT = BASE_PATH + "/heartbeat/robot_to_quest";
+            public const string RESET_POSE = NT_BASE_PATH + "/resetpose";
             
             /// <summary>
             /// How many times we have lost tracking this reboot
             /// </summary>
-            public const string TRACKING_LOST_COUNTER = BASE_PATH + "/device/trackingLostCounter";
+            public const string TRACKING_LOST_COUNTER = NT_BASE_PATH + "/device/trackingLostCounter";
             
             /// <summary>
             /// The current tracking state
             /// </summary>
-            public const string CURRENTLY_TRACKING = BASE_PATH + "/device/isTracking";
+            public const string CURRENTLY_TRACKING = NT_BASE_PATH + "/device/isTracking";
             
             /// <summary>
             /// Battery percentage topic
             /// </summary>
-            public const string BATTERY_PERCENT = BASE_PATH + "/device/batteryPercent";
+            public const string BATTERY_PERCENT = NT_BASE_PATH + "/device/batteryPercent";
         }
 
         /// <summary>
@@ -239,6 +179,36 @@ namespace QuestNav.Core
             /// Position error threshold for warning (meters)
             /// </summary>
             public const float POSITION_ERROR_THRESHOLD = 0.01f; // 1cm
+        }
+
+        /// <summary>
+        /// Constants related to logging
+        /// </summary>
+        public static class Logging
+        {
+            /** NetworkTables logging levels. */
+            static class NTLogLevel
+            {
+                internal const int CRITICAL = 50;
+                internal const int ERROR = 40;
+                internal const int WARNING = 30;
+                internal const int INFO = 20;
+                internal const int DEBUG = 10;
+                internal const int DEBUG1 = 9;
+                internal const int DEBUG2 = 8;
+                internal const int DEBUG3 = 7;
+                internal const int DEBUG4 = 6;
+            }
+
+            /// <summary>
+            /// The lowest level to log. Usually this is INFO, or DEBUG1
+            /// </summary>
+            public const int NT_LOG_LEVEL_MIN = NTLogLevel.DEBUG1;
+            
+            /// <summary>
+            /// The lowest level to log. Almost ALWAYS this is CRITICAL.
+            /// </summary>
+            public const int NT_LOG_LEVEL_MAX = NTLogLevel.CRITICAL;
         }
     }
 }

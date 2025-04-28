@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using QuestNav.Utils;
 
 namespace QuestNav.Native.NTCore
 {
@@ -11,6 +12,7 @@ namespace QuestNav.Native.NTCore
 
         public NtInstance(string instanceName)
         {
+            QueuedLogger.Log("[LibNTCore] Loading NTCore Natives");
             handle = NtCoreNatives.NT_GetDefaultInstance();
 
             byte[] nameUtf8 = Encoding.UTF8.GetBytes(instanceName);

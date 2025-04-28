@@ -2,6 +2,7 @@ using System;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Network;
+using QuestNav.Utils;
 using UnityEngine;
 
 namespace QuestNav.Network
@@ -47,27 +48,6 @@ namespace QuestNav.Network
 
         public void SetCommandResponse(long response);
     }
-
-    /// <summary>
-    /// Enum representing the possible connection states.
-    /// </summary>
-    public enum ConnectionState
-    {
-        NONE,
-        INITIALIZING,
-        ATTEMPTING_CONNECTION,
-        CHECKING_NETWORK_REACHABILITY,
-        NETWORK_UNREACHABLE,
-        RESOLVING_ADDRESS,
-        ADDRESS_RESOLUTION_FAILED,
-        CONNECTING_TO_ADDRESS,
-        CONNECTION_FAILED,
-        CONNECTION_TIMEOUT,
-        CONNECTED,
-        DISCONNECTED,
-        RECONNECT_DELAY,
-        FORCING_RECONNECTION
-    }
     }
 
     /// <summary>
@@ -79,6 +59,8 @@ namespace QuestNav.Network
         /// NetworkTables connection for FRC data communication
         /// </summary>
         private NtInstance ntInstance;
+
+        private PolledLogger ntInstanceLogger;
         
         // Publisher topics
         private IntegerPublisher frameCountPublisher;
@@ -98,7 +80,11 @@ namespace QuestNav.Network
         public NetworkTableConnection()
         {
             // Instantiate instance
-            ntInstance = new NtInstance("questnav");
+            ntInstance = new NtInstance(QuestNavConstants.Topics.NT_BASE_PATH);
+            
+            // Instantiate logger
+            ntInstanceLogger = ntInstance.CreateLogger(QuestNavConstants.Logging.NT_LOG_LEVEL_MIN, QuestNavConstants.Logging.NT_LOG_LEVEL_MAX);
+            
             // Instantiate publisher topics
             frameCountPublisher = ntInstance.GetIntegerPublisher(QuestNavConstants.Topics.FRAME_COUNT, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
             timestampPublisher = ntInstance.GetDoublePublisher(QuestNavConstants.Topics.TIMESTAMP, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
@@ -131,7 +117,14 @@ namespace QuestNav.Network
         /// <param name="teamNumber">The new team number</param>
         public void UpdateTeamNumber(int teamNumber)
         {
-            ntInstance.SetTeamNumber(teamNumber);
+            // Set team number/ip if in debug mode
+            if (QuestNavConstants.Network.DEBUG_NT_SERVER_ADDRESS_OVERRIDE.Length == 0)
+            {
+                QueuedLogger.Log($"[NetworkTableConnection/UpdateTeamNumber] Setting Team number to {teamNumber}");
+                ntInstance.SetTeamNumber(teamNumber);
+            }
+            QueuedLogger.Log("[NetworkTableConnection/UpdateTeamNumber] Running with NetworkTables IP Override! This should only be used for debugging!");
+            ntInstance.SetAddresses(new (string addr, int port)[]{(QuestNavConstants.Network.DEBUG_NT_SERVER_ADDRESS_OVERRIDE, QuestNavConstants.Network.NT_SERVER_PORT)});
         }
         #endregion
 
@@ -143,12 +136,6 @@ namespace QuestNav.Network
         public void PublishFrameData(int frameIndex, double timeStamp, Vector3 position, Quaternion rotation,
             Vector3 eulerAngles)
         {
-            // Check if connection is established before publishing data
-            if (!ntInstance.IsConnected())
-            {
-                return; // Exit early if we aren't connected
-            }
-
             // Publish frame count and timestamp
             frameCountPublisher?.Set(frameIndex);
             timestampPublisher?.Set(timeStamp);
@@ -165,12 +152,6 @@ namespace QuestNav.Network
 
         public void PublishDeviceData(bool currentlyTracking, int trackingLostEvents, float batteryPercent)
         {
-            // Check if connection is established before publishing data
-            if (!ntInstance.IsConnected())
-            {
-                return; // Exit early if connection isn't established
-            }
-
             // Publish tracking lost events counter
             trackingLostPublisher?.Set(trackingLostEvents);
 
@@ -198,6 +179,20 @@ namespace QuestNav.Network
         public void SetCommandResponse(long response)
         {
             commandResponsePublisher.Set(response);
+        }
+
+        #endregion
+
+        #region Logging
+
+        public void LoggerPeriodic()
+        {
+            var messages = ntInstanceLogger.PollForMessages();
+            if (messages == null) return;
+            foreach (var message in messages)
+            {
+                QueuedLogger.Log($"[NetworkTableConnection/LoggerPeriodic] [NTCoreInternal/{message.filename}] {message.message}");
+            }
         }
 
         #endregion

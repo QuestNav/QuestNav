@@ -164,6 +164,8 @@ namespace QuestNav.Core
         /// </summary>
         void FixedUpdate()
         {
+            networkConnection.LoggerPeriodic();
+            
             // Connected - manage heartbeat, publish data, and process commands
             if (!networkConnection.IsConnected) return;
             

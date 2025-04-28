@@ -16,11 +16,6 @@ namespace QuestNav.UI
     public interface IUIManager
     {
         /// <summary>
-        /// Gets the current team number.
-        /// </summary>
-        int TeamNumber { get; }
-
-        /// <summary>
         /// Initializes the UI manager with required UI components.
         /// </summary>
         /// <param name="teamInput">Input field for team number</param>
@@ -56,7 +51,7 @@ namespace QuestNav.UI
     /// <summary>
     /// Manages UI elements and user interactions for the QuestNav application.
     /// </summary>
-    public class UIManager : MonoBehaviour, IUIManager
+    public class UIManager : IUIManager
     {
         #region Fields
         /// <summary>

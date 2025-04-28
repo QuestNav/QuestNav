@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 99eb51b330d9bcf44a25c8105839cf48
+guid: 881c9a82fb325ce4d86b5c0509dd303e
 PluginImporter:
   externalObjects: {}
   serializedVersion: 3
@@ -15,7 +15,7 @@ PluginImporter:
       enabled: 1
       settings:
         AndroidLibraryDependee: UnityLibrary
-        AndroidSharedLibraryType: Symbol
+        AndroidSharedLibraryType: Executable
         CPU: ARM64
     Any:
       enabled: 0

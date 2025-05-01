@@ -16,6 +16,12 @@ namespace QuestNav.Network
         /// Gets whether the connection is currently established.
         /// </summary>
         bool IsConnected { get; }
+        
+        /// <summary>
+        /// Gets whether the connection is ready to connect.
+        /// <returns>true when either an IP or team number has been set</returns>
+        /// </summary>
+        bool IsReadyToConnect { get; }
 
         /// <summary>
         /// Publishes frame data to NetworkTables.
@@ -42,11 +48,13 @@ namespace QuestNav.Network
         /// <param name="teamNumber">The team number</param>
         void UpdateTeamNumber(int teamNumber);
 
-        public long GetCommandRequest();
+        long GetCommandRequest();
 
-        public float[] GetPoseResetPosition();
+        float[] GetPoseResetPosition();
 
-        public void SetCommandResponse(long response);
+        void SetCommandResponse(long response);
+
+        void LoggerPeriodic();
     }
     }
 
@@ -55,6 +63,7 @@ namespace QuestNav.Network
     /// </summary>
     public class NetworkTableConnection : INetworkTableConnection
     {
+        #region Fields
         /// <summary>
         /// NetworkTables connection for FRC data communication
         /// </summary>
@@ -76,6 +85,11 @@ namespace QuestNav.Network
         // Subscriber topics
         private IntegerSubscriber commandRequestSubscriber;
         private FloatArraySubscriber poseResetSubscriber;
+        
+        // Ready state variables
+        private bool teamNumberSet = false;
+        private bool ipAddressSet = false;
+        #endregion
         
         public NetworkTableConnection()
         {
@@ -112,6 +126,11 @@ namespace QuestNav.Network
         public bool IsConnected => ntInstance.IsConnected();
         
         /// <summary>
+        /// Gets whether the connection is currently established.
+        /// </summary>
+        public bool IsReadyToConnect => teamNumberSet || ipAddressSet;
+        
+        /// <summary>
         /// Updates the team number and restarts the connection.
         /// </summary>
         /// <param name="teamNumber">The new team number</param>
@@ -120,11 +139,20 @@ namespace QuestNav.Network
             // Set team number/ip if in debug mode
             if (QuestNavConstants.Network.DEBUG_NT_SERVER_ADDRESS_OVERRIDE.Length == 0)
             {
-                QueuedLogger.Log($"[NetworkTableConnection/UpdateTeamNumber] Setting Team number to {teamNumber}");
+                QueuedLogger.Log($"Setting Team number to {teamNumber}"); 
                 ntInstance.SetTeamNumber(teamNumber);
+                teamNumberSet = true;
             }
-            QueuedLogger.Log("[NetworkTableConnection/UpdateTeamNumber] Running with NetworkTables IP Override! This should only be used for debugging!");
-            ntInstance.SetAddresses(new (string addr, int port)[]{(QuestNavConstants.Network.DEBUG_NT_SERVER_ADDRESS_OVERRIDE, QuestNavConstants.Network.NT_SERVER_PORT)});
+            else
+            {
+                QueuedLogger.Log("Running with NetworkTables IP Override! This should only be used for debugging!");
+                ntInstance.SetAddresses(new (string addr, int port)[]
+                {
+                    (QuestNavConstants.Network.DEBUG_NT_SERVER_ADDRESS_OVERRIDE,
+                        QuestNavConstants.Network.NT_SERVER_PORT)
+                });
+                ipAddressSet = true;
+            }
         }
         #endregion
 
@@ -191,7 +219,7 @@ namespace QuestNav.Network
             if (messages == null) return;
             foreach (var message in messages)
             {
-                QueuedLogger.Log($"[NetworkTableConnection/LoggerPeriodic] [NTCoreInternal/{message.filename}] {message.message}");
+                QueuedLogger.Log($"[NTCoreInternal/{message.filename}] {message.message}");
             }
         }
 

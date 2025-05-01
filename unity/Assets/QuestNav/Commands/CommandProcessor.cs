@@ -35,7 +35,7 @@ namespace QuestNav.Commands
     /// Processes commands received from the robot and performs appropriate actions.
     /// Handles pose tracking, reset operations, and command responses.
     /// </summary>
-    public class CommandProcessor : MonoBehaviour, ICommandProcessor
+    public class CommandProcessor : ICommandProcessor
     {
         #region Fields
         /// <summary>
@@ -75,8 +75,8 @@ namespace QuestNav.Commands
         /// </summary>
         public bool ResetInProgress
         {
-            get { return resetInProgress; }
-            set { resetInProgress = value; }
+            get => resetInProgress;
+            set => resetInProgress = value;
         }
         #endregion
 

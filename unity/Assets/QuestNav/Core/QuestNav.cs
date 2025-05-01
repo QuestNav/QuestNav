@@ -116,20 +116,21 @@ namespace QuestNav.Core
         // Using display frequency constant from QuestNavConstants
 
         #region Component References
+
         /// <summary>
         /// Reference to the network table connection component
         /// </summary>
-        private readonly NetworkTableConnection networkConnection = new();
+        private NetworkTableConnection networkTableConnection;
 
         /// <summary>
         /// Reference to the command processor component
         /// </summary>
-        private CommandProcessor commandProcessor  = new();
+        private CommandProcessor commandProcessor;
 
         /// <summary>
         /// Reference to the UI manager component
         /// </summary>
-        private UIManager uiManager = new();
+        private UIManager uiManager;
         #endregion
         #endregion
 
@@ -139,14 +140,16 @@ namespace QuestNav.Core
         /// </summary>
         void Start()
         {
+            // Initializes components
+            networkTableConnection = new NetworkTableConnection();
+            commandProcessor = new CommandProcessor();
+            uiManager = new UIManager(networkTableConnection, teamInput, ipAddressText, conStateText, teamUpdateButton);
+            
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
             
-            // Initialize UI manager
-            uiManager.Initialize(teamInput, ipAddressText, conStateText, teamUpdateButton, networkConnection);
-            
             // Initialize command processor
-            commandProcessor.Initialize(networkConnection, vrCamera, vrCameraRoot, resetTransform);
+            commandProcessor.Initialize(networkTableConnection, vrCamera, vrCameraRoot, resetTransform);
         }
 
         /// <summary>
@@ -155,8 +158,7 @@ namespace QuestNav.Core
         void LateUpdate()
         {
             // Update UI periodically
-            uiManager.UpdateIPAddressText();
-            uiManager.UpdateConStateText();
+            uiManager.UIPeriodic();
         }
         
         /// <summary>
@@ -164,19 +166,19 @@ namespace QuestNav.Core
         /// </summary>
         void FixedUpdate()
         {
-            networkConnection.LoggerPeriodic();
+            networkTableConnection.LoggerPeriodic();
             
             // Connected - manage heartbeat, publish data, and process commands
-            if (!networkConnection.IsConnected) return;
+            if (!networkTableConnection.IsConnected) return;
             
             
             // Collect and publish current frame data
             UpdateFrameData();
-            networkConnection.PublishFrameData(frameIndex, timeStamp, position, rotation, eulerAngles);
+            networkTableConnection.PublishFrameData(frameIndex, timeStamp, position, rotation, eulerAngles);
                 
             // Collect and publish current device data
             UpdateDeviceData();
-            networkConnection.PublishDeviceData(currentlyTracking, trackingLostEvents, batteryPercent);
+            networkTableConnection.PublishDeviceData(currentlyTracking, trackingLostEvents, batteryPercent);
                 
             // Process robot commands
             commandProcessor.ProcessCommands();

@@ -16,36 +16,9 @@ namespace QuestNav.UI
     public interface IUIManager
     {
         /// <summary>
-        /// Initializes the UI manager with required UI components.
+        /// Updates the connection state and ip address in the UI
         /// </summary>
-        /// <param name="teamInput">Input field for team number</param>
-        /// <param name="ipAddressText">Text for IP address display</param>
-        /// <param name="conStateText">Text for connection state display</param>
-        /// <param name="teamUpdateButton">Button for updating team number</param>
-        /// <param name="networkConnection">Network connection reference for updating state</param>
-        void Initialize(TMP_InputField teamInput, TMP_Text ipAddressText, TMP_Text conStateText, 
-                      Button teamUpdateButton, INetworkTableConnection networkConnection);
-
-        /// <summary>
-        /// Updates the IP address text display.
-        /// </summary>
-        void UpdateIPAddressText();
-
-        /// <summary>
-        /// Updates the connection state text display.
-        /// </summary>
-        void UpdateConStateText();
-
-        /// <summary>
-        /// Sets the input box placeholder text with the current team number.
-        /// </summary>
-        /// <param name="teamNumber">The team number to display</param>
-        void SetInputBox(int teamNumber);
-
-        /// <summary>
-        /// Updates the team number based on user input.
-        /// </summary>
-        void UpdateTeamNumber();
+        void UIPeriodic();
     }
 
     /// <summary>
@@ -55,16 +28,21 @@ namespace QuestNav.UI
     {
         #region Fields
         /// <summary>
+        /// Reference to NetworkTables connection
+        /// </summary>
+        private INetworkTableConnection networkTableConnection;
+        
+        /// <summary>
         /// Input field for team number entry
         /// </summary>
         private TMP_InputField teamInput;
 
-        // <summary>
+        /// <summary>
         /// IP address text
         /// </summary>
         private TMP_Text ipAddressText;
 
-        // <summary>
+        /// <summary>
         /// ConState text
         /// </summary>
         private TMP_Text conStateText;
@@ -75,14 +53,9 @@ namespace QuestNav.UI
         private Button teamUpdateButton;
 
         /// <summary>
-        /// Reference to network connection
-        /// </summary>
-        private INetworkTableConnection networkConnection;
-
-        /// <summary>
         /// Current team number
         /// </summary>
-        private int teamNumber ;
+        private int teamNumber;
 
         /// <summary>
         /// Holds the detected local IP address of the HMD
@@ -90,6 +63,33 @@ namespace QuestNav.UI
         private string myAddressLocal = "0.0.0.0";
         #endregion
 
+        /// <summary>
+        /// Initializes the UI manager with required UI components.
+        /// </summary>
+        /// <param name="networkTableConnection">Network connection reference for updating state</param>
+        /// <param name="teamInput">Input field for team number</param>
+        /// <param name="ipAddressText">Text for IP address display</param>
+        /// <param name="conStateText">Text for connection state display</param>
+        /// <param name="teamUpdateButton">Button for updating team number</param>
+        public UIManager(
+            INetworkTableConnection networkTableConnection,
+            TMP_InputField teamInput,
+            TMP_Text ipAddressText,
+            TMP_Text conStateText,
+            Button teamUpdateButton)
+        {
+            this.networkTableConnection = networkTableConnection;
+            this.teamInput = teamInput;
+            this.ipAddressText = ipAddressText;
+            this.conStateText = conStateText;
+            this.teamUpdateButton = teamUpdateButton;
+            
+            teamNumber = PlayerPrefs.GetInt("TeamNumber", QuestNavConstants.Network.DEFAULT_TEAM_NUMBER);
+            setTeamNumberFromUI();
+            
+            teamUpdateButton.onClick.AddListener(setTeamNumberFromUI);
+        }
+        
         #region Properties
         /// <summary>
         /// Gets the current team number.
@@ -97,73 +97,58 @@ namespace QuestNav.UI
         public int TeamNumber => teamNumber;
         #endregion
 
-        #region Public Methods
-        /// <summary>
-        /// Initializes the UI manager with required UI components.
-        /// </summary>
-        /// <param name="teamInput">Input field for team number</param>
-        /// <param name="ipAddressText">Text for IP address display</param>
-        /// <param name="conStateText">Text for connection state display</param>
-        /// <param name="teamUpdateButton">Button for updating team number</param>
-        /// <param name="networkConnection">Network connection reference for updating state</param>
-        public void Initialize(TMP_InputField teamInput, TMP_Text ipAddressText, TMP_Text conStateText, 
-                             Button teamUpdateButton, INetworkTableConnection networkConnection)
-        {
-            QueuedLogger.Log("[QuestNav] Initializing UI Manager");
-            this.teamInput = teamInput;
-            this.ipAddressText = ipAddressText;
-            this.conStateText = conStateText;
-            this.teamUpdateButton = teamUpdateButton;
-            this.networkConnection = networkConnection;
-
-            teamNumber = PlayerPrefs.GetInt("TeamNumber", QuestNavConstants.Network.DEFAULT_TEAM_NUMBER);
-            SetInputBox(teamNumber);
-            teamInput.Select();
-            
-            teamUpdateButton.onClick.AddListener(UpdateTeamNumber);
-            teamInput.onSelect.AddListener(OnInputFieldSelected);
-            
-            UpdateIPAddressText();
-            UpdateConStateText();
-            networkConnection.UpdateTeamNumber(teamNumber);
-        }
-
+        #region Setters
         /// <summary>
         /// Updates the team number based on user input and triggers an asynchronous connection reset.
         /// </summary>
-        public void UpdateTeamNumber()
+        private void setTeamNumberFromUI()
         {
-            QueuedLogger.Log("[UI Manager] Updating Team Number");
+            QueuedLogger.Log("Updating Team Number");
             teamNumber = Int32.Parse(teamInput.text);
             PlayerPrefs.SetInt("TeamNumber", teamNumber);
             PlayerPrefs.Save();
-            SetInputBox(teamNumber);
+            updateTeamNumberInputBoxPlaceholder(teamNumber);
 
             // Update the connection with new team number
-            networkConnection.UpdateTeamNumber(teamNumber);
+            networkTableConnection.UpdateTeamNumber(teamNumber);
+        }
+        
+        /// <summary>
+        /// Sets the input box placeholder text with the current team number.
+        /// </summary>
+        /// <param name="teamNumber">The team number to display</param>
+        private void updateTeamNumberInputBoxPlaceholder(int teamNumber)
+        {
+            teamInput.text = "";
+            var placeholderText = teamInput.placeholder as TextMeshProUGUI;
+            if (placeholderText != null)
+            {
+                placeholderText.text = "Current: " + teamNumber;
+            }
         }
 
         /// <summary>
         /// Updates the default IP address shown in the UI with the current HMD IP address
         /// </summary>
-        public void UpdateIPAddressText()
+        private void updateIPAddressText()
         {
-            // QueuedLogger.Log("[UI Manager] Updating IP Address Text");
             // Get the local IP
-            IPHostEntry hostEntry = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (IPAddress ip in hostEntry.AddressList)
+            var hostEntry = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in hostEntry.AddressList)
             {
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
                     myAddressLocal = ip.ToString();
-                    TextMeshProUGUI ipText = ipAddressText as TextMeshProUGUI;
+                    if (ipAddressText is not TextMeshProUGUI ipText) return;
                     if (myAddressLocal == "127.0.0.1")
                     {
                         ipText.text = "No Adapter Found";
+                        ipText.color = Color.red;
                     }
                     else
                     {
                         ipText.text = myAddressLocal;
+                        ipText.color = Color.green;
                     }
                 }
                 break;
@@ -173,41 +158,31 @@ namespace QuestNav.UI
         /// <summary>
         /// Updates the connection state text display.
         /// </summary>
-        public void UpdateConStateText()
+        private void updateConStateText()
         {
             TextMeshProUGUI conText = conStateText as TextMeshProUGUI;
-            // conText.text = networkConnection.ConnectionState;
-            // TODO: reimplement connection state status text
-        }
-
-        /// <summary>
-        /// Sets the input box placeholder text with the current team number.
-        /// </summary>
-        /// <param name="teamNumber">The team number to display</param>
-        public void SetInputBox(int teamNumber)
-        {
-            teamInput.text = "";
-            TextMeshProUGUI placeholderText = teamInput.placeholder as TextMeshProUGUI;
-            if (placeholderText != null)
+            if (conText is null) return;
+            if (networkTableConnection.IsConnected)
             {
-                placeholderText.text = "Current: " + teamNumber;
-            }
-            else
+                conText.text = "Connected to NT4";
+                conText.color = Color.green;
+            } else if (teamNumber == QuestNavConstants.Network.DEFAULT_TEAM_NUMBER)
             {
-                QueuedLogger.LogError("[UI Manager] Placeholder is not assigned or not a TextMeshProUGUI component.");
+                conText.text = "Warning! Default Team Number still set! Trying to connect!";
+                conText.color = Color.red;
+            } else if (networkTableConnection.IsReadyToConnect)
+            {
+                conText.text = "Trying to connect to NT4";
+                conText.color = Color.yellow;
             }
         }
-        #endregion
 
-        #region Private Methods
-        /// <summary>
-        /// Event handler for when the input field is selected
-        /// </summary>
-        /// <param name="text">The current text in the input field</param>
-        private void OnInputFieldSelected(string text)
+        public void UIPeriodic()
         {
-            QueuedLogger.Log("[UI Manager] Input Selected");
+            updateConStateText();
+            updateIPAddressText();
         }
         #endregion
+        
     }
 }

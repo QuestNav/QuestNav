@@ -142,14 +142,11 @@ namespace QuestNav.Core
         {
             // Initializes components
             networkTableConnection = new NetworkTableConnection();
-            commandProcessor = new CommandProcessor();
+            commandProcessor = new CommandProcessor(networkTableConnection, vrCamera, vrCameraRoot, resetTransform);
             uiManager = new UIManager(networkTableConnection, teamInput, ipAddressText, conStateText, teamUpdateButton);
             
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
-            
-            // Initialize command processor
-            commandProcessor.Initialize(networkTableConnection, vrCamera, vrCameraRoot, resetTransform);
         }
 
         /// <summary>
@@ -167,10 +164,6 @@ namespace QuestNav.Core
         void FixedUpdate()
         {
             networkTableConnection.LoggerPeriodic();
-            
-            // Connected - manage heartbeat, publish data, and process commands
-            if (!networkTableConnection.IsConnected) return;
-            
             
             // Collect and publish current frame data
             UpdateFrameData();

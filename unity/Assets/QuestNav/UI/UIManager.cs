@@ -26,9 +26,10 @@ namespace QuestNav.UI
         /// <param name="ipAddressText">Text for IP address display</param>
         /// <param name="conStateText">Text for connection state display</param>
         /// <param name="teamUpdateButton">Button for updating team number</param>
+        /// <param name="connectToSimButton">Button for connecting to simulation</param>
         /// <param name="networkConnection">Network connection reference for updating state</param>
-        void Initialize(TMP_InputField teamInput, TMP_Text ipAddressText, TMP_Text conStateText, 
-                      Button teamUpdateButton, INetworkTableConnection networkConnection);
+        void Initialize(TMP_InputField teamInput, TMP_Text ipAddressText, TMP_Text conStateText,
+                      Button teamUpdateButton, Button connectToSimButton, INetworkTableConnection networkConnection);
 
         /// <summary>
         /// Updates the IP address text display.
@@ -79,6 +80,11 @@ namespace QuestNav.UI
         private Button teamUpdateButton;
 
         /// <summary>
+        /// Button to connect to simulation
+        /// </summary>
+        private Button connectToSimButton;
+
+        /// <summary>
         /// Reference to network connection
         /// </summary>
         private INetworkTableConnection networkConnection;
@@ -109,24 +115,27 @@ namespace QuestNav.UI
         /// <param name="ipAddressText">Text for IP address display</param>
         /// <param name="conStateText">Text for connection state display</param>
         /// <param name="teamUpdateButton">Button for updating team number</param>
+        /// <param name="connectToSimButton">Button for connecting to simulation</param>
         /// <param name="networkConnection">Network connection reference for updating state</param>
-        public void Initialize(TMP_InputField teamInput, TMP_Text ipAddressText, TMP_Text conStateText, 
-                             Button teamUpdateButton, INetworkTableConnection networkConnection)
+        public void Initialize(TMP_InputField teamInput, TMP_Text ipAddressText, TMP_Text conStateText,
+                             Button teamUpdateButton, Button connectToSimButton, INetworkTableConnection networkConnection)
         {
             QueuedLogger.Log("[QuestNav] Initializing UI Manager");
             this.teamInput = teamInput;
             this.ipAddressText = ipAddressText;
             this.conStateText = conStateText;
             this.teamUpdateButton = teamUpdateButton;
+            this.connectToSimButton = connectToSimButton;
             this.networkConnection = networkConnection;
 
             teamNumber = PlayerPrefs.GetString("TeamNumber", QuestNavConstants.Network.DEFAULT_TEAM_NUMBER);
             SetInputBox(teamNumber);
             teamInput.Select();
-            
+
             teamUpdateButton.onClick.AddListener(UpdateTeamNumber);
+            connectToSimButton.onClick.AddListener(ConnectToSim);
             teamInput.onSelect.AddListener(OnInputFieldSelected);
-            
+
             UpdateIPAddressText();
             UpdateConStateText();
             networkConnection.UpdateTeamNumber(teamNumber);
@@ -148,6 +157,19 @@ namespace QuestNav.UI
         }
 
         /// <summary>
+        /// Sets the team number to "localhost" for simulation connection and triggers a connection reset.
+        /// </summary>
+        public void ConnectToSim()
+        {
+            QueuedLogger.Log("[UI Manager] Connecting to Simulation");
+            teamNumber = "localhost";
+            SetInputBox(teamNumber);
+
+            // Update the connection with localhost as team number
+            networkConnection.UpdateTeamNumber(teamNumber);
+        }
+
+        /// <summary>
         /// Updates the default IP address shown in the UI with the current HMD IP address
         /// </summary>
         public void UpdateIPAddressText()
@@ -161,7 +183,7 @@ namespace QuestNav.UI
                 {
                     myAddressLocal = ip.ToString();
                     TextMeshProUGUI ipText = ipAddressText as TextMeshProUGUI;
-                    if (myAddressLocal == "127.0.0.1")
+                    if (myAddressLocal == "127.0.0.1" && teamNumber != "localhost")
                     {
                         ipText.text = "No Adapter Found";
                     }

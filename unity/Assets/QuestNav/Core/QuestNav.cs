@@ -72,21 +72,27 @@ namespace QuestNav.Core
         private Button teamUpdateButton;
 
         /// <summary>
+        /// Button to connect to simulation
+        /// </summary>
+        [SerializeField]
+        private Button connectToSimButton;
+
+        /// <summary>
         /// Reference to the VR camera transform
         /// </summary>
-        [SerializeField] 
+        [SerializeField]
         private Transform vrCamera;
 
         /// <summary>
         /// Reference to the VR camera root transform
         /// </summary>
-        [SerializeField] 
+        [SerializeField]
         private Transform vrCameraRoot;
 
         /// <summary>
         /// Reference to the reset position transform
         /// </summary>
-        [SerializeField] 
+        [SerializeField]
         private Transform resetTransform;
 
         /// <summary>
@@ -102,12 +108,12 @@ namespace QuestNav.Core
         /// Increments once every time tracking is lost after having it aquired
         /// </summary>
         private int trackingLostEvents;
-        
+
         ///<summary>
         /// Whether we have tracking
         /// </summary>
         private bool currentlyTracking = false;
-        
+
         ///<summary>
         /// Whether we had tracking
         /// </summary>
@@ -150,16 +156,16 @@ namespace QuestNav.Core
         {
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
-            
+
             // Initialize UI manager
-            uiManager.Initialize(teamInput, ipAddressText, conStateText, teamUpdateButton, networkConnection);
-            
+            uiManager.Initialize(teamInput, ipAddressText, conStateText, teamUpdateButton, connectToSimButton, networkConnection);
+
             // Initialize command processor
             commandProcessor.Initialize(networkConnection, vrCamera, vrCameraRoot, resetTransform);
-            
+
             // Initialize heartbeat manager
             heartbeatManager.Initialize(networkConnection);
-            
+
             // Start connection to robot
             networkConnection.ConnectToRobot();
         }
@@ -180,7 +186,7 @@ namespace QuestNav.Core
             {
                 delayCounter++;
             }
-            
+
             // Check for connection attempt timeout to prevent zombie state
             if (!networkConnection.IsConnected)
             {
@@ -197,22 +203,22 @@ namespace QuestNav.Core
             {
                 // Manage heartbeat to detect zombie connections
                 heartbeatManager.ManageHeartbeat();
-                
+
                 // Collect and publish current frame data
                 UpdateFrameData();
                 networkConnection.PublishFrameData(frameIndex, timeStamp, position, rotation, eulerAngles);
-                
+
                 // Collect and publish current device data
                 UpdateDeviceData();
                 networkConnection.PublishDeviceData(currentlyTracking, trackingLostEvents, batteryPercent);
-                
+
                 // Process robot commands
                 commandProcessor.ProcessCommands();
             }
-            
-            
+
+
             // Check for tracking loss
-            
+
         }
         #endregion
 

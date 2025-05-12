@@ -66,7 +66,7 @@ namespace QuestNav.Network
         /// <param name="batteryPercent">Current battery percentage</param>
         void PublishDeviceData(bool currentlyTracking, int trackingLostEvents, float batteryPercent);
 
-        
+
         /// <summary>
         /// Publishes a value to NetworkTables.
         /// </summary>
@@ -166,6 +166,11 @@ namespace QuestNav.Network
         private Coroutine _connectionCoroutine;
 
         /// <summary>
+        /// Cancellation token source for cancelling ongoing connection attempts
+        /// </summary>
+        private System.Threading.CancellationTokenSource _connectionCancellationTokenSource;
+
+        /// <summary>
         /// used to only set up the coroutine once in async
         /// </summary>
         private bool connectionAttempt = false;
@@ -179,7 +184,7 @@ namespace QuestNav.Network
         /// Timestamp when the connection attempt started for timeout calculation
         /// </summary>
         private float connectionAttemptStartTime = 0;
-        
+
         #endregion
         #endregion
 
@@ -221,13 +226,13 @@ namespace QuestNav.Network
         {
             // Prefix log messages for consistency
             string prefixedMessage = $"[NetworkTableConnection] {message}";
-            
+
             // Update state message if requested
             if (updateState)
             {
                 conStateMessage = message;
             }
-            
+
             // Log with appropriate level
             switch (level)
             {
@@ -242,7 +247,7 @@ namespace QuestNav.Network
                     break;
             }
         }
-        
+
         /// <summary>
         /// Helper method to safely disconnect and clean up connection
         /// </summary>
@@ -276,35 +281,64 @@ namespace QuestNav.Network
                 Log("Connection attempt already in progress, skipping new request", QueuedLogger.LogLevel.Warning, false);
                 return;
             }
-            
+
             // Set connection flags and timestamp for timeout tracking
             connectionAttempt = true;
             connectionAttemptCompleted = false;
             connectionAttemptStartTime = Time.time;
-            
+
+            // Cancel any existing connection attempt
+            CancelExistingConnectionAttempt();
+
+            // Start a new connection attempt with a fresh cancellation token
+            _connectionCancellationTokenSource = new System.Threading.CancellationTokenSource();
+            _connectionCoroutine = StartCoroutine(ConnectionCoroutineWrapper(_connectionCancellationTokenSource.Token));
+        }
+
+        /// <summary>
+        /// Cancels any existing connection attempt by stopping the coroutine and cancelling the task
+        /// </summary>
+        private void CancelExistingConnectionAttempt()
+        {
             // Cancel any existing connection coroutine
             if (_connectionCoroutine != null)
             {
                 StopCoroutine(_connectionCoroutine);
+                _connectionCoroutine = null;
             }
-            
-            // Start a new connection attempt
-            _connectionCoroutine = StartCoroutine(ConnectionCoroutineWrapper());
+
+            // Cancel any existing connection task
+            if (_connectionCancellationTokenSource != null)
+            {
+                _connectionCancellationTokenSource.Cancel();
+                _connectionCancellationTokenSource.Dispose();
+                _connectionCancellationTokenSource = null;
+            }
         }
 
         /// <summary>
         /// A coroutine wrapper that waits until the asynchronous connection method completes.
         /// This wrapper enables setting timeout guardbands for the connection process.
         /// </summary>
-        private IEnumerator ConnectionCoroutineWrapper()
+        /// <param name="cancellationToken">Token to cancel the connection attempt</param>
+        private IEnumerator ConnectionCoroutineWrapper(System.Threading.CancellationToken cancellationToken)
         {
-            var connectionTask = AttemptConnectionAsync();
-            
-            while (!connectionTask.IsCompleted)
+            var connectionTask = AttemptConnectionAsync(cancellationToken);
+
+            while (!connectionTask.IsCompleted && !cancellationToken.IsCancellationRequested)
             {
                 yield return null;
             }
-            
+
+            // If the task was cancelled, we don't need to do anything else
+            if (cancellationToken.IsCancellationRequested)
+            {
+                Log("Connection attempt was cancelled", QueuedLogger.LogLevel.Info);
+                connectionAttempt = false;  // Reset flag to allow new attempts
+                connectionAttemptCompleted = true;
+                yield break;
+            }
+
             // Check if the task completed successfully
             if (connectionTask.IsFaulted)
             {
@@ -319,25 +353,55 @@ namespace QuestNav.Network
         /// Uses async DNS resolution and wraps blocking calls in Task.Run to avoid blocking the main Unity thread.
         /// Will try candidates until successful or all fail, then retry with exponential backoff.
         /// </summary>
-        private async Task AttemptConnectionAsync()
+        /// <param name="cancellationToken">Token to cancel the connection attempt</param>
+        private async Task AttemptConnectionAsync(System.Threading.CancellationToken cancellationToken)
         {
             bool connectionEstablished = false;
-            List<string> candidateAddresses = new List<string>()
-            {
-                generateIP(),
-                "172.22.11.2",
-                $"roboRIO-{teamNumber}-FRC.local",
-                $"roboRIO-{teamNumber}-FRC.lan",
-                $"roboRIO-{teamNumber}-FRC.frc-field.local"
-            };
+            List<string> candidateAddresses;
 
-            while (!connectionEstablished)
+            // Use different candidate addresses based on team number
+            if (teamNumber == "localhost")
             {
-                // Check if the network is reachable.
-                if (Application.internetReachability == NetworkReachability.NotReachable)
+                // When in simulation mode, only try to connect to localhost
+                candidateAddresses = new List<string>()
+                {
+                    "127.0.0.1"
+                };
+            }
+            else
+            {
+                // Normal robot connection addresses
+                candidateAddresses = new List<string>()
+                {
+                    generateIP(),
+                    $"roboRIO-{teamNumber}-FRC.local",
+                    $"roboRIO-{teamNumber}-FRC.lan",
+                    $"roboRIO-{teamNumber}-FRC.frc-field.local"
+                };
+            }
+
+            while (!connectionEstablished && !cancellationToken.IsCancellationRequested)
+            {
+                // Check for cancellation
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Log("Connection attempt cancelled", QueuedLogger.LogLevel.Info);
+                    return;
+                }
+
+                // Check if the network is reachable, but skip this check for localhost connections
+                if (teamNumber != "localhost" && Application.internetReachability == NetworkReachability.NotReachable)
                 {
                     Log($"Network not reachable. Waiting {QuestNavConstants.Network.UNREACHABLE_NETWORK_DELAY} seconds before reattempting.", QueuedLogger.LogLevel.Warning);
-                    await Task.Delay(QuestNavConstants.Network.UNREACHABLE_NETWORK_DELAY * 1000);
+                    try
+                    {
+                        await Task.Delay(QuestNavConstants.Network.UNREACHABLE_NETWORK_DELAY * 1000, cancellationToken);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        Log("Connection attempt cancelled during network delay", QueuedLogger.LogLevel.Info);
+                        return;
+                    }
                     continue;
                 }
 
@@ -388,7 +452,7 @@ namespace QuestNav.Network
                     {
                         // Create a timeout task
                         var timeoutTask = Task.Delay(QuestNavConstants.Network.WEBSOCKET_CONNECTION_TIMEOUT * 1000);
-                        
+
                         // Create the connection task
                         var connectionTask = Task.Run(() =>
                         {
@@ -403,10 +467,10 @@ namespace QuestNav.Network
                                 return null;
                             }
                         });
-                        
+
                         // Wait for either the connection or timeout, whichever comes first
                         var completedTask = await Task.WhenAny(connectionTask, timeoutTask);
-                        
+
                         // If the timeout occurred first
                         if (completedTask == timeoutTask)
                         {
@@ -414,7 +478,7 @@ namespace QuestNav.Network
                             failedCandidates[candidate] = Time.time;
                             continue;
                         }
-                        
+
                         // Get the actual connection result
                         var sink = await connectionTask;
 
@@ -445,7 +509,15 @@ namespace QuestNav.Network
                 if (!connectionEstablished)
                 {
                     Log($"No connection to any addresses. Retry in {reconnectDelay} seconds", QueuedLogger.LogLevel.Warning);
-                    await Task.Delay((int)(reconnectDelay * 1000));
+                    try
+                    {
+                        await Task.Delay((int)(reconnectDelay * 1000), cancellationToken);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        Log("Connection attempt cancelled during retry delay", QueuedLogger.LogLevel.Info);
+                        return;
+                    }
                     reconnectDelay = Mathf.Min(reconnectDelay * 2, QuestNavConstants.Network.MAX_RECONNECT_DELAY);
                 }
             }
@@ -467,12 +539,12 @@ namespace QuestNav.Network
             {
                 return;
             }
-            
+
             Log("Robot disconnected - retrying");
-            
+
             // Safely disconnect if we have a connection
             SafeDisconnect();
-            
+
             // Start a fresh connection attempt
             ConnectToRobot();
         }
@@ -490,17 +562,17 @@ namespace QuestNav.Network
             frcDataSink.PublishTopic(QuestNavConstants.Topics.POSITION, "float[]");
             frcDataSink.PublishTopic(QuestNavConstants.Topics.QUATERNION, "float[]");
             frcDataSink.PublishTopic(QuestNavConstants.Topics.EULER_ANGLES, "float[]");
-            
+
             // Device data
             frcDataSink.PublishTopic(QuestNavConstants.Topics.BATTERY_PERCENT, "double");
             frcDataSink.PublishTopic(QuestNavConstants.Topics.TRACKING_LOST_COUNTER, "int");
             frcDataSink.PublishTopic(QuestNavConstants.Topics.CURRENTLY_TRACKING, "boolean");
-            
+
             frcDataSink.Subscribe(QuestNavConstants.Topics.MOSI, 0.1, false, false, false);
             frcDataSink.Subscribe(QuestNavConstants.Topics.INIT_POSITION, 0.1, false, false, false);
             frcDataSink.Subscribe(QuestNavConstants.Topics.INIT_EULER_ANGLES, 0.1, false, false, false);
             frcDataSink.Subscribe(QuestNavConstants.Topics.RESET_POSE, 0.1, false, false, false);
-            
+
             // Heartbeat system topics
             frcDataSink.PublishTopic(QuestNavConstants.Topics.HEARTBEAT_TO_ROBOT, "double");
             frcDataSink.Subscribe(QuestNavConstants.Topics.HEARTBEAT_FROM_ROBOT, 0.1, false, false, false);
@@ -513,14 +585,17 @@ namespace QuestNav.Network
         public void ForceReconnection()
         {
             Log("Forcing reconnection due to heartbeat failure");
-            
+
+            // Cancel any existing connection attempt
+            CancelExistingConnectionAttempt();
+
             // Disconnect existing connection
             SafeDisconnect();
-            
+
             // Reset connection state flags to enable reconnection
             connectionAttempt = false;
             connectionAttemptCompleted = true;
-            
+
             // Initiate reconnection
             ConnectToRobot();
         }
@@ -532,17 +607,14 @@ namespace QuestNav.Network
         public void UpdateTeamNumber(string teamNumber)
         {
             this.teamNumber = teamNumber;
+            Log($"Team number updated to {teamNumber}");
 
             // Clear cached IP and candidate failure data.
             ipAddress = "";
             failedCandidates.Clear();
 
-            // If a connection coroutine is already running, stop it.
-            if (_connectionCoroutine != null)
-            {
-                StopCoroutine(_connectionCoroutine);
-                _connectionCoroutine = null;
-            }
+            // Cancel any existing connection attempt
+            CancelExistingConnectionAttempt();
 
             // Disconnect existing connection, if any.
             SafeDisconnect();
@@ -550,7 +622,7 @@ namespace QuestNav.Network
             // Reset connection state and restart connection process
             connectionAttempt = false;
             connectionAttemptCompleted = true;
-            
+
             // Restart the asynchronous connection process.
             ConnectToRobot();
         }
@@ -567,7 +639,7 @@ namespace QuestNav.Network
             {
                 return; // Exit early if connection isn't established
             }
-            
+
             frcDataSink.PublishValue(QuestNavConstants.Topics.FRAME_COUNT, frameIndex);
             frcDataSink.PublishValue(QuestNavConstants.Topics.TIMESTAMP, timeStamp);
             frcDataSink.PublishValue(QuestNavConstants.Topics.POSITION, position.ToArray());
@@ -599,7 +671,7 @@ namespace QuestNav.Network
             {
                 return; // Exit early if connection isn't established
             }
-            
+
             frcDataSink.PublishValue(topic, value);
         }
 
@@ -615,7 +687,7 @@ namespace QuestNav.Network
             {
                 return 0.0; // Return default value if connection isn't established
             }
-            
+
             return frcDataSink.GetDouble(topic);
         }
 
@@ -631,7 +703,7 @@ namespace QuestNav.Network
             {
                 return 0; // Return default value if connection isn't established
             }
-            
+
             return frcDataSink.GetLong(topic);
         }
 
@@ -647,8 +719,23 @@ namespace QuestNav.Network
             {
                 return new double[0]; // Return empty array if connection isn't established
             }
-            
+
             return frcDataSink.GetDoubleArray(topic);
+        }
+        #endregion
+
+        #region Unity Lifecycle Methods
+        /// <summary>
+        /// Called when the component is being destroyed.
+        /// Ensures proper cleanup of resources.
+        /// </summary>
+        private void OnDestroy()
+        {
+            // Cancel any ongoing connection attempts
+            CancelExistingConnectionAttempt();
+
+            // Disconnect from the server
+            SafeDisconnect();
         }
         #endregion
 

@@ -10,15 +10,15 @@ namespace QuestNav.Commands.Commands
     /// </summary>
     public class PingCommand : CommandBase
     {
-        private readonly INetworkTableConnection networkConnection;
+        private readonly INetworkTableConnection networkTableConnection;
         
         /// <summary>
         /// Initializes a new instance of the PingCommand
         /// </summary>
-        /// <param name="networkConnection">The network connection to use for command communication</param>
-        public PingCommand(INetworkTableConnection networkConnection)
+        /// <param name="networkTableConnection">The network connection to use for command communication</param>
+        public PingCommand(INetworkTableConnection networkTableConnection)
         {
-            this.networkConnection = networkConnection;
+            this.networkTableConnection = networkTableConnection;
         }
         
         /// <summary>
@@ -32,13 +32,13 @@ namespace QuestNav.Commands.Commands
                 QueuedLogger.Log("Ping received, responding...");
                 
                 // Verify network connection is available
-                if (networkConnection == null)
+                if (networkTableConnection == null)
                 {
                     throw new InvalidOperationException("Network connection is null");
                 }
                 
                 // Set ping response
-                networkConnection.SetCommandResponse(QuestNavConstants.Commands.PING_RESPONSE);
+                networkTableConnection.SetCommandResponse(QuestNavConstants.Commands.PING_RESPONSE);
                 
                 // Log additional diagnostics
                 QueuedLogger.Log("Ping response sent successfully");

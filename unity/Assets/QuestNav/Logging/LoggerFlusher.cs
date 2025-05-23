@@ -1,6 +1,7 @@
+using QuestNav.Utils;
 using UnityEngine;
 
-namespace QuestNav.Utils
+namespace QuestNav.Logging
 {
     public class LoggerFlusher : MonoBehaviour
     {

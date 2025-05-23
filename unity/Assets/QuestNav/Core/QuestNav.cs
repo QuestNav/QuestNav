@@ -175,6 +175,9 @@ namespace QuestNav.Core
                 
             // Process robot commands
             commandProcessor.ProcessCommands();
+            
+            // Flush logs
+            QueuedLogger.Flush();
         }
         #endregion
 

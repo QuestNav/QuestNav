@@ -28,12 +28,12 @@ namespace QuestNav.Commands
     /// </summary>
     public class CommandProcessor : ICommandProcessor
     {
-        private INetworkTableConnection networkConnection;
-        private Transform vrCamera;
-        private Transform vrCameraRoot;
-        private Transform resetTransform;
+        private readonly INetworkTableConnection networkConnection;
+        private readonly Transform vrCamera;
+        private readonly Transform vrCameraRoot;
+        private readonly Transform resetTransform;
         
-        private Dictionary<long, ICommand> commands = new Dictionary<long, ICommand>();
+        private readonly Dictionary<long, ICommand> commands = new Dictionary<long, ICommand>();
         private ICommand currentCommand = null;
         
         /// <summary>

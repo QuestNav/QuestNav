@@ -11,7 +11,7 @@ namespace QuestNav.Commands.Commands
     /// </summary>
     public class HeadingResetCommand : CommandBase
     {
-        private readonly INetworkTableConnection networkConnection;
+        private readonly INetworkTableConnection networkTableConnection;
         private readonly Transform vrCamera;
         private readonly Transform vrCameraRoot;
         private readonly Transform resetTransform;
@@ -19,17 +19,17 @@ namespace QuestNav.Commands.Commands
         /// <summary>
         /// Initializes a new instance of the HeadingResetCommand
         /// </summary>
-        /// <param name="networkConnection">The network connection to use for command communication</param>
+        /// <param name="networkTableConnection">The network connection to use for command communication</param>
         /// <param name="vrCamera">Reference to the VR camera transform</param>
         /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
         /// <param name="resetTransform">Reference to the reset position transform</param>
         public HeadingResetCommand(
-            INetworkTableConnection networkConnection,
+            INetworkTableConnection networkTableConnection,
             Transform vrCamera,
             Transform vrCameraRoot,
             Transform resetTransform)
         {
-            this.networkConnection = networkConnection;
+            this.networkTableConnection = networkTableConnection;
             this.vrCamera = vrCamera;
             this.vrCameraRoot = vrCameraRoot;
             this.resetTransform = resetTransform;
@@ -56,7 +56,7 @@ namespace QuestNav.Commands.Commands
                 vrCameraRoot.transform.position += distanceDiff;
                 
                 // Set success response
-                networkConnection.SetCommandResponse(QuestNavConstants.Commands.HEADING_RESET_SUCCESS);
+                networkTableConnection.SetCommandResponse(QuestNavConstants.Commands.HEADING_RESET_SUCCESS);
                 
                 // Log the details of what was corrected
                 QueuedLogger.Log($"Heading reset applied: Rotated {-rotationAngleY} degrees, translated by {distanceDiff}");
@@ -74,7 +74,7 @@ namespace QuestNav.Commands.Commands
                 SetFailed();
                 
                 // Set error response
-                networkConnection.SetCommandResponse(QuestNavConstants.Commands.IDLE);
+                networkTableConnection.SetCommandResponse(QuestNavConstants.Commands.IDLE);
                 
                 // Command is now complete (with error)
                 return true;

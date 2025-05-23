@@ -10,7 +10,7 @@ namespace QuestNav.Commands.Commands
     /// </summary>
     public class PoseResetCommand : CommandBase
     {
-        private readonly INetworkTableConnection networkConnection;
+        private readonly INetworkTableConnection networkTableConnection;
         private readonly Transform vrCamera;
         private readonly Transform vrCameraRoot;
         private readonly Transform resetTransform;
@@ -18,17 +18,17 @@ namespace QuestNav.Commands.Commands
         /// <summary>
         /// Initializes a new instance of the PoseResetCommand
         /// </summary>
-        /// <param name="networkConnection">The network connection to use for command communication</param>
+        /// <param name="networkTableConnection">The network connection to use for command communication</param>
         /// <param name="vrCamera">Reference to the VR camera transform</param>
         /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
         /// <param name="resetTransform">Reference to the reset position transform</param>
         public PoseResetCommand(
-            INetworkTableConnection networkConnection,
+            INetworkTableConnection networkTableConnection,
             Transform vrCamera,
             Transform vrCameraRoot,
             Transform resetTransform)
         {
-            this.networkConnection = networkConnection;
+            this.networkTableConnection = networkTableConnection;
             this.vrCamera = vrCamera;
             this.vrCameraRoot = vrCameraRoot;
             this.resetTransform = resetTransform;
@@ -43,7 +43,7 @@ namespace QuestNav.Commands.Commands
             QueuedLogger.Log("Received pose reset request, initiating reset...");
             
             // Read pose data from network tables
-            float[] resetPose = networkConnection.GetPoseResetPosition();
+            float[] resetPose = networkTableConnection.GetPoseResetPosition();
             float poseX = resetPose[0];
             float poseY = resetPose[1];
             float poseTheta = resetPose[2];
@@ -86,9 +86,9 @@ namespace QuestNav.Commands.Commands
                 QueuedLogger.Log($"Pose reset applied: X={poseX}, Y={poseY}, Theta={poseTheta}");
                 QueuedLogger.Log($"Position adjusted by {positionDifference}, rotation by {rotationDifference}");
                 
-                networkConnection.SetCommandResponse(QuestNavConstants.Commands.POSE_RESET_SUCCESS);
+                networkTableConnection.SetCommandResponse(QuestNavConstants.Commands.POSE_RESET_SUCCESS);
             } else {
-                networkConnection.SetCommandResponse(QuestNavConstants.Commands.IDLE);
+                networkTableConnection.SetCommandResponse(QuestNavConstants.Commands.IDLE);
                 QueuedLogger.LogWarning("Failed to get valid pose data");
             }
             

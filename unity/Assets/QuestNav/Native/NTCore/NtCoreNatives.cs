@@ -303,7 +303,16 @@ namespace QuestNav.Native.NTCore
 
         [DllImport("ntcore")]
         public static extern float* NT_GetFloatArray(uint subscriber, float* defaultValue, UIntPtr defaultLen, UIntPtr* len);
+        
+        [DllImport("ntcore")]
+        public static extern int NT_SetRaw(uint publisher, long time, byte* value, UIntPtr len);
 
+        [DllImport("ntcore")]
+        public static extern byte* NT_GetRaw(uint subscriber, byte* defaultValue, UIntPtr defaultLen, UIntPtr* len);
+
+        [DllImport("ntcore")]
+        public static extern void NT_FreeRaw(byte* value);
+        
         [DllImport("ntcore")]
         public static extern void NT_FreeFloatArray(float* value);
 

@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using Google.Protobuf;
 using QuestNav.Utils;
 
 namespace QuestNav.Native.NTCore
@@ -12,7 +13,7 @@ namespace QuestNav.Native.NTCore
 
         public NtInstance(string instanceName)
         {
-            QueuedLogger.Log("[LibNTCore] Loading NTCore Natives");
+            QueuedLogger.Log("Loading NTCore Natives");
             handle = NtCoreNatives.NT_GetDefaultInstance();
 
             byte[] nameUtf8 = Encoding.UTF8.GetBytes(instanceName);
@@ -273,6 +274,76 @@ namespace QuestNav.Native.NTCore
                 subHandle = NtCoreNatives.NT_Subscribe(topicHandle, NtType.NT_FLOAT_ARRAY, &str, &nOptions);
             }
             return new FloatArraySubscriber(subHandle);
+        }
+        
+        public unsafe RawPublisher GetRawPublisher(string name, PubSubOptions options) {
+            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
+
+            uint topicHandle;
+
+            fixed (byte* ptr = nameUtf8) {
+                WpiString str = new WpiString {
+                    str = ptr,
+                    len = (UIntPtr)nameUtf8.Length,
+                };
+
+                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
+            }
+
+            byte[] typeStr = Encoding.UTF8.GetBytes("raw");
+
+            uint pubHandle;
+            fixed (byte* ptr = typeStr) {
+                WpiString str = new WpiString {
+                    str = ptr,
+                    len = (UIntPtr)typeStr.Length,
+                };
+                NativePubSubOptions nOptions = options.ToNative();
+                pubHandle = NtCoreNatives.NT_Publish(topicHandle, NtType.NT_RAW, &str, &nOptions);
+            }
+            return new RawPublisher(pubHandle);
+        }
+
+        public unsafe RawSubscriber GetRawSubscriber(string name, PubSubOptions options) {
+            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
+
+            uint topicHandle;
+
+            fixed (byte* ptr = nameUtf8) {
+                WpiString str = new WpiString {
+                    str = ptr,
+                    len = (UIntPtr)nameUtf8.Length,
+                };
+
+                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
+            }
+
+            byte[] typeStr = Encoding.UTF8.GetBytes("raw");
+
+            uint subHandle;
+            fixed (byte* ptr = typeStr) {
+                WpiString str = new WpiString {
+                    str = ptr,
+                    len = (UIntPtr)typeStr.Length,
+                };
+                NativePubSubOptions nOptions = options.ToNative();
+                subHandle = NtCoreNatives.NT_Subscribe(topicHandle, NtType.NT_RAW, &str, &nOptions);
+            }
+            return new RawSubscriber(subHandle);
+        }
+        
+        public ProtobufPublisher<T> GetProtobufPublisher<T>(string name, PubSubOptions options) 
+            where T : IMessage<T> {
+    
+            var rawPublisher = GetRawPublisher(name, options);
+            return new ProtobufPublisher<T>(rawPublisher);
+        }
+
+        public ProtobufSubscriber<T> GetProtobufSubscriber<T>(string name, PubSubOptions options) 
+            where T : IMessage<T>, new() {
+    
+            var rawSubscriber = GetRawSubscriber(name, options);
+            return new ProtobufSubscriber<T>(rawSubscriber);
         }
 
         public PolledLogger CreateLogger(int minLevel, int maxLevel) {

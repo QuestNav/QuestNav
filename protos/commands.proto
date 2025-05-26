@@ -1,0 +1,47 @@
+﻿syntax = "proto3";
+
+package commands;
+
+// Import your geometry messages
+import "geometry.proto";
+
+// Enum for command types (extensible for future commands)
+enum CommandType {
+  COMMAND_TYPE_UNSPECIFIED = 0;  // Default value required in proto3
+  POSE_RESET = 1;                // Reset robot pose to target pose
+  // Future commands can be added here:
+}
+
+// Payload for pose reset command
+message PoseResetPayload {
+  // Target pose in field-relative WPILib coordinate space (x forward, y left, rotation CCW+)
+  geometry.Pose2d target_pose = 1;
+}
+
+// Main Command message
+message Command {
+  // The type of command
+  CommandType type = 1;
+
+  // Command ID for tracking/responses
+  uint32 command_id = 2;
+
+  // Command-specific payload (only one will be set based on command type)
+  oneof payload {
+    PoseResetPayload pose_reset_payload = 10;
+    // Future payloads can be added here:
+    // (Commands with no payload don't need an entry)
+  }
+}
+
+// Response message for commands
+message CommandResponse {
+  // Matches the original command ID
+  uint32 command_id = 1;
+
+  // Whether the command was successful
+  bool success = 2;
+
+  // Error message if success = false
+  string error_message = 3;
+}

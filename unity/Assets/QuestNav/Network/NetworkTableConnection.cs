@@ -1,4 +1,5 @@
 using System;
+using Proto.Commands;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Network;
@@ -48,11 +49,11 @@ namespace QuestNav.Network
         /// <param name="teamNumber">The team number</param>
         void UpdateTeamNumber(int teamNumber);
 
-        long GetCommandRequest();
+        Command GetCommandRequest();
 
         float[] GetPoseResetPosition();
 
-        void SetCommandResponse(long response);
+        void SetCommandResponse(CommandResponse response);
 
         void LoggerPeriodic();
     }
@@ -80,10 +81,10 @@ namespace QuestNav.Network
         private IntegerPublisher trackingLostPublisher;
         private IntegerPublisher currentlyTrackingPublisher;
         private IntegerPublisher batteryPercentPublisher;
-        private IntegerPublisher commandResponsePublisher;
+        private ProtobufPublisher<CommandResponse> commandResponsePublisher;
         
         // Subscriber topics
-        private IntegerSubscriber commandRequestSubscriber;
+        private ProtobufSubscriber<Command> commandRequestSubscriber;
         private FloatArraySubscriber poseResetSubscriber;
         
         // Ready state variables
@@ -111,10 +112,10 @@ namespace QuestNav.Network
                 QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
             batteryPercentPublisher = ntInstance.GetIntegerPublisher(QuestNavConstants.Topics.BATTERY_PERCENT,
                 QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
-            commandResponsePublisher = ntInstance.GetIntegerPublisher(QuestNavConstants.Topics.COMMAND_RESPONSE, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
+            commandResponsePublisher = ntInstance.GetProtobufPublisher<CommandResponse>(QuestNavConstants.Topics.COMMAND_RESPONSE, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
             
             // Instantiate subscriber topics
-            commandRequestSubscriber = ntInstance.GetIntegerSubscriber(QuestNavConstants.Topics.COMMAND_REQUEST, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
+            commandRequestSubscriber = ntInstance.GetProtobufSubscriber<Command>(QuestNavConstants.Topics.COMMAND_REQUEST, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
             poseResetSubscriber = ntInstance.GetFloatArraySubscriber(QuestNavConstants.Topics.RESET_POSE, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
         }
 
@@ -194,9 +195,18 @@ namespace QuestNav.Network
 
         #region Command Processing
 
-        public long GetCommandRequest()
+        /// <summary>
+        ///  Default command when no command is sent
+        /// </summary>
+        private readonly Command defaultCommand = new()
         {
-            return commandRequestSubscriber.Get(QuestNavConstants.Commands.IDLE);
+            Type = CommandType.Unspecified,
+            CommandId = 0
+        };
+        
+        public Command GetCommandRequest()
+        {
+            return commandRequestSubscriber.Get(defaultCommand);
         }
         
         public float[] GetPoseResetPosition()
@@ -204,7 +214,7 @@ namespace QuestNav.Network
             return poseResetSubscriber.Get(new []{0.0f, 0.0f, 0.0f});
         }
 
-        public void SetCommandResponse(long response)
+        public void SetCommandResponse(CommandResponse response)
         {
             commandResponsePublisher.Set(response);
         }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Proto.Geometry;
+using UnityEngine;
 
 namespace QuestNav.Utils
 {
@@ -11,13 +12,12 @@ namespace QuestNav.Utils
         /// Converts from FRC coordinate system to Unity coordinate system.
         /// </summary>
         /// <param name="frc">Array of 3 float values representing position in FRC coordinates.</param>
-        /// <param name="height">The height value to use for the Unity Y-coordinate.</param>
+        /// <param name="height">The height value to use for the Unity Y-coordinate. Should be the same as what the headset auto-detects.</param>
         /// <returns>A Vector3 in Unity coordinate system, or Vector3.zero if input array is invalid.</returns>
-        public static Vector3 FrcToUnity(float[] frc, float height)
+        public static Vector3 FrcToUnity(Pose2d pose2d, float height)
         {
-            if (frc.Length != 3) return Vector3.zero;
             
-            return new Vector3(-frc[1], height, frc[0]);
+            return new Vector3((float) -pose2d.Translation.Y, height, (float) pose2d.Translation.X);
         }
         
         /// <summary>

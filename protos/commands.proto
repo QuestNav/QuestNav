@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-package commands;
+package proto.commands;
 
 // Import your geometry messages
 import "geometry.proto";

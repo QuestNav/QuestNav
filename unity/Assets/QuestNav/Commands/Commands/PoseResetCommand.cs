@@ -1,4 +1,6 @@
-﻿using QuestNav.Core;
+﻿using Proto.Commands;
+using Proto.Geometry;
+using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Utils;
 using UnityEngine;
@@ -8,7 +10,7 @@ namespace QuestNav.Commands.Commands
     /// <summary>
     /// Resets the VR camera pose to a specified position
     /// </summary>
-    public class PoseResetCommand : CommandBase
+    public class PoseResetCommand : ICommand
     {
         private readonly INetworkTableConnection networkTableConnection;
         private readonly Transform vrCamera;
@@ -33,23 +35,27 @@ namespace QuestNav.Commands.Commands
             this.vrCameraRoot = vrCameraRoot;
             this.resetTransform = resetTransform;
         }
-        
+
+        /// <summary>
+        /// The formatted name for PoseResetCommand
+        /// </summary>
+        public string commandNiceName => "PoseReset";
+
         /// <summary>
         /// Executes the pose reset command
         /// </summary>
-        /// <returns>True when the command is complete</returns>
-        protected override bool ExecuteCommand()
+        public void Execute(Command receivedCommand)
         {
             QueuedLogger.Log("Received pose reset request, initiating reset...");
             
             // Read pose data from network tables
-            float[] resetPose = networkTableConnection.GetPoseResetPosition();
-            float poseX = resetPose[0];
-            float poseY = resetPose[1];
-            float poseTheta = resetPose[2];
+            Pose2d resetPose = receivedCommand.PoseResetPayload.TargetPose;
+            double poseX = resetPose.Translation.X;
+            double poseY = resetPose.Translation.Y;
+            double poseTheta = resetPose.Rotation.Radians;
             
             // Validate pose data
-            bool validPose = !float.IsNaN(poseX) && !float.IsNaN(poseY) && !float.IsNaN(poseTheta);
+            bool validPose = !double.IsNaN(poseX) && !double.IsNaN(poseY) && !double.IsNaN(poseTheta);
             
             // Additional validation for field boundaries
             if (validPose) {
@@ -68,7 +74,7 @@ namespace QuestNav.Commands.Commands
                 Vector3 targetPosition = Conversions.FrcToUnity(resetPose, vrCamera.position.y);
                 
                 // Convert field rotation to Unity rotation
-                Quaternion targetRotation = Quaternion.Euler(0, poseTheta * Mathf.Rad2Deg, 0);
+                Quaternion targetRotation = Quaternion.Euler(0, (float) poseTheta * Mathf.Rad2Deg, 0);
                 
                 // Calculate differences
                 Vector3 positionDifference = targetPosition - vrCamera.position;
@@ -85,40 +91,20 @@ namespace QuestNav.Commands.Commands
                 
                 QueuedLogger.Log($"Pose reset applied: X={poseX}, Y={poseY}, Theta={poseTheta}");
                 QueuedLogger.Log($"Position adjusted by {positionDifference}, rotation by {rotationDifference}");
-                
-                networkTableConnection.SetCommandResponse(QuestNavConstants.Commands.POSE_RESET_SUCCESS);
-            } else {
-                networkTableConnection.SetCommandResponse(QuestNavConstants.Commands.IDLE);
-                QueuedLogger.LogWarning("Failed to get valid pose data");
-            }
-            
-            return true; // Command is always complete after one execution
-        }
-        
-        /// <summary>
-        /// Called when command execution starts
-        /// </summary>
-        protected override void OnStart()
-        {
-            QueuedLogger.Log("Starting pose reset operation");
-        }
-        
-        /// <summary>
-        /// Called when command execution ends
-        /// </summary>
-        protected override void OnEnd(bool interrupted)
-        {
-            if (interrupted)
-            {
-                QueuedLogger.LogWarning("Pose reset was interrupted");
-            }
-            else if (State == CommandState.Completed)
-            {
                 QueuedLogger.Log("Pose reset completed successfully");
-            }
-            else if (State == CommandState.Failed)
-            {
-                QueuedLogger.LogError("Pose reset failed");
+                networkTableConnection.SetCommandResponse(new CommandResponse
+                {
+                    CommandId = receivedCommand.CommandId,
+                    Success = true
+                });
+            } else {
+                networkTableConnection.SetCommandResponse(new CommandResponse
+                {
+                    CommandId = receivedCommand.CommandId,
+                    ErrorMessage = "Failed to get valid pose data (Out of bounds or invalid)",
+                    Success = false
+                });
+                QueuedLogger.LogError("Failed to get valid pose data");
             }
         }
     }

@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-package geometry;
+package proto.geometry;
 
 // Translation2d represents a 2D translation (x, y coordinates)
 // This mirrors WPILib's Translation2d class

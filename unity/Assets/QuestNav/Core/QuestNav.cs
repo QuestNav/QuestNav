@@ -19,7 +19,7 @@ namespace QuestNav.Core
         /// <summary>
         /// Current frame index from Unity's Time.frameCount
         /// </summary>
-        private int frameIndex;
+        private int frameCount;
 
         /// <summary>
         /// Current timestamp from Unity's Time.time
@@ -35,11 +35,6 @@ namespace QuestNav.Core
         /// Current rotation of the VR headset as a Quaternion
         /// </summary>
         private Quaternion rotation;
-
-        /// <summary>
-        /// Current rotation of the VR headset in Euler angles
-        /// </summary>
-        private Vector3 eulerAngles;
 
         /// <summary>
         /// Reference to the OVR Camera Rig for tracking
@@ -92,7 +87,7 @@ namespace QuestNav.Core
         /// <summary>
         /// Current battery percentage of the device
         /// </summary>
-        private float batteryPercent;
+        private int batteryPercent;
 
         /// <summary>
         /// Counter for display update delay
@@ -157,16 +152,9 @@ namespace QuestNav.Core
         /// </summary>
         private void FixedUpdate()
         {
-            // Log internal NetworkTable info
-            networkTableConnection.LoggerPeriodic();
-            
             // Collect and publish current frame data
             UpdateFrameData();
-            networkTableConnection.PublishFrameData(frameIndex, timeStamp, position, rotation, eulerAngles);
-                
-            // Collect and publish current device data
-            UpdateDeviceData();
-            networkTableConnection.PublishDeviceData(currentlyTracking, trackingLostEvents, batteryPercent);
+            networkTableConnection.PublishFrameData(frameCount, timeStamp, position, rotation);
                 
             // Process robot commands
             commandProcessor.ProcessCommands();
@@ -178,11 +166,18 @@ namespace QuestNav.Core
         /// </summary>
         private void SlowUpdate()
         {
-            // Flush logs
-            QueuedLogger.Flush();
+            // Log internal NetworkTable info
+            networkTableConnection.LoggerPeriodic();
             
             // Update UI periodically
             uiManager.UIPeriodic();
+            
+            // Collect and publish current device data at a slower rate
+            UpdateDeviceData();
+            networkTableConnection.PublishDeviceData(currentlyTracking, trackingLostEvents, batteryPercent);
+            
+            // Flush logs
+            QueuedLogger.Flush();
         }
         
         #endregion
@@ -193,11 +188,10 @@ namespace QuestNav.Core
         /// </summary>
         private void UpdateFrameData()
         {
-            frameIndex = Time.frameCount;
+            frameCount = Time.frameCount;
             timeStamp = Time.time;
             position = cameraRig.centerEyeAnchor.position;
             rotation = cameraRig.centerEyeAnchor.rotation;
-            eulerAngles = cameraRig.centerEyeAnchor.eulerAngles;
         }
         /// <summary>
         /// Updates the current device data from the VR headset
@@ -205,7 +199,7 @@ namespace QuestNav.Core
         private void UpdateDeviceData()
         {
             CheckTrackingLoss();
-            batteryPercent = SystemInfo.batteryLevel * 100;
+            batteryPercent = (int) (SystemInfo.batteryLevel * 100);
         }
         /// <summary>
         /// Checks to see if tracking is lost, and increments a counter if so

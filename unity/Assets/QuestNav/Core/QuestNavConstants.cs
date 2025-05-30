@@ -45,57 +45,24 @@ namespace QuestNav.Core
             /// <summary>
             /// Command response topic (Quest to robot)
             /// </summary>
-            public const string COMMAND_RESPONSE = NT_BASE_PATH + "/miso";
+            public const string COMMAND_RESPONSE = NT_BASE_PATH + "/response";
 
             /// <summary>
             /// Command request topic (robot to Quest)
             /// </summary>
-            public const string COMMAND_REQUEST = NT_BASE_PATH + "/mosi";
-
-            /// <summary>
-            /// Frame count topic
-            /// </summary>
-            public const string FRAME_COUNT = NT_BASE_PATH + "/frameCount";
-
-            /// <summary>
-            /// Timestamp topic
-            /// </summary>
-            public const string TIMESTAMP = NT_BASE_PATH + "/timestamp";
-
-            /// <summary>
-            /// Position topic
-            /// </summary>
-            public const string POSITION = NT_BASE_PATH + "/position";
-
-            /// <summary>
-            /// Quaternion rotation topic
-            /// </summary>
-            public const string QUATERNION = NT_BASE_PATH + "/quaternion";
-
-            /// <summary>
-            /// Euler angles topic
-            /// </summary>
-            public const string EULER_ANGLES = NT_BASE_PATH + "/eulerAngles";
-
-            /// <summary>
-            /// Reset pose topic
-            /// </summary>
-            public const string RESET_POSE = NT_BASE_PATH + "/resetpose";
+            public const string COMMAND_REQUEST = NT_BASE_PATH + "/request";
             
             /// <summary>
-            /// How many times we have lost tracking this reboot
+            /// Frame data topic
             /// </summary>
-            public const string TRACKING_LOST_COUNTER = NT_BASE_PATH + "/device/trackingLostCounter";
+            public const string FRAME_DATA = NT_BASE_PATH + "/frameData";
             
             /// <summary>
-            /// The current tracking state
+            /// Device data topic
             /// </summary>
-            public const string CURRENTLY_TRACKING = NT_BASE_PATH + "/device/isTracking";
+            public const string DEVICE_DATA = NT_BASE_PATH + "/deviceData";
             
-            /// <summary>
-            /// Battery percentage topic
-            /// </summary>
-            public const string BATTERY_PERCENT = NT_BASE_PATH + "/device/batteryPercent";
+            
         }
 
         /// <summary>

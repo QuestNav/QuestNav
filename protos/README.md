@@ -1,1 +1,0 @@
-﻿# Generating Protobufs:

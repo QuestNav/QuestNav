@@ -4,7 +4,7 @@ package questnav.protos.commands;
 option csharp_namespace = "QuestNav.Protos";
 option java_package = "gg.questnav.questnav.protos";
 
-// Import your geometry messages
+// Import geometry messages
 import "geometry.proto";
 
 // Enum for command types (extensible for future commands)

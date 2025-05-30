@@ -27,21 +27,19 @@ namespace QuestNav.Network
         /// <summary>
         /// Publishes frame data to NetworkTables.
         /// </summary>
-        /// <param name="frameIndex">Current frame index</param>
+        /// <param name="frameCount">Current frame index</param>
         /// <param name="timeStamp">Current timestamp</param>
-        /// <param name="position">Current position</param>
-        /// <param name="rotation">Current rotation</param>
-        /// <param name="eulerAngles">Current euler angles</param>
-        void PublishFrameData(int frameIndex, double timeStamp, Vector3 position, Quaternion rotation,
-            Vector3 eulerAngles);
+        /// <param name="position">Current field-relative position of the Quest headset</param>
+        /// <param name="rotation">The rotation of the quest headset</param>
+        void PublishFrameData(int frameCount, double timeStamp, Vector3 position, Quaternion rotation);
 
         /// <summary>
         /// Publishes device data to NetworkTables.
         /// </summary>
         /// <param name="currentlyTracking">Is the quest tracking currently</param>
-        /// <param name="trackingLostEvents">Number of tracking lost events this session</param>
+        /// <param name="trackingLostCounter">Number of tracking lost events this session</param>
         /// <param name="batteryPercent">Current battery percentage</param>
-        void PublishDeviceData(bool currentlyTracking, int trackingLostEvents, float batteryPercent);
+        void PublishDeviceData(bool currentlyTracking, int trackingLostCounter, int batteryPercent);
         
         /// <summary>
         /// Updates the team number.
@@ -50,8 +48,6 @@ namespace QuestNav.Network
         void UpdateTeamNumber(int teamNumber);
 
         Command GetCommandRequest();
-
-        float[] GetPoseResetPosition();
 
         void SetCommandResponse(CommandResponse response);
 
@@ -73,19 +69,12 @@ namespace QuestNav.Network
         private PolledLogger ntInstanceLogger;
         
         // Publisher topics
-        private IntegerPublisher frameCountPublisher;
-        private DoublePublisher timestampPublisher;
-        private FloatArrayPublisher positionPublisher;
-        private FloatArrayPublisher quaternionPublisher;
-        private FloatArrayPublisher eulerAnglesPublisher;
-        private IntegerPublisher trackingLostPublisher;
-        private IntegerPublisher currentlyTrackingPublisher;
-        private IntegerPublisher batteryPercentPublisher;
+        private ProtobufPublisher<FrameData> frameDataPublisher;
+        private ProtobufPublisher<DeviceData> deviceDataPublisher;
         private ProtobufPublisher<CommandResponse> commandResponsePublisher;
         
         // Subscriber topics
         private ProtobufSubscriber<Command> commandRequestSubscriber;
-        private FloatArraySubscriber poseResetSubscriber;
         
         // Ready state variables
         private bool teamNumberSet = false;
@@ -101,22 +90,14 @@ namespace QuestNav.Network
             ntInstanceLogger = ntInstance.CreateLogger(QuestNavConstants.Logging.NT_LOG_LEVEL_MIN, QuestNavConstants.Logging.NT_LOG_LEVEL_MAX);
             
             // Instantiate publisher topics
-            frameCountPublisher = ntInstance.GetIntegerPublisher(QuestNavConstants.Topics.FRAME_COUNT, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
-            timestampPublisher = ntInstance.GetDoublePublisher(QuestNavConstants.Topics.TIMESTAMP, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
-            positionPublisher = ntInstance.GetFloatArrayPublisher(QuestNavConstants.Topics.POSITION, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
-            quaternionPublisher = ntInstance.GetFloatArrayPublisher(QuestNavConstants.Topics.QUATERNION, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
-            eulerAnglesPublisher = ntInstance.GetFloatArrayPublisher(QuestNavConstants.Topics.EULER_ANGLES, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
-            trackingLostPublisher = ntInstance.GetIntegerPublisher(QuestNavConstants.Topics.TRACKING_LOST_COUNTER,
+            frameDataPublisher = ntInstance.GetProtobufPublisher<FrameData>(QuestNavConstants.Topics.FRAME_DATA,
                 QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
-            currentlyTrackingPublisher = ntInstance.GetIntegerPublisher(QuestNavConstants.Topics.CURRENTLY_TRACKING,
-                QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
-            batteryPercentPublisher = ntInstance.GetIntegerPublisher(QuestNavConstants.Topics.BATTERY_PERCENT,
+            deviceDataPublisher = ntInstance.GetProtobufPublisher<DeviceData>(QuestNavConstants.Topics.DEVICE_DATA,
                 QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
             commandResponsePublisher = ntInstance.GetProtobufPublisher<CommandResponse>(QuestNavConstants.Topics.COMMAND_RESPONSE, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
             
             // Instantiate subscriber topics
             commandRequestSubscriber = ntInstance.GetProtobufSubscriber<Command>(QuestNavConstants.Topics.COMMAND_REQUEST, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
-            poseResetSubscriber = ntInstance.GetFloatArraySubscriber(QuestNavConstants.Topics.RESET_POSE, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
         }
 
         #region Properties
@@ -159,36 +140,34 @@ namespace QuestNav.Network
 
         #region Data Publishing Methods
 
+        private readonly FrameData frameData = new();
+        
         /// <summary>
         /// Publishes current frame data to NetworkTables
         /// </summary>
-        public void PublishFrameData(int frameIndex, double timeStamp, Vector3 position, Quaternion rotation,
-            Vector3 eulerAngles)
+        public void PublishFrameData(int frameCount, double timeStamp, Vector3 position, Quaternion rotation)
         {
-            // Publish frame count and timestamp
-            frameCountPublisher?.Set(frameIndex);
-            timestampPublisher?.Set(timeStamp);
+            frameData.FrameCount = frameCount;
+            frameData.Timestamp = timeStamp;
+            frameData.Pose2D = Conversions.UnityToFrc(position, rotation);
 
-            // Publish position as float array
-            positionPublisher?.Set(new[] { position.x, position.y, position.z });
-
-            // Publish quaternion as float array
-            quaternionPublisher?.Set(new[] { rotation.x, rotation.y, rotation.z, rotation.w });
-
-            // Publish euler angles as float array
-            eulerAnglesPublisher?.Set(new[] { eulerAngles.x, eulerAngles.y, eulerAngles.z });
+            // Publish data
+            frameDataPublisher.Set(frameData);
         }
 
-        public void PublishDeviceData(bool currentlyTracking, int trackingLostEvents, float batteryPercent)
+        private readonly DeviceData deviceData = new();
+        
+        /// <summary>
+        /// Publishes current device data to NetworkTables
+        /// </summary>
+        public void PublishDeviceData(bool currentlyTracking, int trackingLostCounter, int batteryPercent)
         {
-            // Publish tracking lost events counter
-            trackingLostPublisher?.Set(trackingLostEvents);
-
-            // Publish currently tracking
-            currentlyTrackingPublisher?.Set(currentlyTracking ? 1 : 0);
+            deviceData.CurrentlyTracking = currentlyTracking;
+            deviceData.TrackingLostCounter = trackingLostCounter;
+            deviceData.BatteryPercent = batteryPercent;
             
-            // Publish battery percent
-            batteryPercentPublisher?.Set((int) batteryPercent);
+            // Publish data
+            deviceDataPublisher.Set(deviceData);
         }
 
         #endregion
@@ -207,11 +186,6 @@ namespace QuestNav.Network
         public Command GetCommandRequest()
         {
             return commandRequestSubscriber.Get(defaultCommand);
-        }
-        
-        public float[] GetPoseResetPosition()
-        {
-            return poseResetSubscriber.Get(new []{0.0f, 0.0f, 0.0f});
         }
 
         public void SetCommandResponse(CommandResponse response)

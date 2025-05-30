@@ -1,0 +1,32 @@
+﻿syntax = "proto3";
+
+package questnav.protos.data;
+option csharp_namespace = "QuestNav.Protos";
+option java_package = "gg.questnav.questnav.protos";
+
+// Import geometry messages
+import "geometry.proto";
+
+// Tracking data that is sent every loop
+message FrameData {
+  // Number of frames processed by the Quest
+  int32 frame_count = 1;
+  
+  // Time (in seconds) since the QuestNav app started
+  double timestamp = 2;
+  
+  // The 2d field-relative position of the quest
+  geometry.Pose2d pose2d = 3;
+}
+
+// Device data that is sent slower
+message DeviceData {
+  // Number of times the Quest has lost tracking after having it since the app started
+  int32 tracking_lost_counter = 1;
+  
+  // If the Quest is currently tracking?
+  bool currently_tracking = 2;
+  
+  // The battery percentage of the Quest
+  int32 battery_percent = 3;
+}

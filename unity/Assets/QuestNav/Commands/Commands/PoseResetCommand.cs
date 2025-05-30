@@ -72,19 +72,16 @@ namespace QuestNav.Commands.Commands
             // Apply pose reset if data is valid
             if (validPose)
             {
-                // Convert field coordinates to Unity coordinates
-                Vector3 targetPosition = Conversions.FrcToUnity(resetPose, vrCamera.position.y);
-
-                // Convert field rotation to Unity rotation
-                float targetYRotation = (float)poseTheta * Mathf.Rad2Deg;
-
                 // Cache current values
                 Vector3 currentPosition = vrCamera.position;
-                float currentYRotation = vrCamera.rotation.eulerAngles.y;
-
-                // Calculate differences
+                Quaternion currentRotation = vrCamera.rotation;
+                
+                // Convert field coordinates to Unity coordinates
+                var (targetPosition, targetRotation) = Conversions.FrcToUnity(resetPose, currentPosition, currentRotation);
+                
+                // Calculate differences    
                 Vector3 positionDifference = targetPosition - currentPosition;
-                float rotationDifference = Mathf.DeltaAngle(currentYRotation, targetYRotation);
+                float rotationDifference = Mathf.DeltaAngle(currentRotation.eulerAngles.y, targetRotation.eulerAngles.y);
 
                 // Apply position change
                 vrCameraRoot.position += positionDifference;

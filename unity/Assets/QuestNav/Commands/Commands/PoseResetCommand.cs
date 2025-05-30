@@ -16,7 +16,7 @@ namespace QuestNav.Commands.Commands
         private readonly Transform vrCamera;
         private readonly Transform vrCameraRoot;
         private readonly Transform resetTransform;
-        
+
         /// <summary>
         /// Initializes a new instance of the PoseResetCommand
         /// </summary>
@@ -47,48 +47,52 @@ namespace QuestNav.Commands.Commands
         public void Execute(Command receivedCommand)
         {
             QueuedLogger.Log("Received pose reset request, initiating reset...");
-            
+
             // Read pose data from network tables
             Pose2d resetPose = receivedCommand.PoseResetPayload.TargetPose;
             double poseX = resetPose.Translation.X;
             double poseY = resetPose.Translation.Y;
             double poseTheta = resetPose.Rotation.Radians;
-            
+
             // Validate pose data
             bool validPose = !double.IsNaN(poseX) && !double.IsNaN(poseY) && !double.IsNaN(poseTheta);
-            
+
             // Additional validation for field boundaries
-            if (validPose) {
-                validPose = 
-                    poseX < 0 || poseX > QuestNavConstants.Field.FIELD_LENGTH ||
-                    poseY < 0 || poseY > QuestNavConstants.Field.FIELD_WIDTH;
-                
-                if (!validPose) {
+            if (validPose)
+            {
+                validPose =
+                    poseX >= 0 && poseX <= QuestNavConstants.Field.FIELD_LENGTH &&
+                    poseY >= 0 && poseY <= QuestNavConstants.Field.FIELD_WIDTH;
+
+                if (!validPose)
+                {
                     QueuedLogger.LogWarning($"Pose out of field bounds: ({poseX}, {poseY})");
                 }
             }
-            
+
             // Apply pose reset if data is valid
-            if (validPose) {
+            if (validPose)
+            {
                 // Convert field coordinates to Unity coordinates
                 Vector3 targetPosition = Conversions.FrcToUnity(resetPose, vrCamera.position.y);
-                
+
                 // Convert field rotation to Unity rotation
-                Quaternion targetRotation = Quaternion.Euler(0, (float) poseTheta * Mathf.Rad2Deg, 0);
-                
+                float targetYRotation = (float)poseTheta * Mathf.Rad2Deg;
+
+                // Cache current values
+                Vector3 currentPosition = vrCamera.position;
+                float currentYRotation = vrCamera.rotation.eulerAngles.y;
+
                 // Calculate differences
-                Vector3 positionDifference = targetPosition - vrCamera.position;
-                float rotationDifference = Mathf.DeltaAngle(
-                    vrCamera.rotation.eulerAngles.y,
-                    targetRotation.eulerAngles.y
-                );
-                
+                Vector3 positionDifference = targetPosition - currentPosition;
+                float rotationDifference = Mathf.DeltaAngle(currentYRotation, targetYRotation);
+
                 // Apply position change
                 vrCameraRoot.position += positionDifference;
-                
+
                 // Apply rotation change
                 vrCameraRoot.Rotate(0, rotationDifference, 0);
-                
+
                 QueuedLogger.Log($"Pose reset applied: X={poseX}, Y={poseY}, Theta={poseTheta}");
                 QueuedLogger.Log($"Position adjusted by {positionDifference}, rotation by {rotationDifference}");
                 QueuedLogger.Log("Pose reset completed successfully");
@@ -97,7 +101,9 @@ namespace QuestNav.Commands.Commands
                     CommandId = receivedCommand.CommandId,
                     Success = true
                 });
-            } else {
+            }
+            else
+            {
                 networkTableConnection.SetCommandResponse(new CommandResponse
                 {
                     CommandId = receivedCommand.CommandId,

@@ -8,5 +8,5 @@ Next, generate the protobufs
 cd QuestNav/unity
 
 # Build Protobufs with protoc
-protoc -I="../protos" --csharp_out=Assets/QuestNav/Network/Generated/ "../protos/*.proto"
+protoc -I="../protos" --csharp_out=Assets/QuestNav/Protos/ "../protos/*.proto"
 ```

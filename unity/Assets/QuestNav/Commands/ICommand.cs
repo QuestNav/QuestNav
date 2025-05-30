@@ -1,4 +1,4 @@
-﻿using Proto.Commands;
+﻿using QuestNav.Protos;
 
 namespace QuestNav.Commands
 {

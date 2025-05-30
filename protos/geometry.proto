@@ -1,6 +1,8 @@
 ﻿syntax = "proto3";
 
-package proto.geometry;
+package questnav.protos.geometry;
+option csharp_namespace = "QuestNav.Protos";
+option java_package = "gg.questnav.questnav.protos";
 
 // Translation2d represents a 2D translation (x, y coordinates)
 // This mirrors WPILib's Translation2d class

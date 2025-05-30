@@ -1,6 +1,8 @@
 ﻿syntax = "proto3";
 
-package proto.commands;
+package questnav.protos.commands;
+option csharp_namespace = "QuestNav.Protos";
+option java_package = "gg.questnav.questnav.protos";
 
 // Import your geometry messages
 import "geometry.proto";

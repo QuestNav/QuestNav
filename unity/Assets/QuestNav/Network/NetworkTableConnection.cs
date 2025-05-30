@@ -1,5 +1,5 @@
 using System;
-using Proto.Commands;
+using QuestNav.Protos;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Network;

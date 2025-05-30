@@ -1,5 +1,5 @@
-﻿using Proto.Commands;
-using QuestNav.Commands.Commands;
+﻿using QuestNav.Commands.Commands;
+using QuestNav.Protos;
 using QuestNav.Utils;
 using UnityEngine;
 

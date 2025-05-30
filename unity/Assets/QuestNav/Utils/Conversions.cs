@@ -1,4 +1,4 @@
-﻿using Proto.Geometry;
+﻿using QuestNav.Protos;
 using UnityEngine;
 
 namespace QuestNav.Utils

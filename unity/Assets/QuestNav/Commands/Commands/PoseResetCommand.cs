@@ -1,7 +1,6 @@
-﻿using Proto.Commands;
-using Proto.Geometry;
-using QuestNav.Core;
+﻿using QuestNav.Core;
 using QuestNav.Network;
+using QuestNav.Protos;
 using QuestNav.Utils;
 using UnityEngine;
 

@@ -210,5 +210,16 @@ namespace QuestNav.Core
             /// </summary>
             public const int NT_LOG_LEVEL_MAX = NTLogLevel.CRITICAL;
         }
+
+        /// <summary>
+        /// Constants related to non-main loop timing
+        /// </summary>
+        public static class Timing
+        {
+            /// <summary>
+            /// The rate to run the "SlowUpdate" loop at
+            /// </summary>
+            public const int SLOW_UPDATE_HZ = 8;
+        }
     }
 }

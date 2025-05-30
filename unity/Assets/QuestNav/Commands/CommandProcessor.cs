@@ -20,9 +20,6 @@ namespace QuestNav.Commands
     {
         // Command context
         private NetworkTableConnection networkTableConnection;
-        private Transform vrCamera;
-        private Transform vrCameraRoot;
-        private Transform resetTransform;
         
         // Commands
         private PoseResetCommand poseResetCommand;
@@ -30,9 +27,6 @@ namespace QuestNav.Commands
         {
             // Command context
             this.networkTableConnection = networkTableConnection;
-            this.vrCamera = vrCamera;
-            this.vrCameraRoot = vrCameraRoot;
-            this.resetTransform = resetTransform;
             
             // Commands
             poseResetCommand = new PoseResetCommand(networkTableConnection, vrCamera, vrCameraRoot, resetTransform);

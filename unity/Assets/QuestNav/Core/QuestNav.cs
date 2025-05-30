@@ -99,19 +99,19 @@ namespace QuestNav.Core
         /// </summary>
         private int delayCounter;
         /// <summary>
-        /// Increments once every time tracking is lost after having it aquired
+        /// Increments once every time tracking is lost after having it acquired
         /// </summary>
         private int trackingLostEvents;
         
         ///<summary>
         /// Whether we have tracking
         /// </summary>
-        private bool currentlyTracking = false;
-        
+        private bool currentlyTracking;
+
         ///<summary>
         /// Whether we had tracking
         /// </summary>
-        private bool hadTracking = false;
+        private bool hadTracking;
 
         // Using display frequency constant from QuestNavConstants
 
@@ -138,7 +138,7 @@ namespace QuestNav.Core
         /// <summary>
         /// Initializes the connection and UI components
         /// </summary>
-        void Start()
+        private void Start()
         {
             // Initializes components
             networkTableConnection = new NetworkTableConnection();
@@ -147,22 +147,17 @@ namespace QuestNav.Core
             
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
-        }
-
-        /// <summary>
-        /// Handles frame updates for data publishing and command processing
-        /// </summary>
-        void LateUpdate()
-        {
-            // Update UI periodically
-            uiManager.UIPeriodic();
+            
+            // Schedule "SlowUpdate" loop for non loop critical applications
+            InvokeRepeating(nameof(SlowUpdate), 0, 1f / QuestNavConstants.Timing.SLOW_UPDATE_HZ);
         }
         
         /// <summary>
         /// Handles frame updates for data publishing and command processing
         /// </summary>
-        void FixedUpdate()
+        private void FixedUpdate()
         {
+            // Log internal NetworkTable info
             networkTableConnection.LoggerPeriodic();
             
             // Collect and publish current frame data
@@ -175,10 +170,21 @@ namespace QuestNav.Core
                 
             // Process robot commands
             commandProcessor.ProcessCommands();
-            
+        }
+
+        /// <summary>
+        /// This loop runs slower for performance reasons. Expensive methods that aren't loop critical
+        /// should be placed here (e.g. logging)
+        /// </summary>
+        private void SlowUpdate()
+        {
             // Flush logs
             QueuedLogger.Flush();
+            
+            // Update UI periodically
+            uiManager.UIPeriodic();
         }
+        
         #endregion
 
         #region Private Methods

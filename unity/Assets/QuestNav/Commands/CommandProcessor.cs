@@ -15,37 +15,54 @@ namespace QuestNav.Commands
         /// </summary>
         void ProcessCommands();
     }
-    
+
     public class CommandProcessor : ICommandProcessor
     {
         // Command context
         private NetworkTableConnection networkTableConnection;
-        
+
         // Commands
         private PoseResetCommand poseResetCommand;
-        public CommandProcessor(NetworkTableConnection networkTableConnection, Transform vrCamera, Transform vrCameraRoot, Transform resetTransform)
+
+        public CommandProcessor(
+            NetworkTableConnection networkTableConnection,
+            Transform vrCamera,
+            Transform vrCameraRoot,
+            Transform resetTransform
+        )
         {
             // Command context
             this.networkTableConnection = networkTableConnection;
-            
+
             // Commands
-            poseResetCommand = new PoseResetCommand(networkTableConnection, vrCamera, vrCameraRoot, resetTransform);
+            poseResetCommand = new PoseResetCommand(
+                networkTableConnection,
+                vrCamera,
+                vrCameraRoot,
+                resetTransform
+            );
         }
 
         public void ProcessCommands()
         {
             Command receivedCommand = networkTableConnection.GetCommandRequest();
-            
+
             switch (receivedCommand.CommandId)
             {
                 case 0:
-                    QueuedLogger.Log("Execute called with empty command", QueuedLogger.LogLevel.Warning);
+                    QueuedLogger.Log(
+                        "Execute called with empty command",
+                        QueuedLogger.LogLevel.Warning
+                    );
                     break;
                 case 1:
                     poseResetCommand.Execute(receivedCommand);
                     break;
                 default:
-                    QueuedLogger.Log("Execute called with unknown command", QueuedLogger.LogLevel.Warning);
+                    QueuedLogger.Log(
+                        "Execute called with unknown command",
+                        QueuedLogger.LogLevel.Warning
+                    );
                     break;
             }
         }

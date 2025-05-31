@@ -69,19 +69,19 @@ namespace QuestNav.Core
         /// <summary>
         /// Reference to the VR camera transform
         /// </summary>
-        [SerializeField] 
+        [SerializeField]
         private Transform vrCamera;
 
         /// <summary>
         /// Reference to the VR camera root transform
         /// </summary>
-        [SerializeField] 
+        [SerializeField]
         private Transform vrCameraRoot;
 
         /// <summary>
         /// Reference to the reset position transform
         /// </summary>
-        [SerializeField] 
+        [SerializeField]
         private Transform resetTransform;
 
         /// <summary>
@@ -93,11 +93,12 @@ namespace QuestNav.Core
         /// Counter for display update delay
         /// </summary>
         private int delayCounter;
+
         /// <summary>
         /// Increments once every time tracking is lost after having it acquired
         /// </summary>
         private int trackingLostEvents;
-        
+
         ///<summary>
         /// Whether we have tracking
         /// </summary>
@@ -137,16 +138,27 @@ namespace QuestNav.Core
         {
             // Initializes components
             networkTableConnection = new NetworkTableConnection();
-            commandProcessor = new CommandProcessor(networkTableConnection, vrCamera, vrCameraRoot, resetTransform);
-            uiManager = new UIManager(networkTableConnection, teamInput, ipAddressText, conStateText, teamUpdateButton);
-            
+            commandProcessor = new CommandProcessor(
+                networkTableConnection,
+                vrCamera,
+                vrCameraRoot,
+                resetTransform
+            );
+            uiManager = new UIManager(
+                networkTableConnection,
+                teamInput,
+                ipAddressText,
+                conStateText,
+                teamUpdateButton
+            );
+
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
-            
+
             // Schedule "SlowUpdate" loop for non loop critical applications
             InvokeRepeating(nameof(SlowUpdate), 0, 1f / QuestNavConstants.Timing.SLOW_UPDATE_HZ);
         }
-        
+
         /// <summary>
         /// Handles frame updates for data publishing and command processing
         /// </summary>
@@ -155,7 +167,7 @@ namespace QuestNav.Core
             // Collect and publish current frame data
             UpdateFrameData();
             networkTableConnection.PublishFrameData(frameCount, timeStamp, position, rotation);
-                
+
             // Process robot commands
             commandProcessor.ProcessCommands();
         }
@@ -168,18 +180,22 @@ namespace QuestNav.Core
         {
             // Log internal NetworkTable info
             networkTableConnection.LoggerPeriodic();
-            
+
             // Update UI periodically
             uiManager.UIPeriodic();
-            
+
             // Collect and publish current device data at a slower rate
             UpdateDeviceData();
-            networkTableConnection.PublishDeviceData(currentlyTracking, trackingLostEvents, batteryPercent);
-            
+            networkTableConnection.PublishDeviceData(
+                currentlyTracking,
+                trackingLostEvents,
+                batteryPercent
+            );
+
             // Flush logs
             QueuedLogger.Flush();
         }
-        
+
         #endregion
 
         #region Private Methods
@@ -193,14 +209,16 @@ namespace QuestNav.Core
             position = cameraRig.centerEyeAnchor.position;
             rotation = cameraRig.centerEyeAnchor.rotation;
         }
+
         /// <summary>
         /// Updates the current device data from the VR headset
         /// </summary>
         private void UpdateDeviceData()
         {
             CheckTrackingLoss();
-            batteryPercent = (int) (SystemInfo.batteryLevel * 100);
+            batteryPercent = (int)(SystemInfo.batteryLevel * 100);
         }
+
         /// <summary>
         /// Checks to see if tracking is lost, and increments a counter if so
         /// </summary>

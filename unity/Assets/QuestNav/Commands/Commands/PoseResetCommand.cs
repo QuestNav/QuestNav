@@ -27,7 +27,8 @@ namespace QuestNav.Commands.Commands
             INetworkTableConnection networkTableConnection,
             Transform vrCamera,
             Transform vrCameraRoot,
-            Transform resetTransform)
+            Transform resetTransform
+        )
         {
             this.networkTableConnection = networkTableConnection;
             this.vrCamera = vrCamera;
@@ -54,14 +55,17 @@ namespace QuestNav.Commands.Commands
             double poseTheta = resetPose.Rotation.Radians;
 
             // Validate pose data
-            bool validPose = !double.IsNaN(poseX) && !double.IsNaN(poseY) && !double.IsNaN(poseTheta);
+            bool validPose =
+                !double.IsNaN(poseX) && !double.IsNaN(poseY) && !double.IsNaN(poseTheta);
 
             // Additional validation for field boundaries
             if (validPose)
             {
                 validPose =
-                    poseX >= 0 && poseX <= QuestNavConstants.Field.FIELD_LENGTH &&
-                    poseY >= 0 && poseY <= QuestNavConstants.Field.FIELD_WIDTH;
+                    poseX >= 0
+                    && poseX <= QuestNavConstants.Field.FIELD_LENGTH
+                    && poseY >= 0
+                    && poseY <= QuestNavConstants.Field.FIELD_WIDTH;
 
                 if (!validPose)
                 {
@@ -75,13 +79,20 @@ namespace QuestNav.Commands.Commands
                 // Cache current values
                 Vector3 currentPosition = vrCamera.position;
                 Quaternion currentRotation = vrCamera.rotation;
-                
+
                 // Convert field coordinates to Unity coordinates
-                var (targetPosition, targetRotation) = Conversions.FrcToUnity(resetPose, currentPosition, currentRotation);
-                
-                // Calculate differences    
+                var (targetPosition, targetRotation) = Conversions.FrcToUnity(
+                    resetPose,
+                    currentPosition,
+                    currentRotation
+                );
+
+                // Calculate differences
                 Vector3 positionDifference = targetPosition - currentPosition;
-                float rotationDifference = Mathf.DeltaAngle(currentRotation.eulerAngles.y, targetRotation.eulerAngles.y);
+                float rotationDifference = Mathf.DeltaAngle(
+                    currentRotation.eulerAngles.y,
+                    targetRotation.eulerAngles.y
+                );
 
                 // Apply position change
                 vrCameraRoot.position += positionDifference;
@@ -90,22 +101,24 @@ namespace QuestNav.Commands.Commands
                 vrCameraRoot.Rotate(0, rotationDifference, 0);
 
                 QueuedLogger.Log($"Pose reset applied: X={poseX}, Y={poseY}, Theta={poseTheta}");
-                QueuedLogger.Log($"Position adjusted by {positionDifference}, rotation by {rotationDifference}");
+                QueuedLogger.Log(
+                    $"Position adjusted by {positionDifference}, rotation by {rotationDifference}"
+                );
                 QueuedLogger.Log("Pose reset completed successfully");
-                networkTableConnection.SetCommandResponse(new CommandResponse
-                {
-                    CommandId = receivedCommand.CommandId,
-                    Success = true
-                });
+                networkTableConnection.SetCommandResponse(
+                    new CommandResponse { CommandId = receivedCommand.CommandId, Success = true }
+                );
             }
             else
             {
-                networkTableConnection.SetCommandResponse(new CommandResponse
-                {
-                    CommandId = receivedCommand.CommandId,
-                    ErrorMessage = "Failed to get valid pose data (Out of bounds or invalid)",
-                    Success = false
-                });
+                networkTableConnection.SetCommandResponse(
+                    new CommandResponse
+                    {
+                        CommandId = receivedCommand.CommandId,
+                        ErrorMessage = "Failed to get valid pose data (Out of bounds or invalid)",
+                        Success = false,
+                    }
+                );
                 QueuedLogger.LogError("Failed to get valid pose data");
             }
         }

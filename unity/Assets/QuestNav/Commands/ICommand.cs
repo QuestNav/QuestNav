@@ -11,7 +11,7 @@ namespace QuestNav.Commands
         /// Gets the nice name of the command
         /// </summary>
         string commandNiceName { get; }
-        
+
         /// <summary>
         /// Executes this command
         /// </summary>

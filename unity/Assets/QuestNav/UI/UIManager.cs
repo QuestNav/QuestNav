@@ -31,7 +31,7 @@ namespace QuestNav.UI
         /// Reference to NetworkTables connection
         /// </summary>
         private INetworkTableConnection networkTableConnection;
-        
+
         /// <summary>
         /// Input field for team number entry
         /// </summary>
@@ -76,20 +76,24 @@ namespace QuestNav.UI
             TMP_InputField teamInput,
             TMP_Text ipAddressText,
             TMP_Text conStateText,
-            Button teamUpdateButton)
+            Button teamUpdateButton
+        )
         {
             this.networkTableConnection = networkTableConnection;
             this.teamInput = teamInput;
             this.ipAddressText = ipAddressText;
             this.conStateText = conStateText;
             this.teamUpdateButton = teamUpdateButton;
-            
-            teamNumber = PlayerPrefs.GetInt("TeamNumber", QuestNavConstants.Network.DEFAULT_TEAM_NUMBER);
+
+            teamNumber = PlayerPrefs.GetInt(
+                "TeamNumber",
+                QuestNavConstants.Network.DEFAULT_TEAM_NUMBER
+            );
             setTeamNumberFromUI();
-            
+
             teamUpdateButton.onClick.AddListener(setTeamNumberFromUI);
         }
-        
+
         #region Properties
         /// <summary>
         /// Gets the current team number.
@@ -112,7 +116,7 @@ namespace QuestNav.UI
             // Update the connection with new team number
             networkTableConnection.UpdateTeamNumber(teamNumber);
         }
-        
+
         /// <summary>
         /// Sets the input box placeholder text with the current team number.
         /// </summary>
@@ -139,7 +143,8 @@ namespace QuestNav.UI
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
                     myAddressLocal = ip.ToString();
-                    if (ipAddressText is not TextMeshProUGUI ipText) return;
+                    if (ipAddressText is not TextMeshProUGUI ipText)
+                        return;
                     if (myAddressLocal == "127.0.0.1")
                     {
                         ipText.text = "No Adapter Found";
@@ -161,16 +166,19 @@ namespace QuestNav.UI
         private void updateConStateText()
         {
             TextMeshProUGUI conText = conStateText as TextMeshProUGUI;
-            if (conText is null) return;
+            if (conText is null)
+                return;
             if (networkTableConnection.IsConnected)
             {
                 conText.text = "Connected to NT4";
                 conText.color = Color.green;
-            } else if (teamNumber == QuestNavConstants.Network.DEFAULT_TEAM_NUMBER)
+            }
+            else if (teamNumber == QuestNavConstants.Network.DEFAULT_TEAM_NUMBER)
             {
                 conText.text = "Warning! Default Team Number still set! Trying to connect!";
                 conText.color = Color.red;
-            } else if (networkTableConnection.IsReadyToConnect)
+            }
+            else if (networkTableConnection.IsReadyToConnect)
             {
                 conText.text = "Trying to connect to NT4";
                 conText.color = Color.yellow;
@@ -183,6 +191,5 @@ namespace QuestNav.UI
             updateIPAddressText();
         }
         #endregion
-        
     }
 }

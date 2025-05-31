@@ -1,8 +1,8 @@
 using System;
-using QuestNav.Protos;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Network;
+using QuestNav.Protos;
 using QuestNav.Utils;
 using UnityEngine;
 
@@ -17,7 +17,7 @@ namespace QuestNav.Network
         /// Gets whether the connection is currently established.
         /// </summary>
         bool IsConnected { get; }
-        
+
         /// <summary>
         /// Gets whether the connection is ready to connect.
         /// <returns>true when either an IP or team number has been set</returns>
@@ -31,7 +31,12 @@ namespace QuestNav.Network
         /// <param name="timeStamp">Current timestamp</param>
         /// <param name="position">Current field-relative position of the Quest headset</param>
         /// <param name="rotation">The rotation of the quest headset</param>
-        void PublishFrameData(int frameCount, double timeStamp, Vector3 position, Quaternion rotation);
+        void PublishFrameData(
+            int frameCount,
+            double timeStamp,
+            Vector3 position,
+            Quaternion rotation
+        );
 
         /// <summary>
         /// Publishes device data to NetworkTables.
@@ -40,7 +45,7 @@ namespace QuestNav.Network
         /// <param name="trackingLostCounter">Number of tracking lost events this session</param>
         /// <param name="batteryPercent">Current battery percentage</param>
         void PublishDeviceData(bool currentlyTracking, int trackingLostCounter, int batteryPercent);
-        
+
         /// <summary>
         /// Updates the team number.
         /// </summary>
@@ -53,159 +58,188 @@ namespace QuestNav.Network
 
         void LoggerPeriodic();
     }
+}
+
+/// <summary>
+/// Manages NetworkTables connections for communication with an FRC robot.
+/// </summary>
+public class NetworkTableConnection : INetworkTableConnection
+{
+    #region Fields
+    /// <summary>
+    /// NetworkTables connection for FRC data communication
+    /// </summary>
+    private NtInstance ntInstance;
+
+    private PolledLogger ntInstanceLogger;
+
+    // Publisher topics
+    private ProtobufPublisher<FrameData> frameDataPublisher;
+    private ProtobufPublisher<DeviceData> deviceDataPublisher;
+    private ProtobufPublisher<CommandResponse> commandResponsePublisher;
+
+    // Subscriber topics
+    private ProtobufSubscriber<Command> commandRequestSubscriber;
+
+    // Ready state variables
+    private bool teamNumberSet = false;
+    private bool ipAddressSet = false;
+    #endregion
+
+    public NetworkTableConnection()
+    {
+        // Instantiate instance
+        ntInstance = new NtInstance(QuestNavConstants.Topics.NT_BASE_PATH);
+
+        // Instantiate logger
+        ntInstanceLogger = ntInstance.CreateLogger(
+            QuestNavConstants.Logging.NT_LOG_LEVEL_MIN,
+            QuestNavConstants.Logging.NT_LOG_LEVEL_MAX
+        );
+
+        // Instantiate publisher topics
+        frameDataPublisher = ntInstance.GetProtobufPublisher<FrameData>(
+            QuestNavConstants.Topics.FRAME_DATA,
+            QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+        );
+        deviceDataPublisher = ntInstance.GetProtobufPublisher<DeviceData>(
+            QuestNavConstants.Topics.DEVICE_DATA,
+            QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+        );
+        commandResponsePublisher = ntInstance.GetProtobufPublisher<CommandResponse>(
+            QuestNavConstants.Topics.COMMAND_RESPONSE,
+            QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+        );
+
+        // Instantiate subscriber topics
+        commandRequestSubscriber = ntInstance.GetProtobufSubscriber<Command>(
+            QuestNavConstants.Topics.COMMAND_REQUEST,
+            QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+        );
     }
+
+    #region Properties
 
     /// <summary>
-    /// Manages NetworkTables connections for communication with an FRC robot.
+    /// Gets whether the connection is currently established.
     /// </summary>
-    public class NetworkTableConnection : INetworkTableConnection
+    public bool IsConnected => ntInstance.IsConnected();
+
+    /// <summary>
+    /// Gets whether the connection is currently established.
+    /// </summary>
+    public bool IsReadyToConnect => teamNumberSet || ipAddressSet;
+
+    /// <summary>
+    /// Updates the team number and restarts the connection.
+    /// </summary>
+    /// <param name="teamNumber">The new team number</param>
+    public void UpdateTeamNumber(int teamNumber)
     {
-        #region Fields
-        /// <summary>
-        /// NetworkTables connection for FRC data communication
-        /// </summary>
-        private NtInstance ntInstance;
-
-        private PolledLogger ntInstanceLogger;
-        
-        // Publisher topics
-        private ProtobufPublisher<FrameData> frameDataPublisher;
-        private ProtobufPublisher<DeviceData> deviceDataPublisher;
-        private ProtobufPublisher<CommandResponse> commandResponsePublisher;
-        
-        // Subscriber topics
-        private ProtobufSubscriber<Command> commandRequestSubscriber;
-        
-        // Ready state variables
-        private bool teamNumberSet = false;
-        private bool ipAddressSet = false;
-        #endregion
-        
-        public NetworkTableConnection()
+        // Set team number/ip if in debug mode
+        if (QuestNavConstants.Network.DEBUG_NT_SERVER_ADDRESS_OVERRIDE.Length == 0)
         {
-            // Instantiate instance
-            ntInstance = new NtInstance(QuestNavConstants.Topics.NT_BASE_PATH);
-            
-            // Instantiate logger
-            ntInstanceLogger = ntInstance.CreateLogger(QuestNavConstants.Logging.NT_LOG_LEVEL_MIN, QuestNavConstants.Logging.NT_LOG_LEVEL_MAX);
-            
-            // Instantiate publisher topics
-            frameDataPublisher = ntInstance.GetProtobufPublisher<FrameData>(QuestNavConstants.Topics.FRAME_DATA,
-                QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
-            deviceDataPublisher = ntInstance.GetProtobufPublisher<DeviceData>(QuestNavConstants.Topics.DEVICE_DATA,
-                QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
-            commandResponsePublisher = ntInstance.GetProtobufPublisher<CommandResponse>(QuestNavConstants.Topics.COMMAND_RESPONSE, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
-            
-            // Instantiate subscriber topics
-            commandRequestSubscriber = ntInstance.GetProtobufSubscriber<Command>(QuestNavConstants.Topics.COMMAND_REQUEST, QuestNavConstants.Network.NT_PUBLISHER_SETTINGS);
+            QueuedLogger.Log($"Setting Team number to {teamNumber}");
+            ntInstance.SetTeamNumber(teamNumber);
+            teamNumberSet = true;
         }
-
-        #region Properties
-
-        /// <summary>
-        /// Gets whether the connection is currently established.
-        /// </summary>
-        public bool IsConnected => ntInstance.IsConnected();
-        
-        /// <summary>
-        /// Gets whether the connection is currently established.
-        /// </summary>
-        public bool IsReadyToConnect => teamNumberSet || ipAddressSet;
-        
-        /// <summary>
-        /// Updates the team number and restarts the connection.
-        /// </summary>
-        /// <param name="teamNumber">The new team number</param>
-        public void UpdateTeamNumber(int teamNumber)
+        else
         {
-            // Set team number/ip if in debug mode
-            if (QuestNavConstants.Network.DEBUG_NT_SERVER_ADDRESS_OVERRIDE.Length == 0)
-            {
-                QueuedLogger.Log($"Setting Team number to {teamNumber}"); 
-                ntInstance.SetTeamNumber(teamNumber);
-                teamNumberSet = true;
-            }
-            else
-            {
-                QueuedLogger.Log("Running with NetworkTables IP Override! This should only be used for debugging!");
-                ntInstance.SetAddresses(new (string addr, int port)[]
+            QueuedLogger.Log(
+                "Running with NetworkTables IP Override! This should only be used for debugging!"
+            );
+            ntInstance.SetAddresses(
+                new (string addr, int port)[]
                 {
-                    (QuestNavConstants.Network.DEBUG_NT_SERVER_ADDRESS_OVERRIDE,
-                        QuestNavConstants.Network.NT_SERVER_PORT)
-                });
-                ipAddressSet = true;
-            }
+                    (
+                        QuestNavConstants.Network.DEBUG_NT_SERVER_ADDRESS_OVERRIDE,
+                        QuestNavConstants.Network.NT_SERVER_PORT
+                    ),
+                }
+            );
+            ipAddressSet = true;
         }
-        #endregion
-
-        #region Data Publishing Methods
-
-        private readonly FrameData frameData = new();
-        
-        /// <summary>
-        /// Publishes current frame data to NetworkTables
-        /// </summary>
-        public void PublishFrameData(int frameCount, double timeStamp, Vector3 position, Quaternion rotation)
-        {
-            frameData.FrameCount = frameCount;
-            frameData.Timestamp = timeStamp;
-            frameData.Pose2D = Conversions.UnityToFrc(position, rotation);
-
-            // Publish data
-            frameDataPublisher.Set(frameData);
-        }
-
-        private readonly DeviceData deviceData = new();
-        
-        /// <summary>
-        /// Publishes current device data to NetworkTables
-        /// </summary>
-        public void PublishDeviceData(bool currentlyTracking, int trackingLostCounter, int batteryPercent)
-        {
-            deviceData.CurrentlyTracking = currentlyTracking;
-            deviceData.TrackingLostCounter = trackingLostCounter;
-            deviceData.BatteryPercent = batteryPercent;
-            
-            // Publish data
-            deviceDataPublisher.Set(deviceData);
-        }
-
-        #endregion
-
-        #region Command Processing
-
-        /// <summary>
-        ///  Default command when no command is sent
-        /// </summary>
-        private readonly Command defaultCommand = new()
-        {
-            Type = CommandType.Unspecified,
-            CommandId = 0
-        };
-        
-        public Command GetCommandRequest()
-        {
-            return commandRequestSubscriber.Get(defaultCommand);
-        }
-
-        public void SetCommandResponse(CommandResponse response)
-        {
-            commandResponsePublisher.Set(response);
-        }
-
-        #endregion
-
-        #region Logging
-
-        public void LoggerPeriodic()
-        {
-            var messages = ntInstanceLogger.PollForMessages();
-            if (messages == null) return;
-            foreach (var message in messages)
-            {
-                QueuedLogger.Log($"[NTCoreInternal/{message.filename}] {message.message}");
-            }
-        }
-
-        #endregion
     }
+    #endregion
+
+    #region Data Publishing Methods
+
+    private readonly FrameData frameData = new();
+
+    /// <summary>
+    /// Publishes current frame data to NetworkTables
+    /// </summary>
+    public void PublishFrameData(
+        int frameCount,
+        double timeStamp,
+        Vector3 position,
+        Quaternion rotation
+    )
+    {
+        frameData.FrameCount = frameCount;
+        frameData.Timestamp = timeStamp;
+        frameData.Pose2D = Conversions.UnityToFrc(position, rotation);
+
+        // Publish data
+        frameDataPublisher.Set(frameData);
+    }
+
+    private readonly DeviceData deviceData = new();
+
+    /// <summary>
+    /// Publishes current device data to NetworkTables
+    /// </summary>
+    public void PublishDeviceData(
+        bool currentlyTracking,
+        int trackingLostCounter,
+        int batteryPercent
+    )
+    {
+        deviceData.CurrentlyTracking = currentlyTracking;
+        deviceData.TrackingLostCounter = trackingLostCounter;
+        deviceData.BatteryPercent = batteryPercent;
+
+        // Publish data
+        deviceDataPublisher.Set(deviceData);
+    }
+
+    #endregion
+
+    #region Command Processing
+
+    /// <summary>
+    ///  Default command when no command is sent
+    /// </summary>
+    private readonly Command defaultCommand = new()
+    {
+        Type = CommandType.Unspecified,
+        CommandId = 0,
+    };
+
+    public Command GetCommandRequest()
+    {
+        return commandRequestSubscriber.Get(defaultCommand);
+    }
+
+    public void SetCommandResponse(CommandResponse response)
+    {
+        commandResponsePublisher.Set(response);
+    }
+
+    #endregion
+
+    #region Logging
+
+    public void LoggerPeriodic()
+    {
+        var messages = ntInstanceLogger.PollForMessages();
+        if (messages == null)
+            return;
+        foreach (var message in messages)
+        {
+            QueuedLogger.Log($"[NTCoreInternal/{message.filename}] {message.message}");
+        }
+    }
+
+    #endregion
+}

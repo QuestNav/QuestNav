@@ -17,7 +17,12 @@ namespace QuestNav.Native.NTCore
             UIntPtr len = UIntPtr.Zero;
             fixed (float* ptr = defaultValue)
             {
-                res = NtCoreNatives.NT_GetFloatArray(handle, ptr, (UIntPtr)defaultValue.Length, &len);
+                res = NtCoreNatives.NT_GetFloatArray(
+                    handle,
+                    ptr,
+                    (UIntPtr)defaultValue.Length,
+                    &len
+                );
             }
 
             float[] ret = new float[(int)len];

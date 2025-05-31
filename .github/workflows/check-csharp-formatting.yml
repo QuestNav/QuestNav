@@ -1,0 +1,4 @@
+- name: Check CSharp formatting
+  run: |
+    dotnet tool install -g csharpier
+    csharpier --check unity/Assets/QuestNav/

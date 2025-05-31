@@ -7,6 +7,7 @@ namespace QuestNav.Native.NTCore
     public class PolledLogger : IDisposable
     {
         private uint handle;
+
         public PolledLogger(uint handle)
         {
             this.handle = handle;
@@ -43,7 +44,12 @@ namespace QuestNav.Native.NTCore
 
             try
             {
-                List<(string message, string filename, int line, int level)> messages = new List<(string message, string filename, int line, int level)>((int)len);
+                List<(string message, string filename, int line, int level)> messages = new List<(
+                    string message,
+                    string filename,
+                    int line,
+                    int level
+                )>((int)len);
                 for (int i = 0; i < (int)len; i++)
                 {
                     if (events[i].flags != 0x100)
@@ -51,10 +57,29 @@ namespace QuestNav.Native.NTCore
                         continue;
                     }
 
-                    string message = (int)events[i].data.logMessage.message.len != 0  ? Encoding.UTF8.GetString(events[i].data.logMessage.message.str, (int)events[i].data.logMessage.message.len) : "";
-                    string filename = (int)events[i].data.logMessage.filename.len != 0 ? Encoding.UTF8.GetString(events[i].data.logMessage.filename.str, (int)events[i].data.logMessage.filename.len) : "";
+                    string message =
+                        (int)events[i].data.logMessage.message.len != 0
+                            ? Encoding.UTF8.GetString(
+                                events[i].data.logMessage.message.str,
+                                (int)events[i].data.logMessage.message.len
+                            )
+                            : "";
+                    string filename =
+                        (int)events[i].data.logMessage.filename.len != 0
+                            ? Encoding.UTF8.GetString(
+                                events[i].data.logMessage.filename.str,
+                                (int)events[i].data.logMessage.filename.len
+                            )
+                            : "";
 
-                    messages.Add((message, filename, (int)events[i].data.logMessage.line, (int)events[i].data.logMessage.level));
+                    messages.Add(
+                        (
+                            message,
+                            filename,
+                            (int)events[i].data.logMessage.line,
+                            (int)events[i].data.logMessage.level
+                        )
+                    );
                 }
                 return messages;
             }

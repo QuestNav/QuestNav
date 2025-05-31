@@ -27,7 +27,7 @@ namespace QuestNav.Native.NTCore
         public int valid;
     }
 
-     [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct NativeNetworkTableValue
     {
         public NtType type;
@@ -141,7 +141,6 @@ namespace QuestNav.Native.NTCore
         public uint protocolVersion;
     }
 
-
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct NativeNtEvent
     {
@@ -183,7 +182,7 @@ namespace QuestNav.Native.NTCore
         NT_INTEGER = 0x100,
         NT_FLOAT = 0x200,
         NT_INTEGER_ARRAY = 0x400,
-        NT_FLOAT_ARRAY = 0x800
+        NT_FLOAT_ARRAY = 0x800,
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -299,33 +298,61 @@ namespace QuestNav.Native.NTCore
         public static extern double NT_GetDouble(uint subscriber, double defaultValue);
 
         [DllImport("ntcore")]
-        public static extern int NT_SetFloatArray(uint publisher, long time, float* value, UIntPtr len);
+        public static extern int NT_SetFloatArray(
+            uint publisher,
+            long time,
+            float* value,
+            UIntPtr len
+        );
 
         [DllImport("ntcore")]
-        public static extern float* NT_GetFloatArray(uint subscriber, float* defaultValue, UIntPtr defaultLen, UIntPtr* len);
-        
+        public static extern float* NT_GetFloatArray(
+            uint subscriber,
+            float* defaultValue,
+            UIntPtr defaultLen,
+            UIntPtr* len
+        );
+
         [DllImport("ntcore")]
         public static extern int NT_SetRaw(uint publisher, long time, byte* value, UIntPtr len);
 
         [DllImport("ntcore")]
-        public static extern byte* NT_GetRaw(uint subscriber, byte* defaultValue, UIntPtr defaultLen, UIntPtr* len);
+        public static extern byte* NT_GetRaw(
+            uint subscriber,
+            byte* defaultValue,
+            UIntPtr defaultLen,
+            UIntPtr* len
+        );
 
         [DllImport("ntcore")]
         public static extern void NT_FreeRaw(byte* value);
-        
+
         [DllImport("ntcore")]
         public static extern void NT_FreeFloatArray(float* value);
 
         [DllImport("ntcore")]
-        public static extern uint NT_Subscribe(uint topic, NtType type, WpiString* typeStr, NativePubSubOptions* options);
+        public static extern uint NT_Subscribe(
+            uint topic,
+            NtType type,
+            WpiString* typeStr,
+            NativePubSubOptions* options
+        );
 
         [DllImport("ntcore")]
-        public static extern uint NT_Publish(uint topic, NtType type, WpiString* typeStr, NativePubSubOptions* options);
+        public static extern uint NT_Publish(
+            uint topic,
+            NtType type,
+            WpiString* typeStr,
+            NativePubSubOptions* options
+        );
 
         [DllImport("ntcore")]
-        public static extern void NT_SetServerMulti(uint inst, UIntPtr count,
-                       WpiString* server_names,
-                       uint* ports);
+        public static extern void NT_SetServerMulti(
+            uint inst,
+            UIntPtr count,
+            WpiString* server_names,
+            uint* ports
+        );
 
         [DllImport("ntcore")]
         public static extern uint NT_CreateListenerPoller(uint inst);
@@ -341,6 +368,5 @@ namespace QuestNav.Native.NTCore
 
         [DllImport("ntcore")]
         public static extern void NT_DisposeEventArray(NativeNtEvent* arr, UIntPtr count);
-
     }
 }

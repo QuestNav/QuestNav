@@ -13,9 +13,8 @@ namespace QuestNav.Core
         /// </summary>
         public static class Network
         {
-
             public static PubSubOptions NT_PUBLISHER_SETTINGS = PubSubOptions.AllDefault;
-            
+
             /// <summary>
             /// Tells NT4 to connect to this IP instead of via team number if not empty. DEBUGGING PURPOSES ONLY!
             /// </summary>
@@ -51,18 +50,16 @@ namespace QuestNav.Core
             /// Command request topic (robot to Quest)
             /// </summary>
             public const string COMMAND_REQUEST = NT_BASE_PATH + "/request";
-            
+
             /// <summary>
             /// Frame data topic
             /// </summary>
             public const string FRAME_DATA = NT_BASE_PATH + "/frameData";
-            
+
             /// <summary>
             /// Device data topic
             /// </summary>
             public const string DEVICE_DATA = NT_BASE_PATH + "/deviceData";
-            
-            
         }
 
         /// <summary>
@@ -74,7 +71,7 @@ namespace QuestNav.Core
             /// Command code for no request/response
             /// </summary>
             public const int IDLE = 0;
-            
+
             /// <summary>
             /// Command code for heading reset request
             /// </summary>
@@ -171,7 +168,7 @@ namespace QuestNav.Core
             /// The lowest level to log. Usually this is INFO, or DEBUG1
             /// </summary>
             public const int NT_LOG_LEVEL_MIN = NTLogLevel.DEBUG1;
-            
+
             /// <summary>
             /// The lowest level to log. Almost ALWAYS this is CRITICAL.
             /// </summary>

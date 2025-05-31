@@ -6,7 +6,6 @@ using QuestNav.Utils;
 
 namespace QuestNav.Native.NTCore
 {
-
     public unsafe class NtInstance
     {
         private readonly uint handle;
@@ -20,11 +19,7 @@ namespace QuestNav.Native.NTCore
 
             fixed (byte* ptr = nameUtf8)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)nameUtf8.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
 
                 NtCoreNatives.NT_StartClient4(handle, &str);
             }
@@ -50,14 +45,24 @@ namespace QuestNav.Native.NTCore
                     addresses[i].len = (UIntPtr)byteCount;
                     fixed (char* c = addressesAndPorts[i].addr)
                     {
-                        Encoding.UTF8.GetBytes(c, addressesAndPorts[i].addr.Length, addresses[i].str, byteCount);
+                        Encoding.UTF8.GetBytes(
+                            c,
+                            addressesAndPorts[i].addr.Length,
+                            addresses[i].str,
+                            byteCount
+                        );
                     }
                 }
                 fixed (WpiString* addrs = addresses)
                 {
                     fixed (uint* ps = ports)
                     {
-                        NtCoreNatives.NT_SetServerMulti(handle, (UIntPtr)addressesAndPorts.Length, addrs, ps);
+                        NtCoreNatives.NT_SetServerMulti(
+                            handle,
+                            (UIntPtr)addressesAndPorts.Length,
+                            addrs,
+                            ps
+                        );
                     }
                 }
             }
@@ -86,11 +91,7 @@ namespace QuestNav.Native.NTCore
 
             fixed (byte* ptr = nameUtf8)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)nameUtf8.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
 
                 topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
             }
@@ -100,13 +101,14 @@ namespace QuestNav.Native.NTCore
             uint subHandle;
             fixed (byte* ptr = typeStr)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)typeStr.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
                 NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Subscribe(topicHandle, NtType.NT_DOUBLE, &str, &nOptions);
+                subHandle = NtCoreNatives.NT_Subscribe(
+                    topicHandle,
+                    NtType.NT_DOUBLE,
+                    &str,
+                    &nOptions
+                );
             }
             return new DoubleSubscriber(subHandle);
         }
@@ -119,11 +121,7 @@ namespace QuestNav.Native.NTCore
 
             fixed (byte* ptr = nameUtf8)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)nameUtf8.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
 
                 topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
             }
@@ -133,13 +131,14 @@ namespace QuestNav.Native.NTCore
             uint subHandle;
             fixed (byte* ptr = typeStr)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)typeStr.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
                 NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Publish(topicHandle, NtType.NT_DOUBLE, &str, &nOptions);
+                subHandle = NtCoreNatives.NT_Publish(
+                    topicHandle,
+                    NtType.NT_DOUBLE,
+                    &str,
+                    &nOptions
+                );
             }
             return new DoublePublisher(subHandle);
         }
@@ -152,11 +151,7 @@ namespace QuestNav.Native.NTCore
 
             fixed (byte* ptr = nameUtf8)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)nameUtf8.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
 
                 topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
             }
@@ -166,13 +161,14 @@ namespace QuestNav.Native.NTCore
             uint subHandle;
             fixed (byte* ptr = typeStr)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)typeStr.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
                 NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Publish(topicHandle, NtType.NT_INTEGER, &str, &nOptions);
+                subHandle = NtCoreNatives.NT_Publish(
+                    topicHandle,
+                    NtType.NT_INTEGER,
+                    &str,
+                    &nOptions
+                );
             }
             return new IntegerPublisher(subHandle);
         }
@@ -185,11 +181,7 @@ namespace QuestNav.Native.NTCore
 
             fixed (byte* ptr = nameUtf8)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)nameUtf8.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
 
                 topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
             }
@@ -199,13 +191,14 @@ namespace QuestNav.Native.NTCore
             uint subHandle;
             fixed (byte* ptr = typeStr)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)typeStr.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
                 NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Subscribe(topicHandle, NtType.NT_INTEGER, &str, &nOptions);
+                subHandle = NtCoreNatives.NT_Subscribe(
+                    topicHandle,
+                    NtType.NT_INTEGER,
+                    &str,
+                    &nOptions
+                );
             }
             return new IntegerSubscriber(subHandle);
         }
@@ -218,11 +211,7 @@ namespace QuestNav.Native.NTCore
 
             fixed (byte* ptr = nameUtf8)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)nameUtf8.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
 
                 topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
             }
@@ -232,13 +221,14 @@ namespace QuestNav.Native.NTCore
             uint subHandle;
             fixed (byte* ptr = typeStr)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)typeStr.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
                 NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Publish(topicHandle, NtType.NT_FLOAT_ARRAY, &str, &nOptions);
+                subHandle = NtCoreNatives.NT_Publish(
+                    topicHandle,
+                    NtType.NT_FLOAT_ARRAY,
+                    &str,
+                    &nOptions
+                );
             }
             return new FloatArrayPublisher(subHandle);
         }
@@ -251,11 +241,7 @@ namespace QuestNav.Native.NTCore
 
             fixed (byte* ptr = nameUtf8)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)nameUtf8.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
 
                 topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
             }
@@ -265,27 +251,27 @@ namespace QuestNav.Native.NTCore
             uint subHandle;
             fixed (byte* ptr = typeStr)
             {
-                WpiString str = new WpiString
-                {
-                    str = ptr,
-                    len = (UIntPtr)typeStr.Length,
-                };
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
                 NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Subscribe(topicHandle, NtType.NT_FLOAT_ARRAY, &str, &nOptions);
+                subHandle = NtCoreNatives.NT_Subscribe(
+                    topicHandle,
+                    NtType.NT_FLOAT_ARRAY,
+                    &str,
+                    &nOptions
+                );
             }
             return new FloatArraySubscriber(subHandle);
         }
-        
-        public unsafe RawPublisher GetRawPublisher(string name, PubSubOptions options) {
+
+        public unsafe RawPublisher GetRawPublisher(string name, PubSubOptions options)
+        {
             byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
 
             uint topicHandle;
 
-            fixed (byte* ptr = nameUtf8) {
-                WpiString str = new WpiString {
-                    str = ptr,
-                    len = (UIntPtr)nameUtf8.Length,
-                };
+            fixed (byte* ptr = nameUtf8)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
 
                 topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
             }
@@ -293,27 +279,24 @@ namespace QuestNav.Native.NTCore
             byte[] typeStr = Encoding.UTF8.GetBytes("raw");
 
             uint pubHandle;
-            fixed (byte* ptr = typeStr) {
-                WpiString str = new WpiString {
-                    str = ptr,
-                    len = (UIntPtr)typeStr.Length,
-                };
+            fixed (byte* ptr = typeStr)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
                 NativePubSubOptions nOptions = options.ToNative();
                 pubHandle = NtCoreNatives.NT_Publish(topicHandle, NtType.NT_RAW, &str, &nOptions);
             }
             return new RawPublisher(pubHandle);
         }
 
-        public unsafe RawSubscriber GetRawSubscriber(string name, PubSubOptions options) {
+        public unsafe RawSubscriber GetRawSubscriber(string name, PubSubOptions options)
+        {
             byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
 
             uint topicHandle;
 
-            fixed (byte* ptr = nameUtf8) {
-                WpiString str = new WpiString {
-                    str = ptr,
-                    len = (UIntPtr)nameUtf8.Length,
-                };
+            fixed (byte* ptr = nameUtf8)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
 
                 topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
             }
@@ -321,36 +304,34 @@ namespace QuestNav.Native.NTCore
             byte[] typeStr = Encoding.UTF8.GetBytes("raw");
 
             uint subHandle;
-            fixed (byte* ptr = typeStr) {
-                WpiString str = new WpiString {
-                    str = ptr,
-                    len = (UIntPtr)typeStr.Length,
-                };
+            fixed (byte* ptr = typeStr)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
                 NativePubSubOptions nOptions = options.ToNative();
                 subHandle = NtCoreNatives.NT_Subscribe(topicHandle, NtType.NT_RAW, &str, &nOptions);
             }
             return new RawSubscriber(subHandle);
         }
-        
-        public ProtobufPublisher<T> GetProtobufPublisher<T>(string name, PubSubOptions options) 
-            where T : IMessage<T> {
-    
+
+        public ProtobufPublisher<T> GetProtobufPublisher<T>(string name, PubSubOptions options)
+            where T : IMessage<T>
+        {
             var rawPublisher = GetRawPublisher(name, options);
             return new ProtobufPublisher<T>(rawPublisher);
         }
 
-        public ProtobufSubscriber<T> GetProtobufSubscriber<T>(string name, PubSubOptions options) 
-            where T : IMessage<T>, new() {
-    
+        public ProtobufSubscriber<T> GetProtobufSubscriber<T>(string name, PubSubOptions options)
+            where T : IMessage<T>, new()
+        {
             var rawSubscriber = GetRawSubscriber(name, options);
             return new ProtobufSubscriber<T>(rawSubscriber);
         }
 
-        public PolledLogger CreateLogger(int minLevel, int maxLevel) {
+        public PolledLogger CreateLogger(int minLevel, int maxLevel)
+        {
             var poller = NtCoreNatives.NT_CreateListenerPoller(handle);
             NtCoreNatives.NT_AddPolledLogger(poller, (uint)minLevel, (uint)maxLevel);
             return new PolledLogger(poller);
         }
     }
-
 }

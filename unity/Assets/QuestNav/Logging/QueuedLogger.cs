@@ -10,11 +10,12 @@ namespace QuestNav.Utils
         {
             Info,
             Warning,
-            Error
+            Error,
         }
 
         // Queue to hold log entries.
         private static readonly Queue<LogEntry> logQueue = new Queue<LogEntry>();
+
         // Cache the last entry to support deduplication.
         private static LogEntry lastEntry = null;
 
@@ -46,7 +47,12 @@ namespace QuestNav.Utils
         /// </summary>
         public static void Log(string message, LogLevel level = LogLevel.Info)
         {
-            if (lastEntry != null && lastEntry.Message == message && lastEntry.Level == level && lastEntry.Exception == null)
+            if (
+                lastEntry != null
+                && lastEntry.Message == message
+                && lastEntry.Level == level
+                && lastEntry.Exception == null
+            )
             {
                 lastEntry.Count++;
             }
@@ -86,8 +92,12 @@ namespace QuestNav.Utils
         /// </summary>
         public static void LogException(string message, System.Exception exception)
         {
-            if (lastEntry != null && lastEntry.Level == LogLevel.Error && lastEntry.Exception != null
-                && lastEntry.Message == message)
+            if (
+                lastEntry != null
+                && lastEntry.Level == LogLevel.Error
+                && lastEntry.Exception != null
+                && lastEntry.Message == message
+            )
             {
                 lastEntry.Count++;
             }

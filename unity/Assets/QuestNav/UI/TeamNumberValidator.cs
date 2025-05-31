@@ -6,7 +6,9 @@ using UnityEngine;
 public class TeamNumberValidator : TMP_InputValidator
 {
     // This regex matches a complete positive integer between 1 and 25599.
-    private Regex completeRegex = new Regex(@"^(?:[1-9]\d{0,3}|1\d{4}|2(?:[0-4]\d{3}|5[0-5]\d{2}))$");
+    private Regex completeRegex = new Regex(
+        @"^(?:[1-9]\d{0,3}|1\d{4}|2(?:[0-4]\d{3}|5[0-5]\d{2}))$"
+    );
 
     public override char Validate(ref string text, ref int pos, char ch)
     {
@@ -35,7 +37,7 @@ public class TeamNumberValidator : TMP_InputValidator
             if (!completeRegex.IsMatch(newText))
                 return '\0';
         }
-        // For partial input (fewer than 5 digits), we allow any entry that doesn’t break our basic rules.
+        // For partial input (fewer than 5 digits), we allow any entry that doesnï¿½t break our basic rules.
         // (For example, "2", "25", "255", or "2559" can all be extended to a valid number.)
 
         // Accept the input.

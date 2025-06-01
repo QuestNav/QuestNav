@@ -263,7 +263,11 @@ namespace QuestNav.Native.NTCore
             return new FloatArraySubscriber(subHandle);
         }
 
-        public unsafe RawPublisher GetRawPublisher(string name, PubSubOptions options)
+        public unsafe RawPublisher GetRawPublisher(
+            string name,
+            string typeString,
+            PubSubOptions options
+        )
         {
             byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
 
@@ -276,7 +280,7 @@ namespace QuestNav.Native.NTCore
                 topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
             }
 
-            byte[] typeStr = Encoding.UTF8.GetBytes("raw");
+            byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
 
             uint pubHandle;
             fixed (byte* ptr = typeStr)
@@ -288,7 +292,11 @@ namespace QuestNav.Native.NTCore
             return new RawPublisher(pubHandle);
         }
 
-        public unsafe RawSubscriber GetRawSubscriber(string name, PubSubOptions options)
+        public unsafe RawSubscriber GetRawSubscriber(
+            string name,
+            string typeString,
+            PubSubOptions options
+        )
         {
             byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
 
@@ -301,7 +309,7 @@ namespace QuestNav.Native.NTCore
                 topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
             }
 
-            byte[] typeStr = Encoding.UTF8.GetBytes("raw");
+            byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
 
             uint subHandle;
             fixed (byte* ptr = typeStr)
@@ -316,14 +324,14 @@ namespace QuestNav.Native.NTCore
         public ProtobufPublisher<T> GetProtobufPublisher<T>(string name, PubSubOptions options)
             where T : IMessage<T>
         {
-            var rawPublisher = GetRawPublisher(name, options);
+            var rawPublisher = GetRawPublisher(name, "protobuf", options);
             return new ProtobufPublisher<T>(rawPublisher);
         }
 
         public ProtobufSubscriber<T> GetProtobufSubscriber<T>(string name, PubSubOptions options)
             where T : IMessage<T>, new()
         {
-            var rawSubscriber = GetRawSubscriber(name, options);
+            var rawSubscriber = GetRawSubscriber(name, "protobuf", options);
             return new ProtobufSubscriber<T>(rawSubscriber);
         }
 

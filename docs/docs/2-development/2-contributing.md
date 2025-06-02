@@ -70,7 +70,16 @@ Example: `feature/add-path-visualization`
 - Add comments to your code when necessary
 - Update documentation as needed
 
-### 5. Test Your Changes
+### 5. Format your code
+:::note
+QuestNav uses Csharpier to ensure code formatting is universal. Installation instructions are located in the [Development Environment Setup](./1-development-setup.md) guide.
+:::
+Format your code prior to submitting your pull request by running
+```
+  csharpier format unity/Assets/QuestNav/
+```
+from the root of the project
+### 6. Test Your Changes
 
 :::danger
 Always test your changes before submitting a pull request!
@@ -80,7 +89,7 @@ Always test your changes before submitting a pull request!
 - Ensure there are no compiler errors or warnings
 - Verify that existing functionality still works
 
-### 6. Commit Your Changes
+### 7. Commit Your Changes
 
 - Make small, focused commits with clear messages
 - Use the present tense and imperative mood ("Add feature" not "Added feature")
@@ -91,7 +100,7 @@ Example:
 git commit -m "Add path visualization feature (fixes #42)"
 ```
 
-### 7. Stay Updated
+### 8. Stay Updated
 
 Regularly sync your fork with the upstream repository:
 
@@ -100,7 +109,7 @@ git fetch upstream
 git rebase upstream/main
 ```
 
-### 8. Submit a Pull Request
+### 9. Submit a Pull Request
 
 - Push your branch to your fork:
   ```

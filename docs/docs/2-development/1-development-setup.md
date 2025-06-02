@@ -84,31 +84,28 @@ These SDKs must be added to your Unity account before you can import the project
 - Click on the newly imported project
 - Wait for Unity to compile assets and open the main interface
 
-### Step 7: Install Required Packages
-
-:::danger
-The MessagePack plugin is required for Network Tables communication with the robot. The project will not function without it.
-:::
-
-Install the MessagePack plugin for Unity:
-
-- Download the latest release with a `.unitypackage` extension from [the MessagePack-CSharp GitHub repository](https://github.com/MessagePack-CSharp/MessagePack-CSharp/releases)
-- In Unity, select `Assets > Import Package > Custom Package`
-- Browse to the package you downloaded and click `Import`
-
-### Step 8: Configure Build Settings for Android
+### Step 7: Configure Build Settings for Android
 
 - Navigate to `File > Build Profiles`
 - Under `Platforms` select `Android`
 - Click on `Switch Platform`
 - Wait for Unity to recompile assets
 
-### Step 9: Set Up Project for Meta Quest
+### Step 8: Set Up Project for Meta Quest
 
 - Navigate to `Meta > Tools > Project Setup Tool`
 - Apply all the recommended fixes on the default tab (Android)
 - Cycle through the rest of the tabs and apply all fixes
 - Ensure the Android tab shows a green ✅ and reports its status as "XR Ready for Android"
+
+### Step 9: Install Formatting Tools
+
+- Navigate to the root of the git repository
+- Install the formatter:
+```
+  dotnet tool install -g csharpier
+```
+
 
 ## Building and Testing
 

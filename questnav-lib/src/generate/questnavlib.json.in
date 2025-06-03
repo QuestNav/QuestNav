@@ -1,0 +1,19 @@
+{
+  "fileName": "questnavlib.json",
+  "name": "questnavlib",
+  "version": "${questnav_version}",
+  "uuid": "${questnav_uuid}",
+  "frcYear": "${frc_year}",
+  "mavenUrls": [
+    "https://maven.questnav.gg/repository/release",
+    "https://maven.questnav.gg/repository/snapshots"
+  ],
+  "jsonUrl": "${json_url}",
+  "javaDependencies": [
+    {
+      "groupId": "gg.questnav",
+      "artifactId": "questnavlib",
+      "version": "${questnav_version}"
+    }
+  ]
+}

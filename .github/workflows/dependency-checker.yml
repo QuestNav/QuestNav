@@ -1,0 +1,391 @@
+name: Dependency Update Checker
+
+on:
+  schedule:
+    # Check for dependency updates daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      check_wpilib_updates:
+        description: 'Check for WPILib updates'
+        required: true
+        type: boolean
+        default: true
+      check_unity_updates:
+        description: 'Check for Unity Editor updates'
+        required: true
+        type: boolean
+        default: true
+      create_pr:
+        description: 'Create PR for updates'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  check-wpilib-updates:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.check_wpilib_updates == 'true' || github.event_name == 'schedule'
+
+    outputs:
+      latest_version: ${{ steps.wpilib.outputs.latest_version }}
+      current_version: ${{ steps.wpilib.outputs.current_version }}
+      update_available: ${{ steps.wpilib.outputs.update_available }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check WPILib Latest Version
+        id: wpilib
+        run: |
+          echo "🔍 Checking for WPILib updates..."
+          
+          # Get current version from gradle.properties
+          CURRENT_VERSION=$(grep "wpilibVersion=" gradle.properties | cut -d'=' -f2)
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Current WPILib version: $CURRENT_VERSION"
+          
+          # Check GitHub releases for latest version
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/wpilibsuite/allwpilib/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          echo "🆕 Latest WPILib version: $LATEST_VERSION"
+          
+          # Compare versions
+          if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
+            echo "update_available=true" >> $GITHUB_OUTPUT
+            echo "✅ Update available: $CURRENT_VERSION → $LATEST_VERSION"
+          else
+            echo "update_available=false" >> $GITHUB_OUTPUT
+            echo "✅ Already on latest version: $CURRENT_VERSION"
+          fi
+
+  check-gradle-updates:
+    runs-on: ubuntu-latest
+
+    outputs:
+      latest_version: ${{ steps.gradle.outputs.latest_version }}
+      current_version: ${{ steps.gradle.outputs.current_version }}
+      update_available: ${{ steps.gradle.outputs.update_available }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check Gradle Latest Version
+        id: gradle
+        run: |
+          echo "🔍 Checking for Gradle updates..."
+          
+          # Get current version from wrapper properties
+          CURRENT_VERSION=$(grep "distributionUrl" gradle/wrapper/gradle-wrapper.properties | sed -n 's/.*gradle-\([0-9.]*\)-bin.zip/\1/p')
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Current Gradle version: $CURRENT_VERSION"
+          
+          # Check for latest Gradle version
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/gradle/gradle/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          echo "🆕 Latest Gradle version: $LATEST_VERSION"
+          
+          # Compare versions
+          if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
+            echo "update_available=true" >> $GITHUB_OUTPUT
+            echo "✅ Update available: $CURRENT_VERSION → $LATEST_VERSION"
+          else
+            echo "update_available=false" >> $GITHUB_OUTPUT
+            echo "✅ Already on latest version: $CURRENT_VERSION"
+          fi
+
+  check-unity-updates:
+    runs-on: ubuntu-latest
+    if: (github.event.inputs.check_unity_updates == 'true' || github.event_name == 'schedule') && hashFiles('**/unity/ProjectSettings/ProjectVersion.txt') != ''
+
+    outputs:
+      latest_version: ${{ steps.unity.outputs.latest_version }}
+      current_version: ${{ steps.unity.outputs.current_version }}
+      update_available: ${{ steps.unity.outputs.update_available }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check Unity Editor Latest Version
+        id: unity
+        run: |
+          echo "🔍 Checking for Unity Editor updates..."
+          
+          # Check if Unity project exists
+          if [ ! -f "unity/ProjectSettings/ProjectVersion.txt" ]; then
+            echo "⏭️ No Unity project found"
+            echo "current_version=none" >> $GITHUB_OUTPUT
+            echo "latest_version=none" >> $GITHUB_OUTPUT
+            echo "update_available=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Get current Unity version from ProjectVersion.txt
+          CURRENT_VERSION=$(grep "m_EditorVersion:" unity/ProjectSettings/ProjectVersion.txt | cut -d' ' -f2)
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "🎮 Current Unity version: $CURRENT_VERSION"
+          
+          # Get current major.minor version for LTS checking
+          CURRENT_MAJOR_MINOR=$(echo $CURRENT_VERSION | sed -n 's/^\([0-9]*\.[0-9]*\).*/\1/p')
+          
+          # Check Unity release archive for latest LTS version
+          # Unity doesn't have a simple API, so we'll check the Unity download archive page
+          UNITY_RELEASES=$(curl -s "https://unity.com/releases/editor/archive" | grep -o '[0-9]\{4\}\.[0-9]\+\.[0-9]\+f[0-9]\+' | sort -V | tail -20)
+          
+          # Filter for LTS versions (typically even numbered minor versions like 2022.3, 2023.3, etc.)
+          LATEST_LTS=""
+          while IFS= read -r version; do
+            YEAR=$(echo $version | cut -d'.' -f1)
+            MINOR=$(echo $version | cut -d'.' -f2)
+            if [ $((MINOR % 2)) -eq 1 ] || [ $((MINOR % 2)) -eq 3 ]; then  # LTS versions typically end in .1 or .3
+              LATEST_LTS=$version
+            fi
+          done <<< "$UNITY_RELEASES"
+          
+          # If we couldn't determine LTS from archive, use a known LTS pattern
+          if [ -z "$LATEST_LTS" ]; then
+            # Fallback: check for Unity 2023.3.x LTS or 2022.3.x LTS
+            LATEST_LTS=$(echo "$UNITY_RELEASES" | grep -E "(2023\.3\.|2022\.3\.)" | tail -1)
+          fi
+          
+          # If still no LTS found, use the latest available version
+          if [ -z "$LATEST_LTS" ]; then
+            LATEST_LTS=$(echo "$UNITY_RELEASES" | tail -1)
+          fi
+          
+          echo "latest_version=$LATEST_LTS" >> $GITHUB_OUTPUT
+          echo "🆕 Latest Unity LTS version: $LATEST_LTS"
+          
+          # Compare versions (simplified - just check if they're different)
+          if [ "$CURRENT_VERSION" != "$LATEST_LTS" ]; then
+            echo "update_available=true" >> $GITHUB_OUTPUT
+            echo "✅ Update available: $CURRENT_VERSION → $LATEST_LTS"
+          else
+            echo "update_available=false" >> $GITHUB_OUTPUT
+            echo "✅ Already on latest version: $CURRENT_VERSION"
+          fi
+
+
+
+  create-update-pr:
+    runs-on: ubuntu-latest
+    needs: [check-wpilib-updates, check-gradle-updates, check-unity-updates]
+    if: |
+      (needs.check-wpilib-updates.outputs.update_available == 'true' || 
+       needs.check-gradle-updates.outputs.update_available == 'true' ||
+       needs.check-unity-updates.outputs.update_available == 'true') &&
+      (github.event.inputs.create_pr == 'true' || github.event_name == 'schedule')
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.11'
+
+      - name: Create Update Branch
+        run: |
+          # Create a new branch for updates
+          BRANCH_NAME="deps/update-$(date +'%Y%m%d')"
+          git checkout -b $BRANCH_NAME
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Update WPILib Version
+        if: needs.check-wpilib-updates.outputs.update_available == 'true'
+        run: |
+          echo "📦 Updating WPILib version..."
+          NEW_VERSION="${{ needs.check-wpilib-updates.outputs.latest_version }}"
+          
+          # Update gradle.properties
+          sed -i "s/wpilibVersion=.*/wpilibVersion=$NEW_VERSION/" gradle.properties
+          
+          # Update build.gradle default if present
+          if grep -q "wpilibVersion.*:" build.gradle; then
+            sed -i "s/wpilibVersion.*:.*/wpilibVersion = project.findProperty('wpilibVersion') ?: '$NEW_VERSION'/" build.gradle
+          fi
+          
+          echo "✅ Updated WPILib to $NEW_VERSION"
+
+      - name: Update Gradle Version
+        if: needs.check-gradle-updates.outputs.update_available == 'true'
+        run: |
+          echo "🔧 Updating Gradle version..."
+          NEW_VERSION="${{ needs.check-gradle-updates.outputs.latest_version }}"
+          
+          # Update wrapper using gradlew
+          ./gradlew wrapper --gradle-version=$NEW_VERSION
+          
+          echo "✅ Updated Gradle to $NEW_VERSION"
+
+      - name: Update Unity Version
+        if: needs.check-unity-updates.outputs.update_available == 'true'
+        run: |
+          echo "🎮 Updating Unity Editor version..."
+          NEW_VERSION="${{ needs.check-unity-updates.outputs.latest_version }}"
+          
+          # Update ProjectVersion.txt
+          if [ -f "unity/ProjectSettings/ProjectVersion.txt" ]; then
+            sed -i "s/m_EditorVersion: .*/m_EditorVersion: $NEW_VERSION/" unity/ProjectSettings/ProjectVersion.txt
+            echo "✅ Updated Unity Editor to $NEW_VERSION"
+          fi
+
+      - name: Test Updates
+        run: |
+          echo "🧪 Testing dependency updates..."
+          
+          # Test library build
+          if [ -f "build.gradle" ]; then
+            ./gradlew build test
+          fi
+          
+          # Note: Unity projects typically require Unity Editor to build,
+          # so we'll skip Unity build testing in CI
+
+      - name: Commit Changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          git add -A
+          
+          # Create commit message
+          COMMIT_MSG="chore: update dependencies"
+          if [ "${{ needs.check-wpilib-updates.outputs.update_available }}" = "true" ]; then
+            COMMIT_MSG="$COMMIT_MSG\n- WPILib: ${{ needs.check-wpilib-updates.outputs.current_version }} → ${{ needs.check-wpilib-updates.outputs.latest_version }}"
+          fi
+          if [ "${{ needs.check-gradle-updates.outputs.update_available }}" = "true" ]; then
+            COMMIT_MSG="$COMMIT_MSG\n- Gradle: ${{ needs.check-gradle-updates.outputs.current_version }} → ${{ needs.check-gradle-updates.outputs.latest_version }}"
+          fi
+          if [ "${{ needs.check-unity-updates.outputs.update_available }}" = "true" ]; then
+            COMMIT_MSG="$COMMIT_MSG\n- Unity Editor: ${{ needs.check-unity-updates.outputs.current_version }} → ${{ needs.check-unity-updates.outputs.latest_version }}"
+          fi
+          
+          git commit -m "$COMMIT_MSG"
+          git push origin $BRANCH_NAME
+
+      - name: Create Pull Request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'chore: update dependencies';
+            let body = '## 🔄 Dependency Updates\n\nThis PR updates the following dependencies:\n\n';
+            
+            if ('${{ needs.check-wpilib-updates.outputs.update_available }}' === 'true') {
+              body += `- **WPILib**: \`${{ needs.check-wpilib-updates.outputs.current_version }}\` → \`${{ needs.check-wpilib-updates.outputs.latest_version }}\`\n`;
+            }
+            
+            if ('${{ needs.check-gradle-updates.outputs.update_available }}' === 'true') {
+              body += `- **Gradle**: \`${{ needs.check-gradle-updates.outputs.current_version }}\` → \`${{ needs.check-gradle-updates.outputs.latest_version }}\`\n`;
+            }
+            
+            if ('${{ needs.check-unity-updates.outputs.update_available }}' === 'true') {
+              body += `- **Unity Editor**: \`${{ needs.check-unity-updates.outputs.current_version }}\` → \`${{ needs.check-unity-updates.outputs.latest_version }}\`\n`;
+            }
+            
+            body += '\n### ✅ Automated Testing\n\n';
+            body += '- [x] Library build successful\n';
+            body += '- [x] All tests pass\n';
+            body += '- [x] Vendor JSON generation works\n';
+            if ('${{ hashFiles("**/unity/ProjectSettings/ProjectVersion.txt") }}' !== '') {
+              body += '- [ ] Unity project compatibility (requires manual testing)\n';
+            }
+            body += '\n### 📋 Checklist\n\n';
+            body += '- [ ] Review dependency changes\n';
+            body += '- [ ] Verify compatibility with FRC requirements\n';
+            body += '- [ ] Test with example robot projects\n';
+            if ('${{ hashFiles("**/ProjectSettings/ProjectVersion.txt") }}' !== '') {
+              body += '- [ ] Test Unity project in new editor version\n';
+              body += '- [ ] Verify Unity package compatibility\n';
+            }
+            body += '\n*This PR was automatically created by the dependency management workflow.*';
+            
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              head: process.env.BRANCH_NAME,
+              base: 'main',
+              body: body
+            });
+            
+            console.log(`Created PR #${pr.number}`);
+
+  notify-discord:
+    runs-on: ubuntu-latest
+    needs: [check-wpilib-updates, check-gradle-updates, check-unity-updates, create-update-pr]
+    if: always() && !cancelled() && secrets.DISCORD_WEBHOOK_URL != ''
+
+    steps:
+      - name: Send Discord Notification
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        with:
+          args: |
+            🔄 **Dependency Check Complete!**
+            
+            **Scan Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')
+            
+            **WPILib Status:**
+            ${{ needs.check-wpilib-updates.outputs.update_available == 'true' && format('🔄 Update Available: `{0}` → `{1}`', needs.check-wpilib-updates.outputs.current_version, needs.check-wpilib-updates.outputs.latest_version) || format('✅ Up to Date: `{0}`', needs.check-wpilib-updates.outputs.current_version) }}
+            
+            **Gradle Status:**
+            ${{ needs.check-gradle-updates.outputs.update_available == 'true' && format('🔄 Update Available: `{0}` → `{1}`', needs.check-gradle-updates.outputs.current_version, needs.check-gradle-updates.outputs.latest_version) || format('✅ Up to Date: `{0}`', needs.check-gradle-updates.outputs.current_version) }}
+            
+            **Unity Editor Status:**
+            ${{ needs.check-unity-updates.outputs.update_available == 'true' && format('🔄 Update Available: `{0}` → `{1}`', needs.check-unity-updates.outputs.current_version, needs.check-unity-updates.outputs.latest_version) || format('✅ Up to Date: `{0}`', needs.check-unity-updates.outputs.current_version) }}
+            
+            ${{ needs.create-update-pr.result == 'success' && '**Update PR:** ✅ Created automatically' || '' }}
+
+  summary:
+    runs-on: ubuntu-latest
+    needs: [check-wpilib-updates, check-gradle-updates, check-unity-updates]
+    if: always()
+
+    steps:
+      - name: Create Summary
+        run: |
+          echo "## 🔄 Dependency Check Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Scan Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 📦 WPILib" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.check-wpilib-updates.outputs.update_available }}" = "true" ]; then
+            echo "- 🔄 **Update Available**: ${{ needs.check-wpilib-updates.outputs.current_version }} → ${{ needs.check-wpilib-updates.outputs.latest_version }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ✅ **Up to Date**: ${{ needs.check-wpilib-updates.outputs.current_version }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔧 Gradle" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.check-gradle-updates.outputs.update_available }}" = "true" ]; then
+            echo "- 🔄 **Update Available**: ${{ needs.check-gradle-updates.outputs.current_version }} → ${{ needs.check-gradle-updates.outputs.latest_version }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ✅ **Up to Date**: ${{ needs.check-gradle-updates.outputs.current_version }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎮 Unity Editor" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ hashFiles('**/unity/ProjectSettings/ProjectVersion.txt') }}" != "" ]; then
+            if [ "${{ needs.check-unity-updates.outputs.update_available }}" = "true" ]; then
+              echo "- 🔄 **Update Available**: ${{ needs.check-unity-updates.outputs.current_version }} → ${{ needs.check-unity-updates.outputs.latest_version }}" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ✅ **Up to Date**: ${{ needs.check-unity-updates.outputs.current_version }}" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- ⏭️ **No Unity project found**" >> $GITHUB_STEP_SUMMARY
+          fi

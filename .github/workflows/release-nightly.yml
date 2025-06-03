@@ -1,0 +1,285 @@
+name: Nightly Release
+
+on:
+  schedule:
+    # Run every night at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      force_publish:
+        description: 'Force publish even if no changes'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
+  PRIMARY_WPILIB_VERSION: '2025.3.2'
+  PRIMARY_FRC_YEAR: '2025'
+
+jobs:
+  generate-metadata:
+    runs-on: ubuntu-latest
+    outputs:
+      build_date: ${{ steps.metadata.outputs.build_date }}
+      nightly_version: ${{ steps.metadata.outputs.nightly_version }}
+
+    steps:
+      - name: Generate Build Metadata
+        id: metadata
+        run: |
+          BUILD_DATE=$(date +'%Y%m%d')
+          NIGHTLY_VERSION="${{ env.PRIMARY_FRC_YEAR }}-0.0.0-nightly.${BUILD_DATE}"
+          
+          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
+          echo "nightly_version=$NIGHTLY_VERSION" >> $GITHUB_OUTPUT
+          echo "📅 Build date: $BUILD_DATE"
+          echo "📦 Nightly version: $NIGHTLY_VERSION"
+
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+      commit_count: ${{ steps.changes.outputs.commit_count }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history
+
+      - name: Check for Changes Since Last Nightly
+        id: changes
+        run: |
+          # Check if there have been commits in the last 24 hours
+          YESTERDAY=$(date -d '24 hours ago' --utc +%Y-%m-%dT%H:%M:%SZ)
+          COMMIT_COUNT=$(git rev-list --count --since="$YESTERDAY" HEAD)
+          
+          echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
+          
+          if [ $COMMIT_COUNT -gt 0 ] || [ "${{ github.event.inputs.force_publish }}" = "true" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "📈 Found $COMMIT_COUNT commits since yesterday, will build nightly"
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "📭 No changes since yesterday, skipping build"
+          fi
+
+  nightly-lib-build:
+    runs-on: ubuntu-latest
+    needs: [check-changes, generate-metadata]
+    if: needs.check-changes.outputs.has_changes == 'true'
+    outputs:
+      primary_artifact_name: ${{ steps.artifact-name.outputs.primary_name }}
+
+    strategy:
+      matrix:
+        # Test against multiple WPILib versions if we want for compatibility
+        include:
+          - wpilib_version: ${{ env.PRIMARY_WPILIB_VERSION }}
+            frc_year: ${{ env.PRIMARY_FRC_YEAR }}
+            is_primary: true
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.11'
+
+      - name: Generate Artifact Name
+        id: artifact-name
+        run: |
+          ARTIFACT_NAME="questnavlib-nightly-${{ matrix.frc_year }}-wpilib${{ matrix.wpilib_version }}"
+          echo "artifact_name=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
+          
+          if [ "${{ matrix.is_primary }}" = "true" ]; then
+            echo "primary_name=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
+            echo "📦 Primary artifact name: $ARTIFACT_NAME"
+          fi
+
+      - name: Build Nightly Release
+        run: |
+          echo "🌙 Building nightly release..."
+          ./gradlew build \
+            -PquestnavVersion="${{ matrix.frc_year }}-0.0.0" \
+            -PreleaseType="nightly.${{ needs.generate-metadata.outputs.build_date }}" \
+            -PfrcYear="${{ matrix.frc_year }}" \
+            -PwpilibVersion="${{ matrix.wpilib_version }}"
+
+      - name: Generate Vendor JSON
+        run: |
+          echo "📄 Generating vendor JSON..."
+          ./gradlew generateVendorJson \
+            -PquestnavVersion="${{ matrix.frc_year }}-0.0.0" \
+            -PreleaseType="nightly.${{ needs.generate-metadata.outputs.build_date }}" \
+            -PfrcYear="${{ matrix.frc_year }}" \
+            -PwpilibVersion="${{ matrix.wpilib_version }}"
+
+      - name: Upload Nightly Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact-name.outputs.artifact_name }}
+          path: |
+            build/generated/vendordeps/questnavlib.json
+          retention-days: 7
+
+      - name: Publish Nightly Build
+        if: matrix.is_primary && secrets.MAVEN_REPO_URL != ''
+        run: |
+          echo "🚀 Publishing nightly build..."
+          ./gradlew publish \
+            -PquestnavVersion="${{ matrix.frc_year }}-0.0.0" \
+            -PreleaseType="nightly.${{ needs.generate-metadata.outputs.build_date }}" \
+            -PfrcYear="${{ matrix.frc_year }}" \
+            -PwpilibVersion="${{ matrix.wpilib_version }}" \
+            -PmavenRepoUrl="${{ secrets.MAVEN_REPO_URL }}" \
+            -PmavenUsername="${{ secrets.MAVEN_USERNAME }}" \
+            -PmavenPassword="${{ secrets.MAVEN_PASSWORD }}"
+        env:
+          MAVEN_REPO_URL: ${{ secrets.MAVEN_REPO_URL }}
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+
+  nightly-app-build:
+    runs-on: ubuntu-latest
+    needs: [check-changes, generate-metadata]
+    if: needs.check-changes.outputs.has_changes == 'true' && hashFiles('**/build.gradle*', '**/ProjectSettings/ProjectVersion.txt', 'android/**/*') != ''
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build Nightly APK
+        run: |
+          echo "🌙 Building nightly APK..."
+          echo "📱 Nightly app version: ${{ needs.generate-metadata.outputs.nightly_version }}"
+          
+          # Check for Android project structure
+          if [ -d "android" ]; then
+            cd android
+            echo "📁 Found android/ directory"
+          fi
+          
+          # Update version in build.gradle if it exists
+          if [ -f "app/build.gradle" ]; then
+            echo "📝 Updating version in app/build.gradle"
+            sed -i "s/versionName .*/versionName \"${{ needs.generate-metadata.outputs.nightly_version }}\"/" app/build.gradle
+          elif [ -f "build.gradle" ]; then
+            echo "📝 Updating version in build.gradle"
+            sed -i "s/versionName .*/versionName \"${{ needs.generate-metadata.outputs.nightly_version }}\"/" build.gradle
+          fi
+          
+          # Build the APK
+          if [ -f "gradlew" ]; then
+            ./gradlew assembleDebug --no-daemon
+          else
+            echo "❌ No gradlew found in current directory"
+            exit 1
+          fi
+
+      - name: Upload Nightly App Artifacts
+        uses: actions/upload-artifact@v4
+        if: hashFiles('**/app-debug.apk') != ''
+        with:
+          name: questnav-app-nightly
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/debug/*.apk
+          retention-days: 7
+
+  update-latest-dev:
+    runs-on: ubuntu-latest
+    needs: [nightly-lib-build, nightly-app-build, check-changes]
+    if: always() && needs.check-changes.outputs.has_changes == 'true' && needs.nightly-lib-build.outputs.primary_artifact_name != ''
+
+    steps:
+      - name: Download Primary Nightly Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.nightly-lib-build.outputs.primary_artifact_name }}
+          path: ./nightly-artifacts
+
+      - name: Download Nightly App Artifact (if exists)
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: questnav-app-nightly
+          path: ./nightly-artifacts
+
+      - name: Update Latest Nightly Tag
+        uses: actions/upload-artifact@v4
+        with:
+          name: questnav-suite-latest-nightly
+          path: ./nightly-artifacts/
+          retention-days: 30
+
+      - name: Send Discord Notification
+        if: secrets.DISCORD_WEBHOOK_URL != ''
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        with:
+          args: |
+            🌙 **Nightly Build Complete!**
+            
+            **Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')
+            **Commits since yesterday:** ${{ needs.check-changes.outputs.commit_count }}
+            
+            **Components Built:**
+            • QuestNavLib: ✅
+            • QuestNav App: ${{ hashFiles('**/build.gradle*', '**/ProjectSettings/ProjectVersion.txt', 'android/**/*') != '' && '✅' || '⏭️ (no app code found)' }}
+            
+            ${{ secrets.MAVEN_REPO_URL != '' && '📦 Published to Maven snapshots' || '📦 Build artifacts uploaded' }}
+
+      - name: Create Nightly Summary
+        run: |
+          echo "## 🌙 Nightly Build Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "**Commits since yesterday:** ${{ needs.check-changes.outputs.commit_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Artifacts Generated" >> $GITHUB_STEP_SUMMARY
+          echo "- Primary artifact: ${{ needs.nightly-lib-build.outputs.primary_artifact_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- WPILib ${{ env.PRIMARY_WPILIB_VERSION }} compatibility tested" >> $GITHUB_STEP_SUMMARY
+          echo "- Nightly artifacts uploaded" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ secrets.MAVEN_REPO_URL }}" != "" ]; then
+            echo "- Published to Maven snapshots repository" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  cleanup-old-artifacts:
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Delete Old Nightly Artifacts
+        uses: geekyeggo/delete-artifact@v4
+        with:
+          name: questnavlib-nightly-*
+          failOnError: false
+          # Keep artifacts from the last 7 days
+          useGlob: true
+
+      - name: Delete Old App Nightly Artifacts
+        uses: geekyeggo/delete-artifact@v4
+        with:
+          name: questnav-app-nightly-*
+          failOnError: false
+          useGlob: true

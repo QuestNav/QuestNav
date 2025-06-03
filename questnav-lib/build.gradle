@@ -1,0 +1,219 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'edu.wpi.first.GradleRIO' version '2025.3.2'
+}
+
+// Version and build configuration
+ext {
+    baseVersion = project.findProperty('questnavVersion') ?: '2025-1.0.0'
+    releaseType = project.findProperty('releaseType') ?: 'dev'
+    frcYear = project.findProperty('frcYear') ?: '2025'
+    wpilibVersion = project.findProperty('wpilibVersion') ?: '2025.3.2'
+
+    // Construct full version from base + release type
+    questnavVersion = releaseType == 'release' ? baseVersion : "${baseVersion}-${releaseType}"
+
+    // Vendor dependency configuration
+    vendorUuid = 'a706fe68-86e5-4aed-92c5-ce05aca007f0'
+    mavenGroupId = 'gg.questnav'
+    artifactId = 'questnavlib'
+
+    // Repository configuration
+    mavenRepoUrl = project.findProperty('mavenRepoUrl') ?: 'https://maven.questnav.gg/repository'
+    isSnapshot = releaseType in ['dev', 'snapshot'] || questnavVersion.contains('-SNAPSHOT')
+}
+
+// Java configuration
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        name = "WPILib"
+        url = "https://frcmaven.wpi.edu/artifactory/release/"
+    }
+    if (project.hasProperty('mavenRepoUrl')) {
+        maven {
+            name = "QuestNavRepo"
+            url = mavenRepoUrl + (isSnapshot ? "/snapshots" : "/release")
+        }
+    }
+}
+
+dependencies {
+    // WPILib dependencies
+    implementation "edu.wpi.first.wpilibj:wpilibj-java:${wpilibVersion}"
+    implementation "edu.wpi.first.wpiutil:wpiutil-java:${wpilibVersion}"
+    implementation "edu.wpi.first.wpimath:wpimath-java:${wpilibVersion}"
+    implementation "edu.wpi.first.ntcore:ntcore-java:${wpilibVersion}"
+
+    // Test dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// Generate vendor JSON
+def vendorJsonInput = file("src/generate/questnavlib.json.in")
+def vendorJsonOutput = file("$buildDir/generated/vendordeps/questnavlib.json")
+
+task generateVendorJson() {
+    description = "Generates the vendor JSON file"
+    group = "QuestNavLib"
+
+    inputs.file vendorJsonInput
+    inputs.property("baseVersion", baseVersion)
+    inputs.property("releaseType", releaseType)
+    inputs.property("version", questnavVersion)
+    inputs.property("frcYear", frcYear)
+    outputs.file vendorJsonOutput
+
+    doLast {
+        println "Generating vendor JSON ${questnavVersion} (${baseVersion} + ${releaseType}) to ${vendorJsonOutput}"
+
+        vendorJsonOutput.parentFile.mkdirs()
+
+        // Determine repository URL based on release type
+        def repoType = isSnapshot ? "snapshots" : "release"
+        def jsonUrl = "https://maven.questnav.gg/repository/${repoType}/gg/questnav/questnavlib-json/${questnavVersion}/questnavlib-json-${questnavVersion}.json"
+
+        def content = vendorJsonInput.text
+                .replace('${questnav_version}', questnavVersion)
+                .replace('${frc_year}', frcYear)
+                .replace('${questnav_uuid}', vendorUuid)
+                .replace('${json_url}', jsonUrl)
+
+        vendorJsonOutput.text = content
+    }
+
+    outputs.upToDateWhen { false }
+}
+
+// Create publishable artifact
+def vendorJsonArtifact = artifacts.add('archives', vendorJsonOutput) {
+    classifier = 'vendordep'
+    type = 'json'
+    builtBy generateVendorJson
+}
+
+// Publishing configuration
+publishing {
+    publications {
+        questnavlib(MavenPublication) {
+            groupId = mavenGroupId
+            artifactId = artifactId
+            version = questnavVersion
+
+            from components.java
+            artifact vendorJsonArtifact
+
+            pom {
+                name = 'QuestNavLib'
+                description = 'QuestNav library for FRC robot localization using VR headsets'
+                url = 'https://github.com/questnav/questnavlib'
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/questnav/questnavlib.git'
+                    developerConnection = 'scm:git:ssh://github.com/questnav/questnavlib.git'
+                    url = 'https://github.com/questnav/questnavlib'
+                }
+            }
+        }
+
+        // Separate publication for vendor JSON
+        vendorjson(MavenPublication) {
+            groupId = mavenGroupId
+            artifactId = "${artifactId}-json"
+            version = questnavVersion
+
+            artifact vendorJsonArtifact
+        }
+    }
+
+    repositories {
+        if (project.hasProperty('mavenRepoUrl')) {
+            maven {
+                name = "QuestNavRepo"
+                url = mavenRepoUrl + (isSnapshot ? "/snapshots" : "/release")
+
+                // Add credentials if provided
+                if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
+                    credentials {
+                        username = project.findProperty('mavenUsername')
+                        password = project.findProperty('mavenPassword')
+                    }
+                }
+            }
+        }
+
+        // For local testing
+        mavenLocal()
+    }
+}
+
+// Build dependencies
+build.dependsOn generateVendorJson
+
+// Task to copy vendor JSON to local output for testing
+task copyVendorJsonLocal(type: Copy) {
+    description = "Copy vendor JSON to local output directory"
+    group = "QuestNavLib"
+
+    from vendorJsonOutput
+    into "$buildDir/outputs/vendordeps/"
+
+    dependsOn generateVendorJson
+}
+
+// Task to print build info
+task buildInfo {
+    description = "Print build information"
+    group = "QuestNavLib"
+
+    doLast {
+        println "QuestNavLib Build Information:"
+        println "  Base Version: ${baseVersion}"
+        println "  Release Type: ${releaseType}"
+        println "  Full Version: ${questnavVersion}"
+        println "  FRC Year: ${frcYear}"
+        println "  WPILib Version: ${wpilibVersion}"
+        println "  Group ID: ${mavenGroupId}"
+        println "  Artifact ID: ${artifactId}"
+        println "  UUID: ${vendorUuid}"
+        println "  Is Snapshot: ${isSnapshot}"
+        println "  Repository Type: ${isSnapshot ? 'snapshots' : 'release'}"
+        if (project.hasProperty('mavenRepoUrl')) {
+            println "  Repository: ${mavenRepoUrl}"
+        }
+        def jsonUrl = "https://maven.questnav.gg/repository/${isSnapshot ? 'snapshots' : 'release'}/gg/questnav/questnavlib-json/${questnavVersion}/questnavlib-json-${questnavVersion}.json"
+        println "  Vendor JSON URL: ${jsonUrl}"
+    }
+}
+
+// Gradle wrapper task
+wrapper {
+    gradleVersion = '8.11'
+}
+
+// Clean task to remove generated files
+clean {
+    delete "$buildDir/generated"
+    delete "$buildDir/outputs"
+}

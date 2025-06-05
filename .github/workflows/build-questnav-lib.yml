@@ -48,8 +48,9 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          path: questnav-lib
-          
+          sparse-checkout: questnav-lib
+          sparse-checkout-cone-mode: false
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -63,7 +64,7 @@ jobs:
 
       - name: Display Build Configuration
         run: |
-          ./gradlew buildInfo \
+          ./questnav-lib/gradlew buildInfo \
             -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
             -PreleaseType="${{ inputs.versionType }}" \
             -PfrcYear="${{ inputs.versionYear }}" \
@@ -81,7 +82,7 @@ jobs:
 
       - name: Build Library
         run: |
-          ./gradlew build \
+          ./questnav-lib/gradlew build \
             -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
             -PreleaseType="${{ inputs.versionType }}" \
             -PfrcYear="${{ inputs.versionYear }}" \
@@ -89,7 +90,7 @@ jobs:
 
       - name: Generate Vendor JSON
         run: |
-          ./gradlew generateVendorJson \
+          ./questnav-lib/gradlew generateVendorJson \
             -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
             -PreleaseType="${{ inputs.versionType }}" \
             -PfrcYear="${{ inputs.versionYear }}" \
@@ -97,7 +98,7 @@ jobs:
 
       - name: Prepare Artifacts
         run: |
-          ./gradlew copyVendorJsonLocal \
+          ./questnav-lib/gradlew copyVendorJsonLocal \
             -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
             -PreleaseType="${{ inputs.versionType }}" \
             -PfrcYear="${{ inputs.versionYear }}" \

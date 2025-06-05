@@ -1,11 +1,8 @@
-name: Compile ProtoBufs
+name: Compile Protocol Buffers
 on:
   push:
-    branches:
-      - main
-      - Native
-    #paths:
-    #  - 'protos'
+    paths:
+      - 'protos'
   workflow_dispatch:
 jobs:
   compile-protobufs:
@@ -13,7 +10,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Install protoc
         uses: arduino/setup-protoc@v3
@@ -49,6 +47,8 @@ jobs:
             --plugin=protoc-gen-quickbuf=${{ steps.download-quickbuf.outputs.file }} \
             --quickbuf_out=questnav-lib/src/main/java/gg/questnav/questnav/protos/ \
             protos/*.proto
+
+      - name: Build C#
 
       - name: Commit all generated files
         uses: stefanzweifel/git-auto-commit-action@v5

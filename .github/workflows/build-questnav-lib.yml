@@ -39,7 +39,9 @@ env:
 jobs:
   build-questnavlib:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: questnav-lib
     outputs:
       jar-artifact-name: ${{ steps.upload.outputs.artifact-id }}
       jar-filename: ${{ steps.buildJava.outputs.buildVersion }}
@@ -63,11 +65,11 @@ jobs:
           gradle-version: '8.11'
 
       - name: Make gradlew Executable
-        run: 'chmod +x ./questnav-lib/gradlew'
+        run: 'chmod +x ./gradlew'
 
       - name: Display Build Configuration
         run: |
-          ./questnav-lib/gradlew buildInfo \
+          ./gradlew buildInfo \
             -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
             -PreleaseType="${{ inputs.versionType }}" \
             -PfrcYear="${{ inputs.versionYear }}" \
@@ -85,7 +87,7 @@ jobs:
 
       - name: Build Library
         run: |
-          ./questnav-lib/gradlew build \
+          ./gradlew build \
             -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
             -PreleaseType="${{ inputs.versionType }}" \
             -PfrcYear="${{ inputs.versionYear }}" \
@@ -93,7 +95,7 @@ jobs:
 
       - name: Generate Vendor JSON
         run: |
-          ./questnav-lib/gradlew generateVendorJson \
+          ./gradlew generateVendorJson \
             -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
             -PreleaseType="${{ inputs.versionType }}" \
             -PfrcYear="${{ inputs.versionYear }}" \
@@ -101,7 +103,7 @@ jobs:
 
       - name: Prepare Artifacts
         run: |
-          ./questnav-lib/gradlew copyVendorJsonLocal \
+          ./gradlew copyVendorJsonLocal \
             -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
             -PreleaseType="${{ inputs.versionType }}" \
             -PfrcYear="${{ inputs.versionYear }}" \

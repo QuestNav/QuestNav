@@ -1,0 +1,75 @@
+name: Compile ProtoBufs
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'protos'
+  workflow_dispatch:
+
+jobs:
+  csharp:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install protoc
+        uses: arduino/setup-protoc@v3
+
+      - name: Generate C# protobuf
+        run: protoc --csharp_out=unity/Assets/QuestNav/Protos protos/*.proto
+
+      - name: Upload C# Protocol Buffers
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'ci: Generated C# Protobufs'
+          file_pattern: 'unity/Assets/QuestNav/Protos/*.cs'
+
+  java:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download QuickBuf plugin
+        id: download-quickbuf
+        uses: clausnz/github-action-download-maven-artifact@master
+        with:
+          url: 'https://repo1.maven.org'
+          repository: 'maven2'
+          groupId: 'us.hebi.quickbuf'
+          artifactId: 'protoc-gen-quickbuf'
+          version: '1.4'
+          extension: 'exe'
+          classifier: 'linux-x86_64'
+
+      - name: Setup QuickBuf
+        run: chmod +x ${{ steps.download-quickbuf.outputs.file }}
+
+      - name: Compile QuickBuffers
+        run: |
+          protoc \
+            --plugin=protoc-gen-quickbuf=${{ steps.download-quickbuf.outputs.file }} \
+            --quickbuf_out=questnav-lib/src/main/java/gg/questnav/questnav/protos/ \
+            protos/*.proto
+
+      - name: Upload Java QuickBuffers
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'ci: Generated Java QuickBuffers'
+          file_pattern: 'questnav-lib/src/main/java/gg/questnav/questnav/protos/*.java'

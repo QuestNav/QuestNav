@@ -53,6 +53,8 @@ dependencies {
     implementation "edu.wpi.first.wpiutil:wpiutil-java:${wpilibVersion}"
     implementation "edu.wpi.first.wpimath:wpimath-java:${wpilibVersion}"
     implementation "edu.wpi.first.ntcore:ntcore-java:${wpilibVersion}"
+    implementation "edu.wpi.first.wpiunits:wpiunits-java:${wpilibVersion}"
+    implementation "com.google.protobuf:protobuf-java:4.31.1"
 
     // Test dependencies
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
@@ -120,7 +122,7 @@ publishing {
             pom {
                 name = 'QuestNavLib'
                 description = 'QuestNav library for FRC robot localization using VR headsets'
-                url = 'https://github.com/questnav/questnavlib'
+                url = 'https://github.com/questnav/questnav/questnav-lib'
 
                 licenses {
                     license {

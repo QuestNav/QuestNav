@@ -55,6 +55,7 @@ dependencies {
     implementation "edu.wpi.first.ntcore:ntcore-java:${wpilibVersion}"
     implementation "edu.wpi.first.wpiunits:wpiunits-java:${wpilibVersion}"
     implementation "com.google.protobuf:protobuf-java:4.31.1"
+    implementation "us.hebi.quickbuf:quickbuf-runtime:1.4"
 
     // Test dependencies
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'

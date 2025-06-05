@@ -20,7 +20,7 @@ jobs:
         uses: arduino/setup-protoc@v3
 
       - name: Generate C# protobuf
-        run: protoc --csharp_out=unity/Assets/QuestNav/Protos protos/*.proto
+        run: protoc -I="protos" --csharp_out=unity/Assets/QuestNav/Protos protos/*.proto
 
       - name: Upload C# Protocol Buffers
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -65,6 +65,7 @@ jobs:
       - name: Compile QuickBuffers
         run: |
           protoc \
+            -I="protos" \
             --plugin=protoc-gen-quickbuf=${{ steps.download-quickbuf.outputs.file }} \
             --quickbuf_out=questnav-lib/src/main/java/gg/questnav/questnav/protos/ \
             protos/*.proto

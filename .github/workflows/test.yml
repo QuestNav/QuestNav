@@ -1,0 +1,23 @@
+name: Test workflows
+on:
+  push:
+    branches:
+      - Native
+jobs:
+  apk:
+    uses: QuestNav/QuestNav/.github/workflows/build-questnav-apk.yml@Native
+    with:
+      versionMajor: 1
+      versionMinor: 0
+      versionPatch: 0
+      versionYear: 2025
+      versionType: 'dev'
+  lib:
+    uses: QuestNav/QuestNav/.github/workflows/build-questnav-lib.yml@Native
+    with:
+      versionMajor: 1
+      versionMinor: 0
+      versionPatch: 0
+      versionYear: 2025
+      versionType: 'dev'
+      wpilibVersion: '2025.3.2'

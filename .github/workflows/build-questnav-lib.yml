@@ -62,6 +62,9 @@ jobs:
         with:
           gradle-version: '8.11'
 
+      - name: Make gradlew Executable
+        run: 'chmod +x ./questnav-lib/gradlew'
+
       - name: Display Build Configuration
         run: |
           ./questnav-lib/gradlew buildInfo \

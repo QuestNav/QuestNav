@@ -47,7 +47,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
+        with:
+          path: questnav-lib
+          
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:

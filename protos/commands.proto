@@ -5,7 +5,7 @@ option csharp_namespace = "QuestNav.Protos.Generated";
 option java_package = "gg.questnav.questnav.protos.generated";
 
 // Import geometry messages
-import "geometry.proto";
+import "geometry2d.proto";
 
 // Enum for command types (extensible for future commands)
 enum CommandType {
@@ -17,7 +17,7 @@ enum CommandType {
 // Payload for pose reset command
 message PoseResetPayload {
   // Target pose in field-relative WPILib coordinate space (x forward, y left, rotation CCW+)
-  geometry.Pose2d target_pose = 1;
+  geometry2d.Pose2d target_pose = 1;
 }
 
 // Main Command message

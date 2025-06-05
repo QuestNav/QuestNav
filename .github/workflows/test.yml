@@ -7,23 +7,22 @@ jobs:
   apk:
     runs-on: ubuntu-latest
     steps:
-      - uses: QuestNav/QuestNav/.github/workflows/build-questnav-apk.yml@Native
-        with:
-          versionMajor: '1'
-          versionMinor: '0'
-          versionPatch: '0'
-          versionYear: '2025'
-          versionType: 'dev'
+    uses: QuestNav/QuestNav/.github/workflows/build-questnav-apk.yml@Native
+    with:
+      versionMajor: '1'
+      versionMinor: '0'
+      versionPatch: '0'
+      versionYear: '2025'
+      versionType: 'dev'
   lib:
     runs-on: ubuntu-latest
-    steps:
-      - uses: QuestNav/QuestNav/.github/workflows/build-questnav-lib.yml
-        with:
-          versionMajor: '1'
-          versionMinor: '0'
-          versionPatch: '0'
-          versionYear: '2025'
-          versionType: 'dev'
-          wpilibVersion: '2025.3.2'
-          
+    uses: QuestNav/QuestNav/.github/workflows/build-questnav-lib.yml
+    with:
+      versionMajor: '1'
+      versionMinor: '0'
+      versionPatch: '0'
+      versionYear: '2025'
+      versionType: 'dev'
+      wpilibVersion: '2025.3.2'
+
 

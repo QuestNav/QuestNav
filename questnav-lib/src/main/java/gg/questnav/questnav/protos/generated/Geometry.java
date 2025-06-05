@@ -2,6 +2,7 @@
 package gg.questnav.questnav.protos.generated;
 
 import java.io.IOException;
+import us.hebi.quickbuf.Descriptors;
 import us.hebi.quickbuf.FieldName;
 import us.hebi.quickbuf.InvalidProtocolBufferException;
 import us.hebi.quickbuf.JsonSink;
@@ -11,38 +12,46 @@ import us.hebi.quickbuf.ProtoMessage;
 import us.hebi.quickbuf.ProtoSink;
 import us.hebi.quickbuf.ProtoSource;
 import us.hebi.quickbuf.ProtoUtil;
+import us.hebi.quickbuf.RepeatedByte;
 
 public final class Geometry {
-  /**
-   * <pre>
-   *  Translation2d represents a 2D translation (x, y coordinates)
-   *  This mirrors WPILib's Translation2d class
-   * </pre>
-   *
-   * Protobuf type {@code Translation2d}
-   */
-  public static final class Translation2d extends ProtoMessage<Translation2d> implements Cloneable {
-    private static final long serialVersionUID = 0L;
+    private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(1268,
+        "Cg5nZW9tZXRyeS5wcm90bxIYcXVlc3RuYXYucHJvdG9zLmdlb21ldHJ5IisKDVRyYW5zbGF0aW9uMmQS" + 
+        "DAoBeBgBIAEoAVIBeBIMCgF5GAIgASgBUgF5IiYKClJvdGF0aW9uMmQSGAoHcmFkaWFucxgBIAEoAVIH" + 
+        "cmFkaWFucyKVAQoGUG9zZTJkEkkKC3RyYW5zbGF0aW9uGAEgASgLMicucXVlc3RuYXYucHJvdG9zLmdl" + 
+        "b21ldHJ5LlRyYW5zbGF0aW9uMmRSC3RyYW5zbGF0aW9uEkAKCHJvdGF0aW9uGAIgASgLMiQucXVlc3Ru" + 
+        "YXYucHJvdG9zLmdlb21ldHJ5LlJvdGF0aW9uMmRSCHJvdGF0aW9uQkMKJWdnLnF1ZXN0bmF2LnF1ZXN0" + 
+        "bmF2LnByb3Rvcy5nZW5lcmF0ZWSqAhlRdWVzdE5hdi5Qcm90b3MuR2VuZXJhdGVkSo0HCgYSBAADHwEK" + 
+        "CAoBDBIDAAMVCggKAQISAwIAIQoICgEIEgMDADYKCQoCCCUSAwMANgoICgEIEgMEAD4KCQoCCAESAwQA" + 
+        "Pgp1CgIEABIECAAOARppIFRyYW5zbGF0aW9uMmQgcmVwcmVzZW50cyBhIDJEIHRyYW5zbGF0aW9uICh4" + 
+        "LCB5IGNvb3JkaW5hdGVzKQogVGhpcyBtaXJyb3JzIFdQSUxpYidzIFRyYW5zbGF0aW9uMmQgY2xhc3MK" + 
+        "CgoKAwQAARIDCAgVCiUKBAQAAgASAwoCDxoYIFggY29vcmRpbmF0ZSBpbiBtZXRlcnMKCgwKBQQAAgAF" + 
+        "EgMKAggKDAoFBAACAAESAwoJCgoMCgUEAAIAAxIDCg0OCicKBAQAAgESAw0CDxoaIFkgY29vcmRpbmF0" + 
+        "ZSBpbiBtZXRlcnMgIAoKDAoFBAACAQUSAw0CCAoMCgUEAAIBARIDDQkKCgwKBQQAAgEDEgMNDQ4KWQoC" + 
+        "BAESBBIAFQEaTSBSb3RhdGlvbjJkIHJlcHJlc2VudHMgYSAyRCByb3RhdGlvbgogVGhpcyBtaXJyb3Jz" + 
+        "IFdQSUxpYidzIFJvdGF0aW9uMmQgY2xhc3MKCgoKAwQBARIDEggSCigKBAQBAgASAxQCFRobIFJvdGF0" + 
+        "aW9uIGFuZ2xlIGluIHJhZGlhbnMKCgwKBQQBAgAFEgMUAggKDAoFBAECAAESAxQJEAoMCgUEAQIAAxID" + 
+        "FBMUCpMBCgIEAhIEGQAfARqGASBQb3NlMmQgcmVwcmVzZW50cyBhIDJEIHBvc2UgKHBvc2l0aW9uICsg" + 
+        "b3JpZW50YXRpb24pCiBUaGlzIG1pcnJvcnMgV1BJTGliJ3MgUG9zZTJkIGNsYXNzIHdoaWNoIGNvbWJp" + 
+        "bmVzIFRyYW5zbGF0aW9uMmQgYW5kIFJvdGF0aW9uMmQKCgoKAwQCARIDGQgOCjgKBAQCAgASAxsCIBor" + 
+        "IFRoZSB0cmFuc2xhdGlvbiBjb21wb25lbnQgKHgsIHkgcG9zaXRpb24pCgoMCgUEAgIABhIDGwIPCgwK" + 
+        "BQQCAgABEgMbEBsKDAoFBAICAAMSAxseHwozCgQEAgIBEgMeAhoaJiBUaGUgcm90YXRpb24gY29tcG9u",
+        "ZW50IChvcmllbnRhdGlvbikKCgwKBQQCAgEGEgMeAgwKDAoFBAICAQESAx4NFQoMCgUEAgIBAxIDHhgZ" + 
+        "YgZwcm90bzM=");
+
+    static final Descriptors.FileDescriptor descriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom("geometry.proto", "questnav.protos.geometry", descriptorData);
+
+    static final Descriptors.Descriptor questnav_protos_geometry_Translation2d_descriptor = descriptor.internalContainedType(44, 43, "Translation2d", "questnav.protos.geometry.Translation2d");
+
+    static final Descriptors.Descriptor questnav_protos_geometry_Rotation2d_descriptor = descriptor.internalContainedType(89, 38, "Rotation2d", "questnav.protos.geometry.Rotation2d");
+
+    static final Descriptors.Descriptor questnav_protos_geometry_Pose2d_descriptor = descriptor.internalContainedType(130, 149, "Pose2d", "questnav.protos.geometry.Pose2d");
 
     /**
-     * <pre>
-     *  X coordinate in meters
-     * </pre>
-     *
-     * <code>optional double x = 1;</code>
+     * @return this proto file's descriptor.
      */
-    private double x;
-
-    /**
-     * <pre>
-     *  Y coordinate in meters  
-     * </pre>
-     *
-     * <code>optional double y = 2;</code>
-     */
-    private double y;
-
-    private Translation2d() {
+    public static Descriptors.FileDescriptor getDescriptor() {
+        return descriptor;
     }
 
     /**
@@ -51,363 +60,380 @@ public final class Geometry {
      *  This mirrors WPILib's Translation2d class
      * </pre>
      *
-     * @return a new empty instance of {@code Translation2d}
+     * Protobuf type {@code Translation2d}
      */
-    public static Translation2d newInstance() {
-      return new Translation2d();
-    }
+    public static final class Translation2d extends ProtoMessage<Translation2d> implements Cloneable {
+        private static final long serialVersionUID = 0L;
 
-    /**
-     * <pre>
-     *  X coordinate in meters
-     * </pre>
-     *
-     * <code>optional double x = 1;</code>
-     * @return whether the x field is set
-     */
-    public boolean hasX() {
-      return (bitField0_ & 0x00000001) != 0;
-    }
+        /**
+         * <pre>
+         *  X coordinate in meters
+         * </pre>
+         *
+         * <code>optional double x = 1;</code>
+         */
+        private double x;
 
-    /**
-     * <pre>
-     *  X coordinate in meters
-     * </pre>
-     *
-     * <code>optional double x = 1;</code>
-     * @return this
-     */
-    public Translation2d clearX() {
-      bitField0_ &= ~0x00000001;
-      x = 0D;
-      return this;
-    }
+        /**
+         * <pre>
+         *  Y coordinate in meters  
+         * </pre>
+         *
+         * <code>optional double y = 2;</code>
+         */
+        private double y;
 
-    /**
-     * <pre>
-     *  X coordinate in meters
-     * </pre>
-     *
-     * <code>optional double x = 1;</code>
-     * @return the x
-     */
-    public double getX() {
-      return x;
-    }
+        private Translation2d() {
+        }
 
-    /**
-     * <pre>
-     *  X coordinate in meters
-     * </pre>
-     *
-     * <code>optional double x = 1;</code>
-     * @param value the x to set
-     * @return this
-     */
-    public Translation2d setX(final double value) {
-      bitField0_ |= 0x00000001;
-      x = value;
-      return this;
-    }
+        /**
+         * <pre>
+         *  Translation2d represents a 2D translation (x, y coordinates)
+         *  This mirrors WPILib's Translation2d class
+         * </pre>
+         *
+         * @return a new empty instance of {@code Translation2d}
+         */
+        public static Translation2d newInstance() {
+            return new Translation2d();
+        }
 
-    /**
-     * <pre>
-     *  Y coordinate in meters  
-     * </pre>
-     *
-     * <code>optional double y = 2;</code>
-     * @return whether the y field is set
-     */
-    public boolean hasY() {
-      return (bitField0_ & 0x00000002) != 0;
-    }
+        /**
+         * <pre>
+         *  X coordinate in meters
+         * </pre>
+         *
+         * <code>optional double x = 1;</code>
+         * @return whether the x field is set
+         */
+        public boolean hasX() {
+            return (bitField0_ & 0x00000001) != 0;
+        }
 
-    /**
-     * <pre>
-     *  Y coordinate in meters  
-     * </pre>
-     *
-     * <code>optional double y = 2;</code>
-     * @return this
-     */
-    public Translation2d clearY() {
-      bitField0_ &= ~0x00000002;
-      y = 0D;
-      return this;
-    }
-
-    /**
-     * <pre>
-     *  Y coordinate in meters  
-     * </pre>
-     *
-     * <code>optional double y = 2;</code>
-     * @return the y
-     */
-    public double getY() {
-      return y;
-    }
-
-    /**
-     * <pre>
-     *  Y coordinate in meters  
-     * </pre>
-     *
-     * <code>optional double y = 2;</code>
-     * @param value the y to set
-     * @return this
-     */
-    public Translation2d setY(final double value) {
-      bitField0_ |= 0x00000002;
-      y = value;
-      return this;
-    }
-
-    @Override
-    public Translation2d copyFrom(final Translation2d other) {
-      cachedSize = other.cachedSize;
-      if ((bitField0_ | other.bitField0_) != 0) {
-        bitField0_ = other.bitField0_;
-        x = other.x;
-        y = other.y;
-      }
-      return this;
-    }
-
-    @Override
-    public Translation2d mergeFrom(final Translation2d other) {
-      if (other.isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      if (other.hasX()) {
-        setX(other.x);
-      }
-      if (other.hasY()) {
-        setY(other.y);
-      }
-      return this;
-    }
-
-    @Override
-    public Translation2d clear() {
-      if (isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      bitField0_ = 0;
-      x = 0D;
-      y = 0D;
-      return this;
-    }
-
-    @Override
-    public Translation2d clearQuick() {
-      if (isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      bitField0_ = 0;
-      return this;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (o == this) {
-        return true;
-      }
-      if (!(o instanceof Translation2d)) {
-        return false;
-      }
-      Translation2d other = (Translation2d) o;
-      return bitField0_ == other.bitField0_
-        && (!hasX() || ProtoUtil.isEqual(x, other.x))
-        && (!hasY() || ProtoUtil.isEqual(y, other.y));
-    }
-
-    @Override
-    public void writeTo(final ProtoSink output) throws IOException {
-      if ((bitField0_ & 0x00000001) != 0) {
-        output.writeRawByte((byte) 9);
-        output.writeDoubleNoTag(x);
-      }
-      if ((bitField0_ & 0x00000002) != 0) {
-        output.writeRawByte((byte) 17);
-        output.writeDoubleNoTag(y);
-      }
-    }
-
-    @Override
-    protected int computeSerializedSize() {
-      int size = 0;
-      if ((bitField0_ & 0x00000001) != 0) {
-        size += 9;
-      }
-      if ((bitField0_ & 0x00000002) != 0) {
-        size += 9;
-      }
-      return size;
-    }
-
-    @Override
-    @SuppressWarnings("fallthrough")
-    public Translation2d mergeFrom(final ProtoSource input) throws IOException {
-      // Enabled Fall-Through Optimization (QuickBuffers)
-      int tag = input.readTag();
-      while (true) {
-        switch (tag) {
-          case 9: {
-            // x
-            x = input.readDouble();
-            bitField0_ |= 0x00000001;
-            tag = input.readTag();
-            if (tag != 17) {
-              break;
-            }
-          }
-          case 17: {
-            // y
-            y = input.readDouble();
-            bitField0_ |= 0x00000002;
-            tag = input.readTag();
-            if (tag != 0) {
-              break;
-            }
-          }
-          case 0: {
+        /**
+         * <pre>
+         *  X coordinate in meters
+         * </pre>
+         *
+         * <code>optional double x = 1;</code>
+         * @return this
+         */
+        public Translation2d clearX() {
+            bitField0_ &= ~0x00000001;
+            x = 0D;
             return this;
-          }
-          default: {
-            if (!input.skipField(tag)) {
-              return this;
-            }
-            tag = input.readTag();
-            break;
-          }
         }
-      }
-    }
 
-    @Override
-    public void writeTo(final JsonSink output) throws IOException {
-      output.beginObject();
-      if ((bitField0_ & 0x00000001) != 0) {
-        output.writeDouble(FieldNames.x, x);
-      }
-      if ((bitField0_ & 0x00000002) != 0) {
-        output.writeDouble(FieldNames.y, y);
-      }
-      output.endObject();
-    }
-
-    @Override
-    public Translation2d mergeFrom(final JsonSource input) throws IOException {
-      if (!input.beginObject()) {
-        return this;
-      }
-      while (!input.isAtEnd()) {
-        switch (input.readFieldHash()) {
-          case 120: {
-            if (input.isAtField(FieldNames.x)) {
-              if (!input.trySkipNullValue()) {
-                x = input.readDouble();
-                bitField0_ |= 0x00000001;
-              }
-            } else {
-              input.skipUnknownField();
-            }
-            break;
-          }
-          case 121: {
-            if (input.isAtField(FieldNames.y)) {
-              if (!input.trySkipNullValue()) {
-                y = input.readDouble();
-                bitField0_ |= 0x00000002;
-              }
-            } else {
-              input.skipUnknownField();
-            }
-            break;
-          }
-          default: {
-            input.skipUnknownField();
-            break;
-          }
+        /**
+         * <pre>
+         *  X coordinate in meters
+         * </pre>
+         *
+         * <code>optional double x = 1;</code>
+         * @return the x
+         */
+        public double getX() {
+            return x;
         }
-      }
-      input.endObject();
-      return this;
-    }
 
-    @Override
-    public Translation2d clone() {
-      return new Translation2d().copyFrom(this);
-    }
+        /**
+         * <pre>
+         *  X coordinate in meters
+         * </pre>
+         *
+         * <code>optional double x = 1;</code>
+         * @param value the x to set
+         * @return this
+         */
+        public Translation2d setX(final double value) {
+            bitField0_ |= 0x00000001;
+            x = value;
+            return this;
+        }
 
-    @Override
-    public boolean isEmpty() {
-      return ((bitField0_) == 0);
-    }
+        /**
+         * <pre>
+         *  Y coordinate in meters  
+         * </pre>
+         *
+         * <code>optional double y = 2;</code>
+         * @return whether the y field is set
+         */
+        public boolean hasY() {
+            return (bitField0_ & 0x00000002) != 0;
+        }
 
-    public static Translation2d parseFrom(final byte[] data) throws InvalidProtocolBufferException {
-      return ProtoMessage.mergeFrom(new Translation2d(), data).checkInitialized();
-    }
+        /**
+         * <pre>
+         *  Y coordinate in meters  
+         * </pre>
+         *
+         * <code>optional double y = 2;</code>
+         * @return this
+         */
+        public Translation2d clearY() {
+            bitField0_ &= ~0x00000002;
+            y = 0D;
+            return this;
+        }
 
-    public static Translation2d parseFrom(final ProtoSource input) throws IOException {
-      return ProtoMessage.mergeFrom(new Translation2d(), input).checkInitialized();
-    }
+        /**
+         * <pre>
+         *  Y coordinate in meters  
+         * </pre>
+         *
+         * <code>optional double y = 2;</code>
+         * @return the y
+         */
+        public double getY() {
+            return y;
+        }
 
-    public static Translation2d parseFrom(final JsonSource input) throws IOException {
-      return ProtoMessage.mergeFrom(new Translation2d(), input).checkInitialized();
-    }
+        /**
+         * <pre>
+         *  Y coordinate in meters  
+         * </pre>
+         *
+         * <code>optional double y = 2;</code>
+         * @param value the y to set
+         * @return this
+         */
+        public Translation2d setY(final double value) {
+            bitField0_ |= 0x00000002;
+            y = value;
+            return this;
+        }
 
-    /**
-     * @return factory for creating Translation2d messages
-     */
-    public static MessageFactory<Translation2d> getFactory() {
-      return Translation2dFactory.INSTANCE;
-    }
+        @Override
+        public Translation2d copyFrom(final Translation2d other) {
+            cachedSize = other.cachedSize;
+            if ((bitField0_ | other.bitField0_) != 0) {
+                bitField0_ = other.bitField0_;
+                x = other.x;
+                y = other.y;
+            }
+            return this;
+        }
 
-    private enum Translation2dFactory implements MessageFactory<Translation2d> {
-      INSTANCE;
+        @Override
+        public Translation2d mergeFrom(final Translation2d other) {
+            if (other.isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            if (other.hasX()) {
+                setX(other.x);
+            }
+            if (other.hasY()) {
+                setY(other.y);
+            }
+            return this;
+        }
 
-      @Override
-      public Translation2d create() {
-        return Translation2d.newInstance();
-      }
-    }
+        @Override
+        public Translation2d clear() {
+            if (isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            bitField0_ = 0;
+            x = 0D;
+            y = 0D;
+            return this;
+        }
 
-    /**
-     * Contains name constants used for serializing JSON
-     */
-    static class FieldNames {
-      static final FieldName x = FieldName.forField("x");
+        @Override
+        public Translation2d clearQuick() {
+            if (isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            bitField0_ = 0;
+            return this;
+        }
 
-      static final FieldName y = FieldName.forField("y");
-    }
-  }
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+            if (!(o instanceof Translation2d)) {
+                return false;
+            }
+            Translation2d other = (Translation2d) o;
+            return bitField0_ == other.bitField0_
+                && (!hasX() || ProtoUtil.isEqual(x, other.x))
+                && (!hasY() || ProtoUtil.isEqual(y, other.y));
+        }
 
-  /**
-   * <pre>
-   *  Rotation2d represents a 2D rotation
-   *  This mirrors WPILib's Rotation2d class
-   * </pre>
-   *
-   * Protobuf type {@code Rotation2d}
-   */
-  public static final class Rotation2d extends ProtoMessage<Rotation2d> implements Cloneable {
-    private static final long serialVersionUID = 0L;
+        @Override
+        public void writeTo(final ProtoSink output) throws IOException {
+            if ((bitField0_ & 0x00000001) != 0) {
+                output.writeRawByte((byte) 9);
+                output.writeDoubleNoTag(x);
+            }
+            if ((bitField0_ & 0x00000002) != 0) {
+                output.writeRawByte((byte) 17);
+                output.writeDoubleNoTag(y);
+            }
+        }
 
-    /**
-     * <pre>
-     *  Rotation angle in radians
-     * </pre>
-     *
-     * <code>optional double radians = 1;</code>
-     */
-    private double radians;
+        @Override
+        protected int computeSerializedSize() {
+            int size = 0;
+            if ((bitField0_ & 0x00000001) != 0) {
+                size += 9;
+            }
+            if ((bitField0_ & 0x00000002) != 0) {
+                size += 9;
+            }
+            return size;
+        }
 
-    private Rotation2d() {
+        @Override
+        @SuppressWarnings("fallthrough")
+        public Translation2d mergeFrom(final ProtoSource input) throws IOException {
+            // Enabled Fall-Through Optimization (QuickBuffers)
+            int tag = input.readTag();
+            while (true) {
+                switch (tag) {
+                    case 9: {
+                        // x
+                        x = input.readDouble();
+                        bitField0_ |= 0x00000001;
+                        tag = input.readTag();
+                        if (tag != 17) {
+                            break;
+                        }
+                    }
+                    case 17: {
+                        // y
+                        y = input.readDouble();
+                        bitField0_ |= 0x00000002;
+                        tag = input.readTag();
+                        if (tag != 0) {
+                            break;
+                        }
+                    }
+                    case 0: {
+                        return this;
+                    }
+                    default: {
+                        if (!input.skipField(tag)) {
+                            return this;
+                        }
+                        tag = input.readTag();
+                        break;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void writeTo(final JsonSink output) throws IOException {
+            output.beginObject();
+            if ((bitField0_ & 0x00000001) != 0) {
+                output.writeDouble(FieldNames.x, x);
+            }
+            if ((bitField0_ & 0x00000002) != 0) {
+                output.writeDouble(FieldNames.y, y);
+            }
+            output.endObject();
+        }
+
+        @Override
+        public Translation2d mergeFrom(final JsonSource input) throws IOException {
+            if (!input.beginObject()) {
+                return this;
+            }
+            while (!input.isAtEnd()) {
+                switch (input.readFieldHash()) {
+                    case 120: {
+                        if (input.isAtField(FieldNames.x)) {
+                            if (!input.trySkipNullValue()) {
+                                x = input.readDouble();
+                                bitField0_ |= 0x00000001;
+                            }
+                        } else {
+                            input.skipUnknownField();
+                        }
+                        break;
+                    }
+                    case 121: {
+                        if (input.isAtField(FieldNames.y)) {
+                            if (!input.trySkipNullValue()) {
+                                y = input.readDouble();
+                                bitField0_ |= 0x00000002;
+                            }
+                        } else {
+                            input.skipUnknownField();
+                        }
+                        break;
+                    }
+                    default: {
+                        input.skipUnknownField();
+                        break;
+                    }
+                }
+            }
+            input.endObject();
+            return this;
+        }
+
+        @Override
+        public Translation2d clone() {
+            return new Translation2d().copyFrom(this);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return ((bitField0_) == 0);
+        }
+
+        public static Translation2d parseFrom(final byte[] data) throws
+                InvalidProtocolBufferException {
+            return ProtoMessage.mergeFrom(new Translation2d(), data).checkInitialized();
+        }
+
+        public static Translation2d parseFrom(final ProtoSource input) throws IOException {
+            return ProtoMessage.mergeFrom(new Translation2d(), input).checkInitialized();
+        }
+
+        public static Translation2d parseFrom(final JsonSource input) throws IOException {
+            return ProtoMessage.mergeFrom(new Translation2d(), input).checkInitialized();
+        }
+
+        /**
+         * @return factory for creating Translation2d messages
+         */
+        public static MessageFactory<Translation2d> getFactory() {
+            return Translation2dFactory.INSTANCE;
+        }
+
+        /**
+         * @return this type's descriptor.
+         */
+        public static Descriptors.Descriptor getDescriptor() {
+            return Geometry.questnav_protos_geometry_Translation2d_descriptor;
+        }
+
+        private enum Translation2dFactory implements MessageFactory<Translation2d> {
+            INSTANCE;
+
+            @Override
+            public Translation2d create() {
+                return Translation2d.newInstance();
+            }
+        }
+
+        /**
+         * Contains name constants used for serializing JSON
+         */
+        static class FieldNames {
+            static final FieldName x = FieldName.forField("x");
+
+            static final FieldName y = FieldName.forField("y");
+        }
     }
 
     /**
@@ -416,281 +442,280 @@ public final class Geometry {
      *  This mirrors WPILib's Rotation2d class
      * </pre>
      *
-     * @return a new empty instance of {@code Rotation2d}
+     * Protobuf type {@code Rotation2d}
      */
-    public static Rotation2d newInstance() {
-      return new Rotation2d();
-    }
+    public static final class Rotation2d extends ProtoMessage<Rotation2d> implements Cloneable {
+        private static final long serialVersionUID = 0L;
 
-    /**
-     * <pre>
-     *  Rotation angle in radians
-     * </pre>
-     *
-     * <code>optional double radians = 1;</code>
-     * @return whether the radians field is set
-     */
-    public boolean hasRadians() {
-      return (bitField0_ & 0x00000001) != 0;
-    }
+        /**
+         * <pre>
+         *  Rotation angle in radians
+         * </pre>
+         *
+         * <code>optional double radians = 1;</code>
+         */
+        private double radians;
 
-    /**
-     * <pre>
-     *  Rotation angle in radians
-     * </pre>
-     *
-     * <code>optional double radians = 1;</code>
-     * @return this
-     */
-    public Rotation2d clearRadians() {
-      bitField0_ &= ~0x00000001;
-      radians = 0D;
-      return this;
-    }
+        private Rotation2d() {
+        }
 
-    /**
-     * <pre>
-     *  Rotation angle in radians
-     * </pre>
-     *
-     * <code>optional double radians = 1;</code>
-     * @return the radians
-     */
-    public double getRadians() {
-      return radians;
-    }
+        /**
+         * <pre>
+         *  Rotation2d represents a 2D rotation
+         *  This mirrors WPILib's Rotation2d class
+         * </pre>
+         *
+         * @return a new empty instance of {@code Rotation2d}
+         */
+        public static Rotation2d newInstance() {
+            return new Rotation2d();
+        }
 
-    /**
-     * <pre>
-     *  Rotation angle in radians
-     * </pre>
-     *
-     * <code>optional double radians = 1;</code>
-     * @param value the radians to set
-     * @return this
-     */
-    public Rotation2d setRadians(final double value) {
-      bitField0_ |= 0x00000001;
-      radians = value;
-      return this;
-    }
+        /**
+         * <pre>
+         *  Rotation angle in radians
+         * </pre>
+         *
+         * <code>optional double radians = 1;</code>
+         * @return whether the radians field is set
+         */
+        public boolean hasRadians() {
+            return (bitField0_ & 0x00000001) != 0;
+        }
 
-    @Override
-    public Rotation2d copyFrom(final Rotation2d other) {
-      cachedSize = other.cachedSize;
-      if ((bitField0_ | other.bitField0_) != 0) {
-        bitField0_ = other.bitField0_;
-        radians = other.radians;
-      }
-      return this;
-    }
-
-    @Override
-    public Rotation2d mergeFrom(final Rotation2d other) {
-      if (other.isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      if (other.hasRadians()) {
-        setRadians(other.radians);
-      }
-      return this;
-    }
-
-    @Override
-    public Rotation2d clear() {
-      if (isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      bitField0_ = 0;
-      radians = 0D;
-      return this;
-    }
-
-    @Override
-    public Rotation2d clearQuick() {
-      if (isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      bitField0_ = 0;
-      return this;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (o == this) {
-        return true;
-      }
-      if (!(o instanceof Rotation2d)) {
-        return false;
-      }
-      Rotation2d other = (Rotation2d) o;
-      return bitField0_ == other.bitField0_
-        && (!hasRadians() || ProtoUtil.isEqual(radians, other.radians));
-    }
-
-    @Override
-    public void writeTo(final ProtoSink output) throws IOException {
-      if ((bitField0_ & 0x00000001) != 0) {
-        output.writeRawByte((byte) 9);
-        output.writeDoubleNoTag(radians);
-      }
-    }
-
-    @Override
-    protected int computeSerializedSize() {
-      int size = 0;
-      if ((bitField0_ & 0x00000001) != 0) {
-        size += 9;
-      }
-      return size;
-    }
-
-    @Override
-    @SuppressWarnings("fallthrough")
-    public Rotation2d mergeFrom(final ProtoSource input) throws IOException {
-      // Enabled Fall-Through Optimization (QuickBuffers)
-      int tag = input.readTag();
-      while (true) {
-        switch (tag) {
-          case 9: {
-            // radians
-            radians = input.readDouble();
-            bitField0_ |= 0x00000001;
-            tag = input.readTag();
-            if (tag != 0) {
-              break;
-            }
-          }
-          case 0: {
+        /**
+         * <pre>
+         *  Rotation angle in radians
+         * </pre>
+         *
+         * <code>optional double radians = 1;</code>
+         * @return this
+         */
+        public Rotation2d clearRadians() {
+            bitField0_ &= ~0x00000001;
+            radians = 0D;
             return this;
-          }
-          default: {
-            if (!input.skipField(tag)) {
-              return this;
-            }
-            tag = input.readTag();
-            break;
-          }
         }
-      }
-    }
 
-    @Override
-    public void writeTo(final JsonSink output) throws IOException {
-      output.beginObject();
-      if ((bitField0_ & 0x00000001) != 0) {
-        output.writeDouble(FieldNames.radians, radians);
-      }
-      output.endObject();
-    }
-
-    @Override
-    public Rotation2d mergeFrom(final JsonSource input) throws IOException {
-      if (!input.beginObject()) {
-        return this;
-      }
-      while (!input.isAtEnd()) {
-        switch (input.readFieldHash()) {
-          case 968809074: {
-            if (input.isAtField(FieldNames.radians)) {
-              if (!input.trySkipNullValue()) {
-                radians = input.readDouble();
-                bitField0_ |= 0x00000001;
-              }
-            } else {
-              input.skipUnknownField();
-            }
-            break;
-          }
-          default: {
-            input.skipUnknownField();
-            break;
-          }
+        /**
+         * <pre>
+         *  Rotation angle in radians
+         * </pre>
+         *
+         * <code>optional double radians = 1;</code>
+         * @return the radians
+         */
+        public double getRadians() {
+            return radians;
         }
-      }
-      input.endObject();
-      return this;
-    }
 
-    @Override
-    public Rotation2d clone() {
-      return new Rotation2d().copyFrom(this);
-    }
+        /**
+         * <pre>
+         *  Rotation angle in radians
+         * </pre>
+         *
+         * <code>optional double radians = 1;</code>
+         * @param value the radians to set
+         * @return this
+         */
+        public Rotation2d setRadians(final double value) {
+            bitField0_ |= 0x00000001;
+            radians = value;
+            return this;
+        }
 
-    @Override
-    public boolean isEmpty() {
-      return ((bitField0_) == 0);
-    }
+        @Override
+        public Rotation2d copyFrom(final Rotation2d other) {
+            cachedSize = other.cachedSize;
+            if ((bitField0_ | other.bitField0_) != 0) {
+                bitField0_ = other.bitField0_;
+                radians = other.radians;
+            }
+            return this;
+        }
 
-    public static Rotation2d parseFrom(final byte[] data) throws InvalidProtocolBufferException {
-      return ProtoMessage.mergeFrom(new Rotation2d(), data).checkInitialized();
-    }
+        @Override
+        public Rotation2d mergeFrom(final Rotation2d other) {
+            if (other.isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            if (other.hasRadians()) {
+                setRadians(other.radians);
+            }
+            return this;
+        }
 
-    public static Rotation2d parseFrom(final ProtoSource input) throws IOException {
-      return ProtoMessage.mergeFrom(new Rotation2d(), input).checkInitialized();
-    }
+        @Override
+        public Rotation2d clear() {
+            if (isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            bitField0_ = 0;
+            radians = 0D;
+            return this;
+        }
 
-    public static Rotation2d parseFrom(final JsonSource input) throws IOException {
-      return ProtoMessage.mergeFrom(new Rotation2d(), input).checkInitialized();
-    }
+        @Override
+        public Rotation2d clearQuick() {
+            if (isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            bitField0_ = 0;
+            return this;
+        }
 
-    /**
-     * @return factory for creating Rotation2d messages
-     */
-    public static MessageFactory<Rotation2d> getFactory() {
-      return Rotation2dFactory.INSTANCE;
-    }
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+            if (!(o instanceof Rotation2d)) {
+                return false;
+            }
+            Rotation2d other = (Rotation2d) o;
+            return bitField0_ == other.bitField0_
+                && (!hasRadians() || ProtoUtil.isEqual(radians, other.radians));
+        }
 
-    private enum Rotation2dFactory implements MessageFactory<Rotation2d> {
-      INSTANCE;
+        @Override
+        public void writeTo(final ProtoSink output) throws IOException {
+            if ((bitField0_ & 0x00000001) != 0) {
+                output.writeRawByte((byte) 9);
+                output.writeDoubleNoTag(radians);
+            }
+        }
 
-      @Override
-      public Rotation2d create() {
-        return Rotation2d.newInstance();
-      }
-    }
+        @Override
+        protected int computeSerializedSize() {
+            int size = 0;
+            if ((bitField0_ & 0x00000001) != 0) {
+                size += 9;
+            }
+            return size;
+        }
 
-    /**
-     * Contains name constants used for serializing JSON
-     */
-    static class FieldNames {
-      static final FieldName radians = FieldName.forField("radians");
-    }
-  }
+        @Override
+        @SuppressWarnings("fallthrough")
+        public Rotation2d mergeFrom(final ProtoSource input) throws IOException {
+            // Enabled Fall-Through Optimization (QuickBuffers)
+            int tag = input.readTag();
+            while (true) {
+                switch (tag) {
+                    case 9: {
+                        // radians
+                        radians = input.readDouble();
+                        bitField0_ |= 0x00000001;
+                        tag = input.readTag();
+                        if (tag != 0) {
+                            break;
+                        }
+                    }
+                    case 0: {
+                        return this;
+                    }
+                    default: {
+                        if (!input.skipField(tag)) {
+                            return this;
+                        }
+                        tag = input.readTag();
+                        break;
+                    }
+                }
+            }
+        }
 
-  /**
-   * <pre>
-   *  Pose2d represents a 2D pose (position + orientation)
-   *  This mirrors WPILib's Pose2d class which combines Translation2d and Rotation2d
-   * </pre>
-   *
-   * Protobuf type {@code Pose2d}
-   */
-  public static final class Pose2d extends ProtoMessage<Pose2d> implements Cloneable {
-    private static final long serialVersionUID = 0L;
+        @Override
+        public void writeTo(final JsonSink output) throws IOException {
+            output.beginObject();
+            if ((bitField0_ & 0x00000001) != 0) {
+                output.writeDouble(FieldNames.radians, radians);
+            }
+            output.endObject();
+        }
 
-    /**
-     * <pre>
-     *  The translation component (x, y position)
-     * </pre>
-     *
-     * <code>optional .questnav.protos.geometry.Translation2d translation = 1;</code>
-     */
-    private final Translation2d translation = Translation2d.newInstance();
+        @Override
+        public Rotation2d mergeFrom(final JsonSource input) throws IOException {
+            if (!input.beginObject()) {
+                return this;
+            }
+            while (!input.isAtEnd()) {
+                switch (input.readFieldHash()) {
+                    case 968809074: {
+                        if (input.isAtField(FieldNames.radians)) {
+                            if (!input.trySkipNullValue()) {
+                                radians = input.readDouble();
+                                bitField0_ |= 0x00000001;
+                            }
+                        } else {
+                            input.skipUnknownField();
+                        }
+                        break;
+                    }
+                    default: {
+                        input.skipUnknownField();
+                        break;
+                    }
+                }
+            }
+            input.endObject();
+            return this;
+        }
 
-    /**
-     * <pre>
-     *  The rotation component (orientation)
-     * </pre>
-     *
-     * <code>optional .questnav.protos.geometry.Rotation2d rotation = 2;</code>
-     */
-    private final Rotation2d rotation = Rotation2d.newInstance();
+        @Override
+        public Rotation2d clone() {
+            return new Rotation2d().copyFrom(this);
+        }
 
-    private Pose2d() {
+        @Override
+        public boolean isEmpty() {
+            return ((bitField0_) == 0);
+        }
+
+        public static Rotation2d parseFrom(final byte[] data) throws
+                InvalidProtocolBufferException {
+            return ProtoMessage.mergeFrom(new Rotation2d(), data).checkInitialized();
+        }
+
+        public static Rotation2d parseFrom(final ProtoSource input) throws IOException {
+            return ProtoMessage.mergeFrom(new Rotation2d(), input).checkInitialized();
+        }
+
+        public static Rotation2d parseFrom(final JsonSource input) throws IOException {
+            return ProtoMessage.mergeFrom(new Rotation2d(), input).checkInitialized();
+        }
+
+        /**
+         * @return factory for creating Rotation2d messages
+         */
+        public static MessageFactory<Rotation2d> getFactory() {
+            return Rotation2dFactory.INSTANCE;
+        }
+
+        /**
+         * @return this type's descriptor.
+         */
+        public static Descriptors.Descriptor getDescriptor() {
+            return Geometry.questnav_protos_geometry_Rotation2d_descriptor;
+        }
+
+        private enum Rotation2dFactory implements MessageFactory<Rotation2d> {
+            INSTANCE;
+
+            @Override
+            public Rotation2d create() {
+                return Rotation2d.newInstance();
+            }
+        }
+
+        /**
+         * Contains name constants used for serializing JSON
+         */
+        static class FieldNames {
+            static final FieldName radians = FieldName.forField("radians");
+        }
     }
 
     /**
@@ -699,389 +724,428 @@ public final class Geometry {
      *  This mirrors WPILib's Pose2d class which combines Translation2d and Rotation2d
      * </pre>
      *
-     * @return a new empty instance of {@code Pose2d}
+     * Protobuf type {@code Pose2d}
      */
-    public static Pose2d newInstance() {
-      return new Pose2d();
-    }
+    public static final class Pose2d extends ProtoMessage<Pose2d> implements Cloneable {
+        private static final long serialVersionUID = 0L;
 
-    /**
-     * <pre>
-     *  The translation component (x, y position)
-     * </pre>
-     *
-     * <code>optional .questnav.protos.geometry.Translation2d translation = 1;</code>
-     * @return whether the translation field is set
-     */
-    public boolean hasTranslation() {
-      return (bitField0_ & 0x00000001) != 0;
-    }
+        /**
+         * <pre>
+         *  The translation component (x, y position)
+         * </pre>
+         *
+         * <code>optional .questnav.protos.geometry.Translation2d translation = 1;</code>
+         */
+        private final Translation2d translation = Translation2d.newInstance();
 
-    /**
-     * <pre>
-     *  The translation component (x, y position)
-     * </pre>
-     *
-     * <code>optional .questnav.protos.geometry.Translation2d translation = 1;</code>
-     * @return this
-     */
-    public Pose2d clearTranslation() {
-      bitField0_ &= ~0x00000001;
-      translation.clear();
-      return this;
-    }
+        /**
+         * <pre>
+         *  The rotation component (orientation)
+         * </pre>
+         *
+         * <code>optional .questnav.protos.geometry.Rotation2d rotation = 2;</code>
+         */
+        private final Rotation2d rotation = Rotation2d.newInstance();
 
-    /**
-     * <pre>
-     *  The translation component (x, y position)
-     * </pre>
-     *
-     * <code>optional .questnav.protos.geometry.Translation2d translation = 1;</code>
-     *
-     * This method returns the internal storage object without modifying any has state.
-     * The returned object should not be modified and be treated as read-only.
-     *
-     * Use {@link #getMutableTranslation()} if you want to modify it.
-     *
-     * @return internal storage object for reading
-     */
-    public Translation2d getTranslation() {
-      return translation;
-    }
+        private Pose2d() {
+        }
 
-    /**
-     * <pre>
-     *  The translation component (x, y position)
-     * </pre>
-     *
-     * <code>optional .questnav.protos.geometry.Translation2d translation = 1;</code>
-     *
-     * This method returns the internal storage object and sets the corresponding
-     * has state. The returned object will become part of this message and its
-     * contents may be modified as long as the has state is not cleared.
-     *
-     * @return internal storage object for modifications
-     */
-    public Translation2d getMutableTranslation() {
-      bitField0_ |= 0x00000001;
-      return translation;
-    }
+        /**
+         * <pre>
+         *  Pose2d represents a 2D pose (position + orientation)
+         *  This mirrors WPILib's Pose2d class which combines Translation2d and Rotation2d
+         * </pre>
+         *
+         * @return a new empty instance of {@code Pose2d}
+         */
+        public static Pose2d newInstance() {
+            return new Pose2d();
+        }
 
-    /**
-     * <pre>
-     *  The translation component (x, y position)
-     * </pre>
-     *
-     * <code>optional .questnav.protos.geometry.Translation2d translation = 1;</code>
-     * @param value the translation to set
-     * @return this
-     */
-    public Pose2d setTranslation(final Translation2d value) {
-      bitField0_ |= 0x00000001;
-      translation.copyFrom(value);
-      return this;
-    }
+        /**
+         * <pre>
+         *  The translation component (x, y position)
+         * </pre>
+         *
+         * <code>optional .questnav.protos.geometry.Translation2d translation = 1;</code>
+         * @return whether the translation field is set
+         */
+        public boolean hasTranslation() {
+            return (bitField0_ & 0x00000001) != 0;
+        }
 
-    /**
-     * <pre>
-     *  The rotation component (orientation)
-     * </pre>
-     *
-     * <code>optional .questnav.protos.geometry.Rotation2d rotation = 2;</code>
-     * @return whether the rotation field is set
-     */
-    public boolean hasRotation() {
-      return (bitField0_ & 0x00000002) != 0;
-    }
-
-    /**
-     * <pre>
-     *  The rotation component (orientation)
-     * </pre>
-     *
-     * <code>optional .questnav.protos.geometry.Rotation2d rotation = 2;</code>
-     * @return this
-     */
-    public Pose2d clearRotation() {
-      bitField0_ &= ~0x00000002;
-      rotation.clear();
-      return this;
-    }
-
-    /**
-     * <pre>
-     *  The rotation component (orientation)
-     * </pre>
-     *
-     * <code>optional .questnav.protos.geometry.Rotation2d rotation = 2;</code>
-     *
-     * This method returns the internal storage object without modifying any has state.
-     * The returned object should not be modified and be treated as read-only.
-     *
-     * Use {@link #getMutableRotation()} if you want to modify it.
-     *
-     * @return internal storage object for reading
-     */
-    public Rotation2d getRotation() {
-      return rotation;
-    }
-
-    /**
-     * <pre>
-     *  The rotation component (orientation)
-     * </pre>
-     *
-     * <code>optional .questnav.protos.geometry.Rotation2d rotation = 2;</code>
-     *
-     * This method returns the internal storage object and sets the corresponding
-     * has state. The returned object will become part of this message and its
-     * contents may be modified as long as the has state is not cleared.
-     *
-     * @return internal storage object for modifications
-     */
-    public Rotation2d getMutableRotation() {
-      bitField0_ |= 0x00000002;
-      return rotation;
-    }
-
-    /**
-     * <pre>
-     *  The rotation component (orientation)
-     * </pre>
-     *
-     * <code>optional .questnav.protos.geometry.Rotation2d rotation = 2;</code>
-     * @param value the rotation to set
-     * @return this
-     */
-    public Pose2d setRotation(final Rotation2d value) {
-      bitField0_ |= 0x00000002;
-      rotation.copyFrom(value);
-      return this;
-    }
-
-    @Override
-    public Pose2d copyFrom(final Pose2d other) {
-      cachedSize = other.cachedSize;
-      if ((bitField0_ | other.bitField0_) != 0) {
-        bitField0_ = other.bitField0_;
-        translation.copyFrom(other.translation);
-        rotation.copyFrom(other.rotation);
-      }
-      return this;
-    }
-
-    @Override
-    public Pose2d mergeFrom(final Pose2d other) {
-      if (other.isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      if (other.hasTranslation()) {
-        getMutableTranslation().mergeFrom(other.translation);
-      }
-      if (other.hasRotation()) {
-        getMutableRotation().mergeFrom(other.rotation);
-      }
-      return this;
-    }
-
-    @Override
-    public Pose2d clear() {
-      if (isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      bitField0_ = 0;
-      translation.clear();
-      rotation.clear();
-      return this;
-    }
-
-    @Override
-    public Pose2d clearQuick() {
-      if (isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      bitField0_ = 0;
-      translation.clearQuick();
-      rotation.clearQuick();
-      return this;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (o == this) {
-        return true;
-      }
-      if (!(o instanceof Pose2d)) {
-        return false;
-      }
-      Pose2d other = (Pose2d) o;
-      return bitField0_ == other.bitField0_
-        && (!hasTranslation() || translation.equals(other.translation))
-        && (!hasRotation() || rotation.equals(other.rotation));
-    }
-
-    @Override
-    public void writeTo(final ProtoSink output) throws IOException {
-      if ((bitField0_ & 0x00000001) != 0) {
-        output.writeRawByte((byte) 10);
-        output.writeMessageNoTag(translation);
-      }
-      if ((bitField0_ & 0x00000002) != 0) {
-        output.writeRawByte((byte) 18);
-        output.writeMessageNoTag(rotation);
-      }
-    }
-
-    @Override
-    protected int computeSerializedSize() {
-      int size = 0;
-      if ((bitField0_ & 0x00000001) != 0) {
-        size += 1 + ProtoSink.computeMessageSizeNoTag(translation);
-      }
-      if ((bitField0_ & 0x00000002) != 0) {
-        size += 1 + ProtoSink.computeMessageSizeNoTag(rotation);
-      }
-      return size;
-    }
-
-    @Override
-    @SuppressWarnings("fallthrough")
-    public Pose2d mergeFrom(final ProtoSource input) throws IOException {
-      // Enabled Fall-Through Optimization (QuickBuffers)
-      int tag = input.readTag();
-      while (true) {
-        switch (tag) {
-          case 10: {
-            // translation
-            input.readMessage(translation);
-            bitField0_ |= 0x00000001;
-            tag = input.readTag();
-            if (tag != 18) {
-              break;
-            }
-          }
-          case 18: {
-            // rotation
-            input.readMessage(rotation);
-            bitField0_ |= 0x00000002;
-            tag = input.readTag();
-            if (tag != 0) {
-              break;
-            }
-          }
-          case 0: {
+        /**
+         * <pre>
+         *  The translation component (x, y position)
+         * </pre>
+         *
+         * <code>optional .questnav.protos.geometry.Translation2d translation = 1;</code>
+         * @return this
+         */
+        public Pose2d clearTranslation() {
+            bitField0_ &= ~0x00000001;
+            translation.clear();
             return this;
-          }
-          default: {
-            if (!input.skipField(tag)) {
-              return this;
-            }
-            tag = input.readTag();
-            break;
-          }
         }
-      }
-    }
 
-    @Override
-    public void writeTo(final JsonSink output) throws IOException {
-      output.beginObject();
-      if ((bitField0_ & 0x00000001) != 0) {
-        output.writeMessage(FieldNames.translation, translation);
-      }
-      if ((bitField0_ & 0x00000002) != 0) {
-        output.writeMessage(FieldNames.rotation, rotation);
-      }
-      output.endObject();
-    }
-
-    @Override
-    public Pose2d mergeFrom(final JsonSource input) throws IOException {
-      if (!input.beginObject()) {
-        return this;
-      }
-      while (!input.isAtEnd()) {
-        switch (input.readFieldHash()) {
-          case -1840647503: {
-            if (input.isAtField(FieldNames.translation)) {
-              if (!input.trySkipNullValue()) {
-                input.readMessage(translation);
-                bitField0_ |= 0x00000001;
-              }
-            } else {
-              input.skipUnknownField();
-            }
-            break;
-          }
-          case -40300674: {
-            if (input.isAtField(FieldNames.rotation)) {
-              if (!input.trySkipNullValue()) {
-                input.readMessage(rotation);
-                bitField0_ |= 0x00000002;
-              }
-            } else {
-              input.skipUnknownField();
-            }
-            break;
-          }
-          default: {
-            input.skipUnknownField();
-            break;
-          }
+        /**
+         * <pre>
+         *  The translation component (x, y position)
+         * </pre>
+         *
+         * <code>optional .questnav.protos.geometry.Translation2d translation = 1;</code>
+         *
+         * This method returns the internal storage object without modifying any has state.
+         * The returned object should not be modified and be treated as read-only.
+         *
+         * Use {@link #getMutableTranslation()} if you want to modify it.
+         *
+         * @return internal storage object for reading
+         */
+        public Translation2d getTranslation() {
+            return translation;
         }
-      }
-      input.endObject();
-      return this;
+
+        /**
+         * <pre>
+         *  The translation component (x, y position)
+         * </pre>
+         *
+         * <code>optional .questnav.protos.geometry.Translation2d translation = 1;</code>
+         *
+         * This method returns the internal storage object and sets the corresponding
+         * has state. The returned object will become part of this message and its
+         * contents may be modified as long as the has state is not cleared.
+         *
+         * @return internal storage object for modifications
+         */
+        public Translation2d getMutableTranslation() {
+            bitField0_ |= 0x00000001;
+            return translation;
+        }
+
+        /**
+         * <pre>
+         *  The translation component (x, y position)
+         * </pre>
+         *
+         * <code>optional .questnav.protos.geometry.Translation2d translation = 1;</code>
+         * @param value the translation to set
+         * @return this
+         */
+        public Pose2d setTranslation(final Translation2d value) {
+            bitField0_ |= 0x00000001;
+            translation.copyFrom(value);
+            return this;
+        }
+
+        /**
+         * <pre>
+         *  The rotation component (orientation)
+         * </pre>
+         *
+         * <code>optional .questnav.protos.geometry.Rotation2d rotation = 2;</code>
+         * @return whether the rotation field is set
+         */
+        public boolean hasRotation() {
+            return (bitField0_ & 0x00000002) != 0;
+        }
+
+        /**
+         * <pre>
+         *  The rotation component (orientation)
+         * </pre>
+         *
+         * <code>optional .questnav.protos.geometry.Rotation2d rotation = 2;</code>
+         * @return this
+         */
+        public Pose2d clearRotation() {
+            bitField0_ &= ~0x00000002;
+            rotation.clear();
+            return this;
+        }
+
+        /**
+         * <pre>
+         *  The rotation component (orientation)
+         * </pre>
+         *
+         * <code>optional .questnav.protos.geometry.Rotation2d rotation = 2;</code>
+         *
+         * This method returns the internal storage object without modifying any has state.
+         * The returned object should not be modified and be treated as read-only.
+         *
+         * Use {@link #getMutableRotation()} if you want to modify it.
+         *
+         * @return internal storage object for reading
+         */
+        public Rotation2d getRotation() {
+            return rotation;
+        }
+
+        /**
+         * <pre>
+         *  The rotation component (orientation)
+         * </pre>
+         *
+         * <code>optional .questnav.protos.geometry.Rotation2d rotation = 2;</code>
+         *
+         * This method returns the internal storage object and sets the corresponding
+         * has state. The returned object will become part of this message and its
+         * contents may be modified as long as the has state is not cleared.
+         *
+         * @return internal storage object for modifications
+         */
+        public Rotation2d getMutableRotation() {
+            bitField0_ |= 0x00000002;
+            return rotation;
+        }
+
+        /**
+         * <pre>
+         *  The rotation component (orientation)
+         * </pre>
+         *
+         * <code>optional .questnav.protos.geometry.Rotation2d rotation = 2;</code>
+         * @param value the rotation to set
+         * @return this
+         */
+        public Pose2d setRotation(final Rotation2d value) {
+            bitField0_ |= 0x00000002;
+            rotation.copyFrom(value);
+            return this;
+        }
+
+        @Override
+        public Pose2d copyFrom(final Pose2d other) {
+            cachedSize = other.cachedSize;
+            if ((bitField0_ | other.bitField0_) != 0) {
+                bitField0_ = other.bitField0_;
+                translation.copyFrom(other.translation);
+                rotation.copyFrom(other.rotation);
+            }
+            return this;
+        }
+
+        @Override
+        public Pose2d mergeFrom(final Pose2d other) {
+            if (other.isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            if (other.hasTranslation()) {
+                getMutableTranslation().mergeFrom(other.translation);
+            }
+            if (other.hasRotation()) {
+                getMutableRotation().mergeFrom(other.rotation);
+            }
+            return this;
+        }
+
+        @Override
+        public Pose2d clear() {
+            if (isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            bitField0_ = 0;
+            translation.clear();
+            rotation.clear();
+            return this;
+        }
+
+        @Override
+        public Pose2d clearQuick() {
+            if (isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            bitField0_ = 0;
+            translation.clearQuick();
+            rotation.clearQuick();
+            return this;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+            if (!(o instanceof Pose2d)) {
+                return false;
+            }
+            Pose2d other = (Pose2d) o;
+            return bitField0_ == other.bitField0_
+                && (!hasTranslation() || translation.equals(other.translation))
+                && (!hasRotation() || rotation.equals(other.rotation));
+        }
+
+        @Override
+        public void writeTo(final ProtoSink output) throws IOException {
+            if ((bitField0_ & 0x00000001) != 0) {
+                output.writeRawByte((byte) 10);
+                output.writeMessageNoTag(translation);
+            }
+            if ((bitField0_ & 0x00000002) != 0) {
+                output.writeRawByte((byte) 18);
+                output.writeMessageNoTag(rotation);
+            }
+        }
+
+        @Override
+        protected int computeSerializedSize() {
+            int size = 0;
+            if ((bitField0_ & 0x00000001) != 0) {
+                size += 1 + ProtoSink.computeMessageSizeNoTag(translation);
+            }
+            if ((bitField0_ & 0x00000002) != 0) {
+                size += 1 + ProtoSink.computeMessageSizeNoTag(rotation);
+            }
+            return size;
+        }
+
+        @Override
+        @SuppressWarnings("fallthrough")
+        public Pose2d mergeFrom(final ProtoSource input) throws IOException {
+            // Enabled Fall-Through Optimization (QuickBuffers)
+            int tag = input.readTag();
+            while (true) {
+                switch (tag) {
+                    case 10: {
+                        // translation
+                        input.readMessage(translation);
+                        bitField0_ |= 0x00000001;
+                        tag = input.readTag();
+                        if (tag != 18) {
+                            break;
+                        }
+                    }
+                    case 18: {
+                        // rotation
+                        input.readMessage(rotation);
+                        bitField0_ |= 0x00000002;
+                        tag = input.readTag();
+                        if (tag != 0) {
+                            break;
+                        }
+                    }
+                    case 0: {
+                        return this;
+                    }
+                    default: {
+                        if (!input.skipField(tag)) {
+                            return this;
+                        }
+                        tag = input.readTag();
+                        break;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void writeTo(final JsonSink output) throws IOException {
+            output.beginObject();
+            if ((bitField0_ & 0x00000001) != 0) {
+                output.writeMessage(FieldNames.translation, translation);
+            }
+            if ((bitField0_ & 0x00000002) != 0) {
+                output.writeMessage(FieldNames.rotation, rotation);
+            }
+            output.endObject();
+        }
+
+        @Override
+        public Pose2d mergeFrom(final JsonSource input) throws IOException {
+            if (!input.beginObject()) {
+                return this;
+            }
+            while (!input.isAtEnd()) {
+                switch (input.readFieldHash()) {
+                    case -1840647503: {
+                        if (input.isAtField(FieldNames.translation)) {
+                            if (!input.trySkipNullValue()) {
+                                input.readMessage(translation);
+                                bitField0_ |= 0x00000001;
+                            }
+                        } else {
+                            input.skipUnknownField();
+                        }
+                        break;
+                    }
+                    case -40300674: {
+                        if (input.isAtField(FieldNames.rotation)) {
+                            if (!input.trySkipNullValue()) {
+                                input.readMessage(rotation);
+                                bitField0_ |= 0x00000002;
+                            }
+                        } else {
+                            input.skipUnknownField();
+                        }
+                        break;
+                    }
+                    default: {
+                        input.skipUnknownField();
+                        break;
+                    }
+                }
+            }
+            input.endObject();
+            return this;
+        }
+
+        @Override
+        public Pose2d clone() {
+            return new Pose2d().copyFrom(this);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return ((bitField0_) == 0);
+        }
+
+        public static Pose2d parseFrom(final byte[] data) throws InvalidProtocolBufferException {
+            return ProtoMessage.mergeFrom(new Pose2d(), data).checkInitialized();
+        }
+
+        public static Pose2d parseFrom(final ProtoSource input) throws IOException {
+            return ProtoMessage.mergeFrom(new Pose2d(), input).checkInitialized();
+        }
+
+        public static Pose2d parseFrom(final JsonSource input) throws IOException {
+            return ProtoMessage.mergeFrom(new Pose2d(), input).checkInitialized();
+        }
+
+        /**
+         * @return factory for creating Pose2d messages
+         */
+        public static MessageFactory<Pose2d> getFactory() {
+            return Pose2dFactory.INSTANCE;
+        }
+
+        /**
+         * @return this type's descriptor.
+         */
+        public static Descriptors.Descriptor getDescriptor() {
+            return Geometry.questnav_protos_geometry_Pose2d_descriptor;
+        }
+
+        private enum Pose2dFactory implements MessageFactory<Pose2d> {
+            INSTANCE;
+
+            @Override
+            public Pose2d create() {
+                return Pose2d.newInstance();
+            }
+        }
+
+        /**
+         * Contains name constants used for serializing JSON
+         */
+        static class FieldNames {
+            static final FieldName translation = FieldName.forField("translation");
+
+            static final FieldName rotation = FieldName.forField("rotation");
+        }
     }
-
-    @Override
-    public Pose2d clone() {
-      return new Pose2d().copyFrom(this);
-    }
-
-    @Override
-    public boolean isEmpty() {
-      return ((bitField0_) == 0);
-    }
-
-    public static Pose2d parseFrom(final byte[] data) throws InvalidProtocolBufferException {
-      return ProtoMessage.mergeFrom(new Pose2d(), data).checkInitialized();
-    }
-
-    public static Pose2d parseFrom(final ProtoSource input) throws IOException {
-      return ProtoMessage.mergeFrom(new Pose2d(), input).checkInitialized();
-    }
-
-    public static Pose2d parseFrom(final JsonSource input) throws IOException {
-      return ProtoMessage.mergeFrom(new Pose2d(), input).checkInitialized();
-    }
-
-    /**
-     * @return factory for creating Pose2d messages
-     */
-    public static MessageFactory<Pose2d> getFactory() {
-      return Pose2dFactory.INSTANCE;
-    }
-
-    private enum Pose2dFactory implements MessageFactory<Pose2d> {
-      INSTANCE;
-
-      @Override
-      public Pose2d create() {
-        return Pose2d.newInstance();
-      }
-    }
-
-    /**
-     * Contains name constants used for serializing JSON
-     */
-    static class FieldNames {
-      static final FieldName translation = FieldName.forField("translation");
-
-      static final FieldName rotation = FieldName.forField("rotation");
-    }
-  }
 }

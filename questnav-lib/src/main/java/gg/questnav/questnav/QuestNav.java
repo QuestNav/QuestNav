@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.*;
+import edu.wpi.first.util.protobuf.Protobuf;
 import edu.wpi.first.wpilibj.Timer;
 import gg.questnav.questnav.protos.Commands;
 
@@ -25,7 +26,7 @@ public class QuestNav {
     NetworkTable nt4Table = nt4Instance.getTable("questnav");
 
     /** Subscriber for command response */
-    private final ProtobufSubscriber<Commands.CommandResponse> response = nt4Table.getProtobufTopic("response", Commands.CommandResponse.getDescriptor()).subscribe(-1);
+    private final ProtobufSubscriber<Commands.CommandResponse> response = nt4Table.getProtobufTopic("response", Commands.).subscribe(-1);
 
     /** Publisher for command requests */
     private final ProtobufPublisher<Commands.Command> request = nt4Table.getIntegerTopic("request").publish();

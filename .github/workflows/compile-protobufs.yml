@@ -1,10 +1,10 @@
 name: Compile Protocol Buffers
 on:
   push:
-#    paths:
-#      - 'protos'
-#      - 'questnav-lib/src/main/java/gg/questnav/questnav/protos'
-#      - 'unity/Assets/QuestNav/Protos'
+    paths:
+      - 'protos'
+      - 'questnav-lib/src/main/java/gg/questnav/questnav/protos/generated'
+      - 'unity/Assets/QuestNav/Protos/Generated'
   workflow_dispatch:
 jobs:
   compile-protobufs:
@@ -40,7 +40,7 @@ jobs:
         run: chmod +x ${{ steps.download-quickbuf.outputs.file }}
 
       - name: Generate C# protobuf
-        run: protoc -I="protos" --csharp_out=unity/Assets/QuestNav/Protos protos/*.proto
+        run: protoc -I="protos" --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/*.proto
 
       - name: Generate Java QuickBuffers
         run: |
@@ -54,4 +54,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'ci: Generated Protocol Buffers'
-          file_pattern: 'unity/Assets/QuestNav/Protos/*.cs questnav-lib/src/main/java/gg/questnav/questnav/protos/*.java'
+          file_pattern: 'unity/Assets/QuestNav/Protos/Generated/*.cs questnav-lib/src/main/java/gg/questnav/questnav/protos/generated/*.java'

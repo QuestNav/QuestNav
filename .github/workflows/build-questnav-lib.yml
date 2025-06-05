@@ -3,69 +3,35 @@ name: Build QuestNavLib
 on:
   workflow_call:
     inputs:
-      version:
-        description: 'Base version (e.g., 2025-1.0.0)'
+      versionYear:
+        description: 'Current FRC Year'
         required: true
-        type: string
-      release_type:
-        description: 'Release type (dev, beta, rc, release)'
+        default: 2025
+        type: number
+      versionMajor:
+        description: 'Major version'
         required: true
-        type: string
-      frc_year:
-        description: 'FRC Year'
+        default: 1
+        type: number
+      versionMinor:
+        description: 'Minor version'
         required: true
-        type: string
-      wpilib_version:
-        description: 'WPILib Version'
+        default: 0
+        type: number
+      versionPatch:
+        description: 'Patch version'
         required: true
-        type: string
-      publish_to_maven:
-        description: 'Publish to Maven Repository'
-        required: true
-        type: boolean
-    secrets:
-      MAVEN_REPO_URL:
-        required: false
-      MAVEN_USERNAME:
-        required: false
-      MAVEN_PASSWORD:
-        required: false
-      DISCORD_WEBHOOK_URL:
-        required: false
-
-  # Allow manual testing of library builds
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Base version (e.g., 2025-1.0.0)'
-        required: true
-        type: string
-        default: '2025-1.0.0'
-      release_type:
-        description: 'Release type'
-        required: true
-        type: choice
-        options:
-          - dev
-          - beta
-          - rc
-          - release
-        default: 'dev'
-      frc_year:
-        description: 'FRC Year'
-        required: true
-        type: string
-        default: '2025'
-      wpilib_version:
-        description: 'WPILib Version'
+        default: 0
+        type: number
+      wpilibVersion:
+        description: 'WPILib version to compile for'
         required: true
         type: string
         default: '2025.3.2'
-      publish_to_maven:
-        description: 'Publish to Maven Repository'
-        required: true
-        type: boolean
-        default: false
+      versionType:
+        description: 'Type of version'
+        required: false
+        type: string
 
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
@@ -75,8 +41,8 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      final_version: ${{ steps.version.outputs.final_version }}
-      artifact_name: ${{ steps.version.outputs.artifact_name }}
+      jar-artifact-name: ${{ steps.upload.outputs.artifact-id }}
+      jar-filename: ${{ steps.buildJava.outputs.buildVersion }}
 
     steps:
       - name: Checkout Repository
@@ -93,34 +59,13 @@ jobs:
         with:
           gradle-version: '8.11'
 
-      - name: Calculate Final Version
-        id: version
-        run: |
-          BASE_VERSION="${{ inputs.version }}"
-          RELEASE_TYPE="${{ inputs.release_type }}"
-          
-          if [ "$RELEASE_TYPE" = "release" ]; then
-            FINAL_VERSION="$BASE_VERSION"
-          else
-            FINAL_VERSION="$BASE_VERSION-$RELEASE_TYPE"
-          fi
-          
-          echo "final_version=$FINAL_VERSION" >> $GITHUB_OUTPUT
-          echo "artifact_name=questnavlib-$FINAL_VERSION" >> $GITHUB_OUTPUT
-          echo "is_snapshot=$([[ $RELEASE_TYPE == "dev" ]] && echo "true" || echo "false")" >> $GITHUB_OUTPUT
-          echo "repo_type=$([[ $RELEASE_TYPE == "dev" ]] && echo "snapshots" || echo "release")" >> $GITHUB_OUTPUT
-          
-          echo "📦 Building QuestNavLib version: $FINAL_VERSION"
-          echo "📂 Repository type: $([[ $RELEASE_TYPE == "dev" ]] && echo "snapshots" || echo "release")"
-
       - name: Display Build Configuration
         run: |
-          echo "🔍 QuestNavLib Build Configuration:"
           ./gradlew buildInfo \
-            -PquestnavVersion="${{ inputs.version }}" \
-            -PreleaseType="${{ inputs.release_type }}" \
-            -PfrcYear="${{ inputs.frc_year }}" \
-            -PwpilibVersion="${{ inputs.wpilib_version }}"
+            -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
+            -PreleaseType="${{ inputs.versionType }}" \
+            -PfrcYear="${{ inputs.versionYear }}" \
+            -PwpilibVersion="${{ inputs.wpilibVersion }}"
 
       - name: Cache Gradle Dependencies
         uses: actions/cache@v4
@@ -134,107 +79,39 @@ jobs:
 
       - name: Build Library
         run: |
-          echo "🔨 Building QuestNavLib..."
           ./gradlew build \
-            -PquestnavVersion="${{ inputs.version }}" \
-            -PreleaseType="${{ inputs.release_type }}" \
-            -PfrcYear="${{ inputs.frc_year }}" \
-            -PwpilibVersion="${{ inputs.wpilib_version }}"
+            -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
+            -PreleaseType="${{ inputs.versionType }}" \
+            -PfrcYear="${{ inputs.versionYear }}" \
+            -PwpilibVersion="${{ inputs.wpilibVersion }}"
 
       - name: Generate Vendor JSON
         run: |
-          echo "📄 Generating vendor dependency JSON..."
           ./gradlew generateVendorJson \
-            -PquestnavVersion="${{ inputs.version }}" \
-            -PreleaseType="${{ inputs.release_type }}" \
-            -PfrcYear="${{ inputs.frc_year }}" \
-            -PwpilibVersion="${{ inputs.wpilib_version }}"
+            -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
+            -PreleaseType="${{ inputs.versionType }}" \
+            -PfrcYear="${{ inputs.versionYear }}" \
+            -PwpilibVersion="${{ inputs.wpilibVersion }}"
 
       - name: Prepare Artifacts
         run: |
-          echo "📦 Preparing QuestNavLib artifacts..."
           ./gradlew copyVendorJsonLocal \
-            -PquestnavVersion="${{ inputs.version }}" \
-            -PreleaseType="${{ inputs.release_type }}" \
-            -PfrcYear="${{ inputs.frc_year }}" \
-            -PwpilibVersion="${{ inputs.wpilib_version }}"
+            -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
+            -PreleaseType="${{ inputs.versionType }}" \
+            -PfrcYear="${{ inputs.versionYear }}" \
+            -PwpilibVersion="${{ inputs.wpilibVersion }}"
           
           # Create artifacts directory
           mkdir -p artifacts
           
           # Copy vendor JSON with versioned filename
-          cp build/generated/vendordeps/questnavlib.json artifacts/questnavlib-${{ steps.version.outputs.final_version }}.json
+          cp build/generated/vendordeps/questnavlib.json artifacts/questnavlib-${{ inputs.versionYear }}-${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}${{ inputs.versionType && format('-{0}', inputs.versionType) || '' }}.json
           cp build/generated/vendordeps/questnavlib.json artifacts/questnavlib.json
-          
-          # Copy additional outputs
-          cp -r build/outputs/vendordeps/* artifacts/ 2>/dev/null || true
-          
-          echo "📋 QuestNavLib artifacts:"
-          ls -la artifacts/
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.version.outputs.artifact_name }}
+          name: ${{ inputs.versionYear }}-${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}${{ inputs.versionType && format('-{0}', inputs.versionType) || '' }}
           path: artifacts/
-          retention-days: 30
+          retention-days: 7
 
-      - name: Publish to Maven Repository
-        if: ${{ inputs.publish_to_maven == true && secrets.MAVEN_REPO_URL != '' }}
-        run: |
-          echo "🚀 Publishing QuestNavLib to Maven repository..."
-          ./gradlew publish \
-            -PquestnavVersion="${{ inputs.version }}" \
-            -PreleaseType="${{ inputs.release_type }}" \
-            -PfrcYear="${{ inputs.frc_year }}" \
-            -PwpilibVersion="${{ inputs.wpilib_version }}" \
-            -PmavenRepoUrl="${{ secrets.MAVEN_REPO_URL }}" \
-            -PmavenUsername="${{ secrets.MAVEN_USERNAME }}" \
-            -PmavenPassword="${{ secrets.MAVEN_PASSWORD }}"
-        env:
-          MAVEN_REPO_URL: ${{ secrets.MAVEN_REPO_URL }}
-          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
-
-      - name: Verify Publication
-        if: ${{ inputs.publish_to_maven == true && secrets.MAVEN_REPO_URL != '' }}
-        run: |
-          echo "✅ QuestNavLib published successfully!"
-          echo "📦 Version: ${{ steps.version.outputs.final_version }}"
-          echo "🔗 Vendor JSON URL:"
-          echo "https://maven.questnav.gg/repository/${{ steps.version.outputs.repo_type }}/gg/questnav/questnavlib-json/${{ steps.version.outputs.final_version }}/questnavlib-json-${{ steps.version.outputs.final_version }}.json"
-
-      - name: Send Discord Notification (Success)
-        if: success() && secrets.DISCORD_WEBHOOK_URL != ''
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        with:
-          args: |
-            ✅ **QuestNavLib Build Successful!**
-            
-            **Version:** `${{ steps.version.outputs.final_version }}`
-            **FRC Year:** `${{ inputs.frc_year }}`
-            **WPILib:** `${{ inputs.wpilib_version }}`
-            
-            ${{ inputs.publish_to_maven == true && '📦 Published to Maven ✅' || '📦 Build only (no publish)' }}
-            
-            **Vendor JSON URL:**
-            ```
-            https://maven.questnav.gg/repository/${{ steps.version.outputs.repo_type }}/gg/questnav/questnavlib-json/${{ steps.version.outputs.final_version }}/questnavlib-json-${{ steps.version.outputs.final_version }}.json
-            ```
-
-      - name: Send Discord Notification (Failure)
-        if: failure() && secrets.DISCORD_WEBHOOK_URL != ''
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        with:
-          args: |
-            ❌ **QuestNavLib Build Failed!**
-            
-            **Version:** `${{ steps.version.outputs.final_version }}`
-            **Job:** `${{ github.job }}`
-            **Workflow:** `${{ github.workflow }}`
-            
-            Check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.

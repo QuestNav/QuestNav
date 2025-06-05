@@ -1,282 +1,88 @@
 name: Build QuestNav App
-
 on:
   workflow_call:
     inputs:
-      version:
-        description: 'App version (e.g., 2025-1.0.0)'
+      versionYear:
+        description: 'Current FRC Year'
         required: true
-        type: string
-      release_type:
-        description: 'Release type (dev, beta, rc, release)'
+        default: 2025
+        type: number
+      versionMajor:
+        description: 'Major version'
         required: true
+        default: 1
+        type: number
+      versionMinor:
+        description: 'Minor version'
+        required: true
+        default: 0
+        type: number
+      versionPatch:
+        description: 'Patch version'
+        required: true
+        default: 0
+        type: number
+      versionType:
+        description: 'Type of version'
+        required: false
         type: string
     secrets:
-      DISCORD_WEBHOOK_URL:
-        required: false
-
-  # Allow manual testing of app builds
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'App version (e.g., 2025-1.0.0)'
+      UNITY_LICENSE:
+        description: 'Unity License'
         required: true
-        type: string
-        default: '2025-1.0.0'
-      release_type:
-        description: 'Release type'
+      UNITY_EMAIL:
+        description: 'Unity Email'
         required: true
-        type: choice
-        options:
-          - dev
-          - beta
-          - rc
-          - release
-        default: 'dev'
-
-env:
-  UNITY_VERSION: 6000.0.29f1  # Adjust to Unity version
-  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_PASSWORD:
+        description: 'Unity Password'
+        required: true
+    outputs:
+      apk-artifact-name:
+        description: "Name of the uploaded APK artifact"
+        value: ${{ jobs.unity.outputs.apk-artifact-name }}
+      apk-filename:
+        description: "Filename of the built APK"
+        value: ${{ jobs.unity.outputs.apk-filename }}
 
 jobs:
-  build-questnav-app:
+  unity:
     runs-on: ubuntu-latest
-
     outputs:
-      final_version: ${{ steps.version.outputs.final_version }}
-      artifact_name: ${{ steps.version.outputs.artifact_name }}
-
+      apk-artifact-name: ${{ steps.upload.outputs.artifact-id }}
+      apk-filename: ${{ steps.buildUnity.outputs.buildVersion }}.apk
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for version calculation
+          fetch-depth: '0'
+          lfs: true
 
-      - name: Calculate Final Version
-        id: version
-        run: |
-          BASE_VERSION="${{ inputs.version }}"
-          RELEASE_TYPE="${{ inputs.release_type }}"
-          
-          # Remove any existing suffix from base version for consistency
-          CLEAN_VERSION=$(echo "$BASE_VERSION" | sed 's/-[^-]*$//')
-          
-          if [ "$RELEASE_TYPE" = "release" ]; then
-            FINAL_VERSION="$CLEAN_VERSION"
-          else
-            FINAL_VERSION="$CLEAN_VERSION-$RELEASE_TYPE"
-          fi
-          
-          # Calculate version code (required for Android)
-          VERSION_CODE=$(date +'%Y%m%d%H')  # YYYYMMDDHH format
-          
-          echo "final_version=$FINAL_VERSION" >> $GITHUB_OUTPUT
-          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
-          echo "artifact_name=questnav-app-$FINAL_VERSION" >> $GITHUB_OUTPUT
-          
-          echo "📱 Building QuestNav App version: $FINAL_VERSION"
-          echo "🔢 Version code: $VERSION_CODE"
-          echo "🔧 Build type: Debug (always debug regardless of release type)"
+      - name: Setup Caching
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-Android
+          restore-keys: Library-
 
-      # Unity Build Steps (if using Unity)
-      - name: Set up Unity
-        if: hashFiles('**/ProjectSettings/ProjectVersion.txt') != ''
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@v1.3.1
+
+      - name: Build Unity Project for Android
         uses: game-ci/unity-builder@v4
+        id: buildUnity
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         with:
-          projectPath: .
           targetPlatform: Android
-          androidVersionCode: ${{ steps.version.outputs.version_code }}
-          # Always build debug regardless of release type
-          buildMethod: 'BuildScript.BuildAndroid'
-          customParameters: -quit -batchmode -nographics -development
+          versioning: Custom
+          version: ${{ inputs.versionYear }}.${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}${{ inputs.versionType && format('-{0}', inputs.versionType) || '' }}
 
-      # Android Gradle Build Steps (if using native Android)
-      - name: Set up JDK 17
-        if: hashFiles('**/build.gradle*') != '' || hashFiles('**/build.gradle.kts*') != ''
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup Android SDK
-        if: hashFiles('**/build.gradle*') != '' || hashFiles('**/build.gradle.kts*') != ''
-        uses: android-actions/setup-android@v3
-
-      - name: Cache Gradle Dependencies
-        if: hashFiles('**/build.gradle*') != '' || hashFiles('**/build.gradle.kts*') != ''
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-app-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-app-
-
-      - name: Update App Version
-        if: hashFiles('**/build.gradle*') != '' || hashFiles('**/build.gradle.kts*') != ''
-        run: |
-          echo "📝 Updating app version information..."
-          
-          # Update version name and code in build.gradle
-          if [ -f "app/build.gradle" ]; then
-            sed -i "s/versionName .*/versionName \"${{ steps.version.outputs.final_version }}\"/" app/build.gradle
-            sed -i "s/versionCode .*/versionCode ${{ steps.version.outputs.version_code }}/" app/build.gradle
-            echo "✅ Updated app/build.gradle"
-          fi
-          
-          # Update version in gradle.properties if present
-          if [ -f "gradle.properties" ]; then
-            sed -i "s/VERSION_NAME=.*/VERSION_NAME=${{ steps.version.outputs.final_version }}/" gradle.properties || true
-            sed -i "s/VERSION_CODE=.*/VERSION_CODE=${{ steps.version.outputs.version_code }}/" gradle.properties || true
-            echo "✅ Updated gradle.properties"
-          fi
-
-      - name: Build APK
-        if: hashFiles('**/build.gradle*') != '' || hashFiles('**/build.gradle.kts*') != ''
-        run: |
-          echo "🔨 Building APK..."
-          cd android/ 2>/dev/null || true  # Change to android dir if it exists
-          ./gradlew assembleDebug
-
-      - name: Prepare Artifacts
-        run: |
-          echo "📦 Preparing QuestNav App artifacts..."
-          mkdir -p artifacts
-          
-          # Find and copy APK files
-          if [ -d "android/" ]; then
-            find android/ -name "*.apk" -exec cp {} artifacts/ \;
-          fi
-          
-          # Look for Unity build outputs
-          if [ -d "Build/" ]; then
-            find Build/ -name "*.apk" -exec cp {} artifacts/ \;
-          fi
-          
-          # Look for APKs in current directory
-          find . -maxdepth 1 -name "*.apk" -exec cp {} artifacts/ \;
-          
-          # Rename main APK to standardized name
-          if [ -f "artifacts/app-debug.apk" ]; then
-            mv artifacts/app-debug.apk artifacts/questnav-${{ steps.version.outputs.final_version }}.apk
-          fi
-          
-          # Find the first APK and ensure we have a standardized name
-          FIRST_APK=$(find artifacts/ -name "*.apk" | head -1)
-          if [ -n "$FIRST_APK" ] && [ ! -f "artifacts/questnav-${{ steps.version.outputs.final_version }}.apk" ]; then
-            cp "$FIRST_APK" artifacts/questnav-${{ steps.version.outputs.final_version }}.apk
-          fi
-          
-          echo "📋 QuestNav App artifacts:"
-          ls -la artifacts/
-
-      - name: Upload Build Artifacts
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
+        id: upload
         with:
-          name: ${{ steps.version.outputs.artifact_name }}
-          path: artifacts/
-          retention-days: 30
-
-      - name: Generate APK Info
-        run: |
-          echo "📱 APK Build Information:" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** ${{ steps.version.outputs.final_version }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Version Code:** ${{ steps.version.outputs.version_code }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Release Type:** ${{ inputs.release_type }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Build Type:** Debug (always debug build)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          # APK analysis if aapt is available
-          if command -v aapt >/dev/null 2>&1; then
-            for apk in artifacts/*.apk; do
-              if [ -f "$apk" ]; then
-                echo "### APK: $(basename $apk)" >> $GITHUB_STEP_SUMMARY
-                aapt dump badging "$apk" | grep -E "(package|version|sdkVersion)" >> $GITHUB_STEP_SUMMARY || true
-                echo "" >> $GITHUB_STEP_SUMMARY
-              fi
-            done
-          fi
-
-      - name: Send Discord Notification (Success)
-        if: success() && secrets.DISCORD_WEBHOOK_URL != ''
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        with:
-          args: |
-            ✅ **QuestNav App Build Successful!**
-            
-            **Version:** `${{ steps.version.outputs.final_version }}`
-            **Version Code:** `${{ steps.version.outputs.version_code }}`
-            **Release Type:** `${{ inputs.release_type }}`
-            **Build Type:** Debug (always debug build)
-            
-            📱 APK ready for download from artifacts
-            
-            **APK Size:** $(ls -lh artifacts/*.apk 2>/dev/null | awk '{print $5}' | head -1 || echo 'Unknown')
-
-      - name: Send Discord Notification (Failure)
-        if: failure() && secrets.DISCORD_WEBHOOK_URL != ''
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        with:
-          args: |
-            ❌ **QuestNav App Build Failed!**
-            
-            **Version:** `${{ steps.version.outputs.final_version }}`
-            **Release Type:** `${{ inputs.release_type }}`
-            **Job:** `${{ github.job }}`
-            **Workflow:** `${{ github.workflow }}`
-            
-            Check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
-
-  # Basic APK Validation
-  validate-apk:
-    runs-on: ubuntu-latest
-    needs: build-questnav-app
-    if: success()
-
-    steps:
-      - name: Download APK Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.build-questnav-app.outputs.artifact_name }}
-          path: ./apk-artifacts
-
-      - name: APK Validation
-        run: |
-          echo "🔍 Validating APK..."
-          
-          for apk in apk-artifacts/*.apk; do
-            if [ -f "$apk" ]; then
-              echo "📱 Analyzing: $(basename $apk)"
-          
-              # Check file size
-              SIZE=$(stat -c%s "$apk" 2>/dev/null || stat -f%z "$apk" 2>/dev/null || echo "0")
-              echo "📏 APK size: $(echo $SIZE | numfmt --to=iec 2>/dev/null || echo $SIZE bytes)"
-          
-              # Basic checks
-              if [ $SIZE -gt 0 ]; then
-                echo "✅ APK file is not empty"
-              else
-                echo "❌ APK file is empty"
-                exit 1
-              fi
-          
-              # Check if it's a valid ZIP file (APKs are ZIP files)
-              if file "$apk" | grep -q "Zip\|ZIP"; then
-                echo "✅ APK has valid ZIP structure"
-              else
-                echo "⚠️ APK may not have valid ZIP structure"
-              fi
-            fi
-          done
-          
-          echo "✅ APK validation completed"
+          name: questnav-apk-${{ inputs.versionYear }}-${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}${{ inputs.versionType && format('-{0}', inputs.versionType) || '' }}
+          path: build/Android/*.apk
+          retention-days: 7

@@ -16,7 +16,7 @@ jobs:
       versionType: 'dev'
   lib:
     runs-on: ubuntu-latest
-    uses: QuestNav/QuestNav/.github/workflows/build-questnav-lib.yml
+    uses: QuestNav/QuestNav/.github/workflows/build-questnav-lib.yml@Native
     with:
       versionMajor: '1'
       versionMinor: '0'

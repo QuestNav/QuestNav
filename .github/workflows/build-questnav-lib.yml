@@ -95,6 +95,7 @@ jobs:
 
       - name: Prepare Artifacts
         run: |
+          ls -l
           
           # Create artifacts directory
           mkdir -p artifacts

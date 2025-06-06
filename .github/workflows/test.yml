@@ -12,6 +12,10 @@ jobs:
       versionPatch: 0
       versionYear: 2025
       versionType: 'dev'
+    secrets:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
   lib:
     uses: QuestNav/QuestNav/.github/workflows/build-questnav-lib.yml@Native
     with:

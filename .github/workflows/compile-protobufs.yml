@@ -48,7 +48,7 @@ jobs:
           protoc \
             -I="protos" \
             --plugin=protoc-gen-quickbuf=${{ steps.download-quickbuf.outputs.file }} \
-            --quickbuf_out=gen_descriptors=true,indent=4,replace_package=gg.questnav.questnav.protos.generated:questnav-lib/src/main/java/ \
+            --quickbuf_out=gen_descriptors=true,indent=4,replace_package=edu.wpi.first.math.proto=gg.questnav.questnav.protos.generated:questnav-lib/src/main/java/ \
             protos/*.proto
 
       - name: Commit all generated files

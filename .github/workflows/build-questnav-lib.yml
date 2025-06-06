@@ -106,6 +106,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: 'questnavlib.json'
-          path: artifacts/
+          path: 'artifacts/questnavlib.json'
           retention-days: 7
-          

@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'edu.wpi.first.GradleRIO' version '2025.3.2'
+    id 'com.diffplug.spotless' version '6.20.0'
 }
 
 // Version and build configuration
@@ -156,6 +157,7 @@ publishing {
     }
 
     repositories {
+        mavenCentral()
         if (project.hasProperty('mavenRepoUrl')) {
             maven {
                 name = "QuestNavRepo"
@@ -224,4 +226,55 @@ wrapper {
 clean {
     delete "$buildDir/generated"
     delete "$buildDir/outputs"
+}
+
+spotless {
+    java {
+        target fileTree(".") {
+            include "**/*.java"
+            exclude "**/build/**", "**/build-*/**", "**/generated/**"
+        }
+        toggleOffOn()
+
+        licenseHeader '''
+/*
+ * QUESTNAV
+   https://github.com/QuestNav
+ * Copyright (C) $YEAR QuestNav
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the MIT License as published.
+ */
+'''
+        googleJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    groovyGradle {
+        target fileTree(".") {
+            include "**/*.gradle"
+            exclude "**/build/**", "**/build-*/**", "**/generated/**"
+        }
+        greclipse()
+        indentWithSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    json {
+        target fileTree(".") {
+            include "**/*.json"
+            exclude "**/build/**", "**/build-*/**", "**/generated/**"
+        }
+        gson().indentWithSpaces(4)
+    }
+    format "misc", {
+        target fileTree(".") {
+            include "**/*.md", "**/.gitignore"
+            exclude "**/build/**", "**/build-*/**", "**/generated/**"
+        }
+        trimTrailingWhitespace()
+        indentWithSpaces(4)
+        endWithNewline()
+    }
 }

@@ -10,8 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: unity
+          sparse-checkout-cone-mode: false
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4

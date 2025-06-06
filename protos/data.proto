@@ -8,7 +8,7 @@ option java_package = "gg.questnav.questnav.protos.generated";
 import "geometry2d.proto";
 
 // Tracking data that is sent every loop
-message FrameData {
+message ProtobufQuestNavFrameData {
   // Number of frames processed by the Quest
   int32 frame_count = 1;
   
@@ -20,7 +20,7 @@ message FrameData {
 }
 
 // Device data that is sent slower
-message DeviceData {
+message ProtobufQuestNavDeviceData {
   // Number of times the Quest has lost tracking after having it since the app started
   int32 tracking_lost_counter = 1;
   

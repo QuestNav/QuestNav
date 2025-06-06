@@ -85,7 +85,7 @@ jobs:
           projectPath: unity
           targetPlatform: Android
           versioning: Custom
-          version: '${{ inputs.versionYear }}.${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}${{ inputs.versionType && format('-{0}', inputs.versionType) || '' }}'
+          version: ${{ inputs.versionYear }}.${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}${{ inputs.versionType && format('-{0}', inputs.versionType) || '' }}
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

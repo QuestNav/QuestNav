@@ -25,18 +25,18 @@ namespace QuestNav.Protos.Generated {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "CgpkYXRhLnByb3RvEhRxdWVzdG5hdi5wcm90b3MuZGF0YRoQZ2VvbWV0cnky",
-            "ZC5wcm90byJeCglGcmFtZURhdGESEwoLZnJhbWVfY291bnQYASABKAUSEQoJ",
-            "dGltZXN0YW1wGAIgASgBEikKBnBvc2UyZBgDIAEoCzIZLndwaS5wcm90by5Q",
-            "cm90b2J1ZlBvc2UyZCJgCgpEZXZpY2VEYXRhEh0KFXRyYWNraW5nX2xvc3Rf",
-            "Y291bnRlchgBIAEoBRIaChJjdXJyZW50bHlfdHJhY2tpbmcYAiABKAgSFwoP",
-            "YmF0dGVyeV9wZXJjZW50GAMgASgFQkMKJWdnLnF1ZXN0bmF2LnF1ZXN0bmF2",
-            "LnByb3Rvcy5nZW5lcmF0ZWSqAhlRdWVzdE5hdi5Qcm90b3MuR2VuZXJhdGVk",
-            "YgZwcm90bzM="));
+            "ZC5wcm90byJuChlQcm90b2J1ZlF1ZXN0TmF2RnJhbWVEYXRhEhMKC2ZyYW1l",
+            "X2NvdW50GAEgASgFEhEKCXRpbWVzdGFtcBgCIAEoARIpCgZwb3NlMmQYAyAB",
+            "KAsyGS53cGkucHJvdG8uUHJvdG9idWZQb3NlMmQicAoaUHJvdG9idWZRdWVz",
+            "dE5hdkRldmljZURhdGESHQoVdHJhY2tpbmdfbG9zdF9jb3VudGVyGAEgASgF",
+            "EhoKEmN1cnJlbnRseV90cmFja2luZxgCIAEoCBIXCg9iYXR0ZXJ5X3BlcmNl",
+            "bnQYAyABKAVCQwolZ2cucXVlc3RuYXYucXVlc3RuYXYucHJvdG9zLmdlbmVy",
+            "YXRlZKoCGVF1ZXN0TmF2LlByb3Rvcy5HZW5lcmF0ZWRiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Wpi.Proto.Geometry2DReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.FrameData), global::QuestNav.Protos.Generated.FrameData.Parser, new[]{ "FrameCount", "Timestamp", "Pose2D" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.DeviceData), global::QuestNav.Protos.Generated.DeviceData.Parser, new[]{ "TrackingLostCounter", "CurrentlyTracking", "BatteryPercent" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.ProtobufQuestNavFrameData), global::QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Parser, new[]{ "FrameCount", "Timestamp", "Pose2D" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.ProtobufQuestNavDeviceData), global::QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Parser, new[]{ "TrackingLostCounter", "CurrentlyTracking", "BatteryPercent" }, null, null, null, null)
           }));
     }
     #endregion
@@ -46,16 +46,16 @@ namespace QuestNav.Protos.Generated {
   /// <summary>
   /// Tracking data that is sent every loop
   /// </summary>
-  public sealed partial class FrameData : pb::IMessage<FrameData>
+  public sealed partial class ProtobufQuestNavFrameData : pb::IMessage<ProtobufQuestNavFrameData>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<FrameData> _parser = new pb::MessageParser<FrameData>(() => new FrameData());
+    private static readonly pb::MessageParser<ProtobufQuestNavFrameData> _parser = new pb::MessageParser<ProtobufQuestNavFrameData>(() => new ProtobufQuestNavFrameData());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<FrameData> Parser { get { return _parser; } }
+    public static pb::MessageParser<ProtobufQuestNavFrameData> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -71,7 +71,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public FrameData() {
+    public ProtobufQuestNavFrameData() {
       OnConstruction();
     }
 
@@ -79,7 +79,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public FrameData(FrameData other) : this() {
+    public ProtobufQuestNavFrameData(ProtobufQuestNavFrameData other) : this() {
       frameCount_ = other.frameCount_;
       timestamp_ = other.timestamp_;
       pose2D_ = other.pose2D_ != null ? other.pose2D_.Clone() : null;
@@ -88,8 +88,8 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public FrameData Clone() {
-      return new FrameData(this);
+    public ProtobufQuestNavFrameData Clone() {
+      return new ProtobufQuestNavFrameData(this);
     }
 
     /// <summary>Field number for the "frame_count" field.</summary>
@@ -140,12 +140,12 @@ namespace QuestNav.Protos.Generated {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as FrameData);
+      return Equals(other as ProtobufQuestNavFrameData);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(FrameData other) {
+    public bool Equals(ProtobufQuestNavFrameData other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -244,7 +244,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(FrameData other) {
+    public void MergeFrom(ProtobufQuestNavFrameData other) {
       if (other == null) {
         return;
       }
@@ -330,16 +330,16 @@ namespace QuestNav.Protos.Generated {
   /// <summary>
   /// Device data that is sent slower
   /// </summary>
-  public sealed partial class DeviceData : pb::IMessage<DeviceData>
+  public sealed partial class ProtobufQuestNavDeviceData : pb::IMessage<ProtobufQuestNavDeviceData>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<DeviceData> _parser = new pb::MessageParser<DeviceData>(() => new DeviceData());
+    private static readonly pb::MessageParser<ProtobufQuestNavDeviceData> _parser = new pb::MessageParser<ProtobufQuestNavDeviceData>(() => new ProtobufQuestNavDeviceData());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<DeviceData> Parser { get { return _parser; } }
+    public static pb::MessageParser<ProtobufQuestNavDeviceData> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -355,7 +355,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public DeviceData() {
+    public ProtobufQuestNavDeviceData() {
       OnConstruction();
     }
 
@@ -363,7 +363,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public DeviceData(DeviceData other) : this() {
+    public ProtobufQuestNavDeviceData(ProtobufQuestNavDeviceData other) : this() {
       trackingLostCounter_ = other.trackingLostCounter_;
       currentlyTracking_ = other.currentlyTracking_;
       batteryPercent_ = other.batteryPercent_;
@@ -372,8 +372,8 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public DeviceData Clone() {
-      return new DeviceData(this);
+    public ProtobufQuestNavDeviceData Clone() {
+      return new ProtobufQuestNavDeviceData(this);
     }
 
     /// <summary>Field number for the "tracking_lost_counter" field.</summary>
@@ -424,12 +424,12 @@ namespace QuestNav.Protos.Generated {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as DeviceData);
+      return Equals(other as ProtobufQuestNavDeviceData);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(DeviceData other) {
+    public bool Equals(ProtobufQuestNavDeviceData other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -528,7 +528,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(DeviceData other) {
+    public void MergeFrom(ProtobufQuestNavDeviceData other) {
       if (other == null) {
         return;
       }

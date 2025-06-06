@@ -25,23 +25,25 @@ namespace QuestNav.Protos.Generated {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cg5jb21tYW5kcy5wcm90bxIYcXVlc3RuYXYucHJvdG9zLmNvbW1hbmRzGhBn",
-            "ZW9tZXRyeTJkLnByb3RvIkIKEFBvc2VSZXNldFBheWxvYWQSLgoLdGFyZ2V0",
-            "X3Bvc2UYASABKAsyGS53cGkucHJvdG8uUHJvdG9idWZQb3NlMmQipwEKB0Nv",
-            "bW1hbmQSMwoEdHlwZRgBIAEoDjIlLnF1ZXN0bmF2LnByb3Rvcy5jb21tYW5k",
-            "cy5Db21tYW5kVHlwZRISCgpjb21tYW5kX2lkGAIgASgNEkgKEnBvc2VfcmVz",
-            "ZXRfcGF5bG9hZBgKIAEoCzIqLnF1ZXN0bmF2LnByb3Rvcy5jb21tYW5kcy5Q",
-            "b3NlUmVzZXRQYXlsb2FkSABCCQoHcGF5bG9hZCJNCg9Db21tYW5kUmVzcG9u",
-            "c2USEgoKY29tbWFuZF9pZBgBIAEoDRIPCgdzdWNjZXNzGAIgASgIEhUKDWVy",
-            "cm9yX21lc3NhZ2UYAyABKAkqOwoLQ29tbWFuZFR5cGUSHAoYQ09NTUFORF9U",
-            "WVBFX1VOU1BFQ0lGSUVEEAASDgoKUE9TRV9SRVNFVBABQkMKJWdnLnF1ZXN0",
-            "bmF2LnF1ZXN0bmF2LnByb3Rvcy5nZW5lcmF0ZWSqAhlRdWVzdE5hdi5Qcm90",
-            "b3MuR2VuZXJhdGVkYgZwcm90bzM="));
+            "ZW9tZXRyeTJkLnByb3RvIlIKIFByb3RvYnVmUXVlc3ROYXZQb3NlUmVzZXRQ",
+            "YXlsb2FkEi4KC3RhcmdldF9wb3NlGAEgASgLMhkud3BpLnByb3RvLlByb3Rv",
+            "YnVmUG9zZTJkIs8BChdQcm90b2J1ZlF1ZXN0TmF2Q29tbWFuZBI7CgR0eXBl",
+            "GAEgASgOMi0ucXVlc3RuYXYucHJvdG9zLmNvbW1hbmRzLlF1ZXN0TmF2Q29t",
+            "bWFuZFR5cGUSEgoKY29tbWFuZF9pZBgCIAEoDRJYChJwb3NlX3Jlc2V0X3Bh",
+            "eWxvYWQYCiABKAsyOi5xdWVzdG5hdi5wcm90b3MuY29tbWFuZHMuUHJvdG9i",
+            "dWZRdWVzdE5hdlBvc2VSZXNldFBheWxvYWRIAEIJCgdwYXlsb2FkIl0KH1By",
+            "b3RvYnVmUXVlc3ROYXZDb21tYW5kUmVzcG9uc2USEgoKY29tbWFuZF9pZBgB",
+            "IAEoDRIPCgdzdWNjZXNzGAIgASgIEhUKDWVycm9yX21lc3NhZ2UYAyABKAkq",
+            "QwoTUXVlc3ROYXZDb21tYW5kVHlwZRIcChhDT01NQU5EX1RZUEVfVU5TUEVD",
+            "SUZJRUQQABIOCgpQT1NFX1JFU0VUEAFCQwolZ2cucXVlc3RuYXYucXVlc3Ru",
+            "YXYucHJvdG9zLmdlbmVyYXRlZKoCGVF1ZXN0TmF2LlByb3Rvcy5HZW5lcmF0",
+            "ZWRiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Wpi.Proto.Geometry2DReflection.Descriptor, },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::QuestNav.Protos.Generated.CommandType), }, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.PoseResetPayload), global::QuestNav.Protos.Generated.PoseResetPayload.Parser, new[]{ "TargetPose" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.Command), global::QuestNav.Protos.Generated.Command.Parser, new[]{ "Type", "CommandId", "PoseResetPayload" }, new[]{ "Payload" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.CommandResponse), global::QuestNav.Protos.Generated.CommandResponse.Parser, new[]{ "CommandId", "Success", "ErrorMessage" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::QuestNav.Protos.Generated.QuestNavCommandType), }, null, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload), global::QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.Parser, new[]{ "TargetPose" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.ProtobufQuestNavCommand), global::QuestNav.Protos.Generated.ProtobufQuestNavCommand.Parser, new[]{ "Type", "CommandId", "PoseResetPayload" }, new[]{ "Payload" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse), global::QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.Parser, new[]{ "CommandId", "Success", "ErrorMessage" }, null, null, null, null)
           }));
     }
     #endregion
@@ -51,11 +53,11 @@ namespace QuestNav.Protos.Generated {
   /// <summary>
   /// Enum for command types (extensible for future commands)
   /// </summary>
-  public enum CommandType {
+  public enum QuestNavCommandType {
     /// <summary>
     /// Default value required in proto3
     /// </summary>
-    [pbr::OriginalName("COMMAND_TYPE_UNSPECIFIED")] Unspecified = 0,
+    [pbr::OriginalName("COMMAND_TYPE_UNSPECIFIED")] CommandTypeUnspecified = 0,
     /// <summary>
     /// Reset robot pose to target pose
     /// </summary>
@@ -68,16 +70,16 @@ namespace QuestNav.Protos.Generated {
   /// <summary>
   /// Payload for pose reset command
   /// </summary>
-  public sealed partial class PoseResetPayload : pb::IMessage<PoseResetPayload>
+  public sealed partial class ProtobufQuestNavPoseResetPayload : pb::IMessage<ProtobufQuestNavPoseResetPayload>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<PoseResetPayload> _parser = new pb::MessageParser<PoseResetPayload>(() => new PoseResetPayload());
+    private static readonly pb::MessageParser<ProtobufQuestNavPoseResetPayload> _parser = new pb::MessageParser<ProtobufQuestNavPoseResetPayload>(() => new ProtobufQuestNavPoseResetPayload());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<PoseResetPayload> Parser { get { return _parser; } }
+    public static pb::MessageParser<ProtobufQuestNavPoseResetPayload> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -93,7 +95,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public PoseResetPayload() {
+    public ProtobufQuestNavPoseResetPayload() {
       OnConstruction();
     }
 
@@ -101,15 +103,15 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public PoseResetPayload(PoseResetPayload other) : this() {
+    public ProtobufQuestNavPoseResetPayload(ProtobufQuestNavPoseResetPayload other) : this() {
       targetPose_ = other.targetPose_ != null ? other.targetPose_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public PoseResetPayload Clone() {
-      return new PoseResetPayload(this);
+    public ProtobufQuestNavPoseResetPayload Clone() {
+      return new ProtobufQuestNavPoseResetPayload(this);
     }
 
     /// <summary>Field number for the "target_pose" field.</summary>
@@ -130,12 +132,12 @@ namespace QuestNav.Protos.Generated {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as PoseResetPayload);
+      return Equals(other as ProtobufQuestNavPoseResetPayload);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(PoseResetPayload other) {
+    public bool Equals(ProtobufQuestNavPoseResetPayload other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -208,7 +210,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(PoseResetPayload other) {
+    public void MergeFrom(ProtobufQuestNavPoseResetPayload other) {
       if (other == null) {
         return;
       }
@@ -272,16 +274,16 @@ namespace QuestNav.Protos.Generated {
   /// <summary>
   /// Main Command message
   /// </summary>
-  public sealed partial class Command : pb::IMessage<Command>
+  public sealed partial class ProtobufQuestNavCommand : pb::IMessage<ProtobufQuestNavCommand>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<Command> _parser = new pb::MessageParser<Command>(() => new Command());
+    private static readonly pb::MessageParser<ProtobufQuestNavCommand> _parser = new pb::MessageParser<ProtobufQuestNavCommand>(() => new ProtobufQuestNavCommand());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<Command> Parser { get { return _parser; } }
+    public static pb::MessageParser<ProtobufQuestNavCommand> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -297,7 +299,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public Command() {
+    public ProtobufQuestNavCommand() {
       OnConstruction();
     }
 
@@ -305,7 +307,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public Command(Command other) : this() {
+    public ProtobufQuestNavCommand(ProtobufQuestNavCommand other) : this() {
       type_ = other.type_;
       commandId_ = other.commandId_;
       switch (other.PayloadCase) {
@@ -319,19 +321,19 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public Command Clone() {
-      return new Command(this);
+    public ProtobufQuestNavCommand Clone() {
+      return new ProtobufQuestNavCommand(this);
     }
 
     /// <summary>Field number for the "type" field.</summary>
     public const int TypeFieldNumber = 1;
-    private global::QuestNav.Protos.Generated.CommandType type_ = global::QuestNav.Protos.Generated.CommandType.Unspecified;
+    private global::QuestNav.Protos.Generated.QuestNavCommandType type_ = global::QuestNav.Protos.Generated.QuestNavCommandType.CommandTypeUnspecified;
     /// <summary>
     /// The type of command
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::QuestNav.Protos.Generated.CommandType Type {
+    public global::QuestNav.Protos.Generated.QuestNavCommandType Type {
       get { return type_; }
       set {
         type_ = value;
@@ -361,8 +363,8 @@ namespace QuestNav.Protos.Generated {
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::QuestNav.Protos.Generated.PoseResetPayload PoseResetPayload {
-      get { return payloadCase_ == PayloadOneofCase.PoseResetPayload ? (global::QuestNav.Protos.Generated.PoseResetPayload) payload_ : null; }
+    public global::QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload PoseResetPayload {
+      get { return payloadCase_ == PayloadOneofCase.PoseResetPayload ? (global::QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload) payload_ : null; }
       set {
         payload_ = value;
         payloadCase_ = value == null ? PayloadOneofCase.None : PayloadOneofCase.PoseResetPayload;
@@ -392,12 +394,12 @@ namespace QuestNav.Protos.Generated {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as Command);
+      return Equals(other as ProtobufQuestNavCommand);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(Command other) {
+    public bool Equals(ProtobufQuestNavCommand other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -415,7 +417,7 @@ namespace QuestNav.Protos.Generated {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
-      if (Type != global::QuestNav.Protos.Generated.CommandType.Unspecified) hash ^= Type.GetHashCode();
+      if (Type != global::QuestNav.Protos.Generated.QuestNavCommandType.CommandTypeUnspecified) hash ^= Type.GetHashCode();
       if (CommandId != 0) hash ^= CommandId.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.PoseResetPayload) hash ^= PoseResetPayload.GetHashCode();
       hash ^= (int) payloadCase_;
@@ -437,7 +439,7 @@ namespace QuestNav.Protos.Generated {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (Type != global::QuestNav.Protos.Generated.CommandType.Unspecified) {
+      if (Type != global::QuestNav.Protos.Generated.QuestNavCommandType.CommandTypeUnspecified) {
         output.WriteRawTag(8);
         output.WriteEnum((int) Type);
       }
@@ -459,7 +461,7 @@ namespace QuestNav.Protos.Generated {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (Type != global::QuestNav.Protos.Generated.CommandType.Unspecified) {
+      if (Type != global::QuestNav.Protos.Generated.QuestNavCommandType.CommandTypeUnspecified) {
         output.WriteRawTag(8);
         output.WriteEnum((int) Type);
       }
@@ -481,7 +483,7 @@ namespace QuestNav.Protos.Generated {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
-      if (Type != global::QuestNav.Protos.Generated.CommandType.Unspecified) {
+      if (Type != global::QuestNav.Protos.Generated.QuestNavCommandType.CommandTypeUnspecified) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Type);
       }
       if (CommandId != 0) {
@@ -498,11 +500,11 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(Command other) {
+    public void MergeFrom(ProtobufQuestNavCommand other) {
       if (other == null) {
         return;
       }
-      if (other.Type != global::QuestNav.Protos.Generated.CommandType.Unspecified) {
+      if (other.Type != global::QuestNav.Protos.Generated.QuestNavCommandType.CommandTypeUnspecified) {
         Type = other.Type;
       }
       if (other.CommandId != 0) {
@@ -511,7 +513,7 @@ namespace QuestNav.Protos.Generated {
       switch (other.PayloadCase) {
         case PayloadOneofCase.PoseResetPayload:
           if (PoseResetPayload == null) {
-            PoseResetPayload = new global::QuestNav.Protos.Generated.PoseResetPayload();
+            PoseResetPayload = new global::QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload();
           }
           PoseResetPayload.MergeFrom(other.PoseResetPayload);
           break;
@@ -533,7 +535,7 @@ namespace QuestNav.Protos.Generated {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            Type = (global::QuestNav.Protos.Generated.CommandType) input.ReadEnum();
+            Type = (global::QuestNav.Protos.Generated.QuestNavCommandType) input.ReadEnum();
             break;
           }
           case 16: {
@@ -541,7 +543,7 @@ namespace QuestNav.Protos.Generated {
             break;
           }
           case 82: {
-            global::QuestNav.Protos.Generated.PoseResetPayload subBuilder = new global::QuestNav.Protos.Generated.PoseResetPayload();
+            global::QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload subBuilder = new global::QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload();
             if (payloadCase_ == PayloadOneofCase.PoseResetPayload) {
               subBuilder.MergeFrom(PoseResetPayload);
             }
@@ -565,7 +567,7 @@ namespace QuestNav.Protos.Generated {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 8: {
-            Type = (global::QuestNav.Protos.Generated.CommandType) input.ReadEnum();
+            Type = (global::QuestNav.Protos.Generated.QuestNavCommandType) input.ReadEnum();
             break;
           }
           case 16: {
@@ -573,7 +575,7 @@ namespace QuestNav.Protos.Generated {
             break;
           }
           case 82: {
-            global::QuestNav.Protos.Generated.PoseResetPayload subBuilder = new global::QuestNav.Protos.Generated.PoseResetPayload();
+            global::QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload subBuilder = new global::QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload();
             if (payloadCase_ == PayloadOneofCase.PoseResetPayload) {
               subBuilder.MergeFrom(PoseResetPayload);
             }
@@ -591,16 +593,16 @@ namespace QuestNav.Protos.Generated {
   /// <summary>
   /// Response message for commands
   /// </summary>
-  public sealed partial class CommandResponse : pb::IMessage<CommandResponse>
+  public sealed partial class ProtobufQuestNavCommandResponse : pb::IMessage<ProtobufQuestNavCommandResponse>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<CommandResponse> _parser = new pb::MessageParser<CommandResponse>(() => new CommandResponse());
+    private static readonly pb::MessageParser<ProtobufQuestNavCommandResponse> _parser = new pb::MessageParser<ProtobufQuestNavCommandResponse>(() => new ProtobufQuestNavCommandResponse());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<CommandResponse> Parser { get { return _parser; } }
+    public static pb::MessageParser<ProtobufQuestNavCommandResponse> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -616,7 +618,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public CommandResponse() {
+    public ProtobufQuestNavCommandResponse() {
       OnConstruction();
     }
 
@@ -624,7 +626,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public CommandResponse(CommandResponse other) : this() {
+    public ProtobufQuestNavCommandResponse(ProtobufQuestNavCommandResponse other) : this() {
       commandId_ = other.commandId_;
       success_ = other.success_;
       errorMessage_ = other.errorMessage_;
@@ -633,8 +635,8 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public CommandResponse Clone() {
-      return new CommandResponse(this);
+    public ProtobufQuestNavCommandResponse Clone() {
+      return new ProtobufQuestNavCommandResponse(this);
     }
 
     /// <summary>Field number for the "command_id" field.</summary>
@@ -685,12 +687,12 @@ namespace QuestNav.Protos.Generated {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as CommandResponse);
+      return Equals(other as ProtobufQuestNavCommandResponse);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(CommandResponse other) {
+    public bool Equals(ProtobufQuestNavCommandResponse other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -789,7 +791,7 @@ namespace QuestNav.Protos.Generated {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(CommandResponse other) {
+    public void MergeFrom(ProtobufQuestNavCommandResponse other) {
       if (other == null) {
         return;
       }

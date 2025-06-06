@@ -18,48 +18,49 @@ import us.hebi.quickbuf.RepeatedByte;
 import us.hebi.quickbuf.Utf8String;
 
 public final class Commands {
-    private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(1940,
+    private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(2020,
         "Cg5jb21tYW5kcy5wcm90bxIYcXVlc3RuYXYucHJvdG9zLmNvbW1hbmRzGhBnZW9tZXRyeTJkLnByb3Rv" + 
-        "Ik4KEFBvc2VSZXNldFBheWxvYWQSOgoLdGFyZ2V0X3Bvc2UYASABKAsyGS53cGkucHJvdG8uUHJvdG9i" + 
-        "dWZQb3NlMmRSCnRhcmdldFBvc2UiygEKB0NvbW1hbmQSOQoEdHlwZRgBIAEoDjIlLnF1ZXN0bmF2LnBy" + 
-        "b3Rvcy5jb21tYW5kcy5Db21tYW5kVHlwZVIEdHlwZRIdCgpjb21tYW5kX2lkGAIgASgNUgljb21tYW5k" + 
-        "SWQSWgoScG9zZV9yZXNldF9wYXlsb2FkGAogASgLMioucXVlc3RuYXYucHJvdG9zLmNvbW1hbmRzLlBv" + 
-        "c2VSZXNldFBheWxvYWRIAFIQcG9zZVJlc2V0UGF5bG9hZEIJCgdwYXlsb2FkIm8KD0NvbW1hbmRSZXNw" + 
-        "b25zZRIdCgpjb21tYW5kX2lkGAEgASgNUgljb21tYW5kSWQSGAoHc3VjY2VzcxgCIAEoCFIHc3VjY2Vz" + 
-        "cxIjCg1lcnJvcl9tZXNzYWdlGAMgASgJUgxlcnJvck1lc3NhZ2UqOwoLQ29tbWFuZFR5cGUSHAoYQ09N" + 
-        "TUFORF9UWVBFX1VOU1BFQ0lGSUVEEAASDgoKUE9TRV9SRVNFVBABQkMKJWdnLnF1ZXN0bmF2LnF1ZXN0" + 
-        "bmF2LnByb3Rvcy5nZW5lcmF0ZWSqAhlRdWVzdE5hdi5Qcm90b3MuR2VuZXJhdGVkSr0KCgYSBAADMAEK" + 
-        "CAoBDBIDAAMVCggKAQISAwIAIQoICgEIEgMDADYKCQoCCCUSAwMANgoICgEIEgMEAD4KCQoCCAESAwQA" + 
-        "PgolCgIDABIDBwAaGhogSW1wb3J0IGdlb21ldHJ5IG1lc3NhZ2VzCgpFCgIFABIECgAOARo5IEVudW0g" + 
-        "Zm9yIGNvbW1hbmQgdHlwZXMgKGV4dGVuc2libGUgZm9yIGZ1dHVyZSBjb21tYW5kcykKCgoKAwUAARID" + 
-        "CgUQCi8KBAUAAgASAwsCHyIiIERlZmF1bHQgdmFsdWUgcmVxdWlyZWQgaW4gcHJvdG8zCgoMCgUFAAIA" + 
-        "ARIDCwIaCgwKBQUAAgACEgMLHR4KLgoEBQACARIDDAIRIiEgUmVzZXQgcm9ib3QgcG9zZSB0byB0YXJn" + 
-        "ZXQgcG9zZQoKDAoFBQACAQESAwwCDAoMCgUFAAIBAhIDDA8QCiwKAgQAEgQRABQBGiAgUGF5bG9hZCBm" + 
-        "b3IgcG9zZSByZXNldCBjb21tYW5kCgoKCgMEAAESAxEIGApnCgQEAAIAEgMTAisaWiBUYXJnZXQgcG9z" + 
-        "ZSBpbiBmaWVsZC1yZWxhdGl2ZSBXUElMaWIgY29vcmRpbmF0ZSBzcGFjZSAoeCBmb3J3YXJkLCB5IGxl" + 
-        "ZnQsIHJvdGF0aW9uIENDVyspCgoMCgUEAAIABhIDEwIaCgwKBQQAAgABEgMTGyYKDAoFBAACAAMSAxMp" + 
-        "KgoiCgIEARIEFwAkARoWIE1haW4gQ29tbWFuZCBtZXNzYWdlCgoKCgMEAQESAxcIDwoiCgQEAQIAEgMZ",
-        "AhcaFSBUaGUgdHlwZSBvZiBjb21tYW5kCgoMCgUEAQIABhIDGQINCgwKBQQBAgABEgMZDhIKDAoFBAEC" + 
-        "AAMSAxkVFgowCgQEAQIBEgMcAhgaIyBDb21tYW5kIElEIGZvciB0cmFja2luZy9yZXNwb25zZXMKCgwK" + 
-        "BQQBAgEFEgMcAggKDAoFBAECAQESAxwJEwoMCgUEAQIBAxIDHBYXClUKBAQBCAASBB8CIwMaRyBDb21t" + 
-        "YW5kLXNwZWNpZmljIHBheWxvYWQgKG9ubHkgb25lIHdpbGwgYmUgc2V0IGJhc2VkIG9uIGNvbW1hbmQg" + 
-        "dHlwZSkKCgwKBQQBCAABEgMfCA8KYQoEBAECAhIDIAQtIlQgRnV0dXJlIHBheWxvYWRzIGNhbiBiZSBh" + 
-        "ZGRlZCBoZXJlOgogKENvbW1hbmRzIHdpdGggbm8gcGF5bG9hZCBkb24ndCBuZWVkIGFuIGVudHJ5KQoK" + 
-        "DAoFBAECAgYSAyAEFAoMCgUEAQICARIDIBUnCgwKBQQBAgIDEgMgKiwKKwoCBAISBCcAMAEaHyBSZXNw" + 
-        "b25zZSBtZXNzYWdlIGZvciBjb21tYW5kcwoKCgoDBAIBEgMnCBcKLgoEBAICABIDKQIYGiEgTWF0Y2hl" + 
-        "cyB0aGUgb3JpZ2luYWwgY29tbWFuZCBJRAoKDAoFBAICAAUSAykCCAoMCgUEAgIAARIDKQkTCgwKBQQC" + 
-        "AgADEgMpFhcKMQoEBAICARIDLAITGiQgV2hldGhlciB0aGUgY29tbWFuZCB3YXMgc3VjY2Vzc2Z1bAoK" + 
-        "DAoFBAICAQUSAywCBgoMCgUEAgIBARIDLAcOCgwKBQQCAgEDEgMsERIKLwoEBAICAhIDLwIbGiIgRXJy" + 
-        "b3IgbWVzc2FnZSBpZiBzdWNjZXNzID0gZmFsc2UKCgwKBQQCAgIFEgMvAggKDAoFBAICAgESAy8JFgoM" + 
-        "CgUEAgICAxIDLxkaYgZwcm90bzM=");
+        "Il4KIFByb3RvYnVmUXVlc3ROYXZQb3NlUmVzZXRQYXlsb2FkEjoKC3RhcmdldF9wb3NlGAEgASgLMhku" + 
+        "d3BpLnByb3RvLlByb3RvYnVmUG9zZTJkUgp0YXJnZXRQb3NlIvIBChdQcm90b2J1ZlF1ZXN0TmF2Q29t" + 
+        "bWFuZBJBCgR0eXBlGAEgASgOMi0ucXVlc3RuYXYucHJvdG9zLmNvbW1hbmRzLlF1ZXN0TmF2Q29tbWFu" + 
+        "ZFR5cGVSBHR5cGUSHQoKY29tbWFuZF9pZBgCIAEoDVIJY29tbWFuZElkEmoKEnBvc2VfcmVzZXRfcGF5" + 
+        "bG9hZBgKIAEoCzI6LnF1ZXN0bmF2LnByb3Rvcy5jb21tYW5kcy5Qcm90b2J1ZlF1ZXN0TmF2UG9zZVJl" + 
+        "c2V0UGF5bG9hZEgAUhBwb3NlUmVzZXRQYXlsb2FkQgkKB3BheWxvYWQifwofUHJvdG9idWZRdWVzdE5h" + 
+        "dkNvbW1hbmRSZXNwb25zZRIdCgpjb21tYW5kX2lkGAEgASgNUgljb21tYW5kSWQSGAoHc3VjY2VzcxgC" + 
+        "IAEoCFIHc3VjY2VzcxIjCg1lcnJvcl9tZXNzYWdlGAMgASgJUgxlcnJvck1lc3NhZ2UqQwoTUXVlc3RO" + 
+        "YXZDb21tYW5kVHlwZRIcChhDT01NQU5EX1RZUEVfVU5TUEVDSUZJRUQQABIOCgpQT1NFX1JFU0VUEAFC" + 
+        "QwolZ2cucXVlc3RuYXYucXVlc3RuYXYucHJvdG9zLmdlbmVyYXRlZKoCGVF1ZXN0TmF2LlByb3Rvcy5H" + 
+        "ZW5lcmF0ZWRKvQoKBhIEAAMwAQoICgEMEgMAAxUKCAoBAhIDAgAhCggKAQgSAwMANgoJCgIIJRIDAwA2" + 
+        "CggKAQgSAwQAPgoJCgIIARIDBAA+CiUKAgMAEgMHABoaGiBJbXBvcnQgZ2VvbWV0cnkgbWVzc2FnZXMK" + 
+        "CkUKAgUAEgQKAA4BGjkgRW51bSBmb3IgY29tbWFuZCB0eXBlcyAoZXh0ZW5zaWJsZSBmb3IgZnV0dXJl" + 
+        "IGNvbW1hbmRzKQoKCgoDBQABEgMKBRgKLwoEBQACABIDCwIfIiIgRGVmYXVsdCB2YWx1ZSByZXF1aXJl" + 
+        "ZCBpbiBwcm90bzMKCgwKBQUAAgABEgMLAhoKDAoFBQACAAISAwsdHgouCgQFAAIBEgMMAhEiISBSZXNl" + 
+        "dCByb2JvdCBwb3NlIHRvIHRhcmdldCBwb3NlCgoMCgUFAAIBARIDDAIMCgwKBQUAAgECEgMMDxAKLAoC" + 
+        "BAASBBEAFAEaICBQYXlsb2FkIGZvciBwb3NlIHJlc2V0IGNvbW1hbmQKCgoKAwQAARIDEQgoCmcKBAQA" + 
+        "AgASAxMCKxpaIFRhcmdldCBwb3NlIGluIGZpZWxkLXJlbGF0aXZlIFdQSUxpYiBjb29yZGluYXRlIHNw" + 
+        "YWNlICh4IGZvcndhcmQsIHkgbGVmdCwgcm90YXRpb24gQ0NXKykKCgwKBQQAAgAGEgMTAhoKDAoFBAAC",
+        "AAESAxMbJgoMCgUEAAIAAxIDEykqCiIKAgQBEgQXACQBGhYgTWFpbiBDb21tYW5kIG1lc3NhZ2UKCgoK" + 
+        "AwQBARIDFwgfCiIKBAQBAgASAxkCHxoVIFRoZSB0eXBlIG9mIGNvbW1hbmQKCgwKBQQBAgAGEgMZAhUK" + 
+        "DAoFBAECAAESAxkWGgoMCgUEAQIAAxIDGR0eCjAKBAQBAgESAxwCGBojIENvbW1hbmQgSUQgZm9yIHRy" + 
+        "YWNraW5nL3Jlc3BvbnNlcwoKDAoFBAECAQUSAxwCCAoMCgUEAQIBARIDHAkTCgwKBQQBAgEDEgMcFhcK" + 
+        "VQoEBAEIABIEHwIjAxpHIENvbW1hbmQtc3BlY2lmaWMgcGF5bG9hZCAob25seSBvbmUgd2lsbCBiZSBz" + 
+        "ZXQgYmFzZWQgb24gY29tbWFuZCB0eXBlKQoKDAoFBAEIAAESAx8IDwphCgQEAQICEgMgBD0iVCBGdXR1" + 
+        "cmUgcGF5bG9hZHMgY2FuIGJlIGFkZGVkIGhlcmU6CiAoQ29tbWFuZHMgd2l0aCBubyBwYXlsb2FkIGRv" + 
+        "bid0IG5lZWQgYW4gZW50cnkpCgoMCgUEAQICBhIDIAQkCgwKBQQBAgIBEgMgJTcKDAoFBAECAgMSAyA6" + 
+        "PAorCgIEAhIEJwAwARofIFJlc3BvbnNlIG1lc3NhZ2UgZm9yIGNvbW1hbmRzCgoKCgMEAgESAycIJwou" + 
+        "CgQEAgIAEgMpAhgaISBNYXRjaGVzIHRoZSBvcmlnaW5hbCBjb21tYW5kIElECgoMCgUEAgIABRIDKQII" + 
+        "CgwKBQQCAgABEgMpCRMKDAoFBAICAAMSAykWFwoxCgQEAgIBEgMsAhMaJCBXaGV0aGVyIHRoZSBjb21t" + 
+        "YW5kIHdhcyBzdWNjZXNzZnVsCgoMCgUEAgIBBRIDLAIGCgwKBQQCAgEBEgMsBw4KDAoFBAICAQMSAywR" + 
+        "EgovCgQEAgICEgMvAhsaIiBFcnJvciBtZXNzYWdlIGlmIHN1Y2Nlc3MgPSBmYWxzZQoKDAoFBAICAgUS" + 
+        "Ay8CCAoMCgUEAgICARIDLwkWCgwKBQQCAgIDEgMvGRpiBnByb3RvMw==");
 
     static final Descriptors.FileDescriptor descriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom("commands.proto", "questnav.protos.commands", descriptorData, Geometry2D.getDescriptor());
 
-    static final Descriptors.Descriptor questnav_protos_commands_PoseResetPayload_descriptor = descriptor.internalContainedType(62, 78, "PoseResetPayload", "questnav.protos.commands.PoseResetPayload");
+    static final Descriptors.Descriptor questnav_protos_commands_ProtobufQuestNavPoseResetPayload_descriptor = descriptor.internalContainedType(62, 94, "ProtobufQuestNavPoseResetPayload", "questnav.protos.commands.ProtobufQuestNavPoseResetPayload");
 
-    static final Descriptors.Descriptor questnav_protos_commands_Command_descriptor = descriptor.internalContainedType(143, 202, "Command", "questnav.protos.commands.Command");
+    static final Descriptors.Descriptor questnav_protos_commands_ProtobufQuestNavCommand_descriptor = descriptor.internalContainedType(159, 242, "ProtobufQuestNavCommand", "questnav.protos.commands.ProtobufQuestNavCommand");
 
-    static final Descriptors.Descriptor questnav_protos_commands_CommandResponse_descriptor = descriptor.internalContainedType(347, 111, "CommandResponse", "questnav.protos.commands.CommandResponse");
+    static final Descriptors.Descriptor questnav_protos_commands_ProtobufQuestNavCommandResponse_descriptor = descriptor.internalContainedType(403, 127, "ProtobufQuestNavCommandResponse", "questnav.protos.commands.ProtobufQuestNavCommandResponse");
 
     /**
      * @return this proto file's descriptor.
@@ -73,9 +74,9 @@ public final class Commands {
      *  Enum for command types (extensible for future commands)
      * </pre>
      *
-     * Protobuf enum {@code CommandType}
+     * Protobuf enum {@code QuestNavCommandType}
      */
-    public enum CommandType implements ProtoEnum<CommandType> {
+    public enum QuestNavCommandType implements ProtoEnum<QuestNavCommandType> {
         /**
          * <pre>
          *  Default value required in proto3
@@ -116,7 +117,7 @@ public final class Commands {
 
         private final int number;
 
-        private CommandType(String name, int number) {
+        private QuestNavCommandType(String name, int number) {
             this.name = name;
             this.number = number;
         }
@@ -140,16 +141,16 @@ public final class Commands {
         /**
          * @return a converter that maps between this enum's numeric and text representations
          */
-        public static ProtoEnum.EnumConverter<CommandType> converter() {
-            return CommandTypeConverter.INSTANCE;
+        public static ProtoEnum.EnumConverter<QuestNavCommandType> converter() {
+            return QuestNavCommandTypeConverter.INSTANCE;
         }
 
         /**
          * @param value The numeric wire value of the corresponding enum entry.
          * @return The enum associated with the given numeric wire value, or null if unknown.
          */
-        public static CommandType forNumber(int value) {
-            return CommandTypeConverter.INSTANCE.forNumber(value);
+        public static QuestNavCommandType forNumber(int value) {
+            return QuestNavCommandTypeConverter.INSTANCE.forNumber(value);
         }
 
         /**
@@ -157,15 +158,15 @@ public final class Commands {
          * @param other Fallback value in case the value is not known.
          * @return The enum associated with the given numeric wire value, or the fallback value if unknown.
          */
-        public static CommandType forNumberOr(int number, CommandType other) {
-            CommandType value = forNumber(number);
+        public static QuestNavCommandType forNumberOr(int number, QuestNavCommandType other) {
+            QuestNavCommandType value = forNumber(number);
             return value == null ? other : value;
         }
 
-        enum CommandTypeConverter implements ProtoEnum.EnumConverter<CommandType> {
+        enum QuestNavCommandTypeConverter implements ProtoEnum.EnumConverter<QuestNavCommandType> {
             INSTANCE;
 
-            private static final CommandType[] lookup = new CommandType[2];
+            private static final QuestNavCommandType[] lookup = new QuestNavCommandType[2];
 
             static {
                 lookup[0] = COMMAND_TYPE_UNSPECIFIED;
@@ -173,7 +174,7 @@ public final class Commands {
             }
 
             @Override
-            public final CommandType forNumber(final int value) {
+            public final QuestNavCommandType forNumber(final int value) {
                 if (value >= 0 && value < lookup.length) {
                     return lookup[value];
                 }
@@ -181,7 +182,7 @@ public final class Commands {
             }
 
             @Override
-            public final CommandType forName(final CharSequence value) {
+            public final QuestNavCommandType forName(final CharSequence value) {
                 if (value.length() == 10) {
                     if (ProtoUtil.isEqual("POSE_RESET", value)) {
                         return POSE_RESET;
@@ -202,9 +203,9 @@ public final class Commands {
      *  Payload for pose reset command
      * </pre>
      *
-     * Protobuf type {@code PoseResetPayload}
+     * Protobuf type {@code ProtobufQuestNavPoseResetPayload}
      */
-    public static final class PoseResetPayload extends ProtoMessage<PoseResetPayload> implements Cloneable {
+    public static final class ProtobufQuestNavPoseResetPayload extends ProtoMessage<ProtobufQuestNavPoseResetPayload> implements Cloneable {
         private static final long serialVersionUID = 0L;
 
         /**
@@ -216,7 +217,7 @@ public final class Commands {
          */
         private final Geometry2D.ProtobufPose2d targetPose = Geometry2D.ProtobufPose2d.newInstance();
 
-        private PoseResetPayload() {
+        private ProtobufQuestNavPoseResetPayload() {
         }
 
         /**
@@ -224,10 +225,10 @@ public final class Commands {
          *  Payload for pose reset command
          * </pre>
          *
-         * @return a new empty instance of {@code PoseResetPayload}
+         * @return a new empty instance of {@code ProtobufQuestNavPoseResetPayload}
          */
-        public static PoseResetPayload newInstance() {
-            return new PoseResetPayload();
+        public static ProtobufQuestNavPoseResetPayload newInstance() {
+            return new ProtobufQuestNavPoseResetPayload();
         }
 
         /**
@@ -250,7 +251,7 @@ public final class Commands {
          * <code>optional .wpi.proto.ProtobufPose2d target_pose = 1;</code>
          * @return this
          */
-        public PoseResetPayload clearTargetPose() {
+        public ProtobufQuestNavPoseResetPayload clearTargetPose() {
             bitField0_ &= ~0x00000001;
             targetPose.clear();
             return this;
@@ -301,14 +302,16 @@ public final class Commands {
          * @param value the targetPose to set
          * @return this
          */
-        public PoseResetPayload setTargetPose(final Geometry2D.ProtobufPose2d value) {
+        public ProtobufQuestNavPoseResetPayload setTargetPose(
+                final Geometry2D.ProtobufPose2d value) {
             bitField0_ |= 0x00000001;
             targetPose.copyFrom(value);
             return this;
         }
 
         @Override
-        public PoseResetPayload copyFrom(final PoseResetPayload other) {
+        public ProtobufQuestNavPoseResetPayload copyFrom(
+                final ProtobufQuestNavPoseResetPayload other) {
             cachedSize = other.cachedSize;
             if ((bitField0_ | other.bitField0_) != 0) {
                 bitField0_ = other.bitField0_;
@@ -318,7 +321,8 @@ public final class Commands {
         }
 
         @Override
-        public PoseResetPayload mergeFrom(final PoseResetPayload other) {
+        public ProtobufQuestNavPoseResetPayload mergeFrom(
+                final ProtobufQuestNavPoseResetPayload other) {
             if (other.isEmpty()) {
                 return this;
             }
@@ -330,7 +334,7 @@ public final class Commands {
         }
 
         @Override
-        public PoseResetPayload clear() {
+        public ProtobufQuestNavPoseResetPayload clear() {
             if (isEmpty()) {
                 return this;
             }
@@ -341,7 +345,7 @@ public final class Commands {
         }
 
         @Override
-        public PoseResetPayload clearQuick() {
+        public ProtobufQuestNavPoseResetPayload clearQuick() {
             if (isEmpty()) {
                 return this;
             }
@@ -356,10 +360,10 @@ public final class Commands {
             if (o == this) {
                 return true;
             }
-            if (!(o instanceof PoseResetPayload)) {
+            if (!(o instanceof ProtobufQuestNavPoseResetPayload)) {
                 return false;
             }
-            PoseResetPayload other = (PoseResetPayload) o;
+            ProtobufQuestNavPoseResetPayload other = (ProtobufQuestNavPoseResetPayload) o;
             return bitField0_ == other.bitField0_
                 && (!hasTargetPose() || targetPose.equals(other.targetPose));
         }
@@ -383,7 +387,8 @@ public final class Commands {
 
         @Override
         @SuppressWarnings("fallthrough")
-        public PoseResetPayload mergeFrom(final ProtoSource input) throws IOException {
+        public ProtobufQuestNavPoseResetPayload mergeFrom(final ProtoSource input) throws
+                IOException {
             // Enabled Fall-Through Optimization (QuickBuffers)
             int tag = input.readTag();
             while (true) {
@@ -421,7 +426,8 @@ public final class Commands {
         }
 
         @Override
-        public PoseResetPayload mergeFrom(final JsonSource input) throws IOException {
+        public ProtobufQuestNavPoseResetPayload mergeFrom(final JsonSource input) throws
+                IOException {
             if (!input.beginObject()) {
                 return this;
             }
@@ -450,8 +456,8 @@ public final class Commands {
         }
 
         @Override
-        public PoseResetPayload clone() {
-            return new PoseResetPayload().copyFrom(this);
+        public ProtobufQuestNavPoseResetPayload clone() {
+            return new ProtobufQuestNavPoseResetPayload().copyFrom(this);
         }
 
         @Override
@@ -459,39 +465,41 @@ public final class Commands {
             return ((bitField0_) == 0);
         }
 
-        public static PoseResetPayload parseFrom(final byte[] data) throws
+        public static ProtobufQuestNavPoseResetPayload parseFrom(final byte[] data) throws
                 InvalidProtocolBufferException {
-            return ProtoMessage.mergeFrom(new PoseResetPayload(), data).checkInitialized();
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavPoseResetPayload(), data).checkInitialized();
         }
 
-        public static PoseResetPayload parseFrom(final ProtoSource input) throws IOException {
-            return ProtoMessage.mergeFrom(new PoseResetPayload(), input).checkInitialized();
+        public static ProtobufQuestNavPoseResetPayload parseFrom(final ProtoSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavPoseResetPayload(), input).checkInitialized();
         }
 
-        public static PoseResetPayload parseFrom(final JsonSource input) throws IOException {
-            return ProtoMessage.mergeFrom(new PoseResetPayload(), input).checkInitialized();
+        public static ProtobufQuestNavPoseResetPayload parseFrom(final JsonSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavPoseResetPayload(), input).checkInitialized();
         }
 
         /**
-         * @return factory for creating PoseResetPayload messages
+         * @return factory for creating ProtobufQuestNavPoseResetPayload messages
          */
-        public static MessageFactory<PoseResetPayload> getFactory() {
-            return PoseResetPayloadFactory.INSTANCE;
+        public static MessageFactory<ProtobufQuestNavPoseResetPayload> getFactory() {
+            return ProtobufQuestNavPoseResetPayloadFactory.INSTANCE;
         }
 
         /**
          * @return this type's descriptor.
          */
         public static Descriptors.Descriptor getDescriptor() {
-            return Commands.questnav_protos_commands_PoseResetPayload_descriptor;
+            return Commands.questnav_protos_commands_ProtobufQuestNavPoseResetPayload_descriptor;
         }
 
-        private enum PoseResetPayloadFactory implements MessageFactory<PoseResetPayload> {
+        private enum ProtobufQuestNavPoseResetPayloadFactory implements MessageFactory<ProtobufQuestNavPoseResetPayload> {
             INSTANCE;
 
             @Override
-            public PoseResetPayload create() {
-                return PoseResetPayload.newInstance();
+            public ProtobufQuestNavPoseResetPayload create() {
+                return ProtobufQuestNavPoseResetPayload.newInstance();
             }
         }
 
@@ -508,9 +516,9 @@ public final class Commands {
      *  Main Command message
      * </pre>
      *
-     * Protobuf type {@code Command}
+     * Protobuf type {@code ProtobufQuestNavCommand}
      */
-    public static final class Command extends ProtoMessage<Command> implements Cloneable {
+    public static final class ProtobufQuestNavCommand extends ProtoMessage<ProtobufQuestNavCommand> implements Cloneable {
         private static final long serialVersionUID = 0L;
 
         /**
@@ -527,7 +535,7 @@ public final class Commands {
          *  The type of command
          * </pre>
          *
-         * <code>optional .questnav.protos.commands.CommandType type = 1;</code>
+         * <code>optional .questnav.protos.commands.QuestNavCommandType type = 1;</code>
          */
         private int type;
 
@@ -537,11 +545,11 @@ public final class Commands {
          *  (Commands with no payload don't need an entry)
          * </pre>
          *
-         * <code>optional .questnav.protos.commands.PoseResetPayload pose_reset_payload = 10;</code>
+         * <code>optional .questnav.protos.commands.ProtobufQuestNavPoseResetPayload pose_reset_payload = 10;</code>
          */
-        private final PoseResetPayload poseResetPayload = PoseResetPayload.newInstance();
+        private final ProtobufQuestNavPoseResetPayload poseResetPayload = ProtobufQuestNavPoseResetPayload.newInstance();
 
-        private Command() {
+        private ProtobufQuestNavCommand() {
         }
 
         /**
@@ -549,17 +557,17 @@ public final class Commands {
          *  Main Command message
          * </pre>
          *
-         * @return a new empty instance of {@code Command}
+         * @return a new empty instance of {@code ProtobufQuestNavCommand}
          */
-        public static Command newInstance() {
-            return new Command();
+        public static ProtobufQuestNavCommand newInstance() {
+            return new ProtobufQuestNavCommand();
         }
 
         public boolean hasPayload() {
             return (((bitField0_ & 0x00000001)) != 0);
         }
 
-        public Command clearPayload() {
+        public ProtobufQuestNavCommand clearPayload() {
             if (hasPayload()) {
                 clearPoseResetPayload();
             }
@@ -586,7 +594,7 @@ public final class Commands {
          * <code>optional uint32 command_id = 2;</code>
          * @return this
          */
-        public Command clearCommandId() {
+        public ProtobufQuestNavCommand clearCommandId() {
             bitField0_ &= ~0x00000002;
             commandId = 0;
             return this;
@@ -613,7 +621,7 @@ public final class Commands {
          * @param value the commandId to set
          * @return this
          */
-        public Command setCommandId(final int value) {
+        public ProtobufQuestNavCommand setCommandId(final int value) {
             bitField0_ |= 0x00000002;
             commandId = value;
             return this;
@@ -624,7 +632,7 @@ public final class Commands {
          *  The type of command
          * </pre>
          *
-         * <code>optional .questnav.protos.commands.CommandType type = 1;</code>
+         * <code>optional .questnav.protos.commands.QuestNavCommandType type = 1;</code>
          * @return whether the type field is set
          */
         public boolean hasType() {
@@ -636,10 +644,10 @@ public final class Commands {
          *  The type of command
          * </pre>
          *
-         * <code>optional .questnav.protos.commands.CommandType type = 1;</code>
+         * <code>optional .questnav.protos.commands.QuestNavCommandType type = 1;</code>
          * @return this
          */
-        public Command clearType() {
+        public ProtobufQuestNavCommand clearType() {
             bitField0_ &= ~0x00000004;
             type = 0;
             return this;
@@ -650,16 +658,16 @@ public final class Commands {
          *  The type of command
          * </pre>
          *
-         * <code>optional .questnav.protos.commands.CommandType type = 1;</code>
+         * <code>optional .questnav.protos.commands.QuestNavCommandType type = 1;</code>
          * @return the type
          */
-        public CommandType getType() {
-            return CommandType.forNumber(type);
+        public QuestNavCommandType getType() {
+            return QuestNavCommandType.forNumber(type);
         }
 
         /**
          * Gets the value of the internal enum store. The result is
-         * equivalent to {@link Command#getType()}.getNumber().
+         * equivalent to {@link ProtobufQuestNavCommand#getType()}.getNumber().
          *
          * @return numeric wire representation
          */
@@ -670,13 +678,13 @@ public final class Commands {
         /**
          * Sets the value of the internal enum store. This does not
          * do any validity checks, so be sure to use appropriate value
-         * constants from {@link CommandType}. Setting an invalid value
-         * can cause {@link Command#getType()} to return null
+         * constants from {@link QuestNavCommandType}. Setting an invalid value
+         * can cause {@link ProtobufQuestNavCommand#getType()} to return null
          *
          * @param value the numeric wire value to set
          * @return this
          */
-        public Command setTypeValue(final int value) {
+        public ProtobufQuestNavCommand setTypeValue(final int value) {
             bitField0_ |= 0x00000004;
             type = value;
             return this;
@@ -687,11 +695,11 @@ public final class Commands {
          *  The type of command
          * </pre>
          *
-         * <code>optional .questnav.protos.commands.CommandType type = 1;</code>
+         * <code>optional .questnav.protos.commands.QuestNavCommandType type = 1;</code>
          * @param value the type to set
          * @return this
          */
-        public Command setType(final CommandType value) {
+        public ProtobufQuestNavCommand setType(final QuestNavCommandType value) {
             bitField0_ |= 0x00000004;
             type = value.getNumber();
             return this;
@@ -703,7 +711,7 @@ public final class Commands {
          *  (Commands with no payload don't need an entry)
          * </pre>
          *
-         * <code>optional .questnav.protos.commands.PoseResetPayload pose_reset_payload = 10;</code>
+         * <code>optional .questnav.protos.commands.ProtobufQuestNavPoseResetPayload pose_reset_payload = 10;</code>
          * @return whether the poseResetPayload field is set
          */
         public boolean hasPoseResetPayload() {
@@ -716,10 +724,10 @@ public final class Commands {
          *  (Commands with no payload don't need an entry)
          * </pre>
          *
-         * <code>optional .questnav.protos.commands.PoseResetPayload pose_reset_payload = 10;</code>
+         * <code>optional .questnav.protos.commands.ProtobufQuestNavPoseResetPayload pose_reset_payload = 10;</code>
          * @return this
          */
-        public Command clearPoseResetPayload() {
+        public ProtobufQuestNavCommand clearPoseResetPayload() {
             bitField0_ &= ~0x00000001;
             poseResetPayload.clear();
             return this;
@@ -731,7 +739,7 @@ public final class Commands {
          *  (Commands with no payload don't need an entry)
          * </pre>
          *
-         * <code>optional .questnav.protos.commands.PoseResetPayload pose_reset_payload = 10;</code>
+         * <code>optional .questnav.protos.commands.ProtobufQuestNavPoseResetPayload pose_reset_payload = 10;</code>
          *
          * This method returns the internal storage object without modifying any has state.
          * The returned object should not be modified and be treated as read-only.
@@ -740,7 +748,7 @@ public final class Commands {
          *
          * @return internal storage object for reading
          */
-        public PoseResetPayload getPoseResetPayload() {
+        public ProtobufQuestNavPoseResetPayload getPoseResetPayload() {
             return poseResetPayload;
         }
 
@@ -750,7 +758,7 @@ public final class Commands {
          *  (Commands with no payload don't need an entry)
          * </pre>
          *
-         * <code>optional .questnav.protos.commands.PoseResetPayload pose_reset_payload = 10;</code>
+         * <code>optional .questnav.protos.commands.ProtobufQuestNavPoseResetPayload pose_reset_payload = 10;</code>
          *
          * This method returns the internal storage object and sets the corresponding
          * has state. The returned object will become part of this message and its
@@ -758,7 +766,7 @@ public final class Commands {
          *
          * @return internal storage object for modifications
          */
-        public PoseResetPayload getMutablePoseResetPayload() {
+        public ProtobufQuestNavPoseResetPayload getMutablePoseResetPayload() {
             bitField0_ |= 0x00000001;
             return poseResetPayload;
         }
@@ -769,18 +777,19 @@ public final class Commands {
          *  (Commands with no payload don't need an entry)
          * </pre>
          *
-         * <code>optional .questnav.protos.commands.PoseResetPayload pose_reset_payload = 10;</code>
+         * <code>optional .questnav.protos.commands.ProtobufQuestNavPoseResetPayload pose_reset_payload = 10;</code>
          * @param value the poseResetPayload to set
          * @return this
          */
-        public Command setPoseResetPayload(final PoseResetPayload value) {
+        public ProtobufQuestNavCommand setPoseResetPayload(
+                final ProtobufQuestNavPoseResetPayload value) {
             bitField0_ |= 0x00000001;
             poseResetPayload.copyFrom(value);
             return this;
         }
 
         @Override
-        public Command copyFrom(final Command other) {
+        public ProtobufQuestNavCommand copyFrom(final ProtobufQuestNavCommand other) {
             cachedSize = other.cachedSize;
             if ((bitField0_ | other.bitField0_) != 0) {
                 bitField0_ = other.bitField0_;
@@ -792,7 +801,7 @@ public final class Commands {
         }
 
         @Override
-        public Command mergeFrom(final Command other) {
+        public ProtobufQuestNavCommand mergeFrom(final ProtobufQuestNavCommand other) {
             if (other.isEmpty()) {
                 return this;
             }
@@ -810,7 +819,7 @@ public final class Commands {
         }
 
         @Override
-        public Command clear() {
+        public ProtobufQuestNavCommand clear() {
             if (isEmpty()) {
                 return this;
             }
@@ -823,7 +832,7 @@ public final class Commands {
         }
 
         @Override
-        public Command clearQuick() {
+        public ProtobufQuestNavCommand clearQuick() {
             if (isEmpty()) {
                 return this;
             }
@@ -838,10 +847,10 @@ public final class Commands {
             if (o == this) {
                 return true;
             }
-            if (!(o instanceof Command)) {
+            if (!(o instanceof ProtobufQuestNavCommand)) {
                 return false;
             }
-            Command other = (Command) o;
+            ProtobufQuestNavCommand other = (ProtobufQuestNavCommand) o;
             return bitField0_ == other.bitField0_
                 && (!hasCommandId() || commandId == other.commandId)
                 && (!hasType() || type == other.type)
@@ -881,7 +890,7 @@ public final class Commands {
 
         @Override
         @SuppressWarnings("fallthrough")
-        public Command mergeFrom(final ProtoSource input) throws IOException {
+        public ProtobufQuestNavCommand mergeFrom(final ProtoSource input) throws IOException {
             // Enabled Fall-Through Optimization (QuickBuffers)
             int tag = input.readTag();
             while (true) {
@@ -898,7 +907,7 @@ public final class Commands {
                     case 8: {
                         // type
                         final int value = input.readInt32();
-                        if (CommandType.forNumber(value) != null) {
+                        if (QuestNavCommandType.forNumber(value) != null) {
                             type = value;
                             bitField0_ |= 0x00000004;
                         }
@@ -937,7 +946,7 @@ public final class Commands {
                 output.writeUInt32(FieldNames.commandId, commandId);
             }
             if ((bitField0_ & 0x00000004) != 0) {
-                output.writeEnum(FieldNames.type, type, CommandType.converter());
+                output.writeEnum(FieldNames.type, type, QuestNavCommandType.converter());
             }
             if ((bitField0_ & 0x00000001) != 0) {
                 output.writeMessage(FieldNames.poseResetPayload, poseResetPayload);
@@ -946,7 +955,7 @@ public final class Commands {
         }
 
         @Override
-        public Command mergeFrom(final JsonSource input) throws IOException {
+        public ProtobufQuestNavCommand mergeFrom(final JsonSource input) throws IOException {
             if (!input.beginObject()) {
                 return this;
             }
@@ -967,7 +976,7 @@ public final class Commands {
                     case 3575610: {
                         if (input.isAtField(FieldNames.type)) {
                             if (!input.trySkipNullValue()) {
-                                final CommandType value = input.readEnum(CommandType.converter());
+                                final QuestNavCommandType value = input.readEnum(QuestNavCommandType.converter());
                                 if (value != null) {
                                     type = value.getNumber();
                                     bitField0_ |= 0x00000004;
@@ -1003,8 +1012,8 @@ public final class Commands {
         }
 
         @Override
-        public Command clone() {
-            return new Command().copyFrom(this);
+        public ProtobufQuestNavCommand clone() {
+            return new ProtobufQuestNavCommand().copyFrom(this);
         }
 
         @Override
@@ -1012,38 +1021,40 @@ public final class Commands {
             return ((bitField0_) == 0);
         }
 
-        public static Command parseFrom(final byte[] data) throws InvalidProtocolBufferException {
-            return ProtoMessage.mergeFrom(new Command(), data).checkInitialized();
+        public static ProtobufQuestNavCommand parseFrom(final byte[] data) throws
+                InvalidProtocolBufferException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavCommand(), data).checkInitialized();
         }
 
-        public static Command parseFrom(final ProtoSource input) throws IOException {
-            return ProtoMessage.mergeFrom(new Command(), input).checkInitialized();
+        public static ProtobufQuestNavCommand parseFrom(final ProtoSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavCommand(), input).checkInitialized();
         }
 
-        public static Command parseFrom(final JsonSource input) throws IOException {
-            return ProtoMessage.mergeFrom(new Command(), input).checkInitialized();
+        public static ProtobufQuestNavCommand parseFrom(final JsonSource input) throws IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavCommand(), input).checkInitialized();
         }
 
         /**
-         * @return factory for creating Command messages
+         * @return factory for creating ProtobufQuestNavCommand messages
          */
-        public static MessageFactory<Command> getFactory() {
-            return CommandFactory.INSTANCE;
+        public static MessageFactory<ProtobufQuestNavCommand> getFactory() {
+            return ProtobufQuestNavCommandFactory.INSTANCE;
         }
 
         /**
          * @return this type's descriptor.
          */
         public static Descriptors.Descriptor getDescriptor() {
-            return Commands.questnav_protos_commands_Command_descriptor;
+            return Commands.questnav_protos_commands_ProtobufQuestNavCommand_descriptor;
         }
 
-        private enum CommandFactory implements MessageFactory<Command> {
+        private enum ProtobufQuestNavCommandFactory implements MessageFactory<ProtobufQuestNavCommand> {
             INSTANCE;
 
             @Override
-            public Command create() {
-                return Command.newInstance();
+            public ProtobufQuestNavCommand create() {
+                return ProtobufQuestNavCommand.newInstance();
             }
         }
 
@@ -1064,9 +1075,9 @@ public final class Commands {
      *  Response message for commands
      * </pre>
      *
-     * Protobuf type {@code CommandResponse}
+     * Protobuf type {@code ProtobufQuestNavCommandResponse}
      */
-    public static final class CommandResponse extends ProtoMessage<CommandResponse> implements Cloneable {
+    public static final class ProtobufQuestNavCommandResponse extends ProtoMessage<ProtobufQuestNavCommandResponse> implements Cloneable {
         private static final long serialVersionUID = 0L;
 
         /**
@@ -1096,7 +1107,7 @@ public final class Commands {
          */
         private final Utf8String errorMessage = Utf8String.newEmptyInstance();
 
-        private CommandResponse() {
+        private ProtobufQuestNavCommandResponse() {
         }
 
         /**
@@ -1104,10 +1115,10 @@ public final class Commands {
          *  Response message for commands
          * </pre>
          *
-         * @return a new empty instance of {@code CommandResponse}
+         * @return a new empty instance of {@code ProtobufQuestNavCommandResponse}
          */
-        public static CommandResponse newInstance() {
-            return new CommandResponse();
+        public static ProtobufQuestNavCommandResponse newInstance() {
+            return new ProtobufQuestNavCommandResponse();
         }
 
         /**
@@ -1130,7 +1141,7 @@ public final class Commands {
          * <code>optional uint32 command_id = 1;</code>
          * @return this
          */
-        public CommandResponse clearCommandId() {
+        public ProtobufQuestNavCommandResponse clearCommandId() {
             bitField0_ &= ~0x00000001;
             commandId = 0;
             return this;
@@ -1157,7 +1168,7 @@ public final class Commands {
          * @param value the commandId to set
          * @return this
          */
-        public CommandResponse setCommandId(final int value) {
+        public ProtobufQuestNavCommandResponse setCommandId(final int value) {
             bitField0_ |= 0x00000001;
             commandId = value;
             return this;
@@ -1183,7 +1194,7 @@ public final class Commands {
          * <code>optional bool success = 2;</code>
          * @return this
          */
-        public CommandResponse clearSuccess() {
+        public ProtobufQuestNavCommandResponse clearSuccess() {
             bitField0_ &= ~0x00000002;
             success = false;
             return this;
@@ -1210,7 +1221,7 @@ public final class Commands {
          * @param value the success to set
          * @return this
          */
-        public CommandResponse setSuccess(final boolean value) {
+        public ProtobufQuestNavCommandResponse setSuccess(final boolean value) {
             bitField0_ |= 0x00000002;
             success = value;
             return this;
@@ -1236,7 +1247,7 @@ public final class Commands {
          * <code>optional string error_message = 3;</code>
          * @return this
          */
-        public CommandResponse clearErrorMessage() {
+        public ProtobufQuestNavCommandResponse clearErrorMessage() {
             bitField0_ &= ~0x00000004;
             errorMessage.clear();
             return this;
@@ -1288,7 +1299,7 @@ public final class Commands {
          * @param value the errorMessage to set
          * @return this
          */
-        public CommandResponse setErrorMessage(final CharSequence value) {
+        public ProtobufQuestNavCommandResponse setErrorMessage(final CharSequence value) {
             bitField0_ |= 0x00000004;
             errorMessage.copyFrom(value);
             return this;
@@ -1303,14 +1314,15 @@ public final class Commands {
          * @param value the errorMessage to set
          * @return this
          */
-        public CommandResponse setErrorMessage(final Utf8String value) {
+        public ProtobufQuestNavCommandResponse setErrorMessage(final Utf8String value) {
             bitField0_ |= 0x00000004;
             errorMessage.copyFrom(value);
             return this;
         }
 
         @Override
-        public CommandResponse copyFrom(final CommandResponse other) {
+        public ProtobufQuestNavCommandResponse copyFrom(
+                final ProtobufQuestNavCommandResponse other) {
             cachedSize = other.cachedSize;
             if ((bitField0_ | other.bitField0_) != 0) {
                 bitField0_ = other.bitField0_;
@@ -1322,7 +1334,8 @@ public final class Commands {
         }
 
         @Override
-        public CommandResponse mergeFrom(final CommandResponse other) {
+        public ProtobufQuestNavCommandResponse mergeFrom(
+                final ProtobufQuestNavCommandResponse other) {
             if (other.isEmpty()) {
                 return this;
             }
@@ -1340,7 +1353,7 @@ public final class Commands {
         }
 
         @Override
-        public CommandResponse clear() {
+        public ProtobufQuestNavCommandResponse clear() {
             if (isEmpty()) {
                 return this;
             }
@@ -1353,7 +1366,7 @@ public final class Commands {
         }
 
         @Override
-        public CommandResponse clearQuick() {
+        public ProtobufQuestNavCommandResponse clearQuick() {
             if (isEmpty()) {
                 return this;
             }
@@ -1368,10 +1381,10 @@ public final class Commands {
             if (o == this) {
                 return true;
             }
-            if (!(o instanceof CommandResponse)) {
+            if (!(o instanceof ProtobufQuestNavCommandResponse)) {
                 return false;
             }
-            CommandResponse other = (CommandResponse) o;
+            ProtobufQuestNavCommandResponse other = (ProtobufQuestNavCommandResponse) o;
             return bitField0_ == other.bitField0_
                 && (!hasCommandId() || commandId == other.commandId)
                 && (!hasSuccess() || success == other.success)
@@ -1411,7 +1424,8 @@ public final class Commands {
 
         @Override
         @SuppressWarnings("fallthrough")
-        public CommandResponse mergeFrom(final ProtoSource input) throws IOException {
+        public ProtobufQuestNavCommandResponse mergeFrom(final ProtoSource input) throws
+                IOException {
             // Enabled Fall-Through Optimization (QuickBuffers)
             int tag = input.readTag();
             while (true) {
@@ -1473,7 +1487,8 @@ public final class Commands {
         }
 
         @Override
-        public CommandResponse mergeFrom(final JsonSource input) throws IOException {
+        public ProtobufQuestNavCommandResponse mergeFrom(final JsonSource input) throws
+                IOException {
             if (!input.beginObject()) {
                 return this;
             }
@@ -1525,8 +1540,8 @@ public final class Commands {
         }
 
         @Override
-        public CommandResponse clone() {
-            return new CommandResponse().copyFrom(this);
+        public ProtobufQuestNavCommandResponse clone() {
+            return new ProtobufQuestNavCommandResponse().copyFrom(this);
         }
 
         @Override
@@ -1534,39 +1549,41 @@ public final class Commands {
             return ((bitField0_) == 0);
         }
 
-        public static CommandResponse parseFrom(final byte[] data) throws
+        public static ProtobufQuestNavCommandResponse parseFrom(final byte[] data) throws
                 InvalidProtocolBufferException {
-            return ProtoMessage.mergeFrom(new CommandResponse(), data).checkInitialized();
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavCommandResponse(), data).checkInitialized();
         }
 
-        public static CommandResponse parseFrom(final ProtoSource input) throws IOException {
-            return ProtoMessage.mergeFrom(new CommandResponse(), input).checkInitialized();
+        public static ProtobufQuestNavCommandResponse parseFrom(final ProtoSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavCommandResponse(), input).checkInitialized();
         }
 
-        public static CommandResponse parseFrom(final JsonSource input) throws IOException {
-            return ProtoMessage.mergeFrom(new CommandResponse(), input).checkInitialized();
+        public static ProtobufQuestNavCommandResponse parseFrom(final JsonSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavCommandResponse(), input).checkInitialized();
         }
 
         /**
-         * @return factory for creating CommandResponse messages
+         * @return factory for creating ProtobufQuestNavCommandResponse messages
          */
-        public static MessageFactory<CommandResponse> getFactory() {
-            return CommandResponseFactory.INSTANCE;
+        public static MessageFactory<ProtobufQuestNavCommandResponse> getFactory() {
+            return ProtobufQuestNavCommandResponseFactory.INSTANCE;
         }
 
         /**
          * @return this type's descriptor.
          */
         public static Descriptors.Descriptor getDescriptor() {
-            return Commands.questnav_protos_commands_CommandResponse_descriptor;
+            return Commands.questnav_protos_commands_ProtobufQuestNavCommandResponse_descriptor;
         }
 
-        private enum CommandResponseFactory implements MessageFactory<CommandResponse> {
+        private enum ProtobufQuestNavCommandResponseFactory implements MessageFactory<ProtobufQuestNavCommandResponse> {
             INSTANCE;
 
             @Override
-            public CommandResponse create() {
-                return CommandResponse.newInstance();
+            public ProtobufQuestNavCommandResponse create() {
+                return ProtobufQuestNavCommandResponse.newInstance();
             }
         }
 

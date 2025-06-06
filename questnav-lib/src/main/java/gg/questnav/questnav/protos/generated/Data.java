@@ -16,35 +16,35 @@ import us.hebi.quickbuf.ProtoUtil;
 import us.hebi.quickbuf.RepeatedByte;
 
 public final class Data {
-    private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(1282,
-        "CgpkYXRhLnByb3RvEhRxdWVzdG5hdi5wcm90b3MuZGF0YRoQZ2VvbWV0cnkyZC5wcm90byJ9CglGcmFt" + 
-        "ZURhdGESHwoLZnJhbWVfY291bnQYASABKAVSCmZyYW1lQ291bnQSHAoJdGltZXN0YW1wGAIgASgBUgl0" + 
-        "aW1lc3RhbXASMQoGcG9zZTJkGAMgASgLMhkud3BpLnByb3RvLlByb3RvYnVmUG9zZTJkUgZwb3NlMmQi" + 
-        "mAEKCkRldmljZURhdGESMgoVdHJhY2tpbmdfbG9zdF9jb3VudGVyGAEgASgFUhN0cmFja2luZ0xvc3RD" + 
-        "b3VudGVyEi0KEmN1cnJlbnRseV90cmFja2luZxgCIAEoCFIRY3VycmVudGx5VHJhY2tpbmcSJwoPYmF0" + 
-        "dGVyeV9wZXJjZW50GAMgASgFUg5iYXR0ZXJ5UGVyY2VudEJDCiVnZy5xdWVzdG5hdi5xdWVzdG5hdi5w" + 
-        "cm90b3MuZ2VuZXJhdGVkqgIZUXVlc3ROYXYuUHJvdG9zLkdlbmVyYXRlZErkBgoGEgQAAx8BCggKAQwS" + 
-        "AwADFQoICgECEgMCAB0KCAoBCBIDAwA2CgkKAgglEgMDADYKCAoBCBIDBAA+CgkKAggBEgMEAD4KJQoC" + 
-        "AwASAwcAGhoaIEltcG9ydCBnZW9tZXRyeSBtZXNzYWdlcwoKMwoCBAASBAoAEwEaJyBUcmFja2luZyBk" + 
-        "YXRhIHRoYXQgaXMgc2VudCBldmVyeSBsb29wCgoKCgMEAAESAwoIEQo2CgQEAAIAEgMMAhgaKSBOdW1i" + 
-        "ZXIgb2YgZnJhbWVzIHByb2Nlc3NlZCBieSB0aGUgUXVlc3QKCgwKBQQAAgAFEgMMAgcKDAoFBAACAAES" + 
-        "AwwIEwoMCgUEAAIAAxIDDBYXCj8KBAQAAgESAw8CFxoyIFRpbWUgKGluIHNlY29uZHMpIHNpbmNlIHRo" + 
-        "ZSBRdWVzdE5hdiBhcHAgc3RhcnRlZAoKDAoFBAACAQUSAw8CCAoMCgUEAAIBARIDDwkSCgwKBQQAAgED" + 
-        "EgMPFRYKOgoEBAACAhIDEgImGi0gVGhlIDJkIGZpZWxkLXJlbGF0aXZlIHBvc2l0aW9uIG9mIHRoZSBx" + 
-        "dWVzdAoKDAoFBAACAgYSAxICGgoMCgUEAAICARIDEhshCgwKBQQAAgIDEgMSJCUKLQoCBAESBBYAHwEa" + 
-        "ISBEZXZpY2UgZGF0YSB0aGF0IGlzIHNlbnQgc2xvd2VyCgoKCgMEAQESAxYIEgpgCgQEAQIAEgMYAiIa" + 
-        "UyBOdW1iZXIgb2YgdGltZXMgdGhlIFF1ZXN0IGhhcyBsb3N0IHRyYWNraW5nIGFmdGVyIGhhdmluZyBp" + 
-        "dCBzaW5jZSB0aGUgYXBwIHN0YXJ0ZWQKCgwKBQQBAgAFEgMYAgcKDAoFBAECAAESAxgIHQoMCgUEAQIA" + 
-        "AxIDGCAhCjIKBAQBAgESAxsCHholIElmIHRoZSBRdWVzdCBpcyBjdXJyZW50bHkgdHJhY2tpbmc/CgoM" + 
-        "CgUEAQIBBRIDGwIGCgwKBQQBAgEBEgMbBxkKDAoFBAECAQMSAxscHQoyCgQEAQICEgMeAhwaJSBUaGUg",
-        "YmF0dGVyeSBwZXJjZW50YWdlIG9mIHRoZSBRdWVzdAoKDAoFBAECAgUSAx4CBwoMCgUEAQICARIDHggX" + 
-        "CgwKBQQBAgIDEgMeGhtiBnByb3RvMw==");
+    private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(1315,
+        "CgpkYXRhLnByb3RvEhRxdWVzdG5hdi5wcm90b3MuZGF0YRoQZ2VvbWV0cnkyZC5wcm90byKNAQoZUHJv" + 
+        "dG9idWZRdWVzdE5hdkZyYW1lRGF0YRIfCgtmcmFtZV9jb3VudBgBIAEoBVIKZnJhbWVDb3VudBIcCgl0" + 
+        "aW1lc3RhbXAYAiABKAFSCXRpbWVzdGFtcBIxCgZwb3NlMmQYAyABKAsyGS53cGkucHJvdG8uUHJvdG9i" + 
+        "dWZQb3NlMmRSBnBvc2UyZCKoAQoaUHJvdG9idWZRdWVzdE5hdkRldmljZURhdGESMgoVdHJhY2tpbmdf" + 
+        "bG9zdF9jb3VudGVyGAEgASgFUhN0cmFja2luZ0xvc3RDb3VudGVyEi0KEmN1cnJlbnRseV90cmFja2lu" + 
+        "ZxgCIAEoCFIRY3VycmVudGx5VHJhY2tpbmcSJwoPYmF0dGVyeV9wZXJjZW50GAMgASgFUg5iYXR0ZXJ5" + 
+        "UGVyY2VudEJDCiVnZy5xdWVzdG5hdi5xdWVzdG5hdi5wcm90b3MuZ2VuZXJhdGVkqgIZUXVlc3ROYXYu" + 
+        "UHJvdG9zLkdlbmVyYXRlZErkBgoGEgQAAx8BCggKAQwSAwADFQoICgECEgMCAB0KCAoBCBIDAwA2CgkK" + 
+        "AgglEgMDADYKCAoBCBIDBAA+CgkKAggBEgMEAD4KJQoCAwASAwcAGhoaIEltcG9ydCBnZW9tZXRyeSBt" + 
+        "ZXNzYWdlcwoKMwoCBAASBAoAEwEaJyBUcmFja2luZyBkYXRhIHRoYXQgaXMgc2VudCBldmVyeSBsb29w" + 
+        "CgoKCgMEAAESAwoIIQo2CgQEAAIAEgMMAhgaKSBOdW1iZXIgb2YgZnJhbWVzIHByb2Nlc3NlZCBieSB0" + 
+        "aGUgUXVlc3QKCgwKBQQAAgAFEgMMAgcKDAoFBAACAAESAwwIEwoMCgUEAAIAAxIDDBYXCj8KBAQAAgES" + 
+        "Aw8CFxoyIFRpbWUgKGluIHNlY29uZHMpIHNpbmNlIHRoZSBRdWVzdE5hdiBhcHAgc3RhcnRlZAoKDAoF" + 
+        "BAACAQUSAw8CCAoMCgUEAAIBARIDDwkSCgwKBQQAAgEDEgMPFRYKOgoEBAACAhIDEgImGi0gVGhlIDJk" + 
+        "IGZpZWxkLXJlbGF0aXZlIHBvc2l0aW9uIG9mIHRoZSBxdWVzdAoKDAoFBAACAgYSAxICGgoMCgUEAAIC" + 
+        "ARIDEhshCgwKBQQAAgIDEgMSJCUKLQoCBAESBBYAHwEaISBEZXZpY2UgZGF0YSB0aGF0IGlzIHNlbnQg" + 
+        "c2xvd2VyCgoKCgMEAQESAxYIIgpgCgQEAQIAEgMYAiIaUyBOdW1iZXIgb2YgdGltZXMgdGhlIFF1ZXN0" + 
+        "IGhhcyBsb3N0IHRyYWNraW5nIGFmdGVyIGhhdmluZyBpdCBzaW5jZSB0aGUgYXBwIHN0YXJ0ZWQKCgwK" + 
+        "BQQBAgAFEgMYAgcKDAoFBAECAAESAxgIHQoMCgUEAQIAAxIDGCAhCjIKBAQBAgESAxsCHholIElmIHRo" + 
+        "ZSBRdWVzdCBpcyBjdXJyZW50bHkgdHJhY2tpbmc/CgoMCgUEAQIBBRIDGwIGCgwKBQQBAgEBEgMbBxkK",
+        "DAoFBAECAQMSAxscHQoyCgQEAQICEgMeAhwaJSBUaGUgYmF0dGVyeSBwZXJjZW50YWdlIG9mIHRoZSBR" + 
+        "dWVzdAoKDAoFBAECAgUSAx4CBwoMCgUEAQICARIDHggXCgwKBQQBAgIDEgMeGhtiBnByb3RvMw==");
 
     static final Descriptors.FileDescriptor descriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom("data.proto", "questnav.protos.data", descriptorData, Geometry2D.getDescriptor());
 
-    static final Descriptors.Descriptor questnav_protos_data_FrameData_descriptor = descriptor.internalContainedType(54, 125, "FrameData", "questnav.protos.data.FrameData");
+    static final Descriptors.Descriptor questnav_protos_data_ProtobufQuestNavFrameData_descriptor = descriptor.internalContainedType(55, 141, "ProtobufQuestNavFrameData", "questnav.protos.data.ProtobufQuestNavFrameData");
 
-    static final Descriptors.Descriptor questnav_protos_data_DeviceData_descriptor = descriptor.internalContainedType(182, 152, "DeviceData", "questnav.protos.data.DeviceData");
+    static final Descriptors.Descriptor questnav_protos_data_ProtobufQuestNavDeviceData_descriptor = descriptor.internalContainedType(199, 168, "ProtobufQuestNavDeviceData", "questnav.protos.data.ProtobufQuestNavDeviceData");
 
     /**
      * @return this proto file's descriptor.
@@ -58,9 +58,9 @@ public final class Data {
      *  Tracking data that is sent every loop
      * </pre>
      *
-     * Protobuf type {@code FrameData}
+     * Protobuf type {@code ProtobufQuestNavFrameData}
      */
-    public static final class FrameData extends ProtoMessage<FrameData> implements Cloneable {
+    public static final class ProtobufQuestNavFrameData extends ProtoMessage<ProtobufQuestNavFrameData> implements Cloneable {
         private static final long serialVersionUID = 0L;
 
         /**
@@ -90,7 +90,7 @@ public final class Data {
          */
         private final Geometry2D.ProtobufPose2d pose2D = Geometry2D.ProtobufPose2d.newInstance();
 
-        private FrameData() {
+        private ProtobufQuestNavFrameData() {
         }
 
         /**
@@ -98,10 +98,10 @@ public final class Data {
          *  Tracking data that is sent every loop
          * </pre>
          *
-         * @return a new empty instance of {@code FrameData}
+         * @return a new empty instance of {@code ProtobufQuestNavFrameData}
          */
-        public static FrameData newInstance() {
-            return new FrameData();
+        public static ProtobufQuestNavFrameData newInstance() {
+            return new ProtobufQuestNavFrameData();
         }
 
         /**
@@ -124,7 +124,7 @@ public final class Data {
          * <code>optional double timestamp = 2;</code>
          * @return this
          */
-        public FrameData clearTimestamp() {
+        public ProtobufQuestNavFrameData clearTimestamp() {
             bitField0_ &= ~0x00000001;
             timestamp = 0D;
             return this;
@@ -151,7 +151,7 @@ public final class Data {
          * @param value the timestamp to set
          * @return this
          */
-        public FrameData setTimestamp(final double value) {
+        public ProtobufQuestNavFrameData setTimestamp(final double value) {
             bitField0_ |= 0x00000001;
             timestamp = value;
             return this;
@@ -177,7 +177,7 @@ public final class Data {
          * <code>optional int32 frame_count = 1;</code>
          * @return this
          */
-        public FrameData clearFrameCount() {
+        public ProtobufQuestNavFrameData clearFrameCount() {
             bitField0_ &= ~0x00000002;
             frameCount = 0;
             return this;
@@ -204,7 +204,7 @@ public final class Data {
          * @param value the frameCount to set
          * @return this
          */
-        public FrameData setFrameCount(final int value) {
+        public ProtobufQuestNavFrameData setFrameCount(final int value) {
             bitField0_ |= 0x00000002;
             frameCount = value;
             return this;
@@ -230,7 +230,7 @@ public final class Data {
          * <code>optional .wpi.proto.ProtobufPose2d pose2d = 3;</code>
          * @return this
          */
-        public FrameData clearPose2D() {
+        public ProtobufQuestNavFrameData clearPose2D() {
             bitField0_ &= ~0x00000004;
             pose2D.clear();
             return this;
@@ -281,14 +281,14 @@ public final class Data {
          * @param value the pose2D to set
          * @return this
          */
-        public FrameData setPose2D(final Geometry2D.ProtobufPose2d value) {
+        public ProtobufQuestNavFrameData setPose2D(final Geometry2D.ProtobufPose2d value) {
             bitField0_ |= 0x00000004;
             pose2D.copyFrom(value);
             return this;
         }
 
         @Override
-        public FrameData copyFrom(final FrameData other) {
+        public ProtobufQuestNavFrameData copyFrom(final ProtobufQuestNavFrameData other) {
             cachedSize = other.cachedSize;
             if ((bitField0_ | other.bitField0_) != 0) {
                 bitField0_ = other.bitField0_;
@@ -300,7 +300,7 @@ public final class Data {
         }
 
         @Override
-        public FrameData mergeFrom(final FrameData other) {
+        public ProtobufQuestNavFrameData mergeFrom(final ProtobufQuestNavFrameData other) {
             if (other.isEmpty()) {
                 return this;
             }
@@ -318,7 +318,7 @@ public final class Data {
         }
 
         @Override
-        public FrameData clear() {
+        public ProtobufQuestNavFrameData clear() {
             if (isEmpty()) {
                 return this;
             }
@@ -331,7 +331,7 @@ public final class Data {
         }
 
         @Override
-        public FrameData clearQuick() {
+        public ProtobufQuestNavFrameData clearQuick() {
             if (isEmpty()) {
                 return this;
             }
@@ -346,10 +346,10 @@ public final class Data {
             if (o == this) {
                 return true;
             }
-            if (!(o instanceof FrameData)) {
+            if (!(o instanceof ProtobufQuestNavFrameData)) {
                 return false;
             }
-            FrameData other = (FrameData) o;
+            ProtobufQuestNavFrameData other = (ProtobufQuestNavFrameData) o;
             return bitField0_ == other.bitField0_
                 && (!hasTimestamp() || ProtoUtil.isEqual(timestamp, other.timestamp))
                 && (!hasFrameCount() || frameCount == other.frameCount)
@@ -389,7 +389,7 @@ public final class Data {
 
         @Override
         @SuppressWarnings("fallthrough")
-        public FrameData mergeFrom(final ProtoSource input) throws IOException {
+        public ProtobufQuestNavFrameData mergeFrom(final ProtoSource input) throws IOException {
             // Enabled Fall-Through Optimization (QuickBuffers)
             int tag = input.readTag();
             while (true) {
@@ -451,7 +451,7 @@ public final class Data {
         }
 
         @Override
-        public FrameData mergeFrom(final JsonSource input) throws IOException {
+        public ProtobufQuestNavFrameData mergeFrom(final JsonSource input) throws IOException {
             if (!input.beginObject()) {
                 return this;
             }
@@ -502,8 +502,8 @@ public final class Data {
         }
 
         @Override
-        public FrameData clone() {
-            return new FrameData().copyFrom(this);
+        public ProtobufQuestNavFrameData clone() {
+            return new ProtobufQuestNavFrameData().copyFrom(this);
         }
 
         @Override
@@ -511,38 +511,41 @@ public final class Data {
             return ((bitField0_) == 0);
         }
 
-        public static FrameData parseFrom(final byte[] data) throws InvalidProtocolBufferException {
-            return ProtoMessage.mergeFrom(new FrameData(), data).checkInitialized();
+        public static ProtobufQuestNavFrameData parseFrom(final byte[] data) throws
+                InvalidProtocolBufferException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavFrameData(), data).checkInitialized();
         }
 
-        public static FrameData parseFrom(final ProtoSource input) throws IOException {
-            return ProtoMessage.mergeFrom(new FrameData(), input).checkInitialized();
+        public static ProtobufQuestNavFrameData parseFrom(final ProtoSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavFrameData(), input).checkInitialized();
         }
 
-        public static FrameData parseFrom(final JsonSource input) throws IOException {
-            return ProtoMessage.mergeFrom(new FrameData(), input).checkInitialized();
+        public static ProtobufQuestNavFrameData parseFrom(final JsonSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavFrameData(), input).checkInitialized();
         }
 
         /**
-         * @return factory for creating FrameData messages
+         * @return factory for creating ProtobufQuestNavFrameData messages
          */
-        public static MessageFactory<FrameData> getFactory() {
-            return FrameDataFactory.INSTANCE;
+        public static MessageFactory<ProtobufQuestNavFrameData> getFactory() {
+            return ProtobufQuestNavFrameDataFactory.INSTANCE;
         }
 
         /**
          * @return this type's descriptor.
          */
         public static Descriptors.Descriptor getDescriptor() {
-            return Data.questnav_protos_data_FrameData_descriptor;
+            return Data.questnav_protos_data_ProtobufQuestNavFrameData_descriptor;
         }
 
-        private enum FrameDataFactory implements MessageFactory<FrameData> {
+        private enum ProtobufQuestNavFrameDataFactory implements MessageFactory<ProtobufQuestNavFrameData> {
             INSTANCE;
 
             @Override
-            public FrameData create() {
-                return FrameData.newInstance();
+            public ProtobufQuestNavFrameData create() {
+                return ProtobufQuestNavFrameData.newInstance();
             }
         }
 
@@ -563,9 +566,9 @@ public final class Data {
      *  Device data that is sent slower
      * </pre>
      *
-     * Protobuf type {@code DeviceData}
+     * Protobuf type {@code ProtobufQuestNavDeviceData}
      */
-    public static final class DeviceData extends ProtoMessage<DeviceData> implements Cloneable {
+    public static final class ProtobufQuestNavDeviceData extends ProtoMessage<ProtobufQuestNavDeviceData> implements Cloneable {
         private static final long serialVersionUID = 0L;
 
         /**
@@ -595,7 +598,7 @@ public final class Data {
          */
         private boolean currentlyTracking;
 
-        private DeviceData() {
+        private ProtobufQuestNavDeviceData() {
         }
 
         /**
@@ -603,10 +606,10 @@ public final class Data {
          *  Device data that is sent slower
          * </pre>
          *
-         * @return a new empty instance of {@code DeviceData}
+         * @return a new empty instance of {@code ProtobufQuestNavDeviceData}
          */
-        public static DeviceData newInstance() {
-            return new DeviceData();
+        public static ProtobufQuestNavDeviceData newInstance() {
+            return new ProtobufQuestNavDeviceData();
         }
 
         /**
@@ -629,7 +632,7 @@ public final class Data {
          * <code>optional int32 tracking_lost_counter = 1;</code>
          * @return this
          */
-        public DeviceData clearTrackingLostCounter() {
+        public ProtobufQuestNavDeviceData clearTrackingLostCounter() {
             bitField0_ &= ~0x00000001;
             trackingLostCounter = 0;
             return this;
@@ -656,7 +659,7 @@ public final class Data {
          * @param value the trackingLostCounter to set
          * @return this
          */
-        public DeviceData setTrackingLostCounter(final int value) {
+        public ProtobufQuestNavDeviceData setTrackingLostCounter(final int value) {
             bitField0_ |= 0x00000001;
             trackingLostCounter = value;
             return this;
@@ -682,7 +685,7 @@ public final class Data {
          * <code>optional int32 battery_percent = 3;</code>
          * @return this
          */
-        public DeviceData clearBatteryPercent() {
+        public ProtobufQuestNavDeviceData clearBatteryPercent() {
             bitField0_ &= ~0x00000002;
             batteryPercent = 0;
             return this;
@@ -709,7 +712,7 @@ public final class Data {
          * @param value the batteryPercent to set
          * @return this
          */
-        public DeviceData setBatteryPercent(final int value) {
+        public ProtobufQuestNavDeviceData setBatteryPercent(final int value) {
             bitField0_ |= 0x00000002;
             batteryPercent = value;
             return this;
@@ -735,7 +738,7 @@ public final class Data {
          * <code>optional bool currently_tracking = 2;</code>
          * @return this
          */
-        public DeviceData clearCurrentlyTracking() {
+        public ProtobufQuestNavDeviceData clearCurrentlyTracking() {
             bitField0_ &= ~0x00000004;
             currentlyTracking = false;
             return this;
@@ -762,14 +765,14 @@ public final class Data {
          * @param value the currentlyTracking to set
          * @return this
          */
-        public DeviceData setCurrentlyTracking(final boolean value) {
+        public ProtobufQuestNavDeviceData setCurrentlyTracking(final boolean value) {
             bitField0_ |= 0x00000004;
             currentlyTracking = value;
             return this;
         }
 
         @Override
-        public DeviceData copyFrom(final DeviceData other) {
+        public ProtobufQuestNavDeviceData copyFrom(final ProtobufQuestNavDeviceData other) {
             cachedSize = other.cachedSize;
             if ((bitField0_ | other.bitField0_) != 0) {
                 bitField0_ = other.bitField0_;
@@ -781,7 +784,7 @@ public final class Data {
         }
 
         @Override
-        public DeviceData mergeFrom(final DeviceData other) {
+        public ProtobufQuestNavDeviceData mergeFrom(final ProtobufQuestNavDeviceData other) {
             if (other.isEmpty()) {
                 return this;
             }
@@ -799,7 +802,7 @@ public final class Data {
         }
 
         @Override
-        public DeviceData clear() {
+        public ProtobufQuestNavDeviceData clear() {
             if (isEmpty()) {
                 return this;
             }
@@ -812,7 +815,7 @@ public final class Data {
         }
 
         @Override
-        public DeviceData clearQuick() {
+        public ProtobufQuestNavDeviceData clearQuick() {
             if (isEmpty()) {
                 return this;
             }
@@ -826,10 +829,10 @@ public final class Data {
             if (o == this) {
                 return true;
             }
-            if (!(o instanceof DeviceData)) {
+            if (!(o instanceof ProtobufQuestNavDeviceData)) {
                 return false;
             }
-            DeviceData other = (DeviceData) o;
+            ProtobufQuestNavDeviceData other = (ProtobufQuestNavDeviceData) o;
             return bitField0_ == other.bitField0_
                 && (!hasTrackingLostCounter() || trackingLostCounter == other.trackingLostCounter)
                 && (!hasBatteryPercent() || batteryPercent == other.batteryPercent)
@@ -869,7 +872,7 @@ public final class Data {
 
         @Override
         @SuppressWarnings("fallthrough")
-        public DeviceData mergeFrom(final ProtoSource input) throws IOException {
+        public ProtobufQuestNavDeviceData mergeFrom(final ProtoSource input) throws IOException {
             // Enabled Fall-Through Optimization (QuickBuffers)
             int tag = input.readTag();
             while (true) {
@@ -931,7 +934,7 @@ public final class Data {
         }
 
         @Override
-        public DeviceData mergeFrom(final JsonSource input) throws IOException {
+        public ProtobufQuestNavDeviceData mergeFrom(final JsonSource input) throws IOException {
             if (!input.beginObject()) {
                 return this;
             }
@@ -984,8 +987,8 @@ public final class Data {
         }
 
         @Override
-        public DeviceData clone() {
-            return new DeviceData().copyFrom(this);
+        public ProtobufQuestNavDeviceData clone() {
+            return new ProtobufQuestNavDeviceData().copyFrom(this);
         }
 
         @Override
@@ -993,39 +996,41 @@ public final class Data {
             return ((bitField0_) == 0);
         }
 
-        public static DeviceData parseFrom(final byte[] data) throws
+        public static ProtobufQuestNavDeviceData parseFrom(final byte[] data) throws
                 InvalidProtocolBufferException {
-            return ProtoMessage.mergeFrom(new DeviceData(), data).checkInitialized();
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavDeviceData(), data).checkInitialized();
         }
 
-        public static DeviceData parseFrom(final ProtoSource input) throws IOException {
-            return ProtoMessage.mergeFrom(new DeviceData(), input).checkInitialized();
+        public static ProtobufQuestNavDeviceData parseFrom(final ProtoSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavDeviceData(), input).checkInitialized();
         }
 
-        public static DeviceData parseFrom(final JsonSource input) throws IOException {
-            return ProtoMessage.mergeFrom(new DeviceData(), input).checkInitialized();
+        public static ProtobufQuestNavDeviceData parseFrom(final JsonSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavDeviceData(), input).checkInitialized();
         }
 
         /**
-         * @return factory for creating DeviceData messages
+         * @return factory for creating ProtobufQuestNavDeviceData messages
          */
-        public static MessageFactory<DeviceData> getFactory() {
-            return DeviceDataFactory.INSTANCE;
+        public static MessageFactory<ProtobufQuestNavDeviceData> getFactory() {
+            return ProtobufQuestNavDeviceDataFactory.INSTANCE;
         }
 
         /**
          * @return this type's descriptor.
          */
         public static Descriptors.Descriptor getDescriptor() {
-            return Data.questnav_protos_data_DeviceData_descriptor;
+            return Data.questnav_protos_data_ProtobufQuestNavDeviceData_descriptor;
         }
 
-        private enum DeviceDataFactory implements MessageFactory<DeviceData> {
+        private enum ProtobufQuestNavDeviceDataFactory implements MessageFactory<ProtobufQuestNavDeviceData> {
             INSTANCE;
 
             @Override
-            public DeviceData create() {
-                return DeviceData.newInstance();
+            public ProtobufQuestNavDeviceData create() {
+                return ProtobufQuestNavDeviceData.newInstance();
             }
         }
 

@@ -69,19 +69,23 @@ jobs:
 
       - name: Free Disk Space
         uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          android: false
+          dotnet: false
 
       - name: Build Unity Project for Android
         uses: game-ci/unity-builder@v4
         id: buildUnity
         env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         with:
           projectPath: unity
           targetPlatform: Android
           versioning: Custom
-          version: ${{ inputs.versionYear }}.${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}${{ inputs.versionType && format('-{0}', inputs.versionType) || '' }}
+          version: '${{ inputs.versionYear }}.${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}${{ inputs.versionType && format('-{0}', inputs.versionType) || '' }}'
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

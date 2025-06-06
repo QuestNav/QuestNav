@@ -24,20 +24,20 @@ namespace QuestNav.Protos.Generated {
     static CommandsReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg5jb21tYW5kcy5wcm90bxIYcXVlc3RuYXYucHJvdG9zLmNvbW1hbmRzGg5n",
-            "ZW9tZXRyeS5wcm90byJJChBQb3NlUmVzZXRQYXlsb2FkEjUKC3RhcmdldF9w",
-            "b3NlGAEgASgLMiAucXVlc3RuYXYucHJvdG9zLmdlb21ldHJ5LlBvc2UyZCKn",
-            "AQoHQ29tbWFuZBIzCgR0eXBlGAEgASgOMiUucXVlc3RuYXYucHJvdG9zLmNv",
-            "bW1hbmRzLkNvbW1hbmRUeXBlEhIKCmNvbW1hbmRfaWQYAiABKA0SSAoScG9z",
-            "ZV9yZXNldF9wYXlsb2FkGAogASgLMioucXVlc3RuYXYucHJvdG9zLmNvbW1h",
-            "bmRzLlBvc2VSZXNldFBheWxvYWRIAEIJCgdwYXlsb2FkIk0KD0NvbW1hbmRS",
-            "ZXNwb25zZRISCgpjb21tYW5kX2lkGAEgASgNEg8KB3N1Y2Nlc3MYAiABKAgS",
-            "FQoNZXJyb3JfbWVzc2FnZRgDIAEoCSo7CgtDb21tYW5kVHlwZRIcChhDT01N",
-            "QU5EX1RZUEVfVU5TUEVDSUZJRUQQABIOCgpQT1NFX1JFU0VUEAFCQwolZ2cu",
-            "cXVlc3RuYXYucXVlc3RuYXYucHJvdG9zLmdlbmVyYXRlZKoCGVF1ZXN0TmF2",
-            "LlByb3Rvcy5HZW5lcmF0ZWRiBnByb3RvMw=="));
+            "Cg5jb21tYW5kcy5wcm90bxIYcXVlc3RuYXYucHJvdG9zLmNvbW1hbmRzGhBn",
+            "ZW9tZXRyeTJkLnByb3RvIkIKEFBvc2VSZXNldFBheWxvYWQSLgoLdGFyZ2V0",
+            "X3Bvc2UYASABKAsyGS53cGkucHJvdG8uUHJvdG9idWZQb3NlMmQipwEKB0Nv",
+            "bW1hbmQSMwoEdHlwZRgBIAEoDjIlLnF1ZXN0bmF2LnByb3Rvcy5jb21tYW5k",
+            "cy5Db21tYW5kVHlwZRISCgpjb21tYW5kX2lkGAIgASgNEkgKEnBvc2VfcmVz",
+            "ZXRfcGF5bG9hZBgKIAEoCzIqLnF1ZXN0bmF2LnByb3Rvcy5jb21tYW5kcy5Q",
+            "b3NlUmVzZXRQYXlsb2FkSABCCQoHcGF5bG9hZCJNCg9Db21tYW5kUmVzcG9u",
+            "c2USEgoKY29tbWFuZF9pZBgBIAEoDRIPCgdzdWNjZXNzGAIgASgIEhUKDWVy",
+            "cm9yX21lc3NhZ2UYAyABKAkqOwoLQ29tbWFuZFR5cGUSHAoYQ09NTUFORF9U",
+            "WVBFX1VOU1BFQ0lGSUVEEAASDgoKUE9TRV9SRVNFVBABQkMKJWdnLnF1ZXN0",
+            "bmF2LnF1ZXN0bmF2LnByb3Rvcy5nZW5lcmF0ZWSqAhlRdWVzdE5hdi5Qcm90",
+            "b3MuR2VuZXJhdGVkYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::QuestNav.Protos.Generated.GeometryReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Wpi.Proto.Geometry2DReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::QuestNav.Protos.Generated.CommandType), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.PoseResetPayload), global::QuestNav.Protos.Generated.PoseResetPayload.Parser, new[]{ "TargetPose" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.Command), global::QuestNav.Protos.Generated.Command.Parser, new[]{ "Type", "CommandId", "PoseResetPayload" }, new[]{ "Payload" }, null, null, null),
@@ -114,13 +114,13 @@ namespace QuestNav.Protos.Generated {
 
     /// <summary>Field number for the "target_pose" field.</summary>
     public const int TargetPoseFieldNumber = 1;
-    private global::QuestNav.Protos.Generated.Pose2d targetPose_;
+    private global::Wpi.Proto.ProtobufPose2d targetPose_;
     /// <summary>
     /// Target pose in field-relative WPILib coordinate space (x forward, y left, rotation CCW+)
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::QuestNav.Protos.Generated.Pose2d TargetPose {
+    public global::Wpi.Proto.ProtobufPose2d TargetPose {
       get { return targetPose_; }
       set {
         targetPose_ = value;
@@ -214,7 +214,7 @@ namespace QuestNav.Protos.Generated {
       }
       if (other.targetPose_ != null) {
         if (targetPose_ == null) {
-          TargetPose = new global::QuestNav.Protos.Generated.Pose2d();
+          TargetPose = new global::Wpi.Proto.ProtobufPose2d();
         }
         TargetPose.MergeFrom(other.TargetPose);
       }
@@ -235,7 +235,7 @@ namespace QuestNav.Protos.Generated {
             break;
           case 10: {
             if (targetPose_ == null) {
-              TargetPose = new global::QuestNav.Protos.Generated.Pose2d();
+              TargetPose = new global::Wpi.Proto.ProtobufPose2d();
             }
             input.ReadMessage(TargetPose);
             break;
@@ -257,7 +257,7 @@ namespace QuestNav.Protos.Generated {
             break;
           case 10: {
             if (targetPose_ == null) {
-              TargetPose = new global::QuestNav.Protos.Generated.Pose2d();
+              TargetPose = new global::Wpi.Proto.ProtobufPose2d();
             }
             input.ReadMessage(TargetPose);
             break;

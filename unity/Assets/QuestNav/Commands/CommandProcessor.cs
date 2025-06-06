@@ -45,7 +45,7 @@ namespace QuestNav.Commands
 
         public void ProcessCommands()
         {
-            Command receivedCommand = networkTableConnection.GetCommandRequest();
+            ProtobufQuestNavCommand receivedCommand = networkTableConnection.GetCommandRequest();
 
             switch (receivedCommand.CommandId)
             {

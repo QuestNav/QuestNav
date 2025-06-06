@@ -45,7 +45,7 @@ namespace QuestNav.Commands.Commands
         /// <summary>
         /// Executes the pose reset command
         /// </summary>
-        public void Execute(Command receivedCommand)
+        public void Execute(ProtobufQuestNavCommand receivedCommand)
         {
             QueuedLogger.Log("Received pose reset request, initiating reset...");
 
@@ -107,13 +107,13 @@ namespace QuestNav.Commands.Commands
                 );
                 QueuedLogger.Log("Pose reset completed successfully");
                 networkTableConnection.SetCommandResponse(
-                    new CommandResponse { CommandId = receivedCommand.CommandId, Success = true }
+                    new ProtobufQuestNavCommandResponse { CommandId = receivedCommand.CommandId, Success = true }
                 );
             }
             else
             {
                 networkTableConnection.SetCommandResponse(
-                    new CommandResponse
+                    new ProtobufQuestNavCommandResponse
                     {
                         CommandId = receivedCommand.CommandId,
                         ErrorMessage = "Failed to get valid pose data (Out of bounds or invalid)",

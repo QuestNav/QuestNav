@@ -15,6 +15,6 @@ namespace QuestNav.Commands
         /// <summary>
         /// Executes this command
         /// </summary>
-        void Execute(Command receivedCommand);
+        void Execute(ProtobufQuestNavCommand receivedCommand);
     }
 }

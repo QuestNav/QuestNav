@@ -52,9 +52,9 @@ namespace QuestNav.Network
         /// <param name="teamNumber">The team number</param>
         void UpdateTeamNumber(int teamNumber);
 
-        Command GetCommandRequest();
+        ProtobufQuestNavCommand GetCommandRequest();
 
-        void SetCommandResponse(CommandResponse response);
+        void SetCommandResponse(ProtobufQuestNavCommandResponse response);
 
         void LoggerPeriodic();
     }
@@ -74,12 +74,12 @@ public class NetworkTableConnection : INetworkTableConnection
     private PolledLogger ntInstanceLogger;
 
     // Publisher topics
-    private ProtobufPublisher<FrameData> frameDataPublisher;
-    private ProtobufPublisher<DeviceData> deviceDataPublisher;
-    private ProtobufPublisher<CommandResponse> commandResponsePublisher;
+    private ProtobufPublisher<ProtobufQuestNavFrameData> frameDataPublisher;
+    private ProtobufPublisher<ProtobufQuestNavDeviceData> deviceDataPublisher;
+    private ProtobufPublisher<ProtobufQuestNavCommandResponse> commandResponsePublisher;
 
     // Subscriber topics
-    private ProtobufSubscriber<Command> commandRequestSubscriber;
+    private ProtobufSubscriber<ProtobufQuestNavCommand> commandRequestSubscriber;
 
     // Ready state variables
     private bool teamNumberSet = false;
@@ -98,21 +98,21 @@ public class NetworkTableConnection : INetworkTableConnection
         );
 
         // Instantiate publisher topics
-        frameDataPublisher = ntInstance.GetProtobufPublisher<FrameData>(
+        frameDataPublisher = ntInstance.GetProtobufPublisher<ProtobufQuestNavFrameData>(
             QuestNavConstants.Topics.FRAME_DATA,
             QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
         );
-        deviceDataPublisher = ntInstance.GetProtobufPublisher<DeviceData>(
+        deviceDataPublisher = ntInstance.GetProtobufPublisher<ProtobufQuestNavDeviceData>(
             QuestNavConstants.Topics.DEVICE_DATA,
             QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
         );
-        commandResponsePublisher = ntInstance.GetProtobufPublisher<CommandResponse>(
+        commandResponsePublisher = ntInstance.GetProtobufPublisher<ProtobufQuestNavCommandResponse>(
             QuestNavConstants.Topics.COMMAND_RESPONSE,
             QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
         );
 
         // Instantiate subscriber topics
-        commandRequestSubscriber = ntInstance.GetProtobufSubscriber<Command>(
+        commandRequestSubscriber = ntInstance.GetProtobufSubscriber<ProtobufQuestNavCommand>(
             QuestNavConstants.Topics.COMMAND_REQUEST,
             QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
         );
@@ -164,7 +164,7 @@ public class NetworkTableConnection : INetworkTableConnection
 
     #region Data Publishing Methods
 
-    private readonly FrameData frameData = new();
+    private readonly ProtobufQuestNavFrameData frameData = new();
 
     /// <summary>
     /// Publishes current frame data to NetworkTables
@@ -184,7 +184,7 @@ public class NetworkTableConnection : INetworkTableConnection
         frameDataPublisher.Set(frameData);
     }
 
-    private readonly DeviceData deviceData = new();
+    private readonly ProtobufQuestNavDeviceData deviceData = new();
 
     /// <summary>
     /// Publishes current device data to NetworkTables
@@ -210,18 +210,18 @@ public class NetworkTableConnection : INetworkTableConnection
     /// <summary>
     ///  Default command when no command is sent
     /// </summary>
-    private readonly Command defaultCommand = new()
+    private readonly ProtobufQuestNavCommand defaultCommand = new()
     {
-        Type = CommandType.Unspecified,
+        Type = QuestNavCommandType.CommandTypeUnspecified,
         CommandId = 0,
     };
 
-    public Command GetCommandRequest()
+    public ProtobufQuestNavCommand GetCommandRequest()
     {
         return commandRequestSubscriber.Get(defaultCommand);
     }
 
-    public void SetCommandResponse(CommandResponse response)
+    public void SetCommandResponse(ProtobufQuestNavCommandResponse response)
     {
         commandResponsePublisher.Set(response);
     }

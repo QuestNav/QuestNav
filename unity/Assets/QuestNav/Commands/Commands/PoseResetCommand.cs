@@ -107,7 +107,11 @@ namespace QuestNav.Commands.Commands
                 );
                 QueuedLogger.Log("Pose reset completed successfully");
                 networkTableConnection.SetCommandResponse(
-                    new ProtobufQuestNavCommandResponse { CommandId = receivedCommand.CommandId, Success = true }
+                    new ProtobufQuestNavCommandResponse
+                    {
+                        CommandId = receivedCommand.CommandId,
+                        Success = true,
+                    }
                 );
             }
             else

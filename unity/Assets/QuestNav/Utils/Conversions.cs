@@ -55,7 +55,10 @@ namespace QuestNav.Utils
                     X = unityPosition.z, // Unity Z → FRC X
                     Y = -unityPosition.x, // Unity X → FRC -Y
                 },
-                Rotation = new ProtobufRotation2d { Value = unityRotation.eulerAngles.y * Mathf.Deg2Rad },
+                Rotation = new ProtobufRotation2d
+                {
+                    Value = unityRotation.eulerAngles.y * Mathf.Deg2Rad,
+                },
             };
         }
     }

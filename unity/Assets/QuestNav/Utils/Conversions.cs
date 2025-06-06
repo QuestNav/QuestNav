@@ -1,5 +1,5 @@
-﻿using QuestNav.Protos;
-using UnityEngine;
+﻿using UnityEngine;
+using Wpi.Proto;
 
 namespace QuestNav.Utils
 {
@@ -16,7 +16,7 @@ namespace QuestNav.Utils
         /// <param name="currentQuaternion">The current rotation to preserve pitch and roll.</param>
         /// <returns>A tuple of Vector3 and Quaternion in Unity coordinate system.</returns>
         public static (Vector3 position, Quaternion rotation) FrcToUnity(
-            Pose2d targetPose2d,
+            ProtobufPose2d targetPose2d,
             Vector3 currentPose,
             Quaternion currentQuaternion
         )
@@ -32,7 +32,7 @@ namespace QuestNav.Utils
             Vector3 currentEuler = currentQuaternion.eulerAngles;
             Vector3 newEuler = new Vector3(
                 currentEuler.x, // Keep current pitch
-                (float)(targetPose2d.Rotation.Radians * Mathf.Rad2Deg), // Set yaw from FRC
+                (float)(targetPose2d.Rotation.Value * Mathf.Rad2Deg), // Set yaw from FRC
                 currentEuler.z // Keep current roll
             );
             Quaternion unityRotation = Quaternion.Euler(newEuler);
@@ -46,16 +46,16 @@ namespace QuestNav.Utils
         /// <param name="unityPosition">The position in Unity coordinates.</param>
         /// <param name="unityRotation">The rotation in Unity coordinates.</param>
         /// <returns>A Pose2d representing position and rotation in FRC coordinates.</returns>
-        public static Pose2d UnityToFrc(Vector3 unityPosition, Quaternion unityRotation)
+        public static ProtobufPose2d UnityToFrc(Vector3 unityPosition, Quaternion unityRotation)
         {
-            return new Pose2d
+            return new ProtobufPose2d
             {
-                Translation = new Translation2d
+                Translation = new ProtobufTranslation2d
                 {
                     X = unityPosition.z, // Unity Z → FRC X
                     Y = -unityPosition.x, // Unity X → FRC -Y
                 },
-                Rotation = new Rotation2d { Radians = unityRotation.eulerAngles.y * Mathf.Deg2Rad },
+                Rotation = new ProtobufRotation2d { Value = unityRotation.eulerAngles.y * Mathf.Deg2Rad },
             };
         }
     }

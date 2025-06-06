@@ -1,4 +1,4 @@
-﻿using QuestNav.Protos;
+﻿using QuestNav.Protos.Generated;
 
 namespace QuestNav.Commands
 {

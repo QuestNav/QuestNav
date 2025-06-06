@@ -2,8 +2,8 @@ using System;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Network;
-using QuestNav.Protos;
 using QuestNav.Utils;
+using QuestNav.Protos.Generated;
 using UnityEngine;
 
 namespace QuestNav.Network

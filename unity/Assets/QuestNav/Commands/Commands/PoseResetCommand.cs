@@ -1,8 +1,9 @@
 ﻿using QuestNav.Core;
 using QuestNav.Network;
-using QuestNav.Protos;
+using QuestNav.Protos.Generated;
 using QuestNav.Utils;
 using UnityEngine;
+using Wpi.Proto;
 
 namespace QuestNav.Commands.Commands
 {
@@ -49,10 +50,10 @@ namespace QuestNav.Commands.Commands
             QueuedLogger.Log("Received pose reset request, initiating reset...");
 
             // Read pose data from network tables
-            Pose2d resetPose = receivedCommand.PoseResetPayload.TargetPose;
+            ProtobufPose2d resetPose = receivedCommand.PoseResetPayload.TargetPose;
             double poseX = resetPose.Translation.X;
             double poseY = resetPose.Translation.Y;
-            double poseTheta = resetPose.Rotation.Radians;
+            double poseTheta = resetPose.Rotation.Value;
 
             // Validate pose data
             bool validPose =

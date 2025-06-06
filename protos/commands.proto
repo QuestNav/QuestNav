@@ -17,7 +17,7 @@ enum CommandType {
 // Payload for pose reset command
 message PoseResetPayload {
   // Target pose in field-relative WPILib coordinate space (x forward, y left, rotation CCW+)
-  geometry2d.ProtobufPose2d target_pose = 1;
+  wpi.proto.ProtobufPose2d target_pose = 1;
 }
 
 // Main Command message

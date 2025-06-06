@@ -16,7 +16,7 @@ message FrameData {
   double timestamp = 2;
   
   // The 2d field-relative position of the quest
-  geometry2d.ProtobufPose2d pose2d = 3;
+  wpi.proto.ProtobufPose2d pose2d = 3;
 }
 
 // Device data that is sent slower

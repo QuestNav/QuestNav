@@ -1,4 +1,4 @@
-name: CSharp Formatting
+name: CSharp Formatting Check
 
 on:
   pull_request:

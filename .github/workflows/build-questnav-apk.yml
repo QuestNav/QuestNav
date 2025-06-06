@@ -54,15 +54,18 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: '0'
+          sparse-checkout: unity
+          sparse-checkout-cone-mode: false
           lfs: true
 
       - name: Setup Caching
         uses: actions/cache@v3
         with:
-          path: Library
-          key: Library-Android
-          restore-keys: Library-
+          path: unity/Library
+          key: Library-QuestNav-Android
+          restore-keys: |
+            Library-
+            Library-Questnav-
 
       - name: Free Disk Space
         uses: jlumbroso/free-disk-space@v1.3.1
@@ -75,6 +78,7 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         with:
+          projectPath: unity
           targetPlatform: Android
           versioning: Custom
           version: ${{ inputs.versionYear }}.${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}${{ inputs.versionType && format('-{0}', inputs.versionType) || '' }}

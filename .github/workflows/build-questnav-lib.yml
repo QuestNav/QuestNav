@@ -53,6 +53,16 @@ jobs:
           sparse-checkout: questnav-lib
           sparse-checkout-cone-mode: false
 
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-lib-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-lib-
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -74,16 +84,6 @@ jobs:
             -PreleaseType="${{ inputs.versionType }}" \
             -PfrcYear="${{ inputs.versionYear }}" \
             -PwpilibVersion="${{ inputs.wpilibVersion }}"
-
-      - name: Cache Gradle Dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-lib-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-lib-
 
       - name: Build Library
         run: |

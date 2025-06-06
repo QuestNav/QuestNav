@@ -1,13 +1,16 @@
 package gg.questnav.questnav;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Quaternion;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.proto.Pose2dProto;
+import edu.wpi.first.math.proto.Geometry2D;
 import edu.wpi.first.networktables.*;
-import edu.wpi.first.util.protobuf.Protobuf;
 import edu.wpi.first.wpilibj.Timer;
-import gg.questnav.questnav.protos.Commands;
+import gg.questnav.questnav.protos.generated.Commands;
+import gg.questnav.questnav.protos.generated.Data;
+import gg.questnav.questnav.protos.wpilib.CommandProto;
+import gg.questnav.questnav.protos.wpilib.CommandResponseProto;
+import gg.questnav.questnav.protos.wpilib.DeviceDataProto;
+import gg.questnav.questnav.protos.wpilib.FrameDataProto;
 
 import static edu.wpi.first.units.Units.Microseconds;
 import static edu.wpi.first.units.Units.Seconds;
@@ -25,41 +28,53 @@ public class QuestNav {
     /** NetworkTable for Quest navigation data */
     NetworkTable nt4Table = nt4Instance.getTable("questnav");
 
+    /** Protobuf instance for CommandResponse */
+    private final CommandResponseProto commandResponseProto = new CommandResponseProto();
+
+    /** Protobuf instance for Command */
+    private final CommandProto commandProto = new CommandProto();
+
+    /** Protobuf instance for Pose2d */
+    private final Pose2dProto pose2dProto = new Pose2dProto();
+
+    /** Protobuf instance for device data */
+    private final DeviceDataProto deviceDataProto = new DeviceDataProto();
+
+    /** Protobuf instance for frame data */
+    private final FrameDataProto frameDataProto = new FrameDataProto();
+
     /** Subscriber for command response */
-    private final ProtobufSubscriber<Commands.CommandResponse> response = nt4Table.getProtobufTopic("response", Commands.).subscribe(-1);
+    private final ProtobufSubscriber<Commands.ProtobufQuestNavCommandResponse> response = nt4Table.getProtobufTopic("response", commandResponseProto).subscribe(Commands.ProtobufQuestNavCommandResponse.newInstance());
+
+    /** Subscriber for frame data */
+    private final ProtobufSubscriber<Data.ProtobufQuestNavFrameData> frameData = nt4Instance.getProtobufTopic("frameData", frameDataProto).subscribe(Data.ProtobufQuestNavFrameData.newInstance());
+
+    /** Subscriber for device data */
+    private final ProtobufSubscriber<Data.ProtobufQuestNavDeviceData> deviceData = nt4Instance.getProtobufTopic("deviceData", deviceDataProto).subscribe(Data.ProtobufQuestNavDeviceData.newInstance());
 
     /** Publisher for command requests */
-    private final ProtobufPublisher<Commands.Command> request = nt4Table.getIntegerTopic("request").publish();
+    private final ProtobufPublisher<Commands.ProtobufQuestNavCommand> request = nt4Table.getProtobufTopic("request", commandProto).publish();
 
-    /** Last processed heartbeat request ID */
-    private double lastProcessedHeartbeatId = 0;
+    /** Cached request to lessen GC pressure */
+    private final Commands.ProtobufQuestNavCommand commandRequest = Commands.ProtobufQuestNavCommand.newInstance();
+
+    /** Last processed request id */
+    private int lastRequestId = 0;
 
     /**
      * Sets the FRC field relative pose of the Quest. This is the QUESTS POSITION, NOT THE ROBOTS!
      * Make sure you correctly offset back from the center of your robot first!
      * */
     public void setPose(Pose2d pose) {
-        resetPosePub.set(
-                new double[] {
-                        pose.getX(),
-                        pose.getY(),
-                        pose.getRotation().getDegrees()
-                });
-        questMosi.set(Command.RESET_POSE);
-    }
+        Geometry2D.ProtobufPose2d protoPose = Geometry2D.ProtobufPose2d.newInstance();
+        pose2dProto.pack(protoPose, pose);
+        commandRequest.clear();
+        var requestToSend = commandRequest
+                .setType(Commands.QuestNavCommandType.POSE_RESET)
+                .setCommandId(lastRequestId++)
+                .setPoseResetPayload(Commands.ProtobufQuestNavPoseResetPayload.newInstance().setTargetPose(protoPose));
 
-    /**
-     * Processes heartbeat requests from the Quest headset and responds with the same ID.
-     * This helps maintain connection status between the robot and the Quest.
-     * <br/><b>MUST BE RUN IN PERIODIC METHOD</b>
-     */
-    public void processHeartbeat() {
-        double requestId = heartbeatRequestSub.get();
-        // Only respond to new requests to avoid flooding
-        if (requestId > 0 && requestId != lastProcessedHeartbeatId) {
-            heartbeatResponsePub.set(requestId);
-            lastProcessedHeartbeatId = requestId;
-        }
+        request.set(requestToSend);
     }
 
     /**
@@ -67,8 +82,12 @@ public class QuestNav {
      *
      * @return The battery percentage as a Double value
      */
-    public Double getBatteryPercent() {
-        return questBatteryPercent.get();
+    public int getBatteryPercent() {
+        Data.ProtobufQuestNavDeviceData latestDeviceData = deviceData.get();
+        if (latestDeviceData != null) {
+            return latestDeviceData.getBatteryPercent();
+        }
+        return -1; // Return -1 to indicate no data available
     }
 
     /**
@@ -76,26 +95,38 @@ public class QuestNav {
      *
      * @return Boolean indicating if the Quest is currently tracking (true) or not (false)
      */
-    public Boolean getTrackingStatus() {
-        return questIsTracking.get();
+    public boolean isTracking() {
+        Data.ProtobufQuestNavDeviceData latestDeviceData = deviceData.get();
+        if (latestDeviceData != null) {
+            return latestDeviceData.getCurrentlyTracking();
+        }
+        return false; // Return false if no data for failsafe
     }
 
     /**
      * Gets the current frame count from the Quest headset.
      *
-     * @return The frame count as a Long value
+     * @return The frame count value
      */
-    public Long getFrameCount() {
-        return questFrameCount.get();
+    public int getFrameCount() {
+        Data.ProtobufQuestNavFrameData latestFrameData = frameData.get();
+        if (latestFrameData != null) {
+            return latestFrameData.getFrameCount();
+        }
+        return -1; // Return -1 to indicate no data available
     }
 
     /**
      * Gets the number of tracking lost events since the Quest connected to the robot.
      *
-     * @return The tracking lost counter as a Long value
+     * @return The tracking lost counter value
      */
-    public Long getTrackingLostCounter() {
-        return questTrackingLostCount.get();
+    public int getTrackingLostCounter() {
+        Data.ProtobufQuestNavDeviceData latestDeviceData = deviceData.get();
+        if (latestDeviceData != null) {
+            return latestDeviceData.getTrackingLostCounter();
+        }
+        return -1; // Return -1 to indicate no data available
     }
 
     /**
@@ -104,79 +135,44 @@ public class QuestNav {
      *
      * @return Boolean indicating if the Quest is connected (true) or not (false)
      */
-    public Boolean getConnected() {
+    public Boolean isConnected() {
         return Seconds.of(Timer.getTimestamp())
-                .minus(Microseconds.of(questTimestamp.getLastChange()))
+                .minus(Microseconds.of(deviceData.getLastChange()))
                 .lt(Seconds.of(0.25));
     }
 
     /**
-     * Gets the orientation of the Quest headset as a Quaternion.
-     *
-     * @return The orientation as a Quaternion object
-     */
-    public Quaternion getQuaternion() {
-        float[] qqFloats = questQuaternion.get();
-        return new Quaternion(qqFloats[0], qqFloats[1], qqFloats[2], qqFloats[3]);
-    }
-
-    /**
-     * Gets the Quest's timestamp in NetworkTables server time.
+     * Gets the Quest app's timestamp since start
      *
      * @return The timestamp as a double value
      */
     public double getTimestamp() {
-        return questTimestamp.getAtomic().serverTime;
-    }
-
-    /**
-     * Cleans up Quest navigation subroutine messages after processing on the headset.
-     * Resets the MOSI value to zero if MISO is non-zero.
-     * <br/><b>MUST BE RUN IN PERIODIC METHOD</b>
-     */
-    public void cleanupResponses() {
-        if (questMiso.get() != Status.READY) {
-            switch ((int) questMiso.get()) {
-                case Status.POSE_RESET_COMPLETE -> {
-                    questMosi.set(Command.CLEAR);
-                }
-                case Status.HEADING_RESET_COMPLETE -> {
-                    questMosi.set(Command.CLEAR);
-                }
-                case Status.PING_RESPONSE -> {
-                    questMosi.set(Command.CLEAR);
-                }
-            }
+        Data.ProtobufQuestNavFrameData latestFrameData = frameData.get();
+        if (latestFrameData != null) {
+            return latestFrameData.getTimestamp();
         }
+        return -1; // Return -1 to indicate no data available
     }
 
     /**
-     * Converts the raw QuestNav yaw to a Rotation2d object. Applies necessary coordinate system
+     * Converts the QuestNav rotation to a Rotation2d object. Applies necessary coordinate system
      * transformations.
      *
      * @return Rotation2d representing the headset's yaw
      */
-    private Rotation2d getYaw() {
-        return Rotation2d.fromDegrees(-questEulerAngles.get()[1]);
+    private Pose2d getPose() {
+        Data.ProtobufQuestNavFrameData latestFrameData = frameData.get();
+        if (latestFrameData != null) {
+            return pose2dProto.unpack(latestFrameData.getPose2D());
+        }
+        return Pose2d.kZero; // Return kZero to indicate no data available
     }
 
     /**
-     * Gets the position of the Quest headset as a Translation2d object.
-     * Converts the Quest coordinate system to the robot coordinate system.
-     *
-     * @return The position as a Translation2d object
+     * Cleans up QuestNav responses after processing on the headset.
+     * <br/><b>MUST BE RUN IN PERIODIC METHOD</b>
      */
-    private Translation2d getTranslation() {
-        float[] questnavPosition = questPosition.get();
-        return new Translation2d(questnavPosition[2], -questnavPosition[0]);
-    }
-
-    /**
-     * Gets the complete pose (position and orientation) of the Quest headset.
-     *
-     * @return The pose as a Pose2d object
-     */
-    public Pose2d getPose() {
-        return new Pose2d(getTranslation(), getYaw());
+    private void handleResponses() {
+        //TODO: finish this
     }
 }

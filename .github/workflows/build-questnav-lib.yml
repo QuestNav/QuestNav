@@ -93,19 +93,9 @@ jobs:
             -PfrcYear="${{ inputs.versionYear }}" \
             -PwpilibVersion="${{ inputs.wpilibVersion }}"
 
-      - name: Prepare Artifacts
-        run: |
-          ls -l
-          
-          # Create artifacts directory
-          mkdir -p artifacts
-          
-          # Copy vendor JSON with versioned filename
-          cp build/generated/vendordeps/questnavlib.json artifacts/questnavlib.json
-
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: 'questnavlib.json'
-          path: 'artifacts/questnavlib.json'
+          path: 'build/generated/vendordeps/questnavlib.json'
           retention-days: 7

@@ -2,6 +2,8 @@ name: CSharp Formatting Check
 
 on:
   pull_request:
+    paths:
+      - '**.cs'
 
 jobs:
   format-check:

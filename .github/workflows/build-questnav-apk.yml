@@ -98,7 +98,7 @@ jobs:
           customParameters: -Development
           versioning: Custom
           version: ${{ inputs.versionYear }}.${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}${{ inputs.versionType && format('-{0}', inputs.versionType) || '' }}
-          androidVersionCode: ${{ (inputs.versionYear - 2020) * 10000000 + inputs.versionMajor * 100000 + inputs.versionMinor * 1000 + inputs.versionPatch }}
+          androidVersionCode: $(( (${{ inputs.versionYear }} - 2020) * 100000000 + ${{ inputs.versionMajor }} * 1000000 + ${{ inputs.versionMinor }} * 1000 + ${{ inputs.versionPatch }} ))
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

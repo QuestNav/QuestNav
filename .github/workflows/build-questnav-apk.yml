@@ -83,7 +83,7 @@ jobs:
         run: dotnet tool install --global NuGetForUnity.Cli
 
       - name: Restore NuGetForUnity Packages
-        run: dotnet nugetforunity restore unity/
+        run: nugetforunity restore unity/
         
       - name: Build Unity Project for Android
         uses: game-ci/unity-builder@v4

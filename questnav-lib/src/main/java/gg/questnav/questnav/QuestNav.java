@@ -91,7 +91,7 @@ public class QuestNav {
 
   public QuestNav() {
   }
-  
+
   /**
    * Sets the FRC field relative pose of the Quest. This is the QUESTS POSITION, NOT THE ROBOTS!
    * Make sure you correctly offset back from the center of your robot first!
@@ -204,12 +204,11 @@ public class QuestNav {
   /**
    * Cleans up QuestNav responses after processing on the headset.
    */
-  public void handleResponsesIfNeeded() {
+  public void commandPeriodic() {
     Commands.ProtobufQuestNavCommandResponse latestCommandResponse = response.get();
     if (latestCommandResponse == null) return;
 
     if (latestCommandResponse.getCommandId() != lastRequestId) {
-      DriverStation.reportWarning("Received a stale QuestNav command response. Ignoring!", false);
       return;
     }
 
@@ -217,5 +216,6 @@ public class QuestNav {
       DriverStation.reportError("QuestNav command failed!\n" + latestCommandResponse.getErrorMessage(), false);
       return;
     }
+    
   }
 }

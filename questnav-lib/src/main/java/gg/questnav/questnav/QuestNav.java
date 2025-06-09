@@ -60,19 +60,19 @@ public class QuestNav {
 
   /** Subscriber for frame data */
   private final ProtobufSubscriber<Data.ProtobufQuestNavFrameData> frameData =
-          questNavTable
+      questNavTable
           .getProtobufTopic("frameData", frameDataProto)
           .subscribe(Data.ProtobufQuestNavFrameData.newInstance());
 
   /** Subscriber for device data */
   private final ProtobufSubscriber<Data.ProtobufQuestNavDeviceData> deviceData =
-          questNavTable
+      questNavTable
           .getProtobufTopic("deviceData", deviceDataProto)
           .subscribe(Data.ProtobufQuestNavDeviceData.newInstance());
 
   /** Publisher for command requests */
   private final ProtobufPublisher<Commands.ProtobufQuestNavCommand> request =
-          questNavTable.getProtobufTopic("request", commandProto).publish();
+      questNavTable.getProtobufTopic("request", commandProto).publish();
 
   /** Cached request to lessen GC pressure */
   private final Commands.ProtobufQuestNavCommand cachedCommandRequest =
@@ -80,7 +80,7 @@ public class QuestNav {
 
   /** Cached pose reset request to lessen GC pressure */
   private final Commands.ProtobufQuestNavPoseResetPayload cachedPoseResetPayload =
-          Commands.ProtobufQuestNavPoseResetPayload.newInstance();
+      Commands.ProtobufQuestNavPoseResetPayload.newInstance();
 
   /** Cached proto pose (for reset requests) to lessen GC pressure */
   private final Geometry2D.ProtobufPose2d cachedProtoPose = Geometry2D.ProtobufPose2d.newInstance();
@@ -88,9 +88,7 @@ public class QuestNav {
   /** Last processed request id */
   private int lastRequestId = 0;
 
-
-  public QuestNav() {
-  }
+  public QuestNav() {}
 
   /**
    * Sets the FRC field relative pose of the Quest. This is the QUESTS POSITION, NOT THE ROBOTS!
@@ -101,11 +99,10 @@ public class QuestNav {
     pose2dProto.pack(cachedProtoPose, pose);
     cachedCommandRequest.clear();
     var requestToSend =
-            cachedCommandRequest
-                    .setType(Commands.QuestNavCommandType.POSE_RESET)
-                    .setCommandId(++lastRequestId)
-                    .setPoseResetPayload(
-                            cachedPoseResetPayload.clear().setTargetPose(cachedProtoPose));
+        cachedCommandRequest
+            .setType(Commands.QuestNavCommandType.POSE_RESET)
+            .setCommandId(++lastRequestId)
+            .setPoseResetPayload(cachedPoseResetPayload.clear().setTargetPose(cachedProtoPose));
 
     request.set(requestToSend);
   }
@@ -201,9 +198,7 @@ public class QuestNav {
     return Pose2d.kZero; // Return kZero to indicate no data available
   }
 
-  /**
-   * Cleans up QuestNav responses after processing on the headset.
-   */
+  /** Cleans up QuestNav responses after processing on the headset. */
   public void commandPeriodic() {
     Commands.ProtobufQuestNavCommandResponse latestCommandResponse = response.get();
     if (latestCommandResponse == null) return;
@@ -213,9 +208,9 @@ public class QuestNav {
     }
 
     if (!latestCommandResponse.getSuccess()) {
-      DriverStation.reportError("QuestNav command failed!\n" + latestCommandResponse.getErrorMessage(), false);
+      DriverStation.reportError(
+          "QuestNav command failed!\n" + latestCommandResponse.getErrorMessage(), false);
       return;
     }
-    
   }
 }

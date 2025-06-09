@@ -35,7 +35,7 @@ public class QuestNav {
   NetworkTableInstance nt4Instance = NetworkTableInstance.getDefault();
 
   /** NetworkTable for Quest navigation data */
-  NetworkTable nt4Table = nt4Instance.getTable("questnav");
+  NetworkTable questNavTable = nt4Instance.getTable("questnav");
 
   /** Protobuf instance for CommandResponse */
   private final CommandResponseProto commandResponseProto = new CommandResponseProto();
@@ -54,47 +54,58 @@ public class QuestNav {
 
   /** Subscriber for command response */
   private final ProtobufSubscriber<Commands.ProtobufQuestNavCommandResponse> response =
-      nt4Table
+      questNavTable
           .getProtobufTopic("response", commandResponseProto)
           .subscribe(Commands.ProtobufQuestNavCommandResponse.newInstance());
 
   /** Subscriber for frame data */
   private final ProtobufSubscriber<Data.ProtobufQuestNavFrameData> frameData =
-      nt4Instance
+          questNavTable
           .getProtobufTopic("frameData", frameDataProto)
           .subscribe(Data.ProtobufQuestNavFrameData.newInstance());
 
   /** Subscriber for device data */
   private final ProtobufSubscriber<Data.ProtobufQuestNavDeviceData> deviceData =
-      nt4Instance
+          questNavTable
           .getProtobufTopic("deviceData", deviceDataProto)
           .subscribe(Data.ProtobufQuestNavDeviceData.newInstance());
 
   /** Publisher for command requests */
   private final ProtobufPublisher<Commands.ProtobufQuestNavCommand> request =
-      nt4Table.getProtobufTopic("request", commandProto).publish();
+          questNavTable.getProtobufTopic("request", commandProto).publish();
 
   /** Cached request to lessen GC pressure */
-  private final Commands.ProtobufQuestNavCommand commandRequest =
+  private final Commands.ProtobufQuestNavCommand cachedCommandRequest =
       Commands.ProtobufQuestNavCommand.newInstance();
+
+  /** Cached pose reset request to lessen GC pressure */
+  private final Commands.ProtobufQuestNavPoseResetPayload cachedPoseResetPayload =
+          Commands.ProtobufQuestNavPoseResetPayload.newInstance();
+
+  /** Cached proto pose (for reset requests) to lessen GC pressure */
+  private final Geometry2D.ProtobufPose2d cachedProtoPose = Geometry2D.ProtobufPose2d.newInstance();
 
   /** Last processed request id */
   private int lastRequestId = 0;
 
+
+  public QuestNav() {
+  }
+  
   /**
    * Sets the FRC field relative pose of the Quest. This is the QUESTS POSITION, NOT THE ROBOTS!
    * Make sure you correctly offset back from the center of your robot first!
    */
   public void setPose(Pose2d pose) {
-    Geometry2D.ProtobufPose2d protoPose = Geometry2D.ProtobufPose2d.newInstance();
-    pose2dProto.pack(protoPose, pose);
-    commandRequest.clear();
+    cachedProtoPose.clear(); // Clear instead of creating new
+    pose2dProto.pack(cachedProtoPose, pose);
+    cachedCommandRequest.clear();
     var requestToSend =
-        commandRequest
-            .setType(Commands.QuestNavCommandType.POSE_RESET)
-            .setCommandId(++lastRequestId)
-            .setPoseResetPayload(
-                Commands.ProtobufQuestNavPoseResetPayload.newInstance().setTargetPose(protoPose));
+            cachedCommandRequest
+                    .setType(Commands.QuestNavCommandType.POSE_RESET)
+                    .setCommandId(++lastRequestId)
+                    .setPoseResetPayload(
+                            cachedPoseResetPayload.clear().setTargetPose(cachedProtoPose));
 
     request.set(requestToSend);
   }
@@ -182,7 +193,7 @@ public class QuestNav {
    *
    * @return Rotation2d representing the headset's yaw
    */
-  private Pose2d getPose() {
+  public Pose2d getPose() {
     Data.ProtobufQuestNavFrameData latestFrameData = frameData.get();
     if (latestFrameData != null) {
       return pose2dProto.unpack(latestFrameData.getPose2D());
@@ -193,7 +204,7 @@ public class QuestNav {
   /**
    * Cleans up QuestNav responses after processing on the headset.
    */
-  private void handleResponses() {
+  public void handleResponsesIfNeeded() {
     Commands.ProtobufQuestNavCommandResponse latestCommandResponse = response.get();
     if (latestCommandResponse == null) return;
 
@@ -204,6 +215,7 @@ public class QuestNav {
 
     if (!latestCommandResponse.getSuccess()) {
       DriverStation.reportError("QuestNav command failed!\n" + latestCommandResponse.getErrorMessage(), false);
+      return;
     }
   }
 }

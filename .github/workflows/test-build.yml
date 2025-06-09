@@ -1,8 +1,28 @@
 name: Test Build
 on:
   pull_request:
+
 jobs:
+  # Only run the build if actual files have changed
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      java: ${{ steps.filter.outputs.java }}
+      csharp: ${{ steps.filter.outputs.csharp }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            java:
+              - '**/*.java'
+            csharp:
+              - '**/*.cs'
+
   apk:
+    needs: changes
+    if: ${{ needs.changes.outputs.csharp == 'true' }}
     uses: QuestNav/QuestNav/.github/workflows/build-questnav-apk.yml@Native
     with:
       versionMajor: 1
@@ -14,7 +34,10 @@ jobs:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
   lib:
+    needs: changes
+    if: ${{ needs.changes.outputs.java == 'true' }}
     uses: QuestNav/QuestNav/.github/workflows/build-questnav-lib.yml@Native
     with:
       versionMajor: 1

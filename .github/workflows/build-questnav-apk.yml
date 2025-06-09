@@ -39,13 +39,13 @@ on:
     outputs:
       apk-artifact-name:
         description: "Name of the uploaded APK artifact"
-        value: ${{ jobs.unity.outputs.apk-artifact-name }}
+        value: ${{ jobs.build-unity.outputs.apk-artifact-name }}
       apk-filename:
         description: "Filename of the built APK"
-        value: ${{ jobs.unity.outputs.apk-filename }}
+        value: ${{ jobs.build-unity.outputs.apk-filename }}
 
 jobs:
-  unity:
+  build-unity:
     runs-on: ubuntu-latest
     outputs:
       apk-artifact-name: ${{ steps.upload.outputs.artifact-id }}

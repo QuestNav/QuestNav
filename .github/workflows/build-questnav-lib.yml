@@ -32,6 +32,17 @@ on:
         description: 'Type of version'
         required: false
         type: string
+      releaseToMaven:
+        description: 'Whether to release the compiled binaries to the maven repository'
+        required: true
+        type: boolean
+    outputs:
+      json-artifact-name:
+        description: The artifact ID for recall of the JSON VendorDep
+        value: ${{ jobs.build-questnavlib.outputs.json-artifact-name }}
+      json-filename:
+        description: The artifact filename for recall of the JSON VendorDep
+        value: ${{ jobs.build-questnavlib.outputs.buildVersion }}
 
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
@@ -43,8 +54,8 @@ jobs:
       run:
         working-directory: questnav-lib
     outputs:
-      jar-artifact-name: ${{ steps.upload.outputs.artifact-id }}
-      jar-filename: ${{ steps.buildJava.outputs.buildVersion }}
+      json-artifact-name: ${{ steps.upload.outputs.artifact-id }}
+      json-filename: ${{ steps.buildJava.outputs.buildVersion }}
 
     steps:
       - name: Checkout Repository
@@ -78,22 +89,48 @@ jobs:
         run: 'chmod +x ./gradlew'
 
       - name: Display Build Configuration
+        id: buildInfo
         run: |
+          VERSION="${{ inputs.versionYear }}-${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}"
+          if [ -n "${{ inputs.versionType }}" ] && [ "${{ inputs.versionType }}" != "release" ]; then
+            VERSION="${VERSION}-${{ inputs.versionType }}"
+          fi
+          echo "buildVersion=${VERSION}" >> $GITHUB_OUTPUT
+          
           ./gradlew buildInfo \
-            -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
+            -PquestnavVersion="${{ inputs.versionYear }}-${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
             -PreleaseType="${{ inputs.versionType }}" \
             -PfrcYear="${{ inputs.versionYear }}" \
             -PwpilibVersion="${{ inputs.wpilibVersion }}"
 
       - name: Build Library
+        id: buildJava
         run: |
+          VERSION="${{ inputs.versionYear }}-${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}"
+          if [ -n "${{ inputs.versionType }}" ] && [ "${{ inputs.versionType }}" != "release" ]; then
+            VERSION="${VERSION}-${{ inputs.versionType }}"
+          fi
+          echo "buildVersion=${VERSION}" >> $GITHUB_OUTPUT
+          
           ./gradlew build \
-            -PquestnavVersion="${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
+            -PquestnavVersion="${{ inputs.versionYear }}-${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
             -PreleaseType="${{ inputs.versionType }}" \
             -PfrcYear="${{ inputs.versionYear }}" \
             -PwpilibVersion="${{ inputs.wpilibVersion }}"
 
+      - name: Publish to Maven Repository
+        if: ${{ inputs.releaseToMaven == true }}
+        run: |
+          ./gradlew publish \
+            -PquestnavVersion="${{ inputs.versionYear }}-${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}" \
+            -PreleaseType="${{ inputs.versionType }}" \
+            -PfrcYear="${{ inputs.versionYear }}" \
+            -PwpilibVersion="${{ inputs.wpilibVersion }}" \
+            -PmavenUsername="${{ secrets.MAVEN_USERNAME }}" \
+            -PmavenPassword="${{ secrets.MAVEN_PASSWORD }}"
+
       - name: Upload Build Artifacts
+        id: upload
         uses: actions/upload-artifact@v4
         with:
           name: 'questnavlib.json'

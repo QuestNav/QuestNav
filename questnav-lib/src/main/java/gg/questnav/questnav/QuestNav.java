@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.proto.Pose2dProto;
 import edu.wpi.first.math.proto.Geometry2D;
 import edu.wpi.first.networktables.*;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import gg.questnav.questnav.protos.generated.Commands;
 import gg.questnav.questnav.protos.generated.Data;
@@ -91,7 +92,7 @@ public class QuestNav {
     var requestToSend =
         commandRequest
             .setType(Commands.QuestNavCommandType.POSE_RESET)
-            .setCommandId(lastRequestId++)
+            .setCommandId(++lastRequestId)
             .setPoseResetPayload(
                 Commands.ProtobufQuestNavPoseResetPayload.newInstance().setTargetPose(protoPose));
 
@@ -190,10 +191,19 @@ public class QuestNav {
   }
 
   /**
-   * Cleans up QuestNav responses after processing on the headset. <br>
-   * <b>MUST BE RUN IN PERIODIC METHOD</b>
+   * Cleans up QuestNav responses after processing on the headset.
    */
   private void handleResponses() {
-    // TODO: finish this
+    Commands.ProtobufQuestNavCommandResponse latestCommandResponse = response.get();
+    if (latestCommandResponse == null) return;
+
+    if (latestCommandResponse.getCommandId() != lastRequestId) {
+      DriverStation.reportWarning("Received a stale QuestNav command response. Ignoring!", false);
+      return;
+    }
+
+    if (!latestCommandResponse.getSuccess()) {
+      DriverStation.reportError("QuestNav command failed!\n" + latestCommandResponse.getErrorMessage(), false);
+    }
   }
 }

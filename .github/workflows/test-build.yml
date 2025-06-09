@@ -1,8 +1,6 @@
-name: Test workflows
+name: Test Build
 on:
-  push:
-    branches:
-      - Native
+  pull_request:
 jobs:
   apk:
     uses: QuestNav/QuestNav/.github/workflows/build-questnav-apk.yml@Native
@@ -25,3 +23,4 @@ jobs:
       versionYear: 2025
       versionType: 'dev'
       wpilibVersion: '2025.3.2'
+      releaseToMaven: false

@@ -128,8 +128,8 @@ publishing {
 
             pom {
                 name = 'QuestNavLib'
-                description = 'QuestNav library for FRC robot localization using VR headsets'
-                url = 'https://github.com/questnav/questnav/questnav-lib'
+                description = 'QuestNav vendor dependency library'
+                url = 'https://github.com/questnav/questnav/tree/main/questnav-lib'
 
                 licenses {
                     license {
@@ -139,20 +139,11 @@ publishing {
                 }
 
                 scm {
-                    connection = 'scm:git:git://github.com/questnav/questnavlib.git'
-                    developerConnection = 'scm:git:ssh://github.com/questnav/questnavlib.git'
-                    url = 'https://github.com/questnav/questnavlib'
+                    connection = 'scm:git:git://github.com/questnav/questnav.git'
+                    developerConnection = 'scm:git:ssh://github.com/questnav/questnav.git'
+                    url = 'https://github.com/questnav/questnav/questnavlib/tree/main/questnav-lib'
                 }
             }
-        }
-
-        // Separate publication for vendor JSON
-        vendorjson(MavenPublication) {
-            groupId = mavenGroupId
-            artifactId = "${artifactId}-json"
-            version = questnavVersion
-
-            artifact vendorJsonArtifact
         }
     }
 

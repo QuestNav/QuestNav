@@ -1,7 +1,7 @@
 name: Formatting Check
 
 on:
-  pull_request:
+  push:
     paths:
       - '**.java'
       - '**.cs'

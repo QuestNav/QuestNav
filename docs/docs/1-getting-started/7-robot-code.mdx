@@ -19,14 +19,8 @@ Use AdvantageScope to verify that QuestNav data is being published to NetworkTab
 1. Launch AdvantageScope
 2. Connect to NetworkTables using your robot's IP address
 3. Look for the "questnav" table in the NetworkTables view
-4. Verify that you see values updating for:
-    - `position` (array of 3 floats)
-    - `quaternion` (array of 4 floats)
-    - `eulerAngles` (array of 3 floats)
-    - `device/isTracking` (boolean)
-    - `device/batteryPercent` (number)
 
-If these values are updating, QuestNav is successfully communicating with your robot.
+If values are updating, QuestNav is successfully communicating with your robot.
 
 ## Adding QuestNav to Your Project
 
@@ -34,26 +28,22 @@ If these values are updating, QuestNav is successfully communicating with your r
 The QuestNav project only **officially** supports Java as a language. However, as the system is built on top of
 NetworkTables, any language that supports NT4 can be used!
 :::
-The QuestNav library is provided as a single Java file that you can add to your robot project. This approach makes it easy to integrate without complex dependencies.
+The QuestNav library is provided as a vendor dependency that you can add to your robot project. This approach makes it easy to integrate without complex dependencies.
 
 ### Installation Steps
 
-1. Download the `QuestNav.java` file from the [QuestNav GitHub repository](https://github.com/QuestNav/QuestNav/blob/main/robot/QuestNav.java)
-2. Add this file to your robot project in the appropriate package (usually `frc.robot`)
-
-:::note
-A VendorDep (vendor dependency) for QuestNav is planned for the upcoming rewrite. This will make installation even simpler in the future.
-:::
+1. Download the latest `questnav-lib.json` asset from the [QuestNav GitHub releases page](https://github.com/QuestNav/QuestNav/releases)
+2. Add this file to the `vendordeps` folder in your robot project (usually it will contain other JSON files as well)
+3. Rebuild your robot code project
 
 ## Basic Usage
 
-QuestNav communicates with your robot through NetworkTables. The class provides methods to access pose data from the Quest headset. The majority of the code
-controlling the quest **should not** be contained within the `QuestNav.java` file. The `QuestNav.java` file is only designed to
-facilitate communication between the robot code and the Quest. We recommend you call these methods from a subsystem if possible.
+QuestNav communicates with your robot through NetworkTables. The class provides methods to access pose data from the Quest headset.
+We recommend you call these methods from a subsystem if possible.
 
 ### Prerequisites
 :::danger
-v0.9 **REQUIRES** the following methods from the `QuestNav` file to be called periodically. Without this, the system
+v2025-1.0.0 **REQUIRES** the following methods from the `QuestNav` vendor dependency to be called periodically. Without this, the system
 will not function correctly.
 :::
 
@@ -63,13 +53,12 @@ QuestNav questNav = new QuestNav();
 
 @Override
 public void periodic() {
-   questNav.cleanupResponses();
-   questNav.processHeartbeat();
+   questNav.handleResponses();
 }
 ```
 
 ### Getting Robot Pose
-The `QuestNav` file provides a method for getting the pose of the Quest itself. In order to estimate the position of the
+The `QuestNav` vendor dependency provides a method for getting the pose of the Quest itself. In order to estimate the position of the
 robot, we need to transform the Quest's pose to the robot's center.
 
 ```java title="e.g. QuestNavSubsystem.java"
@@ -92,7 +81,7 @@ a field relative position, potentially making this method unnecessary. However, 
 positional updates from other systems (auto start positions, PhotonVision, etc.)
 :::
 :::info
-As of v0.9, QuestNav uses [dead reckoning](https://en.wikipedia.org/wiki/Dead_reckoning) to estimate the headset's
+As of v2025-1.0.0, QuestNav uses [dead reckoning](https://en.wikipedia.org/wiki/Dead_reckoning) to estimate the headset's
 position, so it's important to reset it at an accurate, known location on the field.
 :::
 Likewise, in order to set the pose of QuestNav, we need to transform that pose back from the robot centric pose to

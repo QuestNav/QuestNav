@@ -72,13 +72,17 @@ Example: `feature/add-path-visualization`
 
 ### 5. Format your code
 :::note
-QuestNav uses Csharpier to ensure code formatting is universal. Installation instructions are located in the [Development Environment Setup](./1-development-setup.md) guide.
+QuestNav uses Csharpier and Spotless to ensure code formatting is universal. Installation instructions are located in the [Development Environment Setup](./1-development-setup.md) guide.
 :::
-Format your code prior to submitting your pull request by running
-```
+Format your C# code prior to submitting your pull request by running the following from the repository root
+```shell
   csharpier format unity/Assets/QuestNav/
 ```
-from the root of the project
+Format your Java code prior to submitting your pull request by running the following from the `questnav-lib` directory
+```shell
+  ./gradlew spotlessApply
+```
+
 ### 6. Test Your Changes
 
 :::danger

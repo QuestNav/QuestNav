@@ -12,6 +12,7 @@ import edu.wpi.first.util.protobuf.Protobuf;
 import gg.questnav.questnav.protos.generated.Data;
 import us.hebi.quickbuf.Descriptors;
 
+/** WPILib Protobuf layer for FrameData Protobuf */
 public class FrameDataProto
     implements Protobuf<Data.ProtobufQuestNavFrameData, Data.ProtobufQuestNavFrameData> {
   @Override

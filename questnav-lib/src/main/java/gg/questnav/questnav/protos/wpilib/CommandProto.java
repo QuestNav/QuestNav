@@ -12,6 +12,7 @@ import edu.wpi.first.util.protobuf.Protobuf;
 import gg.questnav.questnav.protos.generated.Commands;
 import us.hebi.quickbuf.Descriptors;
 
+/** WPILib Protobuf layer for Commands Protobuf */
 public class CommandProto
     implements Protobuf<Commands.ProtobufQuestNavCommand, Commands.ProtobufQuestNavCommand> {
   @Override

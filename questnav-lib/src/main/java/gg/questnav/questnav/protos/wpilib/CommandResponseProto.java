@@ -12,6 +12,7 @@ import edu.wpi.first.util.protobuf.Protobuf;
 import gg.questnav.questnav.protos.generated.Commands;
 import us.hebi.quickbuf.Descriptors;
 
+/** WPILib Protobuf layer for CommandResponse Protobuf */
 public class CommandResponseProto
     implements Protobuf<
         Commands.ProtobufQuestNavCommandResponse, Commands.ProtobufQuestNavCommandResponse> {

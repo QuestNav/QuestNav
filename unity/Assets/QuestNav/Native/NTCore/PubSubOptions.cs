@@ -5,7 +5,7 @@ namespace QuestNav.Native.NTCore
         public static PubSubOptions AllDefault { get; } =
             new PubSubOptions()
             {
-                Periodic = 0.01,
+                Periodic = 0.005,
                 SendAll = true,
                 KeepDuplicates = true,
             };

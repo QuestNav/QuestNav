@@ -154,12 +154,13 @@ namespace QuestNav.Core
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
             // Schedule "SlowUpdate" loop for non loop critical applications
             InvokeRepeating(nameof(SlowUpdate), 0, 1f / QuestNavConstants.Timing.SLOW_UPDATE_HZ);
+            InvokeRepeating(nameof(MainUpdate), 0, 1f / QuestNavConstants.Timing.MAIN_UPDATE_HZ);
         }
 
         /// <summary>
         /// Handles frame updates for data publishing and command processing
         /// </summary>
-        private void FixedUpdate()
+        private void MainUpdate()
         {
             // Collect and publish current frame data
             UpdateFrameData();

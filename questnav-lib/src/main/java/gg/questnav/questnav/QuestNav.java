@@ -170,7 +170,7 @@ public class QuestNav {
   public boolean isConnected() {
     return Seconds.of(Timer.getTimestamp())
         .minus(Microseconds.of(frameData.getLastChange()))
-        .lt(Seconds.of(0.01));
+        .lt(Milliseconds.of(50));
   }
 
   /**

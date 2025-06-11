@@ -52,9 +52,7 @@ namespace QuestNav.Commands
                 case 0:
                     break;
                 case 1:
-                    QueuedLogger.Log(
-                        "Executing Pose Reset Command"
-                    );
+                    QueuedLogger.Log("Executing Pose Reset Command");
                     poseResetCommand.Execute(receivedCommand);
                     break;
                 default:

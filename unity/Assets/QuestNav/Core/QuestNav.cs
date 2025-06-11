@@ -108,7 +108,7 @@ namespace QuestNav.Core
         /// Whether we had tracking
         /// </summary>
         private bool hadTracking;
-        
+
         #region Component References
 
         /// <summary>

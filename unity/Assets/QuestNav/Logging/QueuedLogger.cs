@@ -30,7 +30,12 @@ namespace QuestNav.Utils
             public LogLevel Level { get; private set; }
             public System.Exception Exception { get; private set; }
 
-            public LogEntry(string message, LogLevel level, string callingFileName, System.Exception exception = null)
+            public LogEntry(
+                string message,
+                LogLevel level,
+                string callingFileName,
+                System.Exception exception = null
+            )
             {
                 Message = message;
                 Level = level;
@@ -41,9 +46,13 @@ namespace QuestNav.Utils
 
             public override string ToString()
             {
-                string prefix = string.IsNullOrEmpty(CallingFileName) ? "" : $"[{CallingFileName}] ";
+                string prefix = string.IsNullOrEmpty(CallingFileName)
+                    ? ""
+                    : $"[{CallingFileName}] ";
                 string messageWithPrefix = $"{prefix}{Message}";
-                return Count > 1 ? $"{messageWithPrefix} (repeated {Count} times)" : messageWithPrefix;
+                return Count > 1
+                    ? $"{messageWithPrefix} (repeated {Count} times)"
+                    : messageWithPrefix;
             }
         }
 
@@ -51,10 +60,14 @@ namespace QuestNav.Utils
         /// Queues a message with the given log level.
         /// If the message is identical (and has no associated exception) to the previous entry, its count is increased.
         /// </summary>
-        public static void Log(string message, LogLevel level = LogLevel.Info, [CallerFilePath] string callerFilePath = "")
+        public static void Log(
+            string message,
+            LogLevel level = LogLevel.Info,
+            [CallerFilePath] string callerFilePath = ""
+        )
         {
             string callingFileName = GetFileNameFromPath(callerFilePath);
-            
+
             if (
                 lastEntry != null
                 && lastEntry.Message == message
@@ -91,7 +104,10 @@ namespace QuestNav.Utils
         /// <summary>
         /// Queues an exception log entry using the exception's message.
         /// </summary>
-        public static void LogException(System.Exception exception, [CallerFilePath] string callerFilePath = "")
+        public static void LogException(
+            System.Exception exception,
+            [CallerFilePath] string callerFilePath = ""
+        )
         {
             LogException(exception.Message, exception, callerFilePath);
         }
@@ -99,10 +115,14 @@ namespace QuestNav.Utils
         /// <summary>
         /// Queues an exception log entry with a custom message and exception details.
         /// </summary>
-        public static void LogException(string message, System.Exception exception, [CallerFilePath] string callerFilePath = "")
+        public static void LogException(
+            string message,
+            System.Exception exception,
+            [CallerFilePath] string callerFilePath = ""
+        )
         {
             string callingFileName = GetFileNameFromPath(callerFilePath);
-            
+
             if (
                 lastEntry != null
                 && lastEntry.Level == LogLevel.Error
@@ -141,8 +161,12 @@ namespace QuestNav.Utils
                             // If multiple identical exceptions were queued, log an additional error message.
                             if (entry.Count > 1)
                             {
-                                string prefix = string.IsNullOrEmpty(entry.CallingFileName) ? "" : $"[{entry.CallingFileName}] ";
-                                Debug.LogError($"{prefix}{entry.Message} (repeated {entry.Count} times)");
+                                string prefix = string.IsNullOrEmpty(entry.CallingFileName)
+                                    ? ""
+                                    : $"[{entry.CallingFileName}] ";
+                                Debug.LogError(
+                                    $"{prefix}{entry.Message} (repeated {entry.Count} times)"
+                                );
                             }
                         }
                         else
@@ -165,7 +189,7 @@ namespace QuestNav.Utils
         {
             if (string.IsNullOrEmpty(filePath))
                 return "";
-            
+
             return Path.GetFileName(filePath);
         }
     }

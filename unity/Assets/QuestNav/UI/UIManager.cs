@@ -89,6 +89,7 @@ namespace QuestNav.UI
                 "TeamNumber",
                 QuestNavConstants.Network.DEFAULT_TEAM_NUMBER
             );
+            teamInput.text = teamNumber.ToString();
             setTeamNumberFromUI();
 
             teamUpdateButton.onClick.AddListener(setTeamNumberFromUI);
@@ -108,7 +109,7 @@ namespace QuestNav.UI
         private void setTeamNumberFromUI()
         {
             QueuedLogger.Log("Updating Team Number");
-            teamNumber = Int32.Parse(teamInput.text);
+            teamNumber = int.Parse(teamInput.text);
             PlayerPrefs.SetInt("TeamNumber", teamNumber);
             PlayerPrefs.Save();
             updateTeamNumberInputBoxPlaceholder(teamNumber);

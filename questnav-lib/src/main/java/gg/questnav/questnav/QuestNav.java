@@ -8,8 +8,7 @@
 */
 package gg.questnav.questnav;
 
-import static edu.wpi.first.units.Units.Microseconds;
-import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.proto.Pose2dProto;
@@ -88,11 +87,14 @@ public class QuestNav {
   /** Last processed request id */
   private int lastRequestId = -1;
 
+  /** Creates a new QuestNav implementation */
   public QuestNav() {}
 
   /**
    * Sets the FRC field relative pose of the Quest. This is the QUESTS POSITION, NOT THE ROBOTS!
    * Make sure you correctly offset back from the center of your robot first!
+   *
+   * @param pose The field relative position of the Quest
    */
   public void setPose(Pose2d pose) {
     cachedProtoPose.clear(); // Clear instead of creating new
@@ -165,10 +167,21 @@ public class QuestNav {
    *
    * @return Boolean indicating if the Quest is connected (true) or not (false)
    */
-  public Boolean isConnected() {
+  public boolean isConnected() {
     return Seconds.of(Timer.getTimestamp())
         .minus(Microseconds.of(frameData.getLastChange()))
         .lt(Seconds.of(0.01));
+  }
+
+  /**
+   * Gets the latency of the Quest > Robot Connection
+   *
+   * @return double indicating the latency of the frameData (the important part)
+   */
+  public double getLatency() {
+    return Seconds.of(Timer.getTimestamp())
+        .minus(Microseconds.of(frameData.getLastChange()))
+        .in(Milliseconds);
   }
 
   /**

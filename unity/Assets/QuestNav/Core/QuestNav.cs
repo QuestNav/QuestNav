@@ -108,9 +108,7 @@ namespace QuestNav.Core
         /// Whether we had tracking
         /// </summary>
         private bool hadTracking;
-
-        // Using display frequency constant from QuestNavConstants
-
+        
         #region Component References
 
         /// <summary>
@@ -134,7 +132,7 @@ namespace QuestNav.Core
         /// <summary>
         /// Initializes the connection and UI components
         /// </summary>
-        private void Start()
+        private void Awake()
         {
             // Initializes components
             networkTableConnection = new NetworkTableConnection();
@@ -154,7 +152,6 @@ namespace QuestNav.Core
 
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
-
             // Schedule "SlowUpdate" loop for non loop critical applications
             InvokeRepeating(nameof(SlowUpdate), 0, 1f / QuestNavConstants.Timing.SLOW_UPDATE_HZ);
         }

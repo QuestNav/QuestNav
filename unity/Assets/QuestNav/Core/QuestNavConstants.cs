@@ -1,4 +1,4 @@
-﻿using QuestNav.Native.NTCore;
+using QuestNav.Native.NTCore;
 
 namespace QuestNav.Core
 {
@@ -183,7 +183,7 @@ namespace QuestNav.Core
             /// <summary>
             /// The rate to run the "SlowUpdate" loop at
             /// </summary>
-            public const int SLOW_UPDATE_HZ = 8;
+            public const int SLOW_UPDATE_HZ = 3;
         }
     }
 }

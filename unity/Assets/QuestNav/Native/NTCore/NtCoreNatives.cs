@@ -324,7 +324,7 @@ namespace QuestNav.Native.NTCore
             UIntPtr* len
         );
 
-        [DllImport("ntcore")]
+        [DllImport("ntcore", EntryPoint = "NT_FreeCharArray")]
         public static extern void NT_FreeRaw(byte* value);
 
         [DllImport("ntcore")]

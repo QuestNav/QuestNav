@@ -35,7 +35,7 @@ public class QuestNav {
   NetworkTableInstance nt4Instance = NetworkTableInstance.getDefault();
 
   /** NetworkTable for Quest navigation data */
-  NetworkTable questNavTable = nt4Instance.getTable("questnav");
+  NetworkTable questNavTable = nt4Instance.getTable("QuestNav");
 
   /** Protobuf instance for CommandResponse */
   private final CommandResponseProto commandResponseProto = new CommandResponseProto();
@@ -86,7 +86,7 @@ public class QuestNav {
   private final Geometry2D.ProtobufPose2d cachedProtoPose = Geometry2D.ProtobufPose2d.newInstance();
 
   /** Last processed request id */
-  private int lastRequestId = 0;
+  private int lastRequestId = -1;
 
   public QuestNav() {}
 
@@ -167,8 +167,8 @@ public class QuestNav {
    */
   public Boolean isConnected() {
     return Seconds.of(Timer.getTimestamp())
-        .minus(Microseconds.of(deviceData.getLastChange()))
-        .lt(Seconds.of(0.25));
+        .minus(Microseconds.of(frameData.getLastChange()))
+        .lt(Seconds.of(0.01));
   }
 
   /**

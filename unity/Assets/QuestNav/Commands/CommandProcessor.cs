@@ -50,12 +50,11 @@ namespace QuestNav.Commands
             switch (receivedCommand.CommandId)
             {
                 case 0:
-                    QueuedLogger.Log(
-                        "Execute called with empty command",
-                        QueuedLogger.LogLevel.Warning
-                    );
                     break;
                 case 1:
+                    QueuedLogger.Log(
+                        "Executing Pose Reset Command"
+                    );
                     poseResetCommand.Execute(receivedCommand);
                     break;
                 default:

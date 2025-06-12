@@ -100,20 +100,24 @@ public class NetworkTableConnection : INetworkTableConnection
         // Instantiate publisher topics
         frameDataPublisher = ntInstance.GetProtobufPublisher<ProtobufQuestNavFrameData>(
             QuestNavConstants.Topics.FRAME_DATA,
+            "questnav.protos.data.ProtobufQuestNavFrameData",
             QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
         );
         deviceDataPublisher = ntInstance.GetProtobufPublisher<ProtobufQuestNavDeviceData>(
             QuestNavConstants.Topics.DEVICE_DATA,
+            "questnav.protos.data.ProtobufQuestNavDeviceData",
             QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
         );
         commandResponsePublisher = ntInstance.GetProtobufPublisher<ProtobufQuestNavCommandResponse>(
             QuestNavConstants.Topics.COMMAND_RESPONSE,
+            "questnav.protos.commands.ProtobufQuestNavCommandResponse",
             QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
         );
 
         // Instantiate subscriber topics
         commandRequestSubscriber = ntInstance.GetProtobufSubscriber<ProtobufQuestNavCommand>(
             QuestNavConstants.Topics.COMMAND_REQUEST,
+            "questnav.protos.commands.ProtobufQuestNavCommand",
             QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
         );
     }

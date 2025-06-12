@@ -321,17 +321,25 @@ namespace QuestNav.Native.NTCore
             return new RawSubscriber(subHandle);
         }
 
-        public ProtobufPublisher<T> GetProtobufPublisher<T>(string name, PubSubOptions options)
+        public ProtobufPublisher<T> GetProtobufPublisher<T>(
+            string name,
+            string classString,
+            PubSubOptions options
+        )
             where T : IMessage<T>
         {
-            var rawPublisher = GetRawPublisher(name, "protobuf", options);
+            var rawPublisher = GetRawPublisher(name, "proto:" + classString, options);
             return new ProtobufPublisher<T>(rawPublisher);
         }
 
-        public ProtobufSubscriber<T> GetProtobufSubscriber<T>(string name, PubSubOptions options)
+        public ProtobufSubscriber<T> GetProtobufSubscriber<T>(
+            string name,
+            string classString,
+            PubSubOptions options
+        )
             where T : IMessage<T>, new()
         {
-            var rawSubscriber = GetRawSubscriber(name, "protobuf", options);
+            var rawSubscriber = GetRawSubscriber(name, "proto:" + classString, options);
             return new ProtobufSubscriber<T>(rawSubscriber);
         }
 

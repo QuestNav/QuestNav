@@ -24,6 +24,9 @@ namespace QuestNav.Commands
         // Commands
         private PoseResetCommand poseResetCommand;
 
+        // Processed command variable
+        private uint lastCommandIdProcessed;
+
         public CommandProcessor(
             NetworkTableConnection networkTableConnection,
             Transform vrCamera,
@@ -46,22 +49,26 @@ namespace QuestNav.Commands
         public void ProcessCommands()
         {
             ProtobufQuestNavCommand receivedCommand = networkTableConnection.GetCommandRequest();
-
-            switch (receivedCommand.CommandId)
+            if (receivedCommand.CommandId != lastCommandIdProcessed)
             {
-                case 0:
-                    break;
-                case 1:
-                    QueuedLogger.Log("Executing Pose Reset Command");
-                    poseResetCommand.Execute(receivedCommand);
-                    break;
-                default:
-                    QueuedLogger.Log(
-                        "Execute called with unknown command",
-                        QueuedLogger.LogLevel.Warning
-                    );
-                    break;
+                switch (receivedCommand.Type)
+                {
+                    case QuestNavCommandType.CommandTypeUnspecified:
+                        break;
+                    case QuestNavCommandType.PoseReset:
+                        QueuedLogger.Log("Executing Pose Reset Command");
+                        poseResetCommand.Execute(receivedCommand);
+                        break;
+                    default:
+                        QueuedLogger.Log(
+                            "Execute called with unknown command",
+                            QueuedLogger.LogLevel.Warning
+                        );
+                        break;
+                }
             }
+            // Don't double process
+            lastCommandIdProcessed = networkTableConnection.GetCommandRequest().CommandId;
         }
     }
 }

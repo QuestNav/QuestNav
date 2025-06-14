@@ -77,35 +77,32 @@ namespace QuestNav.Commands.Commands
             // Apply pose reset if data is valid
             if (validPose)
             {
-                // Cache current values
-                Vector3 currentPosition = vrCamera.position;
-                Quaternion currentRotation = vrCamera.rotation;
-
                 // Convert field coordinates to Unity coordinates
-                var (targetPosition, targetRotation) = Conversions.FrcToUnity(
+                var (targetCameraPosition, targetCameraRotation) = Conversions.FrcToUnity(
                     resetPose,
-                    currentPosition,
-                    currentRotation
+                    vrCamera.position,
+                    vrCamera.rotation
                 );
 
-                // Calculate differences
-                Vector3 positionDifference = targetPosition - currentPosition;
-                float rotationDifference = Mathf.DeltaAngle(
-                    currentRotation.eulerAngles.y,
-                    targetRotation.eulerAngles.y
-                );
+                // Calculate Y rotation difference between current camera and target
+                float currentCameraY = vrCamera.rotation.eulerAngles.y;
+                float targetCameraY = targetCameraRotation.eulerAngles.y;
+                float rotationDifference = Mathf.DeltaAngle(currentCameraY, targetCameraY);
 
-                // Apply position change
-                vrCameraRoot.position += positionDifference;
+                // Get camera offset in LOCAL space relative to root BEFORE rotation
+                Vector3 localCameraOffset = vrCameraRoot.InverseTransformPoint(vrCamera.position);
 
-                // Apply rotation change
+                // Apply rotation to root
                 vrCameraRoot.Rotate(0, rotationDifference, 0);
 
+                // Recalculate position after rotation
+                Vector3 worldCameraOffset =
+                    vrCameraRoot.TransformPoint(localCameraOffset) - vrCameraRoot.position;
+                Vector3 targetRootPosition = targetCameraPosition - worldCameraOffset;
+                vrCameraRoot.position = targetRootPosition;
+
                 QueuedLogger.Log($"Pose reset applied: X={poseX}, Y={poseY}, Theta={poseTheta}");
-                QueuedLogger.Log(
-                    $"Position adjusted by {positionDifference}, rotation by {rotationDifference}"
-                );
-                QueuedLogger.Log("Pose reset completed successfully");
+
                 networkTableConnection.SetCommandResponse(
                     new ProtobufQuestNavCommandResponse
                     {
@@ -113,6 +110,7 @@ namespace QuestNav.Commands.Commands
                         Success = true,
                     }
                 );
+                QueuedLogger.Log("Pose reset completed successfully");
             }
             else
             {

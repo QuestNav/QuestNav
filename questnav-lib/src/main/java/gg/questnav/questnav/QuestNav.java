@@ -85,7 +85,7 @@ public class QuestNav {
   private final Geometry2D.ProtobufPose2d cachedProtoPose = Geometry2D.ProtobufPose2d.newInstance();
 
   /** Last processed request id */
-  private int lastRequestId = -1;
+  private int lastRequestId = -1; // -1 makes the first requestId 0, and remains within uint limits
 
   /** Creates a new QuestNav implementation */
   public QuestNav() {}

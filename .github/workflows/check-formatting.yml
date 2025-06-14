@@ -7,26 +7,7 @@ on:
       - '**.cs'
 
 jobs:
-  # Job to detect which files have changed
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      java: ${{ steps.filter.outputs.java }}
-      csharp: ${{ steps.filter.outputs.csharp }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            java:
-              - '**/*.java'
-            csharp:
-              - '**/*.cs'
-
   csharp:
-    needs: changes
-    if: ${{ needs.changes.outputs.csharp == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -48,8 +29,6 @@ jobs:
         run: csharpier check unity/Assets/QuestNav/
 
   java:
-    needs: changes
-    if: ${{ needs.changes.outputs.java == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:

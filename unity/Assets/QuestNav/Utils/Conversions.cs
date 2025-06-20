@@ -32,7 +32,7 @@ namespace QuestNav.Utils
             Vector3 currentEuler = currentQuaternion.eulerAngles;
             Vector3 newEuler = new Vector3(
                 currentEuler.x, // Keep current pitch
-                (float)(targetPose2d.Rotation.Value * Mathf.Rad2Deg), // Set yaw from FRC
+                (float)(-targetPose2d.Rotation.Value * Mathf.Rad2Deg), // Set yaw from FRC
                 currentEuler.z // Keep current roll
             );
             Quaternion unityRotation = Quaternion.Euler(newEuler);
@@ -57,7 +57,7 @@ namespace QuestNav.Utils
                 },
                 Rotation = new ProtobufRotation2d
                 {
-                    Value = unityRotation.eulerAngles.y * Mathf.Deg2Rad,
+                    Value = -unityRotation.eulerAngles.y * Mathf.Deg2Rad,
                 },
             };
         }

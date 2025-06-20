@@ -84,8 +84,11 @@ public class QuestNav {
   /** Cached proto pose (for reset requests) to lessen GC pressure */
   private final Geometry2D.ProtobufPose2d cachedProtoPose = Geometry2D.ProtobufPose2d.newInstance();
 
-  /** Last processed request id */
-  private int lastRequestId = -1; // -1 makes the first requestId 0, and remains within uint limits
+  /** Last sent request id */
+  private int lastSentRequestId = 0; // Should be the same on the backend
+
+  /** Last processed response id */
+  private int lastProcessedResponseId = 0; // Should be the same on the backend
 
   /** Creates a new QuestNav implementation */
   public QuestNav() {}
@@ -103,7 +106,7 @@ public class QuestNav {
     var requestToSend =
         cachedCommandRequest
             .setType(Commands.QuestNavCommandType.POSE_RESET)
-            .setCommandId(++lastRequestId)
+            .setCommandId(++lastSentRequestId)
             .setPoseResetPayload(cachedPoseResetPayload.clear().setTargetPose(cachedProtoPose));
 
     request.set(requestToSend);
@@ -185,16 +188,27 @@ public class QuestNav {
   }
 
   /**
-   * Gets the Quest app's timestamp since start
+   * Gets the Quest app's timestamp since start THIS IS NOT THE SAME AS THE TIMESTAMP USED WITH AN
+   * ESTIMATOR! See 'getDataTimestamp' instead
    *
    * @return The timestamp as a double value
    */
-  public double getTimestamp() {
+  public double getAppTimestamp() {
     Data.ProtobufQuestNavFrameData latestFrameData = frameData.get();
     if (latestFrameData != null) {
       return latestFrameData.getTimestamp();
     }
     return -1; // Return -1 to indicate no data available
+  }
+
+  /**
+   * Gets the NT timestamp of when the data was sent. THIS IS THE VALUE YOU USE WHEN ADDING TO AN
+   * ESTIMATOR
+   *
+   * @return The timestamp as a double value
+   */
+  public double getDataTimestamp() {
+    return frameData.getAtomic().serverTime;
   }
 
   /**
@@ -214,16 +228,20 @@ public class QuestNav {
   /** Cleans up QuestNav responses after processing on the headset. */
   public void commandPeriodic() {
     Commands.ProtobufQuestNavCommandResponse latestCommandResponse = response.get();
-    if (latestCommandResponse == null) return;
 
-    if (latestCommandResponse.getCommandId() != lastRequestId) {
+    // if we don't have data or for some reason the response we got isn't for the command we sent,
+    // skip for this loop
+    if (latestCommandResponse == null || latestCommandResponse.getCommandId() != lastSentRequestId)
       return;
-    }
 
-    if (!latestCommandResponse.getSuccess()) {
-      DriverStation.reportError(
-          "QuestNav command failed!\n" + latestCommandResponse.getErrorMessage(), false);
-      return;
+    if (lastProcessedResponseId != latestCommandResponse.getCommandId()) {
+
+      if (!latestCommandResponse.getSuccess()) {
+        DriverStation.reportError(
+            "QuestNav command failed!\n" + latestCommandResponse.getErrorMessage(), false);
+      }
+      // don't double process
+      lastProcessedResponseId = latestCommandResponse.getCommandId();
     }
   }
 }

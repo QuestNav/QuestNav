@@ -81,6 +81,7 @@ To prevent the headset from sleeping during operation:
 For optimal operation on your robot:
 1. **Disable Travel Mode** in power settings
 2. **Disable Battery Saver Mode** in power settings
+3. Turn brightness as low as possible
 
 :::tip
 These power settings are the opposite of what was previously recommended. Testing has shown that disabling these features provides better performance for robot navigation.

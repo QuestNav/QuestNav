@@ -166,4 +166,4 @@ If you encounter any issues during setup, check this section before reaching out
 - **Missing SDK References**: Ensure you've added all required SDKs to your Unity account
 - **Build Fails**: Make sure you've enabled the Development Build option
 - **APK Doesn't Install**: Verify developer mode is enabled on your Quest headset
-- **App Crashes on Launch**: Check that you've installed all required packages, including MessagePack
+- **App Crashes on Launch**: Check that you've restored all packages from NuGetForUnity

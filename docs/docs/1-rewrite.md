@@ -11,29 +11,21 @@ This will come with significant implementation changes, most likely breaking.
 :::
 ## Timeline
 
-1. **Properly implement NT4 (Network Tables 4)** (#26)
-    - Wrapper library for NT4 in C#
-    - Due Date: May 2025
+✅ 1. **Properly implement NT4 (Network Tables 4)** (#26)
+   - Wrapper library for NT4 in C#
+   - Due Date: May 2025
 
 2. **AprilTag detection and tracking** (#31)
     - Core positioning system functionality
-    - Due Date: June 2025
+    - Due Date: August 2025
 
 3. **Get each AprilTag position and place a spatial anchor** (#32)
     - Building on detection capabilities
-    - Due Date: June 2025
+    - Due Date: August 2025
 
 4. **Develop initial field calibration procedure and "calibration mode"** (#34)
     - Essential for accurate positioning
-    - Due Date: July 2025
-
-5. **Develop a means of deleting and/or manually adjusting spatial anchors** (#38)
-    - Provides necessary calibration flexibility
     - Due Date: August 2025
-
-6. **Misc Refactoring** (#44)
-   - Code improvements
-   - Due Date: September 2025
 
 7. **Enable streaming passthrough video to devices on the robot network** (#40)
    - Remote visualization capability

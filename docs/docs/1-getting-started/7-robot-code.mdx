@@ -18,7 +18,7 @@ Use AdvantageScope to verify that QuestNav data is being published to NetworkTab
 
 1. Launch AdvantageScope
 2. Connect to NetworkTables using your robot's IP address
-3. Look for the "questnav" table in the NetworkTables view
+3. Look for the "QuestNav" table in the NetworkTables view
 
 If values are updating, QuestNav is successfully communicating with your robot.
 
@@ -53,7 +53,7 @@ QuestNav questNav = new QuestNav();
 
 @Override
 public void periodic() {
-   questNav.handleResponses();
+   questNav.commandPeriodic();
 }
 ```
 
@@ -116,11 +116,13 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 <Tabs>
-    <TabItem value="CTRE" label="CTRE Swerve Generator">
+    <TabItem value="CTRE" label="CTRE Swerve Generator < v2025.3.1.0 ">
 
         :::warning
-        CTRE does not utilize the `SwerveDrivePoseEstimator` class directly, and uses their own timestamp system.
+        CTRE does not utilize the `SwerveDrivePoseEstimator` class directly, and uses their own timestamp system on older versions.
         If you do not convert the Quest's timestamp to CTRE's current time, it will not function correctly!
+
+        **FOR ANY VERSION NEWER THAN v2025.3.1.0** PLEASE REFERENCE THE OTHER TAB
         :::
         ```java title="e.g. QuestNavSubsystem.java"
         QuestNav questNav = new QuestNav();
@@ -133,11 +135,11 @@ import TabItem from '@theme/TabItem';
                 0.035 // Trust down to 2 degrees rotational
             );
 
-        if (questNav.getConnected() && questNav.getTrackingStatus()) {
+        if (questNav.isConnected() && questNav.isTracking()) {
             // Get pose with the method outlined above
             Pose2d pose = getPose();
             // Get timestamp from the QuestNav instance
-            double timestamp = questNav.getTimestamp();
+            double timestamp = questNav.getDataTimestamp();
 
             // Convert FPGA timestamp to CTRE's time domain using Phoenix 6 utility
             double ctreTimestamp = Utils.fpgaToCurrentTime(timestamp);
@@ -150,7 +152,7 @@ import TabItem from '@theme/TabItem';
         ```
 
     </TabItem>
-    <TabItem value="AdvantageKit-YAGSL" label="AdvantageKit/YAGSL">
+    <TabItem value="AdvantageKit-YAGSL" label="AdvantageKit/YAGSL/CTRE >2025.3.1.0">
 
         :::tip
         This example works for ANY library that utilizes the `SwerveDrivePoseEstimator` class. The most common examples
@@ -166,11 +168,11 @@ import TabItem from '@theme/TabItem';
                 0.035 // Trust down to 2 degrees rotational
             );
 
-        if (questNav.getConnected() && questNav.getTrackingStatus()) {
+        if (questNav.isConnected() && questNav.isTracking()) {
             // Get pose with the method outlined above
             Pose2d pose = getPose();
             // Get timestamp from the QuestNav instance
-            double timestamp = questNav.getTimestamp();
+            double timestamp = questNav.getDataTimestamp();
 
             // You can put some sort of filtering here if you would like!
 

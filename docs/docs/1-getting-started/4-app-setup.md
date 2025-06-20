@@ -62,7 +62,7 @@ After installation, you can launch QuestNav in several ways:
 
 2. **Using ADB**:
    ```
-   adb shell am start -n com.DerpyCatAviationLLC.QuestNav/.MainActivity
+   adb shell am start -n gg.questnav.questnav/.MainActivity
    ```
 
 :::note

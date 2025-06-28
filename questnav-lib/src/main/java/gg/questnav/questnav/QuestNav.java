@@ -212,10 +212,10 @@ public class QuestNav {
   }
 
   /**
-   * Converts the QuestNav rotation to a Rotation2d object. Applies necessary coordinate system
-   * transformations.
+   * Returns the current pose of the Quest on the field.
+   * This will only return the field relative pose if you have used {@link #setPose(Pose2d)} at least once.
    *
-   * @return Rotation2d representing the headset's yaw
+   * @return Pose2d representing the Quest's location on the field
    */
   public Pose2d getPose() {
     Data.ProtobufQuestNavFrameData latestFrameData = frameData.get();

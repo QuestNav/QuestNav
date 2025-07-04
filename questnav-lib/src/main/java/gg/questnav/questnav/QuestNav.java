@@ -93,8 +93,8 @@ public class QuestNav {
   public QuestNav() {}
 
   /**
-   * Sets the field-relative pose of the Quest. This is the position of the Quest, not the robot. Make
-   * sure you correctly offset back from the center of your robot first.
+   * Sets the field-relative pose of the Quest. This is the position of the Quest, not the robot.
+   * Make sure you correctly offset back from the center of your robot first.
    *
    * @param pose The field relative position of the Quest
    */

@@ -29,7 +29,6 @@ import gg.questnav.questnav.protos.wpilib.FrameDataProto;
  * robot and the Quest device.
  */
 public class QuestNav {
-
   /** NetworkTable instance used for communication */
   NetworkTableInstance nt4Instance = NetworkTableInstance.getDefault();
 
@@ -94,8 +93,8 @@ public class QuestNav {
   public QuestNav() {}
 
   /**
-   * Sets the FRC field relative pose of the Quest. This is the QUESTS POSITION, NOT THE ROBOTS!
-   * Make sure you correctly offset back from the center of your robot first!
+   * Sets the field-relative pose of the Quest. This is the Quest's position, not the robot. Make
+   * sure you correctly offset back from the center of your robot first.
    *
    * @param pose The field relative position of the Quest
    */
@@ -113,9 +112,9 @@ public class QuestNav {
   }
 
   /**
-   * Gets the battery percentage of the Quest headset.
+   * Returns the Quest's battery level (0-100%), or -1 if no data is available
    *
-   * @return The battery percentage as a Double value
+   * @return The battery percentage as an int, or -1 if no data is available
    */
   public int getBatteryPercent() {
     Data.ProtobufQuestNavDeviceData latestDeviceData = deviceData.get();
@@ -166,7 +165,7 @@ public class QuestNav {
 
   /**
    * Determines if the Quest headset is currently connected to the robot. Connection is determined
-   * by checking when the last battery update was received.
+   * by the last time the Quest sent a frame.
    *
    * @return Boolean indicating if the Quest is connected (true) or not (false)
    */
@@ -177,19 +176,20 @@ public class QuestNav {
   }
 
   /**
-   * Gets the latency of the Quest > Robot Connection
+   * Gets the latency of the Quest > Robot Connection. Returns the latency between the current time
+   * and the last frame data update.
    *
-   * @return double indicating the latency of the frameData (the important part)
+   * @return The latency in seconds
    */
   public double getLatency() {
     return Seconds.of(Timer.getTimestamp())
         .minus(Microseconds.of(frameData.getLastChange()))
-        .in(Milliseconds);
+        .in(Seconds);
   }
 
   /**
-   * Gets the Quest app's timestamp since start THIS IS NOT THE SAME AS THE TIMESTAMP USED WITH AN
-   * ESTIMATOR! See 'getDataTimestamp' instead
+   * Returns the Quest app's uptime timestamp. For integration with a pose estimator, use {@link
+   * #getDataTimestamp()} instead!
    *
    * @return The timestamp as a double value
    */
@@ -202,8 +202,8 @@ public class QuestNav {
   }
 
   /**
-   * Gets the NT timestamp of when the data was sent. THIS IS THE VALUE YOU USE WHEN ADDING TO AN
-   * ESTIMATOR
+   * Gets the NT timestamp of when the last frame data was sent. This is the value which should be
+   * used with the pose estimator.
    *
    * @return The timestamp as a double value
    */

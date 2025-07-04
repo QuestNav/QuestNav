@@ -93,7 +93,7 @@ public class QuestNav {
   public QuestNav() {}
 
   /**
-   * Sets the field-relative pose of the Quest. This is the Quest's position, not the robot. Make
+   * Sets the field-relative pose of the Quest. This is the position of the Quest, not the robot. Make
    * sure you correctly offset back from the center of your robot first.
    *
    * @param pose The field relative position of the Quest
@@ -165,7 +165,7 @@ public class QuestNav {
 
   /**
    * Determines if the Quest headset is currently connected to the robot. Connection is determined
-   * by the last time the Quest sent a frame.
+   * by how stale the last received frame from the Quest is.
    *
    * @return Boolean indicating if the Quest is connected (true) or not (false)
    */
@@ -203,7 +203,7 @@ public class QuestNav {
 
   /**
    * Gets the NT timestamp of when the last frame data was sent. This is the value which should be
-   * used with the pose estimator.
+   * used with a pose estimator.
    *
    * @return The timestamp as a double value
    */

@@ -179,12 +179,12 @@ public class QuestNav {
    * Gets the latency of the Quest > Robot Connection. Returns the latency between the current time
    * and the last frame data update.
    *
-   * @return The latency in seconds
+   * @return The latency in milliseconds
    */
   public double getLatency() {
     return Seconds.of(Timer.getTimestamp())
         .minus(Microseconds.of(frameData.getLastChange()))
-        .in(Seconds);
+        .in(Milliseconds);
   }
 
   /**

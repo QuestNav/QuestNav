@@ -205,10 +205,10 @@ public class QuestNav {
    * Gets the NT timestamp of when the last frame data was sent. This is the value which should be
    * used with a pose estimator.
    *
-   * @return The timestamp as a double value
+   * @return The timestamp as a double value in seconds
    */
   public double getDataTimestamp() {
-    return frameData.getAtomic().serverTime;
+    return Microseconds.of(frameData.getAtomic().serverTime).in(Seconds);
   }
 
   /**

@@ -98,9 +98,9 @@ Using a dedicated voltage regulator from your robot's main battery:
 
 Recommended USB-compliant 5V regulators:
 - [Redux Robotics Zinc-V](https://shop.reduxrobotics.com/zinc-v/)
+- [Grapple Robotics MitoCANdria](https://www.thethriftybot.com/products/mitocandria)
 
 Recommended 5V regulators (requires soldering and custom circuitry):
-- [Grapple Robotics MitoCANdria](https://www.thethriftybot.com/products/mitocandria)
 - [Pololu D36V50F5 Regulator](https://www.pololu.com/product/4091)
 
 :::tip

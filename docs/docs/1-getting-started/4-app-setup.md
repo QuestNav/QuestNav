@@ -87,10 +87,6 @@ The example app has a team number set to 9999. You'll need to change this to you
 After installing the app, launch it and accept any permission requests. From then on, QuestNav will automatically launch when the headset is
 powered up or rebooted.
 
-:::tip
-Setting QuestNav to auto-start can save valuable time during competition setup and helps ensure the app is running after unexpected restarts.
-:::
-
 ## Troubleshooting Installation
 
 If you encounter issues during installation or launch:

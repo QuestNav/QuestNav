@@ -38,6 +38,11 @@ namespace QuestNav.UI
         private TMP_InputField teamInput;
 
         /// <summary>
+        /// Checkbox for auto start on boot
+        /// </summary>
+        private Toggle autoStartToggle;
+
+        /// <summary>
         /// IP address text
         /// </summary>
         private TMP_Text ipAddressText;
@@ -76,11 +81,13 @@ namespace QuestNav.UI
             TMP_InputField teamInput,
             TMP_Text ipAddressText,
             TMP_Text conStateText,
-            Button teamUpdateButton
+            Button teamUpdateButton,
+            Toggle autoStartToggle
         )
         {
             this.networkTableConnection = networkTableConnection;
             this.teamInput = teamInput;
+            this.autoStartToggle = autoStartToggle;
             this.ipAddressText = ipAddressText;
             this.conStateText = conStateText;
             this.teamUpdateButton = teamUpdateButton;
@@ -93,6 +100,12 @@ namespace QuestNav.UI
             setTeamNumberFromUI();
 
             teamUpdateButton.onClick.AddListener(setTeamNumberFromUI);
+
+            // Load/Save auto start preference
+            bool checkboxValue = PlayerPrefs.GetInt("AutoStart", 1) == 1;
+            autoStartToggle.isOn = checkboxValue;
+
+            autoStartToggle.onValueChanged.AddListener(updateAutoStart);
         }
 
         #region Properties
@@ -186,6 +199,15 @@ namespace QuestNav.UI
             }
         }
 
+        /// <summary>
+        /// Updates the auto start preference in PlayerPrefs.
+        /// </summary>
+        /// <param name="newValue">new AutoStart value</param>
+        void updateAutoStart(bool newValue)
+        {
+            PlayerPrefs.SetInt("AutoStart", newValue ? 1 : 0);
+            PlayerPrefs.Save();
+        }
         public void UIPeriodic()
         {
             updateConStateText();

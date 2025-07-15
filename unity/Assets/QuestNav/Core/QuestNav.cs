@@ -49,6 +49,12 @@ namespace QuestNav.Core
         private TMP_InputField teamInput;
 
         /// <summary>
+        /// Checkbox for auto start on boot
+        /// </summary>
+        [SerializeField]
+        private Toggle autoStartToggle;
+
+        /// <summary>
         /// IP address text
         /// </summary>
         [SerializeField]
@@ -147,7 +153,8 @@ namespace QuestNav.Core
                 teamInput,
                 ipAddressText,
                 conStateText,
-                teamUpdateButton
+                teamUpdateButton,
+                autoStartToggle
             );
 
             // Set Oculus display frequency

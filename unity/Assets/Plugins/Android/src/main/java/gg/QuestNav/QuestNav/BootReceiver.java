@@ -6,6 +6,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+/**
+ * BroadcastReceiver to start QuestNav on boot. Reads the "AutoStart" option from the PlayerPrefs
+ * set in the Unity code.
+ */
 public class BootReceiver extends BroadcastReceiver {
 
     private static final String TAG = "BootReceiver";

@@ -208,6 +208,7 @@ namespace QuestNav.UI
             PlayerPrefs.SetInt("AutoStart", newValue ? 1 : 0);
             PlayerPrefs.Save();
         }
+
         public void UIPeriodic()
         {
             updateConStateText();

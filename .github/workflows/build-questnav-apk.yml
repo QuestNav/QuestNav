@@ -4,23 +4,19 @@ on:
     inputs:
       versionYear:
         description: 'Current FRC Year'
-        required: true
-        default: 2025
+        required: false
         type: string
       versionMajor:
         description: 'Major version'
-        required: true
-        default: 1
+        required: false
         type: string
       versionMinor:
         description: 'Minor version'
-        required: true
-        default: 0
+        required: false
         type: string
       versionPatch:
         description: 'Patch version'
-        required: true
-        default: 0
+        required: false
         type: string
       versionType:
         description: 'Type of version'
@@ -49,14 +45,50 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       apk-artifact-name: ${{ steps.upload.outputs.artifact-id }}
-      apk-filename: ${{ steps.buildUnity.outputs.buildVersion }}.apk
+      apk-filename: ${{ steps.version-info.outputs.version }}.apk
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
           sparse-checkout: unity
           sparse-checkout-cone-mode: false
           lfs: true
+
+      - name: Determine Version Strategy
+        id: version-info
+        run: |
+          # Check if all required version components are provided
+          if [ -n "${{ inputs.versionYear }}" ] && [ -n "${{ inputs.versionMajor }}" ] && [ -n "${{ inputs.versionMinor }}" ] && [ -n "${{ inputs.versionPatch }}" ]; then
+            # Use semantic versioning
+            VERSION="${{ inputs.versionYear }}.${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}"
+            if [ -n "${{ inputs.versionType }}" ]; then
+              VERSION="${VERSION}-${{ inputs.versionType }}"
+            fi
+
+            # Calculate Android version code for semantic versioning
+            YEAR=${{ inputs.versionYear }}
+            MAJOR=${{ inputs.versionMajor }}
+            MINOR=${{ inputs.versionMinor }}
+            PATCH=${{ inputs.versionPatch }}
+            VERSION_CODE=$(( ($YEAR - 2020) * 100000000 + $MAJOR * 1000000 + $MINOR * 1000 + $PATCH ))
+
+            echo "strategy=semantic" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "version-code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          else
+            # Use hash-based versioning - hash first, then dev suffix
+            COMMIT_HASH=$(git rev-parse --short=7 HEAD)
+            VERSION="$COMMIT_HASH-dev"
+
+            # For hash-based versioning, use commit count for version code
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+            VERSION_CODE=$((1000000 + $COMMIT_COUNT))
+
+            echo "strategy=hash" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "version-code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          fi
 
       - name: Free Disk Space
         uses: jlumbroso/free-disk-space@v1.3.1
@@ -85,12 +117,6 @@ jobs:
       - name: Restore NuGetForUnity Packages
         run: nugetforunity restore unity/
 
-      - name: Calculate Android Version Code
-        id: version-code
-        run: |
-          VERSION_CODE=$(( (${{ inputs.versionYear }} - 2020) * 100000000 + ${{ inputs.versionMajor }} * 1000000 + ${{ inputs.versionMinor }} * 1000 + ${{ inputs.versionPatch }} ))
-          echo "code=$VERSION_CODE" >> $GITHUB_OUTPUT
-
       - name: Build Unity Project for Android
         uses: game-ci/unity-builder@v4
         id: buildUnity
@@ -103,13 +129,13 @@ jobs:
           targetPlatform: Android
           customParameters: -developmentBuild
           versioning: Custom
-          version: ${{ inputs.versionYear }}.${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}${{ inputs.versionType && format('-{0}', inputs.versionType) || '' }}
-          androidVersionCode: ${{ steps.version-code.outputs.code }}
+          version: ${{ steps.version-info.outputs.version }}
+          androidVersionCode: ${{ steps.version-info.outputs.version-code }}
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         id: upload
         with:
-          name: questnav-apk-${{ inputs.versionYear }}-${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}${{ inputs.versionType && format('-{0}', inputs.versionType) || '' }}
+          name: questnav-apk-${{ steps.version-info.outputs.version }}
           path: build/Android/*.apk
           retention-days: 7

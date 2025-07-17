@@ -82,9 +82,9 @@ The example app has a team number set to 9999. You'll need to change this to you
 1. Enter your FRC team number in the provided field and click set
 2. This ensures correct network communication with your robot
 
-## Automatic Startup (Optional)
+## Automatic Startup
 
-This is still a WIP! If you know how to do this, please submit a PR!
+QuestNav can automatically start when the headset is powered up or rebooted. This feature can be controlled with the _Auto Start On Boot_ option on the main window.
 
 :::tip
 Setting QuestNav to auto-start can save valuable time during competition setup and helps ensure the app is running after unexpected restarts.

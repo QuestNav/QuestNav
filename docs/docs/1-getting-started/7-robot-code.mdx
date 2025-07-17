@@ -68,7 +68,7 @@ QuestNav questNav = new QuestNav();
 Transform2d ROBOT_TO_QUEST = new Transform2d( /*TODO: Put your x, y, rotational offsets here!*/ )
 
 // Get the Quest pose
-Pose2d questPose = questNav.getPose();
+Pose2d questPose = questNav.getPoseFrame().questPose();
 
 // Transform by the offset to get your final pose!
 Pose2d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
@@ -146,10 +146,17 @@ import TabItem from '@theme/TabItem';
             );
 
         if (questNav.isConnected() && questNav.isTracking()) {
-            // Get pose with the method outlined above
-            Pose2d pose = getPose();
+            // Get the latest pose data from the Quest
+            PoseFrame poseFrame = questNav.getPoseFrame();
+
+            // Get the Quest pose
+            Pose2d questPose = poseFrame.questPose();
+
+            // Transform by the offset to get your final pose!
+            Pose2d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
+
             // Get timestamp from the QuestNav instance
-            double timestamp = questNav.getDataTimestamp();
+            double timestamp = poseFrame.dataTimestamp();
 
             // Convert FPGA timestamp to CTRE's time domain using Phoenix 6 utility
             double ctreTimestamp = Utils.fpgaToCurrentTime(timestamp);
@@ -179,10 +186,17 @@ import TabItem from '@theme/TabItem';
             );
 
         if (questNav.isConnected() && questNav.isTracking()) {
-            // Get pose with the method outlined above
-            Pose2d pose = getPose();
+            // Get the latest pose data from the Quest
+            PoseFrame poseFrame = questNav.getPoseFrame();
+
+            // Get the Quest pose
+            Pose2d questPose = poseFrame.questPose();
+
+            // Transform by the offset to get your final pose!
+            Pose2d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
+
             // Get timestamp from the QuestNav instance
-            double timestamp = questNav.getDataTimestamp();
+            double timestamp = poseFrame.dataTimestamp();
 
             // You can put some sort of filtering here if you would like!
 

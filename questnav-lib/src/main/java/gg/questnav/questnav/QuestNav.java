@@ -8,12 +8,17 @@
 */
 package gg.questnav.questnav;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Microseconds;
+import static edu.wpi.first.units.Units.Milliseconds;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.proto.Pose2dProto;
 import edu.wpi.first.math.proto.Geometry2D;
-import edu.wpi.first.networktables.*;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.ProtobufPublisher;
+import edu.wpi.first.networktables.ProtobufSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import gg.questnav.questnav.protos.generated.Commands;
@@ -29,11 +34,22 @@ import gg.questnav.questnav.protos.wpilib.FrameDataProto;
  * robot and the Quest device.
  */
 public class QuestNav {
+
+  /**
+   * A frame of data from the QuestNav.
+   *
+   * @param questPose The current pose of the Quest on the field. This will only return the
+   *     field-relative pose if {@link #setPose(Pose2d)} has been called at least once.
+   * @param dataTimestamp The NT timestamp of when the last frame data was sent. This is the value
+   *     which should be used with a pose estimator.
+   */
+  public static record PoseFrame(Pose2d questPose, double dataTimestamp) {}
+
   /** NetworkTable instance used for communication */
-  NetworkTableInstance nt4Instance = NetworkTableInstance.getDefault();
+  private NetworkTableInstance nt4Instance = NetworkTableInstance.getDefault();
 
   /** NetworkTable for Quest navigation data */
-  NetworkTable questNavTable = nt4Instance.getTable("QuestNav");
+  private NetworkTable questNavTable = nt4Instance.getTable("QuestNav");
 
   /** Protobuf instance for CommandResponse */
   private final CommandResponseProto commandResponseProto = new CommandResponseProto();
@@ -188,8 +204,8 @@ public class QuestNav {
   }
 
   /**
-   * Returns the Quest app's uptime timestamp. For integration with a pose estimator, use {@link
-   * #getDataTimestamp()} instead!
+   * Returns the Quest app's uptime timestamp. For integration with a pose estimator, use the
+   * timestamp from {@link #getPoseFrame()} instead!
    *
    * @return The timestamp as a double value
    */
@@ -202,27 +218,18 @@ public class QuestNav {
   }
 
   /**
-   * Gets the NT timestamp of when the last frame data was sent. This is the value which should be
-   * used with a pose estimator.
+   * Returns the last frame of pose data from the Quest.
    *
-   * @return The timestamp as a double value in seconds
+   * @return returns the latest frame of pose data
    */
-  public double getDataTimestamp() {
-    return Microseconds.of(frameData.getAtomic().serverTime).in(Seconds);
-  }
-
-  /**
-   * Returns the current pose of the Quest on the field. This will only return the field-relative
-   * pose if {@link #setPose(Pose2d)} has been called at least once.
-   *
-   * @return Pose2d representing the Quest's location on the field
-   */
-  public Pose2d getPose() {
-    Data.ProtobufQuestNavFrameData latestFrameData = frameData.get();
+  public PoseFrame getPoseFrame() {
+    var latestFrameData = frameData.getAtomic();
     if (latestFrameData != null) {
-      return pose2dProto.unpack(latestFrameData.getPose2D());
+      return new PoseFrame(
+          pose2dProto.unpack(latestFrameData.value.getPose2D()),
+          Microseconds.of(latestFrameData.serverTime).in(Seconds));
     }
-    return Pose2d.kZero; // Return kZero to indicate no data available
+    return new PoseFrame(Pose2d.kZero, -1);
   }
 
   /** Cleans up QuestNav responses after processing on the headset. */

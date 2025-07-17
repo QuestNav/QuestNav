@@ -156,29 +156,6 @@ If you do not check the `Development Build` option, the build will fail to run o
 Check the getting started guide for a step-by-step tutorial on how to install the APK [here](../1-getting-started/4-app-setup.md#installing-questnav).
 :::
 
-### Building and testing questnavlib
-The source code is in the questnav-lib folder. Use the gradle wrapper to apply formatting and build the project:
-```
-./gradlew spotlessApply build
-```
-
-To build for local testing with a WPILib project, create the local vendordeps JSON file:
-```
-./gradlew copyVendorJsonLocal
-```
-
-Copy the JSON file `outputs/vendordeps/questnavlib.json` into the vendordeps folder in your WPILib project.
-
-Finally, install questnavlib into the local WPILib maven repo. Note that you may have to change the maven path if you are not on Windows.
-```
-./gradlew publish -PmavenRepoUrl=file:///C:/Users/Public/wpilib/2025/maven
-```
-
-:::tip
-You can publish new versions as you make changes by running `gradlew publish` over and over. To refresh WPILib VS Code (for autocomplete/intellisense), right-click
-the `build.gradle` file in your WPILib project and choose "Reload Projects".
-:::
-
 ## Troubleshooting Common Issues
 
 :::note

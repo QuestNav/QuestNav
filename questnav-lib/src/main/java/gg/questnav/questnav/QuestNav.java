@@ -19,6 +19,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.ProtobufPublisher;
 import edu.wpi.first.networktables.ProtobufSubscriber;
+import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import gg.questnav.questnav.protos.generated.Commands;
@@ -27,6 +28,9 @@ import gg.questnav.questnav.protos.wpilib.CommandProto;
 import gg.questnav.questnav.protos.wpilib.CommandResponseProto;
 import gg.questnav.questnav.protos.wpilib.DeviceDataProto;
 import gg.questnav.questnav.protos.wpilib.FrameDataProto;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.OptionalInt;
 
 /**
  * The QuestNav class provides an interface to communicate with an Oculus/Meta Quest VR headset for
@@ -36,20 +40,24 @@ import gg.questnav.questnav.protos.wpilib.FrameDataProto;
 public class QuestNav {
 
   /**
-   * A frame of data from the QuestNav.
+   * A frame of data from the Quest.
    *
    * @param questPose The current pose of the Quest on the field. This will only return the
    *     field-relative pose if {@link #setPose(Pose2d)} has been called at least once.
    * @param dataTimestamp The NT timestamp of when the last frame data was sent. This is the value
    *     which should be used with a pose estimator.
+   * @param appTimestamp The Quest app's uptime timestamp. For integration with a pose estimator,
+   *     use the timestamp from {@link #dataTimestamp()} instead!
+   * @param frameCount The current frame count.
    */
-  public static record PoseFrame(Pose2d questPose, double dataTimestamp) {}
+  public static record PoseFrame(
+      Pose2d questPose, double dataTimestamp, double appTimestamp, int frameCount) {}
 
   /** NetworkTable instance used for communication */
-  private NetworkTableInstance nt4Instance = NetworkTableInstance.getDefault();
+  private final NetworkTableInstance nt4Instance = NetworkTableInstance.getDefault();
 
   /** NetworkTable for Quest navigation data */
-  private NetworkTable questNavTable = nt4Instance.getTable("QuestNav");
+  private final NetworkTable questNavTable = nt4Instance.getTable("QuestNav");
 
   /** Protobuf instance for CommandResponse */
   private final CommandResponseProto commandResponseProto = new CommandResponseProto();
@@ -67,25 +75,29 @@ public class QuestNav {
   private final FrameDataProto frameDataProto = new FrameDataProto();
 
   /** Subscriber for command response */
-  private final ProtobufSubscriber<Commands.ProtobufQuestNavCommandResponse> response =
+  private final ProtobufSubscriber<Commands.ProtobufQuestNavCommandResponse> responseSubscriber =
       questNavTable
           .getProtobufTopic("response", commandResponseProto)
           .subscribe(Commands.ProtobufQuestNavCommandResponse.newInstance());
 
   /** Subscriber for frame data */
-  private final ProtobufSubscriber<Data.ProtobufQuestNavFrameData> frameData =
+  private final ProtobufSubscriber<Data.ProtobufQuestNavFrameData> frameDataSubscriber =
       questNavTable
           .getProtobufTopic("frameData", frameDataProto)
-          .subscribe(Data.ProtobufQuestNavFrameData.newInstance());
+          .subscribe(
+              Data.ProtobufQuestNavFrameData.newInstance(),
+              PubSubOption.periodic(0.01),
+              PubSubOption.sendAll(true),
+              PubSubOption.pollStorage(20));
 
   /** Subscriber for device data */
-  private final ProtobufSubscriber<Data.ProtobufQuestNavDeviceData> deviceData =
+  private final ProtobufSubscriber<Data.ProtobufQuestNavDeviceData> deviceDataSubscriber =
       questNavTable
           .getProtobufTopic("deviceData", deviceDataProto)
           .subscribe(Data.ProtobufQuestNavDeviceData.newInstance());
 
   /** Publisher for command requests */
-  private final ProtobufPublisher<Commands.ProtobufQuestNavCommand> request =
+  private final ProtobufPublisher<Commands.ProtobufQuestNavCommand> requestPublisher =
       questNavTable.getProtobufTopic("request", commandProto).publish();
 
   /** Cached request to lessen GC pressure */
@@ -124,20 +136,20 @@ public class QuestNav {
             .setCommandId(++lastSentRequestId)
             .setPoseResetPayload(cachedPoseResetPayload.clear().setTargetPose(cachedProtoPose));
 
-    request.set(requestToSend);
+    requestPublisher.set(requestToSend);
   }
 
   /**
-   * Returns the Quest's battery level (0-100%), or -1 if no data is available
+   * Returns the Quest's battery level (0-100%)
    *
-   * @return The battery percentage as an int, or -1 if no data is available
+   * @return An Optional containing battery percentage, or an empty Optional if no data is available
    */
-  public int getBatteryPercent() {
-    Data.ProtobufQuestNavDeviceData latestDeviceData = deviceData.get();
+  public OptionalInt getBatteryPercent() {
+    Data.ProtobufQuestNavDeviceData latestDeviceData = deviceDataSubscriber.get();
     if (latestDeviceData != null) {
-      return latestDeviceData.getBatteryPercent();
+      return OptionalInt.of(latestDeviceData.getBatteryPercent());
     }
-    return -1; // Return -1 to indicate no data available
+    return OptionalInt.empty();
   }
 
   /**
@@ -146,7 +158,7 @@ public class QuestNav {
    * @return Boolean indicating if the Quest is currently tracking (true) or not (false)
    */
   public boolean isTracking() {
-    Data.ProtobufQuestNavDeviceData latestDeviceData = deviceData.get();
+    Data.ProtobufQuestNavDeviceData latestDeviceData = deviceDataSubscriber.get();
     if (latestDeviceData != null) {
       return latestDeviceData.getCurrentlyTracking();
     }
@@ -154,29 +166,16 @@ public class QuestNav {
   }
 
   /**
-   * Gets the current frame count from the Quest headset.
-   *
-   * @return The frame count value
-   */
-  public int getFrameCount() {
-    Data.ProtobufQuestNavFrameData latestFrameData = frameData.get();
-    if (latestFrameData != null) {
-      return latestFrameData.getFrameCount();
-    }
-    return -1; // Return -1 to indicate no data available
-  }
-
-  /**
    * Gets the number of tracking lost events since the Quest connected to the robot.
    *
    * @return The tracking lost counter value
    */
-  public int getTrackingLostCounter() {
-    Data.ProtobufQuestNavDeviceData latestDeviceData = deviceData.get();
+  public OptionalInt getTrackingLostCounter() {
+    Data.ProtobufQuestNavDeviceData latestDeviceData = deviceDataSubscriber.get();
     if (latestDeviceData != null) {
-      return latestDeviceData.getTrackingLostCounter();
+      return OptionalInt.of(latestDeviceData.getTrackingLostCounter());
     }
-    return -1; // Return -1 to indicate no data available
+    return OptionalInt.empty();
   }
 
   /**
@@ -187,7 +186,7 @@ public class QuestNav {
    */
   public boolean isConnected() {
     return Seconds.of(Timer.getTimestamp())
-        .minus(Microseconds.of(frameData.getLastChange()))
+        .minus(Microseconds.of(frameDataSubscriber.getLastChange()))
         .lt(Milliseconds.of(50));
   }
 
@@ -199,42 +198,32 @@ public class QuestNav {
    */
   public double getLatency() {
     return Seconds.of(Timer.getTimestamp())
-        .minus(Microseconds.of(frameData.getLastChange()))
+        .minus(Microseconds.of(frameDataSubscriber.getLastChange()))
         .in(Milliseconds);
   }
 
   /**
-   * Returns the Quest app's uptime timestamp. For integration with a pose estimator, use the
-   * timestamp from {@link #getPoseFrame()} instead!
+   * Gets a list of results sent by the Quest since the last call to getAllUnreadResults().
    *
-   * @return The timestamp as a double value
+   * @return returns a list of frames with pose data
    */
-  public double getAppTimestamp() {
-    Data.ProtobufQuestNavFrameData latestFrameData = frameData.get();
-    if (latestFrameData != null) {
-      return latestFrameData.getTimestamp();
+  public List<PoseFrame> getAllUnreadPoseFrames() {
+    var frameDataArray = frameDataSubscriber.readQueue();
+    var result = new ArrayList<PoseFrame>();
+    for (var frameData : frameDataArray) {
+      result.add(
+          new PoseFrame(
+              pose2dProto.unpack(frameData.value.getPose2D()),
+              Microseconds.of(frameData.serverTime).in(Seconds),
+              frameData.value.getTimestamp(),
+              frameData.value.getFrameCount()));
     }
-    return -1; // Return -1 to indicate no data available
-  }
-
-  /**
-   * Returns the last frame of pose data from the Quest.
-   *
-   * @return returns the latest frame of pose data
-   */
-  public PoseFrame getPoseFrame() {
-    var latestFrameData = frameData.getAtomic();
-    if (latestFrameData != null) {
-      return new PoseFrame(
-          pose2dProto.unpack(latestFrameData.value.getPose2D()),
-          Microseconds.of(latestFrameData.serverTime).in(Seconds));
-    }
-    return new PoseFrame(Pose2d.kZero, -1);
+    return result;
   }
 
   /** Cleans up QuestNav responses after processing on the headset. */
   public void commandPeriodic() {
-    Commands.ProtobufQuestNavCommandResponse latestCommandResponse = response.get();
+    Commands.ProtobufQuestNavCommandResponse latestCommandResponse = responseSubscriber.get();
 
     // if we don't have data or for some reason the response we got isn't for the command we sent,
     // skip for this loop

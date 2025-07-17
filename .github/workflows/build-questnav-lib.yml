@@ -68,6 +68,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
           sparse-checkout: questnav-lib
           sparse-checkout-cone-mode: false
 

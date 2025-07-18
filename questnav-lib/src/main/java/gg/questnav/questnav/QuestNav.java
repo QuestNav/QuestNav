@@ -28,6 +28,7 @@ import gg.questnav.questnav.protos.wpilib.CommandProto;
 import gg.questnav.questnav.protos.wpilib.CommandResponseProto;
 import gg.questnav.questnav.protos.wpilib.DeviceDataProto;
 import gg.questnav.questnav.protos.wpilib.FrameDataProto;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
 /**
@@ -36,20 +37,6 @@ import java.util.OptionalInt;
  * robot and the Quest device.
  */
 public class QuestNav {
-
-  /**
-   * A frame of data from the Quest.
-   *
-   * @param questPose The current pose of the Quest on the field. This will only return the
-   *     field-relative pose if {@link #setPose(Pose2d)} has been called at least once.
-   * @param dataTimestamp The NT timestamp of when the last frame data was sent. This is the value
-   *     which should be used with a pose estimator.
-   * @param appTimestamp The Quest app's uptime timestamp. For integration with a pose estimator,
-   *     use the timestamp from {@link #dataTimestamp()} instead!
-   * @param frameCount The current frame count.
-   */
-  public static record PoseFrame(
-      Pose2d questPose, double dataTimestamp, double appTimestamp, int frameCount) {}
 
   /** NetworkTable instance used for communication */
   private final NetworkTableInstance nt4Instance = NetworkTableInstance.getDefault();
@@ -164,6 +151,19 @@ public class QuestNav {
   }
 
   /**
+   * Gets the current frame count from the Quest headset.
+   *
+   * @return The frame count value
+   */
+  public OptionalInt getFrameCount() {
+    Data.ProtobufQuestNavFrameData latestFrameData = frameDataSubscriber.get();
+    if (latestFrameData != null) {
+      return OptionalInt.of(latestFrameData.getFrameCount());
+    }
+    return OptionalInt.empty();
+  }
+
+  /**
    * Gets the number of tracking lost events since the Quest connected to the robot.
    *
    * @return The tracking lost counter value
@@ -198,6 +198,20 @@ public class QuestNav {
     return Seconds.of(Timer.getTimestamp())
         .minus(Microseconds.of(frameDataSubscriber.getLastChange()))
         .in(Milliseconds);
+  }
+
+  /*
+   * Returns the Quest app's uptime timestamp. For integration with a pose estimator, use {@link
+   * #getDataTimestamp()} instead!
+   *
+   * @return The timestamp as a double value
+   */
+  public OptionalDouble getAppTimestamp() {
+    Data.ProtobufQuestNavFrameData latestFrameData = frameDataSubscriber.get();
+    if (latestFrameData != null) {
+      return OptionalDouble.of(latestFrameData.getTimestamp());
+    }
+    return OptionalDouble.empty();
   }
 
   /**

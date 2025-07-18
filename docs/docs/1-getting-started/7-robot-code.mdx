@@ -61,6 +61,9 @@ public void periodic() {
 The `QuestNav` vendor dependency provides a method for getting the pose of the Quest itself. In order to estimate the position of the
 robot, we need to transform the Quest's pose to the robot's center.
 
+Here is an example of getting the latest pose from the Quest and transforming it to the robot pose. See the
+[Setting Robot Pose](#setting-robot-pose) section below for a more complete example of using the pose from QuestNav for robot pose estimation.
+
 ```java title="e.g. QuestNavSubsystem.java"
 QuestNav questNav = new QuestNav();
 
@@ -68,7 +71,7 @@ QuestNav questNav = new QuestNav();
 Transform2d ROBOT_TO_QUEST = new Transform2d( /*TODO: Put your x, y, rotational offsets here!*/ )
 
 // Get the latest pose data frames from the Quest
-QuestNav.PoseFrame[] poseFrames = questNav.getAllUnreadPoseFrames();
+PoseFrame[] poseFrames = questNav.getAllUnreadPoseFrames();
 
 if (poseFrames.length > 0) {
     // Get the most recent Quest pose
@@ -155,10 +158,10 @@ import TabItem from '@theme/TabItem';
 
         if (questNav.isTracking()) {
             // Get the latest pose data frames from the Quest
-            QuestNav.PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
+            PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
 
             // Loop over the pose data frames and send them to the pose estimator
-            for (QuestNav.PoseFrame questFrame : questFrames) {
+            for (PoseFrame questFrame : questFrames) {
                 // Get the pose of the Quest
                 Pose2d questPose = questFrame.questPose();
                 // Get timestamp for when the data was sent
@@ -197,10 +200,10 @@ import TabItem from '@theme/TabItem';
 
         if (questNav.isTracking()) {
             // Get the latest pose data frames from the Quest
-            QuestNav.PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
+            PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
 
             // Loop over the pose data frames and send them to the pose estimator
-            for (QuestNav.PoseFrame questFrame : questFrames) {
+            for (PoseFrame questFrame : questFrames) {
                 // Get the pose of the Quest
                 Pose2d questPose = questFrame.questPose();
                 // Get timestamp for when the data was sent

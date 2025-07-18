@@ -44,3 +44,6 @@ gradle-app.setting
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+
+# VS Code build directory
+bin

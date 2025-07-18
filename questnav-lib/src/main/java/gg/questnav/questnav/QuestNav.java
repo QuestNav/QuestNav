@@ -28,8 +28,6 @@ import gg.questnav.questnav.protos.wpilib.CommandProto;
 import gg.questnav.questnav.protos.wpilib.CommandResponseProto;
 import gg.questnav.questnav.protos.wpilib.DeviceDataProto;
 import gg.questnav.questnav.protos.wpilib.FrameDataProto;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.OptionalInt;
 
 /**
@@ -207,16 +205,17 @@ public class QuestNav {
    *
    * @return returns a list of frames with pose data
    */
-  public List<PoseFrame> getAllUnreadPoseFrames() {
+  public PoseFrame[] getAllUnreadPoseFrames() {
     var frameDataArray = frameDataSubscriber.readQueue();
-    var result = new ArrayList<PoseFrame>();
-    for (var frameData : frameDataArray) {
-      result.add(
+    var result = new PoseFrame[frameDataArray.length];
+    for (int i = 0; i < result.length; i++) {
+      var frameData = frameDataArray[i];
+      result[i] =
           new PoseFrame(
               pose2dProto.unpack(frameData.value.getPose2D()),
               Microseconds.of(frameData.serverTime).in(Seconds),
               frameData.value.getTimestamp(),
-              frameData.value.getFrameCount()));
+              frameData.value.getFrameCount());
     }
     return result;
   }

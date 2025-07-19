@@ -2,11 +2,5 @@ pluginManagement {
     repositories {
         mavenLocal()
         gradlePluginPortal()
-        maven {
-            name = "WPILib"
-            url = "https://frcmaven.wpi.edu/artifactory/release/"
-        }
     }
 }
-
-rootProject.name = 'questnavlib'

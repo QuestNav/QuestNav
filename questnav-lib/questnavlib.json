@@ -1,0 +1,39 @@
+{
+  "fileName": "questnavlib.json",
+  "name": "QuestNavLib",
+  "version": "${version}",
+  "frcYear": "2025",
+  "uuid": "a706fe68-86e5-4aed-92c5-ce05aca007f0",
+  "mavenUrls": [
+    "https://maven.questnav.gg/releases",
+    "https://maven.questnav.gg/snapshots"
+  ],
+  "jsonUrl": "InsertSomeUrlHere",
+  "javaDependencies": [
+    {
+      "groupId": "${groupId}",
+      "artifactId": "${artifactId}-java",
+      "version": "${version}"
+    }
+  ],
+  "jniDependencies": [],
+  "cppDependencies": [
+    {
+      "groupId": "${groupId}",
+      "artifactId": "${artifactId}-cpp",
+      "version": "${version}",
+      "libName": "Vendor",
+      "headerClassifier": "headers",
+      "sharedLibrary": false,
+      "skipInvalidPlatforms": true,
+      "binaryPlatforms": [
+        "windowsx86-64",
+        "linuxarm64",
+        "linuxx86-64",
+        "linuxathena",
+        "linuxarm32",
+        "osxuniversal"
+      ]
+    }
+  ]
+}

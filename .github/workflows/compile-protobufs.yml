@@ -48,8 +48,24 @@ jobs:
       - name: Setup QuickBuf
         run: chmod +x ${{ steps.download-quickbuf.outputs.file }}
 
+      - name: Download NanoPB
+        id: download-nanopb
+        run: wget -O nanopb.tar.gz https://jpa.kapsi.fi/nanopb/download/nanopb-0.4.9.1-linux-x86.tar.gz
+
+      - name: Extract NanoPB
+        run: tar -xzf nanopb.tar.gz
+
+      - name: Setup NanoPB
+        run: chmod +x nanopb-0.4.9.1-linux-x86/generator-bin/nanopb_generator
+
       - name: Generate C# protobuf
         run: protoc -I="protos" --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/*.proto
+
+      - name: Generate C++ protobuf
+        run: .\nanopb_generator.exe --cpp-descriptors --output-dir=questnav-lib/src/main/native/cpp/gg/questnav/questnav/protos/generated/ -I=protos/ C:\protos\data.proto
+
+      - name: Move C++ header files
+        run: mv questnav-lib/src/main/native/cpp/gg/questnav/questnav/protos/generated/*.pb.h questnav-lib/src/main/native/include/gg/questnav/questnav/protos/generated/
 
       - name: Generate Java QuickBuffers
         run: |
@@ -63,4 +79,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'ci: Generated Protocol Buffers'
-          file_pattern: 'unity/Assets/QuestNav/Protos/Generated/*.cs questnav-lib/src/main/java/gg/questnav/questnav/protos/generated/*.java'
+          file_pattern: 'unity/Assets/QuestNav/Protos/Generated/*.cs questnav-lib/src/main/native/include/gg/questnav/questnav/protos/generated/*.pb.h questnav-lib/src/main/native/cpp/gg/questnav/questnav/protos/generated/*.pb.cc questnav-lib/src/main/java/gg/questnav/questnav/protos/generated/*.java'

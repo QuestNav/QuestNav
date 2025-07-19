@@ -1,298 +1,131 @@
+import edu.wpi.first.toolchain.*
+
 plugins {
+    id 'cpp'
     id 'java'
-    id 'maven-publish'
-    id 'edu.wpi.first.GradleRIO' version '2025.3.2'
-    id 'com.diffplug.spotless' version '6.20.0'
+    id 'google-test'
+    id 'edu.wpi.first.wpilib.repositories.WPILibRepositoriesPlugin' version '2025.0'
+    id 'edu.wpi.first.NativeUtils' version '2025.9.0'
+    id 'edu.wpi.first.GradleJni' version '1.1.0'
+    id 'edu.wpi.first.GradleVsCode' version '2.1.0'
 }
 
-// Version and build configuration
-ext {
-    baseVersion = project.findProperty('questnavVersion') ?: '2025-1.0.0'
-    releaseType = project.findProperty('releaseType') ?: 'dev'
-    frcYear = project.findProperty('frcYear') ?: '2025'
-    wpilibVersion = project.findProperty('wpilibVersion') ?: '2025.3.2'
+// WPILib Version
+ext.wpilibVersion = "2025.+"
 
-    // Construct full version from base + release type
-    questnavVersion = releaseType == 'release' ? baseVersion : "${baseVersion}-${releaseType}"
-
-    // Vendor dependency configuration
-    vendorUuid = 'a706fe68-86e5-4aed-92c5-ce05aca007f0'
-    mavenGroupId = 'gg.questnav'
-    artifactId = 'questnavlib-java'
-
-    // Repository configuration
-    mavenRepoUrl = project.findProperty('mavenRepoUrl') ?: 'https://maven.questnav.gg/'
-    isSnapshot = releaseType in ['dev', 'snapshot'] || questnavVersion.contains('-SNAPSHOT')
+repositories {
+    mavenCentral()
+}
+if (project.hasProperty('releaseMode')) {
+    wpilibRepositories.addAllReleaseRepositories(project)
+} else {
+    wpilibRepositories.addAllDevelopmentRepositories(project)
 }
 
-// Set the base name for all archives globally
-archivesBaseName = artifactId
-
-// Java configuration
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
-    withSourcesJar()
-    withJavadocJar()
 }
+var javaVersion = "17"
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        name = "WPILib"
-        url = "https://frcmaven.wpi.edu/artifactory/release/"
-    }
-    if (project.hasProperty('mavenRepoUrl')) {
-        maven {
-            name = "QuestNavRepo"
-            url = mavenRepoUrl + (isSnapshot ? "/snapshots" : "/releases")
-        }
-    }
-}
+// Apply C++ configuration
+apply from: 'config.gradle'
 
+// Apply Java configuration
 dependencies {
-    // WPILib dependencies
-    implementation "edu.wpi.first.wpilibj:wpilibj-java:${wpilibVersion}"
-    implementation "edu.wpi.first.wpiutil:wpiutil-java:${wpilibVersion}"
-    implementation "edu.wpi.first.wpimath:wpimath-java:${wpilibVersion}"
-    implementation "edu.wpi.first.ntcore:ntcore-java:${wpilibVersion}"
-    implementation "edu.wpi.first.wpiunits:wpiunits-java:${wpilibVersion}"
-    implementation "com.google.protobuf:protobuf-java:4.31.1"
+    implementation "edu.wpi.first.cscore:cscore-java:$wpilibVersion"
+    implementation "edu.wpi.first.cameraserver:cameraserver-java:$wpilibVersion"
+    implementation "edu.wpi.first.ntcore:ntcore-java:$wpilibVersion"
+    implementation "edu.wpi.first.wpilibj:wpilibj-java:$wpilibVersion"
+    implementation "edu.wpi.first.wpiutil:wpiutil-java:$wpilibVersion"
+    implementation "edu.wpi.first.wpimath:wpimath-java:$wpilibVersion"
+    implementation "edu.wpi.first.wpiunits:wpiunits-java:$wpilibVersion"
+    implementation "edu.wpi.first.hal:hal-java:$wpilibVersion"
     implementation "us.hebi.quickbuf:quickbuf-runtime:1.4"
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
+    implementation "org.ejml:ejml-simple:0.43.1"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:2.15.2"
+    implementation "com.fasterxml.jackson.core:jackson-core:2.15.2"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.15.2"
+    implementation 'edu.wpi.first.thirdparty.frc2025.opencv:opencv-java:4.10.0-2'
 
-    // Test dependencies
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// Set up java tests
 test {
     useJUnitPlatform()
+    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
 }
 
+if (project.hasProperty('onlylinuxathena') || project.hasProperty('onlylinuxarm32') || project.hasProperty('onlylinuxarm64') || project.hasProperty('onlywindowsarm64') || project.hasProperty('onlylinuxsystemcore')) {
+    test.enabled = false
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs.add '-XDstringConcat=inline'
+    options.encoding = 'UTF-8'
+}
+
+// Setup Javadocs to link back to WPILib docs
 javadoc {
-    exclude '**/generated/**'
-}
-
-// Generate vendor JSON
-def vendorJsonInput = file("src/generate/questnavlib.json.in")
-def vendorJsonOutput = file("$buildDir/generated/vendordeps/questnavlib.json")
-
-task generateVendorJson() {
-    description = "Generates the vendor JSON file"
-    group = "QuestNavLib"
-
-    inputs.file vendorJsonInput
-    inputs.property("baseVersion", baseVersion)
-    inputs.property("releaseType", releaseType)
-    inputs.property("version", questnavVersion)
-    inputs.property("frcYear", frcYear)
-    outputs.file vendorJsonOutput
-
-    doLast {
-        println "Generating vendor JSON ${questnavVersion} (${baseVersion} + ${releaseType}) to ${vendorJsonOutput}"
-
-        vendorJsonOutput.parentFile.mkdirs()
-
-        // Determine repository URL based on release type
-        def repoType = isSnapshot ? "snapshots" : "releases"
-        def jsonUrl = "https://maven.questnav.gg/${repoType}/gg/questnav/questnavlib-json/${questnavVersion}/questnavlib-json-${questnavVersion}.json"
-
-        def content = vendorJsonInput.text
-                .replace('${questnav_version}', questnavVersion)
-                .replace('${frc_year}', frcYear)
-                .replace('${questnav_uuid}', vendorUuid)
-                .replace('${json_url}', jsonUrl)
-
-        vendorJsonOutput.text = content
+    options {
+        links "https://docs.oracle.com/en/java/javase/$javaVersion/docs/api/", 'https://github.wpilib.org/allwpilib/docs/release/java/'
     }
-
-    outputs.upToDateWhen { false }
 }
 
-// Create publishable artifact
-def vendorJsonArtifact = artifacts.add('archives', vendorJsonOutput) {
-    type = 'json'
-    builtBy generateVendorJson
-}
-
-// Publishing configuration
-publishing {
-    publications {
-        questnavlib(MavenPublication) {
-            groupId = mavenGroupId
-            artifactId = 'questnavlib-java'
-            version = questnavVersion
-
-            from components.java
-
-            pom {
-                name = 'QuestNavLib'
-                description = 'QuestNav vendor dependency library'
-                url = 'https://github.com/questnav/questnav/tree/main/questnav-lib'
-
-                licenses {
-                    license {
-                        name = 'MIT License'
-                        url = 'https://opensource.org/licenses/MIT'
-                    }
-                }
-
-                scm {
-                    connection = 'scm:git:git://github.com/questnav/questnav.git'
-                    developerConnection = 'scm:git:ssh://github.com/questnav/questnav.git'
-                    url = 'https://github.com/questnav/questnav/tree/main/questnav-lib'
-                }
-            }
-        }
-
-        questnavlibJson(MavenPublication) {
-            groupId = mavenGroupId
-            artifactId = 'questnavlib-json'
-            version = questnavVersion
-
-            artifact vendorJsonArtifact
-
-            pom {
-                name = 'QuestNavLib Vendor JSON'
-                description = 'QuestNav vendor dependency JSON file'
-                url = 'https://github.com/questnav/questnav/tree/main/questnav-lib'
-
-                licenses {
-                    license {
-                        name = 'MIT License'
-                        url = 'https://opensource.org/licenses/MIT'
-                    }
-                }
-
-                scm {
-                    connection = 'scm:git:git://github.com/questnav/questnav.git'
-                    developerConnection = 'scm:git:ssh://github.com/questnav/questnav.git'
-                    url = 'https://github.com/questnav/questnav/tree/main/questnav-lib'
-                }
-            }
+// Set up exports properly
+nativeUtils {
+    exportsConfigs {
+        // Main library is just default empty. This will export everything
+        Vendor {
         }
     }
+}
 
-    repositories {
-        if (project.hasProperty('mavenRepoUrl')) {
-            maven {
-                name = "QuestNavRepo"
-                url = mavenRepoUrl + (isSnapshot ? "/snapshots" : "/releases")
+ext.getCurrentArch = {
+    return NativePlatforms.desktop
+}
 
-                // Add credentials if provided
-                if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
-                    credentials {
-                        username = project.findProperty('mavenUsername')
-                        password = project.findProperty('mavenPassword')
+def systemArch = getCurrentArch()
+
+model {
+    components {
+        Vendor(NativeLibrarySpec) {
+            sources {
+                cpp {
+                    source {
+                        srcDirs 'src/main/native/cpp'
+                        include '**/*.cpp'
+                    }
+                    exportedHeaders {
+                        srcDirs 'src/main/native/include'
                     }
                 }
             }
+            nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
         }
+    }
+    testSuites {
+        VendorTest {
+            sources.cpp {
+                source {
+                    srcDir 'src/test/native/cpp'
+                    include '**/*.cpp'
+                }
+            }
 
-        // For local testing
-        mavenLocal()
+            nativeUtils.useRequiredLibrary(it, "wpilib_executable_shared", "googletest_static")
+        }
     }
 }
 
-// Build dependencies
-build.dependsOn generateVendorJson
+apply from: 'publish.gradle'
 
-// Task to copy vendor JSON to local output for testing
-task copyVendorJsonLocal(type: Copy) {
-    description = "Copy vendor JSON to local output directory"
-    group = "QuestNavLib"
-
-    from vendorJsonOutput
-    into "$buildDir/outputs/vendordeps/"
-
-    dependsOn generateVendorJson
-}
-
-// Task to print build info
-task buildInfo {
-    description = "Print build information"
-    group = "QuestNavLib"
-
-    doLast {
-        println "QuestNavLib Build Information:"
-        println "  Base Version: ${baseVersion}"
-        println "  Release Type: ${releaseType}"
-        println "  Full Version: ${questnavVersion}"
-        println "  FRC Year: ${frcYear}"
-        println "  WPILib Version: ${wpilibVersion}"
-        println "  Group ID: ${mavenGroupId}"
-        println "  Artifact ID: ${artifactId}"
-        println "  UUID: ${vendorUuid}"
-        println "  Is Snapshot: ${isSnapshot}"
-        println "  Repository Type: ${isSnapshot ? 'snapshots' : 'release'}"
-        if (project.hasProperty('mavenRepoUrl')) {
-            println "  Repository: ${mavenRepoUrl}"
-        }
-        def jsonUrl = "https://maven.questnav.gg/repository/${isSnapshot ? 'snapshots' : 'release'}/gg/questnav/questnavlib-json/${questnavVersion}/questnavlib-json-${questnavVersion}.json"
-        println "  Vendor JSON URL: ${jsonUrl}"
-    }
-}
-
-// Gradle wrapper task
 wrapper {
-    gradleVersion = '8.11'
-}
-
-// Clean task to remove generated files
-clean {
-    delete "$buildDir/generated"
-    delete "$buildDir/outputs"
-}
-
-spotless {
-    java {
-        target fileTree(".") {
-            include "**/*.java"
-            exclude "**/build/**", "**/build-*/**", "**/generated/**"
-        }
-        toggleOffOn()
-
-        licenseHeader '''
-/*
- * QUESTNAV
-   https://github.com/QuestNav
- * Copyright (C) $YEAR QuestNav
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the MIT License as published.
- */
-'''
-        googleJavaFormat()
-        removeUnusedImports()
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
-    groovyGradle {
-        target fileTree(".") {
-            include "**/*.gradle"
-            exclude "**/build/**", "**/build-*/**", "**/generated/**"
-        }
-        greclipse()
-        indentWithSpaces(4)
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
-    json {
-        target fileTree(".") {
-            include "**/*.json"
-            exclude "**/build/**", "**/build-*/**", "**/generated/**"
-        }
-        gson().indentWithSpaces(4)
-    }
-    format "misc", {
-        target fileTree(".") {
-            include "**/*.md", "**/.gitignore"
-            exclude "**/build/**", "**/build-*/**", "**/generated/**"
-        }
-        trimTrailingWhitespace()
-        indentWithSpaces(4)
-        endWithNewline()
-    }
+    gradleVersion '8.11'
 }

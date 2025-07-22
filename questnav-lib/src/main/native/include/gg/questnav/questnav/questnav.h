@@ -14,6 +14,7 @@
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/ProtobufTopic.h>
+#include <frc/geometry/proto/Pose2dProto.h>
 
 #include "gg/questnav/questnav/protos/generated/Commands.pb.h"
 #include "gg/questnav/questnav/protos/generated/Data.pb.h"
@@ -126,39 +127,26 @@ class QuestNav {
   /** NetworkTable for Quest navigation data */
   std::shared_ptr<nt::NetworkTable> quest_nav_table_;
 
-  /** Protobuf instance for CommandResponse */
-  CommandResponseProto command_response_proto_;
-
-  /** Protobuf instance for Command */
-  CommandProto command_proto_;
-
-  /** Protobuf instance for device data */
-  DeviceDataProto device_data_proto_;
-
-  /** Protobuf instance for frame data */
-  FrameDataProto frame_data_proto_;
-
   /** Subscriber for command response */
-  nt::ProtobufSubscriber<Commands::ProtobufQuestNavCommandResponse> response_;
+  nt::ProtobufSubscriber<questnav_protos_commands_ProtobufQuestNavCommandResponse> response_;
 
   /** Subscriber for frame data */
-  nt::ProtobufSubscriber<Data::ProtobufQuestNavFrameData> frame_data_;
+  nt::ProtobufSubscriber<questnav_protos_data_ProtobufQuestNavFrameData> frame_data_;
 
   /** Subscriber for device data */
-  nt::ProtobufSubscriber<Data::ProtobufQuestNavDeviceData> device_data_;
+  nt::ProtobufSubscriber<questnav_protos_data_ProtobufQuestNavDeviceData> device_data_;
 
   /** Publisher for command requests */
-  nt::ProtobufPublisher<Commands::ProtobufQuestNavCommand> request_;
+  nt::ProtobufPublisher<questnav_protos_commands_ProtobufQuestNavCommand> request_;
 
   /** Cached request to lessen memory allocation pressure */
-  Commands::ProtobufQuestNavCommand cached_command_request_;
+  questnav_protos_commands_ProtobufQuestNavCommand cached_command_request_;
 
   /** Cached pose reset request to lessen memory allocation pressure */
-  Commands::ProtobufQuestNavPoseResetPayload cached_pose_reset_payload_;
+  questnav_protos_commands_ProtobufQuestNavPoseResetPayload cached_pose_reset_payload_;
 
-  /** Cached proto pose (for reset requests) to lessen memory allocation
-   * pressure */
-  frc::proto::ProtobufPose2d cached_proto_pose_;
+  /** Cached proto pose (for reset requests) to lessen memory allocation pressure */
+  wpi_proto_ProtobufPose2d cached_proto_pose_;
 
   /** Last sent request id */
   int last_sent_request_id_ = 0;

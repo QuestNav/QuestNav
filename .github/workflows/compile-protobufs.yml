@@ -50,49 +50,44 @@ jobs:
       - name: Setup QuickBuf
         run: chmod +x ${{ steps.download-quickbuf.outputs.file }}
 
-      - name: Download NanoPB
+      - name: Download WPILib NanoPB
+        uses: GuillaumeFalourd/clone-github-repo-action@v2.3
         id: download-nanopb
-        run: wget -O nanopb.tar.gz https://jpa.kapsi.fi/nanopb/download/nanopb-0.4.9.1-linux-x86.tar.gz
-
-      - name: Extract NanoPB
-        run: tar -xzf nanopb.tar.gz
+        with:
+          depth: 1
+          branch: 'main'
+          owner: 'wpilibsuite'
+          repository: 'allwpilib'
 
       - name: Setup NanoPB
-        run: chmod +x nanopb-0.4.9.1-linux-x86/generator-bin/nanopb_generator
-
-      - name: Generate C# protobuf
-        run: protoc -I="protos" --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/*.proto
+        run: chmod +x allwpilib/wpiutil/src/main/native/thirdparty/nanopb/generator/nanopb_generator
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.x'
+      
+      - name: Install gRPC tools
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            grpcio-tools
 
       - name: Generate C++ protobufs
         run: |
-          # Set variables
-          NANOPB_GENERATOR="./nanopb-0.4.9.1-linux-x86/generator-bin/nanopb_generator"
-            OUTPUT_DIR="questnav-lib/src/main/native/cpp/gg/questnav/questnav/protos/generated/"
-            PROTO_DIR="protos/"
+          python ./allwpilib/wpiutil/src/main/native/thirdparty/nanopb/generator/nanopb_generator.py \
+            -I "protos/" \
+            -D "questnav-lib/src/main/native/cpp/gg/questnav/questnav/protos/generated/" \
+            -S.cpp \
+            -e.npb \
+            protos/*.proto
 
-            # Create output directory if it doesn't exist
-            mkdir -p "$OUTPUT_DIR"
-
-            # Find all .proto files and generate NanoPB code for each
-            for proto_file in "$PROTO_DIR"*.proto; do
-                if [ -f "$proto_file" ]; then
-                    echo "Generating NanoPB code for: $proto_file"
-                    "$NANOPB_GENERATOR" --cpp-descriptors --output-dir="$OUTPUT_DIR" -I="$PROTO_DIR" "$proto_file" -S.cpp -e.npb
-
-                    # Check if the generation was successful
-                    if [ $? -eq 0 ]; then
-                        echo "✓ Successfully generated: $proto_file"
-                    else
-                        echo "✗ Failed to generate: $proto_file"
-                        exit 1
-                    fi
-                fi
-            done
-
-            echo "NanoPB generation complete!"
 
       - name: Move C++ header files
         run: mv questnav-lib/src/main/native/cpp/gg/questnav/questnav/protos/generated/*.npb.h questnav-lib/src/main/native/include/gg/questnav/questnav/protos/generated/
+
+      - name: Generate C# protobuf
+        run: protoc -I="protos" --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/*.proto
 
       - name: Generate Java QuickBuffers
         run: |

@@ -25,9 +25,9 @@ namespace QuestNav.Protos.Generated {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cg5jb21tYW5kcy5wcm90bxIYcXVlc3RuYXYucHJvdG9zLmNvbW1hbmRzGhBn",
-            "ZW9tZXRyeTJkLnByb3RvIlIKIFByb3RvYnVmUXVlc3ROYXZQb3NlUmVzZXRQ",
+            "ZW9tZXRyeTNkLnByb3RvIlIKIFByb3RvYnVmUXVlc3ROYXZQb3NlUmVzZXRQ",
             "YXlsb2FkEi4KC3RhcmdldF9wb3NlGAEgASgLMhkud3BpLnByb3RvLlByb3Rv",
-            "YnVmUG9zZTJkIs8BChdQcm90b2J1ZlF1ZXN0TmF2Q29tbWFuZBI7CgR0eXBl",
+            "YnVmUG9zZTNkIs8BChdQcm90b2J1ZlF1ZXN0TmF2Q29tbWFuZBI7CgR0eXBl",
             "GAEgASgOMi0ucXVlc3RuYXYucHJvdG9zLmNvbW1hbmRzLlF1ZXN0TmF2Q29t",
             "bWFuZFR5cGUSEgoKY29tbWFuZF9pZBgCIAEoDRJYChJwb3NlX3Jlc2V0X3Bh",
             "eWxvYWQYCiABKAsyOi5xdWVzdG5hdi5wcm90b3MuY29tbWFuZHMuUHJvdG9i",
@@ -39,7 +39,7 @@ namespace QuestNav.Protos.Generated {
             "YXYucHJvdG9zLmdlbmVyYXRlZKoCGVF1ZXN0TmF2LlByb3Rvcy5HZW5lcmF0",
             "ZWRiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Wpi.Proto.Geometry2DReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Wpi.Proto.Geometry3DReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::QuestNav.Protos.Generated.QuestNavCommandType), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload), global::QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.Parser, new[]{ "TargetPose" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.ProtobufQuestNavCommand), global::QuestNav.Protos.Generated.ProtobufQuestNavCommand.Parser, new[]{ "Type", "CommandId", "PoseResetPayload" }, new[]{ "Payload" }, null, null, null),
@@ -70,6 +70,7 @@ namespace QuestNav.Protos.Generated {
   /// <summary>
   /// Payload for pose reset command
   /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ProtobufQuestNavPoseResetPayload : pb::IMessage<ProtobufQuestNavPoseResetPayload>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -116,13 +117,13 @@ namespace QuestNav.Protos.Generated {
 
     /// <summary>Field number for the "target_pose" field.</summary>
     public const int TargetPoseFieldNumber = 1;
-    private global::Wpi.Proto.ProtobufPose2d targetPose_;
+    private global::Wpi.Proto.ProtobufPose3d targetPose_;
     /// <summary>
     /// Target pose in field-relative WPILib coordinate space (x forward, y left, rotation CCW+)
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::Wpi.Proto.ProtobufPose2d TargetPose {
+    public global::Wpi.Proto.ProtobufPose3d TargetPose {
       get { return targetPose_; }
       set {
         targetPose_ = value;
@@ -216,7 +217,7 @@ namespace QuestNav.Protos.Generated {
       }
       if (other.targetPose_ != null) {
         if (targetPose_ == null) {
-          TargetPose = new global::Wpi.Proto.ProtobufPose2d();
+          TargetPose = new global::Wpi.Proto.ProtobufPose3d();
         }
         TargetPose.MergeFrom(other.TargetPose);
       }
@@ -231,13 +232,17 @@ namespace QuestNav.Protos.Generated {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 10: {
             if (targetPose_ == null) {
-              TargetPose = new global::Wpi.Proto.ProtobufPose2d();
+              TargetPose = new global::Wpi.Proto.ProtobufPose3d();
             }
             input.ReadMessage(TargetPose);
             break;
@@ -253,13 +258,17 @@ namespace QuestNav.Protos.Generated {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 10: {
             if (targetPose_ == null) {
-              TargetPose = new global::Wpi.Proto.ProtobufPose2d();
+              TargetPose = new global::Wpi.Proto.ProtobufPose3d();
             }
             input.ReadMessage(TargetPose);
             break;
@@ -274,6 +283,7 @@ namespace QuestNav.Protos.Generated {
   /// <summary>
   /// Main Command message
   /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ProtobufQuestNavCommand : pb::IMessage<ProtobufQuestNavCommand>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -530,7 +540,11 @@ namespace QuestNav.Protos.Generated {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -562,7 +576,11 @@ namespace QuestNav.Protos.Generated {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -593,6 +611,7 @@ namespace QuestNav.Protos.Generated {
   /// <summary>
   /// Response message for commands
   /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ProtobufQuestNavCommandResponse : pb::IMessage<ProtobufQuestNavCommandResponse>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -815,7 +834,11 @@ namespace QuestNav.Protos.Generated {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -842,7 +865,11 @@ namespace QuestNav.Protos.Generated {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;

@@ -24,18 +24,18 @@ namespace QuestNav.Protos.Generated {
     static DataReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "CgpkYXRhLnByb3RvEhRxdWVzdG5hdi5wcm90b3MuZGF0YRoQZ2VvbWV0cnky",
+            "CgpkYXRhLnByb3RvEhRxdWVzdG5hdi5wcm90b3MuZGF0YRoQZ2VvbWV0cnkz",
             "ZC5wcm90byJuChlQcm90b2J1ZlF1ZXN0TmF2RnJhbWVEYXRhEhMKC2ZyYW1l",
-            "X2NvdW50GAEgASgFEhEKCXRpbWVzdGFtcBgCIAEoARIpCgZwb3NlMmQYAyAB",
-            "KAsyGS53cGkucHJvdG8uUHJvdG9idWZQb3NlMmQicAoaUHJvdG9idWZRdWVz",
+            "X2NvdW50GAEgASgFEhEKCXRpbWVzdGFtcBgCIAEoARIpCgZwb3NlM2QYAyAB",
+            "KAsyGS53cGkucHJvdG8uUHJvdG9idWZQb3NlM2QicAoaUHJvdG9idWZRdWVz",
             "dE5hdkRldmljZURhdGESHQoVdHJhY2tpbmdfbG9zdF9jb3VudGVyGAEgASgF",
             "EhoKEmN1cnJlbnRseV90cmFja2luZxgCIAEoCBIXCg9iYXR0ZXJ5X3BlcmNl",
             "bnQYAyABKAVCQwolZ2cucXVlc3RuYXYucXVlc3RuYXYucHJvdG9zLmdlbmVy",
             "YXRlZKoCGVF1ZXN0TmF2LlByb3Rvcy5HZW5lcmF0ZWRiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Wpi.Proto.Geometry2DReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Wpi.Proto.Geometry3DReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.ProtobufQuestNavFrameData), global::QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Parser, new[]{ "FrameCount", "Timestamp", "Pose2D" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.ProtobufQuestNavFrameData), global::QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Parser, new[]{ "FrameCount", "Timestamp", "Pose3D" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::QuestNav.Protos.Generated.ProtobufQuestNavDeviceData), global::QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Parser, new[]{ "TrackingLostCounter", "CurrentlyTracking", "BatteryPercent" }, null, null, null, null)
           }));
     }
@@ -46,6 +46,7 @@ namespace QuestNav.Protos.Generated {
   /// <summary>
   /// Tracking data that is sent every loop
   /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ProtobufQuestNavFrameData : pb::IMessage<ProtobufQuestNavFrameData>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -82,7 +83,7 @@ namespace QuestNav.Protos.Generated {
     public ProtobufQuestNavFrameData(ProtobufQuestNavFrameData other) : this() {
       frameCount_ = other.frameCount_;
       timestamp_ = other.timestamp_;
-      pose2D_ = other.pose2D_ != null ? other.pose2D_.Clone() : null;
+      pose3D_ = other.pose3D_ != null ? other.pose3D_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -122,18 +123,18 @@ namespace QuestNav.Protos.Generated {
       }
     }
 
-    /// <summary>Field number for the "pose2d" field.</summary>
-    public const int Pose2DFieldNumber = 3;
-    private global::Wpi.Proto.ProtobufPose2d pose2D_;
+    /// <summary>Field number for the "pose3d" field.</summary>
+    public const int Pose3DFieldNumber = 3;
+    private global::Wpi.Proto.ProtobufPose3d pose3D_;
     /// <summary>
-    /// The 2d field-relative position of the quest
+    /// The 3d field-relative position of the quest
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::Wpi.Proto.ProtobufPose2d Pose2D {
-      get { return pose2D_; }
+    public global::Wpi.Proto.ProtobufPose3d Pose3D {
+      get { return pose3D_; }
       set {
-        pose2D_ = value;
+        pose3D_ = value;
       }
     }
 
@@ -154,7 +155,7 @@ namespace QuestNav.Protos.Generated {
       }
       if (FrameCount != other.FrameCount) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Timestamp, other.Timestamp)) return false;
-      if (!object.Equals(Pose2D, other.Pose2D)) return false;
+      if (!object.Equals(Pose3D, other.Pose3D)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -164,7 +165,7 @@ namespace QuestNav.Protos.Generated {
       int hash = 1;
       if (FrameCount != 0) hash ^= FrameCount.GetHashCode();
       if (Timestamp != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Timestamp);
-      if (pose2D_ != null) hash ^= Pose2D.GetHashCode();
+      if (pose3D_ != null) hash ^= Pose3D.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -191,9 +192,9 @@ namespace QuestNav.Protos.Generated {
         output.WriteRawTag(17);
         output.WriteDouble(Timestamp);
       }
-      if (pose2D_ != null) {
+      if (pose3D_ != null) {
         output.WriteRawTag(26);
-        output.WriteMessage(Pose2D);
+        output.WriteMessage(Pose3D);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -213,9 +214,9 @@ namespace QuestNav.Protos.Generated {
         output.WriteRawTag(17);
         output.WriteDouble(Timestamp);
       }
-      if (pose2D_ != null) {
+      if (pose3D_ != null) {
         output.WriteRawTag(26);
-        output.WriteMessage(Pose2D);
+        output.WriteMessage(Pose3D);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -233,8 +234,8 @@ namespace QuestNav.Protos.Generated {
       if (Timestamp != 0D) {
         size += 1 + 8;
       }
-      if (pose2D_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Pose2D);
+      if (pose3D_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Pose3D);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -254,11 +255,11 @@ namespace QuestNav.Protos.Generated {
       if (other.Timestamp != 0D) {
         Timestamp = other.Timestamp;
       }
-      if (other.pose2D_ != null) {
-        if (pose2D_ == null) {
-          Pose2D = new global::Wpi.Proto.ProtobufPose2d();
+      if (other.pose3D_ != null) {
+        if (pose3D_ == null) {
+          Pose3D = new global::Wpi.Proto.ProtobufPose3d();
         }
-        Pose2D.MergeFrom(other.Pose2D);
+        Pose3D.MergeFrom(other.Pose3D);
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -271,7 +272,11 @@ namespace QuestNav.Protos.Generated {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -284,10 +289,10 @@ namespace QuestNav.Protos.Generated {
             break;
           }
           case 26: {
-            if (pose2D_ == null) {
-              Pose2D = new global::Wpi.Proto.ProtobufPose2d();
+            if (pose3D_ == null) {
+              Pose3D = new global::Wpi.Proto.ProtobufPose3d();
             }
-            input.ReadMessage(Pose2D);
+            input.ReadMessage(Pose3D);
             break;
           }
         }
@@ -301,7 +306,11 @@ namespace QuestNav.Protos.Generated {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -314,10 +323,10 @@ namespace QuestNav.Protos.Generated {
             break;
           }
           case 26: {
-            if (pose2D_ == null) {
-              Pose2D = new global::Wpi.Proto.ProtobufPose2d();
+            if (pose3D_ == null) {
+              Pose3D = new global::Wpi.Proto.ProtobufPose3d();
             }
-            input.ReadMessage(Pose2D);
+            input.ReadMessage(Pose3D);
             break;
           }
         }
@@ -330,6 +339,7 @@ namespace QuestNav.Protos.Generated {
   /// <summary>
   /// Device data that is sent slower
   /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ProtobufQuestNavDeviceData : pb::IMessage<ProtobufQuestNavDeviceData>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -552,7 +562,11 @@ namespace QuestNav.Protos.Generated {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -579,7 +593,11 @@ namespace QuestNav.Protos.Generated {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;

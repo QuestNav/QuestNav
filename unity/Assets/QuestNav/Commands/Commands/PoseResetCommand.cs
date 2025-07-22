@@ -50,14 +50,24 @@ namespace QuestNav.Commands.Commands
             QueuedLogger.Log("Received pose reset request, initiating reset...");
 
             // Read pose data from network tables
-            ProtobufPose2d resetPose = receivedCommand.PoseResetPayload.TargetPose;
+            ProtobufPose3d resetPose = receivedCommand.PoseResetPayload.TargetPose;
             double poseX = resetPose.Translation.X;
             double poseY = resetPose.Translation.Y;
-            double poseTheta = resetPose.Rotation.Value;
+            double poseZ = resetPose.Translation.Z;
+            double poseQX = resetPose.Rotation.Q.X;
+            double poseQY = resetPose.Rotation.Q.Y;
+            double poseQZ = resetPose.Rotation.Q.Z;
+            double poseQW = resetPose.Rotation.Q.W;
 
             // Validate pose data
             bool validPose =
-                !double.IsNaN(poseX) && !double.IsNaN(poseY) && !double.IsNaN(poseTheta);
+                !double.IsNaN(poseX)
+                && !double.IsNaN(poseY)
+                && !double.IsNaN(poseZ)
+                && !double.IsNaN(poseQX)
+                && !double.IsNaN(poseQY)
+                && !double.IsNaN(poseQZ)
+                && !double.IsNaN(poseQW);
 
             // Additional validation for field boundaries
             if (validPose)
@@ -78,30 +88,25 @@ namespace QuestNav.Commands.Commands
             if (validPose)
             {
                 // Convert field coordinates to Unity coordinates
-                var (targetCameraPosition, targetCameraRotation) = Conversions.FrcToUnity(
-                    resetPose,
-                    vrCamera.position,
-                    vrCamera.rotation
+                var (targetCameraPosition, targetCameraRotation) = Conversions.FrcToUnity3d(
+                    resetPose
                 );
 
-                // Calculate Y rotation difference between current camera and target
-                float currentCameraY = vrCamera.rotation.eulerAngles.y;
-                float targetCameraY = targetCameraRotation.eulerAngles.y;
-                float rotationDifference = Mathf.DeltaAngle(currentCameraY, targetCameraY);
+                // Get the position and rotation of the VR camera, without offset
+                vrCamera.GetLocalPositionAndRotation(
+                    out Vector3 localOffset,
+                    out Quaternion localRotation
+                );
 
-                // Get camera offset in LOCAL space relative to root BEFORE rotation
-                Vector3 localCameraOffset = vrCameraRoot.InverseTransformPoint(vrCamera.position);
+                // Calculate and set the new offset based on the reset pose
+                vrCameraRoot.SetPositionAndRotation(
+                    targetCameraPosition - (vrCameraRoot.rotation * localOffset),
+                    targetCameraRotation * Quaternion.Inverse(localRotation)
+                );
 
-                // Apply rotation to root
-                vrCameraRoot.Rotate(0, rotationDifference, 0);
-
-                // Recalculate position after rotation
-                Vector3 worldCameraOffset =
-                    vrCameraRoot.TransformPoint(localCameraOffset) - vrCameraRoot.position;
-                Vector3 targetRootPosition = targetCameraPosition - worldCameraOffset;
-                vrCameraRoot.position = targetRootPosition;
-
-                QueuedLogger.Log($"Pose reset applied: X={poseX}, Y={poseY}, Theta={poseTheta}");
+                QueuedLogger.Log(
+                    $"Pose reset applied: X={poseX}, Y={poseY}, Z={poseZ} Rotation X={targetCameraRotation.eulerAngles.x}, Y={targetCameraRotation.eulerAngles.y}, Z={targetCameraRotation.eulerAngles.z}"
+                );
 
                 networkTableConnection.SetCommandResponse(
                     new ProtobufQuestNavCommandResponse

@@ -6,7 +6,7 @@
 #include <pb.h>
 #include <span>
 #include <string_view>
-#include "geometry2d.npb.h"
+#include "gg/questnav/questnav/protos/generated/geometry2d.npb.h"
 
 #if PB_PROTO_HEADER_VERSION != 40
 #error Regenerate this file with the current version of nanopb generator.

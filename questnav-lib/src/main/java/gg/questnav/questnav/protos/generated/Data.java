@@ -16,81 +16,41 @@ import us.hebi.quickbuf.ProtoUtil;
 import us.hebi.quickbuf.RepeatedByte;
 
 public final class Data {
-  private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(1315,
-    "CgpkYXRhLnByb3RvEhRxdWVzdG5hdi5wcm90b3MuZGF0YRoQZ2VvbWV0cnkzZC5wcm90byKNAQoZUHJv" + 
-    "dG9idWZRdWVzdE5hdkZyYW1lRGF0YRIfCgtmcmFtZV9jb3VudBgBIAEoBVIKZnJhbWVDb3VudBIcCgl0" + 
-    "aW1lc3RhbXAYAiABKAFSCXRpbWVzdGFtcBIxCgZwb3NlM2QYAyABKAsyGS53cGkucHJvdG8uUHJvdG9i" + 
-    "dWZQb3NlM2RSBnBvc2UzZCKoAQoaUHJvdG9idWZRdWVzdE5hdkRldmljZURhdGESMgoVdHJhY2tpbmdf" + 
-    "bG9zdF9jb3VudGVyGAEgASgFUhN0cmFja2luZ0xvc3RDb3VudGVyEi0KEmN1cnJlbnRseV90cmFja2lu" + 
-    "ZxgCIAEoCFIRY3VycmVudGx5VHJhY2tpbmcSJwoPYmF0dGVyeV9wZXJjZW50GAMgASgFUg5iYXR0ZXJ5" + 
-    "UGVyY2VudEJDCiVnZy5xdWVzdG5hdi5xdWVzdG5hdi5wcm90b3MuZ2VuZXJhdGVkqgIZUXVlc3ROYXYu" + 
-    "UHJvdG9zLkdlbmVyYXRlZErkBgoGEgQAAx8BCggKAQwSAwADFQoICgECEgMCAB0KCAoBCBIDAwA2CgkK" + 
-    "AgglEgMDADYKCAoBCBIDBAA+CgkKAggBEgMEAD4KJQoCAwASAwcAGhoaIEltcG9ydCBnZW9tZXRyeSBt" + 
-    "ZXNzYWdlcwoKMwoCBAASBAoAEwEaJyBUcmFja2luZyBkYXRhIHRoYXQgaXMgc2VudCBldmVyeSBsb29w" + 
-    "CgoKCgMEAAESAwoIIQo2CgQEAAIAEgMMAhgaKSBOdW1iZXIgb2YgZnJhbWVzIHByb2Nlc3NlZCBieSB0" + 
-    "aGUgUXVlc3QKCgwKBQQAAgAFEgMMAgcKDAoFBAACAAESAwwIEwoMCgUEAAIAAxIDDBYXCj8KBAQAAgES" + 
-    "Aw8CFxoyIFRpbWUgKGluIHNlY29uZHMpIHNpbmNlIHRoZSBRdWVzdE5hdiBhcHAgc3RhcnRlZAoKDAoF" + 
-    "BAACAQUSAw8CCAoMCgUEAAIBARIDDwkSCgwKBQQAAgEDEgMPFRYKOgoEBAACAhIDEgImGi0gVGhlIDNk" + 
-    "IGZpZWxkLXJlbGF0aXZlIHBvc2l0aW9uIG9mIHRoZSBxdWVzdAoKDAoFBAACAgYSAxICGgoMCgUEAAIC" + 
-    "ARIDEhshCgwKBQQAAgIDEgMSJCUKLQoCBAESBBYAHwEaISBEZXZpY2UgZGF0YSB0aGF0IGlzIHNlbnQg" + 
-    "c2xvd2VyCgoKCgMEAQESAxYIIgpgCgQEAQIAEgMYAiIaUyBOdW1iZXIgb2YgdGltZXMgdGhlIFF1ZXN0" + 
-    "IGhhcyBsb3N0IHRyYWNraW5nIGFmdGVyIGhhdmluZyBpdCBzaW5jZSB0aGUgYXBwIHN0YXJ0ZWQKCgwK" + 
-    "BQQBAgAFEgMYAgcKDAoFBAECAAESAxgIHQoMCgUEAQIAAxIDGCAhCjIKBAQBAgESAxsCHholIElmIHRo" + 
-    "ZSBRdWVzdCBpcyBjdXJyZW50bHkgdHJhY2tpbmc/CgoMCgUEAQIBBRIDGwIGCgwKBQQBAgEBEgMbBxkK",
-    "DAoFBAECAQMSAxscHQoyCgQEAQICEgMeAhwaJSBUaGUgYmF0dGVyeSBwZXJjZW50YWdlIG9mIHRoZSBR" + 
-    "dWVzdAoKDAoFBAECAgUSAx4CBwoMCgUEAQICARIDHggXCgwKBQQBAgIDEgMeGhtiBnByb3RvMw==");
+    private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(1315,
+        "CgpkYXRhLnByb3RvEhRxdWVzdG5hdi5wcm90b3MuZGF0YRoQZ2VvbWV0cnkzZC5wcm90byKNAQoZUHJv" + 
+        "dG9idWZRdWVzdE5hdkZyYW1lRGF0YRIfCgtmcmFtZV9jb3VudBgBIAEoBVIKZnJhbWVDb3VudBIcCgl0" + 
+        "aW1lc3RhbXAYAiABKAFSCXRpbWVzdGFtcBIxCgZwb3NlM2QYAyABKAsyGS53cGkucHJvdG8uUHJvdG9i" + 
+        "dWZQb3NlM2RSBnBvc2UzZCKoAQoaUHJvdG9idWZRdWVzdE5hdkRldmljZURhdGESMgoVdHJhY2tpbmdf" + 
+        "bG9zdF9jb3VudGVyGAEgASgFUhN0cmFja2luZ0xvc3RDb3VudGVyEi0KEmN1cnJlbnRseV90cmFja2lu" + 
+        "ZxgCIAEoCFIRY3VycmVudGx5VHJhY2tpbmcSJwoPYmF0dGVyeV9wZXJjZW50GAMgASgFUg5iYXR0ZXJ5" + 
+        "UGVyY2VudEJDCiVnZy5xdWVzdG5hdi5xdWVzdG5hdi5wcm90b3MuZ2VuZXJhdGVkqgIZUXVlc3ROYXYu" + 
+        "UHJvdG9zLkdlbmVyYXRlZErkBgoGEgQAAx8BCggKAQwSAwADFQoICgECEgMCAB0KCAoBCBIDAwA2CgkK" + 
+        "AgglEgMDADYKCAoBCBIDBAA+CgkKAggBEgMEAD4KJQoCAwASAwcAGhoaIEltcG9ydCBnZW9tZXRyeSBt" + 
+        "ZXNzYWdlcwoKMwoCBAASBAoAEwEaJyBUcmFja2luZyBkYXRhIHRoYXQgaXMgc2VudCBldmVyeSBsb29w" + 
+        "CgoKCgMEAAESAwoIIQo2CgQEAAIAEgMMAhgaKSBOdW1iZXIgb2YgZnJhbWVzIHByb2Nlc3NlZCBieSB0" + 
+        "aGUgUXVlc3QKCgwKBQQAAgAFEgMMAgcKDAoFBAACAAESAwwIEwoMCgUEAAIAAxIDDBYXCj8KBAQAAgES" + 
+        "Aw8CFxoyIFRpbWUgKGluIHNlY29uZHMpIHNpbmNlIHRoZSBRdWVzdE5hdiBhcHAgc3RhcnRlZAoKDAoF" + 
+        "BAACAQUSAw8CCAoMCgUEAAIBARIDDwkSCgwKBQQAAgEDEgMPFRYKOgoEBAACAhIDEgImGi0gVGhlIDNk" + 
+        "IGZpZWxkLXJlbGF0aXZlIHBvc2l0aW9uIG9mIHRoZSBxdWVzdAoKDAoFBAACAgYSAxICGgoMCgUEAAIC" + 
+        "ARIDEhshCgwKBQQAAgIDEgMSJCUKLQoCBAESBBYAHwEaISBEZXZpY2UgZGF0YSB0aGF0IGlzIHNlbnQg" + 
+        "c2xvd2VyCgoKCgMEAQESAxYIIgpgCgQEAQIAEgMYAiIaUyBOdW1iZXIgb2YgdGltZXMgdGhlIFF1ZXN0" + 
+        "IGhhcyBsb3N0IHRyYWNraW5nIGFmdGVyIGhhdmluZyBpdCBzaW5jZSB0aGUgYXBwIHN0YXJ0ZWQKCgwK" + 
+        "BQQBAgAFEgMYAgcKDAoFBAECAAESAxgIHQoMCgUEAQIAAxIDGCAhCjIKBAQBAgESAxsCHholIElmIHRo" + 
+        "ZSBRdWVzdCBpcyBjdXJyZW50bHkgdHJhY2tpbmc/CgoMCgUEAQIBBRIDGwIGCgwKBQQBAgEBEgMbBxkK",
+        "DAoFBAECAQMSAxscHQoyCgQEAQICEgMeAhwaJSBUaGUgYmF0dGVyeSBwZXJjZW50YWdlIG9mIHRoZSBR" + 
+        "dWVzdAoKDAoFBAECAgUSAx4CBwoMCgUEAQICARIDHggXCgwKBQQBAgIDEgMeGhtiBnByb3RvMw==");
 
-  static final Descriptors.FileDescriptor descriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom("data.proto", "questnav.protos.data", descriptorData, Geometry3D.getDescriptor());
+    static final Descriptors.FileDescriptor descriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom("data.proto", "questnav.protos.data", descriptorData, Geometry3D.getDescriptor());
 
-  static final Descriptors.Descriptor questnav_protos_data_ProtobufQuestNavFrameData_descriptor = descriptor.internalContainedType(55, 141, "ProtobufQuestNavFrameData", "questnav.protos.data.ProtobufQuestNavFrameData");
+    static final Descriptors.Descriptor questnav_protos_data_ProtobufQuestNavFrameData_descriptor = descriptor.internalContainedType(55, 141, "ProtobufQuestNavFrameData", "questnav.protos.data.ProtobufQuestNavFrameData");
 
-  static final Descriptors.Descriptor questnav_protos_data_ProtobufQuestNavDeviceData_descriptor = descriptor.internalContainedType(199, 168, "ProtobufQuestNavDeviceData", "questnav.protos.data.ProtobufQuestNavDeviceData");
-
-  /**
-   * @return this proto file's descriptor.
-   */
-  public static Descriptors.FileDescriptor getDescriptor() {
-    return descriptor;
-  }
-
-  /**
-   * <pre>
-   *  Tracking data that is sent every loop
-   * </pre>
-   *
-   * Protobuf type {@code ProtobufQuestNavFrameData}
-   */
-  public static final class ProtobufQuestNavFrameData extends ProtoMessage<ProtobufQuestNavFrameData> implements Cloneable {
-    private static final long serialVersionUID = 0L;
+    static final Descriptors.Descriptor questnav_protos_data_ProtobufQuestNavDeviceData_descriptor = descriptor.internalContainedType(199, 168, "ProtobufQuestNavDeviceData", "questnav.protos.data.ProtobufQuestNavDeviceData");
 
     /**
-     * <pre>
-     *  Time (in seconds) since the QuestNav app started
-     * </pre>
-     *
-     * <code>optional double timestamp = 2;</code>
+     * @return this proto file's descriptor.
      */
-    private double timestamp;
-
-    /**
-     * <pre>
-     *  Number of frames processed by the Quest
-     * </pre>
-     *
-     * <code>optional int32 frame_count = 1;</code>
-     */
-    private int frameCount;
-
-    /**
-     * <pre>
-     *  The 3d field-relative position of the quest
-     * </pre>
-     *
-     * <code>optional .wpi.proto.ProtobufPose3d pose3d = 3;</code>
-     */
-    private final Geometry3D.ProtobufPose3d pose3D = Geometry3D.ProtobufPose3d.newInstance();
-
-    private ProtobufQuestNavFrameData() {
+    public static Descriptors.FileDescriptor getDescriptor() {
+        return descriptor;
     }
 
     /**
@@ -98,505 +58,507 @@ public final class Data {
      *  Tracking data that is sent every loop
      * </pre>
      *
-     * @return a new empty instance of {@code ProtobufQuestNavFrameData}
+     * Protobuf type {@code ProtobufQuestNavFrameData}
      */
-    public static ProtobufQuestNavFrameData newInstance() {
-      return new ProtobufQuestNavFrameData();
-    }
+    public static final class ProtobufQuestNavFrameData extends ProtoMessage<ProtobufQuestNavFrameData> implements Cloneable {
+        private static final long serialVersionUID = 0L;
 
-    /**
-     * <pre>
-     *  Time (in seconds) since the QuestNav app started
-     * </pre>
-     *
-     * <code>optional double timestamp = 2;</code>
-     * @return whether the timestamp field is set
-     */
-    public boolean hasTimestamp() {
-      return (bitField0_ & 0x00000001) != 0;
-    }
+        /**
+         * <pre>
+         *  Time (in seconds) since the QuestNav app started
+         * </pre>
+         *
+         * <code>optional double timestamp = 2;</code>
+         */
+        private double timestamp;
 
-    /**
-     * <pre>
-     *  Time (in seconds) since the QuestNav app started
-     * </pre>
-     *
-     * <code>optional double timestamp = 2;</code>
-     * @return this
-     */
-    public ProtobufQuestNavFrameData clearTimestamp() {
-      bitField0_ &= ~0x00000001;
-      timestamp = 0D;
-      return this;
-    }
+        /**
+         * <pre>
+         *  Number of frames processed by the Quest
+         * </pre>
+         *
+         * <code>optional int32 frame_count = 1;</code>
+         */
+        private int frameCount;
 
-    /**
-     * <pre>
-     *  Time (in seconds) since the QuestNav app started
-     * </pre>
-     *
-     * <code>optional double timestamp = 2;</code>
-     * @return the timestamp
-     */
-    public double getTimestamp() {
-      return timestamp;
-    }
+        /**
+         * <pre>
+         *  The 3d field-relative position of the quest
+         * </pre>
+         *
+         * <code>optional .wpi.proto.ProtobufPose3d pose3d = 3;</code>
+         */
+        private final Geometry3D.ProtobufPose3d pose3D = Geometry3D.ProtobufPose3d.newInstance();
 
-    /**
-     * <pre>
-     *  Time (in seconds) since the QuestNav app started
-     * </pre>
-     *
-     * <code>optional double timestamp = 2;</code>
-     * @param value the timestamp to set
-     * @return this
-     */
-    public ProtobufQuestNavFrameData setTimestamp(final double value) {
-      bitField0_ |= 0x00000001;
-      timestamp = value;
-      return this;
-    }
+        private ProtobufQuestNavFrameData() {
+        }
 
-    /**
-     * <pre>
-     *  Number of frames processed by the Quest
-     * </pre>
-     *
-     * <code>optional int32 frame_count = 1;</code>
-     * @return whether the frameCount field is set
-     */
-    public boolean hasFrameCount() {
-      return (bitField0_ & 0x00000002) != 0;
-    }
+        /**
+         * <pre>
+         *  Tracking data that is sent every loop
+         * </pre>
+         *
+         * @return a new empty instance of {@code ProtobufQuestNavFrameData}
+         */
+        public static ProtobufQuestNavFrameData newInstance() {
+            return new ProtobufQuestNavFrameData();
+        }
 
-    /**
-     * <pre>
-     *  Number of frames processed by the Quest
-     * </pre>
-     *
-     * <code>optional int32 frame_count = 1;</code>
-     * @return this
-     */
-    public ProtobufQuestNavFrameData clearFrameCount() {
-      bitField0_ &= ~0x00000002;
-      frameCount = 0;
-      return this;
-    }
+        /**
+         * <pre>
+         *  Time (in seconds) since the QuestNav app started
+         * </pre>
+         *
+         * <code>optional double timestamp = 2;</code>
+         * @return whether the timestamp field is set
+         */
+        public boolean hasTimestamp() {
+            return (bitField0_ & 0x00000001) != 0;
+        }
 
-    /**
-     * <pre>
-     *  Number of frames processed by the Quest
-     * </pre>
-     *
-     * <code>optional int32 frame_count = 1;</code>
-     * @return the frameCount
-     */
-    public int getFrameCount() {
-      return frameCount;
-    }
-
-    /**
-     * <pre>
-     *  Number of frames processed by the Quest
-     * </pre>
-     *
-     * <code>optional int32 frame_count = 1;</code>
-     * @param value the frameCount to set
-     * @return this
-     */
-    public ProtobufQuestNavFrameData setFrameCount(final int value) {
-      bitField0_ |= 0x00000002;
-      frameCount = value;
-      return this;
-    }
-
-    /**
-     * <pre>
-     *  The 3d field-relative position of the quest
-     * </pre>
-     *
-     * <code>optional .wpi.proto.ProtobufPose3d pose3d = 3;</code>
-     * @return whether the pose3D field is set
-     */
-    public boolean hasPose3D() {
-      return (bitField0_ & 0x00000004) != 0;
-    }
-
-    /**
-     * <pre>
-     *  The 3d field-relative position of the quest
-     * </pre>
-     *
-     * <code>optional .wpi.proto.ProtobufPose3d pose3d = 3;</code>
-     * @return this
-     */
-    public ProtobufQuestNavFrameData clearPose3D() {
-      bitField0_ &= ~0x00000004;
-      pose3D.clear();
-      return this;
-    }
-
-    /**
-     * <pre>
-     *  The 3d field-relative position of the quest
-     * </pre>
-     *
-     * <code>optional .wpi.proto.ProtobufPose3d pose3d = 3;</code>
-     *
-     * This method returns the internal storage object without modifying any has state.
-     * The returned object should not be modified and be treated as read-only.
-     *
-     * Use {@link #getMutablePose3D()} if you want to modify it.
-     *
-     * @return internal storage object for reading
-     */
-    public Geometry3D.ProtobufPose3d getPose3D() {
-      return pose3D;
-    }
-
-    /**
-     * <pre>
-     *  The 3d field-relative position of the quest
-     * </pre>
-     *
-     * <code>optional .wpi.proto.ProtobufPose3d pose3d = 3;</code>
-     *
-     * This method returns the internal storage object and sets the corresponding
-     * has state. The returned object will become part of this message and its
-     * contents may be modified as long as the has state is not cleared.
-     *
-     * @return internal storage object for modifications
-     */
-    public Geometry3D.ProtobufPose3d getMutablePose3D() {
-      bitField0_ |= 0x00000004;
-      return pose3D;
-    }
-
-    /**
-     * <pre>
-     *  The 3d field-relative position of the quest
-     * </pre>
-     *
-     * <code>optional .wpi.proto.ProtobufPose3d pose3d = 3;</code>
-     * @param value the pose3D to set
-     * @return this
-     */
-    public ProtobufQuestNavFrameData setPose3D(final Geometry3D.ProtobufPose3d value) {
-      bitField0_ |= 0x00000004;
-      pose3D.copyFrom(value);
-      return this;
-    }
-
-    @Override
-    public ProtobufQuestNavFrameData copyFrom(final ProtobufQuestNavFrameData other) {
-      cachedSize = other.cachedSize;
-      if ((bitField0_ | other.bitField0_) != 0) {
-        bitField0_ = other.bitField0_;
-        timestamp = other.timestamp;
-        frameCount = other.frameCount;
-        pose3D.copyFrom(other.pose3D);
-      }
-      return this;
-    }
-
-    @Override
-    public ProtobufQuestNavFrameData mergeFrom(final ProtobufQuestNavFrameData other) {
-      if (other.isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      if (other.hasTimestamp()) {
-        setTimestamp(other.timestamp);
-      }
-      if (other.hasFrameCount()) {
-        setFrameCount(other.frameCount);
-      }
-      if (other.hasPose3D()) {
-        getMutablePose3D().mergeFrom(other.pose3D);
-      }
-      return this;
-    }
-
-    @Override
-    public ProtobufQuestNavFrameData clear() {
-      if (isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      bitField0_ = 0;
-      timestamp = 0D;
-      frameCount = 0;
-      pose3D.clear();
-      return this;
-    }
-
-    @Override
-    public ProtobufQuestNavFrameData clearQuick() {
-      if (isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      bitField0_ = 0;
-      pose3D.clearQuick();
-      return this;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (o == this) {
-        return true;
-      }
-      if (!(o instanceof ProtobufQuestNavFrameData)) {
-        return false;
-      }
-      ProtobufQuestNavFrameData other = (ProtobufQuestNavFrameData) o;
-      return bitField0_ == other.bitField0_
-        && (!hasTimestamp() || ProtoUtil.isEqual(timestamp, other.timestamp))
-        && (!hasFrameCount() || frameCount == other.frameCount)
-        && (!hasPose3D() || pose3D.equals(other.pose3D));
-    }
-
-    @Override
-    public void writeTo(final ProtoSink output) throws IOException {
-      if ((bitField0_ & 0x00000001) != 0) {
-        output.writeRawByte((byte) 17);
-        output.writeDoubleNoTag(timestamp);
-      }
-      if ((bitField0_ & 0x00000002) != 0) {
-        output.writeRawByte((byte) 8);
-        output.writeInt32NoTag(frameCount);
-      }
-      if ((bitField0_ & 0x00000004) != 0) {
-        output.writeRawByte((byte) 26);
-        output.writeMessageNoTag(pose3D);
-      }
-    }
-
-    @Override
-    protected int computeSerializedSize() {
-      int size = 0;
-      if ((bitField0_ & 0x00000001) != 0) {
-        size += 9;
-      }
-      if ((bitField0_ & 0x00000002) != 0) {
-        size += 1 + ProtoSink.computeInt32SizeNoTag(frameCount);
-      }
-      if ((bitField0_ & 0x00000004) != 0) {
-        size += 1 + ProtoSink.computeMessageSizeNoTag(pose3D);
-      }
-      return size;
-    }
-
-    @Override
-    @SuppressWarnings("fallthrough")
-    public ProtobufQuestNavFrameData mergeFrom(final ProtoSource input) throws IOException {
-      // Enabled Fall-Through Optimization (QuickBuffers)
-      int tag = input.readTag();
-      while (true) {
-        switch (tag) {
-          case 17: {
-            // timestamp
-            timestamp = input.readDouble();
-            bitField0_ |= 0x00000001;
-            tag = input.readTag();
-            if (tag != 8) {
-              break;
-            }
-          }
-          case 8: {
-            // frameCount
-            frameCount = input.readInt32();
-            bitField0_ |= 0x00000002;
-            tag = input.readTag();
-            if (tag != 26) {
-              break;
-            }
-          }
-          case 26: {
-            // pose3D
-            input.readMessage(pose3D);
-            bitField0_ |= 0x00000004;
-            tag = input.readTag();
-            if (tag != 0) {
-              break;
-            }
-          }
-          case 0: {
+        /**
+         * <pre>
+         *  Time (in seconds) since the QuestNav app started
+         * </pre>
+         *
+         * <code>optional double timestamp = 2;</code>
+         * @return this
+         */
+        public ProtobufQuestNavFrameData clearTimestamp() {
+            bitField0_ &= ~0x00000001;
+            timestamp = 0D;
             return this;
-          }
-          default: {
-            if (!input.skipField(tag)) {
-              return this;
-            }
-            tag = input.readTag();
-            break;
-          }
         }
-      }
-    }
 
-    @Override
-    public void writeTo(final JsonSink output) throws IOException {
-      output.beginObject();
-      if ((bitField0_ & 0x00000001) != 0) {
-        output.writeDouble(FieldNames.timestamp, timestamp);
-      }
-      if ((bitField0_ & 0x00000002) != 0) {
-        output.writeInt32(FieldNames.frameCount, frameCount);
-      }
-      if ((bitField0_ & 0x00000004) != 0) {
-        output.writeMessage(FieldNames.pose3D, pose3D);
-      }
-      output.endObject();
-    }
-
-    @Override
-    public ProtobufQuestNavFrameData mergeFrom(final JsonSource input) throws IOException {
-      if (!input.beginObject()) {
-        return this;
-      }
-      while (!input.isAtEnd()) {
-        switch (input.readFieldHash()) {
-          case 55126294: {
-            if (input.isAtField(FieldNames.timestamp)) {
-              if (!input.trySkipNullValue()) {
-                timestamp = input.readDouble();
-                bitField0_ |= 0x00000001;
-              }
-            } else {
-              input.skipUnknownField();
-            }
-            break;
-          }
-          case -296512606:
-          case 188405693: {
-            if (input.isAtField(FieldNames.frameCount)) {
-              if (!input.trySkipNullValue()) {
-                frameCount = input.readInt32();
-                bitField0_ |= 0x00000002;
-              }
-            } else {
-              input.skipUnknownField();
-            }
-            break;
-          }
-          case -982466846: {
-            if (input.isAtField(FieldNames.pose3D)) {
-              if (!input.trySkipNullValue()) {
-                input.readMessage(pose3D);
-                bitField0_ |= 0x00000004;
-              }
-            } else {
-              input.skipUnknownField();
-            }
-            break;
-          }
-          default: {
-            input.skipUnknownField();
-            break;
-          }
+        /**
+         * <pre>
+         *  Time (in seconds) since the QuestNav app started
+         * </pre>
+         *
+         * <code>optional double timestamp = 2;</code>
+         * @return the timestamp
+         */
+        public double getTimestamp() {
+            return timestamp;
         }
-      }
-      input.endObject();
-      return this;
-    }
 
-    @Override
-    public ProtobufQuestNavFrameData clone() {
-      return new ProtobufQuestNavFrameData().copyFrom(this);
-    }
+        /**
+         * <pre>
+         *  Time (in seconds) since the QuestNav app started
+         * </pre>
+         *
+         * <code>optional double timestamp = 2;</code>
+         * @param value the timestamp to set
+         * @return this
+         */
+        public ProtobufQuestNavFrameData setTimestamp(final double value) {
+            bitField0_ |= 0x00000001;
+            timestamp = value;
+            return this;
+        }
 
-    @Override
-    public boolean isEmpty() {
-      return ((bitField0_) == 0);
-    }
+        /**
+         * <pre>
+         *  Number of frames processed by the Quest
+         * </pre>
+         *
+         * <code>optional int32 frame_count = 1;</code>
+         * @return whether the frameCount field is set
+         */
+        public boolean hasFrameCount() {
+            return (bitField0_ & 0x00000002) != 0;
+        }
 
-    public static ProtobufQuestNavFrameData parseFrom(final byte[] data) throws
-        InvalidProtocolBufferException {
-      return ProtoMessage.mergeFrom(new ProtobufQuestNavFrameData(), data).checkInitialized();
-    }
+        /**
+         * <pre>
+         *  Number of frames processed by the Quest
+         * </pre>
+         *
+         * <code>optional int32 frame_count = 1;</code>
+         * @return this
+         */
+        public ProtobufQuestNavFrameData clearFrameCount() {
+            bitField0_ &= ~0x00000002;
+            frameCount = 0;
+            return this;
+        }
 
-    public static ProtobufQuestNavFrameData parseFrom(final ProtoSource input) throws IOException {
-      return ProtoMessage.mergeFrom(new ProtobufQuestNavFrameData(), input).checkInitialized();
-    }
+        /**
+         * <pre>
+         *  Number of frames processed by the Quest
+         * </pre>
+         *
+         * <code>optional int32 frame_count = 1;</code>
+         * @return the frameCount
+         */
+        public int getFrameCount() {
+            return frameCount;
+        }
 
-    public static ProtobufQuestNavFrameData parseFrom(final JsonSource input) throws IOException {
-      return ProtoMessage.mergeFrom(new ProtobufQuestNavFrameData(), input).checkInitialized();
-    }
+        /**
+         * <pre>
+         *  Number of frames processed by the Quest
+         * </pre>
+         *
+         * <code>optional int32 frame_count = 1;</code>
+         * @param value the frameCount to set
+         * @return this
+         */
+        public ProtobufQuestNavFrameData setFrameCount(final int value) {
+            bitField0_ |= 0x00000002;
+            frameCount = value;
+            return this;
+        }
 
-    /**
-     * @return factory for creating ProtobufQuestNavFrameData messages
-     */
-    public static MessageFactory<ProtobufQuestNavFrameData> getFactory() {
-      return ProtobufQuestNavFrameDataFactory.INSTANCE;
-    }
+        /**
+         * <pre>
+         *  The 3d field-relative position of the quest
+         * </pre>
+         *
+         * <code>optional .wpi.proto.ProtobufPose3d pose3d = 3;</code>
+         * @return whether the pose3D field is set
+         */
+        public boolean hasPose3D() {
+            return (bitField0_ & 0x00000004) != 0;
+        }
 
-    /**
-     * @return this type's descriptor.
-     */
-    public static Descriptors.Descriptor getDescriptor() {
-      return Data.questnav_protos_data_ProtobufQuestNavFrameData_descriptor;
-    }
+        /**
+         * <pre>
+         *  The 3d field-relative position of the quest
+         * </pre>
+         *
+         * <code>optional .wpi.proto.ProtobufPose3d pose3d = 3;</code>
+         * @return this
+         */
+        public ProtobufQuestNavFrameData clearPose3D() {
+            bitField0_ &= ~0x00000004;
+            pose3D.clear();
+            return this;
+        }
 
-    private enum ProtobufQuestNavFrameDataFactory implements MessageFactory<ProtobufQuestNavFrameData> {
-      INSTANCE;
+        /**
+         * <pre>
+         *  The 3d field-relative position of the quest
+         * </pre>
+         *
+         * <code>optional .wpi.proto.ProtobufPose3d pose3d = 3;</code>
+         *
+         * This method returns the internal storage object without modifying any has state.
+         * The returned object should not be modified and be treated as read-only.
+         *
+         * Use {@link #getMutablePose3D()} if you want to modify it.
+         *
+         * @return internal storage object for reading
+         */
+        public Geometry3D.ProtobufPose3d getPose3D() {
+            return pose3D;
+        }
 
-      @Override
-      public ProtobufQuestNavFrameData create() {
-        return ProtobufQuestNavFrameData.newInstance();
-      }
-    }
+        /**
+         * <pre>
+         *  The 3d field-relative position of the quest
+         * </pre>
+         *
+         * <code>optional .wpi.proto.ProtobufPose3d pose3d = 3;</code>
+         *
+         * This method returns the internal storage object and sets the corresponding
+         * has state. The returned object will become part of this message and its
+         * contents may be modified as long as the has state is not cleared.
+         *
+         * @return internal storage object for modifications
+         */
+        public Geometry3D.ProtobufPose3d getMutablePose3D() {
+            bitField0_ |= 0x00000004;
+            return pose3D;
+        }
 
-    /**
-     * Contains name constants used for serializing JSON
-     */
-    static class FieldNames {
-      static final FieldName timestamp = FieldName.forField("timestamp");
+        /**
+         * <pre>
+         *  The 3d field-relative position of the quest
+         * </pre>
+         *
+         * <code>optional .wpi.proto.ProtobufPose3d pose3d = 3;</code>
+         * @param value the pose3D to set
+         * @return this
+         */
+        public ProtobufQuestNavFrameData setPose3D(final Geometry3D.ProtobufPose3d value) {
+            bitField0_ |= 0x00000004;
+            pose3D.copyFrom(value);
+            return this;
+        }
 
-      static final FieldName frameCount = FieldName.forField("frameCount", "frame_count");
+        @Override
+        public ProtobufQuestNavFrameData copyFrom(final ProtobufQuestNavFrameData other) {
+            cachedSize = other.cachedSize;
+            if ((bitField0_ | other.bitField0_) != 0) {
+                bitField0_ = other.bitField0_;
+                timestamp = other.timestamp;
+                frameCount = other.frameCount;
+                pose3D.copyFrom(other.pose3D);
+            }
+            return this;
+        }
 
-      static final FieldName pose3D = FieldName.forField("pose3d");
-    }
-  }
+        @Override
+        public ProtobufQuestNavFrameData mergeFrom(final ProtobufQuestNavFrameData other) {
+            if (other.isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            if (other.hasTimestamp()) {
+                setTimestamp(other.timestamp);
+            }
+            if (other.hasFrameCount()) {
+                setFrameCount(other.frameCount);
+            }
+            if (other.hasPose3D()) {
+                getMutablePose3D().mergeFrom(other.pose3D);
+            }
+            return this;
+        }
 
-  /**
-   * <pre>
-   *  Device data that is sent slower
-   * </pre>
-   *
-   * Protobuf type {@code ProtobufQuestNavDeviceData}
-   */
-  public static final class ProtobufQuestNavDeviceData extends ProtoMessage<ProtobufQuestNavDeviceData> implements Cloneable {
-    private static final long serialVersionUID = 0L;
+        @Override
+        public ProtobufQuestNavFrameData clear() {
+            if (isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            bitField0_ = 0;
+            timestamp = 0D;
+            frameCount = 0;
+            pose3D.clear();
+            return this;
+        }
 
-    /**
-     * <pre>
-     *  Number of times the Quest has lost tracking after having it since the app started
-     * </pre>
-     *
-     * <code>optional int32 tracking_lost_counter = 1;</code>
-     */
-    private int trackingLostCounter;
+        @Override
+        public ProtobufQuestNavFrameData clearQuick() {
+            if (isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            bitField0_ = 0;
+            pose3D.clearQuick();
+            return this;
+        }
 
-    /**
-     * <pre>
-     *  The battery percentage of the Quest
-     * </pre>
-     *
-     * <code>optional int32 battery_percent = 3;</code>
-     */
-    private int batteryPercent;
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+            if (!(o instanceof ProtobufQuestNavFrameData)) {
+                return false;
+            }
+            ProtobufQuestNavFrameData other = (ProtobufQuestNavFrameData) o;
+            return bitField0_ == other.bitField0_
+                && (!hasTimestamp() || ProtoUtil.isEqual(timestamp, other.timestamp))
+                && (!hasFrameCount() || frameCount == other.frameCount)
+                && (!hasPose3D() || pose3D.equals(other.pose3D));
+        }
 
-    /**
-     * <pre>
-     *  If the Quest is currently tracking?
-     * </pre>
-     *
-     * <code>optional bool currently_tracking = 2;</code>
-     */
-    private boolean currentlyTracking;
+        @Override
+        public void writeTo(final ProtoSink output) throws IOException {
+            if ((bitField0_ & 0x00000001) != 0) {
+                output.writeRawByte((byte) 17);
+                output.writeDoubleNoTag(timestamp);
+            }
+            if ((bitField0_ & 0x00000002) != 0) {
+                output.writeRawByte((byte) 8);
+                output.writeInt32NoTag(frameCount);
+            }
+            if ((bitField0_ & 0x00000004) != 0) {
+                output.writeRawByte((byte) 26);
+                output.writeMessageNoTag(pose3D);
+            }
+        }
 
-    private ProtobufQuestNavDeviceData() {
+        @Override
+        protected int computeSerializedSize() {
+            int size = 0;
+            if ((bitField0_ & 0x00000001) != 0) {
+                size += 9;
+            }
+            if ((bitField0_ & 0x00000002) != 0) {
+                size += 1 + ProtoSink.computeInt32SizeNoTag(frameCount);
+            }
+            if ((bitField0_ & 0x00000004) != 0) {
+                size += 1 + ProtoSink.computeMessageSizeNoTag(pose3D);
+            }
+            return size;
+        }
+
+        @Override
+        @SuppressWarnings("fallthrough")
+        public ProtobufQuestNavFrameData mergeFrom(final ProtoSource input) throws IOException {
+            // Enabled Fall-Through Optimization (QuickBuffers)
+            int tag = input.readTag();
+            while (true) {
+                switch (tag) {
+                    case 17: {
+                        // timestamp
+                        timestamp = input.readDouble();
+                        bitField0_ |= 0x00000001;
+                        tag = input.readTag();
+                        if (tag != 8) {
+                            break;
+                        }
+                    }
+                    case 8: {
+                        // frameCount
+                        frameCount = input.readInt32();
+                        bitField0_ |= 0x00000002;
+                        tag = input.readTag();
+                        if (tag != 26) {
+                            break;
+                        }
+                    }
+                    case 26: {
+                        // pose3D
+                        input.readMessage(pose3D);
+                        bitField0_ |= 0x00000004;
+                        tag = input.readTag();
+                        if (tag != 0) {
+                            break;
+                        }
+                    }
+                    case 0: {
+                        return this;
+                    }
+                    default: {
+                        if (!input.skipField(tag)) {
+                            return this;
+                        }
+                        tag = input.readTag();
+                        break;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void writeTo(final JsonSink output) throws IOException {
+            output.beginObject();
+            if ((bitField0_ & 0x00000001) != 0) {
+                output.writeDouble(FieldNames.timestamp, timestamp);
+            }
+            if ((bitField0_ & 0x00000002) != 0) {
+                output.writeInt32(FieldNames.frameCount, frameCount);
+            }
+            if ((bitField0_ & 0x00000004) != 0) {
+                output.writeMessage(FieldNames.pose3D, pose3D);
+            }
+            output.endObject();
+        }
+
+        @Override
+        public ProtobufQuestNavFrameData mergeFrom(final JsonSource input) throws IOException {
+            if (!input.beginObject()) {
+                return this;
+            }
+            while (!input.isAtEnd()) {
+                switch (input.readFieldHash()) {
+                    case 55126294: {
+                        if (input.isAtField(FieldNames.timestamp)) {
+                            if (!input.trySkipNullValue()) {
+                                timestamp = input.readDouble();
+                                bitField0_ |= 0x00000001;
+                            }
+                        } else {
+                            input.skipUnknownField();
+                        }
+                        break;
+                    }
+                    case -296512606:
+                    case 188405693: {
+                        if (input.isAtField(FieldNames.frameCount)) {
+                            if (!input.trySkipNullValue()) {
+                                frameCount = input.readInt32();
+                                bitField0_ |= 0x00000002;
+                            }
+                        } else {
+                            input.skipUnknownField();
+                        }
+                        break;
+                    }
+                    case -982466846: {
+                        if (input.isAtField(FieldNames.pose3D)) {
+                            if (!input.trySkipNullValue()) {
+                                input.readMessage(pose3D);
+                                bitField0_ |= 0x00000004;
+                            }
+                        } else {
+                            input.skipUnknownField();
+                        }
+                        break;
+                    }
+                    default: {
+                        input.skipUnknownField();
+                        break;
+                    }
+                }
+            }
+            input.endObject();
+            return this;
+        }
+
+        @Override
+        public ProtobufQuestNavFrameData clone() {
+            return new ProtobufQuestNavFrameData().copyFrom(this);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return ((bitField0_) == 0);
+        }
+
+        public static ProtobufQuestNavFrameData parseFrom(final byte[] data) throws
+                InvalidProtocolBufferException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavFrameData(), data).checkInitialized();
+        }
+
+        public static ProtobufQuestNavFrameData parseFrom(final ProtoSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavFrameData(), input).checkInitialized();
+        }
+
+        public static ProtobufQuestNavFrameData parseFrom(final JsonSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavFrameData(), input).checkInitialized();
+        }
+
+        /**
+         * @return factory for creating ProtobufQuestNavFrameData messages
+         */
+        public static MessageFactory<ProtobufQuestNavFrameData> getFactory() {
+            return ProtobufQuestNavFrameDataFactory.INSTANCE;
+        }
+
+        /**
+         * @return this type's descriptor.
+         */
+        public static Descriptors.Descriptor getDescriptor() {
+            return Data.questnav_protos_data_ProtobufQuestNavFrameData_descriptor;
+        }
+
+        private enum ProtobufQuestNavFrameDataFactory implements MessageFactory<ProtobufQuestNavFrameData> {
+            INSTANCE;
+
+            @Override
+            public ProtobufQuestNavFrameData create() {
+                return ProtobufQuestNavFrameData.newInstance();
+            }
+        }
+
+        /**
+         * Contains name constants used for serializing JSON
+         */
+        static class FieldNames {
+            static final FieldName timestamp = FieldName.forField("timestamp");
+
+            static final FieldName frameCount = FieldName.forField("frameCount", "frame_count");
+
+            static final FieldName pose3D = FieldName.forField("pose3d");
+        }
     }
 
     /**
@@ -604,441 +566,483 @@ public final class Data {
      *  Device data that is sent slower
      * </pre>
      *
-     * @return a new empty instance of {@code ProtobufQuestNavDeviceData}
+     * Protobuf type {@code ProtobufQuestNavDeviceData}
      */
-    public static ProtobufQuestNavDeviceData newInstance() {
-      return new ProtobufQuestNavDeviceData();
-    }
+    public static final class ProtobufQuestNavDeviceData extends ProtoMessage<ProtobufQuestNavDeviceData> implements Cloneable {
+        private static final long serialVersionUID = 0L;
 
-    /**
-     * <pre>
-     *  Number of times the Quest has lost tracking after having it since the app started
-     * </pre>
-     *
-     * <code>optional int32 tracking_lost_counter = 1;</code>
-     * @return whether the trackingLostCounter field is set
-     */
-    public boolean hasTrackingLostCounter() {
-      return (bitField0_ & 0x00000001) != 0;
-    }
+        /**
+         * <pre>
+         *  Number of times the Quest has lost tracking after having it since the app started
+         * </pre>
+         *
+         * <code>optional int32 tracking_lost_counter = 1;</code>
+         */
+        private int trackingLostCounter;
 
-    /**
-     * <pre>
-     *  Number of times the Quest has lost tracking after having it since the app started
-     * </pre>
-     *
-     * <code>optional int32 tracking_lost_counter = 1;</code>
-     * @return this
-     */
-    public ProtobufQuestNavDeviceData clearTrackingLostCounter() {
-      bitField0_ &= ~0x00000001;
-      trackingLostCounter = 0;
-      return this;
-    }
+        /**
+         * <pre>
+         *  The battery percentage of the Quest
+         * </pre>
+         *
+         * <code>optional int32 battery_percent = 3;</code>
+         */
+        private int batteryPercent;
 
-    /**
-     * <pre>
-     *  Number of times the Quest has lost tracking after having it since the app started
-     * </pre>
-     *
-     * <code>optional int32 tracking_lost_counter = 1;</code>
-     * @return the trackingLostCounter
-     */
-    public int getTrackingLostCounter() {
-      return trackingLostCounter;
-    }
+        /**
+         * <pre>
+         *  If the Quest is currently tracking?
+         * </pre>
+         *
+         * <code>optional bool currently_tracking = 2;</code>
+         */
+        private boolean currentlyTracking;
 
-    /**
-     * <pre>
-     *  Number of times the Quest has lost tracking after having it since the app started
-     * </pre>
-     *
-     * <code>optional int32 tracking_lost_counter = 1;</code>
-     * @param value the trackingLostCounter to set
-     * @return this
-     */
-    public ProtobufQuestNavDeviceData setTrackingLostCounter(final int value) {
-      bitField0_ |= 0x00000001;
-      trackingLostCounter = value;
-      return this;
-    }
+        private ProtobufQuestNavDeviceData() {
+        }
 
-    /**
-     * <pre>
-     *  The battery percentage of the Quest
-     * </pre>
-     *
-     * <code>optional int32 battery_percent = 3;</code>
-     * @return whether the batteryPercent field is set
-     */
-    public boolean hasBatteryPercent() {
-      return (bitField0_ & 0x00000002) != 0;
-    }
+        /**
+         * <pre>
+         *  Device data that is sent slower
+         * </pre>
+         *
+         * @return a new empty instance of {@code ProtobufQuestNavDeviceData}
+         */
+        public static ProtobufQuestNavDeviceData newInstance() {
+            return new ProtobufQuestNavDeviceData();
+        }
 
-    /**
-     * <pre>
-     *  The battery percentage of the Quest
-     * </pre>
-     *
-     * <code>optional int32 battery_percent = 3;</code>
-     * @return this
-     */
-    public ProtobufQuestNavDeviceData clearBatteryPercent() {
-      bitField0_ &= ~0x00000002;
-      batteryPercent = 0;
-      return this;
-    }
+        /**
+         * <pre>
+         *  Number of times the Quest has lost tracking after having it since the app started
+         * </pre>
+         *
+         * <code>optional int32 tracking_lost_counter = 1;</code>
+         * @return whether the trackingLostCounter field is set
+         */
+        public boolean hasTrackingLostCounter() {
+            return (bitField0_ & 0x00000001) != 0;
+        }
 
-    /**
-     * <pre>
-     *  The battery percentage of the Quest
-     * </pre>
-     *
-     * <code>optional int32 battery_percent = 3;</code>
-     * @return the batteryPercent
-     */
-    public int getBatteryPercent() {
-      return batteryPercent;
-    }
-
-    /**
-     * <pre>
-     *  The battery percentage of the Quest
-     * </pre>
-     *
-     * <code>optional int32 battery_percent = 3;</code>
-     * @param value the batteryPercent to set
-     * @return this
-     */
-    public ProtobufQuestNavDeviceData setBatteryPercent(final int value) {
-      bitField0_ |= 0x00000002;
-      batteryPercent = value;
-      return this;
-    }
-
-    /**
-     * <pre>
-     *  If the Quest is currently tracking?
-     * </pre>
-     *
-     * <code>optional bool currently_tracking = 2;</code>
-     * @return whether the currentlyTracking field is set
-     */
-    public boolean hasCurrentlyTracking() {
-      return (bitField0_ & 0x00000004) != 0;
-    }
-
-    /**
-     * <pre>
-     *  If the Quest is currently tracking?
-     * </pre>
-     *
-     * <code>optional bool currently_tracking = 2;</code>
-     * @return this
-     */
-    public ProtobufQuestNavDeviceData clearCurrentlyTracking() {
-      bitField0_ &= ~0x00000004;
-      currentlyTracking = false;
-      return this;
-    }
-
-    /**
-     * <pre>
-     *  If the Quest is currently tracking?
-     * </pre>
-     *
-     * <code>optional bool currently_tracking = 2;</code>
-     * @return the currentlyTracking
-     */
-    public boolean getCurrentlyTracking() {
-      return currentlyTracking;
-    }
-
-    /**
-     * <pre>
-     *  If the Quest is currently tracking?
-     * </pre>
-     *
-     * <code>optional bool currently_tracking = 2;</code>
-     * @param value the currentlyTracking to set
-     * @return this
-     */
-    public ProtobufQuestNavDeviceData setCurrentlyTracking(final boolean value) {
-      bitField0_ |= 0x00000004;
-      currentlyTracking = value;
-      return this;
-    }
-
-    @Override
-    public ProtobufQuestNavDeviceData copyFrom(final ProtobufQuestNavDeviceData other) {
-      cachedSize = other.cachedSize;
-      if ((bitField0_ | other.bitField0_) != 0) {
-        bitField0_ = other.bitField0_;
-        trackingLostCounter = other.trackingLostCounter;
-        batteryPercent = other.batteryPercent;
-        currentlyTracking = other.currentlyTracking;
-      }
-      return this;
-    }
-
-    @Override
-    public ProtobufQuestNavDeviceData mergeFrom(final ProtobufQuestNavDeviceData other) {
-      if (other.isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      if (other.hasTrackingLostCounter()) {
-        setTrackingLostCounter(other.trackingLostCounter);
-      }
-      if (other.hasBatteryPercent()) {
-        setBatteryPercent(other.batteryPercent);
-      }
-      if (other.hasCurrentlyTracking()) {
-        setCurrentlyTracking(other.currentlyTracking);
-      }
-      return this;
-    }
-
-    @Override
-    public ProtobufQuestNavDeviceData clear() {
-      if (isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      bitField0_ = 0;
-      trackingLostCounter = 0;
-      batteryPercent = 0;
-      currentlyTracking = false;
-      return this;
-    }
-
-    @Override
-    public ProtobufQuestNavDeviceData clearQuick() {
-      if (isEmpty()) {
-        return this;
-      }
-      cachedSize = -1;
-      bitField0_ = 0;
-      return this;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (o == this) {
-        return true;
-      }
-      if (!(o instanceof ProtobufQuestNavDeviceData)) {
-        return false;
-      }
-      ProtobufQuestNavDeviceData other = (ProtobufQuestNavDeviceData) o;
-      return bitField0_ == other.bitField0_
-        && (!hasTrackingLostCounter() || trackingLostCounter == other.trackingLostCounter)
-        && (!hasBatteryPercent() || batteryPercent == other.batteryPercent)
-        && (!hasCurrentlyTracking() || currentlyTracking == other.currentlyTracking);
-    }
-
-    @Override
-    public void writeTo(final ProtoSink output) throws IOException {
-      if ((bitField0_ & 0x00000001) != 0) {
-        output.writeRawByte((byte) 8);
-        output.writeInt32NoTag(trackingLostCounter);
-      }
-      if ((bitField0_ & 0x00000002) != 0) {
-        output.writeRawByte((byte) 24);
-        output.writeInt32NoTag(batteryPercent);
-      }
-      if ((bitField0_ & 0x00000004) != 0) {
-        output.writeRawByte((byte) 16);
-        output.writeBoolNoTag(currentlyTracking);
-      }
-    }
-
-    @Override
-    protected int computeSerializedSize() {
-      int size = 0;
-      if ((bitField0_ & 0x00000001) != 0) {
-        size += 1 + ProtoSink.computeInt32SizeNoTag(trackingLostCounter);
-      }
-      if ((bitField0_ & 0x00000002) != 0) {
-        size += 1 + ProtoSink.computeInt32SizeNoTag(batteryPercent);
-      }
-      if ((bitField0_ & 0x00000004) != 0) {
-        size += 2;
-      }
-      return size;
-    }
-
-    @Override
-    @SuppressWarnings("fallthrough")
-    public ProtobufQuestNavDeviceData mergeFrom(final ProtoSource input) throws IOException {
-      // Enabled Fall-Through Optimization (QuickBuffers)
-      int tag = input.readTag();
-      while (true) {
-        switch (tag) {
-          case 8: {
-            // trackingLostCounter
-            trackingLostCounter = input.readInt32();
-            bitField0_ |= 0x00000001;
-            tag = input.readTag();
-            if (tag != 24) {
-              break;
-            }
-          }
-          case 24: {
-            // batteryPercent
-            batteryPercent = input.readInt32();
-            bitField0_ |= 0x00000002;
-            tag = input.readTag();
-            if (tag != 16) {
-              break;
-            }
-          }
-          case 16: {
-            // currentlyTracking
-            currentlyTracking = input.readBool();
-            bitField0_ |= 0x00000004;
-            tag = input.readTag();
-            if (tag != 0) {
-              break;
-            }
-          }
-          case 0: {
+        /**
+         * <pre>
+         *  Number of times the Quest has lost tracking after having it since the app started
+         * </pre>
+         *
+         * <code>optional int32 tracking_lost_counter = 1;</code>
+         * @return this
+         */
+        public ProtobufQuestNavDeviceData clearTrackingLostCounter() {
+            bitField0_ &= ~0x00000001;
+            trackingLostCounter = 0;
             return this;
-          }
-          default: {
-            if (!input.skipField(tag)) {
-              return this;
-            }
-            tag = input.readTag();
-            break;
-          }
         }
-      }
-    }
 
-    @Override
-    public void writeTo(final JsonSink output) throws IOException {
-      output.beginObject();
-      if ((bitField0_ & 0x00000001) != 0) {
-        output.writeInt32(FieldNames.trackingLostCounter, trackingLostCounter);
-      }
-      if ((bitField0_ & 0x00000002) != 0) {
-        output.writeInt32(FieldNames.batteryPercent, batteryPercent);
-      }
-      if ((bitField0_ & 0x00000004) != 0) {
-        output.writeBool(FieldNames.currentlyTracking, currentlyTracking);
-      }
-      output.endObject();
-    }
-
-    @Override
-    public ProtobufQuestNavDeviceData mergeFrom(final JsonSource input) throws IOException {
-      if (!input.beginObject()) {
-        return this;
-      }
-      while (!input.isAtEnd()) {
-        switch (input.readFieldHash()) {
-          case -1237870847:
-          case -2011984791: {
-            if (input.isAtField(FieldNames.trackingLostCounter)) {
-              if (!input.trySkipNullValue()) {
-                trackingLostCounter = input.readInt32();
-                bitField0_ |= 0x00000001;
-              }
-            } else {
-              input.skipUnknownField();
-            }
-            break;
-          }
-          case -2041653896:
-          case -1975165933: {
-            if (input.isAtField(FieldNames.batteryPercent)) {
-              if (!input.trySkipNullValue()) {
-                batteryPercent = input.readInt32();
-                bitField0_ |= 0x00000002;
-              }
-            } else {
-              input.skipUnknownField();
-            }
-            break;
-          }
-          case 879013277:
-          case 106200592: {
-            if (input.isAtField(FieldNames.currentlyTracking)) {
-              if (!input.trySkipNullValue()) {
-                currentlyTracking = input.readBool();
-                bitField0_ |= 0x00000004;
-              }
-            } else {
-              input.skipUnknownField();
-            }
-            break;
-          }
-          default: {
-            input.skipUnknownField();
-            break;
-          }
+        /**
+         * <pre>
+         *  Number of times the Quest has lost tracking after having it since the app started
+         * </pre>
+         *
+         * <code>optional int32 tracking_lost_counter = 1;</code>
+         * @return the trackingLostCounter
+         */
+        public int getTrackingLostCounter() {
+            return trackingLostCounter;
         }
-      }
-      input.endObject();
-      return this;
+
+        /**
+         * <pre>
+         *  Number of times the Quest has lost tracking after having it since the app started
+         * </pre>
+         *
+         * <code>optional int32 tracking_lost_counter = 1;</code>
+         * @param value the trackingLostCounter to set
+         * @return this
+         */
+        public ProtobufQuestNavDeviceData setTrackingLostCounter(final int value) {
+            bitField0_ |= 0x00000001;
+            trackingLostCounter = value;
+            return this;
+        }
+
+        /**
+         * <pre>
+         *  The battery percentage of the Quest
+         * </pre>
+         *
+         * <code>optional int32 battery_percent = 3;</code>
+         * @return whether the batteryPercent field is set
+         */
+        public boolean hasBatteryPercent() {
+            return (bitField0_ & 0x00000002) != 0;
+        }
+
+        /**
+         * <pre>
+         *  The battery percentage of the Quest
+         * </pre>
+         *
+         * <code>optional int32 battery_percent = 3;</code>
+         * @return this
+         */
+        public ProtobufQuestNavDeviceData clearBatteryPercent() {
+            bitField0_ &= ~0x00000002;
+            batteryPercent = 0;
+            return this;
+        }
+
+        /**
+         * <pre>
+         *  The battery percentage of the Quest
+         * </pre>
+         *
+         * <code>optional int32 battery_percent = 3;</code>
+         * @return the batteryPercent
+         */
+        public int getBatteryPercent() {
+            return batteryPercent;
+        }
+
+        /**
+         * <pre>
+         *  The battery percentage of the Quest
+         * </pre>
+         *
+         * <code>optional int32 battery_percent = 3;</code>
+         * @param value the batteryPercent to set
+         * @return this
+         */
+        public ProtobufQuestNavDeviceData setBatteryPercent(final int value) {
+            bitField0_ |= 0x00000002;
+            batteryPercent = value;
+            return this;
+        }
+
+        /**
+         * <pre>
+         *  If the Quest is currently tracking?
+         * </pre>
+         *
+         * <code>optional bool currently_tracking = 2;</code>
+         * @return whether the currentlyTracking field is set
+         */
+        public boolean hasCurrentlyTracking() {
+            return (bitField0_ & 0x00000004) != 0;
+        }
+
+        /**
+         * <pre>
+         *  If the Quest is currently tracking?
+         * </pre>
+         *
+         * <code>optional bool currently_tracking = 2;</code>
+         * @return this
+         */
+        public ProtobufQuestNavDeviceData clearCurrentlyTracking() {
+            bitField0_ &= ~0x00000004;
+            currentlyTracking = false;
+            return this;
+        }
+
+        /**
+         * <pre>
+         *  If the Quest is currently tracking?
+         * </pre>
+         *
+         * <code>optional bool currently_tracking = 2;</code>
+         * @return the currentlyTracking
+         */
+        public boolean getCurrentlyTracking() {
+            return currentlyTracking;
+        }
+
+        /**
+         * <pre>
+         *  If the Quest is currently tracking?
+         * </pre>
+         *
+         * <code>optional bool currently_tracking = 2;</code>
+         * @param value the currentlyTracking to set
+         * @return this
+         */
+        public ProtobufQuestNavDeviceData setCurrentlyTracking(final boolean value) {
+            bitField0_ |= 0x00000004;
+            currentlyTracking = value;
+            return this;
+        }
+
+        @Override
+        public ProtobufQuestNavDeviceData copyFrom(final ProtobufQuestNavDeviceData other) {
+            cachedSize = other.cachedSize;
+            if ((bitField0_ | other.bitField0_) != 0) {
+                bitField0_ = other.bitField0_;
+                trackingLostCounter = other.trackingLostCounter;
+                batteryPercent = other.batteryPercent;
+                currentlyTracking = other.currentlyTracking;
+            }
+            return this;
+        }
+
+        @Override
+        public ProtobufQuestNavDeviceData mergeFrom(final ProtobufQuestNavDeviceData other) {
+            if (other.isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            if (other.hasTrackingLostCounter()) {
+                setTrackingLostCounter(other.trackingLostCounter);
+            }
+            if (other.hasBatteryPercent()) {
+                setBatteryPercent(other.batteryPercent);
+            }
+            if (other.hasCurrentlyTracking()) {
+                setCurrentlyTracking(other.currentlyTracking);
+            }
+            return this;
+        }
+
+        @Override
+        public ProtobufQuestNavDeviceData clear() {
+            if (isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            bitField0_ = 0;
+            trackingLostCounter = 0;
+            batteryPercent = 0;
+            currentlyTracking = false;
+            return this;
+        }
+
+        @Override
+        public ProtobufQuestNavDeviceData clearQuick() {
+            if (isEmpty()) {
+                return this;
+            }
+            cachedSize = -1;
+            bitField0_ = 0;
+            return this;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+            if (!(o instanceof ProtobufQuestNavDeviceData)) {
+                return false;
+            }
+            ProtobufQuestNavDeviceData other = (ProtobufQuestNavDeviceData) o;
+            return bitField0_ == other.bitField0_
+                && (!hasTrackingLostCounter() || trackingLostCounter == other.trackingLostCounter)
+                && (!hasBatteryPercent() || batteryPercent == other.batteryPercent)
+                && (!hasCurrentlyTracking() || currentlyTracking == other.currentlyTracking);
+        }
+
+        @Override
+        public void writeTo(final ProtoSink output) throws IOException {
+            if ((bitField0_ & 0x00000001) != 0) {
+                output.writeRawByte((byte) 8);
+                output.writeInt32NoTag(trackingLostCounter);
+            }
+            if ((bitField0_ & 0x00000002) != 0) {
+                output.writeRawByte((byte) 24);
+                output.writeInt32NoTag(batteryPercent);
+            }
+            if ((bitField0_ & 0x00000004) != 0) {
+                output.writeRawByte((byte) 16);
+                output.writeBoolNoTag(currentlyTracking);
+            }
+        }
+
+        @Override
+        protected int computeSerializedSize() {
+            int size = 0;
+            if ((bitField0_ & 0x00000001) != 0) {
+                size += 1 + ProtoSink.computeInt32SizeNoTag(trackingLostCounter);
+            }
+            if ((bitField0_ & 0x00000002) != 0) {
+                size += 1 + ProtoSink.computeInt32SizeNoTag(batteryPercent);
+            }
+            if ((bitField0_ & 0x00000004) != 0) {
+                size += 2;
+            }
+            return size;
+        }
+
+        @Override
+        @SuppressWarnings("fallthrough")
+        public ProtobufQuestNavDeviceData mergeFrom(final ProtoSource input) throws IOException {
+            // Enabled Fall-Through Optimization (QuickBuffers)
+            int tag = input.readTag();
+            while (true) {
+                switch (tag) {
+                    case 8: {
+                        // trackingLostCounter
+                        trackingLostCounter = input.readInt32();
+                        bitField0_ |= 0x00000001;
+                        tag = input.readTag();
+                        if (tag != 24) {
+                            break;
+                        }
+                    }
+                    case 24: {
+                        // batteryPercent
+                        batteryPercent = input.readInt32();
+                        bitField0_ |= 0x00000002;
+                        tag = input.readTag();
+                        if (tag != 16) {
+                            break;
+                        }
+                    }
+                    case 16: {
+                        // currentlyTracking
+                        currentlyTracking = input.readBool();
+                        bitField0_ |= 0x00000004;
+                        tag = input.readTag();
+                        if (tag != 0) {
+                            break;
+                        }
+                    }
+                    case 0: {
+                        return this;
+                    }
+                    default: {
+                        if (!input.skipField(tag)) {
+                            return this;
+                        }
+                        tag = input.readTag();
+                        break;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void writeTo(final JsonSink output) throws IOException {
+            output.beginObject();
+            if ((bitField0_ & 0x00000001) != 0) {
+                output.writeInt32(FieldNames.trackingLostCounter, trackingLostCounter);
+            }
+            if ((bitField0_ & 0x00000002) != 0) {
+                output.writeInt32(FieldNames.batteryPercent, batteryPercent);
+            }
+            if ((bitField0_ & 0x00000004) != 0) {
+                output.writeBool(FieldNames.currentlyTracking, currentlyTracking);
+            }
+            output.endObject();
+        }
+
+        @Override
+        public ProtobufQuestNavDeviceData mergeFrom(final JsonSource input) throws IOException {
+            if (!input.beginObject()) {
+                return this;
+            }
+            while (!input.isAtEnd()) {
+                switch (input.readFieldHash()) {
+                    case -1237870847:
+                    case -2011984791: {
+                        if (input.isAtField(FieldNames.trackingLostCounter)) {
+                            if (!input.trySkipNullValue()) {
+                                trackingLostCounter = input.readInt32();
+                                bitField0_ |= 0x00000001;
+                            }
+                        } else {
+                            input.skipUnknownField();
+                        }
+                        break;
+                    }
+                    case -2041653896:
+                    case -1975165933: {
+                        if (input.isAtField(FieldNames.batteryPercent)) {
+                            if (!input.trySkipNullValue()) {
+                                batteryPercent = input.readInt32();
+                                bitField0_ |= 0x00000002;
+                            }
+                        } else {
+                            input.skipUnknownField();
+                        }
+                        break;
+                    }
+                    case 879013277:
+                    case 106200592: {
+                        if (input.isAtField(FieldNames.currentlyTracking)) {
+                            if (!input.trySkipNullValue()) {
+                                currentlyTracking = input.readBool();
+                                bitField0_ |= 0x00000004;
+                            }
+                        } else {
+                            input.skipUnknownField();
+                        }
+                        break;
+                    }
+                    default: {
+                        input.skipUnknownField();
+                        break;
+                    }
+                }
+            }
+            input.endObject();
+            return this;
+        }
+
+        @Override
+        public ProtobufQuestNavDeviceData clone() {
+            return new ProtobufQuestNavDeviceData().copyFrom(this);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return ((bitField0_) == 0);
+        }
+
+        public static ProtobufQuestNavDeviceData parseFrom(final byte[] data) throws
+                InvalidProtocolBufferException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavDeviceData(), data).checkInitialized();
+        }
+
+        public static ProtobufQuestNavDeviceData parseFrom(final ProtoSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavDeviceData(), input).checkInitialized();
+        }
+
+        public static ProtobufQuestNavDeviceData parseFrom(final JsonSource input) throws
+                IOException {
+            return ProtoMessage.mergeFrom(new ProtobufQuestNavDeviceData(), input).checkInitialized();
+        }
+
+        /**
+         * @return factory for creating ProtobufQuestNavDeviceData messages
+         */
+        public static MessageFactory<ProtobufQuestNavDeviceData> getFactory() {
+            return ProtobufQuestNavDeviceDataFactory.INSTANCE;
+        }
+
+        /**
+         * @return this type's descriptor.
+         */
+        public static Descriptors.Descriptor getDescriptor() {
+            return Data.questnav_protos_data_ProtobufQuestNavDeviceData_descriptor;
+        }
+
+        private enum ProtobufQuestNavDeviceDataFactory implements MessageFactory<ProtobufQuestNavDeviceData> {
+            INSTANCE;
+
+            @Override
+            public ProtobufQuestNavDeviceData create() {
+                return ProtobufQuestNavDeviceData.newInstance();
+            }
+        }
+
+        /**
+         * Contains name constants used for serializing JSON
+         */
+        static class FieldNames {
+            static final FieldName trackingLostCounter = FieldName.forField("trackingLostCounter", "tracking_lost_counter");
+
+            static final FieldName batteryPercent = FieldName.forField("batteryPercent", "battery_percent");
+
+            static final FieldName currentlyTracking = FieldName.forField("currentlyTracking", "currently_tracking");
+        }
     }
-
-    @Override
-    public ProtobufQuestNavDeviceData clone() {
-      return new ProtobufQuestNavDeviceData().copyFrom(this);
-    }
-
-    @Override
-    public boolean isEmpty() {
-      return ((bitField0_) == 0);
-    }
-
-    public static ProtobufQuestNavDeviceData parseFrom(final byte[] data) throws
-        InvalidProtocolBufferException {
-      return ProtoMessage.mergeFrom(new ProtobufQuestNavDeviceData(), data).checkInitialized();
-    }
-
-    public static ProtobufQuestNavDeviceData parseFrom(final ProtoSource input) throws IOException {
-      return ProtoMessage.mergeFrom(new ProtobufQuestNavDeviceData(), input).checkInitialized();
-    }
-
-    public static ProtobufQuestNavDeviceData parseFrom(final JsonSource input) throws IOException {
-      return ProtoMessage.mergeFrom(new ProtobufQuestNavDeviceData(), input).checkInitialized();
-    }
-
-    /**
-     * @return factory for creating ProtobufQuestNavDeviceData messages
-     */
-    public static MessageFactory<ProtobufQuestNavDeviceData> getFactory() {
-      return ProtobufQuestNavDeviceDataFactory.INSTANCE;
-    }
-
-    /**
-     * @return this type's descriptor.
-     */
-    public static Descriptors.Descriptor getDescriptor() {
-      return Data.questnav_protos_data_ProtobufQuestNavDeviceData_descriptor;
-    }
-
-    private enum ProtobufQuestNavDeviceDataFactory implements MessageFactory<ProtobufQuestNavDeviceData> {
-      INSTANCE;
-
-      @Override
-      public ProtobufQuestNavDeviceData create() {
-        return ProtobufQuestNavDeviceData.newInstance();
-      }
-    }
-
-    /**
-     * Contains name constants used for serializing JSON
-     */
-    static class FieldNames {
-      static final FieldName trackingLostCounter = FieldName.forField("trackingLostCounter", "tracking_lost_counter");
-
-      static final FieldName batteryPercent = FieldName.forField("batteryPercent", "battery_percent");
-
-      static final FieldName currentlyTracking = FieldName.forField("currentlyTracking", "currently_tracking");
-    }
-  }
 }

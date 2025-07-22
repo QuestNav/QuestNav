@@ -78,6 +78,7 @@ jobs:
           python ./allwpilib/wpiutil/src/main/native/thirdparty/nanopb/generator/nanopb_generator.py \
             -I "protos/" \
             -D "questnav-lib/src/main/native/cpp/gg/questnav/questnav/protos/generated/" \
+            -Q '#include "gg/questnav/questnav/protos/generated/%s"' \
             -S.cpp \
             -e.npb \
             protos/*.proto

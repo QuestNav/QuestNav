@@ -92,17 +92,19 @@ namespace QuestNav.Commands.Commands
                     resetPose
                 );
 
-                // Get the position and rotation of the VR camera, without offset
-                vrCamera.GetLocalPositionAndRotation(
-                    out Vector3 localOffset,
-                    out Quaternion localRotation
-                );
+                // Calculate rotation difference between current camera and target
+                Quaternion newRotation =
+                    targetCameraRotation * Quaternion.Inverse(vrCamera.localRotation);
 
-                // Calculate and set the new offset based on the reset pose
-                vrCameraRoot.SetPositionAndRotation(
-                    targetCameraPosition - (vrCameraRoot.rotation * localOffset),
-                    targetCameraRotation * Quaternion.Inverse(localRotation)
-                );
+                // Apply rotation to root
+                vrCameraRoot.rotation = newRotation;
+
+                // Recalculate position after rotation
+                Vector3 newRootPosition =
+                    targetCameraPosition - (newRotation * vrCamera.localPosition);
+
+                // Apply the new position to vrCameraRoot.
+                vrCameraRoot.position = newRootPosition;
 
                 QueuedLogger.Log(
                     $"Pose reset applied: X={poseX}, Y={poseY}, Z={poseZ} Rotation X={targetCameraRotation.eulerAngles.x}, Y={targetCameraRotation.eulerAngles.y}, Z={targetCameraRotation.eulerAngles.z}"

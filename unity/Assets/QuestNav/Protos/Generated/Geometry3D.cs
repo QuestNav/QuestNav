@@ -53,7 +53,6 @@ namespace Wpi.Proto {
 
   }
   #region Messages
-  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ProtobufTranslation3d : pb::IMessage<ProtobufTranslation3d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -267,11 +266,7 @@ namespace Wpi.Proto {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
+        switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -298,11 +293,7 @@ namespace Wpi.Proto {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
+        switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -325,7 +316,6 @@ namespace Wpi.Proto {
 
   }
 
-  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ProtobufQuaternion : pb::IMessage<ProtobufQuaternion>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -568,11 +558,7 @@ namespace Wpi.Proto {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
+        switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -603,11 +589,7 @@ namespace Wpi.Proto {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
+        switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -634,7 +616,6 @@ namespace Wpi.Proto {
 
   }
 
-  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ProtobufRotation3d : pb::IMessage<ProtobufRotation3d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -793,11 +774,7 @@ namespace Wpi.Proto {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
+        switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -819,11 +796,7 @@ namespace Wpi.Proto {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
+        switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -841,7 +814,6 @@ namespace Wpi.Proto {
 
   }
 
-  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ProtobufPose3d : pb::IMessage<ProtobufPose3d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1032,11 +1004,7 @@ namespace Wpi.Proto {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
+        switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -1065,11 +1033,7 @@ namespace Wpi.Proto {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
+        switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -1094,7 +1058,6 @@ namespace Wpi.Proto {
 
   }
 
-  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ProtobufTransform3d : pb::IMessage<ProtobufTransform3d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1285,11 +1248,7 @@ namespace Wpi.Proto {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
+        switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -1318,11 +1277,7 @@ namespace Wpi.Proto {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
+        switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -1347,7 +1302,6 @@ namespace Wpi.Proto {
 
   }
 
-  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ProtobufTwist3d : pb::IMessage<ProtobufTwist3d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1648,11 +1602,7 @@ namespace Wpi.Proto {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
+        switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -1691,11 +1641,7 @@ namespace Wpi.Proto {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
+        switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;

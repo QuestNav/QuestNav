@@ -1,55 +1,23 @@
 /*
- * QUESTNAV
-   https://github.com/QuestNav
- * Copyright (C) 2025 QuestNav
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the MIT License as published.
- */
+* QUESTNAV
+  https://github.com/QuestNav
+* Copyright (C) 2025 QuestNav
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the MIT License as published.
+*/
 #pragma once
 
 #include <wpi/protobuf/Protobuf.h>
-#include "gg/questnav/questnav/protos/generated/data.pb.h"
-
-namespace gg {
-namespace questnav {
-namespace questnav {
-namespace protos {
-namespace wpilib {
+#include "gg/questnav/questnav/struct/DeviceDataStruct.h"
+#include "gg/questnav/questnav/protos/generated/data.npb.h"
 
 template <>
-struct wpi::Protobuf<questnav_protos_data_ProtobufQuestNavDeviceData> {
-  static std::optional<questnav_protos_data_ProtobufQuestNavDeviceData> Unpack(
-      std::span<const uint8_t> data) {
-    questnav_protos_data_ProtobufQuestNavDeviceData msg{};
-    pb_istream_t stream = pb_istream_from_buffer(data.data(), data.size());
-    if (!pb_decode(&stream, &questnav_protos_data_ProtobufQuestNavDeviceData_msg, &msg)) {
-      return {};
-    }
-    return msg;
-  }
+struct wpi::Protobuf<questnav::DeviceDataStruct> {
+  using MessageStruct = questnav_protos_data_ProtobufQuestNavDeviceData;
+  using InputStream = wpi::ProtoInputStream<questnav::DeviceDataStruct>;
+  using OutputStream = wpi::ProtoOutputStream<questnav::DeviceDataStruct>;
 
-  static bool Pack(std::vector<uint8_t>& data,
-                   const questnav_protos_data_ProtobufQuestNavDeviceData& value) {
-    pb_ostream_t sizing_stream{};
-    if (!pb_encode(&sizing_stream, &questnav_protos_data_ProtobufQuestNavDeviceData_msg, &value)) {
-      return false;
-    }
-
-    data.resize(sizing_stream.bytes_written);
-    pb_ostream_t stream = pb_ostream_from_buffer(data.data(), data.size());
-    return pb_encode(&stream, &questnav_protos_data_ProtobufQuestNavDeviceData_msg, &value);
-  }
-
-  static constexpr std::string_view GetTypeString() {
-    return "proto:questnav_protos_data_ProtobufQuestNavDeviceData";
-  }
+  static std::optional<questnav::DeviceDataStruct> Unpack(InputStream& stream);
+  static bool Pack(OutputStream& stream, const questnav::DeviceDataStruct& value);
 };
-
-using DeviceDataProto = wpi::Protobuf<questnav_protos_data_ProtobufQuestNavDeviceData>;
-
-}  // namespace wpilib
-}  // namespace protos
-}  // namespace questnav
-}  // namespace questnav
-}  // namespace gg

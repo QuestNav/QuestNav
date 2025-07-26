@@ -10,7 +10,7 @@
 
 #include <wpi/protobuf/Protobuf.h>
 #include "gg/questnav/questnav/protos/generated/data.npb.h"
-#include "gg/questnav/questnav/struct/QuestNavFrameDataStruct.h"
+#include "gg/questnav/questnav/struct/FrameDataStruct.h"
 
 template <>
 struct wpi::Protobuf<questnav::FrameDataStruct> {

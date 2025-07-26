@@ -83,7 +83,7 @@ javadoc {
 nativeUtils {
     exportsConfigs {
         // Main library is just default empty. This will export everything
-        Vendor {
+        QuestNavLib {
         }
     }
 }
@@ -96,7 +96,7 @@ def systemArch = getCurrentArch()
 
 model {
     components {
-        Vendor(NativeLibrarySpec) {
+        QuestNavLib(NativeLibrarySpec) {
             sources {
                 cpp {
                     source {
@@ -112,7 +112,7 @@ model {
         }
     }
     testSuites {
-        VendorTest {
+        QuestNavLibTest {
             sources.cpp {
                 source {
                     srcDir 'src/test/native/cpp'

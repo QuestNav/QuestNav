@@ -52,7 +52,7 @@ namespace QuestNav.UI
         /// ConState text
         /// </summary>
         private TMP_Text conStateText;
-        
+
         /// <summary>
         /// posXText text
         /// </summary>
@@ -62,12 +62,12 @@ namespace QuestNav.UI
         /// posYText text
         /// </summary>
         private TMP_Text posYText;
-        
+
         /// <summary>
         /// rotationText text
         /// </summary>
         private TMP_Text rotationText;
-        
+
         /// <summary>
         /// Button to update team number
         /// </summary>
@@ -240,7 +240,7 @@ namespace QuestNav.UI
             updateConStateText();
             updateIPAddressText();
         }
-        
+
         /// <summary>
         /// Updates the connection state text display.
         /// </summary>
@@ -251,7 +251,7 @@ namespace QuestNav.UI
             TextMeshProUGUI rotText = rotationText as TextMeshProUGUI;
             if (xText is null || yText is null || rotText is null)
                 return;
-            
+
             var frcPosition = Conversions.UnityToFrc(position, rotation);
             xText.text = $"{frcPosition.Translation.X:0.00} M";
             yText.text = $"{frcPosition.Translation.Y:0.00} M";

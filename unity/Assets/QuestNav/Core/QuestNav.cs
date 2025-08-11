@@ -65,19 +65,19 @@ namespace QuestNav.Core
         /// </summary>
         [SerializeField]
         private TMP_Text conStateText;
-        
+
         /// <summary>
         /// posXText text
         /// </summary>
         [SerializeField]
         private TMP_Text posXText;
-        
+
         /// <summary>
         /// posYText text
         /// </summary>
         [SerializeField]
         private TMP_Text posYText;
-        
+
         /// <summary>
         /// rotationText text
         /// </summary>

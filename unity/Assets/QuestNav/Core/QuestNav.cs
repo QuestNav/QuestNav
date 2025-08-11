@@ -65,6 +65,24 @@ namespace QuestNav.Core
         /// </summary>
         [SerializeField]
         private TMP_Text conStateText;
+        
+        /// <summary>
+        /// posXText text
+        /// </summary>
+        [SerializeField]
+        private TMP_Text posXText;
+        
+        /// <summary>
+        /// posYText text
+        /// </summary>
+        [SerializeField]
+        private TMP_Text posYText;
+        
+        /// <summary>
+        /// rotationText text
+        /// </summary>
+        [SerializeField]
+        private TMP_Text rotationText;
 
         /// <summary>
         /// Button to update team number
@@ -153,6 +171,9 @@ namespace QuestNav.Core
                 teamInput,
                 ipAddressText,
                 conStateText,
+                posXText,
+                posYText,
+                rotationText,
                 teamUpdateButton,
                 autoStartToggle
             );
@@ -188,6 +209,7 @@ namespace QuestNav.Core
 
             // Update UI periodically
             uiManager.UIPeriodic();
+            uiManager.UpdatePositionText(position, rotation);
 
             // Collect and publish current device data at a slower rate
             UpdateDeviceData();

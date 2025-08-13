@@ -12,9 +12,9 @@ import static edu.wpi.first.units.Units.Microseconds;
 import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Seconds;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.proto.Pose2dProto;
-import edu.wpi.first.math.proto.Geometry2D;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.proto.Pose3dProto;
+import edu.wpi.first.math.proto.Geometry3D;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.ProtobufPublisher;
@@ -50,8 +50,8 @@ public class QuestNav {
   /** Protobuf instance for Command */
   private final CommandProto commandProto = new CommandProto();
 
-  /** Protobuf instance for Pose2d */
-  private final Pose2dProto pose2dProto = new Pose2dProto();
+  /** Protobuf instance for Pose3d */
+  private final Pose3dProto pose3dProto = new Pose3dProto();
 
   /** Protobuf instance for device data */
   private final DeviceDataProto deviceDataProto = new DeviceDataProto();
@@ -94,7 +94,7 @@ public class QuestNav {
       Commands.ProtobufQuestNavPoseResetPayload.newInstance();
 
   /** Cached proto pose (for reset requests) to lessen GC pressure */
-  private final Geometry2D.ProtobufPose2d cachedProtoPose = Geometry2D.ProtobufPose2d.newInstance();
+  private final Geometry3D.ProtobufPose3d cachedProtoPose = Geometry3D.ProtobufPose3d.newInstance();
 
   /** Last sent request id */
   private int lastSentRequestId = 0; // Should be the same on the backend
@@ -111,9 +111,9 @@ public class QuestNav {
    *
    * @param pose The field relative position of the Quest
    */
-  public void setPose(Pose2d pose) {
+  public void setPose(Pose3d pose) {
     cachedProtoPose.clear(); // Clear instead of creating new
-    pose2dProto.pack(cachedProtoPose, pose);
+    pose3dProto.pack(cachedProtoPose, pose);
     cachedCommandRequest.clear();
     var requestToSend =
         cachedCommandRequest
@@ -226,7 +226,7 @@ public class QuestNav {
       var frameData = frameDataArray[i];
       result[i] =
           new PoseFrame(
-              pose2dProto.unpack(frameData.value.getPose2D()),
+              pose3dProto.unpack(frameData.value.getPose3D()),
               Microseconds.of(frameData.serverTime).in(Seconds),
               frameData.value.getTimestamp(),
               frameData.value.getFrameCount());

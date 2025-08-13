@@ -182,7 +182,7 @@ public class NetworkTableConnection : INetworkTableConnection
     {
         frameData.FrameCount = frameCount;
         frameData.Timestamp = timeStamp;
-        frameData.Pose2D = Conversions.UnityToFrc(position, rotation);
+        frameData.Pose3D = Conversions.UnityToFrc3d(position, rotation);
 
         // Publish data
         frameDataPublisher.Set(frameData);

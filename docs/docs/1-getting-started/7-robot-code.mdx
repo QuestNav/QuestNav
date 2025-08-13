@@ -62,23 +62,23 @@ The `QuestNav` vendor dependency provides a method for getting the pose of the Q
 robot, we need to transform the Quest's pose to the robot's center.
 
 Here is an example of getting the latest pose from the Quest and transforming it to the robot pose. See the
-[Setting Robot Pose](#updating-swerve-drive-pose) section below for a more complete example of using the pose from QuestNav for robot pose estimation.
+[Updating Serve Drive Pose](#updating-swerve-drive-pose) section below for a more complete example of using the pose from QuestNav for robot pose estimation.
 
 ```java title="e.g. QuestNavSubsystem.java"
 QuestNav questNav = new QuestNav();
 
 // First, Declare our geometrical transform from the robot center to the Quest
-Transform2d ROBOT_TO_QUEST = new Transform2d( /*TODO: Put your x, y, rotational offsets here!*/ )
+Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, rotational offsets here!*/ )
 
 // Get the latest pose data frames from the Quest
 PoseFrame[] poseFrames = questNav.getAllUnreadPoseFrames();
 
 if (poseFrames.length > 0) {
     // Get the most recent Quest pose
-    Pose2d questPose = poseFrames[poseFrames.length - 1].questPose();
+    Pose3d questPose = poseFrames[poseFrames.length - 1].questPose();
 
     // Transform by the mount pose to get your robot pose
-    Pose2d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
+    Pose3d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
 }
 ```
 
@@ -108,13 +108,13 @@ the frame of the Quest.
 QuestNav questNav = new QuestNav();
 
 // First, Declare our geometrical transform from the robot center to the quest
-Transform2d ROBOT_TO_QUEST = new Transform2d( /*TODO: Put your x, y, rotational offsets here!*/ )
+Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, rotational offsets here!*/ )
 
 // Assume this is the requested reset pose
-Pose2d robotPose = new Pose2d( /* Some pose data */ );
+Pose3d robotPose = new Pose3d( /* Some pose data */ );
 
 // Transform by the offset to get the Quest pose
-Pose2d questPose = robotPose.transformBy(ROBOT_TO_QUEST);
+Pose3d questPose = robotPose.transformBy(ROBOT_TO_QUEST);
 
 // Send the reset operation
 questNav.setPose(questPose);
@@ -163,12 +163,12 @@ import TabItem from '@theme/TabItem';
             // Loop over the pose data frames and send them to the pose estimator
             for (PoseFrame questFrame : questFrames) {
                 // Get the pose of the Quest
-                Pose2d questPose = questFrame.questPose();
+                Pose3d questPose = questFrame.questPose();
                 // Get timestamp for when the data was sent
                 double timestamp = questFrame.dataTimestamp();
 
                 // Transform by the mount pose to get your robot pose
-                Pose2d robotPose = questPose.transformBy(QuestNavConstants.ROBOT_TO_QUEST.inverse());
+                Pose3d robotPose = questPose.transformBy(QuestNavConstants.ROBOT_TO_QUEST.inverse());
 
                 // Convert FPGA timestamp to CTRE's time domain using Phoenix 6 utility
                 double ctreTimestamp = Utils.fpgaToCurrentTime(timestamp);
@@ -176,7 +176,7 @@ import TabItem from '@theme/TabItem';
                 // You can put some sort of filtering here if you would like!
 
                 // Add the measurement to our estimator
-                swerveDriveSubsystem.addVisionMeasurement(robotPose, ctreTimestamp, QUESTNAV_STD_DEVS);
+                swerveDriveSubsystem.addVisionMeasurement(robotPose.toPose2d(), ctreTimestamp, QUESTNAV_STD_DEVS);
             }
         }
         ```
@@ -205,17 +205,17 @@ import TabItem from '@theme/TabItem';
             // Loop over the pose data frames and send them to the pose estimator
             for (PoseFrame questFrame : questFrames) {
                 // Get the pose of the Quest
-                Pose2d questPose = questFrame.questPose();
+                Pose3d questPose = questFrame.questPose();
                 // Get timestamp for when the data was sent
                 double timestamp = questFrame.dataTimestamp();
 
                 // Transform by the mount pose to get your robot pose
-                Pose2d robotPose = questPose.transformBy(QuestNavConstants.ROBOT_TO_QUEST.inverse());
+                Pose3d robotPose = questPose.transformBy(QuestNavConstants.ROBOT_TO_QUEST.inverse());
 
                 // You can put some sort of filtering here if you would like!
 
                 // Add the measurement to our estimator
-                swerveDriveSubsystem.addVisionMeasurement(robotPose, timestamp, QUESTNAV_STD_DEVS);
+                swerveDriveSubsystem.addVisionMeasurement(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
             }
         }
         ```

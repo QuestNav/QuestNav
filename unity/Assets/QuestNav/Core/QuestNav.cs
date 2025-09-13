@@ -211,8 +211,12 @@ namespace QuestNav.Core
         {
             frameCount = Time.frameCount;
             timeStamp = Time.time;
-            position = cameraRig.centerEyeAnchor.position;
-            rotation = cameraRig.centerEyeAnchor.rotation;
+
+            if (cameraRig != null && cameraRig.centerEyeAnchor != null)
+            {
+                position = cameraRig.centerEyeAnchor.position;
+                rotation = cameraRig.centerEyeAnchor.rotation;
+            }
         }
 
         /// <summary>

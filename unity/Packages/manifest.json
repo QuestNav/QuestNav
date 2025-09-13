@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.meta.xr.mrutilitykit": "71.0.0",
-    "com.meta.xr.sdk.all": "71.0.0",
+    "com.meta.xr.sdk.all": "78.0.0",
     "com.meta.xr.sdk.interaction": "72.0.0",
     "com.meta.xr.sdk.interaction.ovr": "71.0.0",
     "com.unity.ai.navigation": "2.0.5",
@@ -16,7 +16,8 @@
     "com.unity.timeline": "1.8.7",
     "com.unity.ugui": "2.0.0",
     "com.unity.visualscripting": "1.9.5",
-    "com.unity.xr.oculus": "4.4.0",
+    "com.unity.xr.meta-openxr": "2.2.0",
+    "com.unity.xr.openxr": "1.15.1",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
@@ -50,14 +51,5 @@
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
   },
-  "scopedRegistries": [
-    {
-      "name": "Git for Unity",
-      "url": "https://registry.spoiledcat.com",
-      "scopes": [
-        "com.spoiledcat"
-      ],
-      "overrideBuiltIns": false
-    }
-  ]
+  "scopedRegistries": []
 }

@@ -3,11 +3,13 @@ title: Mounting
 ---
 # Mounting
 
-Properly mounting your Quest headset on your robot is crucial for reliable tracking and navigation. This guide covers mounting options, positioning considerations, and best practices.
+Securely mounting your Quest headset on your robot is crucial for reliable tracking and navigation. This guide covers mounting options, positioning considerations, and best practices.
 
 ## Mount Design
 
-QuestNav requires the Quest headset to be securely mounted to your robot while maintaining visibility of the environment. We recommend using 3D printed mounts specifically designed for this purpose.
+QuestNav requires the Quest headset to be securely mounted to your robot in a stable, rigid location such as the robot base or frame that has a clear and unobstructed view of the field. Keep in mind that the headset's position directly correlates to your robot's position on the field, so allowing the headset to move independent of the robot will lead to position drift on the field.
+
+We recommend using a 3D printed mount designed for your particular headset for this purpose.
 
 :::info
 The specific mount design you need depends on your Quest model. QuestNav is optimized for the Quest 3 and Quest 3S headsets, which have a slightly different form factor than older models.
@@ -15,12 +17,11 @@ The specific mount design you need depends on your Quest model. QuestNav is opti
 
 ### 3D Printed Mount Options
 
-We provide several 3D printable mount designs optimized for different robot configurations:
+STLs and STEP files for both Quest 3 and Quest 3S headsets are available at the links below: 
 
-1. **Standard Mount**: A basic mount suitable for most robot designs
-2. **Low-Profile Mount**: A slimmer mount, designed by 3847 Spectrum.
+[Quest 3S Headset Mount for Robots and Autonomous Vehicles](https://www.printables.com/model/1100711-quest-3s-headset-mount-for-robots-and-autonomous-v)
 
-Download the STL files from the [QuestNav GitHub repository](https://github.com/QuestNav/QuestNav/blob/main/mounts) in the `mounts` directory.
+[Quest 3 Headset Mount for Robots and Autonomous Vehicles](https://www.printables.com/model/1324702-quest-3-headset-mount-for-robots-and-autonomous-ve)
 
 :::tip
 If you don't have access to a 3D printer, check with other local FRC teams, your school's engineering department, or local makerspaces that might offer 3D printing services.
@@ -28,13 +29,13 @@ If you don't have access to a 3D printer, check with other local FRC teams, your
 
 ### Printing Guidelines
 
-- **Material**: PLA or PETG is recommended for durability
+- **Material**: PLA+, PETG, or CF-Nylon filaments are recommended for durability and rigidity
 - **Infill**: 25-30% minimum for structural integrity
 - **Layer Height**: 0.2mm or finer for smoother surfaces
-- **Supports**: Required for overhangs
+- **Supports**: Required for overhangs (on build plate only)
 
 :::warning
-Avoid using ABS for printing mounts, as it can be brittle and crack under the vibration and impacts experienced during competitions.
+Avoid using ABS for printing mounts, as it will shrink and may crack under the vibration and impacts experienced during competitions.
 :::
 
 ## Mounting Position
@@ -45,12 +46,15 @@ The optimal mounting position for your Quest headset depends on several factors:
 
 - Mount the headset **at least 12 inches (30cm) above the floor**
 - Ensure the headset has a clear view of the surroundings
+- Avoid mounting the headset where its view is largely obscured by motors or other robot parts that spin/move a lot
 
 :::danger
-Mounting the headset too low can result in poor tracking as the cameras may only see the field carpet and nearby robot parts rather than distinctive environmental features.
+Mounting the headset too close to the ground can result in poor tracking as the cameras may only see the field carpet and nearby robot parts rather than distinctive environmental features. It also makes damage from robot-to-robot interactions more likely! 
 :::
 
 ### Orientation
+
+It's important to remember that the headset was designed to be worn on a person's head. This means that the headset's front-facing and side cameras will favor one direction than another since they're designed to "look down" rather than directly outwards. 
 
 - **Upright Orientation**: Ideally, keep the headset in its normal upright position
 - **Level Positioning**: Mount should keep the headset approximately level

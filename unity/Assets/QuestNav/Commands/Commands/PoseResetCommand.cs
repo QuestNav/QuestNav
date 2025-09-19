@@ -72,13 +72,13 @@ namespace QuestNav.Commands.Commands
             // Additional validation for field boundaries
             if (validPose)
             {
-                validPose =
+                bool inBounds =
                     poseX >= 0
                     && poseX <= QuestNavConstants.Field.FIELD_LENGTH
                     && poseY >= 0
                     && poseY <= QuestNavConstants.Field.FIELD_WIDTH;
 
-                if (!validPose)
+                if (!inBounds)
                 {
                     QueuedLogger.LogWarning($"Pose out of field bounds: ({poseX}, {poseY})");
                 }
@@ -125,7 +125,7 @@ namespace QuestNav.Commands.Commands
                     new ProtobufQuestNavCommandResponse
                     {
                         CommandId = receivedCommand.CommandId,
-                        ErrorMessage = "Failed to get valid pose data (Out of bounds or invalid)",
+                        ErrorMessage = "Failed to get valid pose data (invalid)",
                         Success = false,
                     }
                 );

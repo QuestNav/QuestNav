@@ -226,3 +226,443 @@ import TabItem from '@theme/TabItem';
 :::note
 The above examples should be called in a **periodic loop** to ensure vision measurements are always being added!
 :::
+
+## Subsystem example
+
+This is an example of a full subsystem, with step by step explanations on what each part does. 
+
+### Prerequisites 
+
+First put the required methods in the subsystem
+
+```java title="e.g. QuestNavSubsystem.java" showLineNumbers
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems;
+
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import gg.questnav.questnav.QuestNav;
+
+public class QuestNavSubsystem extends SubsystemBase {
+  /** Creates a new QuestNavSubsystem. */
+  QuestNav questNav = new QuestNav();
+
+  public QuestNavSubsystem() {}
+
+  @Override
+  public void periodic() {
+    questNav.commandPeriodic();
+    // This method will be called once per scheduler run
+  }
+}
+
+```
+
+### Setting inital pose
+
+Next we will add a method to set the pose, another to set inital pose, and add to our Constructor to set the inital pose.
+:::note
+    Notice: If the driver station is not connected when the subsystem is constucted the pose will not be set to the alliance. Call the `setInitalPose()` method when you know the driver station is connected.
+:::
+```java title="e.g. QuestNavSubsystem.java" showLineNumbers
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems;
+
+// highlight-start
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+// highlight-end
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import gg.questnav.questnav.QuestNav;
+
+public class QuestNavSubsystem extends SubsystemBase {
+  /** Creates a new QuestNavSubsystem. */
+  QuestNav questNav = new QuestNav();
+  // highlight-start
+  Pose2d BLUE_ALLIANCE_INITAL_POSE = new Pose2d( /*TODO: Put your inital blue alliance pose here*/ );
+  Pose2d RED_ALLIANCE_INITAL_POSE = new Pose2d( /*TODO: Put your inital red alliance pose here */ );
+  Pose2d NO_ALLIANCE_INITAL_POSE = new Pose2d( /*TODO: Put your inital allianceless pose here */ );
+  // highlight-end
+
+  public QuestNavSubsystem() {
+
+    // highlight-start
+    if(DriverStation.getAlliance().isPresent()){
+      //If there is a driver station, check which one
+      if(DriverStation.getAlliance().get() == Alliance.Red){ 
+        questNav.setPose(RED_ALLIANCE_INITAL_POSE);
+      } else {
+        questNav.setPose(BLUE_ALLIANCE_INITAL_POSE);
+      }
+
+    } else{
+      questNav.setPose( NO_ALLIANCE_INITAL_POSE );
+    }
+    // highlight-end
+  }
+
+  // highlight-start
+  public void setInitialPose(){
+    if(DriverStation.getAlliance().isPresent()){
+      //If there is a driver station, check which one
+      if(DriverStation.getAlliance().get() == Alliance.Red){ 
+        questNav.setPose(RED_ALLIANCE_INITAL_POSE);
+      } else {
+        questNav.setPose(BLUE_ALLIANCE_INITAL_POSE);
+      }
+    } else{
+      questNav.setPose( NO_ALLIANCE_INITAL_POSE );
+    }
+  }
+  // highlight-end
+
+  // highlight-start
+  public void setPose(Pose2d position){
+    questNav.setPose(position);
+  }
+  // highlight-end
+
+  @Override
+  public void periodic() {
+    questNav.commandPeriodic();
+    // This method will be called once per scheduler run
+  }
+}
+
+```
+
+### Updating Swerve Drive Pose
+
+Now we will use the recieved pose to update the swerves position 
+
+<Tabs>
+    <TabItem value="CTRE" label="CTRE Swerve Generator > v2025.3.1.0 ">
+```java title="e.g. QuestNavSubsystem.java" showLineNumbers
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems;
+
+  // highlight-start
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+  // highlight-end
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+// highlight-next-line
+import frc.robot.subsystems.CommandSwerveDrivetrain;
+// highlight-next-line
+import gg.questnav.questnav.PoseFrame;
+import gg.questnav.questnav.QuestNav;
+
+public class QuestNavSubsystem extends SubsystemBase {
+  /** Creates a new QuestNavSubsystem. */
+  QuestNav questNav = new QuestNav();
+// highlight-next-line
+  CommandSwerveDrivetrain s_Drivetrain;
+  // highlight-next-line
+  Transform2d ROBOT_TO_QUEST = new Transform2d( /*TODO: Put your x, y, rotational offsets here!*/ );
+  Pose2d BLUE_ALLIANCE_INITAL_POSE = new Pose2d( /*TODO: Put your inital blue alliance pose here*/ );
+  Pose2d RED_ALLIANCE_INITAL_POSE = new Pose2d( /*TODO: Put your inital red alliance pose here */ );
+  Pose2d NO_ALLIANCE_INITAL_POSE = new Pose2d( /*TODO: Put your inital allianceless pose here */ );
+
+// highlight-start
+  public QuestNavSubsystem(CommandSwerveDrivetrain swerveSubsystem) {
+    this.s_Drivetrain = swerveSubsystem;
+// highlight-end
+    if(DriverStation.getAlliance().isPresent()){
+      //If there is a driver station, check which one
+      if(DriverStation.getAlliance().get() == Alliance.Red){ 
+        questNav.setPose(RED_ALLIANCE_INITAL_POSE);
+      } else {
+        questNav.setPose(BLUE_ALLIANCE_INITAL_POSE);
+      }
+
+    } else{
+      questNav.setPose( NO_ALLIANCE_INITAL_POSE );
+    }
+
+  }
+
+  public void setInitialPose(){
+    if(DriverStation.getAlliance().isPresent()){
+      //If there is a driver station, check which one
+      if(DriverStation.getAlliance().get() == Alliance.Red){ 
+        questNav.setPose(RED_ALLIANCE_INITAL_POSE);
+      } else {
+        questNav.setPose(BLUE_ALLIANCE_INITAL_POSE);
+      }
+    } else{
+      questNav.setPose( NO_ALLIANCE_INITAL_POSE );
+    }
+  }
+
+  public void setPose(Pose2d position){
+    questNav.setPose(position);
+  }
+
+  @Override
+  public void periodic() {
+    questNav.commandPeriodic();
+
+    // highlight-start
+    Matrix<N3, N1> QUESTNAV_STD_DEVS = VecBuilder.fill(
+        0.02, // Trust down to 2cm in X direction
+        0.02, // Trust down to 2cm in Y direction
+        0.035 // Trust down to 2 degrees rotational
+    );
+
+    if (questNav.isTracking()) {
+      // Get the latest pose data frames from the Quest
+      PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
+
+      // Loop over the pose data frames and send them to the pose estimator
+      for (PoseFrame questFrame : questFrames) {
+        // Get the pose of the Quest
+        Pose2d questPose = questFrame.questPose();
+        // Get timestamp for when the data was sent
+        double timestamp = questFrame.dataTimestamp();
+        // Transform by the mount pose to get your robot pose
+        Pose2d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
+
+        // You can put some sort of filtering here if you would like!
+        // Add the measurement to our estimator
+        s_Drivetrain.addVisionMeasurement(robotPose,timestamp, QUESTNAV_STD_DEVS);
+      }
+    }
+    // highlight-end
+    // This method will be called once per scheduler run
+  }
+}
+
+```
+    </TabItem>
+    <TabItem value="legacyCTRE" label="CTRE Swerve Generator < v2025.3.1.0 ">
+```java title="e.g. QuestNavSubsystem.java" showLineNumbers
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems;
+
+  // highlight-start
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+  // highlight-end
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+// highlight-next-line
+import frc.robot.subsystems.CommandSwerveDrivetrain;
+// highlight-next-line
+import gg.questnav.questnav.PoseFrame;
+import gg.questnav.questnav.QuestNav;
+
+public class QuestNavSubsystem extends SubsystemBase {
+  /** Creates a new QuestNavSubsystem. */
+  QuestNav questNav = new QuestNav();
+// highlight-next-line
+  CommandSwerveDrivetrain s_Drivetrain;
+  // highlight-next-line
+  Transform2d ROBOT_TO_QUEST = new Transform2d( /*TODO: Put your x, y, rotational offsets here!*/ );
+  Pose2d BLUE_ALLIANCE_INITAL_POSE = new Pose2d( /*TODO: Put your inital blue alliance pose here*/ );
+  Pose2d RED_ALLIANCE_INITAL_POSE = new Pose2d( /*TODO: Put your inital red alliance pose here */ );
+  Pose2d NO_ALLIANCE_INITAL_POSE = new Pose2d( /*TODO: Put your inital allianceless pose here */ );
+
+// highlight-start
+  public QuestNavSubsystem(CommandSwerveDrivetrain swerveSubsystem) {
+    this.s_Drivetrain = swerveSubsystem;
+// highlight-end
+    if(DriverStation.getAlliance().isPresent()){
+      //If there is a driver station, check which one
+      if(DriverStation.getAlliance().get() == Alliance.Red){ 
+        questNav.setPose(RED_ALLIANCE_INITAL_POSE);
+      } else {
+        questNav.setPose(BLUE_ALLIANCE_INITAL_POSE);
+      }
+
+    } else{
+      questNav.setPose( NO_ALLIANCE_INITAL_POSE );
+    }
+
+  }
+
+  public void setInitialPose(){
+    if(DriverStation.getAlliance().isPresent()){
+      //If there is a driver station, check which one
+      if(DriverStation.getAlliance().get() == Alliance.Red){ 
+        questNav.setPose(RED_ALLIANCE_INITAL_POSE);
+      } else {
+        questNav.setPose(BLUE_ALLIANCE_INITAL_POSE);
+      }
+    } else{
+      questNav.setPose( NO_ALLIANCE_INITAL_POSE );
+    }
+  }
+
+  public void setPose(Pose2d position){
+    questNav.setPose(position);
+  }
+
+  @Override
+  public void periodic() {
+    questNav.commandPeriodic();
+
+    // highlight-start
+    Matrix<N3, N1> QUESTNAV_STD_DEVS = VecBuilder.fill(
+        0.02, // Trust down to 2cm in X direction
+        0.02, // Trust down to 2cm in Y direction
+        0.035 // Trust down to 2 degrees rotational
+    );
+
+    if (questNav.isTracking()) {
+      // Get the latest pose data frames from the Quest
+      PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
+
+      // Loop over the pose data frames and send them to the pose estimator
+      for (PoseFrame questFrame : questFrames) {
+        // Get the pose of the Quest
+        Pose2d questPose = questFrame.questPose();
+        // Get timestamp for when the data was sent
+        double timestamp = questFrame.dataTimestamp();
+        // Transform by the mount pose to get your robot pose
+        Pose2d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
+
+        double ctreTimestamp = Utils.fpgaToCurrentTime(timestamp);
+        // You can put some sort of filtering here if you would like!
+        // Add the measurement to our estimator
+        s_Drivetrain.addVisionMeasurement(robotPose, ctreTimestamp, QUESTNAV_STD_DEVS);
+      }
+    }
+    // highlight-end
+    // This method will be called once per scheduler run
+  }
+}
+
+```
+    </TabItem>
+
+    <TabItem value="YAGSL" label="YAGSL">
+```java title="e.g. QuestNavSubsystem.java" showLineNumbers
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems;
+
+  // highlight-start
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+  // highlight-end
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+// highlight-next-line
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+// highlight-next-line
+import gg.questnav.questnav.PoseFrame;
+import gg.questnav.questnav.QuestNav;
+
+public class QuestNavSubsystem extends SubsystemBase {
+  /** Creates a new QuestNavSubsystem. */
+  QuestNav questNav = new QuestNav();
+// highlight-next-line
+  SwerveSubsystem s_Drivetrain;
+  // highlight-next-line
+  Transform2d ROBOT_TO_QUEST = new Transform2d( /*TODO: Put your x, y, rotational offsets here!*/ );
+  Pose2d BLUE_ALLIANCE_INITAL_POSE = new Pose2d( /*TODO: Put your inital blue alliance pose here*/ );
+  Pose2d RED_ALLIANCE_INITAL_POSE = new Pose2d( /*TODO: Put your inital red alliance pose here */ );
+  Pose2d NO_ALLIANCE_INITAL_POSE = new Pose2d( /*TODO: Put your inital allianceless pose here */ );
+
+// highlight-start
+  public QuestNavSubsystem(SwerveSubsystem swerveSubsystem) {
+    this.s_Drivetrain = swerveSubsystem;
+// highlight-end
+    if(DriverStation.getAlliance().isPresent()){
+      //If there is a driver station, check which one
+      if(DriverStation.getAlliance().get() == Alliance.Red){ 
+        questNav.setPose(RED_ALLIANCE_INITAL_POSE);
+      } else {
+        questNav.setPose(BLUE_ALLIANCE_INITAL_POSE);
+      }
+
+    } else{
+      questNav.setPose( NO_ALLIANCE_INITAL_POSE );
+    }
+
+  }
+
+  public void setInitialPose(){
+    if(DriverStation.getAlliance().isPresent()){
+      //If there is a driver station, check which one
+      if(DriverStation.getAlliance().get() == Alliance.Red){ 
+        questNav.setPose(RED_ALLIANCE_INITAL_POSE);
+      } else {
+        questNav.setPose(BLUE_ALLIANCE_INITAL_POSE);
+      }
+    } else{
+      questNav.setPose( NO_ALLIANCE_INITAL_POSE );
+    }
+  }
+
+  public void setPose(Pose2d position){
+    questNav.setPose(position);
+  }
+
+  @Override
+  public void periodic() {
+    questNav.commandPeriodic();
+
+    // highlight-start
+    Matrix<N3, N1> QUESTNAV_STD_DEVS = VecBuilder.fill(
+        0.02, // Trust down to 2cm in X direction
+        0.02, // Trust down to 2cm in Y direction
+        0.035 // Trust down to 2 degrees rotational
+    );
+
+    if (questNav.isTracking()) {
+      // Get the latest pose data frames from the Quest
+      PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
+
+      // Loop over the pose data frames and send them to the pose estimator
+      for (PoseFrame questFrame : questFrames) {
+        // Get the pose of the Quest
+        Pose2d questPose = questFrame.questPose();
+        // Get timestamp for when the data was sent
+        double timestamp = questFrame.dataTimestamp();
+        // Transform by the mount pose to get your robot pose
+        Pose2d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
+
+        // You can put some sort of filtering here if you would like!
+        // Add the measurement to our estimator
+        s_Drivetrain.getSwerveDrive().addVisionMeasurement(robotPose,timestamp, QUESTNAV_STD_DEVS);
+      }
+    }
+    // highlight-end
+    // This method will be called once per scheduler run
+  }
+}
+```
+    </TabItem>
+
+</Tabs>

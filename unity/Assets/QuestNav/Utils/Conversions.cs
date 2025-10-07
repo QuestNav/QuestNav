@@ -12,30 +12,25 @@ namespace QuestNav.Utils
         /// Converts from FRC coordinate system to Unity coordinate system.
         /// </summary>
         /// <param name="targetPose2d">Target position in FRC coordinates.</param>
-        /// <param name="currentPose">The current pose of the Quest in Vector3 format (for maintaining Y height).</param>
-        /// <param name="currentQuaternion">The current rotation to preserve pitch and roll.</param>
         /// <returns>A tuple of Vector3 and Quaternion in Unity coordinate system.</returns>
-        public static (Vector3 position, Quaternion rotation) FrcToUnity(
-            ProtobufPose2d targetPose2d,
-            Vector3 currentPose,
-            Quaternion currentQuaternion
+        public static (Vector3 position, Quaternion rotation) FrcToUnity3d(
+            ProtobufPose3d targetPose3d
         )
         {
-            // Convert position: FRC X→Unity Z, FRC Y→Unity -X
+            // Convert position
             Vector3 unityPosition = new Vector3(
-                (float)-targetPose2d.Translation.Y, // FRC Y → Unity -X
-                currentPose.y, // Maintain current height
-                (float)targetPose2d.Translation.X // FRC X → Unity Z
+                (float)-targetPose3d.Translation.Y, // FRC Y → Unity -X
+                (float)targetPose3d.Translation.Z, // FRC Z → Unity Y
+                (float)targetPose3d.Translation.X // FRC X → Unity Z
             );
 
-            // Convert rotation: preserve current pitch/roll, set yaw from FRC
-            Vector3 currentEuler = currentQuaternion.eulerAngles;
-            Vector3 newEuler = new Vector3(
-                currentEuler.x, // Keep current pitch
-                (float)(-targetPose2d.Rotation.Value * Mathf.Rad2Deg), // Set yaw from FRC
-                currentEuler.z // Keep current roll
+            // Convert rotation
+            Quaternion unityRotation = new Quaternion(
+                (float)targetPose3d.Rotation.Q.Y, // FRC Y → Unity X
+                (float)-targetPose3d.Rotation.Q.Z, // FRC Z → Unity -Y
+                (float)-targetPose3d.Rotation.Q.X, // FRC X → Unity -Z
+                (float)targetPose3d.Rotation.Q.W // FRC W → Unity W
             );
-            Quaternion unityRotation = Quaternion.Euler(newEuler);
 
             return (unityPosition, unityRotation);
         }
@@ -45,19 +40,26 @@ namespace QuestNav.Utils
         /// </summary>
         /// <param name="unityPosition">The position in Unity coordinates.</param>
         /// <param name="unityRotation">The rotation in Unity coordinates.</param>
-        /// <returns>A Pose2d representing position and rotation in FRC coordinates.</returns>
-        public static ProtobufPose2d UnityToFrc(Vector3 unityPosition, Quaternion unityRotation)
+        /// <returns>A Pose3d representing position and rotation in FRC coordinates.</returns>
+        public static ProtobufPose3d UnityToFrc3d(Vector3 unityPosition, Quaternion unityRotation)
         {
-            return new ProtobufPose2d
+            return new ProtobufPose3d
             {
-                Translation = new ProtobufTranslation2d
+                Translation = new ProtobufTranslation3d
                 {
                     X = unityPosition.z, // Unity Z → FRC X
                     Y = -unityPosition.x, // Unity X → FRC -Y
+                    Z = unityPosition.y, // Unity Y → FRC Z
                 },
-                Rotation = new ProtobufRotation2d
+                Rotation = new ProtobufRotation3d
                 {
-                    Value = -unityRotation.eulerAngles.y * Mathf.Deg2Rad,
+                    Q = new ProtobufQuaternion
+                    {
+                        X = -unityRotation.z, // Unity Z → FRC -X
+                        Y = unityRotation.x, // Unity X → FRC Y
+                        Z = -unityRotation.y, // Unity Y → FRC -Z
+                        W = unityRotation.w, // Unity W → FRC W
+                    },
                 },
             };
         }

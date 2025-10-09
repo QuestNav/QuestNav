@@ -52,17 +52,17 @@ const sidebars: SidebarsConfig = {
         {
           type: 'link',
           label: 'Protocol Buffers →',
-          href: '/api/proto/',
+          href: 'https://questnav.gg/api/proto/',
         },
         {
           type: 'link',
           label: 'Java API →',
-          href: '/api/java/',
+          href: 'https://questnav.gg/api/java/',
         },
         {
           type: 'link',
           label: 'C# API →',
-          href: '/api/csharp/',
+          href: 'https://questnav.gg/api/csharp/',
         },
       ],
     },

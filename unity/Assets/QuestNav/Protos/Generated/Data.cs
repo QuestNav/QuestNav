@@ -44,7 +44,21 @@ namespace QuestNav.Protos.Generated {
   }
   #region Messages
   /// <summary>
-  /// Tracking data that is sent every loop
+  ///*
+  /// High-frequency tracking data sent from Quest to external systems.
+  /// 
+  /// This message contains the core tracking information that external systems
+  /// (like robot code) need for real-time localization and navigation. It's sent
+  /// at 100 Hz (every 10 milliseconds) to provide smooth, responsive tracking.
+  /// 
+  /// The data represents the Quest's position and orientation on the field,
+  /// derived from visual-inertial odometry using the Quest's cameras and IMU sensors.
+  /// 
+  /// Coordinate System:
+  /// - Uses WPILib field-relative coordinate system
+  /// - Origin and axes depend on field setup and calibration
+  /// - Pose represents the Quest's position; mounting offset to get robot position
+  ///   is applied in end user code
   /// </summary>
   public sealed partial class ProtobufQuestNavFrameData : pb::IMessage<ProtobufQuestNavFrameData>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
@@ -96,7 +110,18 @@ namespace QuestNav.Protos.Generated {
     public const int FrameCountFieldNumber = 1;
     private int frameCount_;
     /// <summary>
-    /// Number of frames processed by the Quest
+    ///*
+    /// Sequential frame counter for this tracking session.
+    /// 
+    /// This counter increments with each frame processed by the Quest's tracking
+    /// system. It can be used to:
+    /// - Detect dropped messages
+    /// - Calculate effective frame rate
+    /// - Synchronize with other data streams
+    /// 
+    /// The counter resets to 0 when the QuestNav app starts and increments
+    /// continuously during operation. Frame drops in transmission will create
+    /// gaps in the sequence.
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -111,7 +136,20 @@ namespace QuestNav.Protos.Generated {
     public const int TimestampFieldNumber = 2;
     private double timestamp_;
     /// <summary>
-    /// Time (in seconds) since the QuestNav app started
+    ///*
+    /// Timestamp in seconds since QuestNav app startup.
+    /// 
+    /// This provides timing information for the tracking data, allowing external
+    /// systems to:
+    /// - Calculate data age and latency
+    /// - Interpolate or extrapolate poses for prediction
+    /// - Synchronize with other sensor data
+    /// - Implement timeout detection
+    /// 
+    /// The timestamp is relative to app startup, not system time, to avoid
+    /// clock synchronization issues between devices.
+    /// 
+    /// Resolution: Typically sub-millisecond precision
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -126,7 +164,28 @@ namespace QuestNav.Protos.Generated {
     public const int Pose2DFieldNumber = 3;
     private global::Wpi.Proto.ProtobufPose2d pose2D_;
     /// <summary>
-    /// The 2d field-relative position of the quest
+    ///*
+    /// Quest's 2D pose on the field in WPILib coordinates.
+    /// 
+    /// This represents the Quest's position and orientation as determined by
+    /// the Quest's tracking system. The pose accounts for:
+    /// - Coordinate system transformation to WPILib standard
+    /// - Any calibration offsets applied
+    /// 
+    /// Note: This is the Quest's position; end user code applies mounting offset
+    /// to get the robot's position.
+    /// 
+    /// Coordinate System Details:
+    /// - X: Forward direction (towards opposing alliance)
+    /// - Y: Left direction (when facing forward)  
+    /// - Rotation: Counter-clockwise positive (radians)
+    /// - Units: meters for translation, radians for rotation
+    /// 
+    /// Accuracy depends on:
+    /// - Environmental lighting and features
+    /// - Quest tracking quality
+    /// - Calibration accuracy
+    /// - Time since last pose reset
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -328,7 +387,22 @@ namespace QuestNav.Protos.Generated {
   }
 
   /// <summary>
-  /// Device data that is sent slower
+  ///*
+  /// Lower-frequency device status data sent from Quest to external systems.
+  /// 
+  /// This message contains device health and status information that doesn't need
+  /// to be sent as frequently as tracking data. It's sent at 3 Hz (every 333 milliseconds)
+  /// to provide monitoring and diagnostic information without consuming excessive
+  /// bandwidth.
+  /// 
+  /// This data helps external systems:
+  /// - Monitor Quest device health
+  /// - Detect tracking system issues
+  /// - Implement failsafe behaviors
+  /// - Provide user feedback about system status
+  /// 
+  /// The information is useful for both autonomous operation and debugging/
+  /// troubleshooting scenarios.
   /// </summary>
   public sealed partial class ProtobufQuestNavDeviceData : pb::IMessage<ProtobufQuestNavDeviceData>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
@@ -380,7 +454,24 @@ namespace QuestNav.Protos.Generated {
     public const int TrackingLostCounterFieldNumber = 1;
     private int trackingLostCounter_;
     /// <summary>
-    /// Number of times the Quest has lost tracking after having it since the app started
+    ///*
+    /// Count of tracking loss events since app startup.
+    /// 
+    /// This counter increments each time the Quest's tracking system loses
+    /// tracking after having established it. Tracking loss can occur due to:
+    /// - Poor lighting conditions
+    /// - Lack of visual features in environment
+    /// - Rapid motion or acceleration
+    /// - Occlusion of cameras
+    /// - Hardware issues
+    /// 
+    /// A high or rapidly increasing counter may indicate:
+    /// - Environmental issues (lighting, features)
+    /// - Quest mounting problems (vibration, obstruction)
+    /// - Hardware degradation
+    /// 
+    /// This metric helps assess tracking system reliability and can trigger
+    /// alerts or fallback behaviors in robot code.
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -395,7 +486,25 @@ namespace QuestNav.Protos.Generated {
     public const int CurrentlyTrackingFieldNumber = 2;
     private bool currentlyTracking_;
     /// <summary>
-    /// If the Quest is currently tracking?
+    ///*
+    /// Current tracking status of the Quest device.
+    /// 
+    /// true:  Quest is actively tracking and pose data is reliable
+    /// false: Quest has lost tracking and pose data should not be trusted
+    /// 
+    /// When tracking is lost:
+    /// - Pose data becomes stale and unreliable
+    /// - Robot should switch to alternative localization methods
+    /// - Movement should be limited or stopped for safety
+    /// 
+    /// Tracking can be recovered by:
+    /// - Improving lighting conditions
+    /// - Moving to area with more visual features
+    /// - Reducing motion to allow system to re-initialize
+    /// - Performing pose reset when tracking recovers
+    /// 
+    /// External systems should monitor this field and implement appropriate
+    /// fallback behaviors when tracking is lost.
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -410,7 +519,28 @@ namespace QuestNav.Protos.Generated {
     public const int BatteryPercentFieldNumber = 3;
     private int batteryPercent_;
     /// <summary>
-    /// The battery percentage of the Quest
+    ///*
+    /// Quest device battery level as a percentage (0-100).
+    /// 
+    /// This provides the current battery charge level of the Quest headset,
+    /// allowing external systems to:
+    /// - Monitor power status during operation
+    /// - Implement low-battery warnings or behaviors
+    /// - Plan operation duration and charging needs
+    /// - Trigger graceful shutdown procedures
+    /// 
+    /// Battery Level Guidelines:
+    /// - 100%: Fully charged
+    /// - 50-100%: Normal operation
+    /// - 20-50%: Consider charging soon
+    /// - 10-20%: Low battery warning recommended
+    /// - 0-10%: Critical - plan immediate shutdown/charging
+    /// 
+    /// Note: Battery drain rate depends on:
+    /// - Processing load (tracking complexity)
+    /// - Display usage (if any)
+    /// - Wireless communication activity
+    /// - Environmental temperature
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]

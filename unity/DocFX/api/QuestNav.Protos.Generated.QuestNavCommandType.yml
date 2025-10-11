@@ -1,0 +1,171 @@
+### YamlMime:ManagedReference
+items:
+- uid: QuestNav.Protos.Generated.QuestNavCommandType
+  commentId: T:QuestNav.Protos.Generated.QuestNavCommandType
+  id: QuestNavCommandType
+  parent: QuestNav.Protos.Generated
+  children:
+  - QuestNav.Protos.Generated.QuestNavCommandType.CommandTypeUnspecified
+  - QuestNav.Protos.Generated.QuestNavCommandType.PoseReset
+  langs:
+  - csharp
+  - vb
+  name: QuestNavCommandType
+  nameWithType: QuestNavCommandType
+  fullName: QuestNav.Protos.Generated.QuestNavCommandType
+  type: Enum
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: QuestNavCommandType
+    path: ../Assets/QuestNav/Protos/Generated/Commands.cs
+    startLine: 65
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: >-
+    *
+     Enumeration of available command types in the QuestNav system.
+
+     This enum defines all the different types of commands that can be sent to
+     the Quest headset. The enum is designed to be extensible - new command types
+     can be added without breaking existing clients.
+
+     Design Notes:
+     - Values start from 0 as required by proto3
+     - UNSPECIFIED value (0) is reserved for error handling
+     - Command values should be assigned incrementally for clarity
+  example: []
+  syntax:
+    content: public enum QuestNavCommandType
+    content.vb: Public Enum QuestNavCommandType
+- uid: QuestNav.Protos.Generated.QuestNavCommandType.CommandTypeUnspecified
+  commentId: F:QuestNav.Protos.Generated.QuestNavCommandType.CommandTypeUnspecified
+  id: CommandTypeUnspecified
+  parent: QuestNav.Protos.Generated.QuestNavCommandType
+  langs:
+  - csharp
+  - vb
+  name: CommandTypeUnspecified
+  nameWithType: QuestNavCommandType.CommandTypeUnspecified
+  fullName: QuestNav.Protos.Generated.QuestNavCommandType.CommandTypeUnspecified
+  type: Field
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: CommandTypeUnspecified
+    path: ../Assets/QuestNav/Protos/Generated/Commands.cs
+    startLine: 69
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: Default/invalid command type (required by proto3)
+  example: []
+  syntax:
+    content: >-
+      [OriginalName("COMMAND_TYPE_UNSPECIFIED")]
+
+      CommandTypeUnspecified = 0
+    return:
+      type: QuestNav.Protos.Generated.QuestNavCommandType
+    content.vb: >-
+      <OriginalName("COMMAND_TYPE_UNSPECIFIED")>
+
+      CommandTypeUnspecified = 0
+  attributes:
+  - type: Google.Protobuf.Reflection.OriginalNameAttribute
+    ctor: Google.Protobuf.Reflection.OriginalNameAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: COMMAND_TYPE_UNSPECIFIED
+- uid: QuestNav.Protos.Generated.QuestNavCommandType.PoseReset
+  commentId: F:QuestNav.Protos.Generated.QuestNavCommandType.PoseReset
+  id: PoseReset
+  parent: QuestNav.Protos.Generated.QuestNavCommandType
+  langs:
+  - csharp
+  - vb
+  name: PoseReset
+  nameWithType: QuestNavCommandType.PoseReset
+  fullName: QuestNav.Protos.Generated.QuestNavCommandType.PoseReset
+  type: Field
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: PoseReset
+    path: ../Assets/QuestNav/Protos/Generated/Commands.cs
+    startLine: 80
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: >-
+    *
+     POSE_RESET: Resets the robot's pose estimation to a specified target pose.
+
+     This command is used to correct drift in the tracking system by setting
+     the robot's position and orientation to known values. Typically used when
+     the robot is placed at a known location on the field.
+
+     Requires: ProtobufQuestNavPoseResetPayload
+  example: []
+  syntax:
+    content: >-
+      [OriginalName("POSE_RESET")]
+
+      PoseReset = 1
+    return:
+      type: QuestNav.Protos.Generated.QuestNavCommandType
+    content.vb: >-
+      <OriginalName("POSE_RESET")>
+
+      PoseReset = 1
+  attributes:
+  - type: Google.Protobuf.Reflection.OriginalNameAttribute
+    ctor: Google.Protobuf.Reflection.OriginalNameAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: POSE_RESET
+references:
+- uid: QuestNav.Protos.Generated
+  commentId: N:QuestNav.Protos.Generated
+  href: QuestNav.html
+  name: QuestNav.Protos.Generated
+  nameWithType: QuestNav.Protos.Generated
+  fullName: QuestNav.Protos.Generated
+  spec.csharp:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Protos
+    name: Protos
+    href: QuestNav.Protos.html
+  - name: .
+  - uid: QuestNav.Protos.Generated
+    name: Generated
+    href: QuestNav.Protos.Generated.html
+  spec.vb:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Protos
+    name: Protos
+    href: QuestNav.Protos.html
+  - name: .
+  - uid: QuestNav.Protos.Generated
+    name: Generated
+    href: QuestNav.Protos.Generated.html
+- uid: QuestNav.Protos.Generated.QuestNavCommandType
+  commentId: T:QuestNav.Protos.Generated.QuestNavCommandType
+  parent: QuestNav.Protos.Generated
+  href: QuestNav.Protos.Generated.QuestNavCommandType.html
+  name: QuestNavCommandType
+  nameWithType: QuestNavCommandType
+  fullName: QuestNav.Protos.Generated.QuestNavCommandType

@@ -1,0 +1,191 @@
+### YamlMime:ManagedReference
+items:
+- uid: QuestNav.Core
+  commentId: N:QuestNav.Core
+  id: QuestNav.Core
+  children:
+  - QuestNav.Core.QuestNav
+  - QuestNav.Core.QuestNavConstants
+  - QuestNav.Core.QuestNavConstants.Commands
+  - QuestNav.Core.QuestNavConstants.Display
+  - QuestNav.Core.QuestNavConstants.Field
+  - QuestNav.Core.QuestNavConstants.Logging
+  - QuestNav.Core.QuestNavConstants.Network
+  - QuestNav.Core.QuestNavConstants.Timing
+  - QuestNav.Core.QuestNavConstants.Topics
+  langs:
+  - csharp
+  - vb
+  name: QuestNav.Core
+  nameWithType: QuestNav.Core
+  fullName: QuestNav.Core
+  type: Namespace
+  assemblies:
+  - QuestNav
+references:
+- uid: QuestNav.Core.QuestNav
+  commentId: T:QuestNav.Core.QuestNav
+  href: QuestNav.Core.QuestNav.html
+  name: QuestNav
+  nameWithType: QuestNav
+  fullName: QuestNav.Core.QuestNav
+- uid: QuestNav.Core.QuestNavConstants
+  commentId: T:QuestNav.Core.QuestNavConstants
+  href: QuestNav.Core.QuestNavConstants.html
+  name: QuestNavConstants
+  nameWithType: QuestNavConstants
+  fullName: QuestNav.Core.QuestNavConstants
+- uid: QuestNav.Core.QuestNavConstants.Network
+  commentId: T:QuestNav.Core.QuestNavConstants.Network
+  href: QuestNav.Core.QuestNavConstants.html
+  name: QuestNavConstants.Network
+  nameWithType: QuestNavConstants.Network
+  fullName: QuestNav.Core.QuestNavConstants.Network
+  spec.csharp:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Network
+    name: Network
+    href: QuestNav.Core.QuestNavConstants.Network.html
+  spec.vb:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Network
+    name: Network
+    href: QuestNav.Core.QuestNavConstants.Network.html
+- uid: QuestNav.Core.QuestNavConstants.Topics
+  commentId: T:QuestNav.Core.QuestNavConstants.Topics
+  href: QuestNav.Core.QuestNavConstants.html
+  name: QuestNavConstants.Topics
+  nameWithType: QuestNavConstants.Topics
+  fullName: QuestNav.Core.QuestNavConstants.Topics
+  spec.csharp:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Topics
+    name: Topics
+    href: QuestNav.Core.QuestNavConstants.Topics.html
+  spec.vb:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Topics
+    name: Topics
+    href: QuestNav.Core.QuestNavConstants.Topics.html
+- uid: QuestNav.Core.QuestNavConstants.Commands
+  commentId: T:QuestNav.Core.QuestNavConstants.Commands
+  href: QuestNav.Core.QuestNavConstants.html
+  name: QuestNavConstants.Commands
+  nameWithType: QuestNavConstants.Commands
+  fullName: QuestNav.Core.QuestNavConstants.Commands
+  spec.csharp:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Commands
+    name: Commands
+    href: QuestNav.Core.QuestNavConstants.Commands.html
+  spec.vb:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Commands
+    name: Commands
+    href: QuestNav.Core.QuestNavConstants.Commands.html
+- uid: QuestNav.Core.QuestNavConstants.Display
+  commentId: T:QuestNav.Core.QuestNavConstants.Display
+  href: QuestNav.Core.QuestNavConstants.html
+  name: QuestNavConstants.Display
+  nameWithType: QuestNavConstants.Display
+  fullName: QuestNav.Core.QuestNavConstants.Display
+  spec.csharp:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Display
+    name: Display
+    href: QuestNav.Core.QuestNavConstants.Display.html
+  spec.vb:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Display
+    name: Display
+    href: QuestNav.Core.QuestNavConstants.Display.html
+- uid: QuestNav.Core.QuestNavConstants.Field
+  commentId: T:QuestNav.Core.QuestNavConstants.Field
+  href: QuestNav.Core.QuestNavConstants.html
+  name: QuestNavConstants.Field
+  nameWithType: QuestNavConstants.Field
+  fullName: QuestNav.Core.QuestNavConstants.Field
+  spec.csharp:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Field
+    name: Field
+    href: QuestNav.Core.QuestNavConstants.Field.html
+  spec.vb:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Field
+    name: Field
+    href: QuestNav.Core.QuestNavConstants.Field.html
+- uid: QuestNav.Core.QuestNavConstants.Logging
+  commentId: T:QuestNav.Core.QuestNavConstants.Logging
+  href: QuestNav.Core.QuestNavConstants.html
+  name: QuestNavConstants.Logging
+  nameWithType: QuestNavConstants.Logging
+  fullName: QuestNav.Core.QuestNavConstants.Logging
+  spec.csharp:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Logging
+    name: Logging
+    href: QuestNav.Core.QuestNavConstants.Logging.html
+  spec.vb:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Logging
+    name: Logging
+    href: QuestNav.Core.QuestNavConstants.Logging.html
+- uid: QuestNav.Core.QuestNavConstants.Timing
+  commentId: T:QuestNav.Core.QuestNavConstants.Timing
+  href: QuestNav.Core.QuestNavConstants.html
+  name: QuestNavConstants.Timing
+  nameWithType: QuestNavConstants.Timing
+  fullName: QuestNav.Core.QuestNavConstants.Timing
+  spec.csharp:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Timing
+    name: Timing
+    href: QuestNav.Core.QuestNavConstants.Timing.html
+  spec.vb:
+  - uid: QuestNav.Core.QuestNavConstants
+    name: QuestNavConstants
+    href: QuestNav.Core.QuestNavConstants.html
+  - name: .
+  - uid: QuestNav.Core.QuestNavConstants.Timing
+    name: Timing
+    href: QuestNav.Core.QuestNavConstants.Timing.html

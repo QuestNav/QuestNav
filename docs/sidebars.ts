@@ -40,6 +40,32 @@ const sidebars: SidebarsConfig = {
         },
       ],
     },
+    {
+      type: 'category',
+      label: 'API Reference',
+      items: [
+        {
+          type: 'doc',
+          id: 'api-reference/index',
+          label: 'Overview',
+        },
+        {
+          type: 'link',
+          label: 'Protocol Buffers →',
+          href: 'https://questnav.gg/api/proto/',
+        },
+        {
+          type: 'link',
+          label: 'Java API →',
+          href: 'https://questnav.gg/api/java/',
+        },
+        {
+          type: 'link',
+          label: 'C# API →',
+          href: 'https://questnav.gg/api/csharp/',
+        },
+      ],
+    },
   ],
 };
 

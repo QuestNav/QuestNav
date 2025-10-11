@@ -13,8 +13,9 @@ namespace QuestNav.Commands
         string commandNiceName { get; }
 
         /// <summary>
-        /// Executes this command
+        /// Executes this command with the provided command data
         /// </summary>
+        /// <param name="receivedCommand">The command data received from the robot</param>
         void Execute(ProtobufQuestNavCommand receivedCommand);
     }
 }

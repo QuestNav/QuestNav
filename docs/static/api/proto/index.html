@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Protocol Documentation</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic"/>
+    <style>
+      body {
+        width: 60em;
+        margin: 1em auto;
+        color: #222;
+        font-family: "Ubuntu", sans-serif;
+        padding-bottom: 4em;
+      }
+
+      h1 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      h2 {
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+        margin: 1.5em 0;
+      }
+
+      h3 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      a {
+        text-decoration: none;
+        color: #567e25;
+      }
+
+      table {
+        width: 100%;
+        font-size: 80%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        font-weight: 700;
+        background-color: #dcdcdc;
+      }
+
+      tbody tr:nth-child(even) {
+        background-color: #fbfbfb;
+      }
+
+      td {
+        border: 1px solid #ccc;
+        padding: 0.5ex 2ex;
+      }
+
+      td p {
+        text-indent: 1em;
+        margin: 0;
+      }
+
+      td p:nth-child(1) {
+        text-indent: 0;  
+      }
+
+       
+      .field-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(3) {  
+        width: 6em;
+      }
+      .field-table td:nth-child(4) {  
+        width: auto;
+      }
+
+       
+      .extension-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(3) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(4) {  
+        width: 5em;
+      }
+      .extension-table td:nth-child(5) {  
+        width: auto;
+      }
+
+       
+      .enum-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(3) {  
+        width: auto;
+      }
+
+       
+      .scalar-value-types-table tr {
+        height: 3em;
+      }
+
+       
+      #toc-container ul {
+        list-style-type: none;
+        padding-left: 1em;
+        line-height: 180%;
+        margin: 0;
+      }
+      #toc > li > a {
+        font-weight: bold;
+      }
+
+       
+      .file-heading {
+        width: 100%;
+        display: table;
+        border-bottom: 1px solid #aaa;
+        margin: 4em 0 1.5em 0;
+      }
+      .file-heading h2 {
+        border: none;
+        display: table-cell;
+      }
+      .file-heading a {
+        text-align: right;
+        display: table-cell;
+      }
+
+       
+      .badge {
+        width: 1.6em;
+        height: 1.6em;
+        display: inline-block;
+
+        line-height: 1.6em;
+        text-align: center;
+        font-weight: bold;
+        font-size: 60%;
+
+        color: #89ba48;
+        background-color: #dff0c8;
+
+        margin: 0.5ex 1em 0.5ex -1em;
+        border: 1px solid #fbfbfb;
+        border-radius: 1ex;
+      }
+    </style>
+
+    
+    <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+  </head>
+
+  <body>
+
+    <h1 id="title">Protocol Documentation</h1>
+
+    <h2>Table of Contents</h2>
+
+    <div id="toc-container">
+      <ul id="toc">
+        
+          
+          <li>
+            <a href="#commands.proto">commands.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#questnav.protos.commands.ProtobufQuestNavCommand"><span class="badge">M</span>ProtobufQuestNavCommand</a>
+                </li>
+              
+                <li>
+                  <a href="#questnav.protos.commands.ProtobufQuestNavCommandResponse"><span class="badge">M</span>ProtobufQuestNavCommandResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#questnav.protos.commands.ProtobufQuestNavPoseResetPayload"><span class="badge">M</span>ProtobufQuestNavPoseResetPayload</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#questnav.protos.commands.QuestNavCommandType"><span class="badge">E</span>QuestNavCommandType</a>
+                </li>
+              
+              
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#data.proto">data.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#questnav.protos.data.ProtobufQuestNavDeviceData"><span class="badge">M</span>ProtobufQuestNavDeviceData</a>
+                </li>
+              
+                <li>
+                  <a href="#questnav.protos.data.ProtobufQuestNavFrameData"><span class="badge">M</span>ProtobufQuestNavFrameData</a>
+                </li>
+              
+              
+              
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#geometry2d.proto">geometry2d.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufEllipse2d"><span class="badge">M</span>ProtobufEllipse2d</a>
+                </li>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufPose2d"><span class="badge">M</span>ProtobufPose2d</a>
+                </li>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufRectangle2d"><span class="badge">M</span>ProtobufRectangle2d</a>
+                </li>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufRotation2d"><span class="badge">M</span>ProtobufRotation2d</a>
+                </li>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufTransform2d"><span class="badge">M</span>ProtobufTransform2d</a>
+                </li>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufTranslation2d"><span class="badge">M</span>ProtobufTranslation2d</a>
+                </li>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufTwist2d"><span class="badge">M</span>ProtobufTwist2d</a>
+                </li>
+              
+              
+              
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#geometry3d.proto">geometry3d.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufPose3d"><span class="badge">M</span>ProtobufPose3d</a>
+                </li>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufQuaternion"><span class="badge">M</span>ProtobufQuaternion</a>
+                </li>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufRotation3d"><span class="badge">M</span>ProtobufRotation3d</a>
+                </li>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufTransform3d"><span class="badge">M</span>ProtobufTransform3d</a>
+                </li>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufTranslation3d"><span class="badge">M</span>ProtobufTranslation3d</a>
+                </li>
+              
+                <li>
+                  <a href="#wpi.proto.ProtobufTwist3d"><span class="badge">M</span>ProtobufTwist3d</a>
+                </li>
+              
+              
+              
+              
+            </ul>
+          </li>
+        
+        <li><a href="#scalar-value-types">Scalar Value Types</a></li>
+      </ul>
+    </div>
+
+    
+      
+      <div class="file-heading">
+        <h2 id="commands.proto">commands.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="questnav.protos.commands.ProtobufQuestNavCommand">ProtobufQuestNavCommand</h3>
+        <p>Main command message sent to the QuestNav system.</p><p>This is the primary message type used to send commands from external systems</p><p>(like robot code) to the Quest headset. Each command includes a type identifier,</p><p>a unique tracking ID, and optional payload data specific to the command type.</p><p>The command system is designed for asynchronous operation - commands are sent</p><p>and responses are received separately, matched by the command_id field.</p><p>Message Flow:</p><p>1. Client creates command with unique command_id</p><p>2. Client sets appropriate type and payload</p><p>3. Client sends command to Quest</p><p>4. Quest processes command and sends response with matching command_id</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>type</td>
+                  <td><a href="#questnav.protos.commands.QuestNavCommandType">QuestNavCommandType</a></td>
+                  <td></td>
+                  <td><p>The type of command being sent.
+
+This field determines which payload (if any) should be populated and
+how the Quest should process the command. See QuestNavCommandType
+enum for available command types. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>command_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Unique identifier for this command instance.
+
+This ID is used to match commands with their responses in asynchronous
+communication. The client should generate unique IDs for each command
+to avoid confusion. The Quest will echo this ID in the response message.
+
+Recommended: Use incrementing integers or timestamps for uniqueness.
+
+Note: For FRC users, the vendor dependency will handle this automatically. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>pose_reset_payload</td>
+                  <td><a href="#questnav.protos.commands.ProtobufQuestNavPoseResetPayload">ProtobufQuestNavPoseResetPayload</a></td>
+                  <td></td>
+                  <td><p>Payload for POSE_RESET commands.
+Set this field when type = POSE_RESET. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="questnav.protos.commands.ProtobufQuestNavCommandResponse">ProtobufQuestNavCommandResponse</h3>
+        <p>Response message sent back after processing a command.</p><p>This message is sent by the Quest back to the client after processing</p><p>a ProtobufQuestNavCommand. It provides status information about whether</p><p>the command was executed successfully and any error details if it failed.</p><p>The response is matched to the original command using the command_id field,</p><p>allowing for proper asynchronous command handling even when multiple</p><p>commands are in flight simultaneously.</p><p>Response Timing:</p><p>- Responses are sent after command processing completes</p><p>- Some commands may take time to execute (e.g., pose reset with validation)</p><p>- Clients should implement timeouts for command responses</p><p>Note: For FRC users, the vendor dependency will handle response matching automatically.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>command_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Command ID that matches the original command.
+
+This field echoes the command_id from the original ProtobufQuestNavCommand
+that this response corresponds to. Clients use this to match responses
+with their original commands in asynchronous communication. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>success</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Indicates whether the command was executed successfully.
+
+true:  Command completed successfully
+false: Command failed (see error_message for details)
+
+Note: A successful response means the command was processed, but doesn&#39;t
+necessarily guarantee the desired outcome (e.g., pose reset might succeed
+but tracking could still be poor due to environmental conditions). </p></td>
+                </tr>
+              
+                <tr>
+                  <td>error_message</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Human-readable error message when success = false.
+
+This field provides detailed information about why a command failed.
+It should be empty or ignored when success = true.
+
+Error messages are intended for debugging and logging purposes.
+They may include technical details about the failure cause.
+
+Examples:
+- &#34;Invalid pose coordinates: x value out of field bounds&#34;
+- &#34;Tracking system not initialized&#34;
+- &#34;Unknown command type&#34; </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="questnav.protos.commands.ProtobufQuestNavPoseResetPayload">ProtobufQuestNavPoseResetPayload</h3>
+        <p>Payload message for the POSE_RESET command.</p><p>This message contains the data needed to execute a pose reset operation.</p><p>The pose reset command allows external systems to correct the Quest's</p><p>understanding of the robot's position and orientation on the field.</p><p>Coordinate System:</p><p>- Uses WPILib field-relative coordinate system</p><p>- X-axis: Forward (towards opposing alliance)</p><p>- Y-axis: Left (when facing forward)</p><p>- Rotation: Counter-clockwise positive (standard mathematical convention)</p><p>- Origin: Typically at one corner of the field (see field layout documentation)</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>target_pose</td>
+                  <td><a href="#wpi.proto.ProtobufPose2d">wpi.proto.ProtobufPose2d</a></td>
+                  <td></td>
+                  <td><p>The target pose to reset the robot to.
+
+This should represent the robot&#39;s actual position and orientation on the field
+in the WPILib coordinate system. The Quest will update its internal tracking
+to match this pose, effectively correcting any accumulated drift.
+
+Units:
+- Translation: meters
+- Rotation: radians </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+        <h3 id="questnav.protos.commands.QuestNavCommandType">QuestNavCommandType</h3>
+        <p>Enumeration of available command types in the QuestNav system.</p><p>This enum defines all the different types of commands that can be sent to</p><p>the Quest headset. The enum is designed to be extensible - new command types</p><p>can be added without breaking existing clients.</p><p>Design Notes:</p><p>- Values start from 0 as required by proto3</p><p>- UNSPECIFIED value (0) is reserved for error handling</p><p>- Command values should be assigned incrementally for clarity</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>COMMAND_TYPE_UNSPECIFIED</td>
+                <td>0</td>
+                <td><p>Default/invalid command type (required by proto3)</p></td>
+              </tr>
+            
+              <tr>
+                <td>POSE_RESET</td>
+                <td>1</td>
+                <td><p>POSE_RESET: Resets the robot&#39;s pose estimation to a specified target pose.
+
+This command is used to correct drift in the tracking system by setting
+the robot&#39;s position and orientation to known values. Typically used when
+the robot is placed at a known location on the field.
+
+Requires: ProtobufQuestNavPoseResetPayload</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+
+      
+
+      
+    
+      
+      <div class="file-heading">
+        <h2 id="data.proto">data.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="questnav.protos.data.ProtobufQuestNavDeviceData">ProtobufQuestNavDeviceData</h3>
+        <p>Lower-frequency device status data sent from Quest to external systems.</p><p>This message contains device health and status information that doesn't need</p><p>to be sent as frequently as tracking data. It's sent at 3 Hz (every 333 milliseconds)</p><p>to provide monitoring and diagnostic information without consuming excessive</p><p>bandwidth.</p><p>This data helps external systems:</p><p>- Monitor Quest device health</p><p>- Detect tracking system issues</p><p>- Implement failsafe behaviors</p><p>- Provide user feedback about system status</p><p>The information is useful for both autonomous operation and debugging/</p><p>troubleshooting scenarios.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>tracking_lost_counter</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Count of tracking loss events since app startup.
+
+This counter increments each time the Quest&#39;s tracking system loses
+tracking after having established it. Tracking loss can occur due to:
+- Poor lighting conditions
+- Lack of visual features in environment
+- Rapid motion or acceleration
+- Occlusion of cameras
+- Hardware issues
+
+A high or rapidly increasing counter may indicate:
+- Environmental issues (lighting, features)
+- Quest mounting problems (vibration, obstruction)
+- Hardware degradation
+
+This metric helps assess tracking system reliability and can trigger
+alerts or fallback behaviors in robot code. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>currently_tracking</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Current tracking status of the Quest device.
+
+true:  Quest is actively tracking and pose data is reliable
+false: Quest has lost tracking and pose data should not be trusted
+
+When tracking is lost:
+- Pose data becomes stale and unreliable
+- Robot should switch to alternative localization methods
+- Movement should be limited or stopped for safety
+
+Tracking can be recovered by:
+- Improving lighting conditions
+- Moving to area with more visual features
+- Reducing motion to allow system to re-initialize
+- Performing pose reset when tracking recovers
+
+External systems should monitor this field and implement appropriate
+fallback behaviors when tracking is lost. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>battery_percent</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Quest device battery level as a percentage (0-100).
+
+This provides the current battery charge level of the Quest headset,
+allowing external systems to:
+- Monitor power status during operation
+- Implement low-battery warnings or behaviors
+- Plan operation duration and charging needs
+- Trigger graceful shutdown procedures
+
+Battery Level Guidelines:
+- 100%: Fully charged
+- 50-100%: Normal operation
+- 20-50%: Consider charging soon
+- 10-20%: Low battery warning recommended
+- 0-10%: Critical - plan immediate shutdown/charging
+
+Note: Battery drain rate depends on:
+- Processing load (tracking complexity)
+- Display usage (if any)
+- Wireless communication activity
+- Environmental temperature </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="questnav.protos.data.ProtobufQuestNavFrameData">ProtobufQuestNavFrameData</h3>
+        <p>High-frequency tracking data sent from Quest to external systems.</p><p>This message contains the core tracking information that external systems</p><p>(like robot code) need for real-time localization and navigation. It's sent</p><p>at 100 Hz (every 10 milliseconds) to provide smooth, responsive tracking.</p><p>The data represents the Quest's position and orientation on the field,</p><p>derived from visual-inertial odometry using the Quest's cameras and IMU sensors.</p><p>Coordinate System:</p><p>- Uses WPILib field-relative coordinate system</p><p>- Origin and axes depend on field setup and calibration</p><p>- Pose represents the Quest's position; mounting offset to get robot position</p><p>is applied in end user code</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>frame_count</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Sequential frame counter for this tracking session.
+
+This counter increments with each frame processed by the Quest&#39;s tracking
+system. It can be used to:
+- Detect dropped messages
+- Calculate effective frame rate
+- Synchronize with other data streams
+
+The counter resets to 0 when the QuestNav app starts and increments
+continuously during operation. Frame drops in transmission will create
+gaps in the sequence. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>timestamp</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Timestamp in seconds since QuestNav app startup.
+
+This provides timing information for the tracking data, allowing external
+systems to:
+- Calculate data age and latency
+- Interpolate or extrapolate poses for prediction
+- Synchronize with other sensor data
+- Implement timeout detection
+
+The timestamp is relative to app startup, not system time, to avoid
+clock synchronization issues between devices.
+
+Resolution: Typically sub-millisecond precision </p></td>
+                </tr>
+              
+                <tr>
+                  <td>pose2d</td>
+                  <td><a href="#wpi.proto.ProtobufPose2d">wpi.proto.ProtobufPose2d</a></td>
+                  <td></td>
+                  <td><p>Quest&#39;s 2D pose on the field in WPILib coordinates.
+
+This represents the Quest&#39;s position and orientation as determined by
+the Quest&#39;s tracking system. The pose accounts for:
+- Coordinate system transformation to WPILib standard
+- Any calibration offsets applied
+
+Note: This is the Quest&#39;s position; end user code applies mounting offset
+to get the robot&#39;s position.
+
+Coordinate System Details:
+- X: Forward direction (towards opposing alliance)
+- Y: Left direction (when facing forward)  
+- Rotation: Counter-clockwise positive (radians)
+- Units: meters for translation, radians for rotation
+
+Accuracy depends on:
+- Environmental lighting and features
+- Quest tracking quality
+- Calibration accuracy
+- Time since last pose reset </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+
+      
+
+      
+    
+      
+      <div class="file-heading">
+        <h2 id="geometry2d.proto">geometry2d.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="wpi.proto.ProtobufEllipse2d">ProtobufEllipse2d</h3>
+        <p>Represents a 2D ellipse with arbitrary orientation.</p><p>This message defines an elliptical region in 2D space using a center pose</p><p>and semi-axis lengths. The ellipse can be rotated to any orientation</p><p>based on the center pose's rotation component.</p><p>Geometric Properties:</p><p>- Center point and orientation defined by pose</p><p>- Major/minor axes aligned with pose's local coordinate frame</p><p>- X semi-axis extends along pose's X-axis (local forward direction)</p><p>- Y semi-axis extends along pose's Y-axis (local left direction)</p><p>- Total area = π * xSemiAxis * ySemiAxis</p><p>Applications:</p><p>- Uncertainty ellipses for localization</p><p>- Smooth obstacle representations</p><p>- Robot operating regions</p><p>- Sensor coverage areas</p><p>- Path planning with uncertainty</p><p>Special Cases:</p><p>- Circle: xSemiAxis = ySemiAxis</p><p>- Degenerate ellipse: one semi-axis approaches zero (becomes a line)</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>center</td>
+                  <td><a href="#wpi.proto.ProtobufPose2d">ProtobufPose2d</a></td>
+                  <td></td>
+                  <td><p>Center pose of the ellipse.
+
+The translation component specifies the center point of the ellipse
+in the coordinate system. The rotation component specifies the
+orientation of the ellipse&#39;s local coordinate frame.
+
+The ellipse&#39;s axes are aligned with this local coordinate frame:
+- X semi-axis extends along local X-axis (rotated forward direction)
+- Y semi-axis extends along local Y-axis (rotated left direction) </p></td>
+                </tr>
+              
+                <tr>
+                  <td>xSemiAxis</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Semi-axis length along the ellipse&#39;s local X-axis.
+
+This is half the width of the ellipse in the direction of the
+center pose&#39;s forward direction (after rotation). The ellipse
+extends ±xSemiAxis from the center along this axis.
+
+Units: meters
+Must be positive
+
+Note: This is the semi-axis, not the full width. The full width
+along this axis is 2 * xSemiAxis. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>ySemiAxis</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Semi-axis length along the ellipse&#39;s local Y-axis.
+
+This is half the height of the ellipse in the direction of the
+center pose&#39;s left direction (after rotation). The ellipse
+extends ±ySemiAxis from the center along this axis.
+
+Units: meters
+Must be positive
+
+Note: This is the semi-axis, not the full height. The full height
+along this axis is 2 * ySemiAxis. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="wpi.proto.ProtobufPose2d">ProtobufPose2d</h3>
+        <p>Represents a complete 2D pose (position and orientation).</p><p>This message combines a 2D position (translation) with a 2D orientation</p><p>(rotation) to fully describe an object's pose in the 2D plane. This is</p><p>the fundamental representation for robot poses in WPILib and QuestNav.</p><p>A pose answers two questions:</p><p>1. Where is the object? (translation component)</p><p>2. Which direction is it facing? (rotation component)</p><p>Applications:</p><p>- Robot pose on field (primary use in QuestNav)</p><p>- Waypoint targets for path following</p><p>- Relative poses between objects</p><p>- Initial poses for localization</p><p>The pose represents the robot's coordinate frame relative to the field</p><p>coordinate frame, allowing transformation of points between the two systems.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>translation</td>
+                  <td><a href="#wpi.proto.ProtobufTranslation2d">ProtobufTranslation2d</a></td>
+                  <td></td>
+                  <td><p>Position component of the pose.
+
+This specifies where the robot is located on the field using the
+field coordinate system. The translation represents the position of
+the robot&#39;s coordinate frame origin (typically the robot center). </p></td>
+                </tr>
+              
+                <tr>
+                  <td>rotation</td>
+                  <td><a href="#wpi.proto.ProtobufRotation2d">ProtobufRotation2d</a></td>
+                  <td></td>
+                  <td><p>Orientation component of the pose.
+
+This specifies which direction the robot is facing on the field.
+The rotation represents the angle between the robot&#39;s forward direction
+and the field&#39;s positive X-axis (forward direction).
+
+Combined with translation, this fully defines the robot&#39;s pose and
+allows for coordinate transformations between robot and field frames. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="wpi.proto.ProtobufRectangle2d">ProtobufRectangle2d</h3>
+        <p>Represents a 2D rectangle with arbitrary orientation.</p><p>This message defines a rectangular region in 2D space using a center pose</p><p>and width/height dimensions. The rectangle can be rotated to any orientation</p><p>based on the center pose's rotation component.</p><p>Geometric Properties:</p><p>- Center point and orientation defined by pose</p><p>- Width extends along the pose's X-axis (local forward direction)</p><p>- Height extends along the pose's Y-axis (local left direction)</p><p>- Total area = xWidth * yWidth</p><p>Applications:</p><p>- Robot footprint representation</p><p>- Obstacle and keep-out zone definitions</p><p>- Field element boundaries</p><p>- Collision detection regions</p><p>- Path planning constraints</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>center</td>
+                  <td><a href="#wpi.proto.ProtobufPose2d">ProtobufPose2d</a></td>
+                  <td></td>
+                  <td><p>Center pose of the rectangle.
+
+The translation component specifies the center point of the rectangle
+in the coordinate system. The rotation component specifies the
+orientation of the rectangle&#39;s local coordinate frame.
+
+The rectangle&#39;s edges are aligned with this local coordinate frame:
+- Width extends along local X-axis (rotated forward direction)
+- Height extends along local Y-axis (rotated left direction) </p></td>
+                </tr>
+              
+                <tr>
+                  <td>xWidth</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Width of the rectangle along its local X-axis.
+
+This is the dimension of the rectangle in the direction of the
+center pose&#39;s forward direction (after rotation). The rectangle
+extends ±xWidth/2 from the center along this axis.
+
+Units: meters
+Must be positive </p></td>
+                </tr>
+              
+                <tr>
+                  <td>yWidth</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Height of the rectangle along its local Y-axis.
+
+This is the dimension of the rectangle in the direction of the
+center pose&#39;s left direction (after rotation). The rectangle
+extends ±yWidth/2 from the center along this axis.
+
+Units: meters
+Must be positive </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="wpi.proto.ProtobufRotation2d">ProtobufRotation2d</h3>
+        <p>Represents a 2D rotation angle.</p><p>This message encodes a rotation in the 2D plane using a single angle value.</p><p>It follows the standard mathematical convention for angle measurement and</p><p>is used to represent orientations and rotational displacements.</p><p>Applications:</p><p>- Robot heading/orientation on field</p><p>- Rotational component of poses and transforms</p><p>- Angular displacement between orientations</p><p>- Waypoint headings</p><p>Angle Convention:</p><p>- 0 radians: Facing positive X direction (forward on field)</p><p>- π/2 radians: Facing positive Y direction (left on field)</p><p>- π radians: Facing negative X direction (backward on field)</p><p>- 3π/2 radians: Facing negative Y direction (right on field)</p><p>- Counter-clockwise rotation is positive</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Rotation angle in radians.
+
+The angle is measured counter-clockwise from the positive X-axis.
+Range: Typically -π to π, but can represent any angle value.
+
+Examples:
+- 0.0: Facing forward (positive X)
+- π/2: Facing left (positive Y)
+- π: Facing backward (negative X)
+- -π/2 or 3π/2: Facing right (negative Y)
+
+Units: radians </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="wpi.proto.ProtobufTransform2d">ProtobufTransform2d</h3>
+        <p>Represents a 2D coordinate transformation.</p><p>This message describes how to transform coordinates from one 2D coordinate</p><p>frame to another. It combines a translation and rotation to define the</p><p>relationship between two coordinate systems.</p><p>Mathematical Interpretation:</p><p>Given a point P in frame A, the corresponding point in frame B is:</p><p>P_B = Transform2d * P_A = Rotation * P_A + Translation</p><p>Applications:</p><p>- Transform between robot and field coordinate frames</p><p>- Relative positioning between objects</p><p>- Coordinate frame conversions in path planning</p><p>- Sensor calibration and mounting offsets</p><p>The transform represents "how to get from frame A to frame B" and can be</p><p>inverted to get the reverse transformation.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>translation</td>
+                  <td><a href="#wpi.proto.ProtobufTranslation2d">ProtobufTranslation2d</a></td>
+                  <td></td>
+                  <td><p>Translation component of the transformation.
+
+This represents the displacement between the origins of the two
+coordinate frames. It specifies how far and in which direction
+the target frame&#39;s origin is from the source frame&#39;s origin. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>rotation</td>
+                  <td><a href="#wpi.proto.ProtobufRotation2d">ProtobufRotation2d</a></td>
+                  <td></td>
+                  <td><p>Rotation component of the transformation.
+
+This represents the angular difference between the two coordinate
+frames. It specifies how much the target frame is rotated relative
+to the source frame.
+
+The rotation is applied before the translation in the transformation
+sequence (standard mathematical convention). </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="wpi.proto.ProtobufTranslation2d">ProtobufTranslation2d</h3>
+        <p>Represents a 2D translation (displacement) vector.</p><p>This message encodes a 2D displacement or position vector using Cartesian</p><p>coordinates. It's used as a building block for more complex geometric</p><p>representations like poses and transforms.</p><p>Applications:</p><p>- Robot position on field</p><p>- Displacement between two points</p><p>- Velocity vectors (when representing change in position)</p><p>- Waypoint coordinates</p><p>Coordinate System:</p><p>- X: Forward/backward displacement (positive = forward)</p><p>- Y: Left/right displacement (positive = left)</p><p>- Units: meters</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>x</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>X-coordinate (forward/backward displacement).
+
+Positive values indicate forward direction (towards opposing alliance).
+Negative values indicate backward direction.
+Units: meters </p></td>
+                </tr>
+              
+                <tr>
+                  <td>y</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Y-coordinate (left/right displacement).
+
+Positive values indicate leftward direction (when facing forward).
+Negative values indicate rightward direction.
+Units: meters </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="wpi.proto.ProtobufTwist2d">ProtobufTwist2d</h3>
+        <p>Represents a 2D twist (velocity in 2D space).</p><p>This message encodes the instantaneous velocity of an object in 2D space,</p><p>including both linear and angular velocity components. It describes how</p><p>an object's pose is changing over time.</p><p>Mathematical Interpretation:</p><p>The twist represents the time derivative of pose:</p><p>- dx/dt: Rate of change in X position</p><p>- dy/dt: Rate of change in Y position  </p><p>- dθ/dt: Rate of change in orientation</p><p>Applications:</p><p>- Robot velocity commands for motion control</p><p>- Velocity feedback from odometry systems</p><p>- Velocity constraints in path planning</p><p>- Dynamic modeling and simulation</p><p>Coordinate Frame:</p><p>The twist can be expressed in different coordinate frames (robot-relative</p><p>or field-relative) depending on the application context.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>dx</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Linear velocity in X direction.
+
+Rate of change of X position over time. In field coordinates,
+this represents forward/backward velocity.
+
+Positive values: Moving in positive X direction (forward)
+Negative values: Moving in negative X direction (backward)
+Units: meters per second </p></td>
+                </tr>
+              
+                <tr>
+                  <td>dy</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Linear velocity in Y direction.
+
+Rate of change of Y position over time. In field coordinates,
+this represents left/right velocity (strafing).
+
+Positive values: Moving in positive Y direction (left)
+Negative values: Moving in negative Y direction (right)
+Units: meters per second </p></td>
+                </tr>
+              
+                <tr>
+                  <td>dtheta</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Angular velocity (rate of rotation).
+
+Rate of change of orientation over time. This represents how
+fast the object is rotating in the 2D plane.
+
+Positive values: Counter-clockwise rotation
+Negative values: Clockwise rotation
+Units: radians per second </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+
+      
+
+      
+    
+      
+      <div class="file-heading">
+        <h2 id="geometry3d.proto">geometry3d.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="wpi.proto.ProtobufPose3d">ProtobufPose3d</h3>
+        <p>Represents a complete 3D pose (position and orientation).</p><p>This message combines a 3D position (translation) with a 3D orientation</p><p>(rotation) to fully describe an object's pose in 3D space. This extends</p><p>the 2D pose concept into three dimensions for applications requiring</p><p>full spatial representation.</p><p>A 3D pose answers two fundamental questions:</p><p>1. Where is the object in 3D space? (translation component)</p><p>2. How is it oriented in 3D space? (rotation component)</p><p>Applications:</p><p>- Camera poses for vision processing</p><p>- AprilTag poses in 3D space</p><p>- Robotic arm end-effector poses</p><p>- Drone/UAV poses (position and attitude)</p><p>- 3D object tracking and localization</p><p>- Sensor mounting positions and orientations</p><p>The pose represents the object's coordinate frame relative to a reference</p><p>coordinate frame, enabling transformation of points and vectors between</p><p>the two coordinate systems.</p><p>Coordinate Frame Transformation:</p><p>Given a point P in the object's local frame, the corresponding point</p><p>in the reference frame is: P_ref = rotation * P_local + translation</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>translation</td>
+                  <td><a href="#wpi.proto.ProtobufTranslation3d">ProtobufTranslation3d</a></td>
+                  <td></td>
+                  <td><p>Position component of the 3D pose.
+
+This specifies where the object is located in 3D space using the
+reference coordinate system. The translation represents the position
+of the object&#39;s coordinate frame origin relative to the reference frame. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>rotation</td>
+                  <td><a href="#wpi.proto.ProtobufRotation3d">ProtobufRotation3d</a></td>
+                  <td></td>
+                  <td><p>Orientation component of the 3D pose.
+
+This specifies how the object is oriented in 3D space relative to
+the reference coordinate system. The rotation represents the orientation
+of the object&#39;s coordinate frame relative to the reference frame.
+
+Combined with translation, this fully defines the object&#39;s pose and
+allows for coordinate transformations between object and reference frames. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="wpi.proto.ProtobufQuaternion">ProtobufQuaternion</h3>
+        <p>Represents a quaternion for 3D rotation.</p><p>Quaternions provide a mathematically robust way to represent 3D rotations</p><p>without the singularities (gimbal lock) that can occur with Euler angles.</p><p>They are the preferred representation for 3D rotations in robotics.</p><p>Mathematical Properties:</p><p>- Unit quaternion: w² + x² + y² + z² = 1</p><p>- Represents rotation around axis (x,y,z) by angle θ:</p><p>w = cos(θ/2), (x,y,z) = sin(θ/2) * unit_axis</p><p>- Identity rotation: (w=1, x=0, y=0, z=0)</p><p>- Conjugate: (w, -x, -y, -z) represents inverse rotation</p><p>Applications:</p><p>- 3D object orientations</p><p>- IMU/gyroscope data representation</p><p>- Camera pose orientations</p><p>- Robotic arm joint orientations</p><p>- Smooth rotation interpolation (SLERP)</p><p>Advantages over Euler angles:</p><p>- No gimbal lock singularities</p><p>- Smooth interpolation</p><p>- Efficient composition of rotations</p><p>- Numerically stable</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>w</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>W component (scalar/real part) of the quaternion.
+
+This is the &#34;real&#34; or &#34;scalar&#34; component of the quaternion.
+For a rotation by angle θ around an axis, w = cos(θ/2).
+
+Range: [-1, 1] for unit quaternions
+Identity rotation: w = 1 </p></td>
+                </tr>
+              
+                <tr>
+                  <td>x</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>X component (i coefficient) of the quaternion.
+
+This is the coefficient of the i basis quaternion.
+For a rotation by angle θ around axis (ax, ay, az),
+x = sin(θ/2) * ax (where (ax, ay, az) is unit length).
+
+Range: [-1, 1] for unit quaternions </p></td>
+                </tr>
+              
+                <tr>
+                  <td>y</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Y component (j coefficient) of the quaternion.
+
+This is the coefficient of the j basis quaternion.
+For a rotation by angle θ around axis (ax, ay, az),
+y = sin(θ/2) * ay (where (ax, ay, az) is unit length).
+
+Range: [-1, 1] for unit quaternions </p></td>
+                </tr>
+              
+                <tr>
+                  <td>z</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Z component (k coefficient) of the quaternion.
+
+This is the coefficient of the k basis quaternion.
+For a rotation by angle θ around axis (ax, ay, az),
+z = sin(θ/2) * az (where (ax, ay, az) is unit length).
+
+Range: [-1, 1] for unit quaternions </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="wpi.proto.ProtobufRotation3d">ProtobufRotation3d</h3>
+        <p>Represents a 3D rotation using a quaternion.</p><p>This message wraps a quaternion to represent 3D rotations in a standardized</p><p>way. It provides a clean interface for 3D rotation operations while</p><p>leveraging the mathematical advantages of quaternions internally.</p><p>The rotation represents the orientation of a coordinate frame relative to</p><p>a reference frame, or the rotation needed to transform vectors from one</p><p>coordinate system to another.</p><p>Applications:</p><p>- Object orientations in 3D space</p><p>- Camera pose rotations</p><p>- IMU orientation data</p><p>- Robotic arm end-effector orientations</p><p>- Transformation between coordinate frames</p><p>Mathematical Operations:</p><p>- Composition: R3 = R2 * R1 (apply R1 first, then R2)</p><p>- Inverse: R^(-1) represents the opposite rotation</p><p>- Identity: No rotation (quaternion w=1, x=y=z=0)</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>q</td>
+                  <td><a href="#wpi.proto.ProtobufQuaternion">ProtobufQuaternion</a></td>
+                  <td></td>
+                  <td><p>Quaternion representing the 3D rotation.
+
+This quaternion should be normalized (unit quaternion) to represent
+a valid rotation. Non-unit quaternions may lead to scaling effects
+in addition to rotation.
+
+The quaternion represents the rotation from the reference coordinate
+frame to the rotated coordinate frame. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="wpi.proto.ProtobufTransform3d">ProtobufTransform3d</h3>
+        <p>Represents a 3D coordinate transformation.</p><p>This message describes how to transform coordinates from one 3D coordinate</p><p>frame to another. It combines a 3D translation and rotation to define the</p><p>complete spatial relationship between two coordinate systems.</p><p>Mathematical Interpretation:</p><p>Given a point P in frame A, the corresponding point in frame B is:</p><p>P_B = Transform3d * P_A = Rotation * P_A + Translation</p><p>This follows the standard transformation sequence:</p><p>1. Apply rotation to the point</p><p>2. Add translation to the rotated point</p><p>Applications:</p><p>- Transform between robot and world coordinate frames</p><p>- Camera calibration and extrinsic parameters</p><p>- Sensor mounting transformations</p><p>- Relative positioning between 3D objects</p><p>- Coordinate frame conversions in 3D path planning</p><p>- Multi-robot relative localization</p><p>The transform represents "how to get from frame A to frame B" and can be</p><p>inverted to get the reverse transformation. Transforms can also be composed</p><p>to create transformation chains through multiple coordinate frames.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>translation</td>
+                  <td><a href="#wpi.proto.ProtobufTranslation3d">ProtobufTranslation3d</a></td>
+                  <td></td>
+                  <td><p>Translation component of the 3D transformation.
+
+This represents the displacement between the origins of the two
+coordinate frames in 3D space. It specifies how far and in which
+direction the target frame&#39;s origin is from the source frame&#39;s origin. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>rotation</td>
+                  <td><a href="#wpi.proto.ProtobufRotation3d">ProtobufRotation3d</a></td>
+                  <td></td>
+                  <td><p>Rotation component of the 3D transformation.
+
+This represents the angular difference between the two coordinate
+frames in 3D space. It specifies how the target frame is rotated
+relative to the source frame.
+
+The rotation is applied before the translation in the transformation
+sequence (standard mathematical convention for homogeneous transforms). </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="wpi.proto.ProtobufTranslation3d">ProtobufTranslation3d</h3>
+        <p>Represents a 3D translation (displacement) vector.</p><p>This message encodes a 3D displacement or position vector using Cartesian</p><p>coordinates. It extends the 2D translation concept into three dimensions</p><p>and serves as a building block for more complex 3D geometric representations.</p><p>Applications:</p><p>- 3D object positions in space</p><p>- Displacement vectors between 3D points</p><p>- 3D velocity vectors (when representing change in position)</p><p>- Camera/sensor positions relative to robot</p><p>- AprilTag positions in 3D space</p><p>Coordinate System:</p><p>- X: Forward/backward displacement (positive = forward)</p><p>- Y: Left/right displacement (positive = left)</p><p>- Z: Up/down displacement (positive = up)</p><p>- Units: meters</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>x</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>X-coordinate (forward/backward displacement).
+
+Positive values indicate forward direction.
+Negative values indicate backward direction.
+Units: meters </p></td>
+                </tr>
+              
+                <tr>
+                  <td>y</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Y-coordinate (left/right displacement).
+
+Positive values indicate leftward direction.
+Negative values indicate rightward direction.
+Units: meters </p></td>
+                </tr>
+              
+                <tr>
+                  <td>z</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Z-coordinate (up/down displacement).
+
+Positive values indicate upward direction.
+Negative values indicate downward direction.
+Units: meters </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="wpi.proto.ProtobufTwist3d">ProtobufTwist3d</h3>
+        <p>Represents a 3D twist (velocity in 3D space).</p><p>This message encodes the instantaneous velocity of an object in 3D space,</p><p>including both linear and angular velocity components. It describes how</p><p>an object's 3D pose is changing over time, extending the 2D twist concept</p><p>into three dimensions.</p><p>Mathematical Interpretation:</p><p>The twist represents the time derivative of 3D pose:</p><p>- Linear velocity: (dx/dt, dy/dt, dz/dt)</p><p>- Angular velocity: (rx, ry, rz) as rotation rates about each axis</p><p>Applications:</p><p>- 3D robot velocity commands (drones, robotic arms)</p><p>- 3D velocity feedback from odometry systems</p><p>- Velocity constraints in 3D path planning</p><p>- Dynamic modeling and simulation in 3D</p><p>- IMU angular velocity data representation</p><p>- Camera motion estimation</p><p>Coordinate Frame:</p><p>The twist can be expressed in different coordinate frames (body-relative</p><p>or world-relative) depending on the application context. The angular</p><p>velocity components represent rotation rates about the coordinate axes.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>dx</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Linear velocity in X direction.
+
+Rate of change of X position over time. In world coordinates,
+this represents forward/backward velocity.
+
+Positive values: Moving in positive X direction (forward)
+Negative values: Moving in negative X direction (backward)
+Units: meters per second </p></td>
+                </tr>
+              
+                <tr>
+                  <td>dy</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Linear velocity in Y direction.
+
+Rate of change of Y position over time. In world coordinates,
+this represents left/right velocity (strafing).
+
+Positive values: Moving in positive Y direction (left)
+Negative values: Moving in negative Y direction (right)
+Units: meters per second </p></td>
+                </tr>
+              
+                <tr>
+                  <td>dz</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Linear velocity in Z direction.
+
+Rate of change of Z position over time. In world coordinates,
+this represents up/down velocity (climbing/descending).
+
+Positive values: Moving in positive Z direction (up)
+Negative values: Moving in negative Z direction (down)
+Units: meters per second </p></td>
+                </tr>
+              
+                <tr>
+                  <td>rx</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Angular velocity about X-axis (roll rate).
+
+Rate of rotation about the X-axis. This represents how fast
+the object is rolling (rotating around its forward axis).
+
+Positive values: Counter-clockwise rotation when looking down the positive X-axis
+Negative values: Clockwise rotation when looking down the positive X-axis
+Units: radians per second </p></td>
+                </tr>
+              
+                <tr>
+                  <td>ry</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Angular velocity about Y-axis (pitch rate).
+
+Rate of rotation about the Y-axis. This represents how fast
+the object is pitching (nose up/down motion).
+
+Positive values: Counter-clockwise rotation when looking down the positive Y-axis
+Negative values: Clockwise rotation when looking down the positive Y-axis
+Units: radians per second </p></td>
+                </tr>
+              
+                <tr>
+                  <td>rz</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Angular velocity about Z-axis (yaw rate).
+
+Rate of rotation about the Z-axis. This represents how fast
+the object is yawing (turning left/right).
+
+Positive values: Counter-clockwise rotation when looking down the positive Z-axis
+Negative values: Clockwise rotation when looking down the positive Z-axis
+Units: radians per second </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+
+      
+
+      
+    
+
+    <h2 id="scalar-value-types">Scalar Value Types</h2>
+    <table class="scalar-value-types-table">
+      <thead>
+        <tr><td>.proto Type</td><td>Notes</td><td>C++</td><td>Java</td><td>Python</td><td>Go</td><td>C#</td><td>PHP</td><td>Ruby</td></tr>
+      </thead>
+      <tbody>
+        
+          <tr id="double">
+            <td>double</td>
+            <td></td>
+            <td>double</td>
+            <td>double</td>
+            <td>float</td>
+            <td>float64</td>
+            <td>double</td>
+            <td>float</td>
+            <td>Float</td>
+          </tr>
+        
+          <tr id="float">
+            <td>float</td>
+            <td></td>
+            <td>float</td>
+            <td>float</td>
+            <td>float</td>
+            <td>float32</td>
+            <td>float</td>
+            <td>float</td>
+            <td>Float</td>
+          </tr>
+        
+          <tr id="int32">
+            <td>int32</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint32 instead.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="int64">
+            <td>int64</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint64 instead.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="uint32">
+            <td>uint32</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int/long</td>
+            <td>uint32</td>
+            <td>uint</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="uint64">
+            <td>uint64</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>uint64</td>
+            <td>ulong</td>
+            <td>integer/string</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sint32">
+            <td>sint32</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sint64">
+            <td>sint64</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="fixed32">
+            <td>fixed32</td>
+            <td>Always four bytes. More efficient than uint32 if values are often greater than 2^28.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>uint32</td>
+            <td>uint</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="fixed64">
+            <td>fixed64</td>
+            <td>Always eight bytes. More efficient than uint64 if values are often greater than 2^56.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>uint64</td>
+            <td>ulong</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="sfixed32">
+            <td>sfixed32</td>
+            <td>Always four bytes.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sfixed64">
+            <td>sfixed64</td>
+            <td>Always eight bytes.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="bool">
+            <td>bool</td>
+            <td></td>
+            <td>bool</td>
+            <td>boolean</td>
+            <td>boolean</td>
+            <td>bool</td>
+            <td>bool</td>
+            <td>boolean</td>
+            <td>TrueClass/FalseClass</td>
+          </tr>
+        
+          <tr id="string">
+            <td>string</td>
+            <td>A string must always contain UTF-8 encoded or 7-bit ASCII text.</td>
+            <td>string</td>
+            <td>String</td>
+            <td>str/unicode</td>
+            <td>string</td>
+            <td>string</td>
+            <td>string</td>
+            <td>String (UTF-8)</td>
+          </tr>
+        
+          <tr id="bytes">
+            <td>bytes</td>
+            <td>May contain any arbitrary sequence of bytes.</td>
+            <td>string</td>
+            <td>ByteString</td>
+            <td>str</td>
+            <td>[]byte</td>
+            <td>ByteString</td>
+            <td>string</td>
+            <td>String (ASCII-8BIT)</td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </body>
+</html>
+

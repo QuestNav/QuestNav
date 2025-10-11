@@ -137,51 +137,6 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 <Tabs>
-    <TabItem value="CTRE" label="CTRE Swerve Generator < v2025.3.1.0 ">
-
-        :::warning
-        CTRE does not utilize the `SwerveDrivePoseEstimator` class directly, and uses their own timestamp system on older versions.
-        If you do not convert the Quest's timestamp to CTRE's current time, it will not function correctly!
-
-        **FOR ANY VERSION NEWER THAN v2025.3.1.0** PLEASE REFERENCE THE OTHER TAB
-        :::
-        ```java title="e.g. QuestNavSubsystem.java"
-        QuestNav questNav = new QuestNav();
-
-        SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
-        Matrix<N3, N1> QUESTNAV_STD_DEVS =
-            VecBuilder.fill(
-                0.02, // Trust down to 2cm in X direction
-                0.02, // Trust down to 2cm in Y direction
-                0.035 // Trust down to 2 degrees rotational
-            );
-
-        if (questNav.isTracking()) {
-            // Get the latest pose data frames from the Quest
-            PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
-
-            // Loop over the pose data frames and send them to the pose estimator
-            for (PoseFrame questFrame : questFrames) {
-                // Get the pose of the Quest
-                Pose2d questPose = questFrame.questPose();
-                // Get timestamp for when the data was sent
-                double timestamp = questFrame.dataTimestamp();
-
-                // Transform by the mount pose to get your robot pose
-                Pose2d robotPose = questPose.transformBy(QuestNavConstants.ROBOT_TO_QUEST.inverse());
-
-                // Convert FPGA timestamp to CTRE's time domain using Phoenix 6 utility
-                double ctreTimestamp = Utils.fpgaToCurrentTime(timestamp);
-
-                // You can put some sort of filtering here if you would like!
-
-                // Add the measurement to our estimator
-                swerveDriveSubsystem.addVisionMeasurement(robotPose, ctreTimestamp, QUESTNAV_STD_DEVS);
-            }
-        }
-        ```
-
-    </TabItem>
     <TabItem value="AdvantageKit-YAGSL" label="AdvantageKit/YAGSL/CTRE >2025.3.1.0">
 
         :::tip
@@ -197,32 +152,35 @@ import TabItem from '@theme/TabItem';
                 0.02, // Trust down to 2cm in Y direction
                 0.035 // Trust down to 2 degrees rotational
             );
+        
+        @Override
+        public void periodic() {
+            if (questNav.isTracking()) {
+                // Get the latest pose data frames from the Quest
+                PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
 
-        if (questNav.isTracking()) {
-            // Get the latest pose data frames from the Quest
-            PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
+                // Loop over the pose data frames and send them to the pose estimator
+                for (PoseFrame questFrame : questFrames) {
+                    // Get the pose of the Quest
+                    Pose2d questPose = questFrame.questPose();
+                    // Get timestamp for when the data was sent
+                    double timestamp = questFrame.dataTimestamp();
 
-            // Loop over the pose data frames and send them to the pose estimator
-            for (PoseFrame questFrame : questFrames) {
-                // Get the pose of the Quest
-                Pose2d questPose = questFrame.questPose();
-                // Get timestamp for when the data was sent
-                double timestamp = questFrame.dataTimestamp();
+                    // Transform by the mount pose to get your robot pose
+                    Pose2d robotPose = questPose.transformBy(QuestNavConstants.ROBOT_TO_QUEST.inverse());
 
-                // Transform by the mount pose to get your robot pose
-                Pose2d robotPose = questPose.transformBy(QuestNavConstants.ROBOT_TO_QUEST.inverse());
+                    // You can put some sort of filtering here if you would like!
 
-                // You can put some sort of filtering here if you would like!
-
-                // Add the measurement to our estimator
-                swerveDriveSubsystem.addVisionMeasurement(robotPose, timestamp, QUESTNAV_STD_DEVS);
+                    // Add the measurement to our estimator
+                    swerveDriveSubsystem.addVisionMeasurement(robotPose, timestamp, QUESTNAV_STD_DEVS);
+                }
             }
         }
-        ```
+    ```
 
     </TabItem>
 </Tabs>
 
 :::note
-The above examples should be called in a **periodic loop** to ensure vision measurements are always being added!
+The above example should be called in a **periodic loop** to ensure vision measurements are always being added!
 :::

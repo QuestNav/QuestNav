@@ -43,8 +43,9 @@ namespace QuestNav.Commands.Commands
         public string commandNiceName => "PoseReset";
 
         /// <summary>
-        /// Executes the pose reset command
+        /// Executes the pose reset command by applying the target pose to the VR camera system
         /// </summary>
+        /// <param name="receivedCommand">The command containing pose reset payload with target position</param>
         public void Execute(ProtobufQuestNavCommand receivedCommand)
         {
             QueuedLogger.Log("Received pose reset request, initiating reset...");
@@ -77,25 +78,52 @@ namespace QuestNav.Commands.Commands
             // Apply pose reset if data is valid
             if (validPose)
             {
-                // Convert field coordinates to Unity coordinates
+                /*
+                 * POSE RESET ALGORITHM EXPLANATION:
+                 *
+                 * The challenge: We need to move the VR camera to a specific field position, but the user
+                 * might be standing anywhere in their physical play space. We can't move the user physically,
+                 * so we move the virtual world around them.
+                 *
+                 * VR Hierarchy:
+                 * - vrCameraRoot: The "world origin" that we can move/rotate
+                 * - vrCamera: The actual headset position (controlled by VR tracking, we can't move this directly)
+                 *
+                 * Algorithm Steps:
+                 * 1. Convert target field coordinates to Unity world coordinates
+                 * 2. Calculate how much we need to rotate the world to align headset orientation
+                 * 3. Capture the headset's offset from world origin BEFORE rotation
+                 * 4. Rotate the world origin to align orientations
+                 * 5. Move the world origin so the headset ends up at the target position
+                 *
+                 * This ensures the user's physical position in their room doesn't change, but their
+                 * virtual position on the field matches what the robot expects.
+                 */
+
+                // Step 1: Convert FRC field coordinates (meters, standard orientation) to Unity coordinates
+                // This accounts for coordinate system differences (FRC: X forward, Y left vs Unity: Z forward, X right)
                 var (targetCameraPosition, targetCameraRotation) = Conversions.FrcToUnity(
                     resetPose,
                     vrCamera.position,
                     vrCamera.rotation
                 );
 
-                // Calculate Y rotation difference between current camera and target
+                // Step 2: Calculate how much to rotate the world to align headset with target orientation
+                // We only care about Y-axis rotation (yaw) since pitch/roll should remain user-controlled
                 float currentCameraY = vrCamera.rotation.eulerAngles.y;
                 float targetCameraY = targetCameraRotation.eulerAngles.y;
                 float rotationDifference = Mathf.DeltaAngle(currentCameraY, targetCameraY);
 
-                // Get camera offset in LOCAL space relative to root BEFORE rotation
+                // Step 3: Capture headset offset from world origin in LOCAL space BEFORE we rotate
+                // This is crucial - we need the offset in the coordinate system that will be rotated
                 Vector3 localCameraOffset = vrCameraRoot.InverseTransformPoint(vrCamera.position);
 
-                // Apply rotation to root
+                // Step 4: Rotate the world origin to align orientations
+                // This rotates the entire virtual world around the user
                 vrCameraRoot.Rotate(0, rotationDifference, 0);
 
-                // Recalculate position after rotation
+                // Step 5: Calculate where to position the world origin so headset ends up at target
+                // After rotation, we need to recalculate the world-space offset and adjust accordingly
                 Vector3 worldCameraOffset =
                     vrCameraRoot.TransformPoint(localCameraOffset) - vrCameraRoot.position;
                 Vector3 targetRootPosition = targetCameraPosition - worldCameraOffset;

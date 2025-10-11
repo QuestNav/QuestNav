@@ -1,0 +1,88 @@
+### YamlMime:ManagedReference
+items:
+- uid: QuestNav.Commands.ICommandProcessor
+  commentId: T:QuestNav.Commands.ICommandProcessor
+  id: ICommandProcessor
+  parent: QuestNav.Commands
+  children:
+  - QuestNav.Commands.ICommandProcessor.ProcessCommands
+  langs:
+  - csharp
+  - vb
+  name: ICommandProcessor
+  nameWithType: ICommandProcessor
+  fullName: QuestNav.Commands.ICommandProcessor
+  type: Interface
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Commands/CommandProcessor.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: ICommandProcessor
+    path: ../Assets/QuestNav/Commands/CommandProcessor.cs
+    startLine: 10
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Commands
+  summary: Interface for command processing.
+  example: []
+  syntax:
+    content: public interface ICommandProcessor
+    content.vb: Public Interface ICommandProcessor
+- uid: QuestNav.Commands.ICommandProcessor.ProcessCommands
+  commentId: M:QuestNav.Commands.ICommandProcessor.ProcessCommands
+  id: ProcessCommands
+  parent: QuestNav.Commands.ICommandProcessor
+  langs:
+  - csharp
+  - vb
+  name: ProcessCommands()
+  nameWithType: ICommandProcessor.ProcessCommands()
+  fullName: QuestNav.Commands.ICommandProcessor.ProcessCommands()
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Commands/CommandProcessor.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: ProcessCommands
+    path: ../Assets/QuestNav/Commands/CommandProcessor.cs
+    startLine: 15
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Commands
+  summary: Processes commands received from the robot.
+  example: []
+  syntax:
+    content: void ProcessCommands()
+    content.vb: Sub ProcessCommands()
+  overload: QuestNav.Commands.ICommandProcessor.ProcessCommands*
+references:
+- uid: QuestNav.Commands
+  commentId: N:QuestNav.Commands
+  href: QuestNav.html
+  name: QuestNav.Commands
+  nameWithType: QuestNav.Commands
+  fullName: QuestNav.Commands
+  spec.csharp:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Commands
+    name: Commands
+    href: QuestNav.Commands.html
+  spec.vb:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Commands
+    name: Commands
+    href: QuestNav.Commands.html
+- uid: QuestNav.Commands.ICommandProcessor.ProcessCommands*
+  commentId: Overload:QuestNav.Commands.ICommandProcessor.ProcessCommands
+  href: QuestNav.Commands.ICommandProcessor.html#QuestNav_Commands_ICommandProcessor_ProcessCommands
+  name: ProcessCommands
+  nameWithType: ICommandProcessor.ProcessCommands
+  fullName: QuestNav.Commands.ICommandProcessor.ProcessCommands

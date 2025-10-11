@@ -1,0 +1,31 @@
+name: Build Java Documentation (Standalone)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'questnav-lib/src/**'  # Trigger on Java source changes
+      - 'questnav-lib/build.gradle'  # Trigger on build config changes
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'questnav-lib/src/**'
+      - 'questnav-lib/build.gradle'
+
+concurrency:
+  group: build-javadoc-standalone-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-javadoc-standalone:
+    name: Build Javadoc Documentation (Standalone)
+    uses: ./.github/workflows/build-javadoc-api.yml
+    with:
+      unity-build-completed: false  # This is a standalone build
+      force-build: true  # Force build for standalone execution
+    permissions:
+      contents: write
+      pull-requests: write

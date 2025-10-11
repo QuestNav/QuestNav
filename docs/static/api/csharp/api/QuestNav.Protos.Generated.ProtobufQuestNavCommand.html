@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Class ProtobufQuestNavCommand | QuestNav API Documentation </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Class ProtobufQuestNavCommand | QuestNav API Documentation ">
+    
+    <meta name="description" content="Main command message sent to the QuestNav system. This is the primary message type used to send commands from external systems (like robot code) to the Quest headset. Each command includes a type identifier, a unique tracking ID, and optional payload data specific to the command type. The command system is designed for asynchronous operation - commands are sent and responses are received separately, matched by the command_id field. Message Flow:  Client creates command with unique command_id Client sets appropriate type and payload Client sends command to Quest Quest processes command and sends response with matching command_id">
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../styles/docfx.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="QuestNav API">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first=First data-prev=Previous data-next=Next data-last=Last></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand">
+
+
+
+  <h1 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand" class="text-break">Class ProtobufQuestNavCommand</h1>
+  <div class="markdown level0 summary"><ul>
+<li></li>
+</ul>
+<p>Main command message sent to the QuestNav system.</p>
+<p>This is the primary message type used to send commands from external systems
+(like robot code) to the Quest headset. Each command includes a type identifier,
+a unique tracking ID, and optional payload data specific to the command type.</p>
+<p>The command system is designed for asynchronous operation - commands are sent
+and responses are received separately, matched by the command_id field.</p>
+<p>Message Flow:</p>
+<ol>
+<li>Client creates command with unique command_id</li>
+<li>Client sets appropriate type and payload</li>
+<li>Client sends command to Quest</li>
+<li>Quest processes command and sends response with matching command_id</li>
+</ol>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+    <div class="level1"><span class="xref">ProtobufQuestNavCommand</span></div>
+  </div>
+  <div class="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">IMessage</span>&lt;<a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.html">ProtobufQuestNavCommand</a>&gt;</div>
+    <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iequatable-1">IEquatable</a>&lt;<a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.html">ProtobufQuestNavCommand</a>&gt;</div>
+    <div><span class="xref">IDeepCloneable</span>&lt;<a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.html">ProtobufQuestNavCommand</a>&gt;</div>
+    <div><span class="xref">IBufferMessage</span></div>
+    <div><span class="xref">IMessage</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="QuestNav.html">QuestNav</a>.<a class="xref" href="QuestNav.Protos.html">Protos</a>.<a class="xref" href="QuestNav.Protos.Generated.html">Generated</a></h6>
+  <h6><strong>Assembly</strong>: QuestNav.dll</h6>
+  <h5 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class ProtobufQuestNavCommand : IMessage&lt;ProtobufQuestNavCommand&gt;, IEquatable&lt;ProtobufQuestNavCommand&gt;, IDeepCloneable&lt;ProtobufQuestNavCommand&gt;, IBufferMessage, IMessage</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+</h3>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand__ctor_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.#ctor*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand__ctor" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.#ctor">ProtobufQuestNavCommand()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufQuestNavCommand()</code></pre>
+  </div>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand__ctor_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.#ctor*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand__ctor_QuestNav_Protos_Generated_ProtobufQuestNavCommand_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.#ctor(QuestNav.Protos.Generated.ProtobufQuestNavCommand)">ProtobufQuestNavCommand(ProtobufQuestNavCommand)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufQuestNavCommand(ProtobufQuestNavCommand other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.html">ProtobufQuestNavCommand</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="fields">Fields
+</h3>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_CommandIdFieldNumber" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.CommandIdFieldNumber">CommandIdFieldNumber</h4>
+  <div class="markdown level1 summary"><p>Field number for the &quot;command_id&quot; field.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const int CommandIdFieldNumber = 2</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_PoseResetPayloadFieldNumber" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.PoseResetPayloadFieldNumber">PoseResetPayloadFieldNumber</h4>
+  <div class="markdown level1 summary"><p>Field number for the &quot;pose_reset_payload&quot; field.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const int PoseResetPayloadFieldNumber = 10</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_TypeFieldNumber" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.TypeFieldNumber">TypeFieldNumber</h4>
+  <div class="markdown level1 summary"><p>Field number for the &quot;type&quot; field.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const int TypeFieldNumber = 1</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+</h3>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_CommandId_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.CommandId*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_CommandId" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.CommandId">CommandId</h4>
+  <div class="markdown level1 summary"><ul>
+<li></li>
+</ul>
+<p>Unique identifier for this command instance.</p>
+<p>This ID is used to match commands with their responses in asynchronous
+communication. The client should generate unique IDs for each command
+to avoid confusion. The Quest will echo this ID in the response message.</p>
+<p>Recommended: Use incrementing integers or timestamps for uniqueness.</p>
+<p>Note: For FRC users, the vendor dependency will handle this automatically.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint CommandId { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.uint32">uint</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Descriptor_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Descriptor*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Descriptor" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Descriptor">Descriptor</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static MessageDescriptor Descriptor { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">MessageDescriptor</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Parser_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Parser*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Parser" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Parser">Parser</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static MessageParser&lt;ProtobufQuestNavCommand&gt; Parser { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">MessageParser</span>&lt;<a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.html">ProtobufQuestNavCommand</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_PayloadCase_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadCase*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_PayloadCase" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadCase">PayloadCase</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufQuestNavCommand.PayloadOneofCase PayloadCase { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.html">ProtobufQuestNavCommand</a>.<a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.html">PayloadOneofCase</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_PoseResetPayload_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.PoseResetPayload*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_PoseResetPayload" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.PoseResetPayload">PoseResetPayload</h4>
+  <div class="markdown level1 summary"><ul>
+<li></li>
+</ul>
+<p>Payload for POSE_RESET commands.
+Set this field when type = POSE_RESET.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufQuestNavPoseResetPayload PoseResetPayload { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.html">ProtobufQuestNavPoseResetPayload</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Type_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Type*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Type" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Type">Type</h4>
+  <div class="markdown level1 summary"><ul>
+<li></li>
+</ul>
+<p>The type of command being sent.</p>
+<p>This field determines which payload (if any) should be populated and
+how the Quest should process the command. See QuestNavCommandType
+enum for available command types.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public QuestNavCommandType Type { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="QuestNav.Protos.Generated.QuestNavCommandType.html">QuestNavCommandType</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+</h3>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_CalculateSize_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.CalculateSize*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_CalculateSize" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.CalculateSize">CalculateSize()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int CalculateSize()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_ClearPayload_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.ClearPayload*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_ClearPayload" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.ClearPayload">ClearPayload()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ClearPayload()</code></pre>
+  </div>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Clone_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Clone*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Clone" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Clone">Clone()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufQuestNavCommand Clone()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.html">ProtobufQuestNavCommand</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Equals_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Equals*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Equals_QuestNav_Protos_Generated_ProtobufQuestNavCommand_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Equals(QuestNav.Protos.Generated.ProtobufQuestNavCommand)">Equals(ProtobufQuestNavCommand)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Equals(ProtobufQuestNavCommand other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.html">ProtobufQuestNavCommand</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Equals_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Equals*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_Equals_System_Object_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.Equals(System.Object)">Equals(object)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override bool Equals(object other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a></div>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_GetHashCode_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.GetHashCode*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_GetHashCode" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.GetHashCode">GetHashCode()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override int GetHashCode()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a></div>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_MergeFrom_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.MergeFrom*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_MergeFrom_Google_Protobuf_CodedInputStream_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.MergeFrom(Google.Protobuf.CodedInputStream)">MergeFrom(CodedInputStream)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void MergeFrom(CodedInputStream input)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">CodedInputStream</span></td>
+        <td><span class="parametername">input</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_MergeFrom_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.MergeFrom*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_MergeFrom_QuestNav_Protos_Generated_ProtobufQuestNavCommand_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavCommand)">MergeFrom(ProtobufQuestNavCommand)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void MergeFrom(ProtobufQuestNavCommand other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.html">ProtobufQuestNavCommand</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_ToString_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.ToString*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_ToString" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.ToString">ToString()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override string ToString()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a></div>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_WriteTo_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.WriteTo*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavCommand_WriteTo_Google_Protobuf_CodedOutputStream_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavCommand.WriteTo(Google.Protobuf.CodedOutputStream)">WriteTo(CodedOutputStream)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void WriteTo(CodedOutputStream output)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">CodedOutputStream</span></td>
+        <td><span class="parametername">output</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <span class="xref">Google.Protobuf.IMessage&lt;T&gt;</span>
+  </div>
+  <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iequatable-1">IEquatable&lt;T&gt;</a>
+  </div>
+  <div>
+      <span class="xref">Google.Protobuf.IDeepCloneable&lt;T&gt;</span>
+  </div>
+  <div>
+      <span class="xref">Google.Protobuf.IBufferMessage</span>
+  </div>
+  <div>
+      <span class="xref">Google.Protobuf.IMessage</span>
+  </div>
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      QuestNav - VR Navigation for FRC Robots
+      
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

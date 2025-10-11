@@ -1,0 +1,23 @@
+### YamlMime:ManagedReference
+items:
+- uid: QuestNav.Commands.Commands
+  commentId: N:QuestNav.Commands.Commands
+  id: QuestNav.Commands.Commands
+  children:
+  - QuestNav.Commands.Commands.PoseResetCommand
+  langs:
+  - csharp
+  - vb
+  name: QuestNav.Commands.Commands
+  nameWithType: QuestNav.Commands.Commands
+  fullName: QuestNav.Commands.Commands
+  type: Namespace
+  assemblies:
+  - QuestNav
+references:
+- uid: QuestNav.Commands.Commands.PoseResetCommand
+  commentId: T:QuestNav.Commands.Commands.PoseResetCommand
+  href: QuestNav.Commands.Commands.PoseResetCommand.html
+  name: PoseResetCommand
+  nameWithType: PoseResetCommand
+  fullName: QuestNav.Commands.Commands.PoseResetCommand

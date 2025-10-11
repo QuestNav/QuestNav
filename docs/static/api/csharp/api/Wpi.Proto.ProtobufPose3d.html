@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Class ProtobufPose3d | QuestNav API Documentation </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Class ProtobufPose3d | QuestNav API Documentation ">
+    
+    <meta name="description" content="Represents a complete 3D pose (position and orientation). This message combines a 3D position (translation) with a 3D orientation (rotation) to fully describe an object&#39;s pose in 3D space. This extends the 2D pose concept into three dimensions for applications requiring full spatial representation. A 3D pose answers two fundamental questions:  Where is the object in 3D space? (translation component) How is it oriented in 3D space? (rotation component)  Applications:  Camera poses for vision processing AprilTag poses in 3D space Robotic arm end-effector poses Drone/UAV poses (position and attitude) 3D object tracking and localization Sensor mounting positions and orientations  The pose represents the object&#39;s coordinate frame relative to a reference coordinate frame, enabling transformation of points and vectors between the two coordinate systems. Coordinate Frame Transformation: Given a point P in the object&#39;s local frame, the corresponding point in the reference frame is: P_ref = rotation * P_local + translation">
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../styles/docfx.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="QuestNav API">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first=First data-prev=Previous data-next=Next data-last=Last></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Wpi.Proto.ProtobufPose3d">
+
+
+
+  <h1 id="Wpi_Proto_ProtobufPose3d" data-uid="Wpi.Proto.ProtobufPose3d" class="text-break">Class ProtobufPose3d</h1>
+  <div class="markdown level0 summary"><ul>
+<li></li>
+</ul>
+<p>Represents a complete 3D pose (position and orientation).</p>
+<p>This message combines a 3D position (translation) with a 3D orientation
+(rotation) to fully describe an object's pose in 3D space. This extends
+the 2D pose concept into three dimensions for applications requiring
+full spatial representation.</p>
+<p>A 3D pose answers two fundamental questions:</p>
+<ol>
+<li>Where is the object in 3D space? (translation component)</li>
+<li>How is it oriented in 3D space? (rotation component)</li>
+</ol>
+<p>Applications:</p>
+<ul>
+<li>Camera poses for vision processing</li>
+<li>AprilTag poses in 3D space</li>
+<li>Robotic arm end-effector poses</li>
+<li>Drone/UAV poses (position and attitude)</li>
+<li>3D object tracking and localization</li>
+<li>Sensor mounting positions and orientations</li>
+</ul>
+<p>The pose represents the object's coordinate frame relative to a reference
+coordinate frame, enabling transformation of points and vectors between
+the two coordinate systems.</p>
+<p>Coordinate Frame Transformation:
+Given a point P in the object's local frame, the corresponding point
+in the reference frame is: P_ref = rotation * P_local + translation</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+    <div class="level1"><span class="xref">ProtobufPose3d</span></div>
+  </div>
+  <div class="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">IMessage</span>&lt;<a class="xref" href="Wpi.Proto.ProtobufPose3d.html">ProtobufPose3d</a>&gt;</div>
+    <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iequatable-1">IEquatable</a>&lt;<a class="xref" href="Wpi.Proto.ProtobufPose3d.html">ProtobufPose3d</a>&gt;</div>
+    <div><span class="xref">IDeepCloneable</span>&lt;<a class="xref" href="Wpi.Proto.ProtobufPose3d.html">ProtobufPose3d</a>&gt;</div>
+    <div><span class="xref">IBufferMessage</span></div>
+    <div><span class="xref">IMessage</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Wpi.html">Wpi</a>.<a class="xref" href="Wpi.Proto.html">Proto</a></h6>
+  <h6><strong>Assembly</strong>: QuestNav.dll</h6>
+  <h5 id="Wpi_Proto_ProtobufPose3d_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class ProtobufPose3d : IMessage&lt;ProtobufPose3d&gt;, IEquatable&lt;ProtobufPose3d&gt;, IDeepCloneable&lt;ProtobufPose3d&gt;, IBufferMessage, IMessage</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+</h3>
+  <a id="Wpi_Proto_ProtobufPose3d__ctor_" data-uid="Wpi.Proto.ProtobufPose3d.#ctor*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d__ctor" data-uid="Wpi.Proto.ProtobufPose3d.#ctor">ProtobufPose3d()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufPose3d()</code></pre>
+  </div>
+  <a id="Wpi_Proto_ProtobufPose3d__ctor_" data-uid="Wpi.Proto.ProtobufPose3d.#ctor*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d__ctor_Wpi_Proto_ProtobufPose3d_" data-uid="Wpi.Proto.ProtobufPose3d.#ctor(Wpi.Proto.ProtobufPose3d)">ProtobufPose3d(ProtobufPose3d)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufPose3d(ProtobufPose3d other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Wpi.Proto.ProtobufPose3d.html">ProtobufPose3d</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="fields">Fields
+</h3>
+  <h4 id="Wpi_Proto_ProtobufPose3d_RotationFieldNumber" data-uid="Wpi.Proto.ProtobufPose3d.RotationFieldNumber">RotationFieldNumber</h4>
+  <div class="markdown level1 summary"><p>Field number for the &quot;rotation&quot; field.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const int RotationFieldNumber = 2</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="Wpi_Proto_ProtobufPose3d_TranslationFieldNumber" data-uid="Wpi.Proto.ProtobufPose3d.TranslationFieldNumber">TranslationFieldNumber</h4>
+  <div class="markdown level1 summary"><p>Field number for the &quot;translation&quot; field.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const int TranslationFieldNumber = 1</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+</h3>
+  <a id="Wpi_Proto_ProtobufPose3d_Descriptor_" data-uid="Wpi.Proto.ProtobufPose3d.Descriptor*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_Descriptor" data-uid="Wpi.Proto.ProtobufPose3d.Descriptor">Descriptor</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static MessageDescriptor Descriptor { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">MessageDescriptor</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="Wpi_Proto_ProtobufPose3d_Parser_" data-uid="Wpi.Proto.ProtobufPose3d.Parser*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_Parser" data-uid="Wpi.Proto.ProtobufPose3d.Parser">Parser</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static MessageParser&lt;ProtobufPose3d&gt; Parser { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">MessageParser</span>&lt;<a class="xref" href="Wpi.Proto.ProtobufPose3d.html">ProtobufPose3d</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="Wpi_Proto_ProtobufPose3d_Rotation_" data-uid="Wpi.Proto.ProtobufPose3d.Rotation*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_Rotation" data-uid="Wpi.Proto.ProtobufPose3d.Rotation">Rotation</h4>
+  <div class="markdown level1 summary"><ul>
+<li></li>
+</ul>
+<p>Orientation component of the 3D pose.</p>
+<p>This specifies how the object is oriented in 3D space relative to
+the reference coordinate system. The rotation represents the orientation
+of the object's coordinate frame relative to the reference frame.</p>
+<p>Combined with translation, this fully defines the object's pose and
+allows for coordinate transformations between object and reference frames.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufRotation3d Rotation { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Wpi.Proto.ProtobufRotation3d.html">ProtobufRotation3d</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="Wpi_Proto_ProtobufPose3d_Translation_" data-uid="Wpi.Proto.ProtobufPose3d.Translation*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_Translation" data-uid="Wpi.Proto.ProtobufPose3d.Translation">Translation</h4>
+  <div class="markdown level1 summary"><ul>
+<li></li>
+</ul>
+<p>Position component of the 3D pose.</p>
+<p>This specifies where the object is located in 3D space using the
+reference coordinate system. The translation represents the position
+of the object's coordinate frame origin relative to the reference frame.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufTranslation3d Translation { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Wpi.Proto.ProtobufTranslation3d.html">ProtobufTranslation3d</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+</h3>
+  <a id="Wpi_Proto_ProtobufPose3d_CalculateSize_" data-uid="Wpi.Proto.ProtobufPose3d.CalculateSize*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_CalculateSize" data-uid="Wpi.Proto.ProtobufPose3d.CalculateSize">CalculateSize()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int CalculateSize()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="Wpi_Proto_ProtobufPose3d_Clone_" data-uid="Wpi.Proto.ProtobufPose3d.Clone*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_Clone" data-uid="Wpi.Proto.ProtobufPose3d.Clone">Clone()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufPose3d Clone()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Wpi.Proto.ProtobufPose3d.html">ProtobufPose3d</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="Wpi_Proto_ProtobufPose3d_Equals_" data-uid="Wpi.Proto.ProtobufPose3d.Equals*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_Equals_System_Object_" data-uid="Wpi.Proto.ProtobufPose3d.Equals(System.Object)">Equals(object)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override bool Equals(object other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a></div>
+  <a id="Wpi_Proto_ProtobufPose3d_Equals_" data-uid="Wpi.Proto.ProtobufPose3d.Equals*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_Equals_Wpi_Proto_ProtobufPose3d_" data-uid="Wpi.Proto.ProtobufPose3d.Equals(Wpi.Proto.ProtobufPose3d)">Equals(ProtobufPose3d)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Equals(ProtobufPose3d other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Wpi.Proto.ProtobufPose3d.html">ProtobufPose3d</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="Wpi_Proto_ProtobufPose3d_GetHashCode_" data-uid="Wpi.Proto.ProtobufPose3d.GetHashCode*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_GetHashCode" data-uid="Wpi.Proto.ProtobufPose3d.GetHashCode">GetHashCode()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override int GetHashCode()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a></div>
+  <a id="Wpi_Proto_ProtobufPose3d_MergeFrom_" data-uid="Wpi.Proto.ProtobufPose3d.MergeFrom*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_MergeFrom_Google_Protobuf_CodedInputStream_" data-uid="Wpi.Proto.ProtobufPose3d.MergeFrom(Google.Protobuf.CodedInputStream)">MergeFrom(CodedInputStream)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void MergeFrom(CodedInputStream input)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">CodedInputStream</span></td>
+        <td><span class="parametername">input</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="Wpi_Proto_ProtobufPose3d_MergeFrom_" data-uid="Wpi.Proto.ProtobufPose3d.MergeFrom*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_MergeFrom_Wpi_Proto_ProtobufPose3d_" data-uid="Wpi.Proto.ProtobufPose3d.MergeFrom(Wpi.Proto.ProtobufPose3d)">MergeFrom(ProtobufPose3d)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void MergeFrom(ProtobufPose3d other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Wpi.Proto.ProtobufPose3d.html">ProtobufPose3d</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="Wpi_Proto_ProtobufPose3d_ToString_" data-uid="Wpi.Proto.ProtobufPose3d.ToString*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_ToString" data-uid="Wpi.Proto.ProtobufPose3d.ToString">ToString()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override string ToString()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a></div>
+  <a id="Wpi_Proto_ProtobufPose3d_WriteTo_" data-uid="Wpi.Proto.ProtobufPose3d.WriteTo*"></a>
+  <h4 id="Wpi_Proto_ProtobufPose3d_WriteTo_Google_Protobuf_CodedOutputStream_" data-uid="Wpi.Proto.ProtobufPose3d.WriteTo(Google.Protobuf.CodedOutputStream)">WriteTo(CodedOutputStream)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void WriteTo(CodedOutputStream output)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">CodedOutputStream</span></td>
+        <td><span class="parametername">output</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <span class="xref">Google.Protobuf.IMessage&lt;T&gt;</span>
+  </div>
+  <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iequatable-1">IEquatable&lt;T&gt;</a>
+  </div>
+  <div>
+      <span class="xref">Google.Protobuf.IDeepCloneable&lt;T&gt;</span>
+  </div>
+  <div>
+      <span class="xref">Google.Protobuf.IBufferMessage</span>
+  </div>
+  <div>
+      <span class="xref">Google.Protobuf.IMessage</span>
+  </div>
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      QuestNav - VR Navigation for FRC Robots
+      
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

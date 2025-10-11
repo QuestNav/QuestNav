@@ -16,17 +16,33 @@ namespace QuestNav.Commands
         void ProcessCommands();
     }
 
+    /// <summary>
+    /// Processes commands received from the robot and executes appropriate actions
+    /// </summary>
     public class CommandProcessor : ICommandProcessor
     {
-        // Command context
+        /// <summary>
+        /// Network connection for command communication
+        /// </summary>
         private NetworkTableConnection networkTableConnection;
 
-        // Commands
+        /// <summary>
+        /// Command handler for pose reset operations
+        /// </summary>
         private PoseResetCommand poseResetCommand;
 
-        // Processed command variable
+        /// <summary>
+        /// ID of the last processed command to prevent duplicate execution
+        /// </summary>
         private uint lastCommandIdProcessed;
 
+        /// <summary>
+        /// Initializes a new command processor with required dependencies
+        /// </summary>
+        /// <param name="networkTableConnection">Network connection for command communication</param>
+        /// <param name="vrCamera">Reference to the VR camera transform</param>
+        /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
+        /// <param name="resetTransform">Reference to the reset position transform</param>
         public CommandProcessor(
             NetworkTableConnection networkTableConnection,
             Transform vrCamera,
@@ -46,6 +62,9 @@ namespace QuestNav.Commands
             );
         }
 
+        /// <summary>
+        /// Processes incoming commands from the robot and executes them if they haven't been processed before
+        /// </summary>
         public void ProcessCommands()
         {
             ProtobufQuestNavCommand receivedCommand = networkTableConnection.GetCommandRequest();

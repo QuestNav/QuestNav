@@ -1,0 +1,1256 @@
+{
+  "source_base_path": "C:/actions-runner/_work/QuestNav/QuestNav/unity/DocFX",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Resource",
+      "output": {
+        "resource": {
+          "relative_path": "index.json"
+        }
+      }
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "README.md",
+      "output": {
+        ".html": {
+          "relative_path": "README.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Commands.CommandProcessor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Commands.CommandProcessor.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Commands.CommandProcessor",
+      "Summary": "<p sourcefile=\"api/QuestNav.Commands.CommandProcessor.yml\" sourcestartlinenumber=\"1\">Processes commands received from the robot and executes appropriate actions</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Commands.Commands.PoseResetCommand.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Commands.Commands.PoseResetCommand.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Commands.Commands.PoseResetCommand",
+      "Summary": "<p sourcefile=\"api/QuestNav.Commands.Commands.PoseResetCommand.yml\" sourcestartlinenumber=\"1\">Resets the VR camera pose to a specified position</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Commands.Commands.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Commands.Commands.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Commands.Commands",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Commands.ICommand.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Commands.ICommand.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Commands.ICommand",
+      "Summary": "<p sourcefile=\"api/QuestNav.Commands.ICommand.yml\" sourcestartlinenumber=\"1\">Interface for individual command implementations</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Commands.ICommandProcessor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Commands.ICommandProcessor.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Commands.ICommandProcessor",
+      "Summary": "<p sourcefile=\"api/QuestNav.Commands.ICommandProcessor.yml\" sourcestartlinenumber=\"1\">Interface for command processing.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Commands.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Commands.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Commands",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Core.QuestNav.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Core.QuestNav.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Core.QuestNav",
+      "Summary": "<p sourcefile=\"api/QuestNav.Core.QuestNav.yml\" sourcestartlinenumber=\"1\">Main controller class for QuestNav application.\nManages streaming of VR motion data to a FRC robot through NetworkTables.\nOrchestrates pose tracking, reset operations, and network communication.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Core.QuestNavConstants.Commands.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Core.QuestNavConstants.Commands.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Core.QuestNavConstants.Commands",
+      "Summary": "<p sourcefile=\"api/QuestNav.Core.QuestNavConstants.Commands.yml\" sourcestartlinenumber=\"1\">Constants related to command processing.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Core.QuestNavConstants.Display.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Core.QuestNavConstants.Display.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Core.QuestNavConstants.Display",
+      "Summary": "<p sourcefile=\"api/QuestNav.Core.QuestNavConstants.Display.yml\" sourcestartlinenumber=\"1\">Constants related to the display and update frequency.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Core.QuestNavConstants.Field.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Core.QuestNavConstants.Field.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Core.QuestNavConstants.Field",
+      "Summary": "<p sourcefile=\"api/QuestNav.Core.QuestNavConstants.Field.yml\" sourcestartlinenumber=\"1\">Constants related to FRC field dimensions and pose resets.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Core.QuestNavConstants.Logging.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Core.QuestNavConstants.Logging.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Core.QuestNavConstants.Logging",
+      "Summary": "<p sourcefile=\"api/QuestNav.Core.QuestNavConstants.Logging.yml\" sourcestartlinenumber=\"1\">Constants related to logging</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Core.QuestNavConstants.Network.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Core.QuestNavConstants.Network.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Core.QuestNavConstants.Network",
+      "Summary": "<p sourcefile=\"api/QuestNav.Core.QuestNavConstants.Network.yml\" sourcestartlinenumber=\"1\">Constants related to network configuration and communication.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Core.QuestNavConstants.Timing.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Core.QuestNavConstants.Timing.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Core.QuestNavConstants.Timing",
+      "Summary": "<p sourcefile=\"api/QuestNav.Core.QuestNavConstants.Timing.yml\" sourcestartlinenumber=\"1\">Constants related to non-main loop timing</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Core.QuestNavConstants.Topics.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Core.QuestNavConstants.Topics.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Core.QuestNavConstants.Topics",
+      "Summary": "<p sourcefile=\"api/QuestNav.Core.QuestNavConstants.Topics.yml\" sourcestartlinenumber=\"1\">Constants related to NetworkTables topics and paths.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Core.QuestNavConstants.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Core.QuestNavConstants.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Core.QuestNavConstants",
+      "Summary": "<p sourcefile=\"api/QuestNav.Core.QuestNavConstants.yml\" sourcestartlinenumber=\"1\">Contains all constants used by the QuestNav application.\nOrganized by functional category for easier maintenance.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Core.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Core.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Core",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.DoublePublisher.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.DoublePublisher.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.DoublePublisher",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.DoubleSubscriber.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.DoubleSubscriber.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.DoubleSubscriber",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.FloatArrayPublisher.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.FloatArrayPublisher.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.FloatArrayPublisher",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.FloatArraySubscriber.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.FloatArraySubscriber.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.FloatArraySubscriber",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.IntegerPublisher.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.IntegerPublisher.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.IntegerPublisher",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.IntegerSubscriber.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.IntegerSubscriber.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.IntegerSubscriber",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeConnectionInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeConnectionInfo.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeConnectionInfo",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueBooleanArray.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueBooleanArray.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueBooleanArray",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueDoubleArray.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueDoubleArray.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueDoubleArray",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueFloatArray.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueFloatArray.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueFloatArray",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueIntArray.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueIntArray.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueIntArray",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueRaw.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueRaw.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueRaw",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueStringArray.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueStringArray.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.NtValueStringArray",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeNetworkTableValue.NtValueUnion",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeNetworkTableValue.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeNetworkTableValue",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeNtEvent.NtEventUnion.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeNtEvent.NtEventUnion.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeNtEvent.NtEventUnion",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeNtEvent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeNtEvent.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeNtEvent",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeNtLogMessage.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeNtLogMessage.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeNtLogMessage",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativePubSubOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativePubSubOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativePubSubOptions",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeTimeSyncEventData.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeTimeSyncEventData.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeTimeSyncEventData",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeTopicInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeTopicInfo.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeTopicInfo",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NativeValueEventData.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NativeValueEventData.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NativeValueEventData",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NtCoreNatives.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NtCoreNatives.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NtCoreNatives",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NtInstance.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NtInstance.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NtInstance",
+      "Summary": "<p sourcefile=\"api/QuestNav.Native.NTCore.NtInstance.yml\" sourcestartlinenumber=\"1\">Represents a NetworkTables instance for communication with FRC robots.\nProvides methods for creating publishers, subscribers, and managing connections.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.NtType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.NtType.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.NtType",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.PolledLogger.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.PolledLogger.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.PolledLogger",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.ProtobufPublisher-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.ProtobufPublisher-1.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.ProtobufPublisher<T>",
+      "Summary": "<p sourcefile=\"api/QuestNav.Native.NTCore.ProtobufPublisher-1.yml\" sourcestartlinenumber=\"1\">Publisher for protobuf messages over NetworkTables. Handles serialization of protobuf messages to byte arrays.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.ProtobufSubscriber-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.ProtobufSubscriber-1.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.ProtobufSubscriber<T>",
+      "Summary": "<p sourcefile=\"api/QuestNav.Native.NTCore.ProtobufSubscriber-1.yml\" sourcestartlinenumber=\"1\">Subscriber for protobuf messages over NetworkTables. Handles deserialization of byte arrays to protobuf messages.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.PubSubOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.PubSubOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.PubSubOptions",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.RawPublisher.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.RawPublisher.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.RawPublisher",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.RawSubscriber.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.RawSubscriber.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.RawSubscriber",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.WpiString.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.WpiString.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore.WpiString",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Native.NTCore.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Native.NTCore.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Native.NTCore",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Network.INetworkTableConnection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Network.INetworkTableConnection.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Network.INetworkTableConnection",
+      "Summary": "<p sourcefile=\"api/QuestNav.Network.INetworkTableConnection.yml\" sourcestartlinenumber=\"1\">Interface for NetworkTables connection management.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Network.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Network.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Network",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Protos.Generated.CommandsReflection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Protos.Generated.CommandsReflection.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Protos.Generated.CommandsReflection",
+      "Summary": "<p sourcefile=\"api/QuestNav.Protos.Generated.CommandsReflection.yml\" sourcestartlinenumber=\"1\">Holder for reflection information generated from commands.proto</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Protos.Generated.DataReflection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Protos.Generated.DataReflection.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Protos.Generated.DataReflection",
+      "Summary": "<p sourcefile=\"api/QuestNav.Protos.Generated.DataReflection.yml\" sourcestartlinenumber=\"1\">Holder for reflection information generated from data.proto</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase",
+      "Summary": "<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.yml\" sourcestartlinenumber=\"1\">Enum of possible cases for the &quot;payload&quot; oneof.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Protos.Generated.ProtobufQuestNavCommand",
+      "Summary": "<ul sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.yml\" sourcestartlinenumber=\"2\">Main command message sent to the QuestNav system.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.yml\" sourcestartlinenumber=\"4\">This is the primary message type used to send commands from external systems\n(like robot code) to the Quest headset. Each command includes a type identifier,\na unique tracking ID, and optional payload data specific to the command type.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.yml\" sourcestartlinenumber=\"8\">The command system is designed for asynchronous operation - commands are sent\nand responses are received separately, matched by the command_id field.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.yml\" sourcestartlinenumber=\"11\">Message Flow:</p>\n<ol sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.yml\" sourcestartlinenumber=\"12\">\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.yml\" sourcestartlinenumber=\"12\">Client creates command with unique command_id</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.yml\" sourcestartlinenumber=\"13\">Client sets appropriate type and payload</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.yml\" sourcestartlinenumber=\"14\">Client sends command to Quest</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommand.yml\" sourcestartlinenumber=\"15\">Quest processes command and sends response with matching command_id</li>\n</ol>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse",
+      "Summary": "<ul sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.yml\" sourcestartlinenumber=\"2\">Response message sent back after processing a command.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.yml\" sourcestartlinenumber=\"4\">This message is sent by the Quest back to the client after processing\na ProtobufQuestNavCommand. It provides status information about whether\nthe command was executed successfully and any error details if it failed.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.yml\" sourcestartlinenumber=\"8\">The response is matched to the original command using the command_id field,\nallowing for proper asynchronous command handling even when multiple\ncommands are in flight simultaneously.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.yml\" sourcestartlinenumber=\"12\">Response Timing:</p>\n<ul sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.yml\" sourcestartlinenumber=\"13\">\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.yml\" sourcestartlinenumber=\"13\">Responses are sent after command processing completes</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.yml\" sourcestartlinenumber=\"14\">Some commands may take time to execute (e.g., pose reset with validation)</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.yml\" sourcestartlinenumber=\"15\">Clients should implement timeouts for command responses</li>\n</ul>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.yml\" sourcestartlinenumber=\"17\">Note: For FRC users, the vendor dependency will handle response matching automatically.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Protos.Generated.ProtobufQuestNavDeviceData",
+      "Summary": "<ul sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.yml\" sourcestartlinenumber=\"2\">Lower-frequency device status data sent from Quest to external systems.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.yml\" sourcestartlinenumber=\"4\">This message contains device health and status information that doesn't need\nto be sent as frequently as tracking data. It's sent at 3 Hz (every 333 milliseconds)\nto provide monitoring and diagnostic information without consuming excessive\nbandwidth.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.yml\" sourcestartlinenumber=\"9\">This data helps external systems:</p>\n<ul sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.yml\" sourcestartlinenumber=\"10\">\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.yml\" sourcestartlinenumber=\"10\">Monitor Quest device health</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.yml\" sourcestartlinenumber=\"11\">Detect tracking system issues</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.yml\" sourcestartlinenumber=\"12\">Implement failsafe behaviors</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.yml\" sourcestartlinenumber=\"13\">Provide user feedback about system status</li>\n</ul>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.yml\" sourcestartlinenumber=\"15\">The information is useful for both autonomous operation and debugging/\ntroubleshooting scenarios.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Protos.Generated.ProtobufQuestNavFrameData",
+      "Summary": "<ul sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.yml\" sourcestartlinenumber=\"2\">High-frequency tracking data sent from Quest to external systems.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.yml\" sourcestartlinenumber=\"4\">This message contains the core tracking information that external systems\n(like robot code) need for real-time localization and navigation. It's sent\nat 100 Hz (every 10 milliseconds) to provide smooth, responsive tracking.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.yml\" sourcestartlinenumber=\"8\">The data represents the Quest's position and orientation on the field,\nderived from visual-inertial odometry using the Quest's cameras and IMU sensors.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.yml\" sourcestartlinenumber=\"11\">Coordinate System:</p>\n<ul sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.yml\" sourcestartlinenumber=\"12\">\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.yml\" sourcestartlinenumber=\"12\">Uses WPILib field-relative coordinate system</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.yml\" sourcestartlinenumber=\"13\">Origin and axes depend on field setup and calibration</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.yml\" sourcestartlinenumber=\"14\">Pose represents the Quest's position; mounting offset to get robot position\nis applied in end user code</li>\n</ul>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload",
+      "Summary": "<ul sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.yml\" sourcestartlinenumber=\"2\">Payload message for the POSE_RESET command.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.yml\" sourcestartlinenumber=\"4\">This message contains the data needed to execute a pose reset operation.\nThe pose reset command allows external systems to correct the Quest's\nunderstanding of the robot's position and orientation on the field.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.yml\" sourcestartlinenumber=\"8\">Coordinate System:</p>\n<ul sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.yml\" sourcestartlinenumber=\"9\">\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.yml\" sourcestartlinenumber=\"9\">Uses WPILib field-relative coordinate system</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.yml\" sourcestartlinenumber=\"10\">X-axis: Forward (towards opposing alliance)</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.yml\" sourcestartlinenumber=\"11\">Y-axis: Left (when facing forward)</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.yml\" sourcestartlinenumber=\"12\">Rotation: Counter-clockwise positive (standard mathematical convention)</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.yml\" sourcestartlinenumber=\"13\">Origin: Typically at one corner of the field (see field layout documentation)</li>\n</ul>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Protos.Generated.QuestNavCommandType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Protos.Generated.QuestNavCommandType.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Protos.Generated.QuestNavCommandType",
+      "Summary": "<ul sourcefile=\"api/QuestNav.Protos.Generated.QuestNavCommandType.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/QuestNav.Protos.Generated.QuestNavCommandType.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/QuestNav.Protos.Generated.QuestNavCommandType.yml\" sourcestartlinenumber=\"2\">Enumeration of available command types in the QuestNav system.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.QuestNavCommandType.yml\" sourcestartlinenumber=\"4\">This enum defines all the different types of commands that can be sent to\nthe Quest headset. The enum is designed to be extensible - new command types\ncan be added without breaking existing clients.</p>\n<p sourcefile=\"api/QuestNav.Protos.Generated.QuestNavCommandType.yml\" sourcestartlinenumber=\"8\">Design Notes:</p>\n<ul sourcefile=\"api/QuestNav.Protos.Generated.QuestNavCommandType.yml\" sourcestartlinenumber=\"9\">\n<li sourcefile=\"api/QuestNav.Protos.Generated.QuestNavCommandType.yml\" sourcestartlinenumber=\"9\">Values start from 0 as required by proto3</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.QuestNavCommandType.yml\" sourcestartlinenumber=\"10\">UNSPECIFIED value (0) is reserved for error handling</li>\n<li sourcefile=\"api/QuestNav.Protos.Generated.QuestNavCommandType.yml\" sourcestartlinenumber=\"11\">Command values should be assigned incrementally for clarity</li>\n</ul>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Protos.Generated.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Protos.Generated.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Protos.Generated",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.UI.IUIManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.UI.IUIManager.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.UI.IUIManager",
+      "Summary": "<p sourcefile=\"api/QuestNav.UI.IUIManager.yml\" sourcestartlinenumber=\"1\">Interface for UI management.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.UI.UIManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.UI.UIManager.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.UI.UIManager",
+      "Summary": "<p sourcefile=\"api/QuestNav.UI.UIManager.yml\" sourcestartlinenumber=\"1\">Manages UI elements and user interactions for the QuestNav application.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.UI.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.UI.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.UI",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Utils.Conversions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Utils.Conversions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Utils.Conversions",
+      "Summary": "<p sourcefile=\"api/QuestNav.Utils.Conversions.yml\" sourcestartlinenumber=\"1\">Provides utility methods for converting between FRC and Unity coordinate systems.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Utils.QuaternionExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Utils.QuaternionExtensions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Utils.QuaternionExtensions",
+      "Summary": "<p sourcefile=\"api/QuestNav.Utils.QuaternionExtensions.yml\" sourcestartlinenumber=\"1\">Extension methods for Unity's Quaternion class to convert to array format.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Utils.QueuedLogger.LogLevel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Utils.QueuedLogger.LogLevel.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Utils.QueuedLogger.LogLevel",
+      "Summary": "<p sourcefile=\"api/QuestNav.Utils.QueuedLogger.LogLevel.yml\" sourcestartlinenumber=\"1\">Defines the supported log levels for the queued logger</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Utils.QueuedLogger.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Utils.QueuedLogger.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Utils.QueuedLogger",
+      "Summary": "<p sourcefile=\"api/QuestNav.Utils.QueuedLogger.yml\" sourcestartlinenumber=\"1\">A thread-safe logging system that queues log messages and supports deduplication of identical messages.\nMessages are batched and flushed to Unity's Debug system periodically.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Utils.VectorExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Utils.VectorExtensions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Utils.VectorExtensions",
+      "Summary": "<p sourcefile=\"api/QuestNav.Utils.VectorExtensions.yml\" sourcestartlinenumber=\"1\">Extension methods for Unity's Vector3 class to convert to array format.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/QuestNav.Utils.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/QuestNav.Utils.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "QuestNav.Utils",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.Geometry2DReflection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.Geometry2DReflection.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.Geometry2DReflection",
+      "Summary": "<p sourcefile=\"api/Wpi.Proto.Geometry2DReflection.yml\" sourcestartlinenumber=\"1\">Holder for reflection information generated from geometry2d.proto</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.Geometry3DReflection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.Geometry3DReflection.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.Geometry3DReflection",
+      "Summary": "<p sourcefile=\"api/Wpi.Proto.Geometry3DReflection.yml\" sourcestartlinenumber=\"1\">Holder for reflection information generated from geometry3d.proto</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufEllipse2d.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufEllipse2d.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufEllipse2d",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"2\">Represents a 2D ellipse with arbitrary orientation.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"4\">This message defines an elliptical region in 2D space using a center pose\nand semi-axis lengths. The ellipse can be rotated to any orientation\nbased on the center pose's rotation component.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"8\">Geometric Properties:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"9\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"9\">Center point and orientation defined by pose</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"10\">Major/minor axes aligned with pose's local coordinate frame</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"11\">X semi-axis extends along pose's X-axis (local forward direction)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"12\">Y semi-axis extends along pose's Y-axis (local left direction)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"13\">Total area = π * xSemiAxis * ySemiAxis</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"15\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"16\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"16\">Uncertainty ellipses for localization</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"17\">Smooth obstacle representations</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"18\">Robot operating regions</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"19\">Sensor coverage areas</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"20\">Path planning with uncertainty</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"22\">Special Cases:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"23\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"23\">Circle: xSemiAxis = ySemiAxis</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufEllipse2d.yml\" sourcestartlinenumber=\"24\">Degenerate ellipse: one semi-axis approaches zero (becomes a line)</li>\n</ul>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufPose2d.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufPose2d.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufPose2d",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"2\">Represents a complete 2D pose (position and orientation).</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"4\">This message combines a 2D position (translation) with a 2D orientation\n(rotation) to fully describe an object's pose in the 2D plane. This is\nthe fundamental representation for robot poses in WPILib and QuestNav.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"8\">A pose answers two questions:</p>\n<ol sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"9\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"9\">Where is the object? (translation component)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"10\">Which direction is it facing? (rotation component)</li>\n</ol>\n<p sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"12\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"13\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"13\">Robot pose on field (primary use in QuestNav)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"14\">Waypoint targets for path following</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"15\">Relative poses between objects</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"16\">Initial poses for localization</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufPose2d.yml\" sourcestartlinenumber=\"18\">The pose represents the robot's coordinate frame relative to the field\ncoordinate frame, allowing transformation of points between the two systems.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufPose3d.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufPose3d.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufPose3d",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"2\">Represents a complete 3D pose (position and orientation).</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"4\">This message combines a 3D position (translation) with a 3D orientation\n(rotation) to fully describe an object's pose in 3D space. This extends\nthe 2D pose concept into three dimensions for applications requiring\nfull spatial representation.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"9\">A 3D pose answers two fundamental questions:</p>\n<ol sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"10\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"10\">Where is the object in 3D space? (translation component)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"11\">How is it oriented in 3D space? (rotation component)</li>\n</ol>\n<p sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"13\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"14\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"14\">Camera poses for vision processing</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"15\">AprilTag poses in 3D space</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"16\">Robotic arm end-effector poses</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"17\">Drone/UAV poses (position and attitude)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"18\">3D object tracking and localization</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"19\">Sensor mounting positions and orientations</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"21\">The pose represents the object's coordinate frame relative to a reference\ncoordinate frame, enabling transformation of points and vectors between\nthe two coordinate systems.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufPose3d.yml\" sourcestartlinenumber=\"25\">Coordinate Frame Transformation:\nGiven a point P in the object's local frame, the corresponding point\nin the reference frame is: P_ref = rotation * P_local + translation</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufQuaternion.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufQuaternion.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufQuaternion",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"2\">Represents a quaternion for 3D rotation.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"4\">Quaternions provide a mathematically robust way to represent 3D rotations\nwithout the singularities (gimbal lock) that can occur with Euler angles.\nThey are the preferred representation for 3D rotations in robotics.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"8\">Mathematical Properties:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"9\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"9\">Unit quaternion: w² + x² + y² + z² = 1</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"10\">Represents rotation around axis (x,y,z) by angle θ:\nw = cos(θ/2), (x,y,z) = sin(θ/2) * unit_axis</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"12\">Identity rotation: (w=1, x=0, y=0, z=0)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"13\">Conjugate: (w, -x, -y, -z) represents inverse rotation</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"15\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"16\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"16\">3D object orientations</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"17\">IMU/gyroscope data representation</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"18\">Camera pose orientations</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"19\">Robotic arm joint orientations</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"20\">Smooth rotation interpolation (SLERP)</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"22\">Advantages over Euler angles:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"23\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"23\">No gimbal lock singularities</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"24\">Smooth interpolation</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"25\">Efficient composition of rotations</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufQuaternion.yml\" sourcestartlinenumber=\"26\">Numerically stable</li>\n</ul>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufRectangle2d.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufRectangle2d.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufRectangle2d",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"2\">Represents a 2D rectangle with arbitrary orientation.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"4\">This message defines a rectangular region in 2D space using a center pose\nand width/height dimensions. The rectangle can be rotated to any orientation\nbased on the center pose's rotation component.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"8\">Geometric Properties:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"9\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"9\">Center point and orientation defined by pose</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"10\">Width extends along the pose's X-axis (local forward direction)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"11\">Height extends along the pose's Y-axis (local left direction)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"12\">Total area = xWidth * yWidth</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"14\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"15\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"15\">Robot footprint representation</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"16\">Obstacle and keep-out zone definitions</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"17\">Field element boundaries</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"18\">Collision detection regions</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRectangle2d.yml\" sourcestartlinenumber=\"19\">Path planning constraints</li>\n</ul>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufRotation2d.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufRotation2d.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufRotation2d",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"2\">Represents a 2D rotation angle.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"4\">This message encodes a rotation in the 2D plane using a single angle value.\nIt follows the standard mathematical convention for angle measurement and\nis used to represent orientations and rotational displacements.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"8\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"9\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"9\">Robot heading/orientation on field</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"10\">Rotational component of poses and transforms</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"11\">Angular displacement between orientations</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"12\">Waypoint headings</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"14\">Angle Convention:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"15\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"15\">0 radians: Facing positive X direction (forward on field)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"16\">π/2 radians: Facing positive Y direction (left on field)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"17\">π radians: Facing negative X direction (backward on field)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"18\">3π/2 radians: Facing negative Y direction (right on field)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation2d.yml\" sourcestartlinenumber=\"19\">Counter-clockwise rotation is positive</li>\n</ul>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufRotation3d.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufRotation3d.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufRotation3d",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"2\">Represents a 3D rotation using a quaternion.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"4\">This message wraps a quaternion to represent 3D rotations in a standardized\nway. It provides a clean interface for 3D rotation operations while\nleveraging the mathematical advantages of quaternions internally.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"8\">The rotation represents the orientation of a coordinate frame relative to\na reference frame, or the rotation needed to transform vectors from one\ncoordinate system to another.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"12\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"13\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"13\">Object orientations in 3D space</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"14\">Camera pose rotations</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"15\">IMU orientation data</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"16\">Robotic arm end-effector orientations</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"17\">Transformation between coordinate frames</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"19\">Mathematical Operations:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"20\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"20\">Composition: R3 = R2 * R1 (apply R1 first, then R2)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"21\">Inverse: R^(-1) represents the opposite rotation</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufRotation3d.yml\" sourcestartlinenumber=\"22\">Identity: No rotation (quaternion w=1, x=y=z=0)</li>\n</ul>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufTransform2d.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufTransform2d.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufTransform2d",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufTransform2d.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform2d.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTransform2d.yml\" sourcestartlinenumber=\"2\">Represents a 2D coordinate transformation.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTransform2d.yml\" sourcestartlinenumber=\"4\">This message describes how to transform coordinates from one 2D coordinate\nframe to another. It combines a translation and rotation to define the\nrelationship between two coordinate systems.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTransform2d.yml\" sourcestartlinenumber=\"8\">Mathematical Interpretation:\nGiven a point P in frame A, the corresponding point in frame B is:\nP_B = Transform2d * P_A = Rotation * P_A + Translation</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTransform2d.yml\" sourcestartlinenumber=\"12\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufTransform2d.yml\" sourcestartlinenumber=\"13\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform2d.yml\" sourcestartlinenumber=\"13\">Transform between robot and field coordinate frames</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform2d.yml\" sourcestartlinenumber=\"14\">Relative positioning between objects</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform2d.yml\" sourcestartlinenumber=\"15\">Coordinate frame conversions in path planning</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform2d.yml\" sourcestartlinenumber=\"16\">Sensor calibration and mounting offsets</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTransform2d.yml\" sourcestartlinenumber=\"18\">The transform represents &quot;how to get from frame A to frame B&quot; and can be\ninverted to get the reverse transformation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufTransform3d.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufTransform3d.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufTransform3d",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"2\">Represents a 3D coordinate transformation.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"4\">This message describes how to transform coordinates from one 3D coordinate\nframe to another. It combines a 3D translation and rotation to define the\ncomplete spatial relationship between two coordinate systems.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"8\">Mathematical Interpretation:\nGiven a point P in frame A, the corresponding point in frame B is:\nP_B = Transform3d * P_A = Rotation * P_A + Translation</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"12\">This follows the standard transformation sequence:</p>\n<ol sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"13\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"13\">Apply rotation to the point</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"14\">Add translation to the rotated point</li>\n</ol>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"16\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"17\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"17\">Transform between robot and world coordinate frames</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"18\">Camera calibration and extrinsic parameters</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"19\">Sensor mounting transformations</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"20\">Relative positioning between 3D objects</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"21\">Coordinate frame conversions in 3D path planning</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"22\">Multi-robot relative localization</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTransform3d.yml\" sourcestartlinenumber=\"24\">The transform represents &quot;how to get from frame A to frame B&quot; and can be\ninverted to get the reverse transformation. Transforms can also be composed\nto create transformation chains through multiple coordinate frames.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufTranslation2d.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufTranslation2d.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufTranslation2d",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"2\">Represents a 2D translation (displacement) vector.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"4\">This message encodes a 2D displacement or position vector using Cartesian\ncoordinates. It's used as a building block for more complex geometric\nrepresentations like poses and transforms.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"8\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"9\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"9\">Robot position on field</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"10\">Displacement between two points</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"11\">Velocity vectors (when representing change in position)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"12\">Waypoint coordinates</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"14\">Coordinate System:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"15\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"15\">X: Forward/backward displacement (positive = forward)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"16\">Y: Left/right displacement (positive = left)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation2d.yml\" sourcestartlinenumber=\"17\">Units: meters</li>\n</ul>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufTranslation3d.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufTranslation3d.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufTranslation3d",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"2\">Represents a 3D translation (displacement) vector.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"4\">This message encodes a 3D displacement or position vector using Cartesian\ncoordinates. It extends the 2D translation concept into three dimensions\nand serves as a building block for more complex 3D geometric representations.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"8\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"9\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"9\">3D object positions in space</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"10\">Displacement vectors between 3D points</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"11\">3D velocity vectors (when representing change in position)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"12\">Camera/sensor positions relative to robot</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"13\">AprilTag positions in 3D space</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"15\">Coordinate System:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"16\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"16\">X: Forward/backward displacement (positive = forward)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"17\">Y: Left/right displacement (positive = left)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"18\">Z: Up/down displacement (positive = up)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTranslation3d.yml\" sourcestartlinenumber=\"19\">Units: meters</li>\n</ul>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufTwist2d.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufTwist2d.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufTwist2d",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"2\">Represents a 2D twist (velocity in 2D space).</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"4\">This message encodes the instantaneous velocity of an object in 2D space,\nincluding both linear and angular velocity components. It describes how\nan object's pose is changing over time.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"8\">Mathematical Interpretation:\nThe twist represents the time derivative of pose:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"10\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"10\">dx/dt: Rate of change in X position</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"11\">dy/dt: Rate of change in Y position</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"12\">dθ/dt: Rate of change in orientation</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"14\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"15\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"15\">Robot velocity commands for motion control</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"16\">Velocity feedback from odometry systems</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"17\">Velocity constraints in path planning</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"18\">Dynamic modeling and simulation</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTwist2d.yml\" sourcestartlinenumber=\"20\">Coordinate Frame:\nThe twist can be expressed in different coordinate frames (robot-relative\nor field-relative) depending on the application context.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.ProtobufTwist3d.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.ProtobufTwist3d.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto.ProtobufTwist3d",
+      "Summary": "<ul sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"1\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"1\"></li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"2\">Represents a 3D twist (velocity in 3D space).</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"4\">This message encodes the instantaneous velocity of an object in 3D space,\nincluding both linear and angular velocity components. It describes how\nan object's 3D pose is changing over time, extending the 2D twist concept\ninto three dimensions.</p>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"9\">Mathematical Interpretation:\nThe twist represents the time derivative of 3D pose:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"11\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"11\">Linear velocity: (dx/dt, dy/dt, dz/dt)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"12\">Angular velocity: (rx, ry, rz) as rotation rates about each axis</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"14\">Applications:</p>\n<ul sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"15\">\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"15\">3D robot velocity commands (drones, robotic arms)</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"16\">3D velocity feedback from odometry systems</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"17\">Velocity constraints in 3D path planning</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"18\">Dynamic modeling and simulation in 3D</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"19\">IMU angular velocity data representation</li>\n<li sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"20\">Camera motion estimation</li>\n</ul>\n<p sourcefile=\"api/Wpi.Proto.ProtobufTwist3d.yml\" sourcestartlinenumber=\"22\">Coordinate Frame:\nThe twist can be expressed in different coordinate frames (body-relative\nor world-relative) depending on the application context. The angular\nvelocity components represent rotation rates about the coordinate axes.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Wpi.Proto.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Wpi.Proto.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Wpi.Proto",
+      "Summary": null
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html"
+        },
+        ".json": {
+          "relative_path": "api/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html"
+        }
+      },
+      "version": ""
+    }
+  ],
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}

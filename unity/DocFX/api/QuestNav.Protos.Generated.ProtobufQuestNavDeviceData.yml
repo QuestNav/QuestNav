@@ -1,0 +1,1632 @@
+### YamlMime:ManagedReference
+items:
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  commentId: T:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  id: ProtobufQuestNavDeviceData
+  parent: QuestNav.Protos.Generated
+  children:
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercent
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercentFieldNumber
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CalculateSize
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Clone
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTracking
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTrackingFieldNumber
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Descriptor
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals(System.Object)
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.GetHashCode
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom(Google.Protobuf.CodedInputStream)
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Parser
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ToString
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounter
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounterFieldNumber
+  - QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.WriteTo(Google.Protobuf.CodedOutputStream)
+  langs:
+  - csharp
+  - vb
+  name: ProtobufQuestNavDeviceData
+  nameWithType: ProtobufQuestNavDeviceData
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  type: Class
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: ProtobufQuestNavDeviceData
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 406
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: >-
+    *
+     Lower-frequency device status data sent from Quest to external systems.
+
+     This message contains device health and status information that doesn't need
+     to be sent as frequently as tracking data. It's sent at 3 Hz (every 333 milliseconds)
+     to provide monitoring and diagnostic information without consuming excessive
+     bandwidth.
+
+     This data helps external systems:
+     - Monitor Quest device health
+     - Detect tracking system issues
+     - Implement failsafe behaviors
+     - Provide user feedback about system status
+
+     The information is useful for both autonomous operation and debugging/
+     troubleshooting scenarios.
+  example: []
+  syntax:
+    content: 'public sealed class ProtobufQuestNavDeviceData : IMessage<ProtobufQuestNavDeviceData>, IEquatable<ProtobufQuestNavDeviceData>, IDeepCloneable<ProtobufQuestNavDeviceData>, IBufferMessage, IMessage'
+    content.vb: Public NotInheritable Class ProtobufQuestNavDeviceData Implements IMessage(Of ProtobufQuestNavDeviceData), IEquatable(Of ProtobufQuestNavDeviceData), IDeepCloneable(Of ProtobufQuestNavDeviceData), IBufferMessage, IMessage
+  inheritance:
+  - System.Object
+  implements:
+  - Google.Protobuf.IMessage{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  - System.IEquatable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  - Google.Protobuf.IDeepCloneable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  - Google.Protobuf.IBufferMessage
+  - Google.Protobuf.IMessage
+  inheritedMembers:
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Parser
+  commentId: P:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Parser
+  id: Parser
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: Parser
+  nameWithType: ProtobufQuestNavDeviceData.Parser
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Parser
+  type: Property
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: Parser
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 413
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  syntax:
+    content: public static MessageParser<ProtobufQuestNavDeviceData> Parser { get; }
+    parameters: []
+    return:
+      type: Google.Protobuf.MessageParser{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+    content.vb: Public Shared ReadOnly Property Parser As MessageParser(Of ProtobufQuestNavDeviceData)
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Parser*
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Descriptor
+  commentId: P:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Descriptor
+  id: Descriptor
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: Descriptor
+  nameWithType: ProtobufQuestNavDeviceData.Descriptor
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Descriptor
+  type: Property
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: Descriptor
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 417
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  syntax:
+    content: public static MessageDescriptor Descriptor { get; }
+    parameters: []
+    return:
+      type: Google.Protobuf.Reflection.MessageDescriptor
+    content.vb: Public Shared ReadOnly Property Descriptor As MessageDescriptor
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Descriptor*
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor
+  commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor
+  id: '#ctor'
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: ProtobufQuestNavDeviceData()
+  nameWithType: ProtobufQuestNavDeviceData.ProtobufQuestNavDeviceData()
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ProtobufQuestNavDeviceData()
+  type: Constructor
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: .ctor
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 429
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  syntax:
+    content: public ProtobufQuestNavDeviceData()
+    content.vb: Public Sub New()
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor*
+  nameWithType.vb: ProtobufQuestNavDeviceData.New()
+  fullName.vb: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.New()
+  name.vb: New()
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  id: '#ctor(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)'
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: ProtobufQuestNavDeviceData(ProtobufQuestNavDeviceData)
+  nameWithType: ProtobufQuestNavDeviceData.ProtobufQuestNavDeviceData(ProtobufQuestNavDeviceData)
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ProtobufQuestNavDeviceData(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  type: Constructor
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: .ctor
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 437
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  syntax:
+    content: public ProtobufQuestNavDeviceData(ProtobufQuestNavDeviceData other)
+    parameters:
+    - id: other
+      type: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    content.vb: Public Sub New(other As ProtobufQuestNavDeviceData)
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor*
+  nameWithType.vb: ProtobufQuestNavDeviceData.New(ProtobufQuestNavDeviceData)
+  fullName.vb: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.New(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  name.vb: New(ProtobufQuestNavDeviceData)
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Clone
+  commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Clone
+  id: Clone
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: Clone()
+  nameWithType: ProtobufQuestNavDeviceData.Clone()
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Clone()
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: Clone
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 446
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: Creates a deep clone of this object.
+  example: []
+  syntax:
+    content: public ProtobufQuestNavDeviceData Clone()
+    return:
+      type: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+      description: A deep clone of this object.
+    content.vb: Public Function Clone() As ProtobufQuestNavDeviceData
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Clone*
+  implements:
+  - Google.Protobuf.IDeepCloneable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.Clone
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounterFieldNumber
+  commentId: F:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounterFieldNumber
+  id: TrackingLostCounterFieldNumber
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: TrackingLostCounterFieldNumber
+  nameWithType: ProtobufQuestNavDeviceData.TrackingLostCounterFieldNumber
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounterFieldNumber
+  type: Field
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: TrackingLostCounterFieldNumber
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 453
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: Field number for the "tracking_lost_counter" field.
+  example: []
+  syntax:
+    content: public const int TrackingLostCounterFieldNumber = 1
+    return:
+      type: System.Int32
+    content.vb: Public Const TrackingLostCounterFieldNumber As Integer = 1
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounter
+  commentId: P:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounter
+  id: TrackingLostCounter
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: TrackingLostCounter
+  nameWithType: ProtobufQuestNavDeviceData.TrackingLostCounter
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounter
+  type: Property
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: TrackingLostCounter
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 475
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: >-
+    *
+     Count of tracking loss events since app startup.
+
+     This counter increments each time the Quest's tracking system loses
+     tracking after having established it. Tracking loss can occur due to:
+     - Poor lighting conditions
+     - Lack of visual features in environment
+     - Rapid motion or acceleration
+     - Occlusion of cameras
+     - Hardware issues
+
+     A high or rapidly increasing counter may indicate:
+     - Environmental issues (lighting, features)
+     - Quest mounting problems (vibration, obstruction)
+     - Hardware degradation
+
+     This metric helps assess tracking system reliability and can trigger
+     alerts or fallback behaviors in robot code.
+  example: []
+  syntax:
+    content: public int TrackingLostCounter { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property TrackingLostCounter As Integer
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounter*
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTrackingFieldNumber
+  commentId: F:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTrackingFieldNumber
+  id: CurrentlyTrackingFieldNumber
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: CurrentlyTrackingFieldNumber
+  nameWithType: ProtobufQuestNavDeviceData.CurrentlyTrackingFieldNumber
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTrackingFieldNumber
+  type: Field
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: CurrentlyTrackingFieldNumber
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 485
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: Field number for the "currently_tracking" field.
+  example: []
+  syntax:
+    content: public const int CurrentlyTrackingFieldNumber = 2
+    return:
+      type: System.Int32
+    content.vb: Public Const CurrentlyTrackingFieldNumber As Integer = 2
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTracking
+  commentId: P:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTracking
+  id: CurrentlyTracking
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: CurrentlyTracking
+  nameWithType: ProtobufQuestNavDeviceData.CurrentlyTracking
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTracking
+  type: Property
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: CurrentlyTracking
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 508
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: >-
+    *
+     Current tracking status of the Quest device.
+
+     true:  Quest is actively tracking and pose data is reliable
+     false: Quest has lost tracking and pose data should not be trusted
+
+     When tracking is lost:
+     - Pose data becomes stale and unreliable
+     - Robot should switch to alternative localization methods
+     - Movement should be limited or stopped for safety
+
+     Tracking can be recovered by:
+     - Improving lighting conditions
+     - Moving to area with more visual features
+     - Reducing motion to allow system to re-initialize
+     - Performing pose reset when tracking recovers
+
+     External systems should monitor this field and implement appropriate
+     fallback behaviors when tracking is lost.
+  example: []
+  syntax:
+    content: public bool CurrentlyTracking { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property CurrentlyTracking As Boolean
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTracking*
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercentFieldNumber
+  commentId: F:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercentFieldNumber
+  id: BatteryPercentFieldNumber
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: BatteryPercentFieldNumber
+  nameWithType: ProtobufQuestNavDeviceData.BatteryPercentFieldNumber
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercentFieldNumber
+  type: Field
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: BatteryPercentFieldNumber
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 518
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: Field number for the "battery_percent" field.
+  example: []
+  syntax:
+    content: public const int BatteryPercentFieldNumber = 3
+    return:
+      type: System.Int32
+    content.vb: Public Const BatteryPercentFieldNumber As Integer = 3
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercent
+  commentId: P:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercent
+  id: BatteryPercent
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: BatteryPercent
+  nameWithType: ProtobufQuestNavDeviceData.BatteryPercent
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercent
+  type: Property
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: BatteryPercent
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 544
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: >-
+    *
+     Quest device battery level as a percentage (0-100).
+
+     This provides the current battery charge level of the Quest headset,
+     allowing external systems to:
+     - Monitor power status during operation
+     - Implement low-battery warnings or behaviors
+     - Plan operation duration and charging needs
+     - Trigger graceful shutdown procedures
+
+     Battery Level Guidelines:
+     - 100%: Fully charged
+     - 50-100%: Normal operation
+     - 20-50%: Consider charging soon
+     - 10-20%: Low battery warning recommended
+     - 0-10%: Critical - plan immediate shutdown/charging
+
+     Note: Battery drain rate depends on:
+     - Processing load (tracking complexity)
+     - Display usage (if any)
+     - Wireless communication activity
+     - Environmental temperature
+  example: []
+  syntax:
+    content: public int BatteryPercent { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property BatteryPercent As Integer
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercent*
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals(System.Object)
+  commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals(System.Object)
+  id: Equals(System.Object)
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: Equals(object)
+  nameWithType: ProtobufQuestNavDeviceData.Equals(object)
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals(object)
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: Equals
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 553
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  example: []
+  syntax:
+    content: public override bool Equals(object other)
+    parameters:
+    - id: other
+      type: System.Object
+    return:
+      type: System.Boolean
+    content.vb: Public Overrides Function Equals(other As Object) As Boolean
+  overridden: System.Object.Equals(System.Object)
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals*
+  nameWithType.vb: ProtobufQuestNavDeviceData.Equals(Object)
+  fullName.vb: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals(Object)
+  name.vb: Equals(Object)
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  id: Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: Equals(ProtobufQuestNavDeviceData)
+  nameWithType: ProtobufQuestNavDeviceData.Equals(ProtobufQuestNavDeviceData)
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: Equals
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 559
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  example: []
+  syntax:
+    content: public bool Equals(ProtobufQuestNavDeviceData other)
+    parameters:
+    - id: other
+      type: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    return:
+      type: System.Boolean
+    content.vb: Public Function Equals(other As ProtobufQuestNavDeviceData) As Boolean
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals*
+  implements:
+  - System.IEquatable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.GetHashCode
+  commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.GetHashCode
+  id: GetHashCode
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: GetHashCode()
+  nameWithType: ProtobufQuestNavDeviceData.GetHashCode()
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.GetHashCode()
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: GetHashCode
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 574
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  example: []
+  syntax:
+    content: public override int GetHashCode()
+    return:
+      type: System.Int32
+    content.vb: Public Overrides Function GetHashCode() As Integer
+  overridden: System.Object.GetHashCode
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.GetHashCode*
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ToString
+  commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ToString
+  id: ToString
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: ToString()
+  nameWithType: ProtobufQuestNavDeviceData.ToString()
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ToString()
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: ToString
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 587
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  example: []
+  syntax:
+    content: public override string ToString()
+    return:
+      type: System.String
+    content.vb: Public Overrides Function ToString() As String
+  overridden: System.Object.ToString
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ToString*
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.WriteTo(Google.Protobuf.CodedOutputStream)
+  commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.WriteTo(Google.Protobuf.CodedOutputStream)
+  id: WriteTo(Google.Protobuf.CodedOutputStream)
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: WriteTo(CodedOutputStream)
+  nameWithType: ProtobufQuestNavDeviceData.WriteTo(CodedOutputStream)
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.WriteTo(Google.Protobuf.CodedOutputStream)
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: WriteTo
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 593
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: Writes the data to the given coded output stream.
+  example: []
+  syntax:
+    content: public void WriteTo(CodedOutputStream output)
+    parameters:
+    - id: output
+      type: Google.Protobuf.CodedOutputStream
+      description: Coded output stream to write the data to. Must not be null.
+    content.vb: Public Sub WriteTo(output As CodedOutputStream)
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.WriteTo*
+  implements:
+  - Google.Protobuf.IMessage.WriteTo(Google.Protobuf.CodedOutputStream)
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CalculateSize
+  commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CalculateSize
+  id: CalculateSize
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: CalculateSize()
+  nameWithType: ProtobufQuestNavDeviceData.CalculateSize()
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CalculateSize()
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: CalculateSize
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 639
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: Calculates the size of this message in Protocol Buffer wire format, in bytes.
+  example: []
+  syntax:
+    content: public int CalculateSize()
+    return:
+      type: System.Int32
+      description: >-
+        The number of bytes required to write this message
+                    to a coded output stream.
+    content.vb: Public Function CalculateSize() As Integer
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CalculateSize*
+  implements:
+  - Google.Protobuf.IMessage.CalculateSize
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  id: MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: MergeFrom(ProtobufQuestNavDeviceData)
+  nameWithType: ProtobufQuestNavDeviceData.MergeFrom(ProtobufQuestNavDeviceData)
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: MergeFrom
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 658
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: Merges the given message into this one.
+  remarks: See the user guide for precise merge semantics.
+  example: []
+  syntax:
+    content: public void MergeFrom(ProtobufQuestNavDeviceData other)
+    parameters:
+    - id: other
+      type: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    content.vb: Public Sub MergeFrom(other As ProtobufQuestNavDeviceData)
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom*
+  implements:
+  - Google.Protobuf.IMessage{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom(Google.Protobuf.CodedInputStream)
+  commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom(Google.Protobuf.CodedInputStream)
+  id: MergeFrom(Google.Protobuf.CodedInputStream)
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  langs:
+  - csharp
+  - vb
+  name: MergeFrom(CodedInputStream)
+  nameWithType: ProtobufQuestNavDeviceData.MergeFrom(CodedInputStream)
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom(Google.Protobuf.CodedInputStream)
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Data.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: MergeFrom
+    path: ../Assets/QuestNav/Protos/Generated/Data.cs
+    startLine: 676
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: Merges the data from the specified coded input stream with the current message.
+  remarks: See the user guide for precise merge semantics.
+  example: []
+  syntax:
+    content: public void MergeFrom(CodedInputStream input)
+    parameters:
+    - id: input
+      type: Google.Protobuf.CodedInputStream
+      description: ''
+    content.vb: Public Sub MergeFrom(input As CodedInputStream)
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom*
+  implements:
+  - Google.Protobuf.IMessage.MergeFrom(Google.Protobuf.CodedInputStream)
+references:
+- uid: QuestNav.Protos.Generated
+  commentId: N:QuestNav.Protos.Generated
+  href: QuestNav.html
+  name: QuestNav.Protos.Generated
+  nameWithType: QuestNav.Protos.Generated
+  fullName: QuestNav.Protos.Generated
+  spec.csharp:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Protos
+    name: Protos
+    href: QuestNav.Protos.html
+  - name: .
+  - uid: QuestNav.Protos.Generated
+    name: Generated
+    href: QuestNav.Protos.Generated.html
+  spec.vb:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Protos
+    name: Protos
+    href: QuestNav.Protos.html
+  - name: .
+  - uid: QuestNav.Protos.Generated
+    name: Generated
+    href: QuestNav.Protos.Generated.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Google.Protobuf.IMessage{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  commentId: T:Google.Protobuf.IMessage{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  parent: Google.Protobuf
+  definition: Google.Protobuf.IMessage`1
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  name: IMessage<ProtobufQuestNavDeviceData>
+  nameWithType: IMessage<ProtobufQuestNavDeviceData>
+  fullName: Google.Protobuf.IMessage<QuestNav.Protos.Generated.ProtobufQuestNavDeviceData>
+  nameWithType.vb: IMessage(Of ProtobufQuestNavDeviceData)
+  fullName.vb: Google.Protobuf.IMessage(Of QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  name.vb: IMessage(Of ProtobufQuestNavDeviceData)
+  spec.csharp:
+  - uid: Google.Protobuf.IMessage`1
+    name: IMessage
+    isExternal: true
+  - name: <
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    name: ProtobufQuestNavDeviceData
+    href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  - name: '>'
+  spec.vb:
+  - uid: Google.Protobuf.IMessage`1
+    name: IMessage
+    isExternal: true
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    name: ProtobufQuestNavDeviceData
+    href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  - name: )
+- uid: System.IEquatable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  commentId: T:System.IEquatable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<ProtobufQuestNavDeviceData>
+  nameWithType: IEquatable<ProtobufQuestNavDeviceData>
+  fullName: System.IEquatable<QuestNav.Protos.Generated.ProtobufQuestNavDeviceData>
+  nameWithType.vb: IEquatable(Of ProtobufQuestNavDeviceData)
+  fullName.vb: System.IEquatable(Of QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  name.vb: IEquatable(Of ProtobufQuestNavDeviceData)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    name: ProtobufQuestNavDeviceData
+    href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    name: ProtobufQuestNavDeviceData
+    href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  - name: )
+- uid: Google.Protobuf.IDeepCloneable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  commentId: T:Google.Protobuf.IDeepCloneable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  parent: Google.Protobuf
+  definition: Google.Protobuf.IDeepCloneable`1
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  name: IDeepCloneable<ProtobufQuestNavDeviceData>
+  nameWithType: IDeepCloneable<ProtobufQuestNavDeviceData>
+  fullName: Google.Protobuf.IDeepCloneable<QuestNav.Protos.Generated.ProtobufQuestNavDeviceData>
+  nameWithType.vb: IDeepCloneable(Of ProtobufQuestNavDeviceData)
+  fullName.vb: Google.Protobuf.IDeepCloneable(Of QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  name.vb: IDeepCloneable(Of ProtobufQuestNavDeviceData)
+  spec.csharp:
+  - uid: Google.Protobuf.IDeepCloneable`1
+    name: IDeepCloneable
+    isExternal: true
+  - name: <
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    name: ProtobufQuestNavDeviceData
+    href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  - name: '>'
+  spec.vb:
+  - uid: Google.Protobuf.IDeepCloneable`1
+    name: IDeepCloneable
+    isExternal: true
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    name: ProtobufQuestNavDeviceData
+    href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  - name: )
+- uid: Google.Protobuf.IBufferMessage
+  commentId: T:Google.Protobuf.IBufferMessage
+  parent: Google.Protobuf
+  isExternal: true
+  name: IBufferMessage
+  nameWithType: IBufferMessage
+  fullName: Google.Protobuf.IBufferMessage
+- uid: Google.Protobuf.IMessage
+  commentId: T:Google.Protobuf.IMessage
+  parent: Google.Protobuf
+  isExternal: true
+  name: IMessage
+  nameWithType: IMessage
+  fullName: Google.Protobuf.IMessage
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Google.Protobuf.IMessage`1
+  commentId: T:Google.Protobuf.IMessage`1
+  isExternal: true
+  name: IMessage<T>
+  nameWithType: IMessage<T>
+  fullName: Google.Protobuf.IMessage<T>
+  nameWithType.vb: IMessage(Of T)
+  fullName.vb: Google.Protobuf.IMessage(Of T)
+  name.vb: IMessage(Of T)
+  spec.csharp:
+  - uid: Google.Protobuf.IMessage`1
+    name: IMessage
+    isExternal: true
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: Google.Protobuf.IMessage`1
+    name: IMessage
+    isExternal: true
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: Google.Protobuf
+  commentId: N:Google.Protobuf
+  isExternal: true
+  name: Google.Protobuf
+  nameWithType: Google.Protobuf
+  fullName: Google.Protobuf
+  spec.csharp:
+  - uid: Google
+    name: Google
+    isExternal: true
+  - name: .
+  - uid: Google.Protobuf
+    name: Protobuf
+    isExternal: true
+  spec.vb:
+  - uid: Google
+    name: Google
+    isExternal: true
+  - name: .
+  - uid: Google.Protobuf
+    name: Protobuf
+    isExternal: true
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: Google.Protobuf.IDeepCloneable`1
+  commentId: T:Google.Protobuf.IDeepCloneable`1
+  isExternal: true
+  name: IDeepCloneable<T>
+  nameWithType: IDeepCloneable<T>
+  fullName: Google.Protobuf.IDeepCloneable<T>
+  nameWithType.vb: IDeepCloneable(Of T)
+  fullName.vb: Google.Protobuf.IDeepCloneable(Of T)
+  name.vb: IDeepCloneable(Of T)
+  spec.csharp:
+  - uid: Google.Protobuf.IDeepCloneable`1
+    name: IDeepCloneable
+    isExternal: true
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: Google.Protobuf.IDeepCloneable`1
+    name: IDeepCloneable
+    isExternal: true
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Parser*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Parser
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Parser
+  name: Parser
+  nameWithType: ProtobufQuestNavDeviceData.Parser
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Parser
+- uid: Google.Protobuf.MessageParser{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  commentId: T:Google.Protobuf.MessageParser{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  parent: Google.Protobuf
+  definition: Google.Protobuf.MessageParser`1
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  name: MessageParser<ProtobufQuestNavDeviceData>
+  nameWithType: MessageParser<ProtobufQuestNavDeviceData>
+  fullName: Google.Protobuf.MessageParser<QuestNav.Protos.Generated.ProtobufQuestNavDeviceData>
+  nameWithType.vb: MessageParser(Of ProtobufQuestNavDeviceData)
+  fullName.vb: Google.Protobuf.MessageParser(Of QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  name.vb: MessageParser(Of ProtobufQuestNavDeviceData)
+  spec.csharp:
+  - uid: Google.Protobuf.MessageParser`1
+    name: MessageParser
+    isExternal: true
+  - name: <
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    name: ProtobufQuestNavDeviceData
+    href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  - name: '>'
+  spec.vb:
+  - uid: Google.Protobuf.MessageParser`1
+    name: MessageParser
+    isExternal: true
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    name: ProtobufQuestNavDeviceData
+    href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  - name: )
+- uid: Google.Protobuf.MessageParser`1
+  commentId: T:Google.Protobuf.MessageParser`1
+  isExternal: true
+  name: MessageParser<T>
+  nameWithType: MessageParser<T>
+  fullName: Google.Protobuf.MessageParser<T>
+  nameWithType.vb: MessageParser(Of T)
+  fullName.vb: Google.Protobuf.MessageParser(Of T)
+  name.vb: MessageParser(Of T)
+  spec.csharp:
+  - uid: Google.Protobuf.MessageParser`1
+    name: MessageParser
+    isExternal: true
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: Google.Protobuf.MessageParser`1
+    name: MessageParser
+    isExternal: true
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Descriptor*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Descriptor
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Descriptor
+  name: Descriptor
+  nameWithType: ProtobufQuestNavDeviceData.Descriptor
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Descriptor
+- uid: Google.Protobuf.Reflection.MessageDescriptor
+  commentId: T:Google.Protobuf.Reflection.MessageDescriptor
+  parent: Google.Protobuf.Reflection
+  isExternal: true
+  name: MessageDescriptor
+  nameWithType: MessageDescriptor
+  fullName: Google.Protobuf.Reflection.MessageDescriptor
+- uid: Google.Protobuf.Reflection
+  commentId: N:Google.Protobuf.Reflection
+  isExternal: true
+  name: Google.Protobuf.Reflection
+  nameWithType: Google.Protobuf.Reflection
+  fullName: Google.Protobuf.Reflection
+  spec.csharp:
+  - uid: Google
+    name: Google
+    isExternal: true
+  - name: .
+  - uid: Google.Protobuf
+    name: Protobuf
+    isExternal: true
+  - name: .
+  - uid: Google.Protobuf.Reflection
+    name: Reflection
+    isExternal: true
+  spec.vb:
+  - uid: Google
+    name: Google
+    isExternal: true
+  - name: .
+  - uid: Google.Protobuf
+    name: Protobuf
+    isExternal: true
+  - name: .
+  - uid: Google.Protobuf.Reflection
+    name: Reflection
+    isExternal: true
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData__ctor
+  name: ProtobufQuestNavDeviceData
+  nameWithType: ProtobufQuestNavDeviceData.ProtobufQuestNavDeviceData
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ProtobufQuestNavDeviceData
+  nameWithType.vb: ProtobufQuestNavDeviceData.New
+  fullName.vb: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.New
+  name.vb: New
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  commentId: T:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+  parent: QuestNav.Protos.Generated
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  name: ProtobufQuestNavDeviceData
+  nameWithType: ProtobufQuestNavDeviceData
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Clone*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Clone
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Clone
+  name: Clone
+  nameWithType: ProtobufQuestNavDeviceData.Clone
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Clone
+- uid: Google.Protobuf.IDeepCloneable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.Clone
+  commentId: M:Google.Protobuf.IDeepCloneable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.Clone
+  parent: Google.Protobuf.IDeepCloneable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  definition: Google.Protobuf.IDeepCloneable`1.Clone
+  name: Clone()
+  nameWithType: IDeepCloneable<ProtobufQuestNavDeviceData>.Clone()
+  fullName: Google.Protobuf.IDeepCloneable<QuestNav.Protos.Generated.ProtobufQuestNavDeviceData>.Clone()
+  nameWithType.vb: IDeepCloneable(Of ProtobufQuestNavDeviceData).Clone()
+  fullName.vb: Google.Protobuf.IDeepCloneable(Of QuestNav.Protos.Generated.ProtobufQuestNavDeviceData).Clone()
+  spec.csharp:
+  - uid: Google.Protobuf.IDeepCloneable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.Clone
+    name: Clone
+    isExternal: true
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Google.Protobuf.IDeepCloneable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.Clone
+    name: Clone
+    isExternal: true
+  - name: (
+  - name: )
+- uid: Google.Protobuf.IDeepCloneable`1.Clone
+  commentId: M:Google.Protobuf.IDeepCloneable`1.Clone
+  isExternal: true
+  name: Clone()
+  nameWithType: IDeepCloneable<T>.Clone()
+  fullName: Google.Protobuf.IDeepCloneable<T>.Clone()
+  nameWithType.vb: IDeepCloneable(Of T).Clone()
+  fullName.vb: Google.Protobuf.IDeepCloneable(Of T).Clone()
+  spec.csharp:
+  - uid: Google.Protobuf.IDeepCloneable`1.Clone
+    name: Clone
+    isExternal: true
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Google.Protobuf.IDeepCloneable`1.Clone
+    name: Clone
+    isExternal: true
+  - name: (
+  - name: )
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounter*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounter
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_TrackingLostCounter
+  name: TrackingLostCounter
+  nameWithType: ProtobufQuestNavDeviceData.TrackingLostCounter
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounter
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTracking*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTracking
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_CurrentlyTracking
+  name: CurrentlyTracking
+  nameWithType: ProtobufQuestNavDeviceData.CurrentlyTracking
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTracking
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercent*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercent
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_BatteryPercent
+  name: BatteryPercent
+  nameWithType: ProtobufQuestNavDeviceData.BatteryPercent
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercent
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Equals_System_Object_
+  name: Equals
+  nameWithType: ProtobufQuestNavDeviceData.Equals
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals
+- uid: System.IEquatable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  commentId: M:System.IEquatable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  parent: System.IEquatable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  definition: System.IEquatable`1.Equals(`0)
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(ProtobufQuestNavDeviceData)
+  nameWithType: IEquatable<ProtobufQuestNavDeviceData>.Equals(ProtobufQuestNavDeviceData)
+  fullName: System.IEquatable<QuestNav.Protos.Generated.ProtobufQuestNavDeviceData>.Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  nameWithType.vb: IEquatable(Of ProtobufQuestNavDeviceData).Equals(ProtobufQuestNavDeviceData)
+  fullName.vb: System.IEquatable(Of QuestNav.Protos.Generated.ProtobufQuestNavDeviceData).Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  spec.csharp:
+  - uid: System.IEquatable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    name: ProtobufQuestNavDeviceData
+    href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    name: ProtobufQuestNavDeviceData
+    href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  - name: )
+- uid: System.IEquatable`1.Equals(`0)
+  commentId: M:System.IEquatable`1.Equals(`0)
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(T)
+  nameWithType: IEquatable<T>.Equals(T)
+  fullName: System.IEquatable<T>.Equals(T)
+  nameWithType.vb: IEquatable(Of T).Equals(T)
+  fullName.vb: System.IEquatable(Of T).Equals(T)
+  spec.csharp:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.GetHashCode*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.GetHashCode
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_GetHashCode
+  name: GetHashCode
+  nameWithType: ProtobufQuestNavDeviceData.GetHashCode
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.GetHashCode
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ToString*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ToString
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_ToString
+  name: ToString
+  nameWithType: ProtobufQuestNavDeviceData.ToString
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ToString
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.WriteTo*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.WriteTo
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_WriteTo_Google_Protobuf_CodedOutputStream_
+  name: WriteTo
+  nameWithType: ProtobufQuestNavDeviceData.WriteTo
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.WriteTo
+- uid: Google.Protobuf.IMessage.WriteTo(Google.Protobuf.CodedOutputStream)
+  commentId: M:Google.Protobuf.IMessage.WriteTo(Google.Protobuf.CodedOutputStream)
+  parent: Google.Protobuf.IMessage
+  isExternal: true
+  name: WriteTo(CodedOutputStream)
+  nameWithType: IMessage.WriteTo(CodedOutputStream)
+  fullName: Google.Protobuf.IMessage.WriteTo(Google.Protobuf.CodedOutputStream)
+  spec.csharp:
+  - uid: Google.Protobuf.IMessage.WriteTo(Google.Protobuf.CodedOutputStream)
+    name: WriteTo
+    isExternal: true
+  - name: (
+  - uid: Google.Protobuf.CodedOutputStream
+    name: CodedOutputStream
+    isExternal: true
+  - name: )
+  spec.vb:
+  - uid: Google.Protobuf.IMessage.WriteTo(Google.Protobuf.CodedOutputStream)
+    name: WriteTo
+    isExternal: true
+  - name: (
+  - uid: Google.Protobuf.CodedOutputStream
+    name: CodedOutputStream
+    isExternal: true
+  - name: )
+- uid: Google.Protobuf.CodedOutputStream
+  commentId: T:Google.Protobuf.CodedOutputStream
+  parent: Google.Protobuf
+  isExternal: true
+  name: CodedOutputStream
+  nameWithType: CodedOutputStream
+  fullName: Google.Protobuf.CodedOutputStream
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CalculateSize*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CalculateSize
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_CalculateSize
+  name: CalculateSize
+  nameWithType: ProtobufQuestNavDeviceData.CalculateSize
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CalculateSize
+- uid: Google.Protobuf.IMessage.CalculateSize
+  commentId: M:Google.Protobuf.IMessage.CalculateSize
+  parent: Google.Protobuf.IMessage
+  isExternal: true
+  name: CalculateSize()
+  nameWithType: IMessage.CalculateSize()
+  fullName: Google.Protobuf.IMessage.CalculateSize()
+  spec.csharp:
+  - uid: Google.Protobuf.IMessage.CalculateSize
+    name: CalculateSize
+    isExternal: true
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Google.Protobuf.IMessage.CalculateSize
+    name: CalculateSize
+    isExternal: true
+  - name: (
+  - name: )
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html#QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_MergeFrom_QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_
+  name: MergeFrom
+  nameWithType: ProtobufQuestNavDeviceData.MergeFrom
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom
+- uid: Google.Protobuf.IMessage{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  commentId: M:Google.Protobuf.IMessage{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  parent: Google.Protobuf.IMessage{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}
+  definition: Google.Protobuf.IMessage`1.MergeFrom(`0)
+  href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  name: MergeFrom(ProtobufQuestNavDeviceData)
+  nameWithType: IMessage<ProtobufQuestNavDeviceData>.MergeFrom(ProtobufQuestNavDeviceData)
+  fullName: Google.Protobuf.IMessage<QuestNav.Protos.Generated.ProtobufQuestNavDeviceData>.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  nameWithType.vb: IMessage(Of ProtobufQuestNavDeviceData).MergeFrom(ProtobufQuestNavDeviceData)
+  fullName.vb: Google.Protobuf.IMessage(Of QuestNav.Protos.Generated.ProtobufQuestNavDeviceData).MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+  spec.csharp:
+  - uid: Google.Protobuf.IMessage{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+    name: MergeFrom
+    isExternal: true
+  - name: (
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    name: ProtobufQuestNavDeviceData
+    href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  - name: )
+  spec.vb:
+  - uid: Google.Protobuf.IMessage{QuestNav.Protos.Generated.ProtobufQuestNavDeviceData}.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)
+    name: MergeFrom
+    isExternal: true
+  - name: (
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData
+    name: ProtobufQuestNavDeviceData
+    href: QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html
+  - name: )
+- uid: Google.Protobuf.IMessage`1.MergeFrom(`0)
+  commentId: M:Google.Protobuf.IMessage`1.MergeFrom(`0)
+  isExternal: true
+  name: MergeFrom(T)
+  nameWithType: IMessage<T>.MergeFrom(T)
+  fullName: Google.Protobuf.IMessage<T>.MergeFrom(T)
+  nameWithType.vb: IMessage(Of T).MergeFrom(T)
+  fullName.vb: Google.Protobuf.IMessage(Of T).MergeFrom(T)
+  spec.csharp:
+  - uid: Google.Protobuf.IMessage`1.MergeFrom(`0)
+    name: MergeFrom
+    isExternal: true
+  - name: (
+  - name: T
+  - name: )
+  spec.vb:
+  - uid: Google.Protobuf.IMessage`1.MergeFrom(`0)
+    name: MergeFrom
+    isExternal: true
+  - name: (
+  - name: T
+  - name: )
+- uid: Google.Protobuf.IMessage.MergeFrom(Google.Protobuf.CodedInputStream)
+  commentId: M:Google.Protobuf.IMessage.MergeFrom(Google.Protobuf.CodedInputStream)
+  parent: Google.Protobuf.IMessage
+  isExternal: true
+  name: MergeFrom(CodedInputStream)
+  nameWithType: IMessage.MergeFrom(CodedInputStream)
+  fullName: Google.Protobuf.IMessage.MergeFrom(Google.Protobuf.CodedInputStream)
+  spec.csharp:
+  - uid: Google.Protobuf.IMessage.MergeFrom(Google.Protobuf.CodedInputStream)
+    name: MergeFrom
+    isExternal: true
+  - name: (
+  - uid: Google.Protobuf.CodedInputStream
+    name: CodedInputStream
+    isExternal: true
+  - name: )
+  spec.vb:
+  - uid: Google.Protobuf.IMessage.MergeFrom(Google.Protobuf.CodedInputStream)
+    name: MergeFrom
+    isExternal: true
+  - name: (
+  - uid: Google.Protobuf.CodedInputStream
+    name: CodedInputStream
+    isExternal: true
+  - name: )
+- uid: Google.Protobuf.CodedInputStream
+  commentId: T:Google.Protobuf.CodedInputStream
+  parent: Google.Protobuf
+  isExternal: true
+  name: CodedInputStream
+  nameWithType: CodedInputStream
+  fullName: Google.Protobuf.CodedInputStream

@@ -1,0 +1,487 @@
+### YamlMime:ManagedReference
+items:
+- uid: QuestNav.Network.INetworkTableConnection
+  commentId: T:QuestNav.Network.INetworkTableConnection
+  id: INetworkTableConnection
+  parent: QuestNav.Network
+  children:
+  - QuestNav.Network.INetworkTableConnection.GetCommandRequest
+  - QuestNav.Network.INetworkTableConnection.IsConnected
+  - QuestNav.Network.INetworkTableConnection.IsReadyToConnect
+  - QuestNav.Network.INetworkTableConnection.LoggerPeriodic
+  - QuestNav.Network.INetworkTableConnection.PublishDeviceData(System.Boolean,System.Int32,System.Int32)
+  - QuestNav.Network.INetworkTableConnection.PublishFrameData(System.Int32,System.Double,UnityEngine.Vector3,UnityEngine.Quaternion)
+  - QuestNav.Network.INetworkTableConnection.SetCommandResponse(QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse)
+  - QuestNav.Network.INetworkTableConnection.UpdateTeamNumber(System.Int32)
+  langs:
+  - csharp
+  - vb
+  name: INetworkTableConnection
+  nameWithType: INetworkTableConnection
+  fullName: QuestNav.Network.INetworkTableConnection
+  type: Interface
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: INetworkTableConnection
+    path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
+    startLine: 13
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Network
+  summary: Interface for NetworkTables connection management.
+  example: []
+  syntax:
+    content: public interface INetworkTableConnection
+    content.vb: Public Interface INetworkTableConnection
+- uid: QuestNav.Network.INetworkTableConnection.IsConnected
+  commentId: P:QuestNav.Network.INetworkTableConnection.IsConnected
+  id: IsConnected
+  parent: QuestNav.Network.INetworkTableConnection
+  langs:
+  - csharp
+  - vb
+  name: IsConnected
+  nameWithType: INetworkTableConnection.IsConnected
+  fullName: QuestNav.Network.INetworkTableConnection.IsConnected
+  type: Property
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: IsConnected
+    path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
+    startLine: 18
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Network
+  summary: Gets whether the connection is currently established.
+  example: []
+  syntax:
+    content: bool IsConnected { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: ReadOnly Property IsConnected As Boolean
+  overload: QuestNav.Network.INetworkTableConnection.IsConnected*
+- uid: QuestNav.Network.INetworkTableConnection.IsReadyToConnect
+  commentId: P:QuestNav.Network.INetworkTableConnection.IsReadyToConnect
+  id: IsReadyToConnect
+  parent: QuestNav.Network.INetworkTableConnection
+  langs:
+  - csharp
+  - vb
+  name: IsReadyToConnect
+  nameWithType: INetworkTableConnection.IsReadyToConnect
+  fullName: QuestNav.Network.INetworkTableConnection.IsReadyToConnect
+  type: Property
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: IsReadyToConnect
+    path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
+    startLine: 24
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Network
+  summary: Gets whether the connection is ready to connect.
+  example: []
+  syntax:
+    content: bool IsReadyToConnect { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+      description: true when either an IP or team number has been set
+    content.vb: ReadOnly Property IsReadyToConnect As Boolean
+  overload: QuestNav.Network.INetworkTableConnection.IsReadyToConnect*
+- uid: QuestNav.Network.INetworkTableConnection.PublishFrameData(System.Int32,System.Double,UnityEngine.Vector3,UnityEngine.Quaternion)
+  commentId: M:QuestNav.Network.INetworkTableConnection.PublishFrameData(System.Int32,System.Double,UnityEngine.Vector3,UnityEngine.Quaternion)
+  id: PublishFrameData(System.Int32,System.Double,UnityEngine.Vector3,UnityEngine.Quaternion)
+  parent: QuestNav.Network.INetworkTableConnection
+  langs:
+  - csharp
+  - vb
+  name: PublishFrameData(int, double, Vector3, Quaternion)
+  nameWithType: INetworkTableConnection.PublishFrameData(int, double, Vector3, Quaternion)
+  fullName: QuestNav.Network.INetworkTableConnection.PublishFrameData(int, double, UnityEngine.Vector3, UnityEngine.Quaternion)
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: PublishFrameData
+    path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
+    startLine: 33
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Network
+  summary: Publishes frame data to NetworkTables.
+  example: []
+  syntax:
+    content: void PublishFrameData(int frameCount, double timeStamp, Vector3 position, Quaternion rotation)
+    parameters:
+    - id: frameCount
+      type: System.Int32
+      description: Current frame index
+    - id: timeStamp
+      type: System.Double
+      description: Current timestamp
+    - id: position
+      type: UnityEngine.Vector3
+      description: Current field-relative position of the Quest headset
+    - id: rotation
+      type: UnityEngine.Quaternion
+      description: The rotation of the quest headset
+    content.vb: Sub PublishFrameData(frameCount As Integer, timeStamp As Double, position As Vector3, rotation As Quaternion)
+  overload: QuestNav.Network.INetworkTableConnection.PublishFrameData*
+  nameWithType.vb: INetworkTableConnection.PublishFrameData(Integer, Double, Vector3, Quaternion)
+  fullName.vb: QuestNav.Network.INetworkTableConnection.PublishFrameData(Integer, Double, UnityEngine.Vector3, UnityEngine.Quaternion)
+  name.vb: PublishFrameData(Integer, Double, Vector3, Quaternion)
+- uid: QuestNav.Network.INetworkTableConnection.PublishDeviceData(System.Boolean,System.Int32,System.Int32)
+  commentId: M:QuestNav.Network.INetworkTableConnection.PublishDeviceData(System.Boolean,System.Int32,System.Int32)
+  id: PublishDeviceData(System.Boolean,System.Int32,System.Int32)
+  parent: QuestNav.Network.INetworkTableConnection
+  langs:
+  - csharp
+  - vb
+  name: PublishDeviceData(bool, int, int)
+  nameWithType: INetworkTableConnection.PublishDeviceData(bool, int, int)
+  fullName: QuestNav.Network.INetworkTableConnection.PublishDeviceData(bool, int, int)
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: PublishDeviceData
+    path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
+    startLine: 46
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Network
+  summary: Publishes device data to NetworkTables.
+  example: []
+  syntax:
+    content: void PublishDeviceData(bool currentlyTracking, int trackingLostCounter, int batteryPercent)
+    parameters:
+    - id: currentlyTracking
+      type: System.Boolean
+      description: Is the quest tracking currently
+    - id: trackingLostCounter
+      type: System.Int32
+      description: Number of tracking lost events this session
+    - id: batteryPercent
+      type: System.Int32
+      description: Current battery percentage
+    content.vb: Sub PublishDeviceData(currentlyTracking As Boolean, trackingLostCounter As Integer, batteryPercent As Integer)
+  overload: QuestNav.Network.INetworkTableConnection.PublishDeviceData*
+  nameWithType.vb: INetworkTableConnection.PublishDeviceData(Boolean, Integer, Integer)
+  fullName.vb: QuestNav.Network.INetworkTableConnection.PublishDeviceData(Boolean, Integer, Integer)
+  name.vb: PublishDeviceData(Boolean, Integer, Integer)
+- uid: QuestNav.Network.INetworkTableConnection.UpdateTeamNumber(System.Int32)
+  commentId: M:QuestNav.Network.INetworkTableConnection.UpdateTeamNumber(System.Int32)
+  id: UpdateTeamNumber(System.Int32)
+  parent: QuestNav.Network.INetworkTableConnection
+  langs:
+  - csharp
+  - vb
+  name: UpdateTeamNumber(int)
+  nameWithType: INetworkTableConnection.UpdateTeamNumber(int)
+  fullName: QuestNav.Network.INetworkTableConnection.UpdateTeamNumber(int)
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: UpdateTeamNumber
+    path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
+    startLine: 52
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Network
+  summary: Updates the team number.
+  example: []
+  syntax:
+    content: void UpdateTeamNumber(int teamNumber)
+    parameters:
+    - id: teamNumber
+      type: System.Int32
+      description: The team number
+    content.vb: Sub UpdateTeamNumber(teamNumber As Integer)
+  overload: QuestNav.Network.INetworkTableConnection.UpdateTeamNumber*
+  nameWithType.vb: INetworkTableConnection.UpdateTeamNumber(Integer)
+  fullName.vb: QuestNav.Network.INetworkTableConnection.UpdateTeamNumber(Integer)
+  name.vb: UpdateTeamNumber(Integer)
+- uid: QuestNav.Network.INetworkTableConnection.GetCommandRequest
+  commentId: M:QuestNav.Network.INetworkTableConnection.GetCommandRequest
+  id: GetCommandRequest
+  parent: QuestNav.Network.INetworkTableConnection
+  langs:
+  - csharp
+  - vb
+  name: GetCommandRequest()
+  nameWithType: INetworkTableConnection.GetCommandRequest()
+  fullName: QuestNav.Network.INetworkTableConnection.GetCommandRequest()
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: GetCommandRequest
+    path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
+    startLine: 58
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Network
+  summary: Gets the latest command request from the robot
+  example: []
+  syntax:
+    content: ProtobufQuestNavCommand GetCommandRequest()
+    return:
+      type: QuestNav.Protos.Generated.ProtobufQuestNavCommand
+      description: The command request, or a default command if none available
+    content.vb: Function GetCommandRequest() As ProtobufQuestNavCommand
+  overload: QuestNav.Network.INetworkTableConnection.GetCommandRequest*
+- uid: QuestNav.Network.INetworkTableConnection.SetCommandResponse(QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse)
+  commentId: M:QuestNav.Network.INetworkTableConnection.SetCommandResponse(QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse)
+  id: SetCommandResponse(QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse)
+  parent: QuestNav.Network.INetworkTableConnection
+  langs:
+  - csharp
+  - vb
+  name: SetCommandResponse(ProtobufQuestNavCommandResponse)
+  nameWithType: INetworkTableConnection.SetCommandResponse(ProtobufQuestNavCommandResponse)
+  fullName: QuestNav.Network.INetworkTableConnection.SetCommandResponse(QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse)
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: SetCommandResponse
+    path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
+    startLine: 64
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Network
+  summary: Sends a command response back to the robot
+  example: []
+  syntax:
+    content: void SetCommandResponse(ProtobufQuestNavCommandResponse response)
+    parameters:
+    - id: response
+      type: QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse
+      description: The response to send
+    content.vb: Sub SetCommandResponse(response As ProtobufQuestNavCommandResponse)
+  overload: QuestNav.Network.INetworkTableConnection.SetCommandResponse*
+- uid: QuestNav.Network.INetworkTableConnection.LoggerPeriodic
+  commentId: M:QuestNav.Network.INetworkTableConnection.LoggerPeriodic
+  id: LoggerPeriodic
+  parent: QuestNav.Network.INetworkTableConnection
+  langs:
+  - csharp
+  - vb
+  name: LoggerPeriodic()
+  nameWithType: INetworkTableConnection.LoggerPeriodic()
+  fullName: QuestNav.Network.INetworkTableConnection.LoggerPeriodic()
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: LoggerPeriodic
+    path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
+    startLine: 69
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Network
+  summary: Processes and logs NetworkTables internal messages
+  example: []
+  syntax:
+    content: void LoggerPeriodic()
+    content.vb: Sub LoggerPeriodic()
+  overload: QuestNav.Network.INetworkTableConnection.LoggerPeriodic*
+references:
+- uid: QuestNav.Network
+  commentId: N:QuestNav.Network
+  href: QuestNav.html
+  name: QuestNav.Network
+  nameWithType: QuestNav.Network
+  fullName: QuestNav.Network
+  spec.csharp:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Network
+    name: Network
+    href: QuestNav.Network.html
+  spec.vb:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Network
+    name: Network
+    href: QuestNav.Network.html
+- uid: QuestNav.Network.INetworkTableConnection.IsConnected*
+  commentId: Overload:QuestNav.Network.INetworkTableConnection.IsConnected
+  href: QuestNav.Network.INetworkTableConnection.html#QuestNav_Network_INetworkTableConnection_IsConnected
+  name: IsConnected
+  nameWithType: INetworkTableConnection.IsConnected
+  fullName: QuestNav.Network.INetworkTableConnection.IsConnected
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: QuestNav.Network.INetworkTableConnection.IsReadyToConnect*
+  commentId: Overload:QuestNav.Network.INetworkTableConnection.IsReadyToConnect
+  href: QuestNav.Network.INetworkTableConnection.html#QuestNav_Network_INetworkTableConnection_IsReadyToConnect
+  name: IsReadyToConnect
+  nameWithType: INetworkTableConnection.IsReadyToConnect
+  fullName: QuestNav.Network.INetworkTableConnection.IsReadyToConnect
+- uid: QuestNav.Network.INetworkTableConnection.PublishFrameData*
+  commentId: Overload:QuestNav.Network.INetworkTableConnection.PublishFrameData
+  href: QuestNav.Network.INetworkTableConnection.html#QuestNav_Network_INetworkTableConnection_PublishFrameData_System_Int32_System_Double_UnityEngine_Vector3_UnityEngine_Quaternion_
+  name: PublishFrameData
+  nameWithType: INetworkTableConnection.PublishFrameData
+  fullName: QuestNav.Network.INetworkTableConnection.PublishFrameData
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: UnityEngine.Vector3
+  commentId: T:UnityEngine.Vector3
+  parent: UnityEngine
+  isExternal: true
+  name: Vector3
+  nameWithType: Vector3
+  fullName: UnityEngine.Vector3
+- uid: UnityEngine.Quaternion
+  commentId: T:UnityEngine.Quaternion
+  parent: UnityEngine
+  isExternal: true
+  name: Quaternion
+  nameWithType: Quaternion
+  fullName: UnityEngine.Quaternion
+- uid: UnityEngine
+  commentId: N:UnityEngine
+  isExternal: true
+  name: UnityEngine
+  nameWithType: UnityEngine
+  fullName: UnityEngine
+- uid: QuestNav.Network.INetworkTableConnection.PublishDeviceData*
+  commentId: Overload:QuestNav.Network.INetworkTableConnection.PublishDeviceData
+  href: QuestNav.Network.INetworkTableConnection.html#QuestNav_Network_INetworkTableConnection_PublishDeviceData_System_Boolean_System_Int32_System_Int32_
+  name: PublishDeviceData
+  nameWithType: INetworkTableConnection.PublishDeviceData
+  fullName: QuestNav.Network.INetworkTableConnection.PublishDeviceData
+- uid: QuestNav.Network.INetworkTableConnection.UpdateTeamNumber*
+  commentId: Overload:QuestNav.Network.INetworkTableConnection.UpdateTeamNumber
+  href: QuestNav.Network.INetworkTableConnection.html#QuestNav_Network_INetworkTableConnection_UpdateTeamNumber_System_Int32_
+  name: UpdateTeamNumber
+  nameWithType: INetworkTableConnection.UpdateTeamNumber
+  fullName: QuestNav.Network.INetworkTableConnection.UpdateTeamNumber
+- uid: QuestNav.Network.INetworkTableConnection.GetCommandRequest*
+  commentId: Overload:QuestNav.Network.INetworkTableConnection.GetCommandRequest
+  href: QuestNav.Network.INetworkTableConnection.html#QuestNav_Network_INetworkTableConnection_GetCommandRequest
+  name: GetCommandRequest
+  nameWithType: INetworkTableConnection.GetCommandRequest
+  fullName: QuestNav.Network.INetworkTableConnection.GetCommandRequest
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavCommand
+  commentId: T:QuestNav.Protos.Generated.ProtobufQuestNavCommand
+  parent: QuestNav.Protos.Generated
+  href: QuestNav.Protos.Generated.ProtobufQuestNavCommand.html
+  name: ProtobufQuestNavCommand
+  nameWithType: ProtobufQuestNavCommand
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavCommand
+- uid: QuestNav.Protos.Generated
+  commentId: N:QuestNav.Protos.Generated
+  href: QuestNav.html
+  name: QuestNav.Protos.Generated
+  nameWithType: QuestNav.Protos.Generated
+  fullName: QuestNav.Protos.Generated
+  spec.csharp:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Protos
+    name: Protos
+    href: QuestNav.Protos.html
+  - name: .
+  - uid: QuestNav.Protos.Generated
+    name: Generated
+    href: QuestNav.Protos.Generated.html
+  spec.vb:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Protos
+    name: Protos
+    href: QuestNav.Protos.html
+  - name: .
+  - uid: QuestNav.Protos.Generated
+    name: Generated
+    href: QuestNav.Protos.Generated.html
+- uid: QuestNav.Network.INetworkTableConnection.SetCommandResponse*
+  commentId: Overload:QuestNav.Network.INetworkTableConnection.SetCommandResponse
+  href: QuestNav.Network.INetworkTableConnection.html#QuestNav_Network_INetworkTableConnection_SetCommandResponse_QuestNav_Protos_Generated_ProtobufQuestNavCommandResponse_
+  name: SetCommandResponse
+  nameWithType: INetworkTableConnection.SetCommandResponse
+  fullName: QuestNav.Network.INetworkTableConnection.SetCommandResponse
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse
+  commentId: T:QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse
+  parent: QuestNav.Protos.Generated
+  href: QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.html
+  name: ProtobufQuestNavCommandResponse
+  nameWithType: ProtobufQuestNavCommandResponse
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse
+- uid: QuestNav.Network.INetworkTableConnection.LoggerPeriodic*
+  commentId: Overload:QuestNav.Network.INetworkTableConnection.LoggerPeriodic
+  href: QuestNav.Network.INetworkTableConnection.html#QuestNav_Network_INetworkTableConnection_LoggerPeriodic
+  name: LoggerPeriodic
+  nameWithType: INetworkTableConnection.LoggerPeriodic
+  fullName: QuestNav.Network.INetworkTableConnection.LoggerPeriodic

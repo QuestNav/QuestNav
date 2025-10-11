@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Class ProtobufQuestNavDeviceData | QuestNav API Documentation </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Class ProtobufQuestNavDeviceData | QuestNav API Documentation ">
+    
+    <meta name="description" content="Lower-frequency device status data sent from Quest to external systems. This message contains device health and status information that doesn&#39;t need to be sent as frequently as tracking data. It&#39;s sent at 3 Hz (every 333 milliseconds) to provide monitoring and diagnostic information without consuming excessive bandwidth. This data helps external systems:  Monitor Quest device health Detect tracking system issues Implement failsafe behaviors Provide user feedback about system status  The information is useful for both autonomous operation and debugging/ troubleshooting scenarios.">
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../styles/docfx.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="QuestNav API">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first=First data-prev=Previous data-next=Next data-last=Last></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData">
+
+
+
+  <h1 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData" class="text-break">Class ProtobufQuestNavDeviceData</h1>
+  <div class="markdown level0 summary"><ul>
+<li></li>
+</ul>
+<p>Lower-frequency device status data sent from Quest to external systems.</p>
+<p>This message contains device health and status information that doesn't need
+to be sent as frequently as tracking data. It's sent at 3 Hz (every 333 milliseconds)
+to provide monitoring and diagnostic information without consuming excessive
+bandwidth.</p>
+<p>This data helps external systems:</p>
+<ul>
+<li>Monitor Quest device health</li>
+<li>Detect tracking system issues</li>
+<li>Implement failsafe behaviors</li>
+<li>Provide user feedback about system status</li>
+</ul>
+<p>The information is useful for both autonomous operation and debugging/
+troubleshooting scenarios.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+    <div class="level1"><span class="xref">ProtobufQuestNavDeviceData</span></div>
+  </div>
+  <div class="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">IMessage</span>&lt;<a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html">ProtobufQuestNavDeviceData</a>&gt;</div>
+    <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iequatable-1">IEquatable</a>&lt;<a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html">ProtobufQuestNavDeviceData</a>&gt;</div>
+    <div><span class="xref">IDeepCloneable</span>&lt;<a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html">ProtobufQuestNavDeviceData</a>&gt;</div>
+    <div><span class="xref">IBufferMessage</span></div>
+    <div><span class="xref">IMessage</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="QuestNav.html">QuestNav</a>.<a class="xref" href="QuestNav.Protos.html">Protos</a>.<a class="xref" href="QuestNav.Protos.Generated.html">Generated</a></h6>
+  <h6><strong>Assembly</strong>: QuestNav.dll</h6>
+  <h5 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class ProtobufQuestNavDeviceData : IMessage&lt;ProtobufQuestNavDeviceData&gt;, IEquatable&lt;ProtobufQuestNavDeviceData&gt;, IDeepCloneable&lt;ProtobufQuestNavDeviceData&gt;, IBufferMessage, IMessage</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+</h3>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData__ctor_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData__ctor" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor">ProtobufQuestNavDeviceData()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufQuestNavDeviceData()</code></pre>
+  </div>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData__ctor_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData__ctor_QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.#ctor(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)">ProtobufQuestNavDeviceData(ProtobufQuestNavDeviceData)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufQuestNavDeviceData(ProtobufQuestNavDeviceData other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html">ProtobufQuestNavDeviceData</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="fields">Fields
+</h3>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_BatteryPercentFieldNumber" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercentFieldNumber">BatteryPercentFieldNumber</h4>
+  <div class="markdown level1 summary"><p>Field number for the &quot;battery_percent&quot; field.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const int BatteryPercentFieldNumber = 3</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_CurrentlyTrackingFieldNumber" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTrackingFieldNumber">CurrentlyTrackingFieldNumber</h4>
+  <div class="markdown level1 summary"><p>Field number for the &quot;currently_tracking&quot; field.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const int CurrentlyTrackingFieldNumber = 2</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_TrackingLostCounterFieldNumber" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounterFieldNumber">TrackingLostCounterFieldNumber</h4>
+  <div class="markdown level1 summary"><p>Field number for the &quot;tracking_lost_counter&quot; field.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const int TrackingLostCounterFieldNumber = 1</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+</h3>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_BatteryPercent_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercent*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_BatteryPercent" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.BatteryPercent">BatteryPercent</h4>
+  <div class="markdown level1 summary"><ul>
+<li></li>
+</ul>
+<p>Quest device battery level as a percentage (0-100).</p>
+<p>This provides the current battery charge level of the Quest headset,
+allowing external systems to:</p>
+<ul>
+<li>Monitor power status during operation</li>
+<li>Implement low-battery warnings or behaviors</li>
+<li>Plan operation duration and charging needs</li>
+<li>Trigger graceful shutdown procedures</li>
+</ul>
+<p>Battery Level Guidelines:</p>
+<ul>
+<li>100%: Fully charged</li>
+<li>50-100%: Normal operation</li>
+<li>20-50%: Consider charging soon</li>
+<li>10-20%: Low battery warning recommended</li>
+<li>0-10%: Critical - plan immediate shutdown/charging</li>
+</ul>
+<p>Note: Battery drain rate depends on:</p>
+<ul>
+<li>Processing load (tracking complexity)</li>
+<li>Display usage (if any)</li>
+<li>Wireless communication activity</li>
+<li>Environmental temperature</li>
+</ul>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int BatteryPercent { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_CurrentlyTracking_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTracking*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_CurrentlyTracking" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CurrentlyTracking">CurrentlyTracking</h4>
+  <div class="markdown level1 summary"><ul>
+<li></li>
+</ul>
+<p>Current tracking status of the Quest device.</p>
+<p>true:  Quest is actively tracking and pose data is reliable
+false: Quest has lost tracking and pose data should not be trusted</p>
+<p>When tracking is lost:</p>
+<ul>
+<li>Pose data becomes stale and unreliable</li>
+<li>Robot should switch to alternative localization methods</li>
+<li>Movement should be limited or stopped for safety</li>
+</ul>
+<p>Tracking can be recovered by:</p>
+<ul>
+<li>Improving lighting conditions</li>
+<li>Moving to area with more visual features</li>
+<li>Reducing motion to allow system to re-initialize</li>
+<li>Performing pose reset when tracking recovers</li>
+</ul>
+<p>External systems should monitor this field and implement appropriate
+fallback behaviors when tracking is lost.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool CurrentlyTracking { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Descriptor_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Descriptor*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Descriptor" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Descriptor">Descriptor</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static MessageDescriptor Descriptor { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">MessageDescriptor</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Parser_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Parser*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Parser" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Parser">Parser</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static MessageParser&lt;ProtobufQuestNavDeviceData&gt; Parser { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">MessageParser</span>&lt;<a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html">ProtobufQuestNavDeviceData</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_TrackingLostCounter_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounter*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_TrackingLostCounter" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.TrackingLostCounter">TrackingLostCounter</h4>
+  <div class="markdown level1 summary"><ul>
+<li></li>
+</ul>
+<p>Count of tracking loss events since app startup.</p>
+<p>This counter increments each time the Quest's tracking system loses
+tracking after having established it. Tracking loss can occur due to:</p>
+<ul>
+<li>Poor lighting conditions</li>
+<li>Lack of visual features in environment</li>
+<li>Rapid motion or acceleration</li>
+<li>Occlusion of cameras</li>
+<li>Hardware issues</li>
+</ul>
+<p>A high or rapidly increasing counter may indicate:</p>
+<ul>
+<li>Environmental issues (lighting, features)</li>
+<li>Quest mounting problems (vibration, obstruction)</li>
+<li>Hardware degradation</li>
+</ul>
+<p>This metric helps assess tracking system reliability and can trigger
+alerts or fallback behaviors in robot code.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int TrackingLostCounter { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+</h3>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_CalculateSize_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CalculateSize*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_CalculateSize" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.CalculateSize">CalculateSize()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int CalculateSize()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Clone_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Clone*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Clone" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Clone">Clone()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ProtobufQuestNavDeviceData Clone()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html">ProtobufQuestNavDeviceData</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Equals_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Equals_QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)">Equals(ProtobufQuestNavDeviceData)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Equals(ProtobufQuestNavDeviceData other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html">ProtobufQuestNavDeviceData</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Equals_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_Equals_System_Object_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.Equals(System.Object)">Equals(object)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override bool Equals(object other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a></div>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_GetHashCode_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.GetHashCode*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_GetHashCode" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.GetHashCode">GetHashCode()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override int GetHashCode()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a></div>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_MergeFrom_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_MergeFrom_Google_Protobuf_CodedInputStream_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom(Google.Protobuf.CodedInputStream)">MergeFrom(CodedInputStream)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void MergeFrom(CodedInputStream input)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">CodedInputStream</span></td>
+        <td><span class="parametername">input</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_MergeFrom_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_MergeFrom_QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavDeviceData)">MergeFrom(ProtobufQuestNavDeviceData)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void MergeFrom(ProtobufQuestNavDeviceData other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html">ProtobufQuestNavDeviceData</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_ToString_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ToString*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_ToString" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.ToString">ToString()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override string ToString()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a></div>
+  <a id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_WriteTo_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.WriteTo*"></a>
+  <h4 id="QuestNav_Protos_Generated_ProtobufQuestNavDeviceData_WriteTo_Google_Protobuf_CodedOutputStream_" data-uid="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.WriteTo(Google.Protobuf.CodedOutputStream)">WriteTo(CodedOutputStream)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="declaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void WriteTo(CodedOutputStream output)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">CodedOutputStream</span></td>
+        <td><span class="parametername">output</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <span class="xref">Google.Protobuf.IMessage&lt;T&gt;</span>
+  </div>
+  <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iequatable-1">IEquatable&lt;T&gt;</a>
+  </div>
+  <div>
+      <span class="xref">Google.Protobuf.IDeepCloneable&lt;T&gt;</span>
+  </div>
+  <div>
+      <span class="xref">Google.Protobuf.IBufferMessage</span>
+  </div>
+  <div>
+      <span class="xref">Google.Protobuf.IMessage</span>
+  </div>
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      QuestNav - VR Navigation for FRC Robots
+      
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

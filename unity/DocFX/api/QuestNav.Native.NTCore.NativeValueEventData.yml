@@ -1,0 +1,385 @@
+### YamlMime:ManagedReference
+items:
+- uid: QuestNav.Native.NTCore.NativeValueEventData
+  commentId: T:QuestNav.Native.NTCore.NativeValueEventData
+  id: NativeValueEventData
+  parent: QuestNav.Native.NTCore
+  children:
+  - QuestNav.Native.NTCore.NativeValueEventData.subentry
+  - QuestNav.Native.NTCore.NativeValueEventData.topic
+  - QuestNav.Native.NTCore.NativeValueEventData.value
+  langs:
+  - csharp
+  - vb
+  name: NativeValueEventData
+  nameWithType: NativeValueEventData
+  fullName: QuestNav.Native.NTCore.NativeValueEventData
+  type: Struct
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: NativeValueEventData
+    path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
+    startLine: 115
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Native.NTCore
+  syntax:
+    content: public struct NativeValueEventData
+    content.vb: Public Structure NativeValueEventData
+  inheritedMembers:
+  - System.ValueType.Equals(System.Object)
+  - System.ValueType.GetHashCode
+  - System.ValueType.ToString
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: QuestNav.Native.NTCore.NativeValueEventData.topic
+  commentId: F:QuestNav.Native.NTCore.NativeValueEventData.topic
+  id: topic
+  parent: QuestNav.Native.NTCore.NativeValueEventData
+  langs:
+  - csharp
+  - vb
+  name: topic
+  nameWithType: NativeValueEventData.topic
+  fullName: QuestNav.Native.NTCore.NativeValueEventData.topic
+  type: Field
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: topic
+    path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
+    startLine: 118
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Native.NTCore
+  syntax:
+    content: public int topic
+    return:
+      type: System.Int32
+    content.vb: Public topic As Integer
+- uid: QuestNav.Native.NTCore.NativeValueEventData.subentry
+  commentId: F:QuestNav.Native.NTCore.NativeValueEventData.subentry
+  id: subentry
+  parent: QuestNav.Native.NTCore.NativeValueEventData
+  langs:
+  - csharp
+  - vb
+  name: subentry
+  nameWithType: NativeValueEventData.subentry
+  fullName: QuestNav.Native.NTCore.NativeValueEventData.subentry
+  type: Field
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: subentry
+    path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
+    startLine: 119
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Native.NTCore
+  syntax:
+    content: public int subentry
+    return:
+      type: System.Int32
+    content.vb: Public subentry As Integer
+- uid: QuestNav.Native.NTCore.NativeValueEventData.value
+  commentId: F:QuestNav.Native.NTCore.NativeValueEventData.value
+  id: value
+  parent: QuestNav.Native.NTCore.NativeValueEventData
+  langs:
+  - csharp
+  - vb
+  name: value
+  nameWithType: NativeValueEventData.value
+  fullName: QuestNav.Native.NTCore.NativeValueEventData.value
+  type: Field
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: value
+    path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
+    startLine: 120
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Native.NTCore
+  syntax:
+    content: public NativeNetworkTableValue value
+    return:
+      type: QuestNav.Native.NTCore.NativeNetworkTableValue
+    content.vb: Public value As NativeNetworkTableValue
+references:
+- uid: QuestNav.Native.NTCore
+  commentId: N:QuestNav.Native.NTCore
+  href: QuestNav.html
+  name: QuestNav.Native.NTCore
+  nameWithType: QuestNav.Native.NTCore
+  fullName: QuestNav.Native.NTCore
+  spec.csharp:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Native
+    name: Native
+    href: QuestNav.Native.html
+  - name: .
+  - uid: QuestNav.Native.NTCore
+    name: NTCore
+    href: QuestNav.Native.NTCore.html
+  spec.vb:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Native
+    name: Native
+    href: QuestNav.Native.html
+  - name: .
+  - uid: QuestNav.Native.NTCore
+    name: NTCore
+    href: QuestNav.Native.NTCore.html
+- uid: System.ValueType.Equals(System.Object)
+  commentId: M:System.ValueType.Equals(System.Object)
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  name: Equals(object)
+  nameWithType: ValueType.Equals(object)
+  fullName: System.ValueType.Equals(object)
+  nameWithType.vb: ValueType.Equals(Object)
+  fullName.vb: System.ValueType.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.ValueType.GetHashCode
+  commentId: M:System.ValueType.GetHashCode
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  name: GetHashCode()
+  nameWithType: ValueType.GetHashCode()
+  fullName: System.ValueType.GetHashCode()
+  spec.csharp:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+- uid: System.ValueType.ToString
+  commentId: M:System.ValueType.ToString
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  name: ToString()
+  nameWithType: ValueType.ToString()
+  fullName: System.ValueType.ToString()
+  spec.csharp:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.ValueType
+  commentId: T:System.ValueType
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype
+  name: ValueType
+  nameWithType: ValueType
+  fullName: System.ValueType
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: QuestNav.Native.NTCore.NativeNetworkTableValue
+  commentId: T:QuestNav.Native.NTCore.NativeNetworkTableValue
+  parent: QuestNav.Native.NTCore
+  href: QuestNav.Native.NTCore.NativeNetworkTableValue.html
+  name: NativeNetworkTableValue
+  nameWithType: NativeNetworkTableValue
+  fullName: QuestNav.Native.NTCore.NativeNetworkTableValue

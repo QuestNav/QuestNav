@@ -1,5 +1,3 @@
-using System;
-using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using QuestNav.Core;
@@ -255,7 +253,7 @@ namespace QuestNav.UI
             var frcPosition = Conversions.UnityToFrc(position, rotation);
             xText.text = $"{frcPosition.Translation.X:0.00} M";
             yText.text = $"{frcPosition.Translation.Y:0.00} M";
-            rotText.text = $"{(frcPosition.Rotation.Value * Mathf.Rad2Deg + 360f) % 360f :0.00}°";
+            rotText.text = $"{(frcPosition.Rotation.Value * Mathf.Rad2Deg + 360f) % 360f:0.00}°";
         }
         #endregion
     }

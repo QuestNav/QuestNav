@@ -43,6 +43,6 @@ MonoBehaviour:
   insightPassthroughEnabled: 0
   _insightPassthroughSupport: 1
   _processorFavor: 0
-  systemSplashScreen: {fileID: 0}
+  systemSplashScreen: {fileID: 2800000, guid: e7ca9eda9b8176146aef7440106dd606, type: 3}
   systemSplashScreenType: 0
   _systemLoadingScreenBackground: 1

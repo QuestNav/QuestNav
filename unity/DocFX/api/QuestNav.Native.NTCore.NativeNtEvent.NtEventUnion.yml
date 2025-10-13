@@ -20,8 +20,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NtEventUnion
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 150
@@ -52,8 +52,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: connInfo
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 154
@@ -79,8 +79,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: topicInfo
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 157
@@ -106,8 +106,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: valueData
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 160
@@ -133,8 +133,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: logMessage
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 163
@@ -160,8 +160,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: timeSyncData
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 166

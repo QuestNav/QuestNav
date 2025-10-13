@@ -19,8 +19,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/PolledLogger.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PolledLogger
     path: ../Assets/QuestNav/Native/NTCore/PolledLogger.cs
     startLine: 6
@@ -56,8 +56,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/PolledLogger.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: .ctor
     path: ../Assets/QuestNav/Native/NTCore/PolledLogger.cs
     startLine: 10
@@ -88,8 +88,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/PolledLogger.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Close
     path: ../Assets/QuestNav/Native/NTCore/PolledLogger.cs
     startLine: 15
@@ -114,8 +114,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/PolledLogger.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Dispose
     path: ../Assets/QuestNav/Native/NTCore/PolledLogger.cs
     startLine: 24
@@ -143,8 +143,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/PolledLogger.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PollForMessages
     path: ../Assets/QuestNav/Native/NTCore/PolledLogger.cs
     startLine: 29

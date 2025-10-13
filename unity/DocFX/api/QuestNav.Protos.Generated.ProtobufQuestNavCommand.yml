@@ -36,11 +36,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ProtobufQuestNavCommand
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 328
+    startLine: 329
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -90,11 +90,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Parser
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 335
+    startLine: 336
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -119,11 +119,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Descriptor
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 339
+    startLine: 340
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -148,11 +148,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: .ctor
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 351
+    startLine: 352
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -177,11 +177,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: .ctor
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 359
+    startLine: 360
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -209,21 +209,19 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Clone
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 373
+    startLine: 374
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Creates a deep clone of this object.
   example: []
   syntax:
     content: public ProtobufQuestNavCommand Clone()
     return:
       type: QuestNav.Protos.Generated.ProtobufQuestNavCommand
-      description: A deep clone of this object.
     content.vb: Public Function Clone() As ProtobufQuestNavCommand
   overload: QuestNav.Protos.Generated.ProtobufQuestNavCommand.Clone*
   implements:
@@ -242,11 +240,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: TypeFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 380
+    startLine: 381
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -271,11 +269,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Type
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 390
+    startLine: 391
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -308,11 +306,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: CommandIdFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 400
+    startLine: 401
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -337,11 +335,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: CommandId
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 414
+    startLine: 415
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -378,11 +376,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PoseResetPayloadFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 424
+    startLine: 425
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -407,11 +405,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PoseResetPayload
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 430
+    startLine: 431
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -441,11 +439,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PayloadCase
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 447
+    startLine: 448
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -470,11 +468,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ClearPayload
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 453
+    startLine: 454
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -496,11 +494,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Equals
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 460
+    startLine: 461
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -532,11 +530,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Equals
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 466
+    startLine: 467
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -566,11 +564,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: GetHashCode
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 482
+    startLine: 483
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -596,11 +594,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ToString
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 496
+    startLine: 497
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -626,22 +624,20 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: WriteTo
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 502
+    startLine: 503
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Writes the data to the given coded output stream.
   example: []
   syntax:
     content: public void WriteTo(CodedOutputStream output)
     parameters:
     - id: output
       type: Google.Protobuf.CodedOutputStream
-      description: Coded output stream to write the data to. Must not be null.
     content.vb: Public Sub WriteTo(output As CodedOutputStream)
   overload: QuestNav.Protos.Generated.ProtobufQuestNavCommand.WriteTo*
   implements:
@@ -660,23 +656,19 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: CalculateSize
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 548
+    startLine: 549
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Calculates the size of this message in Protocol Buffer wire format, in bytes.
   example: []
   syntax:
     content: public int CalculateSize()
     return:
       type: System.Int32
-      description: >-
-        The number of bytes required to write this message
-                    to a coded output stream.
     content.vb: Public Function CalculateSize() As Integer
   overload: QuestNav.Protos.Generated.ProtobufQuestNavCommand.CalculateSize*
   implements:
@@ -695,16 +687,14 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: MergeFrom
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 567
+    startLine: 568
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Merges the given message into this one.
-  remarks: See the user guide for precise merge semantics.
   example: []
   syntax:
     content: public void MergeFrom(ProtobufQuestNavCommand other)
@@ -729,23 +719,20 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: MergeFrom
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 591
+    startLine: 592
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Merges the data from the specified coded input stream with the current message.
-  remarks: See the user guide for precise merge semantics.
   example: []
   syntax:
     content: public void MergeFrom(CodedInputStream input)
     parameters:
     - id: input
       type: Google.Protobuf.CodedInputStream
-      description: ''
     content.vb: Public Sub MergeFrom(input As CodedInputStream)
   overload: QuestNav.Protos.Generated.ProtobufQuestNavCommand.MergeFrom*
   implements:

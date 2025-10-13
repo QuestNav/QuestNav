@@ -17,8 +17,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: WpiString
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 5
@@ -49,8 +49,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: str
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 8
@@ -76,8 +76,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: len
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 9

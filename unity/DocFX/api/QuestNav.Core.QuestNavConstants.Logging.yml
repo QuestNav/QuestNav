@@ -17,8 +17,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Logging
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 153
@@ -54,8 +54,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_LOG_LEVEL_MIN
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 191
@@ -83,8 +83,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_LOG_LEVEL_MAX
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 196

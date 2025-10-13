@@ -18,8 +18,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NativeValueEventData
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 115
@@ -50,8 +50,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: topic
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 118
@@ -77,8 +77,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: subentry
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 119
@@ -104,8 +104,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: value
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 120

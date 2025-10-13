@@ -21,8 +21,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Logging/QueuedLogger.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: QueuedLogger
     path: ../Assets/QuestNav/Logging/QueuedLogger.cs
     startLine: 11
@@ -61,8 +61,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Logging/QueuedLogger.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Log
     path: ../Assets/QuestNav/Logging/QueuedLogger.cs
     startLine: 98
@@ -105,8 +105,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Logging/QueuedLogger.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: LogWarning
     path: ../Assets/QuestNav/Logging/QueuedLogger.cs
     startLine: 128
@@ -143,8 +143,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Logging/QueuedLogger.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: LogError
     path: ../Assets/QuestNav/Logging/QueuedLogger.cs
     startLine: 138
@@ -181,8 +181,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Logging/QueuedLogger.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: LogException
     path: ../Assets/QuestNav/Logging/QueuedLogger.cs
     startLine: 148
@@ -219,8 +219,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Logging/QueuedLogger.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: LogException
     path: ../Assets/QuestNav/Logging/QueuedLogger.cs
     startLine: 162
@@ -260,8 +260,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Logging/QueuedLogger.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Flush
     path: ../Assets/QuestNav/Logging/QueuedLogger.cs
     startLine: 191

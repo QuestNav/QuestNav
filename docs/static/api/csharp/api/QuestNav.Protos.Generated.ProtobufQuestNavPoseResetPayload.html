@@ -9,7 +9,7 @@
       <meta name="viewport" content="width=device-width">
       <meta name="title" content="Class ProtobufQuestNavPoseResetPayload | QuestNav API Documentation ">
     
-    <meta name="description" content="Payload message for the POSE_RESET command. This message contains the data needed to execute a pose reset operation. The pose reset command allows external systems to correct the Quest&#39;s understanding of the robot&#39;s position and orientation on the field. Coordinate System:  Uses WPILib field-relative coordinate system X-axis: Forward (towards opposing alliance) Y-axis: Left (when facing forward) Rotation: Counter-clockwise positive (standard mathematical convention) Origin: Typically at one corner of the field (see field layout documentation)">
+    <meta name="description" content="Payload message for the POSE_RESET command. This message contains the data needed to execute a pose reset operation. The pose reset command allows external systems to correct the Quest&#39;s understanding of the robot&#39;s position and orientation on the field. Coordinate System:  Uses WPILib field-relative coordinate system X-axis: Forward (towards opposing alliance) Y-axis: Left (when facing forward) Z-axis: Up Rotation: Counter-clockwise positive (right-hand coordinate system) Origin: Typically at one corner of the field (see field layout documentation)">
       <link rel="shortcut icon" href="../favicon.ico">
       <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
       <link rel="stylesheet" href="../styles/docfx.css">
@@ -93,7 +93,8 @@ understanding of the robot's position and orientation on the field.</p>
 <li>Uses WPILib field-relative coordinate system</li>
 <li>X-axis: Forward (towards opposing alliance)</li>
 <li>Y-axis: Left (when facing forward)</li>
-<li>Rotation: Counter-clockwise positive (standard mathematical convention)</li>
+<li>Z-axis: Up</li>
+<li>Rotation: Counter-clockwise positive (right-hand coordinate system)</li>
 <li>Origin: Typically at one corner of the field (see field layout documentation)</li>
 </ul>
 </div>
@@ -255,7 +256,7 @@ to match this pose, effectively correcting any accumulated drift.</p>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public ProtobufPose2d TargetPose { get; set; }</code></pre>
+    <pre><code class="lang-csharp hljs">public ProtobufPose3d TargetPose { get; set; }</code></pre>
   </div>
   <h5 class="propertyValue">Property Value</h5>
   <table class="table table-bordered table-condensed">
@@ -267,7 +268,7 @@ to match this pose, effectively correcting any accumulated drift.</p>
     </thead>
     <tbody>
       <tr>
-        <td><a class="xref" href="Wpi.Proto.ProtobufPose2d.html">ProtobufPose2d</a></td>
+        <td><a class="xref" href="Wpi.Proto.ProtobufPose3d.html">ProtobufPose3d</a></td>
         <td></td>
       </tr>
     </tbody>

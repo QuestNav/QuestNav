@@ -40,8 +40,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ProtobufTwist3d
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1574
@@ -104,8 +104,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Parser
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1581
@@ -133,8 +133,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Descriptor
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1585
@@ -162,8 +162,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: .ctor
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1597
@@ -191,8 +191,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: .ctor
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1605
@@ -223,21 +223,19 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Clone
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1617
   assemblies:
   - QuestNav
   namespace: Wpi.Proto
-  summary: Creates a deep clone of this object.
   example: []
   syntax:
     content: public ProtobufTwist3d Clone()
     return:
       type: Wpi.Proto.ProtobufTwist3d
-      description: A deep clone of this object.
     content.vb: Public Function Clone() As ProtobufTwist3d
   overload: Wpi.Proto.ProtobufTwist3d.Clone*
   implements:
@@ -256,8 +254,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: DxFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1624
@@ -285,8 +283,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Dx
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1637
@@ -325,8 +323,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: DyFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1647
@@ -354,8 +352,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Dy
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1660
@@ -394,8 +392,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: DzFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1670
@@ -423,8 +421,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Dz
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1683
@@ -463,8 +461,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: RxFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1693
@@ -492,8 +490,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Rx
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1706
@@ -532,8 +530,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: RyFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1716
@@ -561,8 +559,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Ry
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1729
@@ -601,8 +599,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: RzFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1739
@@ -630,8 +628,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Rz
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1752
@@ -670,8 +668,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Equals
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1761
@@ -706,8 +704,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Equals
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1767
@@ -740,8 +738,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: GetHashCode
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1785
@@ -770,8 +768,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ToString
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1801
@@ -800,22 +798,20 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: WriteTo
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1807
   assemblies:
   - QuestNav
   namespace: Wpi.Proto
-  summary: Writes the data to the given coded output stream.
   example: []
   syntax:
     content: public void WriteTo(CodedOutputStream output)
     parameters:
     - id: output
       type: Google.Protobuf.CodedOutputStream
-      description: Coded output stream to write the data to. Must not be null.
     content.vb: Public Sub WriteTo(output As CodedOutputStream)
   overload: Wpi.Proto.ProtobufTwist3d.WriteTo*
   implements:
@@ -834,23 +830,19 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: CalculateSize
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1877
   assemblies:
   - QuestNav
   namespace: Wpi.Proto
-  summary: Calculates the size of this message in Protocol Buffer wire format, in bytes.
   example: []
   syntax:
     content: public int CalculateSize()
     return:
       type: System.Int32
-      description: >-
-        The number of bytes required to write this message
-                    to a coded output stream.
     content.vb: Public Function CalculateSize() As Integer
   overload: Wpi.Proto.ProtobufTwist3d.CalculateSize*
   implements:
@@ -869,16 +861,14 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: MergeFrom
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1905
   assemblies:
   - QuestNav
   namespace: Wpi.Proto
-  summary: Merges the given message into this one.
-  remarks: See the user guide for precise merge semantics.
   example: []
   syntax:
     content: public void MergeFrom(ProtobufTwist3d other)
@@ -903,23 +893,20 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Geometry3D.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: MergeFrom
     path: ../Assets/QuestNav/Protos/Generated/Geometry3D.cs
     startLine: 1932
   assemblies:
   - QuestNav
   namespace: Wpi.Proto
-  summary: Merges the data from the specified coded input stream with the current message.
-  remarks: See the user guide for precise merge semantics.
   example: []
   syntax:
     content: public void MergeFrom(CodedInputStream input)
     parameters:
     - id: input
       type: Google.Protobuf.CodedInputStream
-      description: ''
     content.vb: Public Sub MergeFrom(input As CodedInputStream)
   overload: Wpi.Proto.ProtobufTwist3d.MergeFrom*
   implements:

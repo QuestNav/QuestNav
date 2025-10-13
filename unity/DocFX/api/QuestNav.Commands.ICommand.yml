@@ -17,8 +17,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Commands/ICommand.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ICommand
     path: ../Assets/QuestNav/Commands/ICommand.cs
     startLine: 7
@@ -44,8 +44,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Commands/ICommand.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: commandNiceName
     path: ../Assets/QuestNav/Commands/ICommand.cs
     startLine: 12
@@ -75,8 +75,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Commands/ICommand.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Execute
     path: ../Assets/QuestNav/Commands/ICommand.cs
     startLine: 18

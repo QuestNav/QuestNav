@@ -17,11 +17,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PayloadOneofCase
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 442
+    startLine: 443
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -44,11 +44,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: None
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 443
+    startLine: 444
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -70,11 +70,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PoseResetPayload
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 444
+    startLine: 445
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated

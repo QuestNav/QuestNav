@@ -20,8 +20,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/PubSubOptions.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PubSubOptions
     path: ../Assets/QuestNav/Native/NTCore/PubSubOptions.cs
     startLine: 2
@@ -52,8 +52,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/PubSubOptions.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: AllDefault
     path: ../Assets/QuestNav/Native/NTCore/PubSubOptions.cs
     startLine: 4
@@ -81,8 +81,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/PubSubOptions.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Periodic
     path: ../Assets/QuestNav/Native/NTCore/PubSubOptions.cs
     startLine: 12
@@ -110,8 +110,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/PubSubOptions.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: SendAll
     path: ../Assets/QuestNav/Native/NTCore/PubSubOptions.cs
     startLine: 13
@@ -139,8 +139,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/PubSubOptions.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: KeepDuplicates
     path: ../Assets/QuestNav/Native/NTCore/PubSubOptions.cs
     startLine: 14
@@ -168,8 +168,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/PubSubOptions.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ToNative
     path: ../Assets/QuestNav/Native/NTCore/PubSubOptions.cs
     startLine: 16

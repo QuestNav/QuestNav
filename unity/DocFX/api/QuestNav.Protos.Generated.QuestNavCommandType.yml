@@ -17,8 +17,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: QuestNavCommandType
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
     startLine: 65
@@ -55,8 +55,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: CommandTypeUnspecified
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
     startLine: 69
@@ -96,8 +96,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PoseReset
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
     startLine: 80

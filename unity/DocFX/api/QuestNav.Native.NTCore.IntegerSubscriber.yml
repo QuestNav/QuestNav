@@ -16,8 +16,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/IntegerSubscriber.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: IntegerSubscriber
     path: ../Assets/QuestNav/Native/NTCore/IntegerSubscriber.cs
     startLine: 2
@@ -51,8 +51,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/IntegerSubscriber.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Get
     path: ../Assets/QuestNav/Native/NTCore/IntegerSubscriber.cs
     startLine: 11

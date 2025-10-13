@@ -30,11 +30,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ProtobufQuestNavPoseResetPayload
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 101
+    startLine: 102
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -50,7 +50,8 @@ items:
      - Uses WPILib field-relative coordinate system
      - X-axis: Forward (towards opposing alliance)
      - Y-axis: Left (when facing forward)
-     - Rotation: Counter-clockwise positive (standard mathematical convention)
+     - Z-axis: Up
+     - Rotation: Counter-clockwise positive (right-hand coordinate system)
      - Origin: Typically at one corner of the field (see field layout documentation)
   example: []
   syntax:
@@ -82,11 +83,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Parser
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 108
+    startLine: 109
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -111,11 +112,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Descriptor
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 112
+    startLine: 113
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -140,11 +141,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: .ctor
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 124
+    startLine: 125
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -169,11 +170,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: .ctor
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 132
+    startLine: 133
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -201,21 +202,19 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Clone
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 139
+    startLine: 140
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Creates a deep clone of this object.
   example: []
   syntax:
     content: public ProtobufQuestNavPoseResetPayload Clone()
     return:
       type: QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload
-      description: A deep clone of this object.
     content.vb: Public Function Clone() As ProtobufQuestNavPoseResetPayload
   overload: QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.Clone*
   implements:
@@ -234,11 +233,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: TargetPoseFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 146
+    startLine: 147
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -263,11 +262,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: TargetPose
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 160
+    startLine: 161
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -284,11 +283,11 @@ items:
      - Rotation: radians
   example: []
   syntax:
-    content: public ProtobufPose2d TargetPose { get; set; }
+    content: public ProtobufPose3d TargetPose { get; set; }
     parameters: []
     return:
-      type: Wpi.Proto.ProtobufPose2d
-    content.vb: Public Property TargetPose As ProtobufPose2d
+      type: Wpi.Proto.ProtobufPose3d
+    content.vb: Public Property TargetPose As ProtobufPose3d
   overload: QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.TargetPose*
 - uid: QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.Equals(System.Object)
   commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.Equals(System.Object)
@@ -304,11 +303,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Equals
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 169
+    startLine: 170
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -340,11 +339,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Equals
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 175
+    startLine: 176
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -374,11 +373,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: GetHashCode
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 188
+    startLine: 189
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -404,11 +403,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ToString
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 199
+    startLine: 200
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -434,22 +433,20 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: WriteTo
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 205
+    startLine: 206
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Writes the data to the given coded output stream.
   example: []
   syntax:
     content: public void WriteTo(CodedOutputStream output)
     parameters:
     - id: output
       type: Google.Protobuf.CodedOutputStream
-      description: Coded output stream to write the data to. Must not be null.
     content.vb: Public Sub WriteTo(output As CodedOutputStream)
   overload: QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.WriteTo*
   implements:
@@ -468,23 +465,19 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: CalculateSize
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 235
+    startLine: 236
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Calculates the size of this message in Protocol Buffer wire format, in bytes.
   example: []
   syntax:
     content: public int CalculateSize()
     return:
       type: System.Int32
-      description: >-
-        The number of bytes required to write this message
-                    to a coded output stream.
     content.vb: Public Function CalculateSize() As Integer
   overload: QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.CalculateSize*
   implements:
@@ -503,16 +496,14 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: MergeFrom
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 248
+    startLine: 249
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Merges the given message into this one.
-  remarks: See the user guide for precise merge semantics.
   example: []
   syntax:
     content: public void MergeFrom(ProtobufQuestNavPoseResetPayload other)
@@ -537,23 +528,20 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: MergeFrom
     path: ../Assets/QuestNav/Protos/Generated/Commands.cs
-    startLine: 263
+    startLine: 264
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Merges the data from the specified coded input stream with the current message.
-  remarks: See the user guide for precise merge semantics.
   example: []
   syntax:
     content: public void MergeFrom(CodedInputStream input)
     parameters:
     - id: input
       type: Google.Protobuf.CodedInputStream
-      description: ''
     content.vb: Public Sub MergeFrom(input As CodedInputStream)
   overload: QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.MergeFrom*
   implements:
@@ -1115,13 +1103,13 @@ references:
   name: TargetPose
   nameWithType: ProtobufQuestNavPoseResetPayload.TargetPose
   fullName: QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.TargetPose
-- uid: Wpi.Proto.ProtobufPose2d
-  commentId: T:Wpi.Proto.ProtobufPose2d
+- uid: Wpi.Proto.ProtobufPose3d
+  commentId: T:Wpi.Proto.ProtobufPose3d
   parent: Wpi.Proto
-  href: Wpi.Proto.ProtobufPose2d.html
-  name: ProtobufPose2d
-  nameWithType: ProtobufPose2d
-  fullName: Wpi.Proto.ProtobufPose2d
+  href: Wpi.Proto.ProtobufPose3d.html
+  name: ProtobufPose3d
+  nameWithType: ProtobufPose3d
+  fullName: Wpi.Proto.ProtobufPose3d
 - uid: Wpi.Proto
   commentId: N:Wpi.Proto
   href: Wpi.html

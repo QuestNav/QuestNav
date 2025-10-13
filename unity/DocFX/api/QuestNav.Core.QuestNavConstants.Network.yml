@@ -19,8 +19,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Network
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 13
@@ -56,8 +56,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_PUBLISHER_SETTINGS
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 18
@@ -85,8 +85,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: DEBUG_NT_SERVER_ADDRESS_OVERRIDE
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 23
@@ -114,8 +114,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_SERVER_PORT
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 28
@@ -143,8 +143,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: DEFAULT_TEAM_NUMBER
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 33

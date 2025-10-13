@@ -121,32 +121,14 @@
   </div>
   <h3 id="methods">Methods
 </h3>
-  <a id="QuestNav_Utils_Conversions_FrcToUnity_" data-uid="QuestNav.Utils.Conversions.FrcToUnity*"></a>
-  <h4 id="QuestNav_Utils_Conversions_FrcToUnity_Wpi_Proto_ProtobufPose2d_UnityEngine_Vector3_UnityEngine_Quaternion_" data-uid="QuestNav.Utils.Conversions.FrcToUnity(Wpi.Proto.ProtobufPose2d,UnityEngine.Vector3,UnityEngine.Quaternion)">FrcToUnity(ProtobufPose2d, Vector3, Quaternion)</h4>
+  <a id="QuestNav_Utils_Conversions_FrcToUnity3d_" data-uid="QuestNav.Utils.Conversions.FrcToUnity3d*"></a>
+  <h4 id="QuestNav_Utils_Conversions_FrcToUnity3d_Wpi_Proto_ProtobufPose3d_" data-uid="QuestNav.Utils.Conversions.FrcToUnity3d(Wpi.Proto.ProtobufPose3d)">FrcToUnity3d(ProtobufPose3d)</h4>
   <div class="markdown level1 summary"><p>Converts from FRC coordinate system to Unity coordinate system.</p>
-<p>COORDINATE SYSTEM DIFFERENCES:
-FRC Field Coordinates:          Unity World Coordinates:</p>
-<ul>
-<li>Origin: Blue alliance wall    - Origin: Arbitrary (set by VR tracking)</li>
-<li>X-axis: Points toward red     - X-axis: Points right</li>
-<li>Y-axis: Points left           - Y-axis: Points up</li>
-<li>Z-axis: Points up             - Z-axis: Points forward</li>
-<li>Rotation: Counter-clockwise   - Rotation: Clockwise (left-handed)</li>
-</ul>
-<p>CONVERSION MAPPING:
-FRC X (forward) → Unity Z (forward)
-FRC Y (left) → Unity -X (right becomes left)
-FRC Z (up) → Unity Y (up)
-FRC θ (CCW) → Unity -Y rotation (CW)</p>
-<p>HEIGHT PRESERVATION:
-The Y coordinate (height) is preserved from the current VR position since
-FRC operates in 2D while VR tracking provides 3D data. This allows users
-to crouch, stand, etc. without affecting the robot's 2D field position.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static (Vector3 position, Quaternion rotation) FrcToUnity(ProtobufPose2d targetPose2d, Vector3 currentPose, Quaternion currentQuaternion)</code></pre>
+    <pre><code class="lang-csharp hljs">public static (Vector3 position, Quaternion rotation) FrcToUnity3d(ProtobufPose3d targetPose3d)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-condensed">
@@ -159,21 +141,9 @@ to crouch, stand, etc. without affecting the robot's 2D field position.</p>
     </thead>
     <tbody>
       <tr>
-        <td><a class="xref" href="Wpi.Proto.ProtobufPose2d.html">ProtobufPose2d</a></td>
-        <td><span class="parametername">targetPose2d</span></td>
+        <td><a class="xref" href="Wpi.Proto.ProtobufPose3d.html">ProtobufPose3d</a></td>
+        <td><span class="parametername">targetPose3d</span></td>
         <td><p>Target position in FRC coordinates (meters, radians)</p>
-</td>
-      </tr>
-      <tr>
-        <td><a class="xref" href="https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Vector3.html">Vector3</a></td>
-        <td><span class="parametername">currentPose</span></td>
-        <td><p>Current VR headset position (for preserving Y height)</p>
-</td>
-      </tr>
-      <tr>
-        <td><a class="xref" href="https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Quaternion.html">Quaternion</a></td>
-        <td><span class="parametername">currentQuaternion</span></td>
-        <td><p>Current VR headset rotation (for preserving pitch/roll)</p>
 </td>
       </tr>
     </tbody>
@@ -194,25 +164,38 @@ to crouch, stand, etc. without affecting the robot's 2D field position.</p>
       </tr>
     </tbody>
   </table>
-  <a id="QuestNav_Utils_Conversions_UnityToFrc_" data-uid="QuestNav.Utils.Conversions.UnityToFrc*"></a>
-  <h4 id="QuestNav_Utils_Conversions_UnityToFrc_UnityEngine_Vector3_UnityEngine_Quaternion_" data-uid="QuestNav.Utils.Conversions.UnityToFrc(UnityEngine.Vector3,UnityEngine.Quaternion)">UnityToFrc(Vector3, Quaternion)</h4>
-  <div class="markdown level1 summary"><p>Converts from Unity coordinate system to FRC coordinate system.</p>
-<p>This is the inverse of FrcToUnity(), used to send VR headset position
-to the robot in the coordinate system it expects.</p>
-<p>CONVERSION MAPPING (REVERSE):
-Unity X (right) → FRC -Y (left, accounting for handedness)
-Unity Y (up) → Ignored (FRC is 2D, robot doesn't need height)
-Unity Z (forward) → FRC X (forward)
-Unity Y rotation (CW degrees) → FRC θ (CCW radians)</p>
-<p>USAGE:
-Called 100 times per second to stream headset position to robot.
-The robot uses this data for autonomous navigation, driver assistance,
-or any other functionality that needs to know where the driver is looking.</p>
+  <h5 id="QuestNav_Utils_Conversions_FrcToUnity3d_Wpi_Proto_ProtobufPose3d__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><table><thead><tr><th class="term">FRC Field Coordinates</th><th class="description">Unity World Coordinates</th></tr></thead><tbody><tr><td class="term">Origin: Blue alliance wall</td><td class="description">Origin: Arbitrary (set by VR tracking)</td></tr><tr><td class="term">X-axis: Points toward red</td><td class="description">X-axis: Points right</td></tr><tr><td class="term">Y-axis: Points left</td><td class="description">Y-axis: Points up</td></tr><tr><td class="term">Z-axis: Points up</td><td class="description">Z-axis: Points forward</td></tr><tr><td class="term">Rotation: Counter-clockwise</td><td class="description">Rotation: Clockwise (left-handed)</td></tr></tbody></table>
+<p><b>TRANSLATION MAPPING:</b><br>
+FRC X (forward) → Unity Z (forward)<br>
+FRC Y (left) → Unity -X (right becomes left)<br>
+FRC Z (up) → Unity Y (up)<br>
+FRC θ (CCW) → Unity -Y rotation (CW)
+</p>
+<p><b>ROTATION MAPPING:</b></p>
+<p>
+Converting rotation requires remapping the axes and accounting for the change in "handedness".
+A robot's primary rotation in FRC is yaw, which is a counter-clockwise rotation around the FRC Z-axis (up).
+In Unity, the equivalent rotation is yaw around Unity's Y-axis (up). However, Unity's left-handed system
+means positive rotation is clockwise. Therefore, the angle must be inverted.
+</p>
+<p>
+This transformation is accomplished by shuffling and negating the quaternion components:
+<pre><code class="lang-csharp">Unity.x =  FRC.y
+Unity.y = -FRC.z
+Unity.z = -FRC.x
+Unity.w =  FRC.w</code></pre>
+This correctly maps the rotation from FRC's right-handed, Z-up frame to Unity's left-handed, Y-up frame.
+
+</div>
+  <a id="QuestNav_Utils_Conversions_UnityToFrc3d_" data-uid="QuestNav.Utils.Conversions.UnityToFrc3d*"></a>
+  <h4 id="QuestNav_Utils_Conversions_UnityToFrc3d_UnityEngine_Vector3_UnityEngine_Quaternion_" data-uid="QuestNav.Utils.Conversions.UnityToFrc3d(UnityEngine.Vector3,UnityEngine.Quaternion)">UnityToFrc3d(Vector3, Quaternion)</h4>
+  <div class="markdown level1 summary"><p>Converts a pose from the Unity world coordinate system to the FRC field coordinate system.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static ProtobufPose2d UnityToFrc(Vector3 unityPosition, Quaternion unityRotation)</code></pre>
+    <pre><code class="lang-csharp hljs">public static ProtobufPose3d UnityToFrc3d(Vector3 unityPosition, Quaternion unityRotation)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-condensed">
@@ -227,13 +210,13 @@ or any other functionality that needs to know where the driver is looking.</p>
       <tr>
         <td><a class="xref" href="https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Vector3.html">Vector3</a></td>
         <td><span class="parametername">unityPosition</span></td>
-        <td><p>VR headset position in Unity world coordinates</p>
+        <td><p>The position from Unity's world space (e.g., from a VR headset).</p>
 </td>
       </tr>
       <tr>
         <td><a class="xref" href="https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Quaternion.html">Quaternion</a></td>
         <td><span class="parametername">unityRotation</span></td>
-        <td><p>VR headset orientation in Unity world coordinates</p>
+        <td><p>The orientation from Unity's world space.</p>
 </td>
       </tr>
     </tbody>
@@ -248,12 +231,45 @@ or any other functionality that needs to know where the driver is looking.</p>
     </thead>
     <tbody>
       <tr>
-        <td><a class="xref" href="Wpi.Proto.ProtobufPose2d.html">ProtobufPose2d</a></td>
-        <td><p>2D pose in FRC field coordinates (meters, radians)</p>
+        <td><a class="xref" href="Wpi.Proto.ProtobufPose3d.html">ProtobufPose3d</a></td>
+        <td><p>A 3D pose in the FRC field coordinate system (meters, radians).</p>
 </td>
       </tr>
     </tbody>
   </table>
+  <h5 id="QuestNav_Utils_Conversions_UnityToFrc3d_UnityEngine_Vector3_UnityEngine_Quaternion__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>
+This method performs the inverse of <code>FrcToUnity3d</code>. It is primarily used to send data,
+such as a VR headset's pose, back to the robot in the coordinate system it understands.
+</p>
+<p><b>COORDINATE SYSTEM DIFFERENCES:</b></p>
+<table><thead><tr><th class="term">Unity World Coordinates (Left-Handed, Y-up)</th><th class="description">FRC Field Coordinates (Right-Handed, Z-up)</th></tr></thead><tbody><tr><td class="term">Origin: Arbitrary (set by VR tracking)</td><td class="description">Origin: Blue alliance wall</td></tr><tr><td class="term">X-axis: Points right</td><td class="description">X-axis: Points toward red alliance (forward)</td></tr><tr><td class="term">Y-axis: Points up</td><td class="description">Y-axis: Points left</td></tr><tr><td class="term">Z-axis: Points forward</td><td class="description">Z-axis: Points up</td></tr><tr><td class="term">Rotation: Clockwise (CW) positive</td><td class="description">Rotation: Counter-clockwise (CCW) positive</td></tr></tbody></table>
+<p><b>TRANSLATION MAPPING:</b><br>
+Unity Z (forward) → FRC X (forward)<br>
+Unity X (right)   → FRC -Y (left)<br>
+Unity Y (up)      → FRC Z (up)
+</p>
+<p><b>ROTATION MAPPING:</b></p>
+<p>
+To convert rotation from Unity back to FRC, the axes are remapped and the change in "handedness" is reversed.
+Unity's primary yaw rotation occurs around its Y-axis (up) in a clockwise direction. This is converted
+back to the FRC standard of yaw around its Z-axis (up) in a counter-clockwise direction.
+</p>
+<p>
+This inverse transformation is accomplished by the reverse quaternion component shuffle:
+<pre><code class="lang-csharp">FRC.x = -Unity.z
+FRC.y =  Unity.x
+FRC.z = -Unity.y
+FRC.w =  Unity.w</code></pre>
+This correctly maps the rotation from Unity's left-handed, Y-up frame back to FRC's right-handed, Z-up frame.
+
+<p>
+USAGE:
+Called 100 times per second to stream headset position to robot.
+The robot uses this data for autonomous navigation, driver assistance,
+or any other functionality that needs to know where the driver is looking.
+</p>
+</div>
 
 </article>
           </div>

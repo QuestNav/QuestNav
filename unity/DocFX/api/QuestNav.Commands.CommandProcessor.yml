@@ -17,8 +17,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Commands/CommandProcessor.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: CommandProcessor
     path: ../Assets/QuestNav/Commands/CommandProcessor.cs
     startLine: 21
@@ -56,8 +56,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Commands/CommandProcessor.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: .ctor
     path: ../Assets/QuestNav/Commands/CommandProcessor.cs
     startLine: 45
@@ -100,8 +100,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Commands/CommandProcessor.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ProcessCommands
     path: ../Assets/QuestNav/Commands/CommandProcessor.cs
     startLine: 67

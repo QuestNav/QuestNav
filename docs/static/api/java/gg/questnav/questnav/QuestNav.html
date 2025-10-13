@@ -11,7 +11,7 @@
 <link rel="stylesheet" type="text/css" href="../../../script-dir/jquery-ui.min.css" title="Style">
 <link rel="stylesheet" type="text/css" href="../../../jquery-ui.overrides.css" title="Style">
 <script type="text/javascript" src="../../../script.js"></script>
-<script type="text/javascript" src="../../../script-dir/jquery-3.7.1.min.js"></script>
+<script type="text/javascript" src="../../../script-dir/jquery-3.5.1.min.js"></script>
 <script type="text/javascript" src="../../../script-dir/jquery-ui.min.js"></script>
 </head>
 <body class="class-declaration-page">
@@ -55,7 +55,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail">Method</a></li>
 </ul>
 </div>
-<div class="nav-list-search"><label for="search-input">SEARCH:</label>
+<div class="nav-list-search"><label for="search">SEARCH:</label>
 <input type="text" id="search-input" value="search" disabled="disabled">
 <input type="reset" id="reset-button" value="reset" disabled="disabled">
 </div>
@@ -152,13 +152,9 @@ loadScripts(document, 'script');</script>
 <dt>Since:</dt>
 <dd>2025.1.0</dd>
 <dt>See Also:</dt>
-<dd>
-<ul class="see-list">
-<li><a href="PoseFrame.html" title="class in gg.questnav.questnav"><code>PoseFrame</code></a></li>
-<li><code>Pose2d</code></li>
-<li><code>NetworkTableInstance</code></li>
-</ul>
-</dd>
+<dd><a href="PoseFrame.html" title="class in gg.questnav.questnav"><code>PoseFrame</code></a>, 
+<code>Pose2d</code>, 
+<code>NetworkTableInstance</code></dd>
 </dl>
 </section>
 <section class="summary">
@@ -184,8 +180,8 @@ loadScripts(document, 'script');</script>
 <h2>Method Summary</h2>
 <div id="method-summary-table">
 <div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
-<div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
-<div class="summary-table three-column-summary">
+<div id="method-summary-table.tabpanel" role="tabpanel">
+<div class="summary-table three-column-summary" aria-labelledby="method-summary-table-tab0">
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
@@ -235,7 +231,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Gets the current tracking state of the Quest headset.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setPose(edu.wpi.first.math.geometry.Pose2d)" class="member-name-link">setPose</a><wbr>(edu.wpi.first.math.geometry.Pose2d&nbsp;pose)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setPose(edu.wpi.first.math.geometry.Pose3d)" class="member-name-link">setPose</a>&#8203;(edu.wpi.first.math.geometry.Pose3d&nbsp;pose)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the field-relative pose of the Quest headset by commanding it to reset its tracking.</div>
 </div>
@@ -264,7 +260,7 @@ loadScripts(document, 'script');</script>
 
  <p>This constructor initializes all necessary NetworkTables subscribers and publishers for
  communication with the Quest device. The instance is ready to use immediately, but you should
- call <a href="#setPose(edu.wpi.first.math.geometry.Pose2d)"><code>setPose(Pose2d)</code></a> to establish field-relative tracking before relying on pose data.
+ call <a href="#setPose(edu.wpi.first.math.geometry.Pose3d)"><code>setPose(Pose2d)</code></a> to establish field-relative tracking before relying on pose data.
 
  <p>The constructor sets up:
 
@@ -286,9 +282,9 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="setPose(edu.wpi.first.math.geometry.Pose2d)">
+<section class="detail" id="setPose(edu.wpi.first.math.geometry.Pose3d)">
 <h3>setPose</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setPose</span><wbr><span class="parameters">(edu.wpi.first.math.geometry.Pose2d&nbsp;pose)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setPose</span>&#8203;<span class="parameters">(edu.wpi.first.math.geometry.Pose3d&nbsp;pose)</span></div>
 <div class="block">Sets the field-relative pose of the Quest headset by commanding it to reset its tracking.
 
  <p>This method sends a pose reset command to the Quest headset, telling it where the Quest is
@@ -327,13 +323,9 @@ loadScripts(document, 'script');</script>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if pose contains NaN or infinite values</dd>
 <dt>See Also:</dt>
-<dd>
-<ul class="see-list">
-<li><a href="#commandPeriodic()"><code>commandPeriodic()</code></a></li>
-<li><a href="#isConnected()"><code>isConnected()</code></a></li>
-<li><code>Pose2d</code></li>
-</ul>
-</dd>
+<dd><a href="#commandPeriodic()"><code>commandPeriodic()</code></a>, 
+<a href="#isConnected()"><code>isConnected()</code></a>, 
+<code>Pose2d</code></dd>
 </dl>
 </section>
 </li>
@@ -367,12 +359,8 @@ loadScripts(document, 'script');</script>
 <dd>An <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/OptionalInt.html" title="class or interface in java.util" class="external-link"><code>OptionalInt</code></a> containing the battery percentage (0-100), or empty if no device
      data is available or Quest is disconnected</dd>
 <dt>See Also:</dt>
-<dd>
-<ul class="see-list">
-<li><a href="#isConnected()"><code>isConnected()</code></a></li>
-<li><a href="#getLatency()"><code>getLatency()</code></a></li>
-</ul>
-</dd>
+<dd><a href="#isConnected()"><code>isConnected()</code></a>, 
+<a href="#getLatency()"><code>getLatency()</code></a></dd>
 </dl>
 </section>
 </li>
@@ -404,20 +392,16 @@ loadScripts(document, 'script');</script>
    <li>Move to an area with more visual features
    <li>Reduce robot motion to allow re-initialization
    <li>Clear any obstructions from Quest cameras
-   <li>Call <a href="#setPose(edu.wpi.first.math.geometry.Pose2d)"><code>setPose(Pose2d)</code></a> once tracking recovers
+   <li>Call <a href="#setPose(edu.wpi.first.math.geometry.Pose3d)"><code>setPose(Pose2d)</code></a> once tracking recovers
  </ul></div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><code>true</code> if the Quest is actively tracking and pose data is reliable, <code>false</code>
      if tracking is lost or no device data is available</dd>
 <dt>See Also:</dt>
-<dd>
-<ul class="see-list">
-<li><a href="#isConnected()"><code>isConnected()</code></a></li>
-<li><a href="#getTrackingLostCounter()"><code>getTrackingLostCounter()</code></a></li>
-<li><a href="#getAllUnreadPoseFrames()"><code>getAllUnreadPoseFrames()</code></a></li>
-</ul>
-</dd>
+<dd><a href="#isConnected()"><code>isConnected()</code></a>, 
+<a href="#getTrackingLostCounter()"><code>getTrackingLostCounter()</code></a>, 
+<a href="#getAllUnreadPoseFrames()"><code>getAllUnreadPoseFrames()</code></a></dd>
 </dl>
 </section>
 </li>
@@ -491,12 +475,8 @@ loadScripts(document, 'script');</script>
 <dd>An <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/OptionalDouble.html" title="class or interface in java.util" class="external-link"><code>OptionalDouble</code></a> containing the Quest app uptime in seconds, or empty if no
      frame data is available</dd>
 <dt>See Also:</dt>
-<dd>
-<ul class="see-list">
-<li><a href="PoseFrame.html#dataTimestamp()"><code>PoseFrame.dataTimestamp()</code></a></li>
-<li><a href="#getAllUnreadPoseFrames()"><code>getAllUnreadPoseFrames()</code></a></li>
-</ul>
-</dd>
+<dd><a href="PoseFrame.html#dataTimestamp()"><code>PoseFrame.dataTimestamp()</code></a>, 
+<a href="#getAllUnreadPoseFrames()"><code>getAllUnreadPoseFrames()</code></a></dd>
 </dl>
 </section>
 </li>
@@ -552,14 +532,10 @@ loadScripts(document, 'script');</script>
 <dd>Array of new <a href="PoseFrame.html" title="class in gg.questnav.questnav"><code>PoseFrame</code></a> objects received since the last call. Empty array if no
      new frames are available or Quest is disconnected.</dd>
 <dt>See Also:</dt>
-<dd>
-<ul class="see-list">
-<li><a href="PoseFrame.html" title="class in gg.questnav.questnav"><code>PoseFrame</code></a></li>
-<li><a href="#isTracking()"><code>isTracking()</code></a></li>
-<li><a href="#isConnected()"><code>isConnected()</code></a></li>
-<li><code>PoseEstimator</code></li>
-</ul>
-</dd>
+<dd><a href="PoseFrame.html" title="class in gg.questnav.questnav"><code>PoseFrame</code></a>, 
+<a href="#isTracking()"><code>isTracking()</code></a>, 
+<a href="#isConnected()"><code>isConnected()</code></a>, 
+<code>PoseEstimator</code></dd>
 </dl>
 </section>
 </li>
@@ -572,7 +548,7 @@ loadScripts(document, 'script');</script>
  <p>This method must be called regularly (typically in <code>robotPeriodic()</code>) to:
 
  <ul>
-   <li>Process responses to commands sent via <a href="#setPose(edu.wpi.first.math.geometry.Pose2d)"><code>setPose(Pose2d)</code></a>
+   <li>Process responses to commands sent via <a href="#setPose(edu.wpi.first.math.geometry.Pose3d)"><code>setPose(Pose2d)</code></a>
    <li>Log command failures to the DriverStation for debugging
    <li>Maintain proper command/response synchronization
    <li>Prevent command response queue overflow
@@ -606,12 +582,8 @@ loadScripts(document, 'script');</script>
  (20ms). It only processes new responses and exits quickly when none are available.</div>
 <dl class="notes">
 <dt>See Also:</dt>
-<dd>
-<ul class="see-list-long">
-<li><a href="#setPose(edu.wpi.first.math.geometry.Pose2d)"><code>setPose(Pose2d)</code></a></li>
-<li><code>DriverStation.reportError(String, boolean)</code></li>
-</ul>
-</dd>
+<dd><a href="#setPose(edu.wpi.first.math.geometry.Pose3d)"><code>setPose(Pose2d)</code></a>, 
+<code>DriverStation.reportError(String, boolean)</code></dd>
 </dl>
 </section>
 </li>

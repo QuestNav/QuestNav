@@ -2976,25 +2976,25 @@ references:
   isSpec: "True"
   fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Parser
   nameWithType: ProtobufQuestNavFrameData.Parser
-- uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D
-  name: Pose2D
-  href: api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.html#QuestNav_Protos_Generated_ProtobufQuestNavFrameData_Pose2D
-  commentId: P:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D
-  fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D
-  nameWithType: ProtobufQuestNavFrameData.Pose2D
-- uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D*
-  name: Pose2D
-  href: api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.html#QuestNav_Protos_Generated_ProtobufQuestNavFrameData_Pose2D_
-  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D
+  name: Pose3D
+  href: api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.html#QuestNav_Protos_Generated_ProtobufQuestNavFrameData_Pose3D
+  commentId: P:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D
+  nameWithType: ProtobufQuestNavFrameData.Pose3D
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D*
+  name: Pose3D
+  href: api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.html#QuestNav_Protos_Generated_ProtobufQuestNavFrameData_Pose3D_
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D
   isSpec: "True"
-  fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D
-  nameWithType: ProtobufQuestNavFrameData.Pose2D
-- uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2DFieldNumber
-  name: Pose2DFieldNumber
-  href: api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.html#QuestNav_Protos_Generated_ProtobufQuestNavFrameData_Pose2DFieldNumber
-  commentId: F:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2DFieldNumber
-  fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2DFieldNumber
-  nameWithType: ProtobufQuestNavFrameData.Pose2DFieldNumber
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D
+  nameWithType: ProtobufQuestNavFrameData.Pose3D
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3DFieldNumber
+  name: Pose3DFieldNumber
+  href: api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.html#QuestNav_Protos_Generated_ProtobufQuestNavFrameData_Pose3DFieldNumber
+  commentId: F:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3DFieldNumber
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3DFieldNumber
+  nameWithType: ProtobufQuestNavFrameData.Pose3DFieldNumber
 - uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Timestamp
   name: Timestamp
   href: api/QuestNav.Protos.Generated.ProtobufQuestNavFrameData.html#QuestNav_Protos_Generated_ProtobufQuestNavFrameData_Timestamp
@@ -3274,15 +3274,15 @@ references:
   commentId: T:QuestNav.UI.UIManager
   fullName: QuestNav.UI.UIManager
   nameWithType: UIManager
-- uid: QuestNav.UI.UIManager.#ctor(QuestNav.Network.INetworkTableConnection,TMPro.TMP_InputField,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,UnityEngine.UI.Button,UnityEngine.UI.Toggle)
-  name: UIManager(INetworkTableConnection, TMP_InputField, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, Button, Toggle)
-  href: api/QuestNav.UI.UIManager.html#QuestNav_UI_UIManager__ctor_QuestNav_Network_INetworkTableConnection_TMPro_TMP_InputField_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_UnityEngine_UI_Button_UnityEngine_UI_Toggle_
-  commentId: M:QuestNav.UI.UIManager.#ctor(QuestNav.Network.INetworkTableConnection,TMPro.TMP_InputField,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,UnityEngine.UI.Button,UnityEngine.UI.Toggle)
-  name.vb: New(INetworkTableConnection, TMP_InputField, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, Button, Toggle)
-  fullName: QuestNav.UI.UIManager.UIManager(QuestNav.Network.INetworkTableConnection, TMPro.TMP_InputField, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, UnityEngine.UI.Button, UnityEngine.UI.Toggle)
-  fullName.vb: QuestNav.UI.UIManager.New(QuestNav.Network.INetworkTableConnection, TMPro.TMP_InputField, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, UnityEngine.UI.Button, UnityEngine.UI.Toggle)
-  nameWithType: UIManager.UIManager(INetworkTableConnection, TMP_InputField, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, Button, Toggle)
-  nameWithType.vb: UIManager.New(INetworkTableConnection, TMP_InputField, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, Button, Toggle)
+- uid: QuestNav.UI.UIManager.#ctor(QuestNav.Network.INetworkTableConnection,TMPro.TMP_InputField,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,UnityEngine.UI.Button,UnityEngine.UI.Toggle)
+  name: UIManager(INetworkTableConnection, TMP_InputField, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, Button, Toggle)
+  href: api/QuestNav.UI.UIManager.html#QuestNav_UI_UIManager__ctor_QuestNav_Network_INetworkTableConnection_TMPro_TMP_InputField_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_UnityEngine_UI_Button_UnityEngine_UI_Toggle_
+  commentId: M:QuestNav.UI.UIManager.#ctor(QuestNav.Network.INetworkTableConnection,TMPro.TMP_InputField,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,UnityEngine.UI.Button,UnityEngine.UI.Toggle)
+  name.vb: New(INetworkTableConnection, TMP_InputField, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, Button, Toggle)
+  fullName: QuestNav.UI.UIManager.UIManager(QuestNav.Network.INetworkTableConnection, TMPro.TMP_InputField, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, UnityEngine.UI.Button, UnityEngine.UI.Toggle)
+  fullName.vb: QuestNav.UI.UIManager.New(QuestNav.Network.INetworkTableConnection, TMPro.TMP_InputField, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, TMPro.TMP_Text, UnityEngine.UI.Button, UnityEngine.UI.Toggle)
+  nameWithType: UIManager.UIManager(INetworkTableConnection, TMP_InputField, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, Button, Toggle)
+  nameWithType.vb: UIManager.New(INetworkTableConnection, TMP_InputField, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, Button, Toggle)
 - uid: QuestNav.UI.UIManager.#ctor*
   name: UIManager
   href: api/QuestNav.UI.UIManager.html#QuestNav_UI_UIManager__ctor_
@@ -3344,32 +3344,32 @@ references:
   commentId: T:QuestNav.Utils.Conversions
   fullName: QuestNav.Utils.Conversions
   nameWithType: Conversions
-- uid: QuestNav.Utils.Conversions.FrcToUnity(Wpi.Proto.ProtobufPose2d,UnityEngine.Vector3,UnityEngine.Quaternion)
-  name: FrcToUnity(ProtobufPose2d, Vector3, Quaternion)
-  href: api/QuestNav.Utils.Conversions.html#QuestNav_Utils_Conversions_FrcToUnity_Wpi_Proto_ProtobufPose2d_UnityEngine_Vector3_UnityEngine_Quaternion_
-  commentId: M:QuestNav.Utils.Conversions.FrcToUnity(Wpi.Proto.ProtobufPose2d,UnityEngine.Vector3,UnityEngine.Quaternion)
-  fullName: QuestNav.Utils.Conversions.FrcToUnity(Wpi.Proto.ProtobufPose2d, UnityEngine.Vector3, UnityEngine.Quaternion)
-  nameWithType: Conversions.FrcToUnity(ProtobufPose2d, Vector3, Quaternion)
-- uid: QuestNav.Utils.Conversions.FrcToUnity*
-  name: FrcToUnity
-  href: api/QuestNav.Utils.Conversions.html#QuestNav_Utils_Conversions_FrcToUnity_
-  commentId: Overload:QuestNav.Utils.Conversions.FrcToUnity
+- uid: QuestNav.Utils.Conversions.FrcToUnity3d(Wpi.Proto.ProtobufPose3d)
+  name: FrcToUnity3d(ProtobufPose3d)
+  href: api/QuestNav.Utils.Conversions.html#QuestNav_Utils_Conversions_FrcToUnity3d_Wpi_Proto_ProtobufPose3d_
+  commentId: M:QuestNav.Utils.Conversions.FrcToUnity3d(Wpi.Proto.ProtobufPose3d)
+  fullName: QuestNav.Utils.Conversions.FrcToUnity3d(Wpi.Proto.ProtobufPose3d)
+  nameWithType: Conversions.FrcToUnity3d(ProtobufPose3d)
+- uid: QuestNav.Utils.Conversions.FrcToUnity3d*
+  name: FrcToUnity3d
+  href: api/QuestNav.Utils.Conversions.html#QuestNav_Utils_Conversions_FrcToUnity3d_
+  commentId: Overload:QuestNav.Utils.Conversions.FrcToUnity3d
   isSpec: "True"
-  fullName: QuestNav.Utils.Conversions.FrcToUnity
-  nameWithType: Conversions.FrcToUnity
-- uid: QuestNav.Utils.Conversions.UnityToFrc(UnityEngine.Vector3,UnityEngine.Quaternion)
-  name: UnityToFrc(Vector3, Quaternion)
-  href: api/QuestNav.Utils.Conversions.html#QuestNav_Utils_Conversions_UnityToFrc_UnityEngine_Vector3_UnityEngine_Quaternion_
-  commentId: M:QuestNav.Utils.Conversions.UnityToFrc(UnityEngine.Vector3,UnityEngine.Quaternion)
-  fullName: QuestNav.Utils.Conversions.UnityToFrc(UnityEngine.Vector3, UnityEngine.Quaternion)
-  nameWithType: Conversions.UnityToFrc(Vector3, Quaternion)
-- uid: QuestNav.Utils.Conversions.UnityToFrc*
-  name: UnityToFrc
-  href: api/QuestNav.Utils.Conversions.html#QuestNav_Utils_Conversions_UnityToFrc_
-  commentId: Overload:QuestNav.Utils.Conversions.UnityToFrc
+  fullName: QuestNav.Utils.Conversions.FrcToUnity3d
+  nameWithType: Conversions.FrcToUnity3d
+- uid: QuestNav.Utils.Conversions.UnityToFrc3d(UnityEngine.Vector3,UnityEngine.Quaternion)
+  name: UnityToFrc3d(Vector3, Quaternion)
+  href: api/QuestNav.Utils.Conversions.html#QuestNav_Utils_Conversions_UnityToFrc3d_UnityEngine_Vector3_UnityEngine_Quaternion_
+  commentId: M:QuestNav.Utils.Conversions.UnityToFrc3d(UnityEngine.Vector3,UnityEngine.Quaternion)
+  fullName: QuestNav.Utils.Conversions.UnityToFrc3d(UnityEngine.Vector3, UnityEngine.Quaternion)
+  nameWithType: Conversions.UnityToFrc3d(Vector3, Quaternion)
+- uid: QuestNav.Utils.Conversions.UnityToFrc3d*
+  name: UnityToFrc3d
+  href: api/QuestNav.Utils.Conversions.html#QuestNav_Utils_Conversions_UnityToFrc3d_
+  commentId: Overload:QuestNav.Utils.Conversions.UnityToFrc3d
   isSpec: "True"
-  fullName: QuestNav.Utils.Conversions.UnityToFrc
-  nameWithType: Conversions.UnityToFrc
+  fullName: QuestNav.Utils.Conversions.UnityToFrc3d
+  nameWithType: Conversions.UnityToFrc3d
 - uid: QuestNav.Utils.QuaternionExtensions
   name: QuaternionExtensions
   href: api/QuestNav.Utils.QuaternionExtensions.html

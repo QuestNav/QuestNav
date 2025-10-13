@@ -18,8 +18,8 @@ items:
   - QuestNav.Protos.Generated.ProtobufQuestNavFrameData.MergeFrom(Google.Protobuf.CodedInputStream)
   - QuestNav.Protos.Generated.ProtobufQuestNavFrameData.MergeFrom(QuestNav.Protos.Generated.ProtobufQuestNavFrameData)
   - QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Parser
-  - QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D
-  - QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2DFieldNumber
+  - QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D
+  - QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3DFieldNumber
   - QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Timestamp
   - QuestNav.Protos.Generated.ProtobufQuestNavFrameData.TimestampFieldNumber
   - QuestNav.Protos.Generated.ProtobufQuestNavFrameData.ToString
@@ -34,8 +34,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ProtobufQuestNavFrameData
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
     startLine: 62
@@ -88,8 +88,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Parser
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
     startLine: 69
@@ -117,8 +117,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Descriptor
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
     startLine: 73
@@ -146,8 +146,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: .ctor
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
     startLine: 85
@@ -175,8 +175,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: .ctor
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
     startLine: 93
@@ -207,21 +207,19 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Clone
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
     startLine: 102
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Creates a deep clone of this object.
   example: []
   syntax:
     content: public ProtobufQuestNavFrameData Clone()
     return:
       type: QuestNav.Protos.Generated.ProtobufQuestNavFrameData
-      description: A deep clone of this object.
     content.vb: Public Function Clone() As ProtobufQuestNavFrameData
   overload: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Clone*
   implements:
@@ -240,8 +238,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: FrameCountFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
     startLine: 109
@@ -269,8 +267,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: FrameCount
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
     startLine: 125
@@ -312,8 +310,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: TimestampFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
     startLine: 135
@@ -341,8 +339,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Timestamp
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
     startLine: 153
@@ -372,60 +370,60 @@ items:
       type: System.Double
     content.vb: Public Property Timestamp As Double
   overload: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Timestamp*
-- uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2DFieldNumber
-  commentId: F:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2DFieldNumber
-  id: Pose2DFieldNumber
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3DFieldNumber
+  commentId: F:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3DFieldNumber
+  id: Pose3DFieldNumber
   parent: QuestNav.Protos.Generated.ProtobufQuestNavFrameData
   langs:
   - csharp
   - vb
-  name: Pose2DFieldNumber
-  nameWithType: ProtobufQuestNavFrameData.Pose2DFieldNumber
-  fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2DFieldNumber
+  name: Pose3DFieldNumber
+  nameWithType: ProtobufQuestNavFrameData.Pose3DFieldNumber
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3DFieldNumber
   type: Field
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
-    id: Pose2DFieldNumber
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
+    id: Pose3DFieldNumber
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
     startLine: 163
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Field number for the "pose2d" field.
+  summary: Field number for the "pose3d" field.
   example: []
   syntax:
-    content: public const int Pose2DFieldNumber = 3
+    content: public const int Pose3DFieldNumber = 3
     return:
       type: System.Int32
-    content.vb: Public Const Pose2DFieldNumber As Integer = 3
-- uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D
-  commentId: P:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D
-  id: Pose2D
+    content.vb: Public Const Pose3DFieldNumber As Integer = 3
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D
+  commentId: P:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D
+  id: Pose3D
   parent: QuestNav.Protos.Generated.ProtobufQuestNavFrameData
   langs:
   - csharp
   - vb
-  name: Pose2D
-  nameWithType: ProtobufQuestNavFrameData.Pose2D
-  fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D
+  name: Pose3D
+  nameWithType: ProtobufQuestNavFrameData.Pose3D
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D
   type: Property
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
-    id: Pose2D
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
+    id: Pose3D
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
-    startLine: 189
+    startLine: 190
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
   summary: >-
     *
-     Quest's 2D pose on the field in WPILib coordinates.
+     Quest's 3D pose on the field in WPILib coordinates.
 
      This represents the Quest's position and orientation as determined by
      the Quest's tracking system. The pose accounts for:
@@ -437,7 +435,8 @@ items:
 
      Coordinate System Details:
      - X: Forward direction (towards opposing alliance)
-     - Y: Left direction (when facing forward)  
+     - Y: Left direction (when facing forward)
+     - Z: Up direction
      - Rotation: Counter-clockwise positive (radians)
      - Units: meters for translation, radians for rotation
 
@@ -448,12 +447,12 @@ items:
      - Time since last pose reset
   example: []
   syntax:
-    content: public ProtobufPose2d Pose2D { get; set; }
+    content: public ProtobufPose3d Pose3D { get; set; }
     parameters: []
     return:
-      type: Wpi.Proto.ProtobufPose2d
-    content.vb: Public Property Pose2D As ProtobufPose2d
-  overload: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D*
+      type: Wpi.Proto.ProtobufPose3d
+    content.vb: Public Property Pose3D As ProtobufPose3d
+  overload: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D*
 - uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Equals(System.Object)
   commentId: M:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Equals(System.Object)
   id: Equals(System.Object)
@@ -468,11 +467,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Equals
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
-    startLine: 198
+    startLine: 199
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -504,11 +503,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Equals
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
-    startLine: 204
+    startLine: 205
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -538,11 +537,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: GetHashCode
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
-    startLine: 219
+    startLine: 220
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -568,11 +567,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ToString
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
-    startLine: 232
+    startLine: 233
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
@@ -598,22 +597,20 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: WriteTo
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
-    startLine: 238
+    startLine: 239
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Writes the data to the given coded output stream.
   example: []
   syntax:
     content: public void WriteTo(CodedOutputStream output)
     parameters:
     - id: output
       type: Google.Protobuf.CodedOutputStream
-      description: Coded output stream to write the data to. Must not be null.
     content.vb: Public Sub WriteTo(output As CodedOutputStream)
   overload: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.WriteTo*
   implements:
@@ -632,23 +629,19 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: CalculateSize
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
-    startLine: 284
+    startLine: 285
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Calculates the size of this message in Protocol Buffer wire format, in bytes.
   example: []
   syntax:
     content: public int CalculateSize()
     return:
       type: System.Int32
-      description: >-
-        The number of bytes required to write this message
-                    to a coded output stream.
     content.vb: Public Function CalculateSize() As Integer
   overload: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.CalculateSize*
   implements:
@@ -667,16 +660,14 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: MergeFrom
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
-    startLine: 303
+    startLine: 304
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Merges the given message into this one.
-  remarks: See the user guide for precise merge semantics.
   example: []
   syntax:
     content: public void MergeFrom(ProtobufQuestNavFrameData other)
@@ -701,23 +692,20 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Protos/Generated/Data.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: MergeFrom
     path: ../Assets/QuestNav/Protos/Generated/Data.cs
-    startLine: 324
+    startLine: 325
   assemblies:
   - QuestNav
   namespace: QuestNav.Protos.Generated
-  summary: Merges the data from the specified coded input stream with the current message.
-  remarks: See the user guide for precise merge semantics.
   example: []
   syntax:
     content: public void MergeFrom(CodedInputStream input)
     parameters:
     - id: input
       type: Google.Protobuf.CodedInputStream
-      description: ''
     content.vb: Public Sub MergeFrom(input As CodedInputStream)
   overload: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.MergeFrom*
   implements:
@@ -1296,19 +1284,19 @@ references:
   nameWithType.vb: Double
   fullName.vb: Double
   name.vb: Double
-- uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D*
-  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D
-  href: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.html#QuestNav_Protos_Generated_ProtobufQuestNavFrameData_Pose2D
-  name: Pose2D
-  nameWithType: ProtobufQuestNavFrameData.Pose2D
-  fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose2D
-- uid: Wpi.Proto.ProtobufPose2d
-  commentId: T:Wpi.Proto.ProtobufPose2d
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D*
+  commentId: Overload:QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D
+  href: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.html#QuestNav_Protos_Generated_ProtobufQuestNavFrameData_Pose3D
+  name: Pose3D
+  nameWithType: ProtobufQuestNavFrameData.Pose3D
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavFrameData.Pose3D
+- uid: Wpi.Proto.ProtobufPose3d
+  commentId: T:Wpi.Proto.ProtobufPose3d
   parent: Wpi.Proto
-  href: Wpi.Proto.ProtobufPose2d.html
-  name: ProtobufPose2d
-  nameWithType: ProtobufPose2d
-  fullName: Wpi.Proto.ProtobufPose2d
+  href: Wpi.Proto.ProtobufPose3d.html
+  name: ProtobufPose3d
+  nameWithType: ProtobufPose3d
+  fullName: Wpi.Proto.ProtobufPose3d
 - uid: Wpi.Proto
   commentId: N:Wpi.Proto
   href: Wpi.html

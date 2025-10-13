@@ -417,7 +417,7 @@ Examples:
         
       
         <h3 id="questnav.protos.commands.ProtobufQuestNavPoseResetPayload">ProtobufQuestNavPoseResetPayload</h3>
-        <p>Payload message for the POSE_RESET command.</p><p>This message contains the data needed to execute a pose reset operation.</p><p>The pose reset command allows external systems to correct the Quest's</p><p>understanding of the robot's position and orientation on the field.</p><p>Coordinate System:</p><p>- Uses WPILib field-relative coordinate system</p><p>- X-axis: Forward (towards opposing alliance)</p><p>- Y-axis: Left (when facing forward)</p><p>- Rotation: Counter-clockwise positive (standard mathematical convention)</p><p>- Origin: Typically at one corner of the field (see field layout documentation)</p>
+        <p>Payload message for the POSE_RESET command.</p><p>This message contains the data needed to execute a pose reset operation.</p><p>The pose reset command allows external systems to correct the Quest's</p><p>understanding of the robot's position and orientation on the field.</p><p>Coordinate System:</p><p>- Uses WPILib field-relative coordinate system</p><p>- X-axis: Forward (towards opposing alliance)</p><p>- Y-axis: Left (when facing forward)</p><p>- Z-axis: Up</p><p>- Rotation: Counter-clockwise positive (right-hand coordinate system)</p><p>- Origin: Typically at one corner of the field (see field layout documentation)</p>
 
         
           <table class="field-table">
@@ -428,7 +428,7 @@ Examples:
               
                 <tr>
                   <td>target_pose</td>
-                  <td><a href="#wpi.proto.ProtobufPose2d">wpi.proto.ProtobufPose2d</a></td>
+                  <td><a href="#wpi.proto.ProtobufPose3d">wpi.proto.ProtobufPose3d</a></td>
                   <td></td>
                   <td><p>The target pose to reset the robot to.
 
@@ -629,10 +629,10 @@ Resolution: Typically sub-millisecond precision </p></td>
                 </tr>
               
                 <tr>
-                  <td>pose2d</td>
-                  <td><a href="#wpi.proto.ProtobufPose2d">wpi.proto.ProtobufPose2d</a></td>
+                  <td>pose3d</td>
+                  <td><a href="#wpi.proto.ProtobufPose3d">wpi.proto.ProtobufPose3d</a></td>
                   <td></td>
-                  <td><p>Quest&#39;s 2D pose on the field in WPILib coordinates.
+                  <td><p>Quest&#39;s 3D pose on the field in WPILib coordinates.
 
 This represents the Quest&#39;s position and orientation as determined by
 the Quest&#39;s tracking system. The pose accounts for:
@@ -644,7 +644,8 @@ to get the robot&#39;s position.
 
 Coordinate System Details:
 - X: Forward direction (towards opposing alliance)
-- Y: Left direction (when facing forward)  
+- Y: Left direction (when facing forward)
+- Z: Up direction
 - Rotation: Counter-clockwise positive (radians)
 - Units: meters for translation, radians for rotation
 

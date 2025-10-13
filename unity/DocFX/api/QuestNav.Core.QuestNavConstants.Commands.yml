@@ -22,8 +22,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Commands
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 70
@@ -59,8 +59,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: IDLE
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 75
@@ -88,8 +88,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: HEADING_RESET
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 80
@@ -117,8 +117,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: POSE_RESET
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 85
@@ -146,8 +146,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PING
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 90
@@ -175,8 +175,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PING_RESPONSE
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 95
@@ -204,8 +204,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: POSE_RESET_SUCCESS
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 100
@@ -233,8 +233,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: HEADING_RESET_SUCCESS
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 105

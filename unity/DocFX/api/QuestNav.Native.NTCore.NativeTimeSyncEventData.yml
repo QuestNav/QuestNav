@@ -18,8 +18,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NativeTimeSyncEventData
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 21
@@ -50,8 +50,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: serverTimeOffset
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 24
@@ -77,8 +77,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: rtt2
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 25
@@ -104,8 +104,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: valid
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 26

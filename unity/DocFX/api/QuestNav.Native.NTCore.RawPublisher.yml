@@ -16,8 +16,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/RawPublisher.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: RawPublisher
     path: ../Assets/QuestNav/Native/NTCore/RawPublisher.cs
     startLine: 4
@@ -51,8 +51,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/RawPublisher.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Set
     path: ../Assets/QuestNav/Native/NTCore/RawPublisher.cs
     startLine: 13

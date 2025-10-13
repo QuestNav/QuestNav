@@ -126,13 +126,13 @@
   <h3 id="constructors">Constructors
 </h3>
   <a id="QuestNav_UI_UIManager__ctor_" data-uid="QuestNav.UI.UIManager.#ctor*"></a>
-  <h4 id="QuestNav_UI_UIManager__ctor_QuestNav_Network_INetworkTableConnection_TMPro_TMP_InputField_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_UnityEngine_UI_Button_UnityEngine_UI_Toggle_" data-uid="QuestNav.UI.UIManager.#ctor(QuestNav.Network.INetworkTableConnection,TMPro.TMP_InputField,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,UnityEngine.UI.Button,UnityEngine.UI.Toggle)">UIManager(INetworkTableConnection, TMP_InputField, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, Button, Toggle)</h4>
+  <h4 id="QuestNav_UI_UIManager__ctor_QuestNav_Network_INetworkTableConnection_TMPro_TMP_InputField_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_TMPro_TMP_Text_UnityEngine_UI_Button_UnityEngine_UI_Toggle_" data-uid="QuestNav.UI.UIManager.#ctor(QuestNav.Network.INetworkTableConnection,TMPro.TMP_InputField,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,TMPro.TMP_Text,UnityEngine.UI.Button,UnityEngine.UI.Toggle)">UIManager(INetworkTableConnection, TMP_InputField, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, TMP_Text, Button, Toggle)</h4>
   <div class="markdown level1 summary"><p>Initializes the UI manager with required UI components.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="declaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public UIManager(INetworkTableConnection networkTableConnection, TMP_InputField teamInput, TMP_Text ipAddressText, TMP_Text conStateText, TMP_Text posXText, TMP_Text posYText, TMP_Text rotationText, Button teamUpdateButton, Toggle autoStartToggle)</code></pre>
+    <pre><code class="lang-csharp hljs">public UIManager(INetworkTableConnection networkTableConnection, TMP_InputField teamInput, TMP_Text ipAddressText, TMP_Text conStateText, TMP_Text posXText, TMP_Text posYText, TMP_Text posZText, TMP_Text xRotText, TMP_Text yRotText, TMP_Text zRotText, Button teamUpdateButton, Toggle autoStartToggle)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-condensed">
@@ -182,8 +182,26 @@
       </tr>
       <tr>
         <td><span class="xref">TMP_Text</span></td>
-        <td><span class="parametername">rotationText</span></td>
-        <td><p>Text for rotation coordinate of Quest position</p>
+        <td><span class="parametername">posZText</span></td>
+        <td><p>Text for Z coordinate of Quest position</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">TMP_Text</span></td>
+        <td><span class="parametername">xRotText</span></td>
+        <td><p>Text for X rotation of Quest position</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">TMP_Text</span></td>
+        <td><span class="parametername">yRotText</span></td>
+        <td><p>Text for Y rotation of Quest position</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">TMP_Text</span></td>
+        <td><span class="parametername">zRotText</span></td>
+        <td><p>Text for Z rotation of Quest position</p>
 </td>
       </tr>
       <tr>

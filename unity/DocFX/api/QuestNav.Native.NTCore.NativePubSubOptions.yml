@@ -27,8 +27,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NativePubSubOptions
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 187
@@ -59,8 +59,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: structSize
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 193
@@ -87,8 +87,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: pollStorage
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 201
@@ -115,8 +115,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: periodic
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 209
@@ -143,8 +143,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: excludePublisher
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 215
@@ -171,8 +171,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: sendAll
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 220
@@ -199,8 +199,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: topicsOnly
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 225
@@ -227,8 +227,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: prefixMatch
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 232
@@ -255,8 +255,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: keepDuplicates
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 237
@@ -283,8 +283,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: disableRemote
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 243
@@ -311,8 +311,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: disableLocal
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 249
@@ -339,8 +339,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: excludeSelf
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 255
@@ -367,8 +367,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: hidden
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 263

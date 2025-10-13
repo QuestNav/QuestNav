@@ -23,8 +23,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: INetworkTableConnection
     path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
     startLine: 13
@@ -50,8 +50,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: IsConnected
     path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
     startLine: 18
@@ -81,8 +81,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: IsReadyToConnect
     path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
     startLine: 24
@@ -113,8 +113,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PublishFrameData
     path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
     startLine: 33
@@ -157,8 +157,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: PublishDeviceData
     path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
     startLine: 46
@@ -198,8 +198,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: UpdateTeamNumber
     path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
     startLine: 52
@@ -233,8 +233,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: GetCommandRequest
     path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
     startLine: 58
@@ -264,8 +264,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: SetCommandResponse
     path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
     startLine: 64
@@ -296,8 +296,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Network/NetworkTableConnection.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: LoggerPeriodic
     path: ../Assets/QuestNav/Network/NetworkTableConnection.cs
     startLine: 69

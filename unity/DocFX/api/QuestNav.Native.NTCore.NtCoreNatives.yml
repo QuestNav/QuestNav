@@ -39,8 +39,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NtCoreNatives
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 266
@@ -74,8 +74,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_DEFAULT_PORT4
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 268

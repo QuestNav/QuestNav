@@ -16,8 +16,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Utils/QuaternionExtensions.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: QuaternionExtensions
     path: ../Assets/QuestNav/Utils/QuaternionExtensions.cs
     startLine: 7
@@ -54,8 +54,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Utils/QuaternionExtensions.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ToArray
     path: ../Assets/QuestNav/Utils/QuaternionExtensions.cs
     startLine: 14

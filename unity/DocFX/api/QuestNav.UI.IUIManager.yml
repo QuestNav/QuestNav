@@ -16,11 +16,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/UI/UIManager.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: IUIManager
     path: ../Assets/QuestNav/UI/UIManager.cs
-    startLine: 15
+    startLine: 14
   assemblies:
   - QuestNav
   namespace: QuestNav.UI
@@ -43,11 +43,11 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/UI/UIManager.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: UIPeriodic
     path: ../Assets/QuestNav/UI/UIManager.cs
-    startLine: 20
+    startLine: 19
   assemblies:
   - QuestNav
   namespace: QuestNav.UI

@@ -16,8 +16,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/ProtobufSubscriber.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: ProtobufSubscriber
     path: ../Assets/QuestNav/Native/NTCore/ProtobufSubscriber.cs
     startLine: 9
@@ -59,8 +59,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/ProtobufSubscriber.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Get
     path: ../Assets/QuestNav/Native/NTCore/ProtobufSubscriber.cs
     startLine: 37

@@ -28,8 +28,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NtType
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 170
@@ -53,8 +53,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_UNASSIGNED
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 172
@@ -79,8 +79,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_BOOLEAN
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 173
@@ -105,8 +105,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_DOUBLE
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 174
@@ -131,8 +131,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_STRING
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 175
@@ -157,8 +157,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_RAW
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 176
@@ -183,8 +183,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_BOOLEAN_ARRAY
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 177
@@ -209,8 +209,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_DOUBLE_ARRAY
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 178
@@ -235,8 +235,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_STRING_ARRAY
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 179
@@ -261,8 +261,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_RPC
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 180
@@ -287,8 +287,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_INTEGER
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 181
@@ -313,8 +313,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_FLOAT
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 182
@@ -339,8 +339,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_INTEGER_ARRAY
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 183
@@ -365,8 +365,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: NT_FLOAT_ARRAY
     path: ../Assets/QuestNav/Native/NTCore/NtCoreNatives.cs
     startLine: 184

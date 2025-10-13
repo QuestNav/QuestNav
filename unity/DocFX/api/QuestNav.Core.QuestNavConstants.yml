@@ -15,8 +15,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Core/QuestNavConstants.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: QuestNavConstants
     path: ../Assets/QuestNav/Core/QuestNavConstants.cs
     startLine: 8

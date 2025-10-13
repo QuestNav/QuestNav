@@ -5,8 +5,8 @@ items:
   id: Conversions
   parent: QuestNav.Utils
   children:
-  - QuestNav.Utils.Conversions.FrcToUnity(Wpi.Proto.ProtobufPose2d,UnityEngine.Vector3,UnityEngine.Quaternion)
-  - QuestNav.Utils.Conversions.UnityToFrc(UnityEngine.Vector3,UnityEngine.Quaternion)
+  - QuestNav.Utils.Conversions.FrcToUnity3d(Wpi.Proto.ProtobufPose3d)
+  - QuestNav.Utils.Conversions.UnityToFrc3d(UnityEngine.Vector3,UnityEngine.Quaternion)
   langs:
   - csharp
   - vb
@@ -17,8 +17,8 @@ items:
   source:
     remote:
       path: unity/Assets/QuestNav/Utils/Conversions.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
     id: Conversions
     path: ../Assets/QuestNav/Utils/Conversions.cs
     startLine: 8
@@ -40,124 +40,164 @@ items:
   - System.Object.MemberwiseClone
   - System.Object.ReferenceEquals(System.Object,System.Object)
   - System.Object.ToString
-- uid: QuestNav.Utils.Conversions.FrcToUnity(Wpi.Proto.ProtobufPose2d,UnityEngine.Vector3,UnityEngine.Quaternion)
-  commentId: M:QuestNav.Utils.Conversions.FrcToUnity(Wpi.Proto.ProtobufPose2d,UnityEngine.Vector3,UnityEngine.Quaternion)
-  id: FrcToUnity(Wpi.Proto.ProtobufPose2d,UnityEngine.Vector3,UnityEngine.Quaternion)
+- uid: QuestNav.Utils.Conversions.FrcToUnity3d(Wpi.Proto.ProtobufPose3d)
+  commentId: M:QuestNav.Utils.Conversions.FrcToUnity3d(Wpi.Proto.ProtobufPose3d)
+  id: FrcToUnity3d(Wpi.Proto.ProtobufPose3d)
   parent: QuestNav.Utils.Conversions
   langs:
   - csharp
   - vb
-  name: FrcToUnity(ProtobufPose2d, Vector3, Quaternion)
-  nameWithType: Conversions.FrcToUnity(ProtobufPose2d, Vector3, Quaternion)
-  fullName: QuestNav.Utils.Conversions.FrcToUnity(Wpi.Proto.ProtobufPose2d, UnityEngine.Vector3, UnityEngine.Quaternion)
+  name: FrcToUnity3d(ProtobufPose3d)
+  nameWithType: Conversions.FrcToUnity3d(ProtobufPose3d)
+  fullName: QuestNav.Utils.Conversions.FrcToUnity3d(Wpi.Proto.ProtobufPose3d)
   type: Method
   source:
     remote:
       path: unity/Assets/QuestNav/Utils/Conversions.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
-    id: FrcToUnity
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
+    id: FrcToUnity3d
     path: ../Assets/QuestNav/Utils/Conversions.cs
-    startLine: 36
+    startLine: 68
   assemblies:
   - QuestNav
   namespace: QuestNav.Utils
-  summary: >-
-    Converts from FRC coordinate system to Unity coordinate system.
+  summary: Converts from FRC coordinate system to Unity coordinate system.
+  remarks: >-
+    <table><thead><tr><th class="term">FRC Field Coordinates</th><th class="description">Unity World Coordinates</th></tr></thead><tbody><tr><td class="term">Origin: Blue alliance wall</td><td class="description">Origin: Arbitrary (set by VR tracking)</td></tr><tr><td class="term">X-axis: Points toward red</td><td class="description">X-axis: Points right</td></tr><tr><td class="term">Y-axis: Points left</td><td class="description">Y-axis: Points up</td></tr><tr><td class="term">Z-axis: Points up</td><td class="description">Z-axis: Points forward</td></tr><tr><td class="term">Rotation: Counter-clockwise</td><td class="description">Rotation: Clockwise (left-handed)</td></tr></tbody></table>
 
 
-    COORDINATE SYSTEM DIFFERENCES:
+    <p><b>TRANSLATION MAPPING:</b><br />
 
-    FRC Field Coordinates:          Unity World Coordinates:
+    FRC X (forward) → Unity Z (forward)<br />
 
-    - Origin: Blue alliance wall    - Origin: Arbitrary (set by VR tracking)
+    FRC Y (left) → Unity -X (right becomes left)<br />
 
-    - X-axis: Points toward red     - X-axis: Points right
-
-    - Y-axis: Points left           - Y-axis: Points up
-
-    - Z-axis: Points up             - Z-axis: Points forward
-
-    - Rotation: Counter-clockwise   - Rotation: Clockwise (left-handed)
-
-
-    CONVERSION MAPPING:
-
-    FRC X (forward) → Unity Z (forward)
-
-    FRC Y (left) → Unity -X (right becomes left)
-
-    FRC Z (up) → Unity Y (up)
+    FRC Z (up) → Unity Y (up)<br />
 
     FRC θ (CCW) → Unity -Y rotation (CW)
 
+    </p>
 
-    HEIGHT PRESERVATION:
 
-    The Y coordinate (height) is preserved from the current VR position since
+    <p><b>ROTATION MAPPING:</b></p>
 
-    FRC operates in 2D while VR tracking provides 3D data. This allows users
+    <p>
 
-    to crouch, stand, etc. without affecting the robot's 2D field position.
+    Converting rotation requires remapping the axes and accounting for the change in "handedness".
+
+    A robot's primary rotation in FRC is yaw, which is a counter-clockwise rotation around the FRC Z-axis (up).
+
+    In Unity, the equivalent rotation is yaw around Unity's Y-axis (up). However, Unity's left-handed system
+
+    means positive rotation is clockwise. Therefore, the angle must be inverted.
+
+    </p>
+
+    <p>
+
+    This transformation is accomplished by shuffling and negating the quaternion components:
+
+    <pre><code class="lang-csharp">Unity.x =  FRC.y
+
+    Unity.y = -FRC.z
+
+    Unity.z = -FRC.x
+
+    Unity.w =  FRC.w</code></pre>
+
+    This correctly maps the rotation from FRC's right-handed, Z-up frame to Unity's left-handed, Y-up frame.
+
+    </p>
   example: []
   syntax:
-    content: public static (Vector3 position, Quaternion rotation) FrcToUnity(ProtobufPose2d targetPose2d, Vector3 currentPose, Quaternion currentQuaternion)
+    content: public static (Vector3 position, Quaternion rotation) FrcToUnity3d(ProtobufPose3d targetPose3d)
     parameters:
-    - id: targetPose2d
-      type: Wpi.Proto.ProtobufPose2d
+    - id: targetPose3d
+      type: Wpi.Proto.ProtobufPose3d
       description: Target position in FRC coordinates (meters, radians)
-    - id: currentPose
-      type: UnityEngine.Vector3
-      description: Current VR headset position (for preserving Y height)
-    - id: currentQuaternion
-      type: UnityEngine.Quaternion
-      description: Current VR headset rotation (for preserving pitch/roll)
     return:
       type: System.ValueTuple{UnityEngine.Vector3,UnityEngine.Quaternion}
       description: Position and rotation in Unity coordinate system
-    content.vb: Public Shared Function FrcToUnity(targetPose2d As ProtobufPose2d, currentPose As Vector3, currentQuaternion As Quaternion) As (position As Vector3, rotation As Quaternion)
-  overload: QuestNav.Utils.Conversions.FrcToUnity*
-- uid: QuestNav.Utils.Conversions.UnityToFrc(UnityEngine.Vector3,UnityEngine.Quaternion)
-  commentId: M:QuestNav.Utils.Conversions.UnityToFrc(UnityEngine.Vector3,UnityEngine.Quaternion)
-  id: UnityToFrc(UnityEngine.Vector3,UnityEngine.Quaternion)
+    content.vb: Public Shared Function FrcToUnity3d(targetPose3d As ProtobufPose3d) As (position As Vector3, rotation As Quaternion)
+  overload: QuestNav.Utils.Conversions.FrcToUnity3d*
+- uid: QuestNav.Utils.Conversions.UnityToFrc3d(UnityEngine.Vector3,UnityEngine.Quaternion)
+  commentId: M:QuestNav.Utils.Conversions.UnityToFrc3d(UnityEngine.Vector3,UnityEngine.Quaternion)
+  id: UnityToFrc3d(UnityEngine.Vector3,UnityEngine.Quaternion)
   parent: QuestNav.Utils.Conversions
   langs:
   - csharp
   - vb
-  name: UnityToFrc(Vector3, Quaternion)
-  nameWithType: Conversions.UnityToFrc(Vector3, Quaternion)
-  fullName: QuestNav.Utils.Conversions.UnityToFrc(UnityEngine.Vector3, UnityEngine.Quaternion)
+  name: UnityToFrc3d(Vector3, Quaternion)
+  nameWithType: Conversions.UnityToFrc3d(Vector3, Quaternion)
+  fullName: QuestNav.Utils.Conversions.UnityToFrc3d(UnityEngine.Vector3, UnityEngine.Quaternion)
   type: Method
   source:
     remote:
       path: unity/Assets/QuestNav/Utils/Conversions.cs
-      branch: doc-updates
-      repo: https://github.com/QuestNav/QuestNav.git
-    id: UnityToFrc
+      branch: Andy/Pose3d
+      repo: git@github.com:STMARobotics/QuestNav.git
+    id: UnityToFrc3d
     path: ../Assets/QuestNav/Utils/Conversions.cs
-    startLine: 83
+    startLine: 162
   assemblies:
   - QuestNav
   namespace: QuestNav.Utils
-  summary: >-
-    Converts from Unity coordinate system to FRC coordinate system.
+  summary: Converts a pose from the Unity world coordinate system to the FRC field coordinate system.
+  remarks: >-
+    <p>
+
+    This method performs the inverse of <code>FrcToUnity3d</code>. It is primarily used to send data,
+
+    such as a VR headset's pose, back to the robot in the coordinate system it understands.
+
+    </p>
+
+    <p><b>COORDINATE SYSTEM DIFFERENCES:</b></p>
+
+    <table><thead><tr><th class="term">Unity World Coordinates (Left-Handed, Y-up)</th><th class="description">FRC Field Coordinates (Right-Handed, Z-up)</th></tr></thead><tbody><tr><td class="term">Origin: Arbitrary (set by VR tracking)</td><td class="description">Origin: Blue alliance wall</td></tr><tr><td class="term">X-axis: Points right</td><td class="description">X-axis: Points toward red alliance (forward)</td></tr><tr><td class="term">Y-axis: Points up</td><td class="description">Y-axis: Points left</td></tr><tr><td class="term">Z-axis: Points forward</td><td class="description">Z-axis: Points up</td></tr><tr><td class="term">Rotation: Clockwise (CW) positive</td><td class="description">Rotation: Counter-clockwise (CCW) positive</td></tr></tbody></table>
 
 
-    This is the inverse of FrcToUnity(), used to send VR headset position
+    <p><b>TRANSLATION MAPPING:</b><br />
 
-    to the robot in the coordinate system it expects.
+    Unity Z (forward) → FRC X (forward)<br />
+
+    Unity X (right)   → FRC -Y (left)<br />
+
+    Unity Y (up)      → FRC Z (up)
+
+    </p>
 
 
-    CONVERSION MAPPING (REVERSE):
+    <p><b>ROTATION MAPPING:</b></p>
 
-    Unity X (right) → FRC -Y (left, accounting for handedness)
+    <p>
 
-    Unity Y (up) → Ignored (FRC is 2D, robot doesn't need height)
+    To convert rotation from Unity back to FRC, the axes are remapped and the change in "handedness" is reversed.
 
-    Unity Z (forward) → FRC X (forward)
+    Unity's primary yaw rotation occurs around its Y-axis (up) in a clockwise direction. This is converted
 
-    Unity Y rotation (CW degrees) → FRC θ (CCW radians)
+    back to the FRC standard of yaw around its Z-axis (up) in a counter-clockwise direction.
 
+    </p>
+
+    <p>
+
+    This inverse transformation is accomplished by the reverse quaternion component shuffle:
+
+    <pre><code class="lang-csharp">FRC.x = -Unity.z
+
+    FRC.y =  Unity.x
+
+    FRC.z = -Unity.y
+
+    FRC.w =  Unity.w</code></pre>
+
+    This correctly maps the rotation from Unity's left-handed, Y-up frame back to FRC's right-handed, Z-up frame.
+
+    </p>
+
+    <p>
 
     USAGE:
 
@@ -166,21 +206,23 @@ items:
     The robot uses this data for autonomous navigation, driver assistance,
 
     or any other functionality that needs to know where the driver is looking.
+
+    </p>
   example: []
   syntax:
-    content: public static ProtobufPose2d UnityToFrc(Vector3 unityPosition, Quaternion unityRotation)
+    content: public static ProtobufPose3d UnityToFrc3d(Vector3 unityPosition, Quaternion unityRotation)
     parameters:
     - id: unityPosition
       type: UnityEngine.Vector3
-      description: VR headset position in Unity world coordinates
+      description: The position from Unity's world space (e.g., from a VR headset).
     - id: unityRotation
       type: UnityEngine.Quaternion
-      description: VR headset orientation in Unity world coordinates
+      description: The orientation from Unity's world space.
     return:
-      type: Wpi.Proto.ProtobufPose2d
-      description: 2D pose in FRC field coordinates (meters, radians)
-    content.vb: Public Shared Function UnityToFrc(unityPosition As Vector3, unityRotation As Quaternion) As ProtobufPose2d
-  overload: QuestNav.Utils.Conversions.UnityToFrc*
+      type: Wpi.Proto.ProtobufPose3d
+      description: A 3D pose in the FRC field coordinate system (meters, radians).
+    content.vb: Public Shared Function UnityToFrc3d(unityPosition As Vector3, unityRotation As Quaternion) As ProtobufPose3d
+  overload: QuestNav.Utils.Conversions.UnityToFrc3d*
 references:
 - uid: QuestNav.Utils
   commentId: N:QuestNav.Utils
@@ -441,33 +483,19 @@ references:
   name: System
   nameWithType: System
   fullName: System
-- uid: QuestNav.Utils.Conversions.FrcToUnity*
-  commentId: Overload:QuestNav.Utils.Conversions.FrcToUnity
-  href: QuestNav.Utils.Conversions.html#QuestNav_Utils_Conversions_FrcToUnity_Wpi_Proto_ProtobufPose2d_UnityEngine_Vector3_UnityEngine_Quaternion_
-  name: FrcToUnity
-  nameWithType: Conversions.FrcToUnity
-  fullName: QuestNav.Utils.Conversions.FrcToUnity
-- uid: Wpi.Proto.ProtobufPose2d
-  commentId: T:Wpi.Proto.ProtobufPose2d
+- uid: QuestNav.Utils.Conversions.FrcToUnity3d*
+  commentId: Overload:QuestNav.Utils.Conversions.FrcToUnity3d
+  href: QuestNav.Utils.Conversions.html#QuestNav_Utils_Conversions_FrcToUnity3d_Wpi_Proto_ProtobufPose3d_
+  name: FrcToUnity3d
+  nameWithType: Conversions.FrcToUnity3d
+  fullName: QuestNav.Utils.Conversions.FrcToUnity3d
+- uid: Wpi.Proto.ProtobufPose3d
+  commentId: T:Wpi.Proto.ProtobufPose3d
   parent: Wpi.Proto
-  href: Wpi.Proto.ProtobufPose2d.html
-  name: ProtobufPose2d
-  nameWithType: ProtobufPose2d
-  fullName: Wpi.Proto.ProtobufPose2d
-- uid: UnityEngine.Vector3
-  commentId: T:UnityEngine.Vector3
-  parent: UnityEngine
-  isExternal: true
-  name: Vector3
-  nameWithType: Vector3
-  fullName: UnityEngine.Vector3
-- uid: UnityEngine.Quaternion
-  commentId: T:UnityEngine.Quaternion
-  parent: UnityEngine
-  isExternal: true
-  name: Quaternion
-  nameWithType: Quaternion
-  fullName: UnityEngine.Quaternion
+  href: Wpi.Proto.ProtobufPose3d.html
+  name: ProtobufPose3d
+  nameWithType: ProtobufPose3d
+  fullName: Wpi.Proto.ProtobufPose3d
 - uid: System.ValueTuple{UnityEngine.Vector3,UnityEngine.Quaternion}
   commentId: T:System.ValueTuple{UnityEngine.Vector3,UnityEngine.Quaternion}
   parent: System
@@ -543,12 +571,6 @@ references:
   - uid: Wpi.Proto
     name: Proto
     href: Wpi.Proto.html
-- uid: UnityEngine
-  commentId: N:UnityEngine
-  isExternal: true
-  name: UnityEngine
-  nameWithType: UnityEngine
-  fullName: UnityEngine
 - uid: System.ValueTuple`2
   commentId: T:System.ValueTuple`2
   name: (T1, T2)
@@ -568,9 +590,29 @@ references:
   - name: " "
   - name: T2
   - name: )
-- uid: QuestNav.Utils.Conversions.UnityToFrc*
-  commentId: Overload:QuestNav.Utils.Conversions.UnityToFrc
-  href: QuestNav.Utils.Conversions.html#QuestNav_Utils_Conversions_UnityToFrc_UnityEngine_Vector3_UnityEngine_Quaternion_
-  name: UnityToFrc
-  nameWithType: Conversions.UnityToFrc
-  fullName: QuestNav.Utils.Conversions.UnityToFrc
+- uid: QuestNav.Utils.Conversions.UnityToFrc3d*
+  commentId: Overload:QuestNav.Utils.Conversions.UnityToFrc3d
+  href: QuestNav.Utils.Conversions.html#QuestNav_Utils_Conversions_UnityToFrc3d_UnityEngine_Vector3_UnityEngine_Quaternion_
+  name: UnityToFrc3d
+  nameWithType: Conversions.UnityToFrc3d
+  fullName: QuestNav.Utils.Conversions.UnityToFrc3d
+- uid: UnityEngine.Vector3
+  commentId: T:UnityEngine.Vector3
+  parent: UnityEngine
+  isExternal: true
+  name: Vector3
+  nameWithType: Vector3
+  fullName: UnityEngine.Vector3
+- uid: UnityEngine.Quaternion
+  commentId: T:UnityEngine.Quaternion
+  parent: UnityEngine
+  isExternal: true
+  name: Quaternion
+  nameWithType: Quaternion
+  fullName: UnityEngine.Quaternion
+- uid: UnityEngine
+  commentId: N:UnityEngine
+  isExternal: true
+  name: UnityEngine
+  nameWithType: UnityEngine
+  fullName: UnityEngine

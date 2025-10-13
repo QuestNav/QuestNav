@@ -79,10 +79,28 @@ namespace QuestNav.Core
         private TMP_Text posYText;
 
         /// <summary>
-        /// rotationText text
+        /// posZText text
         /// </summary>
         [SerializeField]
-        private TMP_Text rotationText;
+        private TMP_Text posZText;
+
+        /// <summary>
+        /// X rotation text
+        /// </summary>
+        [SerializeField]
+        private TMP_Text xRotText;
+
+        /// <summary>
+        /// Y rotation text
+        /// </summary>
+        [SerializeField]
+        private TMP_Text yRotText;
+
+        /// <summary>
+        /// Z rotation text
+        /// </summary>
+        [SerializeField]
+        private TMP_Text zRotText;
 
         /// <summary>
         /// Button to update team number
@@ -173,7 +191,10 @@ namespace QuestNav.Core
                 conStateText,
                 posXText,
                 posYText,
-                rotationText,
+                posZText,
+                xRotText,
+                yRotText,
+                zRotText,
                 teamUpdateButton,
                 autoStartToggle
             );

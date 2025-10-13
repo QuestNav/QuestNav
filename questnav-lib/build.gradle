@@ -207,6 +207,12 @@ task copyVendorJsonLocal(type: Copy) {
     from vendorJsonOutput
     into "$buildDir/outputs/vendordeps/"
 
+
+    // Replace the remote maven repo with the local WPILib repo
+    filter { line ->
+        line.replace('https://maven.questnav.gg', "C:/Users/Public/wpilib/${frcYear}/maven")
+    }
+
     dependsOn generateVendorJson
 }
 

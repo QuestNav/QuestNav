@@ -21,7 +21,7 @@ namespace QuestNav.Core
             /// <summary>
             /// Tells NT4 to connect to this IP instead of via team number if not empty. DEBUGGING PURPOSES ONLY!
             /// </summary>
-            public const string DEBUG_NT_SERVER_ADDRESS_OVERRIDE = "";
+            public const string DEBUG_NT_SERVER_ADDRESS_OVERRIDE = "192.168.1.195";
 
             /// <summary>
             /// NetworkTables server port
@@ -210,7 +210,7 @@ namespace QuestNav.Core
             /// <summary>
             /// The rate to run the "MainUpdate" loop at
             /// </summary>
-            public const int MAIN_UPDATE_HZ = 100;
+            public const int MAIN_UPDATE_HZ = 120;
         }
     }
 }

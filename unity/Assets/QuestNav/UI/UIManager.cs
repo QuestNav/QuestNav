@@ -62,9 +62,24 @@ namespace QuestNav.UI
         private TMP_Text posYText;
 
         /// <summary>
-        /// rotationText text
+        /// posZText text
         /// </summary>
-        private TMP_Text rotationText;
+        private TMP_Text posZText;
+
+        /// <summary>
+        /// X rotation text
+        /// </summary>
+        private TMP_Text xRotText;
+
+        /// <summary>
+        /// Y rotation text
+        /// </summary>
+        private TMP_Text yRotText;
+
+        /// <summary>
+        /// Z rotation text
+        /// </summary>
+        private TMP_Text zRotText;
 
         /// <summary>
         /// Button to update team number
@@ -91,7 +106,10 @@ namespace QuestNav.UI
         /// <param name="conStateText">Text for connection state display</param>
         /// <param name="posXText">Text for X coordinate of Quest position</param>
         /// <param name="posYText">Text for Y coordinate of Quest position</param>
-        /// <param name="rotationText">Text for rotation coordinate of Quest position</param>
+        /// <param name="posZText">Text for Y coordinate of Quest position</param>
+        /// <param name="xRotText">Text for X rotation of Quest position</param>
+        /// <param name="yRotText">Text for Y rotation of Quest position</param>
+        /// <param name="zRotText">Text for Z rotation of Quest position</param>
         /// <param name="teamUpdateButton">Button for updating team number</param>
         /// <param name="autoStartToggle">Button for turning auto start on/off</param>
         public UIManager(
@@ -101,7 +119,10 @@ namespace QuestNav.UI
             TMP_Text conStateText,
             TMP_Text posXText,
             TMP_Text posYText,
-            TMP_Text rotationText,
+            TMP_Text posZText,
+            TMP_Text xRotText,
+            TMP_Text yRotText,
+            TMP_Text zRotText,
             Button teamUpdateButton,
             Toggle autoStartToggle
         )
@@ -112,7 +133,10 @@ namespace QuestNav.UI
             this.conStateText = conStateText;
             this.posXText = posXText;
             this.posYText = posYText;
-            this.rotationText = rotationText;
+            this.posZText = posZText;
+            this.xRotText = xRotText;
+            this.yRotText = yRotText;
+            this.zRotText = zRotText;
             this.teamUpdateButton = teamUpdateButton;
             this.autoStartToggle = autoStartToggle;
 
@@ -246,14 +270,35 @@ namespace QuestNav.UI
         {
             TextMeshProUGUI xText = posXText as TextMeshProUGUI;
             TextMeshProUGUI yText = posYText as TextMeshProUGUI;
-            TextMeshProUGUI rotText = rotationText as TextMeshProUGUI;
-            if (xText is null || yText is null || rotText is null)
+            TextMeshProUGUI zText = posZText as TextMeshProUGUI;
+            TextMeshProUGUI xRotText = this.xRotText as TextMeshProUGUI;
+            TextMeshProUGUI yRotText = this.yRotText as TextMeshProUGUI;
+            TextMeshProUGUI zRotText = this.zRotText as TextMeshProUGUI;
+            if (
+                xText is null
+                || yText is null
+                || zText is null
+                || xRotText is null
+                || yRotText is null
+                || zRotText is null
+            )
                 return;
 
             var frcPosition = Conversions.UnityToFrc3d(position, rotation);
             xText.text = $"{frcPosition.Translation.X:0.00} M";
             yText.text = $"{frcPosition.Translation.Y:0.00} M";
-            rotText.text = $"{(frcPosition.Rotation.Q.Z * Mathf.Rad2Deg + 360f) % 360f:0.00}°";
+            zText.text = $"{frcPosition.Translation.Z:0.00} M";
+
+            Quaternion unityQuat = new Quaternion(
+                (float)frcPosition.Rotation.Q.X,
+                (float)frcPosition.Rotation.Q.Y,
+                (float)frcPosition.Rotation.Q.Z,
+                (float)frcPosition.Rotation.Q.W
+            );
+            Vector3 euler = unityQuat.eulerAngles;
+            xRotText.text = $"{euler.x:0.00}°";
+            yRotText.text = $"{euler.y:0.00}°";
+            zRotText.text = $"{euler.z:0.00}°";
         }
         #endregion
     }

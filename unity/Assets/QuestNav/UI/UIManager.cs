@@ -106,7 +106,7 @@ namespace QuestNav.UI
         /// <param name="conStateText">Text for connection state display</param>
         /// <param name="posXText">Text for X coordinate of Quest position</param>
         /// <param name="posYText">Text for Y coordinate of Quest position</param>
-        /// <param name="posZText">Text for Y coordinate of Quest position</param>
+        /// <param name="posZText">Text for Z coordinate of Quest position</param>
         /// <param name="xRotText">Text for X rotation of Quest position</param>
         /// <param name="yRotText">Text for Y rotation of Quest position</param>
         /// <param name="zRotText">Text for Z rotation of Quest position</param>

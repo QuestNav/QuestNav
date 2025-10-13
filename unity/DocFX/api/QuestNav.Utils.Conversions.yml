@@ -139,7 +139,7 @@ items:
       repo: git@github.com:STMARobotics/QuestNav.git
     id: UnityToFrc3d
     path: ../Assets/QuestNav/Utils/Conversions.cs
-    startLine: 162
+    startLine: 159
   assemblies:
   - QuestNav
   namespace: QuestNav.Utils
@@ -214,13 +214,13 @@ items:
     parameters:
     - id: unityPosition
       type: UnityEngine.Vector3
-      description: The position from Unity's world space (e.g., from a VR headset).
+      description: VR headset position in Unity world coordinates
     - id: unityRotation
       type: UnityEngine.Quaternion
-      description: The orientation from Unity's world space.
+      description: VR headset orientation in Unity world coordinates
     return:
       type: Wpi.Proto.ProtobufPose3d
-      description: A 3D pose in the FRC field coordinate system (meters, radians).
+      description: 2D pose in FRC field coordinates (meters, radians)
     content.vb: Public Shared Function UnityToFrc3d(unityPosition As Vector3, unityRotation As Quaternion) As ProtobufPose3d
   overload: QuestNav.Utils.Conversions.UnityToFrc3d*
 references:

@@ -92,9 +92,6 @@ namespace QuestNav.Utils
         /// <summary>
         /// Converts a pose from the Unity world coordinate system to the FRC field coordinate system.
         /// </summary>
-        /// <param name="unityPosition">The position from Unity's world space (e.g., from a VR headset).</param>
-        /// <param name="unityRotation">The orientation from Unity's world space.</param>
-        /// <returns>A 3D pose in the FRC field coordinate system (meters, radians).</returns>
         /// <remarks>
         /// <para>
         /// This method performs the inverse of <c>FrcToUnity3d</c>. It is primarily used to send data,

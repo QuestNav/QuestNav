@@ -68,7 +68,7 @@ Here is an example of getting the latest pose from the Quest and transforming it
 QuestNav questNav = new QuestNav();
 
 // First, Declare our geometrical transform from the robot center to the Quest
-Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, rotational offsets here!*/ )
+Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, yaw, pitch, and roll offsets here!*/ )
 
 // Get the latest pose data frames from the Quest
 PoseFrame[] poseFrames = questNav.getAllUnreadPoseFrames();
@@ -87,7 +87,9 @@ The FRC coordinate system follows these standards:
 - X: Positive -> Forward from robot center
 - Y: Positive -> Left from robot center
 - Z: Positive -> Up from robot center
-- Rotation: Positive -> Counter Clockwise
+- Yaw (Z): Rotation -> Counter-clockwise (right-handed) rotation around the Z axis
+- Pitch (Y): Rotation -> Counter-clockwise (right-handed) rotation around the Y axis
+- Roll (X): Rotation -> Counter-clockwise (right-handed) rotation around the X axis
 
 See the [WPILib Coordinate System documentation](https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html)
 for details
@@ -108,8 +110,8 @@ the frame of the Quest.
 ```java title="e.g. QuestNavSubsystem.java"
 QuestNav questNav = new QuestNav();
 
-// First, Declare our geometrical transform from the robot center to the quest
-Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, rotational offsets here!*/ )
+// First, Declare our geometrical transform from the robot center to the Quest
+Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, yaw, pitch, and roll offsets here!*/ )
 
 // Assume this is the requested reset pose
 Pose3d robotPose = new Pose3d( /* Some pose data */ );

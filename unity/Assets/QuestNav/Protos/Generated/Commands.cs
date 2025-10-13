@@ -96,7 +96,8 @@ namespace QuestNav.Protos.Generated {
   /// - Uses WPILib field-relative coordinate system
   /// - X-axis: Forward (towards opposing alliance)
   /// - Y-axis: Left (when facing forward)
-  /// - Rotation: Counter-clockwise positive (standard mathematical convention)
+  /// - Z-axis: Up
+  /// - Rotation: Counter-clockwise positive (right-hand coordinate system)
   /// - Origin: Typically at one corner of the field (see field layout documentation)
   /// </summary>
   public sealed partial class ProtobufQuestNavPoseResetPayload : pb::IMessage<ProtobufQuestNavPoseResetPayload>

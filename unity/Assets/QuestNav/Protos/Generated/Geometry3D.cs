@@ -53,6 +53,27 @@ namespace Wpi.Proto {
 
   }
   #region Messages
+  /// <summary>
+  ///*
+  /// Represents a 3D translation (displacement) vector.
+  /// 
+  /// This message encodes a 3D displacement or position vector using Cartesian
+  /// coordinates. It extends the 2D translation concept into three dimensions
+  /// and serves as a building block for more complex 3D geometric representations.
+  /// 
+  /// Applications:
+  /// - 3D object positions in space
+  /// - Displacement vectors between 3D points
+  /// - 3D velocity vectors (when representing change in position)
+  /// - Camera/sensor positions relative to robot
+  /// - AprilTag positions in 3D space
+  /// 
+  /// Coordinate System:
+  /// - X: Forward/backward displacement (positive = forward)
+  /// - Y: Left/right displacement (positive = left)
+  /// - Z: Up/down displacement (positive = up)
+  /// - Units: meters
+  /// </summary>
   public sealed partial class ProtobufTranslation3d : pb::IMessage<ProtobufTranslation3d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -102,6 +123,14 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "x" field.</summary>
     public const int XFieldNumber = 1;
     private double x_;
+    /// <summary>
+    ///*
+    /// X-coordinate (forward/backward displacement).
+    /// 
+    /// Positive values indicate forward direction.
+    /// Negative values indicate backward direction.
+    /// Units: meters
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double X {
@@ -114,6 +143,14 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "y" field.</summary>
     public const int YFieldNumber = 2;
     private double y_;
+    /// <summary>
+    ///*
+    /// Y-coordinate (left/right displacement).
+    /// 
+    /// Positive values indicate leftward direction.
+    /// Negative values indicate rightward direction.
+    /// Units: meters
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Y {
@@ -126,6 +163,14 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "z" field.</summary>
     public const int ZFieldNumber = 3;
     private double z_;
+    /// <summary>
+    ///*
+    /// Z-coordinate (up/down displacement).
+    /// 
+    /// Positive values indicate upward direction.
+    /// Negative values indicate downward direction.
+    /// Units: meters
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Z {
@@ -316,6 +361,34 @@ namespace Wpi.Proto {
 
   }
 
+  /// <summary>
+  ///*
+  /// Represents a quaternion for 3D rotation.
+  /// 
+  /// Quaternions provide a mathematically robust way to represent 3D rotations
+  /// without the singularities (gimbal lock) that can occur with Euler angles.
+  /// They are the preferred representation for 3D rotations in robotics.
+  /// 
+  /// Mathematical Properties:
+  /// - Unit quaternion: w² + x² + y² + z² = 1
+  /// - Represents rotation around axis (x,y,z) by angle θ:
+  ///   w = cos(θ/2), (x,y,z) = sin(θ/2) * unit_axis
+  /// - Identity rotation: (w=1, x=0, y=0, z=0)
+  /// - Conjugate: (w, -x, -y, -z) represents inverse rotation
+  /// 
+  /// Applications:
+  /// - 3D object orientations
+  /// - IMU/gyroscope data representation
+  /// - Camera pose orientations
+  /// - Robotic arm joint orientations
+  /// - Smooth rotation interpolation (SLERP)
+  /// 
+  /// Advantages over Euler angles:
+  /// - No gimbal lock singularities
+  /// - Smooth interpolation
+  /// - Efficient composition of rotations
+  /// - Numerically stable
+  /// </summary>
   public sealed partial class ProtobufQuaternion : pb::IMessage<ProtobufQuaternion>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -366,6 +439,16 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "w" field.</summary>
     public const int WFieldNumber = 1;
     private double w_;
+    /// <summary>
+    ///*
+    /// W component (scalar/real part) of the quaternion.
+    /// 
+    /// This is the "real" or "scalar" component of the quaternion.
+    /// For a rotation by angle θ around an axis, w = cos(θ/2).
+    /// 
+    /// Range: [-1, 1] for unit quaternions
+    /// Identity rotation: w = 1
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double W {
@@ -378,6 +461,16 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "x" field.</summary>
     public const int XFieldNumber = 2;
     private double x_;
+    /// <summary>
+    ///*
+    /// X component (i coefficient) of the quaternion.
+    /// 
+    /// This is the coefficient of the i basis quaternion.
+    /// For a rotation by angle θ around axis (ax, ay, az),
+    /// x = sin(θ/2) * ax (where (ax, ay, az) is unit length).
+    /// 
+    /// Range: [-1, 1] for unit quaternions
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double X {
@@ -390,6 +483,16 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "y" field.</summary>
     public const int YFieldNumber = 3;
     private double y_;
+    /// <summary>
+    ///*
+    /// Y component (j coefficient) of the quaternion.
+    /// 
+    /// This is the coefficient of the j basis quaternion.
+    /// For a rotation by angle θ around axis (ax, ay, az),
+    /// y = sin(θ/2) * ay (where (ax, ay, az) is unit length).
+    /// 
+    /// Range: [-1, 1] for unit quaternions
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Y {
@@ -402,6 +505,16 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "z" field.</summary>
     public const int ZFieldNumber = 4;
     private double z_;
+    /// <summary>
+    ///*
+    /// Z component (k coefficient) of the quaternion.
+    /// 
+    /// This is the coefficient of the k basis quaternion.
+    /// For a rotation by angle θ around axis (ax, ay, az),
+    /// z = sin(θ/2) * az (where (ax, ay, az) is unit length).
+    /// 
+    /// Range: [-1, 1] for unit quaternions
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Z {
@@ -616,6 +729,30 @@ namespace Wpi.Proto {
 
   }
 
+  /// <summary>
+  ///*
+  /// Represents a 3D rotation using a quaternion.
+  /// 
+  /// This message wraps a quaternion to represent 3D rotations in a standardized
+  /// way. It provides a clean interface for 3D rotation operations while
+  /// leveraging the mathematical advantages of quaternions internally.
+  /// 
+  /// The rotation represents the orientation of a coordinate frame relative to
+  /// a reference frame, or the rotation needed to transform vectors from one
+  /// coordinate system to another.
+  /// 
+  /// Applications:
+  /// - Object orientations in 3D space
+  /// - Camera pose rotations
+  /// - IMU orientation data
+  /// - Robotic arm end-effector orientations
+  /// - Transformation between coordinate frames
+  /// 
+  /// Mathematical Operations:
+  /// - Composition: R3 = R2 * R1 (apply R1 first, then R2)
+  /// - Inverse: R^(-1) represents the opposite rotation
+  /// - Identity: No rotation (quaternion w=1, x=y=z=0)
+  /// </summary>
   public sealed partial class ProtobufRotation3d : pb::IMessage<ProtobufRotation3d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -663,6 +800,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "q" field.</summary>
     public const int QFieldNumber = 1;
     private global::Wpi.Proto.ProtobufQuaternion q_;
+    /// <summary>
+    ///*
+    /// Quaternion representing the 3D rotation.
+    /// 
+    /// This quaternion should be normalized (unit quaternion) to represent
+    /// a valid rotation. Non-unit quaternions may lead to scaling effects
+    /// in addition to rotation.
+    /// 
+    /// The quaternion represents the rotation from the reference coordinate
+    /// frame to the rotated coordinate frame.
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public global::Wpi.Proto.ProtobufQuaternion Q {
@@ -814,6 +962,35 @@ namespace Wpi.Proto {
 
   }
 
+  /// <summary>
+  ///*
+  /// Represents a complete 3D pose (position and orientation).
+  /// 
+  /// This message combines a 3D position (translation) with a 3D orientation
+  /// (rotation) to fully describe an object's pose in 3D space. This extends
+  /// the 2D pose concept into three dimensions for applications requiring
+  /// full spatial representation.
+  /// 
+  /// A 3D pose answers two fundamental questions:
+  /// 1. Where is the object in 3D space? (translation component)
+  /// 2. How is it oriented in 3D space? (rotation component)
+  /// 
+  /// Applications:
+  /// - Camera poses for vision processing
+  /// - AprilTag poses in 3D space
+  /// - Robotic arm end-effector poses
+  /// - Drone/UAV poses (position and attitude)
+  /// - 3D object tracking and localization
+  /// - Sensor mounting positions and orientations
+  /// 
+  /// The pose represents the object's coordinate frame relative to a reference
+  /// coordinate frame, enabling transformation of points and vectors between
+  /// the two coordinate systems.
+  /// 
+  /// Coordinate Frame Transformation:
+  /// Given a point P in the object's local frame, the corresponding point
+  /// in the reference frame is: P_ref = rotation * P_local + translation
+  /// </summary>
   public sealed partial class ProtobufPose3d : pb::IMessage<ProtobufPose3d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -862,6 +1039,14 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "translation" field.</summary>
     public const int TranslationFieldNumber = 1;
     private global::Wpi.Proto.ProtobufTranslation3d translation_;
+    /// <summary>
+    ///*
+    /// Position component of the 3D pose.
+    /// 
+    /// This specifies where the object is located in 3D space using the
+    /// reference coordinate system. The translation represents the position
+    /// of the object's coordinate frame origin relative to the reference frame.
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public global::Wpi.Proto.ProtobufTranslation3d Translation {
@@ -874,6 +1059,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "rotation" field.</summary>
     public const int RotationFieldNumber = 2;
     private global::Wpi.Proto.ProtobufRotation3d rotation_;
+    /// <summary>
+    ///*
+    /// Orientation component of the 3D pose.
+    /// 
+    /// This specifies how the object is oriented in 3D space relative to
+    /// the reference coordinate system. The rotation represents the orientation
+    /// of the object's coordinate frame relative to the reference frame.
+    /// 
+    /// Combined with translation, this fully defines the object's pose and
+    /// allows for coordinate transformations between object and reference frames.
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public global::Wpi.Proto.ProtobufRotation3d Rotation {
@@ -1058,6 +1254,34 @@ namespace Wpi.Proto {
 
   }
 
+  /// <summary>
+  ///*
+  /// Represents a 3D coordinate transformation.
+  /// 
+  /// This message describes how to transform coordinates from one 3D coordinate
+  /// frame to another. It combines a 3D translation and rotation to define the
+  /// complete spatial relationship between two coordinate systems.
+  /// 
+  /// Mathematical Interpretation:
+  /// Given a point P in frame A, the corresponding point in frame B is:
+  /// P_B = Transform3d * P_A = Rotation * P_A + Translation
+  /// 
+  /// This follows the standard transformation sequence:
+  /// 1. Apply rotation to the point
+  /// 2. Add translation to the rotated point
+  /// 
+  /// Applications:
+  /// - Transform between robot and world coordinate frames
+  /// - Camera calibration and extrinsic parameters
+  /// - Sensor mounting transformations
+  /// - Relative positioning between 3D objects
+  /// - Coordinate frame conversions in 3D path planning
+  /// - Multi-robot relative localization
+  /// 
+  /// The transform represents "how to get from frame A to frame B" and can be
+  /// inverted to get the reverse transformation. Transforms can also be composed
+  /// to create transformation chains through multiple coordinate frames.
+  /// </summary>
   public sealed partial class ProtobufTransform3d : pb::IMessage<ProtobufTransform3d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1106,6 +1330,14 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "translation" field.</summary>
     public const int TranslationFieldNumber = 1;
     private global::Wpi.Proto.ProtobufTranslation3d translation_;
+    /// <summary>
+    ///*
+    /// Translation component of the 3D transformation.
+    /// 
+    /// This represents the displacement between the origins of the two
+    /// coordinate frames in 3D space. It specifies how far and in which
+    /// direction the target frame's origin is from the source frame's origin.
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public global::Wpi.Proto.ProtobufTranslation3d Translation {
@@ -1118,6 +1350,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "rotation" field.</summary>
     public const int RotationFieldNumber = 2;
     private global::Wpi.Proto.ProtobufRotation3d rotation_;
+    /// <summary>
+    ///*
+    /// Rotation component of the 3D transformation.
+    /// 
+    /// This represents the angular difference between the two coordinate
+    /// frames in 3D space. It specifies how the target frame is rotated
+    /// relative to the source frame.
+    /// 
+    /// The rotation is applied before the translation in the transformation
+    /// sequence (standard mathematical convention for homogeneous transforms).
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public global::Wpi.Proto.ProtobufRotation3d Rotation {
@@ -1302,6 +1545,33 @@ namespace Wpi.Proto {
 
   }
 
+  /// <summary>
+  ///*
+  /// Represents a 3D twist (velocity in 3D space).
+  /// 
+  /// This message encodes the instantaneous velocity of an object in 3D space,
+  /// including both linear and angular velocity components. It describes how
+  /// an object's 3D pose is changing over time, extending the 2D twist concept
+  /// into three dimensions.
+  /// 
+  /// Mathematical Interpretation:
+  /// The twist represents the time derivative of 3D pose:
+  /// - Linear velocity: (dx/dt, dy/dt, dz/dt)
+  /// - Angular velocity: (rx, ry, rz) as rotation rates about each axis
+  /// 
+  /// Applications:
+  /// - 3D robot velocity commands (drones, robotic arms)
+  /// - 3D velocity feedback from odometry systems
+  /// - Velocity constraints in 3D path planning
+  /// - Dynamic modeling and simulation in 3D
+  /// - IMU angular velocity data representation
+  /// - Camera motion estimation
+  /// 
+  /// Coordinate Frame:
+  /// The twist can be expressed in different coordinate frames (body-relative
+  /// or world-relative) depending on the application context. The angular
+  /// velocity components represent rotation rates about the coordinate axes.
+  /// </summary>
   public sealed partial class ProtobufTwist3d : pb::IMessage<ProtobufTwist3d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1354,6 +1624,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "dx" field.</summary>
     public const int DxFieldNumber = 1;
     private double dx_;
+    /// <summary>
+    ///*
+    /// Linear velocity in X direction.
+    /// 
+    /// Rate of change of X position over time. In world coordinates,
+    /// this represents forward/backward velocity.
+    /// 
+    /// Positive values: Moving in positive X direction (forward)
+    /// Negative values: Moving in negative X direction (backward)
+    /// Units: meters per second
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Dx {
@@ -1366,6 +1647,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "dy" field.</summary>
     public const int DyFieldNumber = 2;
     private double dy_;
+    /// <summary>
+    ///*
+    /// Linear velocity in Y direction.
+    /// 
+    /// Rate of change of Y position over time. In world coordinates,
+    /// this represents left/right velocity (strafing).
+    /// 
+    /// Positive values: Moving in positive Y direction (left)
+    /// Negative values: Moving in negative Y direction (right)
+    /// Units: meters per second
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Dy {
@@ -1378,6 +1670,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "dz" field.</summary>
     public const int DzFieldNumber = 3;
     private double dz_;
+    /// <summary>
+    ///*
+    /// Linear velocity in Z direction.
+    /// 
+    /// Rate of change of Z position over time. In world coordinates,
+    /// this represents up/down velocity (climbing/descending).
+    /// 
+    /// Positive values: Moving in positive Z direction (up)
+    /// Negative values: Moving in negative Z direction (down)
+    /// Units: meters per second
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Dz {
@@ -1390,6 +1693,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "rx" field.</summary>
     public const int RxFieldNumber = 4;
     private double rx_;
+    /// <summary>
+    ///*
+    /// Angular velocity about X-axis (roll rate).
+    /// 
+    /// Rate of rotation about the X-axis. This represents how fast
+    /// the object is rolling (rotating around its forward axis).
+    /// 
+    /// Positive values: Counter-clockwise rotation when looking down the positive X-axis
+    /// Negative values: Clockwise rotation when looking down the positive X-axis
+    /// Units: radians per second
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Rx {
@@ -1402,6 +1716,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "ry" field.</summary>
     public const int RyFieldNumber = 5;
     private double ry_;
+    /// <summary>
+    ///*
+    /// Angular velocity about Y-axis (pitch rate).
+    /// 
+    /// Rate of rotation about the Y-axis. This represents how fast
+    /// the object is pitching (nose up/down motion).
+    /// 
+    /// Positive values: Counter-clockwise rotation when looking down the positive Y-axis
+    /// Negative values: Clockwise rotation when looking down the positive Y-axis
+    /// Units: radians per second
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Ry {
@@ -1414,6 +1739,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "rz" field.</summary>
     public const int RzFieldNumber = 6;
     private double rz_;
+    /// <summary>
+    ///*
+    /// Angular velocity about Z-axis (yaw rate).
+    /// 
+    /// Rate of rotation about the Z-axis. This represents how fast
+    /// the object is yawing (turning left/right).
+    /// 
+    /// Positive values: Counter-clockwise rotation when looking down the positive Z-axis
+    /// Negative values: Clockwise rotation when looking down the positive Z-axis
+    /// Units: radians per second
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Rz {

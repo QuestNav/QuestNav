@@ -51,15 +51,32 @@ namespace QuestNav.Protos.Generated {
   }
   #region Enums
   /// <summary>
-  /// Enum for command types (extensible for future commands)
+  ///*
+  /// Enumeration of available command types in the QuestNav system.
+  /// 
+  /// This enum defines all the different types of commands that can be sent to
+  /// the Quest headset. The enum is designed to be extensible - new command types
+  /// can be added without breaking existing clients.
+  /// 
+  /// Design Notes:
+  /// - Values start from 0 as required by proto3
+  /// - UNSPECIFIED value (0) is reserved for error handling
+  /// - Command values should be assigned incrementally for clarity
   /// </summary>
   public enum QuestNavCommandType {
     /// <summary>
-    /// Default value required in proto3
+    /// Default/invalid command type (required by proto3)
     /// </summary>
     [pbr::OriginalName("COMMAND_TYPE_UNSPECIFIED")] CommandTypeUnspecified = 0,
     /// <summary>
-    /// Reset robot pose to target pose
+    ///*
+    /// POSE_RESET: Resets the robot's pose estimation to a specified target pose.
+    /// 
+    /// This command is used to correct drift in the tracking system by setting
+    /// the robot's position and orientation to known values. Typically used when
+    /// the robot is placed at a known location on the field.
+    /// 
+    /// Requires: ProtobufQuestNavPoseResetPayload
     /// </summary>
     [pbr::OriginalName("POSE_RESET")] PoseReset = 1,
   }
@@ -68,7 +85,19 @@ namespace QuestNav.Protos.Generated {
 
   #region Messages
   /// <summary>
-  /// Payload for pose reset command
+  ///*
+  /// Payload message for the POSE_RESET command.
+  /// 
+  /// This message contains the data needed to execute a pose reset operation.
+  /// The pose reset command allows external systems to correct the Quest's
+  /// understanding of the robot's position and orientation on the field.
+  /// 
+  /// Coordinate System:
+  /// - Uses WPILib field-relative coordinate system
+  /// - X-axis: Forward (towards opposing alliance)
+  /// - Y-axis: Left (when facing forward)
+  /// - Rotation: Counter-clockwise positive (standard mathematical convention)
+  /// - Origin: Typically at one corner of the field (see field layout documentation)
   /// </summary>
   public sealed partial class ProtobufQuestNavPoseResetPayload : pb::IMessage<ProtobufQuestNavPoseResetPayload>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
@@ -118,7 +147,16 @@ namespace QuestNav.Protos.Generated {
     public const int TargetPoseFieldNumber = 1;
     private global::Wpi.Proto.ProtobufPose3d targetPose_;
     /// <summary>
-    /// Target pose in field-relative WPILib coordinate space (x forward, y left, rotation CCW+)
+    ///*
+    /// The target pose to reset the robot to.
+    /// 
+    /// This should represent the robot's actual position and orientation on the field
+    /// in the WPILib coordinate system. The Quest will update its internal tracking
+    /// to match this pose, effectively correcting any accumulated drift.
+    /// 
+    /// Units:
+    /// - Translation: meters
+    /// - Rotation: radians
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -272,7 +310,21 @@ namespace QuestNav.Protos.Generated {
   }
 
   /// <summary>
-  /// Main Command message
+  ///*
+  /// Main command message sent to the QuestNav system.
+  /// 
+  /// This is the primary message type used to send commands from external systems
+  /// (like robot code) to the Quest headset. Each command includes a type identifier,
+  /// a unique tracking ID, and optional payload data specific to the command type.
+  /// 
+  /// The command system is designed for asynchronous operation - commands are sent
+  /// and responses are received separately, matched by the command_id field.
+  /// 
+  /// Message Flow:
+  /// 1. Client creates command with unique command_id
+  /// 2. Client sets appropriate type and payload
+  /// 3. Client sends command to Quest
+  /// 4. Quest processes command and sends response with matching command_id
   /// </summary>
   public sealed partial class ProtobufQuestNavCommand : pb::IMessage<ProtobufQuestNavCommand>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
@@ -329,7 +381,12 @@ namespace QuestNav.Protos.Generated {
     public const int TypeFieldNumber = 1;
     private global::QuestNav.Protos.Generated.QuestNavCommandType type_ = global::QuestNav.Protos.Generated.QuestNavCommandType.CommandTypeUnspecified;
     /// <summary>
-    /// The type of command
+    ///*
+    /// The type of command being sent.
+    /// 
+    /// This field determines which payload (if any) should be populated and
+    /// how the Quest should process the command. See QuestNavCommandType
+    /// enum for available command types.
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -344,7 +401,16 @@ namespace QuestNav.Protos.Generated {
     public const int CommandIdFieldNumber = 2;
     private uint commandId_;
     /// <summary>
-    /// Command ID for tracking/responses
+    ///*
+    /// Unique identifier for this command instance.
+    /// 
+    /// This ID is used to match commands with their responses in asynchronous
+    /// communication. The client should generate unique IDs for each command
+    /// to avoid confusion. The Quest will echo this ID in the response message.
+    /// 
+    /// Recommended: Use incrementing integers or timestamps for uniqueness.
+    /// 
+    /// Note: For FRC users, the vendor dependency will handle this automatically.
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -358,8 +424,9 @@ namespace QuestNav.Protos.Generated {
     /// <summary>Field number for the "pose_reset_payload" field.</summary>
     public const int PoseResetPayloadFieldNumber = 10;
     /// <summary>
-    /// Future payloads can be added here:
-    /// (Commands with no payload don't need an entry)
+    ///*
+    /// Payload for POSE_RESET commands.
+    /// Set this field when type = POSE_RESET.
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -591,7 +658,23 @@ namespace QuestNav.Protos.Generated {
   }
 
   /// <summary>
-  /// Response message for commands
+  ///*
+  /// Response message sent back after processing a command.
+  /// 
+  /// This message is sent by the Quest back to the client after processing
+  /// a ProtobufQuestNavCommand. It provides status information about whether
+  /// the command was executed successfully and any error details if it failed.
+  /// 
+  /// The response is matched to the original command using the command_id field,
+  /// allowing for proper asynchronous command handling even when multiple
+  /// commands are in flight simultaneously.
+  /// 
+  /// Response Timing:
+  /// - Responses are sent after command processing completes
+  /// - Some commands may take time to execute (e.g., pose reset with validation)
+  /// - Clients should implement timeouts for command responses
+  /// 
+  /// Note: For FRC users, the vendor dependency will handle response matching automatically.
   /// </summary>
   public sealed partial class ProtobufQuestNavCommandResponse : pb::IMessage<ProtobufQuestNavCommandResponse>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
@@ -643,7 +726,12 @@ namespace QuestNav.Protos.Generated {
     public const int CommandIdFieldNumber = 1;
     private uint commandId_;
     /// <summary>
-    /// Matches the original command ID
+    ///*
+    /// Command ID that matches the original command.
+    /// 
+    /// This field echoes the command_id from the original ProtobufQuestNavCommand
+    /// that this response corresponds to. Clients use this to match responses
+    /// with their original commands in asynchronous communication.
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -658,7 +746,15 @@ namespace QuestNav.Protos.Generated {
     public const int SuccessFieldNumber = 2;
     private bool success_;
     /// <summary>
-    /// Whether the command was successful
+    ///*
+    /// Indicates whether the command was executed successfully.
+    /// 
+    /// true:  Command completed successfully
+    /// false: Command failed (see error_message for details)
+    /// 
+    /// Note: A successful response means the command was processed, but doesn't
+    /// necessarily guarantee the desired outcome (e.g., pose reset might succeed
+    /// but tracking could still be poor due to environmental conditions).
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -673,7 +769,19 @@ namespace QuestNav.Protos.Generated {
     public const int ErrorMessageFieldNumber = 3;
     private string errorMessage_ = "";
     /// <summary>
-    /// Error message if success = false
+    ///*
+    /// Human-readable error message when success = false.
+    /// 
+    /// This field provides detailed information about why a command failed.
+    /// It should be empty or ignored when success = true.
+    /// 
+    /// Error messages are intended for debugging and logging purposes.
+    /// They may include technical details about the failure cause.
+    /// 
+    /// Examples:
+    /// - "Invalid pose coordinates: x value out of field bounds"
+    /// - "Tracking system not initialized"
+    /// - "Unknown command type"
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]

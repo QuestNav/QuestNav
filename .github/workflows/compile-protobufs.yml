@@ -13,6 +13,7 @@ on:
       - 'questnav-lib/src/main/java/gg/questnav/questnav/protos/generated/*'
       - 'unity/Assets/QuestNav/Protos/Generated/*'
   workflow_dispatch:
+  workflow_call:
 jobs:
   compile-protobufs:
     runs-on: ubuntu-latest

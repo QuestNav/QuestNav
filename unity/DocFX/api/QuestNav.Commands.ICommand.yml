@@ -1,0 +1,185 @@
+### YamlMime:ManagedReference
+items:
+- uid: QuestNav.Commands.ICommand
+  commentId: T:QuestNav.Commands.ICommand
+  id: ICommand
+  parent: QuestNav.Commands
+  children:
+  - QuestNav.Commands.ICommand.Execute(QuestNav.Protos.Generated.ProtobufQuestNavCommand)
+  - QuestNav.Commands.ICommand.commandNiceName
+  langs:
+  - csharp
+  - vb
+  name: ICommand
+  nameWithType: ICommand
+  fullName: QuestNav.Commands.ICommand
+  type: Interface
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Commands/ICommand.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: ICommand
+    path: ../Assets/QuestNav/Commands/ICommand.cs
+    startLine: 7
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Commands
+  summary: Interface for individual command implementations
+  example: []
+  syntax:
+    content: public interface ICommand
+    content.vb: Public Interface ICommand
+- uid: QuestNav.Commands.ICommand.commandNiceName
+  commentId: P:QuestNav.Commands.ICommand.commandNiceName
+  id: commandNiceName
+  parent: QuestNav.Commands.ICommand
+  langs:
+  - csharp
+  - vb
+  name: commandNiceName
+  nameWithType: ICommand.commandNiceName
+  fullName: QuestNav.Commands.ICommand.commandNiceName
+  type: Property
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Commands/ICommand.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: commandNiceName
+    path: ../Assets/QuestNav/Commands/ICommand.cs
+    startLine: 12
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Commands
+  summary: Gets the nice name of the command
+  example: []
+  syntax:
+    content: string commandNiceName { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: ReadOnly Property commandNiceName As String
+  overload: QuestNav.Commands.ICommand.commandNiceName*
+- uid: QuestNav.Commands.ICommand.Execute(QuestNav.Protos.Generated.ProtobufQuestNavCommand)
+  commentId: M:QuestNav.Commands.ICommand.Execute(QuestNav.Protos.Generated.ProtobufQuestNavCommand)
+  id: Execute(QuestNav.Protos.Generated.ProtobufQuestNavCommand)
+  parent: QuestNav.Commands.ICommand
+  langs:
+  - csharp
+  - vb
+  name: Execute(ProtobufQuestNavCommand)
+  nameWithType: ICommand.Execute(ProtobufQuestNavCommand)
+  fullName: QuestNav.Commands.ICommand.Execute(QuestNav.Protos.Generated.ProtobufQuestNavCommand)
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Commands/ICommand.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: Execute
+    path: ../Assets/QuestNav/Commands/ICommand.cs
+    startLine: 18
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Commands
+  summary: Executes this command with the provided command data
+  example: []
+  syntax:
+    content: void Execute(ProtobufQuestNavCommand receivedCommand)
+    parameters:
+    - id: receivedCommand
+      type: QuestNav.Protos.Generated.ProtobufQuestNavCommand
+      description: The command data received from the robot
+    content.vb: Sub Execute(receivedCommand As ProtobufQuestNavCommand)
+  overload: QuestNav.Commands.ICommand.Execute*
+references:
+- uid: QuestNav.Commands
+  commentId: N:QuestNav.Commands
+  href: QuestNav.html
+  name: QuestNav.Commands
+  nameWithType: QuestNav.Commands
+  fullName: QuestNav.Commands
+  spec.csharp:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Commands
+    name: Commands
+    href: QuestNav.Commands.html
+  spec.vb:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Commands
+    name: Commands
+    href: QuestNav.Commands.html
+- uid: QuestNav.Commands.ICommand.commandNiceName*
+  commentId: Overload:QuestNav.Commands.ICommand.commandNiceName
+  href: QuestNav.Commands.ICommand.html#QuestNav_Commands_ICommand_commandNiceName
+  name: commandNiceName
+  nameWithType: ICommand.commandNiceName
+  fullName: QuestNav.Commands.ICommand.commandNiceName
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: QuestNav.Commands.ICommand.Execute*
+  commentId: Overload:QuestNav.Commands.ICommand.Execute
+  href: QuestNav.Commands.ICommand.html#QuestNav_Commands_ICommand_Execute_QuestNav_Protos_Generated_ProtobufQuestNavCommand_
+  name: Execute
+  nameWithType: ICommand.Execute
+  fullName: QuestNav.Commands.ICommand.Execute
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavCommand
+  commentId: T:QuestNav.Protos.Generated.ProtobufQuestNavCommand
+  parent: QuestNav.Protos.Generated
+  href: QuestNav.Protos.Generated.ProtobufQuestNavCommand.html
+  name: ProtobufQuestNavCommand
+  nameWithType: ProtobufQuestNavCommand
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavCommand
+- uid: QuestNav.Protos.Generated
+  commentId: N:QuestNav.Protos.Generated
+  href: QuestNav.html
+  name: QuestNav.Protos.Generated
+  nameWithType: QuestNav.Protos.Generated
+  fullName: QuestNav.Protos.Generated
+  spec.csharp:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Protos
+    name: Protos
+    href: QuestNav.Protos.html
+  - name: .
+  - uid: QuestNav.Protos.Generated
+    name: Generated
+    href: QuestNav.Protos.Generated.html
+  spec.vb:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Protos
+    name: Protos
+    href: QuestNav.Protos.html
+  - name: .
+  - uid: QuestNav.Protos.Generated
+    name: Generated
+    href: QuestNav.Protos.Generated.html

@@ -67,6 +67,24 @@ namespace QuestNav.Core
         private TMP_Text conStateText;
 
         /// <summary>
+        /// posXText text
+        /// </summary>
+        [SerializeField]
+        private TMP_Text posXText;
+
+        /// <summary>
+        /// posYText text
+        /// </summary>
+        [SerializeField]
+        private TMP_Text posYText;
+
+        /// <summary>
+        /// rotationText text
+        /// </summary>
+        [SerializeField]
+        private TMP_Text rotationText;
+
+        /// <summary>
         /// Button to update team number
         /// </summary>
         [SerializeField]
@@ -153,6 +171,9 @@ namespace QuestNav.Core
                 teamInput,
                 ipAddressText,
                 conStateText,
+                posXText,
+                posYText,
+                rotationText,
                 teamUpdateButton,
                 autoStartToggle
             );
@@ -165,31 +186,55 @@ namespace QuestNav.Core
         }
 
         /// <summary>
-        /// Handles frame updates for data publishing and command processing
+        /// Main update loop that runs at high frequency (100Hz) for time-critical operations.
+        /// This is the core of the QuestNav system, responsible for:
+        /// 1. Capturing VR headset pose data (position/rotation) from the Oculus SDK
+        /// 2. Converting Unity coordinates to FRC field coordinates
+        /// 3. Publishing pose data to NetworkTables for robot consumption
+        /// 4. Processing incoming commands from the robot (pose resets, etc.)
+        ///
+        /// Performance Note: This runs 100 times per second, so all operations here
+        /// must be lightweight. Heavy operations should go in SlowUpdate().
         /// </summary>
         private void MainUpdate()
         {
-            // Collect and publish current frame data
+            // Collect current VR headset pose data from Oculus tracking system
+            // This includes position (x,y,z) and rotation (quaternion) in Unity world space
             UpdateFrameData();
+
+            // Convert Unity coordinates to FRC field coordinates and publish to NetworkTables
+            // The robot subscribes to this data to know where the headset is on the field
             networkTableConnection.PublishFrameData(frameCount, timeStamp, position, rotation);
 
-            // Process robot commands
+            // Check for and execute any pending commands from the robot
+            // Commands include pose resets, calibration requests, etc.
             commandProcessor.ProcessCommands();
         }
 
         /// <summary>
-        /// This loop runs slower for performance reasons. Expensive methods that aren't loop critical
-        /// should be placed here (e.g. logging)
+        /// Slower update loop that runs at 3Hz for non-critical operations.
+        /// This handles expensive operations that don't need to run every frame:
+        /// 1. NetworkTables internal logging and diagnostics
+        /// 2. UI updates (connection status, IP address, team number display)
+        /// 3. Device health monitoring (tracking status, battery level)
+        /// 4. Log message processing and output to Unity console
+        ///
+        /// Design Rationale: Running these operations at 3Hz instead of 100Hz
+        /// significantly reduces CPU overhead while maintaining responsive UI updates.
         /// </summary>
         private void SlowUpdate()
         {
-            // Log internal NetworkTable info
+            // Process and display NetworkTables internal messages (connection status, errors, etc.)
+            // This helps with debugging connection issues without impacting performance
             networkTableConnection.LoggerPeriodic();
 
-            // Update UI periodically
+            // Update UI elements like connection status, IP address display, team number validation
+            // UI updates don't need to be real-time, 3Hz provides smooth visual feedback
             uiManager.UIPeriodic();
+            uiManager.UpdatePositionText(position, rotation);
 
-            // Collect and publish current device data at a slower rate
+            // Monitor device health: tracking status, battery level, tracking loss events
+            // This data helps diagnose issues but doesn't need high-frequency updates
             UpdateDeviceData();
             networkTableConnection.PublishDeviceData(
                 currentlyTracking,
@@ -197,7 +242,8 @@ namespace QuestNav.Core
                 batteryPercent
             );
 
-            // Flush logs
+            // Flush queued log messages to Unity console
+            // Batching log output improves performance and reduces console spam
             QueuedLogger.Flush();
         }
 
@@ -205,13 +251,37 @@ namespace QuestNav.Core
 
         #region Private Methods
         /// <summary>
-        /// Updates the current frame data from the VR headset
+        /// Captures the current VR headset pose data from the Oculus tracking system.
+        ///
+        /// This function extracts:
+        /// - Frame count: Unity's internal frame counter for data synchronization
+        /// - Timestamp: Unity's time since startup for temporal correlation
+        /// - Position: 3D world position of the headset's center eye point in Unity coordinates
+        /// - Rotation: Quaternion representing the headset's orientation in Unity coordinates
+        ///
+        /// Technical Details:
+        /// - Uses OVRCameraRig.centerEyeAnchor which provides the averaged position between left/right eyes
+        /// - Position is in Unity world space (meters), with Y-up coordinate system
+        /// - Rotation quaternion represents the headset's orientation relative to the tracking origin
+        /// - This data will be converted to FRC field coordinates before transmission to the robot
+        ///
+        /// Performance: This is called 100 times per second, so it uses direct property access
+        /// rather than more expensive operations like transforms or calculations.
         /// </summary>
         private void UpdateFrameData()
         {
+            // Unity's frame counter - useful for detecting dropped frames or synchronization issues
             frameCount = Time.frameCount;
+
+            // Time since Unity startup in seconds - provides temporal correlation for robot code
             timeStamp = Time.time;
+
+            // Get the center eye position - this is the averaged position between left and right eyes
+            // This represents the "head" position that the robot should track
             position = cameraRig.centerEyeAnchor.position;
+
+            // Get the headset orientation as a quaternion
+            // This includes pitch (looking up/down), yaw (turning left/right), and roll (tilting head)
             rotation = cameraRig.centerEyeAnchor.rotation;
         }
 

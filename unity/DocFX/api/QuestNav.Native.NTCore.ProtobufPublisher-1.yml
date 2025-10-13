@@ -1,0 +1,381 @@
+### YamlMime:ManagedReference
+items:
+- uid: QuestNav.Native.NTCore.ProtobufPublisher`1
+  commentId: T:QuestNav.Native.NTCore.ProtobufPublisher`1
+  id: ProtobufPublisher`1
+  parent: QuestNav.Native.NTCore
+  children:
+  - QuestNav.Native.NTCore.ProtobufPublisher`1.Set(`0)
+  langs:
+  - csharp
+  - vb
+  name: ProtobufPublisher<T>
+  nameWithType: ProtobufPublisher<T>
+  fullName: QuestNav.Native.NTCore.ProtobufPublisher<T>
+  type: Class
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Native/NTCore/ProtobufPublisher.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: ProtobufPublisher
+    path: ../Assets/QuestNav/Native/NTCore/ProtobufPublisher.cs
+    startLine: 9
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Native.NTCore
+  summary: Publisher for protobuf messages over NetworkTables. Handles serialization of protobuf messages to byte arrays.
+  example: []
+  syntax:
+    content: 'public class ProtobufPublisher<T> where T : IMessage<T>'
+    typeParameters:
+    - id: T
+      description: The protobuf message type
+    content.vb: Public Class ProtobufPublisher(Of T As IMessage(Of T))
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.MemberwiseClone
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+  nameWithType.vb: ProtobufPublisher(Of T)
+  fullName.vb: QuestNav.Native.NTCore.ProtobufPublisher(Of T)
+  name.vb: ProtobufPublisher(Of T)
+- uid: QuestNav.Native.NTCore.ProtobufPublisher`1.Set(`0)
+  commentId: M:QuestNav.Native.NTCore.ProtobufPublisher`1.Set(`0)
+  id: Set(`0)
+  parent: QuestNav.Native.NTCore.ProtobufPublisher`1
+  langs:
+  - csharp
+  - vb
+  name: Set(T)
+  nameWithType: ProtobufPublisher<T>.Set(T)
+  fullName: QuestNav.Native.NTCore.ProtobufPublisher<T>.Set(T)
+  type: Method
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Native/NTCore/ProtobufPublisher.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: Set
+    path: ../Assets/QuestNav/Native/NTCore/ProtobufPublisher.cs
+    startLine: 31
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Native.NTCore
+  summary: Publishes a protobuf message by serializing it to bytes and sending over NetworkTables
+  example: []
+  syntax:
+    content: public bool Set(T message)
+    parameters:
+    - id: message
+      type: '{T}'
+      description: The protobuf message to publish
+    return:
+      type: System.Boolean
+      description: True if the message was successfully published, false otherwise
+    content.vb: Public Function [Set](message As T) As Boolean
+  overload: QuestNav.Native.NTCore.ProtobufPublisher`1.Set*
+  nameWithType.vb: ProtobufPublisher(Of T).Set(T)
+  fullName.vb: QuestNav.Native.NTCore.ProtobufPublisher(Of T).Set(T)
+references:
+- uid: QuestNav.Native.NTCore
+  commentId: N:QuestNav.Native.NTCore
+  href: QuestNav.html
+  name: QuestNav.Native.NTCore
+  nameWithType: QuestNav.Native.NTCore
+  fullName: QuestNav.Native.NTCore
+  spec.csharp:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Native
+    name: Native
+    href: QuestNav.Native.html
+  - name: .
+  - uid: QuestNav.Native.NTCore
+    name: NTCore
+    href: QuestNav.Native.NTCore.html
+  spec.vb:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Native
+    name: Native
+    href: QuestNav.Native.html
+  - name: .
+  - uid: QuestNav.Native.NTCore
+    name: NTCore
+    href: QuestNav.Native.NTCore.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.MemberwiseClone
+  commentId: M:System.Object.MemberwiseClone
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  name: MemberwiseClone()
+  nameWithType: object.MemberwiseClone()
+  fullName: object.MemberwiseClone()
+  nameWithType.vb: Object.MemberwiseClone()
+  fullName.vb: Object.MemberwiseClone()
+  spec.csharp:
+  - uid: System.Object.MemberwiseClone
+    name: MemberwiseClone
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.MemberwiseClone
+    name: MemberwiseClone
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: QuestNav.Native.NTCore.ProtobufPublisher`1.Set*
+  commentId: Overload:QuestNav.Native.NTCore.ProtobufPublisher`1.Set
+  href: QuestNav.Native.NTCore.ProtobufPublisher-1.html#QuestNav_Native_NTCore_ProtobufPublisher_1_Set__0_
+  name: Set
+  nameWithType: ProtobufPublisher<T>.Set
+  fullName: QuestNav.Native.NTCore.ProtobufPublisher<T>.Set
+  nameWithType.vb: ProtobufPublisher(Of T).Set
+  fullName.vb: QuestNav.Native.NTCore.ProtobufPublisher(Of T).Set
+- uid: '{T}'
+  commentId: '!:T'
+  definition: T
+  name: T
+  nameWithType: T
+  fullName: T
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: T
+  name: T
+  nameWithType: T
+  fullName: T

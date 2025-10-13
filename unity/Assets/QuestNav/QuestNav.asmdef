@@ -1,0 +1,24 @@
+{
+    "name": "QuestNav",
+    "rootNamespace": "QuestNav",
+    "references": [
+        "Unity.TextMeshPro",
+        "Unity.InputSystem",
+        "Oculus.VR"
+    ],
+    "includePlatforms": [
+        "Android",
+        "Editor",
+        "WindowsStandalone64"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Google.Protobuf.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

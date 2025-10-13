@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Namespace QuestNav.Protos.Generated | QuestNav API Documentation </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Namespace QuestNav.Protos.Generated | QuestNav API Documentation ">
+    
+    
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../styles/docfx.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="QuestNav API">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first=First data-prev=Previous data-next=Next data-last=Last></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="QuestNav.Protos.Generated">
+
+  <h1 id="QuestNav_Protos_Generated" data-uid="QuestNav.Protos.Generated" class="text-break">Namespace QuestNav.Protos.Generated</h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+    <h3 id="classes">
+Classes
+</h3>
+      <h4><a class="xref" href="QuestNav.Protos.Generated.CommandsReflection.html">CommandsReflection</a></h4>
+      <section><p>Holder for reflection information generated from commands.proto</p>
+</section>
+      <h4><a class="xref" href="QuestNav.Protos.Generated.DataReflection.html">DataReflection</a></h4>
+      <section><p>Holder for reflection information generated from data.proto</p>
+</section>
+      <h4><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.html">ProtobufQuestNavCommand</a></h4>
+      <section><ul>
+<li></li>
+</ul>
+<p>Main command message sent to the QuestNav system.</p>
+<p>This is the primary message type used to send commands from external systems
+(like robot code) to the Quest headset. Each command includes a type identifier,
+a unique tracking ID, and optional payload data specific to the command type.</p>
+<p>The command system is designed for asynchronous operation - commands are sent
+and responses are received separately, matched by the command_id field.</p>
+<p>Message Flow:</p>
+<ol>
+<li>Client creates command with unique command_id</li>
+<li>Client sets appropriate type and payload</li>
+<li>Client sends command to Quest</li>
+<li>Quest processes command and sends response with matching command_id</li>
+</ol>
+</section>
+      <h4><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommandResponse.html">ProtobufQuestNavCommandResponse</a></h4>
+      <section><ul>
+<li></li>
+</ul>
+<p>Response message sent back after processing a command.</p>
+<p>This message is sent by the Quest back to the client after processing
+a ProtobufQuestNavCommand. It provides status information about whether
+the command was executed successfully and any error details if it failed.</p>
+<p>The response is matched to the original command using the command_id field,
+allowing for proper asynchronous command handling even when multiple
+commands are in flight simultaneously.</p>
+<p>Response Timing:</p>
+<ul>
+<li>Responses are sent after command processing completes</li>
+<li>Some commands may take time to execute (e.g., pose reset with validation)</li>
+<li>Clients should implement timeouts for command responses</li>
+</ul>
+<p>Note: For FRC users, the vendor dependency will handle response matching automatically.</p>
+</section>
+      <h4><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavDeviceData.html">ProtobufQuestNavDeviceData</a></h4>
+      <section><ul>
+<li></li>
+</ul>
+<p>Lower-frequency device status data sent from Quest to external systems.</p>
+<p>This message contains device health and status information that doesn't need
+to be sent as frequently as tracking data. It's sent at 3 Hz (every 333 milliseconds)
+to provide monitoring and diagnostic information without consuming excessive
+bandwidth.</p>
+<p>This data helps external systems:</p>
+<ul>
+<li>Monitor Quest device health</li>
+<li>Detect tracking system issues</li>
+<li>Implement failsafe behaviors</li>
+<li>Provide user feedback about system status</li>
+</ul>
+<p>The information is useful for both autonomous operation and debugging/
+troubleshooting scenarios.</p>
+</section>
+      <h4><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavFrameData.html">ProtobufQuestNavFrameData</a></h4>
+      <section><ul>
+<li></li>
+</ul>
+<p>High-frequency tracking data sent from Quest to external systems.</p>
+<p>This message contains the core tracking information that external systems
+(like robot code) need for real-time localization and navigation. It's sent
+at 100 Hz (every 10 milliseconds) to provide smooth, responsive tracking.</p>
+<p>The data represents the Quest's position and orientation on the field,
+derived from visual-inertial odometry using the Quest's cameras and IMU sensors.</p>
+<p>Coordinate System:</p>
+<ul>
+<li>Uses WPILib field-relative coordinate system</li>
+<li>Origin and axes depend on field setup and calibration</li>
+<li>Pose represents the Quest's position; mounting offset to get robot position
+is applied in end user code</li>
+</ul>
+</section>
+      <h4><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavPoseResetPayload.html">ProtobufQuestNavPoseResetPayload</a></h4>
+      <section><ul>
+<li></li>
+</ul>
+<p>Payload message for the POSE_RESET command.</p>
+<p>This message contains the data needed to execute a pose reset operation.
+The pose reset command allows external systems to correct the Quest's
+understanding of the robot's position and orientation on the field.</p>
+<p>Coordinate System:</p>
+<ul>
+<li>Uses WPILib field-relative coordinate system</li>
+<li>X-axis: Forward (towards opposing alliance)</li>
+<li>Y-axis: Left (when facing forward)</li>
+<li>Rotation: Counter-clockwise positive (standard mathematical convention)</li>
+<li>Origin: Typically at one corner of the field (see field layout documentation)</li>
+</ul>
+</section>
+    <h3 id="enums">
+Enums
+</h3>
+      <h4><a class="xref" href="QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.html">ProtobufQuestNavCommand.PayloadOneofCase</a></h4>
+      <section><p>Enum of possible cases for the &quot;payload&quot; oneof.</p>
+</section>
+      <h4><a class="xref" href="QuestNav.Protos.Generated.QuestNavCommandType.html">QuestNavCommandType</a></h4>
+      <section><ul>
+<li></li>
+</ul>
+<p>Enumeration of available command types in the QuestNav system.</p>
+<p>This enum defines all the different types of commands that can be sent to
+the Quest headset. The enum is designed to be extensible - new command types
+can be added without breaking existing clients.</p>
+<p>Design Notes:</p>
+<ul>
+<li>Values start from 0 as required by proto3</li>
+<li>UNSPECIFIED value (0) is reserved for error handling</li>
+<li>Command values should be assigned incrementally for clarity</li>
+</ul>
+</section>
+
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      QuestNav - VR Navigation for FRC Robots
+      
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

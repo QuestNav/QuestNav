@@ -55,6 +55,25 @@ namespace Wpi.Proto {
 
   }
   #region Messages
+  /// <summary>
+  ///*
+  /// Represents a 2D translation (displacement) vector.
+  /// 
+  /// This message encodes a 2D displacement or position vector using Cartesian
+  /// coordinates. It's used as a building block for more complex geometric
+  /// representations like poses and transforms.
+  /// 
+  /// Applications:
+  /// - Robot position on field
+  /// - Displacement between two points
+  /// - Velocity vectors (when representing change in position)
+  /// - Waypoint coordinates
+  /// 
+  /// Coordinate System:
+  /// - X: Forward/backward displacement (positive = forward)
+  /// - Y: Left/right displacement (positive = left)
+  /// - Units: meters
+  /// </summary>
   public sealed partial class ProtobufTranslation2d : pb::IMessage<ProtobufTranslation2d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -103,6 +122,14 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "x" field.</summary>
     public const int XFieldNumber = 1;
     private double x_;
+    /// <summary>
+    ///*
+    /// X-coordinate (forward/backward displacement).
+    /// 
+    /// Positive values indicate forward direction (towards opposing alliance).
+    /// Negative values indicate backward direction.
+    /// Units: meters
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double X {
@@ -115,6 +142,14 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "y" field.</summary>
     public const int YFieldNumber = 2;
     private double y_;
+    /// <summary>
+    ///*
+    /// Y-coordinate (left/right displacement).
+    /// 
+    /// Positive values indicate leftward direction (when facing forward).
+    /// Negative values indicate rightward direction.
+    /// Units: meters
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Y {
@@ -281,6 +316,27 @@ namespace Wpi.Proto {
 
   }
 
+  /// <summary>
+  ///*
+  /// Represents a 2D rotation angle.
+  /// 
+  /// This message encodes a rotation in the 2D plane using a single angle value.
+  /// It follows the standard mathematical convention for angle measurement and
+  /// is used to represent orientations and rotational displacements.
+  /// 
+  /// Applications:
+  /// - Robot heading/orientation on field
+  /// - Rotational component of poses and transforms
+  /// - Angular displacement between orientations
+  /// - Waypoint headings
+  /// 
+  /// Angle Convention:
+  /// - 0 radians: Facing positive X direction (forward on field)
+  /// - π/2 radians: Facing positive Y direction (left on field)
+  /// - π radians: Facing negative X direction (backward on field)
+  /// - 3π/2 radians: Facing negative Y direction (right on field)
+  /// - Counter-clockwise rotation is positive
+  /// </summary>
   public sealed partial class ProtobufRotation2d : pb::IMessage<ProtobufRotation2d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -328,6 +384,21 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "value" field.</summary>
     public const int ValueFieldNumber = 1;
     private double value_;
+    /// <summary>
+    ///*
+    /// Rotation angle in radians.
+    /// 
+    /// The angle is measured counter-clockwise from the positive X-axis.
+    /// Range: Typically -π to π, but can represent any angle value.
+    /// 
+    /// Examples:
+    /// - 0.0: Facing forward (positive X)
+    /// - π/2: Facing left (positive Y)
+    /// - π: Facing backward (negative X)
+    /// - -π/2 or 3π/2: Facing right (negative Y)
+    /// 
+    /// Units: radians
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Value {
@@ -470,6 +541,27 @@ namespace Wpi.Proto {
 
   }
 
+  /// <summary>
+  ///*
+  /// Represents a complete 2D pose (position and orientation).
+  /// 
+  /// This message combines a 2D position (translation) with a 2D orientation
+  /// (rotation) to fully describe an object's pose in the 2D plane. This is
+  /// the fundamental representation for robot poses in WPILib and QuestNav.
+  /// 
+  /// A pose answers two questions:
+  /// 1. Where is the object? (translation component)
+  /// 2. Which direction is it facing? (rotation component)
+  /// 
+  /// Applications:
+  /// - Robot pose on field (primary use in QuestNav)
+  /// - Waypoint targets for path following
+  /// - Relative poses between objects
+  /// - Initial poses for localization
+  /// 
+  /// The pose represents the robot's coordinate frame relative to the field
+  /// coordinate frame, allowing transformation of points between the two systems.
+  /// </summary>
   public sealed partial class ProtobufPose2d : pb::IMessage<ProtobufPose2d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -518,6 +610,14 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "translation" field.</summary>
     public const int TranslationFieldNumber = 1;
     private global::Wpi.Proto.ProtobufTranslation2d translation_;
+    /// <summary>
+    ///*
+    /// Position component of the pose.
+    /// 
+    /// This specifies where the robot is located on the field using the
+    /// field coordinate system. The translation represents the position of
+    /// the robot's coordinate frame origin (typically the robot center).
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public global::Wpi.Proto.ProtobufTranslation2d Translation {
@@ -530,6 +630,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "rotation" field.</summary>
     public const int RotationFieldNumber = 2;
     private global::Wpi.Proto.ProtobufRotation2d rotation_;
+    /// <summary>
+    ///*
+    /// Orientation component of the pose.
+    /// 
+    /// This specifies which direction the robot is facing on the field.
+    /// The rotation represents the angle between the robot's forward direction
+    /// and the field's positive X-axis (forward direction).
+    /// 
+    /// Combined with translation, this fully defines the robot's pose and
+    /// allows for coordinate transformations between robot and field frames.
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public global::Wpi.Proto.ProtobufRotation2d Rotation {
@@ -714,6 +825,27 @@ namespace Wpi.Proto {
 
   }
 
+  /// <summary>
+  ///*
+  /// Represents a 2D coordinate transformation.
+  /// 
+  /// This message describes how to transform coordinates from one 2D coordinate
+  /// frame to another. It combines a translation and rotation to define the
+  /// relationship between two coordinate systems.
+  /// 
+  /// Mathematical Interpretation:
+  /// Given a point P in frame A, the corresponding point in frame B is:
+  /// P_B = Transform2d * P_A = Rotation * P_A + Translation
+  /// 
+  /// Applications:
+  /// - Transform between robot and field coordinate frames
+  /// - Relative positioning between objects
+  /// - Coordinate frame conversions in path planning
+  /// - Sensor calibration and mounting offsets
+  /// 
+  /// The transform represents "how to get from frame A to frame B" and can be
+  /// inverted to get the reverse transformation.
+  /// </summary>
   public sealed partial class ProtobufTransform2d : pb::IMessage<ProtobufTransform2d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -762,6 +894,14 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "translation" field.</summary>
     public const int TranslationFieldNumber = 1;
     private global::Wpi.Proto.ProtobufTranslation2d translation_;
+    /// <summary>
+    ///*
+    /// Translation component of the transformation.
+    /// 
+    /// This represents the displacement between the origins of the two
+    /// coordinate frames. It specifies how far and in which direction
+    /// the target frame's origin is from the source frame's origin.
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public global::Wpi.Proto.ProtobufTranslation2d Translation {
@@ -774,6 +914,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "rotation" field.</summary>
     public const int RotationFieldNumber = 2;
     private global::Wpi.Proto.ProtobufRotation2d rotation_;
+    /// <summary>
+    ///*
+    /// Rotation component of the transformation.
+    /// 
+    /// This represents the angular difference between the two coordinate
+    /// frames. It specifies how much the target frame is rotated relative
+    /// to the source frame.
+    /// 
+    /// The rotation is applied before the translation in the transformation
+    /// sequence (standard mathematical convention).
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public global::Wpi.Proto.ProtobufRotation2d Rotation {
@@ -958,6 +1109,30 @@ namespace Wpi.Proto {
 
   }
 
+  /// <summary>
+  ///*
+  /// Represents a 2D twist (velocity in 2D space).
+  /// 
+  /// This message encodes the instantaneous velocity of an object in 2D space,
+  /// including both linear and angular velocity components. It describes how
+  /// an object's pose is changing over time.
+  /// 
+  /// Mathematical Interpretation:
+  /// The twist represents the time derivative of pose:
+  /// - dx/dt: Rate of change in X position
+  /// - dy/dt: Rate of change in Y position  
+  /// - dθ/dt: Rate of change in orientation
+  /// 
+  /// Applications:
+  /// - Robot velocity commands for motion control
+  /// - Velocity feedback from odometry systems
+  /// - Velocity constraints in path planning
+  /// - Dynamic modeling and simulation
+  /// 
+  /// Coordinate Frame:
+  /// The twist can be expressed in different coordinate frames (robot-relative
+  /// or field-relative) depending on the application context.
+  /// </summary>
   public sealed partial class ProtobufTwist2d : pb::IMessage<ProtobufTwist2d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1007,6 +1182,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "dx" field.</summary>
     public const int DxFieldNumber = 1;
     private double dx_;
+    /// <summary>
+    ///*
+    /// Linear velocity in X direction.
+    /// 
+    /// Rate of change of X position over time. In field coordinates,
+    /// this represents forward/backward velocity.
+    /// 
+    /// Positive values: Moving in positive X direction (forward)
+    /// Negative values: Moving in negative X direction (backward)
+    /// Units: meters per second
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Dx {
@@ -1019,6 +1205,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "dy" field.</summary>
     public const int DyFieldNumber = 2;
     private double dy_;
+    /// <summary>
+    ///*
+    /// Linear velocity in Y direction.
+    /// 
+    /// Rate of change of Y position over time. In field coordinates,
+    /// this represents left/right velocity (strafing).
+    /// 
+    /// Positive values: Moving in positive Y direction (left)
+    /// Negative values: Moving in negative Y direction (right)
+    /// Units: meters per second
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Dy {
@@ -1031,6 +1228,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "dtheta" field.</summary>
     public const int DthetaFieldNumber = 3;
     private double dtheta_;
+    /// <summary>
+    ///*
+    /// Angular velocity (rate of rotation).
+    /// 
+    /// Rate of change of orientation over time. This represents how
+    /// fast the object is rotating in the 2D plane.
+    /// 
+    /// Positive values: Counter-clockwise rotation
+    /// Negative values: Clockwise rotation
+    /// Units: radians per second
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double Dtheta {
@@ -1221,6 +1429,27 @@ namespace Wpi.Proto {
 
   }
 
+  /// <summary>
+  ///*
+  /// Represents a 2D rectangle with arbitrary orientation.
+  /// 
+  /// This message defines a rectangular region in 2D space using a center pose
+  /// and width/height dimensions. The rectangle can be rotated to any orientation
+  /// based on the center pose's rotation component.
+  /// 
+  /// Geometric Properties:
+  /// - Center point and orientation defined by pose
+  /// - Width extends along the pose's X-axis (local forward direction)
+  /// - Height extends along the pose's Y-axis (local left direction)
+  /// - Total area = xWidth * yWidth
+  /// 
+  /// Applications:
+  /// - Robot footprint representation
+  /// - Obstacle and keep-out zone definitions
+  /// - Field element boundaries
+  /// - Collision detection regions
+  /// - Path planning constraints
+  /// </summary>
   public sealed partial class ProtobufRectangle2d : pb::IMessage<ProtobufRectangle2d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1270,6 +1499,18 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "center" field.</summary>
     public const int CenterFieldNumber = 1;
     private global::Wpi.Proto.ProtobufPose2d center_;
+    /// <summary>
+    ///*
+    /// Center pose of the rectangle.
+    /// 
+    /// The translation component specifies the center point of the rectangle
+    /// in the coordinate system. The rotation component specifies the
+    /// orientation of the rectangle's local coordinate frame.
+    /// 
+    /// The rectangle's edges are aligned with this local coordinate frame:
+    /// - Width extends along local X-axis (rotated forward direction)
+    /// - Height extends along local Y-axis (rotated left direction)
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public global::Wpi.Proto.ProtobufPose2d Center {
@@ -1282,6 +1523,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "xWidth" field.</summary>
     public const int XWidthFieldNumber = 2;
     private double xWidth_;
+    /// <summary>
+    ///*
+    /// Width of the rectangle along its local X-axis.
+    /// 
+    /// This is the dimension of the rectangle in the direction of the
+    /// center pose's forward direction (after rotation). The rectangle
+    /// extends ±xWidth/2 from the center along this axis.
+    /// 
+    /// Units: meters
+    /// Must be positive
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double XWidth {
@@ -1294,6 +1546,17 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "yWidth" field.</summary>
     public const int YWidthFieldNumber = 3;
     private double yWidth_;
+    /// <summary>
+    ///*
+    /// Height of the rectangle along its local Y-axis.
+    /// 
+    /// This is the dimension of the rectangle in the direction of the
+    /// center pose's left direction (after rotation). The rectangle
+    /// extends ±yWidth/2 from the center along this axis.
+    /// 
+    /// Units: meters
+    /// Must be positive
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double YWidth {
@@ -1493,6 +1756,32 @@ namespace Wpi.Proto {
 
   }
 
+  /// <summary>
+  ///*
+  /// Represents a 2D ellipse with arbitrary orientation.
+  /// 
+  /// This message defines an elliptical region in 2D space using a center pose
+  /// and semi-axis lengths. The ellipse can be rotated to any orientation
+  /// based on the center pose's rotation component.
+  /// 
+  /// Geometric Properties:
+  /// - Center point and orientation defined by pose
+  /// - Major/minor axes aligned with pose's local coordinate frame
+  /// - X semi-axis extends along pose's X-axis (local forward direction)
+  /// - Y semi-axis extends along pose's Y-axis (local left direction)
+  /// - Total area = π * xSemiAxis * ySemiAxis
+  /// 
+  /// Applications:
+  /// - Uncertainty ellipses for localization
+  /// - Smooth obstacle representations
+  /// - Robot operating regions
+  /// - Sensor coverage areas
+  /// - Path planning with uncertainty
+  /// 
+  /// Special Cases:
+  /// - Circle: xSemiAxis = ySemiAxis
+  /// - Degenerate ellipse: one semi-axis approaches zero (becomes a line)
+  /// </summary>
   public sealed partial class ProtobufEllipse2d : pb::IMessage<ProtobufEllipse2d>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1542,6 +1831,18 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "center" field.</summary>
     public const int CenterFieldNumber = 1;
     private global::Wpi.Proto.ProtobufPose2d center_;
+    /// <summary>
+    ///*
+    /// Center pose of the ellipse.
+    /// 
+    /// The translation component specifies the center point of the ellipse
+    /// in the coordinate system. The rotation component specifies the
+    /// orientation of the ellipse's local coordinate frame.
+    /// 
+    /// The ellipse's axes are aligned with this local coordinate frame:
+    /// - X semi-axis extends along local X-axis (rotated forward direction)
+    /// - Y semi-axis extends along local Y-axis (rotated left direction)
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public global::Wpi.Proto.ProtobufPose2d Center {
@@ -1554,6 +1855,20 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "xSemiAxis" field.</summary>
     public const int XSemiAxisFieldNumber = 2;
     private double xSemiAxis_;
+    /// <summary>
+    ///*
+    /// Semi-axis length along the ellipse's local X-axis.
+    /// 
+    /// This is half the width of the ellipse in the direction of the
+    /// center pose's forward direction (after rotation). The ellipse
+    /// extends ±xSemiAxis from the center along this axis.
+    /// 
+    /// Units: meters
+    /// Must be positive
+    /// 
+    /// Note: This is the semi-axis, not the full width. The full width
+    /// along this axis is 2 * xSemiAxis.
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double XSemiAxis {
@@ -1566,6 +1881,20 @@ namespace Wpi.Proto {
     /// <summary>Field number for the "ySemiAxis" field.</summary>
     public const int YSemiAxisFieldNumber = 3;
     private double ySemiAxis_;
+    /// <summary>
+    ///*
+    /// Semi-axis length along the ellipse's local Y-axis.
+    /// 
+    /// This is half the height of the ellipse in the direction of the
+    /// center pose's left direction (after rotation). The ellipse
+    /// extends ±ySemiAxis from the center along this axis.
+    /// 
+    /// Units: meters
+    /// Must be positive
+    /// 
+    /// Note: This is the semi-axis, not the full height. The full height
+    /// along this axis is 2 * ySemiAxis.
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public double YSemiAxis {

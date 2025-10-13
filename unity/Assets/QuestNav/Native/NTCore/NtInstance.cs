@@ -6,10 +6,21 @@ using QuestNav.Utils;
 
 namespace QuestNav.Native.NTCore
 {
+    /// <summary>
+    /// Represents a NetworkTables instance for communication with FRC robots.
+    /// Provides methods for creating publishers, subscribers, and managing connections.
+    /// </summary>
     public unsafe class NtInstance
     {
+        /// <summary>
+        /// The native handle for this NetworkTables instance
+        /// </summary>
         private readonly uint handle;
 
+        /// <summary>
+        /// Creates a new NetworkTables instance with the specified name
+        /// </summary>
+        /// <param name="instanceName">The name for this NetworkTables instance</param>
         public NtInstance(string instanceName)
         {
             QueuedLogger.Log("Loading NTCore Natives");
@@ -25,11 +36,20 @@ namespace QuestNav.Native.NTCore
             }
         }
 
+        /// <summary>
+        /// Sets the team number for automatic FRC robot connection
+        /// </summary>
+        /// <param name="teamNumber">The FRC team number</param>
+        /// <param name="port">The NetworkTables port (defaults to standard port)</param>
         public void SetTeamNumber(int teamNumber, int port = NtCoreNatives.NT_DEFAULT_PORT4)
         {
             NtCoreNatives.NT_SetServerTeam(handle, (uint)teamNumber, (uint)port);
         }
 
+        /// <summary>
+        /// Sets specific IP addresses and ports for NetworkTables connection
+        /// </summary>
+        /// <param name="addressesAndPorts">Array of address/port tuples to connect to</param>
         public void SetAddresses((string addr, int port)[] addressesAndPorts)
         {
             WpiString[] addresses = new WpiString[addressesAndPorts.Length];
@@ -78,6 +98,10 @@ namespace QuestNav.Native.NTCore
             }
         }
 
+        /// <summary>
+        /// Checks if this NetworkTables instance is currently connected to a server
+        /// </summary>
+        /// <returns>True if connected, false otherwise</returns>
         public bool IsConnected()
         {
             return NtCoreNatives.NT_IsConnected(handle) != 0;
@@ -321,6 +345,14 @@ namespace QuestNav.Native.NTCore
             return new RawSubscriber(subHandle);
         }
 
+        /// <summary>
+        /// Creates a protobuf publisher for the specified topic and message type
+        /// </summary>
+        /// <typeparam name="T">The protobuf message type</typeparam>
+        /// <param name="name">The topic name</param>
+        /// <param name="classString">The protobuf class identifier</param>
+        /// <param name="options">Publisher options</param>
+        /// <returns>A protobuf publisher for the specified type</returns>
         public ProtobufPublisher<T> GetProtobufPublisher<T>(
             string name,
             string classString,
@@ -332,6 +364,14 @@ namespace QuestNav.Native.NTCore
             return new ProtobufPublisher<T>(rawPublisher);
         }
 
+        /// <summary>
+        /// Creates a protobuf subscriber for the specified topic and message type
+        /// </summary>
+        /// <typeparam name="T">The protobuf message type</typeparam>
+        /// <param name="name">The topic name</param>
+        /// <param name="classString">The protobuf class identifier</param>
+        /// <param name="options">Subscriber options</param>
+        /// <returns>A protobuf subscriber for the specified type</returns>
         public ProtobufSubscriber<T> GetProtobufSubscriber<T>(
             string name,
             string classString,
@@ -343,6 +383,12 @@ namespace QuestNav.Native.NTCore
             return new ProtobufSubscriber<T>(rawSubscriber);
         }
 
+        /// <summary>
+        /// Creates a logger for NetworkTables internal messages within the specified level range
+        /// </summary>
+        /// <param name="minLevel">Minimum log level to capture</param>
+        /// <param name="maxLevel">Maximum log level to capture</param>
+        /// <returns>A polled logger for NetworkTables messages</returns>
         public PolledLogger CreateLogger(int minLevel, int maxLevel)
         {
             var poller = NtCoreNatives.NT_CreateListenerPoller(handle);

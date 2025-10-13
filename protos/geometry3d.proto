@@ -1,41 +1,397 @@
 syntax = "proto3";
 
+/**
+ * WPILib 3D Geometry Protocol Buffer Definitions
+ * 
+ * This file defines 3D geometric primitives used in robotics applications
+ * that require full 3D spatial representation. While most FRC robotics
+ * applications operate in 2D, these 3D primitives are useful for:
+ * 
+ * - Advanced vision processing and AprilTag detection
+ * - 3D sensor data (LiDAR, depth cameras, IMU orientation)
+ * - Robotic arms and manipulators with 3D motion
+ * - Drone/aerial robotics applications
+ * - Simulation and visualization systems
+ * 
+ * The geometric primitives follow standard 3D conventions:
+ * - Right-handed coordinate system
+ * - Quaternions for rotation representation (avoiding gimbal lock)
+ * - Units in meters for distances, radians for angles
+ * - Standard mathematical conventions for transformations
+ * 
+ * These messages are designed to be:
+ * - Mathematically robust (quaternions prevent singularities)
+ * - Compact for network transmission
+ * - Compatible with WPILib's existing 3D geometry classes
+ * - Suitable for real-time robotics applications
+ * 
+ * Coordinate System Convention:
+ * - X-axis: Forward direction
+ * - Y-axis: Left direction  
+ * - Z-axis: Up direction
+ * - Right-handed system: X × Y = Z
+ */
+
 package wpi.proto;
 
 option java_package = "edu.wpi.first.math.proto";
 
+/**
+ * Represents a 3D translation (displacement) vector.
+ * 
+ * This message encodes a 3D displacement or position vector using Cartesian
+ * coordinates. It extends the 2D translation concept into three dimensions
+ * and serves as a building block for more complex 3D geometric representations.
+ * 
+ * Applications:
+ * - 3D object positions in space
+ * - Displacement vectors between 3D points
+ * - 3D velocity vectors (when representing change in position)
+ * - Camera/sensor positions relative to robot
+ * - AprilTag positions in 3D space
+ * 
+ * Coordinate System:
+ * - X: Forward/backward displacement (positive = forward)
+ * - Y: Left/right displacement (positive = left)
+ * - Z: Up/down displacement (positive = up)
+ * - Units: meters
+ */
 message ProtobufTranslation3d {
+  /**
+   * X-coordinate (forward/backward displacement).
+   * 
+   * Positive values indicate forward direction.
+   * Negative values indicate backward direction.
+   * Units: meters
+   */
   double x = 1;
+  
+  /**
+   * Y-coordinate (left/right displacement).
+   * 
+   * Positive values indicate leftward direction.
+   * Negative values indicate rightward direction.
+   * Units: meters
+   */
   double y = 2;
+  
+  /**
+   * Z-coordinate (up/down displacement).
+   * 
+   * Positive values indicate upward direction.
+   * Negative values indicate downward direction.
+   * Units: meters
+   */
   double z = 3;
 }
 
+/**
+ * Represents a quaternion for 3D rotation.
+ * 
+ * Quaternions provide a mathematically robust way to represent 3D rotations
+ * without the singularities (gimbal lock) that can occur with Euler angles.
+ * They are the preferred representation for 3D rotations in robotics.
+ * 
+ * Mathematical Properties:
+ * - Unit quaternion: w² + x² + y² + z² = 1
+ * - Represents rotation around axis (x,y,z) by angle θ:
+ *   w = cos(θ/2), (x,y,z) = sin(θ/2) * unit_axis
+ * - Identity rotation: (w=1, x=0, y=0, z=0)
+ * - Conjugate: (w, -x, -y, -z) represents inverse rotation
+ * 
+ * Applications:
+ * - 3D object orientations
+ * - IMU/gyroscope data representation
+ * - Camera pose orientations
+ * - Robotic arm joint orientations
+ * - Smooth rotation interpolation (SLERP)
+ * 
+ * Advantages over Euler angles:
+ * - No gimbal lock singularities
+ * - Smooth interpolation
+ * - Efficient composition of rotations
+ * - Numerically stable
+ */
 message ProtobufQuaternion {
+  /**
+   * W component (scalar/real part) of the quaternion.
+   * 
+   * This is the "real" or "scalar" component of the quaternion.
+   * For a rotation by angle θ around an axis, w = cos(θ/2).
+   * 
+   * Range: [-1, 1] for unit quaternions
+   * Identity rotation: w = 1
+   */
   double w = 1;
+  
+  /**
+   * X component (i coefficient) of the quaternion.
+   * 
+   * This is the coefficient of the i basis quaternion.
+   * For a rotation by angle θ around axis (ax, ay, az),
+   * x = sin(θ/2) * ax (where (ax, ay, az) is unit length).
+   * 
+   * Range: [-1, 1] for unit quaternions
+   */
   double x = 2;
+  
+  /**
+   * Y component (j coefficient) of the quaternion.
+   * 
+   * This is the coefficient of the j basis quaternion.
+   * For a rotation by angle θ around axis (ax, ay, az),
+   * y = sin(θ/2) * ay (where (ax, ay, az) is unit length).
+   * 
+   * Range: [-1, 1] for unit quaternions
+   */
   double y = 3;
+  
+  /**
+   * Z component (k coefficient) of the quaternion.
+   * 
+   * This is the coefficient of the k basis quaternion.
+   * For a rotation by angle θ around axis (ax, ay, az),
+   * z = sin(θ/2) * az (where (ax, ay, az) is unit length).
+   * 
+   * Range: [-1, 1] for unit quaternions
+   */
   double z = 4;
 }
 
+/**
+ * Represents a 3D rotation using a quaternion.
+ * 
+ * This message wraps a quaternion to represent 3D rotations in a standardized
+ * way. It provides a clean interface for 3D rotation operations while
+ * leveraging the mathematical advantages of quaternions internally.
+ * 
+ * The rotation represents the orientation of a coordinate frame relative to
+ * a reference frame, or the rotation needed to transform vectors from one
+ * coordinate system to another.
+ * 
+ * Applications:
+ * - Object orientations in 3D space
+ * - Camera pose rotations
+ * - IMU orientation data
+ * - Robotic arm end-effector orientations
+ * - Transformation between coordinate frames
+ * 
+ * Mathematical Operations:
+ * - Composition: R3 = R2 * R1 (apply R1 first, then R2)
+ * - Inverse: R^(-1) represents the opposite rotation
+ * - Identity: No rotation (quaternion w=1, x=y=z=0)
+ */
 message ProtobufRotation3d {
+  /**
+   * Quaternion representing the 3D rotation.
+   * 
+   * This quaternion should be normalized (unit quaternion) to represent
+   * a valid rotation. Non-unit quaternions may lead to scaling effects
+   * in addition to rotation.
+   * 
+   * The quaternion represents the rotation from the reference coordinate
+   * frame to the rotated coordinate frame.
+   */
   ProtobufQuaternion q = 1;
 }
 
+/**
+ * Represents a complete 3D pose (position and orientation).
+ * 
+ * This message combines a 3D position (translation) with a 3D orientation
+ * (rotation) to fully describe an object's pose in 3D space. This extends
+ * the 2D pose concept into three dimensions for applications requiring
+ * full spatial representation.
+ * 
+ * A 3D pose answers two fundamental questions:
+ * 1. Where is the object in 3D space? (translation component)
+ * 2. How is it oriented in 3D space? (rotation component)
+ * 
+ * Applications:
+ * - Camera poses for vision processing
+ * - AprilTag poses in 3D space
+ * - Robotic arm end-effector poses
+ * - Drone/UAV poses (position and attitude)
+ * - 3D object tracking and localization
+ * - Sensor mounting positions and orientations
+ * 
+ * The pose represents the object's coordinate frame relative to a reference
+ * coordinate frame, enabling transformation of points and vectors between
+ * the two coordinate systems.
+ * 
+ * Coordinate Frame Transformation:
+ * Given a point P in the object's local frame, the corresponding point
+ * in the reference frame is: P_ref = rotation * P_local + translation
+ */
 message ProtobufPose3d {
+  /**
+   * Position component of the 3D pose.
+   * 
+   * This specifies where the object is located in 3D space using the
+   * reference coordinate system. The translation represents the position
+   * of the object's coordinate frame origin relative to the reference frame.
+   */
   ProtobufTranslation3d translation = 1;
+  
+  /**
+   * Orientation component of the 3D pose.
+   * 
+   * This specifies how the object is oriented in 3D space relative to
+   * the reference coordinate system. The rotation represents the orientation
+   * of the object's coordinate frame relative to the reference frame.
+   * 
+   * Combined with translation, this fully defines the object's pose and
+   * allows for coordinate transformations between object and reference frames.
+   */
   ProtobufRotation3d rotation = 2;
 }
 
+/**
+ * Represents a 3D coordinate transformation.
+ * 
+ * This message describes how to transform coordinates from one 3D coordinate
+ * frame to another. It combines a 3D translation and rotation to define the
+ * complete spatial relationship between two coordinate systems.
+ * 
+ * Mathematical Interpretation:
+ * Given a point P in frame A, the corresponding point in frame B is:
+ * P_B = Transform3d * P_A = Rotation * P_A + Translation
+ * 
+ * This follows the standard transformation sequence:
+ * 1. Apply rotation to the point
+ * 2. Add translation to the rotated point
+ * 
+ * Applications:
+ * - Transform between robot and world coordinate frames
+ * - Camera calibration and extrinsic parameters
+ * - Sensor mounting transformations
+ * - Relative positioning between 3D objects
+ * - Coordinate frame conversions in 3D path planning
+ * - Multi-robot relative localization
+ * 
+ * The transform represents "how to get from frame A to frame B" and can be
+ * inverted to get the reverse transformation. Transforms can also be composed
+ * to create transformation chains through multiple coordinate frames.
+ */
 message ProtobufTransform3d {
+  /**
+   * Translation component of the 3D transformation.
+   * 
+   * This represents the displacement between the origins of the two
+   * coordinate frames in 3D space. It specifies how far and in which
+   * direction the target frame's origin is from the source frame's origin.
+   */
   ProtobufTranslation3d translation = 1;
+  
+  /**
+   * Rotation component of the 3D transformation.
+   * 
+   * This represents the angular difference between the two coordinate
+   * frames in 3D space. It specifies how the target frame is rotated
+   * relative to the source frame.
+   * 
+   * The rotation is applied before the translation in the transformation
+   * sequence (standard mathematical convention for homogeneous transforms).
+   */
   ProtobufRotation3d rotation = 2;
 }
 
+/**
+ * Represents a 3D twist (velocity in 3D space).
+ * 
+ * This message encodes the instantaneous velocity of an object in 3D space,
+ * including both linear and angular velocity components. It describes how
+ * an object's 3D pose is changing over time, extending the 2D twist concept
+ * into three dimensions.
+ * 
+ * Mathematical Interpretation:
+ * The twist represents the time derivative of 3D pose:
+ * - Linear velocity: (dx/dt, dy/dt, dz/dt)
+ * - Angular velocity: (rx, ry, rz) as rotation rates about each axis
+ * 
+ * Applications:
+ * - 3D robot velocity commands (drones, robotic arms)
+ * - 3D velocity feedback from odometry systems
+ * - Velocity constraints in 3D path planning
+ * - Dynamic modeling and simulation in 3D
+ * - IMU angular velocity data representation
+ * - Camera motion estimation
+ * 
+ * Coordinate Frame:
+ * The twist can be expressed in different coordinate frames (body-relative
+ * or world-relative) depending on the application context. The angular
+ * velocity components represent rotation rates about the coordinate axes.
+ */
 message ProtobufTwist3d {
+  /**
+   * Linear velocity in X direction.
+   * 
+   * Rate of change of X position over time. In world coordinates,
+   * this represents forward/backward velocity.
+   * 
+   * Positive values: Moving in positive X direction (forward)
+   * Negative values: Moving in negative X direction (backward)
+   * Units: meters per second
+   */
   double dx = 1;
+  
+  /**
+   * Linear velocity in Y direction.
+   * 
+   * Rate of change of Y position over time. In world coordinates,
+   * this represents left/right velocity (strafing).
+   * 
+   * Positive values: Moving in positive Y direction (left)
+   * Negative values: Moving in negative Y direction (right)
+   * Units: meters per second
+   */
   double dy = 2;
+  
+  /**
+   * Linear velocity in Z direction.
+   * 
+   * Rate of change of Z position over time. In world coordinates,
+   * this represents up/down velocity (climbing/descending).
+   * 
+   * Positive values: Moving in positive Z direction (up)
+   * Negative values: Moving in negative Z direction (down)
+   * Units: meters per second
+   */
   double dz = 3;
+  
+  /**
+   * Angular velocity about X-axis (roll rate).
+   * 
+   * Rate of rotation about the X-axis. This represents how fast
+   * the object is rolling (rotating around its forward axis).
+   * 
+   * Positive values: Counter-clockwise rotation when looking down the positive X-axis
+   * Negative values: Clockwise rotation when looking down the positive X-axis
+   * Units: radians per second
+   */
   double rx = 4;
+  
+  /**
+   * Angular velocity about Y-axis (pitch rate).
+   * 
+   * Rate of rotation about the Y-axis. This represents how fast
+   * the object is pitching (nose up/down motion).
+   * 
+   * Positive values: Counter-clockwise rotation when looking down the positive Y-axis
+   * Negative values: Clockwise rotation when looking down the positive Y-axis
+   * Units: radians per second
+   */
   double ry = 5;
+  
+  /**
+   * Angular velocity about Z-axis (yaw rate).
+   * 
+   * Rate of rotation about the Z-axis. This represents how fast
+   * the object is yawing (turning left/right).
+   * 
+   * Positive values: Counter-clockwise rotation when looking down the positive Z-axis
+   * Negative values: Clockwise rotation when looking down the positive Z-axis
+   * Units: radians per second
+   */
   double rz = 6;
 }

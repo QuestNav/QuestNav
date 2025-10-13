@@ -1,4 +1,3 @@
-﻿using System;
 using System.Net;
 using System.Net.Sockets;
 using QuestNav.Core;
@@ -53,6 +52,21 @@ namespace QuestNav.UI
         private TMP_Text conStateText;
 
         /// <summary>
+        /// posXText text
+        /// </summary>
+        private TMP_Text posXText;
+
+        /// <summary>
+        /// posYText text
+        /// </summary>
+        private TMP_Text posYText;
+
+        /// <summary>
+        /// rotationText text
+        /// </summary>
+        private TMP_Text rotationText;
+
+        /// <summary>
         /// Button to update team number
         /// </summary>
         private Button teamUpdateButton;
@@ -75,22 +89,32 @@ namespace QuestNav.UI
         /// <param name="teamInput">Input field for team number</param>
         /// <param name="ipAddressText">Text for IP address display</param>
         /// <param name="conStateText">Text for connection state display</param>
+        /// <param name="posXText">Text for X coordinate of Quest position</param>
+        /// <param name="posYText">Text for Y coordinate of Quest position</param>
+        /// <param name="rotationText">Text for rotation coordinate of Quest position</param>
         /// <param name="teamUpdateButton">Button for updating team number</param>
+        /// <param name="autoStartToggle">Button for turning auto start on/off</param>
         public UIManager(
             INetworkTableConnection networkTableConnection,
             TMP_InputField teamInput,
             TMP_Text ipAddressText,
             TMP_Text conStateText,
+            TMP_Text posXText,
+            TMP_Text posYText,
+            TMP_Text rotationText,
             Button teamUpdateButton,
             Toggle autoStartToggle
         )
         {
             this.networkTableConnection = networkTableConnection;
             this.teamInput = teamInput;
-            this.autoStartToggle = autoStartToggle;
             this.ipAddressText = ipAddressText;
             this.conStateText = conStateText;
+            this.posXText = posXText;
+            this.posYText = posYText;
+            this.rotationText = rotationText;
             this.teamUpdateButton = teamUpdateButton;
+            this.autoStartToggle = autoStartToggle;
 
             teamNumber = PlayerPrefs.GetInt(
                 "TeamNumber",
@@ -141,7 +165,7 @@ namespace QuestNav.UI
             var placeholderText = teamInput.placeholder as TextMeshProUGUI;
             if (placeholderText != null)
             {
-                placeholderText.text = "Current: " + teamNumber;
+                placeholderText.text = teamNumber.ToString();
             }
         }
 
@@ -213,6 +237,23 @@ namespace QuestNav.UI
         {
             updateConStateText();
             updateIPAddressText();
+        }
+
+        /// <summary>
+        /// Updates the connection state text display.
+        /// </summary>
+        public void UpdatePositionText(Vector3 position, Quaternion rotation)
+        {
+            TextMeshProUGUI xText = posXText as TextMeshProUGUI;
+            TextMeshProUGUI yText = posYText as TextMeshProUGUI;
+            TextMeshProUGUI rotText = rotationText as TextMeshProUGUI;
+            if (xText is null || yText is null || rotText is null)
+                return;
+
+            var frcPosition = Conversions.UnityToFrc3d(position, rotation);
+            xText.text = $"{frcPosition.Translation.X:0.00} M";
+            yText.text = $"{frcPosition.Translation.Y:0.00} M";
+            rotText.text = $"{(frcPosition.Rotation.Q.Z * Mathf.Rad2Deg + 360f) % 360f:0.00}°";
         }
         #endregion
     }

@@ -1,0 +1,260 @@
+name: Build Javadoc API Documentation
+
+on:
+  workflow_call:
+    inputs:
+      unity-build-completed:
+        description: 'Whether Unity build has completed successfully'
+        required: true
+        type: boolean
+  workflow_dispatch:
+    inputs:
+      force-build:
+        description: 'Force build even without fresh Unity build'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: build-javadoc-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-javadoc:
+    name: Build Java API Documentation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to commit generated docs back to repo
+      pull-requests: write  # Required for PR comments
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper git operations
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11'
+
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            questnav-lib/.gradle
+          key: ${{ runner.os }}-gradle-javadoc-${{ hashFiles('questnav-lib/**/*.gradle*', 'questnav-lib/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-javadoc-
+            ${{ runner.os }}-gradle-lib-
+
+      - name: Make gradlew Executable
+        working-directory: questnav-lib
+        run: chmod +x ./gradlew
+
+      - name: Check Unity Build Dependency
+        id: check-unity-build
+        run: |
+          if [ "${{ inputs.unity-build-completed }}" == "true" ]; then
+            echo "Unity build completed - proceeding with Javadoc generation"
+            echo "should-build=true" >> $GITHUB_OUTPUT
+          elif [ "${{ inputs.force-build }}" == "true" ]; then
+            echo "Force build requested - proceeding with Javadoc generation"
+            echo "should-build=true" >> $GITHUB_OUTPUT
+          else
+            echo "No Unity build completed and no force build requested"
+            echo "should-build=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate Javadoc Documentation
+        if: steps.check-unity-build.outputs.should-build == 'true'
+        working-directory: questnav-lib
+        run: |
+          echo "Generating Javadoc documentation..."
+          ./gradlew javadoc --info
+          
+          echo "Javadoc generation completed"
+          echo "Generated files:"
+          find build/docs/javadoc -name "*.html" | head -10
+
+      - name: Copy Javadoc to Documentation Directory
+        if: steps.check-unity-build.outputs.should-build == 'true'
+        run: |
+          echo "Copying Javadoc files to documentation directory..."
+          
+          # Create the target directory if it doesn't exist
+          mkdir -p docs/static/api/java/
+          
+          # Remove old documentation to ensure clean state
+          rm -rf docs/static/api/java/*
+          
+          # Copy new documentation
+          cp -r questnav-lib/build/docs/javadoc/* docs/static/api/java/
+          
+          echo "Documentation copied successfully"
+          echo "Files in target directory:"
+          ls -la docs/static/api/java/
+
+      - name: Fail if No Unity Build
+        if: steps.check-unity-build.outputs.should-build == 'false'
+        run: |
+          echo "ERROR: Java documentation build requires Unity build completion"
+          echo ""
+          if [ "${{ inputs.unity-build-completed }}" != "true" ]; then
+            echo "This workflow requires a successful Unity build to proceed."
+            echo "The Unity build ensures that:"
+            echo "- All dependencies are properly resolved"
+            echo "- Generated protobuf classes are available"
+            echo "- The Java library is in a consistent state"
+            echo ""
+            echo "To resolve this issue:"
+            echo "1. Run the Unity build workflow (build-questnav-apk.yml) first"
+            echo "2. The Unity build will trigger this Javadoc workflow automatically"
+            echo "3. Or use workflow_dispatch with force-build=true to bypass this check"
+          fi
+          echo ""
+          echo "If you need to force a build without Unity build completion, use workflow_dispatch with force-build=true"
+          exit 1
+
+      - name: Verify Generated Documentation
+        if: steps.check-unity-build.outputs.should-build == 'true'
+        run: |
+          echo "Verifying Javadoc output..."
+          
+          # Check that main files exist
+          if [ ! -f "docs/static/api/java/index.html" ]; then
+            echo "ERROR: Main index.html not found"
+            exit 1
+          fi
+          
+          if [ ! -f "docs/static/api/java/allclasses-index.html" ]; then
+            echo "ERROR: All classes index not found"
+            exit 1
+          fi
+          
+          # Count generated HTML files
+          HTML_COUNT=$(find docs/static/api/java -name "*.html" | wc -l)
+          echo "Generated HTML files: $HTML_COUNT"
+          
+          if [ "$HTML_COUNT" -lt 5 ]; then
+            echo "ERROR: Too few HTML files generated ($HTML_COUNT)"
+            exit 1
+          fi
+          
+          echo "Documentation verification passed"
+          echo "Main packages documented:"
+          find docs/static/api/java -name "package-summary.html" | sed 's|docs/static/api/java/||' | sed 's|/package-summary.html||'
+
+      - name: Check for Changes
+        if: steps.check-unity-build.outputs.should-build == 'true'
+        id: changes
+        run: |
+          # Add all files to staging area to detect new/changed files
+          git add docs/static/api/java/
+          
+          # Check if there are any changes to commit (including new files)
+          if git diff --cached --quiet docs/static/api/java/; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes detected in Javadoc output"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in Javadoc output"
+            git diff --cached --stat docs/static/api/java/
+          fi
+
+      - name: Pull Latest Changes
+        if: steps.check-unity-build.outputs.should-build == 'true' && steps.changes.outputs.changed == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_call')
+        run: |
+          echo "Pulling latest changes to avoid conflicts with DocFX commit..."
+          git pull --rebase --autostash origin main || true
+          echo "Latest changes pulled successfully"
+
+      - name: Commit Updated Documentation
+        if: steps.check-unity-build.outputs.should-build == 'true' && steps.changes.outputs.changed == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_call')
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'docs: Update Java API documentation via Javadoc'
+          file_pattern: 'docs/static/api/java/**'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Upload Javadoc Artifacts
+        if: steps.check-unity-build.outputs.should-build == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: javadoc-api-docs-${{ github.run_id }}
+          path: docs/static/api/java/
+          retention-days: 30
+
+      - name: Comment on PR
+        if: steps.check-unity-build.outputs.should-build == 'true' && github.event_name == 'pull_request' && steps.changes.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Count generated files
+            const apiDir = 'docs/static/api/java/';
+            const files = fs.readdirSync(apiDir).filter(f => f.endsWith('.html'));
+            
+            // Get package information
+            const packageDirs = fs.readdirSync(apiDir, { withFileTypes: true })
+              .filter(dirent => dirent.isDirectory())
+              .map(dirent => dirent.name)
+              .filter(name => !['legal', 'resources', 'script-dir'].includes(name));
+            
+            const comment = `## Javadoc API Documentation Updated
+            
+            The Java API documentation has been regenerated with your changes:
+            
+            - **Generated Files**: ${files.length} HTML pages
+            - **Packages Covered**: ${packageDirs.join(', ')}
+            - **Preview**: The updated docs will be available at \`/api/java/\` once deployed
+            
+            ### Key Changes
+            - Updated API reference from Javadoc comments
+            - Regenerated class hierarchy and package documentation
+            - Updated method signatures and parameter documentation
+            
+            The documentation will be automatically deployed with your Docusaurus site.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # Optional: Trigger Docusaurus deployment if Javadoc docs changed
+  trigger-docs-deploy:
+    name: Trigger Documentation Deployment
+    needs: build-javadoc
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' || github.event_name == 'workflow_call') && (github.ref == 'refs/heads/main' || github.ref_name == 'main')
+    permissions:
+      actions: write  # Required to trigger other workflows
+    
+    steps:
+      - name: Trigger Docusaurus Deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Trigger the Docusaurus deployment workflow
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-docusaurus.yml',
+              ref: 'main'
+            });
+            
+            console.log('Triggered Docusaurus deployment workflow');

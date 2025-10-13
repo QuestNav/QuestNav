@@ -1,0 +1,3 @@
+# This directory stores XML documentation files preserved from Unity builds
+# The XML files are copied here by the build-questnav-apk.yml workflow
+# to prevent them from being cleaned up when Unity builds complete.

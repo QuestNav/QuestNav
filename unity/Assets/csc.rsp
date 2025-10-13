@@ -1,0 +1,3 @@
+-doc:Library/ScriptAssemblies/QuestNav.xml
+-r:Assets/Plugins/Google.Protobuf/Google.Protobuf.dll
+-nowarn:1591

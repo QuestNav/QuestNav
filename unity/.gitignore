@@ -12,6 +12,20 @@
 **/[Bb]uilds/
 **/[Ll]ogs/
 **/[Uu]ser[Ss]ettings/
+
+# XR Temporary files
+**/Assets/XR/Temp/
+**/Assets/XR/Temp.meta
+**/Assets/XR/UserSimulationSettings/
+**/Assets/XR/UserSimulationSettings.meta
+
+# Composition Layers user settings (auto-generated)
+**/Assets/CompositionLayers/
+**/Assets/CompositionLayers.meta
+
+# Unity temporary assembly files
+**/TempAssembly.dll
+**/TempAssembly.dll.meta
 **/.utmp/**
 **/QuestNav_BurstDebugInformation_DoNotShip/**
 **.vscode/**
@@ -85,3 +99,6 @@ crashlytics-build.properties
 # NuGetForUnity Packages
 Packages/*
 !Packages/*.json
+
+# Secrets file for debugging CI builds
+.secrets

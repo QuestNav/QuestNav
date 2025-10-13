@@ -2,14 +2,35 @@ using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// TextMeshPro input validator for FRC team numbers (1-25599).
+/// Prevents invalid input during typing and enforces proper team number format.
+/// </summary>
 [CreateAssetMenu(fileName = "TeamNumberValidator", menuName = "TMP Input Validators/TeamNumber")]
 public class TeamNumberValidator : TMP_InputValidator
 {
-    // This regex matches a complete positive integer between 1 and 25599.
+    /// <summary>
+    /// Regular expression that matches a complete positive integer between 1 and 25599 (valid FRC team number range).
+    ///
+    /// REGEX BREAKDOWN: ^(?:[1-9]\d{0,3}|1\d{4}|2(?:[0-4]\d{3}|5[0-5]\d{2}))$
+    /// - [1-9]\d{0,3}: Matches 1-4 digits starting with 1-9 (covers 1-9999)
+    /// - 1\d{4}: Matches 5 digits starting with 1 (covers 10000-19999)
+    /// - 2[0-4]\d{3}: Matches 5 digits starting with 20-24 (covers 20000-24999)
+    /// - 25[0-5]\d{2}: Matches 5 digits starting with 250-255 (covers 25000-25599)
+    ///
+    /// This covers the complete valid range of FRC team numbers as allocated by FIRST.
+    /// </summary>
     private Regex completeRegex = new Regex(
         @"^(?:[1-9]\d{0,3}|1\d{4}|2(?:[0-4]\d{3}|5[0-5]\d{2}))$"
     );
 
+    /// <summary>
+    /// Validates character input for team number field, ensuring only valid FRC team numbers can be entered.
+    /// </summary>
+    /// <param name="text">Current text in the input field</param>
+    /// <param name="pos">Current cursor position</param>
+    /// <param name="ch">Character being input</param>
+    /// <returns>The validated character, or '\0' if the character should be rejected</returns>
     public override char Validate(ref string text, ref int pos, char ch)
     {
         // Allow control characters (such as backspace).

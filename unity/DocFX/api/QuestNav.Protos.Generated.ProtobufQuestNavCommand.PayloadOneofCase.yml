@@ -1,0 +1,138 @@
+### YamlMime:ManagedReference
+items:
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase
+  commentId: T:QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase
+  id: ProtobufQuestNavCommand.PayloadOneofCase
+  parent: QuestNav.Protos.Generated
+  children:
+  - QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.None
+  - QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.PoseResetPayload
+  langs:
+  - csharp
+  - vb
+  name: ProtobufQuestNavCommand.PayloadOneofCase
+  nameWithType: ProtobufQuestNavCommand.PayloadOneofCase
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase
+  type: Enum
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: PayloadOneofCase
+    path: ../Assets/QuestNav/Protos/Generated/Commands.cs
+    startLine: 442
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  summary: Enum of possible cases for the "payload" oneof.
+  example: []
+  syntax:
+    content: public enum ProtobufQuestNavCommand.PayloadOneofCase
+    content.vb: Public Enum ProtobufQuestNavCommand.PayloadOneofCase
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.None
+  commentId: F:QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.None
+  id: None
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: ProtobufQuestNavCommand.PayloadOneofCase.None
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.None
+  type: Field
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: None
+    path: ../Assets/QuestNav/Protos/Generated/Commands.cs
+    startLine: 443
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  syntax:
+    content: None = 0
+    return:
+      type: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.PoseResetPayload
+  commentId: F:QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.PoseResetPayload
+  id: PoseResetPayload
+  parent: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase
+  langs:
+  - csharp
+  - vb
+  name: PoseResetPayload
+  nameWithType: ProtobufQuestNavCommand.PayloadOneofCase.PoseResetPayload
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.PoseResetPayload
+  type: Field
+  source:
+    remote:
+      path: unity/Assets/QuestNav/Protos/Generated/Commands.cs
+      branch: doc-updates
+      repo: https://github.com/QuestNav/QuestNav.git
+    id: PoseResetPayload
+    path: ../Assets/QuestNav/Protos/Generated/Commands.cs
+    startLine: 444
+  assemblies:
+  - QuestNav
+  namespace: QuestNav.Protos.Generated
+  syntax:
+    content: PoseResetPayload = 10
+    return:
+      type: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase
+references:
+- uid: QuestNav.Protos.Generated
+  commentId: N:QuestNav.Protos.Generated
+  href: QuestNav.html
+  name: QuestNav.Protos.Generated
+  nameWithType: QuestNav.Protos.Generated
+  fullName: QuestNav.Protos.Generated
+  spec.csharp:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Protos
+    name: Protos
+    href: QuestNav.Protos.html
+  - name: .
+  - uid: QuestNav.Protos.Generated
+    name: Generated
+    href: QuestNav.Protos.Generated.html
+  spec.vb:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Protos
+    name: Protos
+    href: QuestNav.Protos.html
+  - name: .
+  - uid: QuestNav.Protos.Generated
+    name: Generated
+    href: QuestNav.Protos.Generated.html
+- uid: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase
+  commentId: T:QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase
+  parent: QuestNav.Protos.Generated
+  href: QuestNav.Protos.Generated.ProtobufQuestNavCommand.html
+  name: ProtobufQuestNavCommand.PayloadOneofCase
+  nameWithType: ProtobufQuestNavCommand.PayloadOneofCase
+  fullName: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase
+  spec.csharp:
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavCommand
+    name: ProtobufQuestNavCommand
+    href: QuestNav.Protos.Generated.ProtobufQuestNavCommand.html
+  - name: .
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase
+    name: PayloadOneofCase
+    href: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.html
+  spec.vb:
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavCommand
+    name: ProtobufQuestNavCommand
+    href: QuestNav.Protos.Generated.ProtobufQuestNavCommand.html
+  - name: .
+  - uid: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase
+    name: PayloadOneofCase
+    href: QuestNav.Protos.Generated.ProtobufQuestNavCommand.PayloadOneofCase.html

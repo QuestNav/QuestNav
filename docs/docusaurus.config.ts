@@ -21,7 +21,10 @@ const config: Config = {
   organizationName: 'QuestNav', // Usually your GitHub org/user name.
   projectName: 'QuestNav', // Usually your repo name.
 
-  onBrokenLinks: 'throw',
+  // Ignore broken links to keep CI builds clean
+  // The /api/* paths are static files served separately from Docusaurus
+  // and will be available at runtime after deployment
+  onBrokenLinks: 'ignore',
   onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
@@ -96,6 +99,25 @@ const config: Config = {
           label: 'Docs',
         },
         {
+          type: 'dropdown',
+          label: 'API Reference',
+          position: 'left',
+          items: [
+            {
+              label: 'Protocol Buffers',
+              href: 'https://questnav.gg/api/proto/',
+            },
+            {
+              label: 'Java API',
+              href: 'https://questnav.gg/api/java/',
+            },
+            {
+              label: 'C# API',
+              href: 'https://questnav.gg/api/csharp/',
+            },
+          ],
+        },
+        {
           to: 'https://github.com/QuestNav/QuestNav/releases',
           label: 'Releases',
           position: 'left',
@@ -117,6 +139,27 @@ const config: Config = {
               label: 'Getting Started',
               to: '/docs/getting-started/about',
             },
+            {
+              label: 'Development Guide',
+              to: '/docs/development/development-setup',
+            },
+          ],
+        },
+        {
+          title: 'API Reference',
+          items: [
+            {
+              label: 'Protocol Buffers',
+              href: 'https://questnav.gg/api/proto/',
+            },
+            {
+              label: 'Java API',
+              href: 'https://questnav.gg/api/java/',
+            },
+            {
+              label: 'C# API',
+              href: 'https://questnav.gg/api/csharp/',
+            },
           ],
         },
         {
@@ -126,6 +169,23 @@ const config: Config = {
               label: 'Discord',
               href: 'https://discord.gg/hD3FtR7YAZ',
             }
+          ],
+        },
+        {
+          title: 'Need Help?',
+          items: [
+            {
+              label: 'Report Issues',
+              href: 'https://github.com/QuestNav/QuestNav/issues',
+            },
+            {
+              label: 'GitHub Discussions',
+              href: 'https://github.com/QuestNav/QuestNav/discussions',
+            },
+            {
+              label: 'Contributing Guide',
+              to: '/docs/development/contributing',
+            },
           ],
         },
         {

@@ -1,0 +1,90 @@
+### YamlMime:ManagedReference
+items:
+- uid: QuestNav.Utils
+  commentId: N:QuestNav.Utils
+  id: QuestNav.Utils
+  children:
+  - QuestNav.Utils.Conversions
+  - QuestNav.Utils.QuaternionExtensions
+  - QuestNav.Utils.QueuedLogger
+  - QuestNav.Utils.QueuedLogger.LogLevel
+  - QuestNav.Utils.VectorExtensions
+  langs:
+  - csharp
+  - vb
+  name: QuestNav.Utils
+  nameWithType: QuestNav.Utils
+  fullName: QuestNav.Utils
+  type: Namespace
+  assemblies:
+  - QuestNav
+references:
+- uid: QuestNav.Utils.Conversions
+  commentId: T:QuestNav.Utils.Conversions
+  href: QuestNav.Utils.Conversions.html
+  name: Conversions
+  nameWithType: Conversions
+  fullName: QuestNav.Utils.Conversions
+- uid: QuestNav.Utils.QueuedLogger
+  commentId: T:QuestNav.Utils.QueuedLogger
+  href: QuestNav.Utils.QueuedLogger.html
+  name: QueuedLogger
+  nameWithType: QueuedLogger
+  fullName: QuestNav.Utils.QueuedLogger
+- uid: QuestNav.Utils.QueuedLogger.LogLevel
+  commentId: T:QuestNav.Utils.QueuedLogger.LogLevel
+  parent: QuestNav.Utils
+  href: QuestNav.Utils.QueuedLogger.html
+  name: QueuedLogger.LogLevel
+  nameWithType: QueuedLogger.LogLevel
+  fullName: QuestNav.Utils.QueuedLogger.LogLevel
+  spec.csharp:
+  - uid: QuestNav.Utils.QueuedLogger
+    name: QueuedLogger
+    href: QuestNav.Utils.QueuedLogger.html
+  - name: .
+  - uid: QuestNav.Utils.QueuedLogger.LogLevel
+    name: LogLevel
+    href: QuestNav.Utils.QueuedLogger.LogLevel.html
+  spec.vb:
+  - uid: QuestNav.Utils.QueuedLogger
+    name: QueuedLogger
+    href: QuestNav.Utils.QueuedLogger.html
+  - name: .
+  - uid: QuestNav.Utils.QueuedLogger.LogLevel
+    name: LogLevel
+    href: QuestNav.Utils.QueuedLogger.LogLevel.html
+- uid: QuestNav.Utils.VectorExtensions
+  commentId: T:QuestNav.Utils.VectorExtensions
+  href: QuestNav.Utils.VectorExtensions.html
+  name: VectorExtensions
+  nameWithType: VectorExtensions
+  fullName: QuestNav.Utils.VectorExtensions
+- uid: QuestNav.Utils.QuaternionExtensions
+  commentId: T:QuestNav.Utils.QuaternionExtensions
+  href: QuestNav.Utils.QuaternionExtensions.html
+  name: QuaternionExtensions
+  nameWithType: QuaternionExtensions
+  fullName: QuestNav.Utils.QuaternionExtensions
+- uid: QuestNav.Utils
+  commentId: N:QuestNav.Utils
+  href: QuestNav.html
+  name: QuestNav.Utils
+  nameWithType: QuestNav.Utils
+  fullName: QuestNav.Utils
+  spec.csharp:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Utils
+    name: Utils
+    href: QuestNav.Utils.html
+  spec.vb:
+  - uid: QuestNav
+    name: QuestNav
+    href: QuestNav.html
+  - name: .
+  - uid: QuestNav.Utils
+    name: Utils
+    href: QuestNav.Utils.html

@@ -1,0 +1,51 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": ["QuestNav.csproj"],
+          "src": "../"
+        }
+      ],
+      "dest": "api",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": true,
+      "properties": {
+        "TargetFramework": "netstandard2.1"
+      }
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": ["api/**.yml", "api/index.md"]
+      },
+      {
+        "files": ["*.md"]
+      }
+    ],
+    "output": "../../docs/static/api/csharp",
+    "template": ["default"],
+    "globalMetadata": {
+      "_appTitle": "QuestNav API Documentation",
+      "_appName": "QuestNav API",
+      "_appFooter": "QuestNav - VR Navigation for FRC Robots",
+      "_enableSearch": true,
+      "_enableNewTab": false,
+      "_disableContribution": true,
+      "_disableToc": false,
+      "_disableAffix": false
+    },
+    "xref": [
+      "https://normanderwan.github.io/UnityXrefMaps/6000.0/xrefmap.yml"
+    ],
+    "xrefService": [
+      "https://xref.docs.microsoft.com/query?uid={uid}"
+    ]
+  }
+}

@@ -5,27 +5,32 @@ on:
       versionYear:
         description: 'Current FRC Year'
         required: true
-        default: 2025
+        default: '2025'
         type: string
       wpilibVersion:
         description: 'WPILib version to compile for'
         required: true
         type: string
         default: '2025.3.2'
+      unityVersion:
+        description: 'Unity Editor version'
+        required: false
+        type: string
+        default: '6000.2.6f2'
       versionMajor:
         description: 'Major version'
         required: true
-        default: 1
+        default: '1'
         type: string
       versionMinor:
         description: 'Minor version'
         required: true
-        default: 0
+        default: '0'
         type: string
       versionPatch:
         description: 'Patch version'
         required: true
-        default: 0
+        default: '0'
         type: string
       versionType:
         description: 'Type of version'
@@ -41,6 +46,7 @@ jobs:
   apk:
     uses: QuestNav/QuestNav/.github/workflows/build-questnav-apk.yml@main
     with:
+      unityVersion: ${{ inputs.unityVersion }}
       versionMajor: ${{ inputs.versionMajor }}
       versionMinor: ${{ inputs.versionMinor }}
       versionPatch: ${{ inputs.versionPatch }}

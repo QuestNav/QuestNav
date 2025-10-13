@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply from: '../shared/common.gradle'
 apply from: '../shared/keepUnitySymbols.gradle'
 **APPLY_PLUGINS**
 
@@ -39,6 +40,12 @@ android {
     androidResources {
         noCompress = **BUILTIN_NOCOMPRESS** + unityStreamingAssets.tokenize(', ')
         ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~"
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
     }**PACKAGING**
 }
 **IL_CPP_BUILD_SETUP**

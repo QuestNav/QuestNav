@@ -43,8 +43,9 @@ namespace QuestNav.Commands.Commands
         public string commandNiceName => "PoseReset";
 
         /// <summary>
-        /// Executes the pose reset command
+        /// Executes the pose reset command by applying the target pose to the VR camera system
         /// </summary>
+        /// <param name="receivedCommand">The command containing pose reset payload with target position</param>
         public void Execute(ProtobufQuestNavCommand receivedCommand)
         {
             QueuedLogger.Log("Received pose reset request, initiating reset...");
@@ -87,23 +88,46 @@ namespace QuestNav.Commands.Commands
             // Apply pose reset if data is valid
             if (validPose)
             {
-                // Convert field coordinates to Unity coordinates
+                /*
+                 * POSE RESET ALGORITHM EXPLANATION:
+                 *
+                 * The challenge: We need to move the VR camera to a specific field position, but the user
+                 * might be standing anywhere in their physical play space. We can't move the user physically,
+                 * so we move the virtual world around them.
+                 *
+                 * VR Hierarchy:
+                 * - vrCameraRoot: The "world origin" that we can move/rotate
+                 * - vrCamera: The actual headset position (controlled by VR tracking, we can't move this directly)
+                 *
+                 * Algorithm Steps:
+                 * 1. Convert target field coordinates to Unity world coordinates
+                 * 2. Calculate rotation difference between current camera and target
+                 * 3. Apply rotation to root
+                 * 4. Recalculate position after rotation
+                 * 5. Apply the new position to vrCameraRoot
+                 *
+                 * This ensures the user's physical position in their room doesn't change, but their
+                 * virtual position on the field matches what the robot expects.
+                 */
+
+                // Step 1: Convert FRC field coordinates (meters, standard orientation) to Unity coordinates
+                // This accounts for coordinate system differences (FRC: X forward, Y left vs Unity: Z forward, X right)
                 var (targetCameraPosition, targetCameraRotation) = Conversions.FrcToUnity3d(
                     resetPose
                 );
 
-                // Calculate rotation difference between current camera and target
+                // Step 2: Calculate rotation difference between current camera and target
                 Quaternion newRotation =
                     targetCameraRotation * Quaternion.Inverse(vrCamera.localRotation);
 
-                // Apply rotation to root
+                // Step 3: Apply rotation to root
                 vrCameraRoot.rotation = newRotation;
 
-                // Recalculate position after rotation
+                // Step 4: Recalculate position after rotation
                 Vector3 newRootPosition =
                     targetCameraPosition - (newRotation * vrCamera.localPosition);
 
-                // Apply the new position to vrCameraRoot.
+                // Step 5: Apply the new position to vrCameraRoot
                 vrCameraRoot.position = newRootPosition;
 
                 QueuedLogger.Log(

@@ -18,7 +18,7 @@ import us.hebi.quickbuf.RepeatedByte;
 import us.hebi.quickbuf.Utf8String;
 
 public final class Commands {
-    private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(7518,
+    private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(7733,
         "Cg5jb21tYW5kcy5wcm90bxIYcXVlc3RuYXYucHJvdG9zLmNvbW1hbmRzGhBnZW9tZXRyeTNkLnByb3Rv" + 
         "Il4KIFByb3RvYnVmUXVlc3ROYXZQb3NlUmVzZXRQYXlsb2FkEjoKC3RhcmdldF9wb3NlGAEgASgLMhku" + 
         "d3BpLnByb3RvLlByb3RvYnVmUG9zZTNkUgp0YXJnZXRQb3NlIvIBChdQcm90b2J1ZlF1ZXN0TmF2Q29t" + 
@@ -30,7 +30,7 @@ public final class Commands {
         "IAEoCFIHc3VjY2VzcxIjCg1lcnJvcl9tZXNzYWdlGAMgASgJUgxlcnJvck1lc3NhZ2UqQwoTUXVlc3RO" + 
         "YXZDb21tYW5kVHlwZRIcChhDT01NQU5EX1RZUEVfVU5TUEVDSUZJRUQQABIOCgpQT1NFX1JFU0VUEAFC" + 
         "QwolZ2cucXVlc3RuYXYucXVlc3RuYXYucHJvdG9zLmdlbmVyYXRlZKoCGVF1ZXN0TmF2LlByb3Rvcy5H" + 
-        "ZW5lcmF0ZWRKtzUKBxIFAAPSAQEKCAoBDBIDAAMVCvYFCgECEgMWACEy6wUqCiBRdWVzdE5hdiBDb21t" + 
+        "ZW5lcmF0ZWRKjjcKBxIFAAPVAQEKCAoBDBIDAAMVCvYFCgECEgMWACEy6wUqCiBRdWVzdE5hdiBDb21t" + 
         "YW5kcyBQcm90b2NvbCBCdWZmZXIgRGVmaW5pdGlvbnMKIAogVGhpcyBmaWxlIGRlZmluZXMgdGhlIGNv" + 
         "bW1hbmQgc3lzdGVtIGZvciBRdWVzdE5hdiwgd2hpY2ggYWxsb3dzIGV4dGVybmFsIHN5c3RlbXMKIChz" + 
         "dWNoIGFzIHJvYm90IGNvZGUpIHRvIHNlbmQgY29tbWFuZHMgdG8gdGhlIFF1ZXN0IGhlYWRzZXQgZm9y" + 
@@ -60,91 +60,94 @@ public final class Commands {
         "bmcgc3lzdGVtIGJ5IHNldHRpbmcKIHRoZSByb2JvdCdzIHBvc2l0aW9uIGFuZCBvcmllbnRhdGlvbiB0" + 
         "byBrbm93biB2YWx1ZXMuIFR5cGljYWxseSB1c2VkIHdoZW4KIHRoZSByb2JvdCBpcyBwbGFjZWQgYXQg",
         "YSBrbm93biBsb2NhdGlvbiBvbiB0aGUgZmllbGQuCiAKIFJlcXVpcmVzOiBQcm90b2J1ZlF1ZXN0TmF2" + 
-        "UG9zZVJlc2V0UGF5bG9hZAoKDAoFBQACAQESAzUCDAoMCgUFAAIBAhIDNQ8QCtUECgIEABIETABZARrI" + 
-        "BCoKIFBheWxvYWQgbWVzc2FnZSBmb3IgdGhlIFBPU0VfUkVTRVQgY29tbWFuZC4KIAogVGhpcyBtZXNz" + 
+        "UG9zZVJlc2V0UGF5bG9hZAoKDAoFBQACAQESAzUCDAoMCgUFAAIBAhIDNQ8QCqwGCgIEABIETwBcARqf" + 
+        "BioKIFBheWxvYWQgbWVzc2FnZSBmb3IgdGhlIFBPU0VfUkVTRVQgY29tbWFuZC4KIAogVGhpcyBtZXNz" + 
         "YWdlIGNvbnRhaW5zIHRoZSBkYXRhIG5lZWRlZCB0byBleGVjdXRlIGEgcG9zZSByZXNldCBvcGVyYXRp" + 
         "b24uCiBUaGUgcG9zZSByZXNldCBjb21tYW5kIGFsbG93cyBleHRlcm5hbCBzeXN0ZW1zIHRvIGNvcnJl" + 
         "Y3QgdGhlIFF1ZXN0J3MKIHVuZGVyc3RhbmRpbmcgb2YgdGhlIHJvYm90J3MgcG9zaXRpb24gYW5kIG9y" + 
         "aWVudGF0aW9uIG9uIHRoZSBmaWVsZC4KIAogQ29vcmRpbmF0ZSBTeXN0ZW06CiAtIFVzZXMgV1BJTGli" + 
         "IGZpZWxkLXJlbGF0aXZlIGNvb3JkaW5hdGUgc3lzdGVtCiAtIFgtYXhpczogRm9yd2FyZCAodG93YXJk" + 
         "cyBvcHBvc2luZyBhbGxpYW5jZSkKIC0gWS1heGlzOiBMZWZ0ICh3aGVuIGZhY2luZyBmb3J3YXJkKQog" + 
-        "LSBaLWF4aXM6IFVwCiAtIFJvdGF0aW9uOiBDb3VudGVyLWNsb2Nrd2lzZSBwb3NpdGl2ZSAocmlnaHQt" + 
-        "aGFuZCBjb29yZGluYXRlIHN5c3RlbSkKIC0gT3JpZ2luOiBUeXBpY2FsbHkgYXQgb25lIGNvcm5lciBv" + 
-        "ZiB0aGUgZmllbGQgKHNlZSBmaWVsZCBsYXlvdXQgZG9jdW1lbnRhdGlvbikKCgoKAwQAARIDTAgoCtEC" + 
-        "CgQEAAIAEgNYAisawwIqCiBUaGUgdGFyZ2V0IHBvc2UgdG8gcmVzZXQgdGhlIHJvYm90IHRvLgogCiBU" + 
-        "aGlzIHNob3VsZCByZXByZXNlbnQgdGhlIHJvYm90J3MgYWN0dWFsIHBvc2l0aW9uIGFuZCBvcmllbnRh" + 
-        "dGlvbiBvbiB0aGUgZmllbGQKIGluIHRoZSBXUElMaWIgY29vcmRpbmF0ZSBzeXN0ZW0uIFRoZSBRdWVz" + 
-        "dCB3aWxsIHVwZGF0ZSBpdHMgaW50ZXJuYWwgdHJhY2tpbmcKIHRvIG1hdGNoIHRoaXMgcG9zZSwgZWZm" + 
-        "ZWN0aXZlbHkgY29ycmVjdGluZyBhbnkgYWNjdW11bGF0ZWQgZHJpZnQuCiAKIFVuaXRzOgogLSBUcmFu" + 
-        "c2xhdGlvbjogbWV0ZXJzCiAtIFJvdGF0aW9uOiByYWRpYW5zCgoMCgUEAAIABhIDWAIaCgwKBQQAAgAB" + 
-        "EgNYGyYKDAoFBAACAAMSA1gpKgqoBQoCBAESBWsAmQEBGpoFKgogTWFpbiBjb21tYW5kIG1lc3NhZ2Ug" + 
-        "c2VudCB0byB0aGUgUXVlc3ROYXYgc3lzdGVtLgogCiBUaGlzIGlzIHRoZSBwcmltYXJ5IG1lc3NhZ2Ug",
-        "dHlwZSB1c2VkIHRvIHNlbmQgY29tbWFuZHMgZnJvbSBleHRlcm5hbCBzeXN0ZW1zCiAobGlrZSByb2Jv" + 
-        "dCBjb2RlKSB0byB0aGUgUXVlc3QgaGVhZHNldC4gRWFjaCBjb21tYW5kIGluY2x1ZGVzIGEgdHlwZSBp" + 
-        "ZGVudGlmaWVyLAogYSB1bmlxdWUgdHJhY2tpbmcgSUQsIGFuZCBvcHRpb25hbCBwYXlsb2FkIGRhdGEg" + 
-        "c3BlY2lmaWMgdG8gdGhlIGNvbW1hbmQgdHlwZS4KIAogVGhlIGNvbW1hbmQgc3lzdGVtIGlzIGRlc2ln" + 
-        "bmVkIGZvciBhc3luY2hyb25vdXMgb3BlcmF0aW9uIC0gY29tbWFuZHMgYXJlIHNlbnQKIGFuZCByZXNw" + 
-        "b25zZXMgYXJlIHJlY2VpdmVkIHNlcGFyYXRlbHksIG1hdGNoZWQgYnkgdGhlIGNvbW1hbmRfaWQgZmll" + 
-        "bGQuCiAKIE1lc3NhZ2UgRmxvdzoKIDEuIENsaWVudCBjcmVhdGVzIGNvbW1hbmQgd2l0aCB1bmlxdWUg" + 
-        "Y29tbWFuZF9pZAogMi4gQ2xpZW50IHNldHMgYXBwcm9wcmlhdGUgdHlwZSBhbmQgcGF5bG9hZAogMy4g" + 
-        "Q2xpZW50IHNlbmRzIGNvbW1hbmQgdG8gUXVlc3QKIDQuIFF1ZXN0IHByb2Nlc3NlcyBjb21tYW5kIGFu" + 
-        "ZCBzZW5kcyByZXNwb25zZSB3aXRoIG1hdGNoaW5nIGNvbW1hbmRfaWQKCgoKAwQBARIDawgfCt8BCgQE" + 
-        "AQIAEgNzAh8a0QEqCiBUaGUgdHlwZSBvZiBjb21tYW5kIGJlaW5nIHNlbnQuCiAKIFRoaXMgZmllbGQg" + 
-        "ZGV0ZXJtaW5lcyB3aGljaCBwYXlsb2FkIChpZiBhbnkpIHNob3VsZCBiZSBwb3B1bGF0ZWQgYW5kCiBo" + 
-        "b3cgdGhlIFF1ZXN0IHNob3VsZCBwcm9jZXNzIHRoZSBjb21tYW5kLiBTZWUgUXVlc3ROYXZDb21tYW5k" + 
-        "VHlwZQogZW51bSBmb3IgYXZhaWxhYmxlIGNvbW1hbmQgdHlwZXMuCgoMCgUEAQIABhIDcwIVCgwKBQQB" + 
-        "AgABEgNzFhoKDAoFBAECAAMSA3MdHgqwAwoEBAECARIEgAECGBqhAyoKIFVuaXF1ZSBpZGVudGlmaWVy" + 
-        "IGZvciB0aGlzIGNvbW1hbmQgaW5zdGFuY2UuCiAKIFRoaXMgSUQgaXMgdXNlZCB0byBtYXRjaCBjb21t" + 
-        "YW5kcyB3aXRoIHRoZWlyIHJlc3BvbnNlcyBpbiBhc3luY2hyb25vdXMKIGNvbW11bmljYXRpb24uIFRo" + 
-        "ZSBjbGllbnQgc2hvdWxkIGdlbmVyYXRlIHVuaXF1ZSBJRHMgZm9yIGVhY2ggY29tbWFuZAogdG8gYXZv" + 
-        "aWQgY29uZnVzaW9uLiBUaGUgUXVlc3Qgd2lsbCBlY2hvIHRoaXMgSUQgaW4gdGhlIHJlc3BvbnNlIG1l" + 
-        "c3NhZ2UuCiAKIFJlY29tbWVuZGVkOiBVc2UgaW5jcmVtZW50aW5nIGludGVnZXJzIG9yIHRpbWVzdGFt",
-        "cHMgZm9yIHVuaXF1ZW5lc3MuCiAKIE5vdGU6IEZvciBGUkMgdXNlcnMsIHRoZSB2ZW5kb3IgZGVwZW5k" + 
-        "ZW5jeSB3aWxsIGhhbmRsZSB0aGlzIGF1dG9tYXRpY2FsbHkuCgoNCgUEAQIBBRIEgAECCAoNCgUEAQIB" + 
-        "ARIEgAEJEwoNCgUEAQIBAxIEgAEWFwrZAgoEBAEIABIGiwECmAEDGsgCKgogQ29tbWFuZC1zcGVjaWZp" + 
-        "YyBwYXlsb2FkIGRhdGEuCiAKIFRoaXMgb25lb2YgZmllbGQgY29udGFpbnMgdGhlIHNwZWNpZmljIGRh" + 
-        "dGEgbmVlZGVkIGZvciBlYWNoIGNvbW1hbmQgdHlwZS4KIE9ubHkgb25lIHBheWxvYWQgZmllbGQgd2ls" + 
-        "bCBiZSBzZXQsIGNvcnJlc3BvbmRpbmcgdG8gdGhlIGNvbW1hbmQgdHlwZS4KIENvbW1hbmRzIHRoYXQg" + 
-        "ZG9uJ3QgcmVxdWlyZSBhZGRpdGlvbmFsIGRhdGEgZG9uJ3QgbmVlZCBhIHBheWxvYWQgZW50cnkuCiAK" + 
-        "IEZpZWxkIG51bWJlcmluZyBzdGFydHMgYXQgMTAgdG8gbGVhdmUgcm9vbSBmb3IgZnV0dXJlIGNvbW1v" + 
-        "biBmaWVsZHMuCgoNCgUEAQgAARIEiwEIDwpaCgQEAQICEgSQAQQ9GkwqCiBQYXlsb2FkIGZvciBQT1NF" + 
-        "X1JFU0VUIGNvbW1hbmRzLgogU2V0IHRoaXMgZmllbGQgd2hlbiB0eXBlID0gUE9TRV9SRVNFVC4KCg0K" + 
-        "BQQBAgIGEgSQAQQkCg0KBQQBAgIBEgSQASU3Cg0KBQQBAgIDEgSQATo8CpMGCgIEAhIGrQEA0gEBGoQG" + 
-        "KgogUmVzcG9uc2UgbWVzc2FnZSBzZW50IGJhY2sgYWZ0ZXIgcHJvY2Vzc2luZyBhIGNvbW1hbmQuCiAK" + 
-        "IFRoaXMgbWVzc2FnZSBpcyBzZW50IGJ5IHRoZSBRdWVzdCBiYWNrIHRvIHRoZSBjbGllbnQgYWZ0ZXIg" + 
-        "cHJvY2Vzc2luZwogYSBQcm90b2J1ZlF1ZXN0TmF2Q29tbWFuZC4gSXQgcHJvdmlkZXMgc3RhdHVzIGlu" + 
-        "Zm9ybWF0aW9uIGFib3V0IHdoZXRoZXIKIHRoZSBjb21tYW5kIHdhcyBleGVjdXRlZCBzdWNjZXNzZnVs" + 
-        "bHkgYW5kIGFueSBlcnJvciBkZXRhaWxzIGlmIGl0IGZhaWxlZC4KIAogVGhlIHJlc3BvbnNlIGlzIG1h" + 
-        "dGNoZWQgdG8gdGhlIG9yaWdpbmFsIGNvbW1hbmQgdXNpbmcgdGhlIGNvbW1hbmRfaWQgZmllbGQsCiBh" + 
-        "bGxvd2luZyBmb3IgcHJvcGVyIGFzeW5jaHJvbm91cyBjb21tYW5kIGhhbmRsaW5nIGV2ZW4gd2hlbiBt" + 
-        "dWx0aXBsZQogY29tbWFuZHMgYXJlIGluIGZsaWdodCBzaW11bHRhbmVvdXNseS4KIAogUmVzcG9uc2Ug" + 
-        "VGltaW5nOgogLSBSZXNwb25zZXMgYXJlIHNlbnQgYWZ0ZXIgY29tbWFuZCBwcm9jZXNzaW5nIGNvbXBs",
-        "ZXRlcwogLSBTb21lIGNvbW1hbmRzIG1heSB0YWtlIHRpbWUgdG8gZXhlY3V0ZSAoZS5nLiwgcG9zZSBy" + 
-        "ZXNldCB3aXRoIHZhbGlkYXRpb24pCiAtIENsaWVudHMgc2hvdWxkIGltcGxlbWVudCB0aW1lb3V0cyBm" + 
-        "b3IgY29tbWFuZCByZXNwb25zZXMKIAogTm90ZTogRm9yIEZSQyB1c2VycywgdGhlIHZlbmRvciBkZXBl" + 
-        "bmRlbmN5IHdpbGwgaGFuZGxlIHJlc3BvbnNlIG1hdGNoaW5nIGF1dG9tYXRpY2FsbHkuCgoLCgMEAgES" + 
-        "BK0BCCcKkwIKBAQCAgASBLUBAhgahAIqCiBDb21tYW5kIElEIHRoYXQgbWF0Y2hlcyB0aGUgb3JpZ2lu" + 
-        "YWwgY29tbWFuZC4KIAogVGhpcyBmaWVsZCBlY2hvZXMgdGhlIGNvbW1hbmRfaWQgZnJvbSB0aGUgb3Jp" + 
-        "Z2luYWwgUHJvdG9idWZRdWVzdE5hdkNvbW1hbmQKIHRoYXQgdGhpcyByZXNwb25zZSBjb3JyZXNwb25k" + 
-        "cyB0by4gQ2xpZW50cyB1c2UgdGhpcyB0byBtYXRjaCByZXNwb25zZXMKIHdpdGggdGhlaXIgb3JpZ2lu" + 
-        "YWwgY29tbWFuZHMgaW4gYXN5bmNocm9ub3VzIGNvbW11bmljYXRpb24uCgoNCgUEAgIABRIEtQECCAoN" + 
-        "CgUEAgIAARIEtQEJEwoNCgUEAgIAAxIEtQEWFwqGAwoEBAICARIEwQECExr3AioKIEluZGljYXRlcyB3" + 
-        "aGV0aGVyIHRoZSBjb21tYW5kIHdhcyBleGVjdXRlZCBzdWNjZXNzZnVsbHkuCiAKIHRydWU6ICBDb21t" + 
-        "YW5kIGNvbXBsZXRlZCBzdWNjZXNzZnVsbHkKIGZhbHNlOiBDb21tYW5kIGZhaWxlZCAoc2VlIGVycm9y" + 
-        "X21lc3NhZ2UgZm9yIGRldGFpbHMpCiAKIE5vdGU6IEEgc3VjY2Vzc2Z1bCByZXNwb25zZSBtZWFucyB0" + 
-        "aGUgY29tbWFuZCB3YXMgcHJvY2Vzc2VkLCBidXQgZG9lc24ndAogbmVjZXNzYXJpbHkgZ3VhcmFudGVl" + 
-        "IHRoZSBkZXNpcmVkIG91dGNvbWUgKGUuZy4sIHBvc2UgcmVzZXQgbWlnaHQgc3VjY2VlZAogYnV0IHRy" + 
-        "YWNraW5nIGNvdWxkIHN0aWxsIGJlIHBvb3IgZHVlIHRvIGVudmlyb25tZW50YWwgY29uZGl0aW9ucyku" + 
-        "CgoNCgUEAgIBBRIEwQECBgoNCgUEAgIBARIEwQEHDgoNCgUEAgIBAxIEwQEREgrIAwoEBAICAhIE0QEC" + 
-        "Gxq5AyoKIEh1bWFuLXJlYWRhYmxlIGVycm9yIG1lc3NhZ2Ugd2hlbiBzdWNjZXNzID0gZmFsc2UuCiAK" + 
-        "IFRoaXMgZmllbGQgcHJvdmlkZXMgZGV0YWlsZWQgaW5mb3JtYXRpb24gYWJvdXQgd2h5IGEgY29tbWFu" + 
-        "ZCBmYWlsZWQuCiBJdCBzaG91bGQgYmUgZW1wdHkgb3IgaWdub3JlZCB3aGVuIHN1Y2Nlc3MgPSB0cnVl",
-        "LgogCiBFcnJvciBtZXNzYWdlcyBhcmUgaW50ZW5kZWQgZm9yIGRlYnVnZ2luZyBhbmQgbG9nZ2luZyBw" + 
-        "dXJwb3Nlcy4KIFRoZXkgbWF5IGluY2x1ZGUgdGVjaG5pY2FsIGRldGFpbHMgYWJvdXQgdGhlIGZhaWx1" + 
-        "cmUgY2F1c2UuCiAKIEV4YW1wbGVzOgogLSAiSW52YWxpZCBwb3NlIGNvb3JkaW5hdGVzOiB4IHZhbHVl" + 
-        "IG91dCBvZiBmaWVsZCBib3VuZHMiCiAtICJUcmFja2luZyBzeXN0ZW0gbm90IGluaXRpYWxpemVkIgog" + 
-        "LSAiVW5rbm93biBjb21tYW5kIHR5cGUiCgoNCgUEAgICBRIE0QECCAoNCgUEAgICARIE0QEJFgoNCgUE" + 
-        "AgICAxIE0QEZGmIGcHJvdG8z");
+        "LSBaLWF4aXM6IFVwCiAtIFlhdyAoWik6IENvdW50ZXItY2xvY2t3aXNlIChyaWdodC1oYW5kZWQpIHJv" + 
+        "dGF0aW9uIGFyb3VuZCB0aGUgWiBheGlzCiAtIFBpdGNoIChZKTogQ291bnRlci1jbG9ja3dpc2UgKHJp" + 
+        "Z2h0LWhhbmRlZCkgcm90YXRpb24gYXJvdW5kIFkgYXhpcwogLSBSb2xsIChYKTogQ291bnRlci1jbG9j" + 
+        "a3dpc2UgKHJpZ2h0LWhhbmRlZCkgcm90YXRpb24gYXJvdW5kIHRoZSBYIGF4aXMKIC0gUm90YXRpb246" + 
+        "IENvdW50ZXItY2xvY2t3aXNlIHBvc2l0aXZlIChyaWdodC1oYW5kIGNvb3JkaW5hdGUgc3lzdGVtKQog" + 
+        "LSBPcmlnaW46IFR5cGljYWxseSBhdCBvbmUgY29ybmVyIG9mIHRoZSBmaWVsZCAoc2VlIGZpZWxkIGxh" + 
+        "eW91dCBkb2N1bWVudGF0aW9uKQoKCgoDBAABEgNPCCgK0QIKBAQAAgASA1sCKxrDAioKIFRoZSB0YXJn" + 
+        "ZXQgcG9zZSB0byByZXNldCB0aGUgcm9ib3QgdG8uCiAKIFRoaXMgc2hvdWxkIHJlcHJlc2VudCB0aGUg" + 
+        "cm9ib3QncyBhY3R1YWwgcG9zaXRpb24gYW5kIG9yaWVudGF0aW9uIG9uIHRoZSBmaWVsZAogaW4gdGhl" + 
+        "IFdQSUxpYiBjb29yZGluYXRlIHN5c3RlbS4gVGhlIFF1ZXN0IHdpbGwgdXBkYXRlIGl0cyBpbnRlcm5h" + 
+        "bCB0cmFja2luZwogdG8gbWF0Y2ggdGhpcyBwb3NlLCBlZmZlY3RpdmVseSBjb3JyZWN0aW5nIGFueSBh",
+        "Y2N1bXVsYXRlZCBkcmlmdC4KIAogVW5pdHM6CiAtIFRyYW5zbGF0aW9uOiBtZXRlcnMKIC0gUm90YXRp" + 
+        "b246IHJhZGlhbnMKCgwKBQQAAgAGEgNbAhoKDAoFBAACAAESA1sbJgoMCgUEAAIAAxIDWykqCqgFCgIE" + 
+        "ARIFbgCcAQEamgUqCiBNYWluIGNvbW1hbmQgbWVzc2FnZSBzZW50IHRvIHRoZSBRdWVzdE5hdiBzeXN0" + 
+        "ZW0uCiAKIFRoaXMgaXMgdGhlIHByaW1hcnkgbWVzc2FnZSB0eXBlIHVzZWQgdG8gc2VuZCBjb21tYW5k" + 
+        "cyBmcm9tIGV4dGVybmFsIHN5c3RlbXMKIChsaWtlIHJvYm90IGNvZGUpIHRvIHRoZSBRdWVzdCBoZWFk" + 
+        "c2V0LiBFYWNoIGNvbW1hbmQgaW5jbHVkZXMgYSB0eXBlIGlkZW50aWZpZXIsCiBhIHVuaXF1ZSB0cmFj" + 
+        "a2luZyBJRCwgYW5kIG9wdGlvbmFsIHBheWxvYWQgZGF0YSBzcGVjaWZpYyB0byB0aGUgY29tbWFuZCB0" + 
+        "eXBlLgogCiBUaGUgY29tbWFuZCBzeXN0ZW0gaXMgZGVzaWduZWQgZm9yIGFzeW5jaHJvbm91cyBvcGVy" + 
+        "YXRpb24gLSBjb21tYW5kcyBhcmUgc2VudAogYW5kIHJlc3BvbnNlcyBhcmUgcmVjZWl2ZWQgc2VwYXJh" + 
+        "dGVseSwgbWF0Y2hlZCBieSB0aGUgY29tbWFuZF9pZCBmaWVsZC4KIAogTWVzc2FnZSBGbG93OgogMS4g" + 
+        "Q2xpZW50IGNyZWF0ZXMgY29tbWFuZCB3aXRoIHVuaXF1ZSBjb21tYW5kX2lkCiAyLiBDbGllbnQgc2V0" + 
+        "cyBhcHByb3ByaWF0ZSB0eXBlIGFuZCBwYXlsb2FkCiAzLiBDbGllbnQgc2VuZHMgY29tbWFuZCB0byBR" + 
+        "dWVzdAogNC4gUXVlc3QgcHJvY2Vzc2VzIGNvbW1hbmQgYW5kIHNlbmRzIHJlc3BvbnNlIHdpdGggbWF0" + 
+        "Y2hpbmcgY29tbWFuZF9pZAoKCgoDBAEBEgNuCB8K3wEKBAQBAgASA3YCHxrRASoKIFRoZSB0eXBlIG9m" + 
+        "IGNvbW1hbmQgYmVpbmcgc2VudC4KIAogVGhpcyBmaWVsZCBkZXRlcm1pbmVzIHdoaWNoIHBheWxvYWQg" + 
+        "KGlmIGFueSkgc2hvdWxkIGJlIHBvcHVsYXRlZCBhbmQKIGhvdyB0aGUgUXVlc3Qgc2hvdWxkIHByb2Nl" + 
+        "c3MgdGhlIGNvbW1hbmQuIFNlZSBRdWVzdE5hdkNvbW1hbmRUeXBlCiBlbnVtIGZvciBhdmFpbGFibGUg" + 
+        "Y29tbWFuZCB0eXBlcy4KCgwKBQQBAgAGEgN2AhUKDAoFBAECAAESA3YWGgoMCgUEAQIAAxIDdh0eCrAD" + 
+        "CgQEAQIBEgSDAQIYGqEDKgogVW5pcXVlIGlkZW50aWZpZXIgZm9yIHRoaXMgY29tbWFuZCBpbnN0YW5j" + 
+        "ZS4KIAogVGhpcyBJRCBpcyB1c2VkIHRvIG1hdGNoIGNvbW1hbmRzIHdpdGggdGhlaXIgcmVzcG9uc2Vz",
+        "IGluIGFzeW5jaHJvbm91cwogY29tbXVuaWNhdGlvbi4gVGhlIGNsaWVudCBzaG91bGQgZ2VuZXJhdGUg" + 
+        "dW5pcXVlIElEcyBmb3IgZWFjaCBjb21tYW5kCiB0byBhdm9pZCBjb25mdXNpb24uIFRoZSBRdWVzdCB3" + 
+        "aWxsIGVjaG8gdGhpcyBJRCBpbiB0aGUgcmVzcG9uc2UgbWVzc2FnZS4KIAogUmVjb21tZW5kZWQ6IFVz" + 
+        "ZSBpbmNyZW1lbnRpbmcgaW50ZWdlcnMgb3IgdGltZXN0YW1wcyBmb3IgdW5pcXVlbmVzcy4KIAogTm90" + 
+        "ZTogRm9yIEZSQyB1c2VycywgdGhlIHZlbmRvciBkZXBlbmRlbmN5IHdpbGwgaGFuZGxlIHRoaXMgYXV0" + 
+        "b21hdGljYWxseS4KCg0KBQQBAgEFEgSDAQIICg0KBQQBAgEBEgSDAQkTCg0KBQQBAgEDEgSDARYXCtkC" + 
+        "CgQEAQgAEgaOAQKbAQMayAIqCiBDb21tYW5kLXNwZWNpZmljIHBheWxvYWQgZGF0YS4KIAogVGhpcyBv" + 
+        "bmVvZiBmaWVsZCBjb250YWlucyB0aGUgc3BlY2lmaWMgZGF0YSBuZWVkZWQgZm9yIGVhY2ggY29tbWFu" + 
+        "ZCB0eXBlLgogT25seSBvbmUgcGF5bG9hZCBmaWVsZCB3aWxsIGJlIHNldCwgY29ycmVzcG9uZGluZyB0" + 
+        "byB0aGUgY29tbWFuZCB0eXBlLgogQ29tbWFuZHMgdGhhdCBkb24ndCByZXF1aXJlIGFkZGl0aW9uYWwg" + 
+        "ZGF0YSBkb24ndCBuZWVkIGEgcGF5bG9hZCBlbnRyeS4KIAogRmllbGQgbnVtYmVyaW5nIHN0YXJ0cyBh" + 
+        "dCAxMCB0byBsZWF2ZSByb29tIGZvciBmdXR1cmUgY29tbW9uIGZpZWxkcy4KCg0KBQQBCAABEgSOAQgP" + 
+        "CloKBAQBAgISBJMBBD0aTCoKIFBheWxvYWQgZm9yIFBPU0VfUkVTRVQgY29tbWFuZHMuCiBTZXQgdGhp" + 
+        "cyBmaWVsZCB3aGVuIHR5cGUgPSBQT1NFX1JFU0VULgoKDQoFBAECAgYSBJMBBCQKDQoFBAECAgESBJMB" + 
+        "JTcKDQoFBAECAgMSBJMBOjwKkwYKAgQCEgawAQDVAQEahAYqCiBSZXNwb25zZSBtZXNzYWdlIHNlbnQg" + 
+        "YmFjayBhZnRlciBwcm9jZXNzaW5nIGEgY29tbWFuZC4KIAogVGhpcyBtZXNzYWdlIGlzIHNlbnQgYnkg" + 
+        "dGhlIFF1ZXN0IGJhY2sgdG8gdGhlIGNsaWVudCBhZnRlciBwcm9jZXNzaW5nCiBhIFByb3RvYnVmUXVl" + 
+        "c3ROYXZDb21tYW5kLiBJdCBwcm92aWRlcyBzdGF0dXMgaW5mb3JtYXRpb24gYWJvdXQgd2hldGhlcgog" + 
+        "dGhlIGNvbW1hbmQgd2FzIGV4ZWN1dGVkIHN1Y2Nlc3NmdWxseSBhbmQgYW55IGVycm9yIGRldGFpbHMg" + 
+        "aWYgaXQgZmFpbGVkLgogCiBUaGUgcmVzcG9uc2UgaXMgbWF0Y2hlZCB0byB0aGUgb3JpZ2luYWwgY29t",
+        "bWFuZCB1c2luZyB0aGUgY29tbWFuZF9pZCBmaWVsZCwKIGFsbG93aW5nIGZvciBwcm9wZXIgYXN5bmNo" + 
+        "cm9ub3VzIGNvbW1hbmQgaGFuZGxpbmcgZXZlbiB3aGVuIG11bHRpcGxlCiBjb21tYW5kcyBhcmUgaW4g" + 
+        "ZmxpZ2h0IHNpbXVsdGFuZW91c2x5LgogCiBSZXNwb25zZSBUaW1pbmc6CiAtIFJlc3BvbnNlcyBhcmUg" + 
+        "c2VudCBhZnRlciBjb21tYW5kIHByb2Nlc3NpbmcgY29tcGxldGVzCiAtIFNvbWUgY29tbWFuZHMgbWF5" + 
+        "IHRha2UgdGltZSB0byBleGVjdXRlIChlLmcuLCBwb3NlIHJlc2V0IHdpdGggdmFsaWRhdGlvbikKIC0g" + 
+        "Q2xpZW50cyBzaG91bGQgaW1wbGVtZW50IHRpbWVvdXRzIGZvciBjb21tYW5kIHJlc3BvbnNlcwogCiBO" + 
+        "b3RlOiBGb3IgRlJDIHVzZXJzLCB0aGUgdmVuZG9yIGRlcGVuZGVuY3kgd2lsbCBoYW5kbGUgcmVzcG9u" + 
+        "c2UgbWF0Y2hpbmcgYXV0b21hdGljYWxseS4KCgsKAwQCARIEsAEIJwqTAgoEBAICABIEuAECGBqEAioK" + 
+        "IENvbW1hbmQgSUQgdGhhdCBtYXRjaGVzIHRoZSBvcmlnaW5hbCBjb21tYW5kLgogCiBUaGlzIGZpZWxk" + 
+        "IGVjaG9lcyB0aGUgY29tbWFuZF9pZCBmcm9tIHRoZSBvcmlnaW5hbCBQcm90b2J1ZlF1ZXN0TmF2Q29t" + 
+        "bWFuZAogdGhhdCB0aGlzIHJlc3BvbnNlIGNvcnJlc3BvbmRzIHRvLiBDbGllbnRzIHVzZSB0aGlzIHRv" + 
+        "IG1hdGNoIHJlc3BvbnNlcwogd2l0aCB0aGVpciBvcmlnaW5hbCBjb21tYW5kcyBpbiBhc3luY2hyb25v" + 
+        "dXMgY29tbXVuaWNhdGlvbi4KCg0KBQQCAgAFEgS4AQIICg0KBQQCAgABEgS4AQkTCg0KBQQCAgADEgS4" + 
+        "ARYXCoYDCgQEAgIBEgTEAQITGvcCKgogSW5kaWNhdGVzIHdoZXRoZXIgdGhlIGNvbW1hbmQgd2FzIGV4" + 
+        "ZWN1dGVkIHN1Y2Nlc3NmdWxseS4KIAogdHJ1ZTogIENvbW1hbmQgY29tcGxldGVkIHN1Y2Nlc3NmdWxs" + 
+        "eQogZmFsc2U6IENvbW1hbmQgZmFpbGVkIChzZWUgZXJyb3JfbWVzc2FnZSBmb3IgZGV0YWlscykKIAog" + 
+        "Tm90ZTogQSBzdWNjZXNzZnVsIHJlc3BvbnNlIG1lYW5zIHRoZSBjb21tYW5kIHdhcyBwcm9jZXNzZWQs" + 
+        "IGJ1dCBkb2Vzbid0CiBuZWNlc3NhcmlseSBndWFyYW50ZWUgdGhlIGRlc2lyZWQgb3V0Y29tZSAoZS5n" + 
+        "LiwgcG9zZSByZXNldCBtaWdodCBzdWNjZWVkCiBidXQgdHJhY2tpbmcgY291bGQgc3RpbGwgYmUgcG9v" + 
+        "ciBkdWUgdG8gZW52aXJvbm1lbnRhbCBjb25kaXRpb25zKS4KCg0KBQQCAgEFEgTEAQIGCg0KBQQCAgEB",
+        "EgTEAQcOCg0KBQQCAgEDEgTEARESCsgDCgQEAgICEgTUAQIbGrkDKgogSHVtYW4tcmVhZGFibGUgZXJy" + 
+        "b3IgbWVzc2FnZSB3aGVuIHN1Y2Nlc3MgPSBmYWxzZS4KIAogVGhpcyBmaWVsZCBwcm92aWRlcyBkZXRh" + 
+        "aWxlZCBpbmZvcm1hdGlvbiBhYm91dCB3aHkgYSBjb21tYW5kIGZhaWxlZC4KIEl0IHNob3VsZCBiZSBl" + 
+        "bXB0eSBvciBpZ25vcmVkIHdoZW4gc3VjY2VzcyA9IHRydWUuCiAKIEVycm9yIG1lc3NhZ2VzIGFyZSBp" + 
+        "bnRlbmRlZCBmb3IgZGVidWdnaW5nIGFuZCBsb2dnaW5nIHB1cnBvc2VzLgogVGhleSBtYXkgaW5jbHVk" + 
+        "ZSB0ZWNobmljYWwgZGV0YWlscyBhYm91dCB0aGUgZmFpbHVyZSBjYXVzZS4KIAogRXhhbXBsZXM6CiAt" + 
+        "ICJJbnZhbGlkIHBvc2UgY29vcmRpbmF0ZXM6IHggdmFsdWUgb3V0IG9mIGZpZWxkIGJvdW5kcyIKIC0g" + 
+        "IlRyYWNraW5nIHN5c3RlbSBub3QgaW5pdGlhbGl6ZWQiCiAtICJVbmtub3duIGNvbW1hbmQgdHlwZSIK" + 
+        "Cg0KBQQCAgIFEgTUAQIICg0KBQQCAgIBEgTUAQkWCg0KBQQCAgIDEgTUARkaYgZwcm90bzM=");
 
     static final Descriptors.FileDescriptor descriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom("commands.proto", "questnav.protos.commands", descriptorData, Geometry3D.getDescriptor());
 
@@ -328,6 +331,9 @@ public final class Commands {
      *  - X-axis: Forward (towards opposing alliance)
      *  - Y-axis: Left (when facing forward)
      *  - Z-axis: Up
+     *  - Yaw (Z): Counter-clockwise (right-handed) rotation around the Z axis
+     *  - Pitch (Y): Counter-clockwise (right-handed) rotation around Y axis
+     *  - Roll (X): Counter-clockwise (right-handed) rotation around the X axis
      *  - Rotation: Counter-clockwise positive (right-hand coordinate system)
      *  - Origin: Typically at one corner of the field (see field layout documentation)
      * </pre>
@@ -372,6 +378,9 @@ public final class Commands {
          *  - X-axis: Forward (towards opposing alliance)
          *  - Y-axis: Left (when facing forward)
          *  - Z-axis: Up
+         *  - Yaw (Z): Counter-clockwise (right-handed) rotation around the Z axis
+         *  - Pitch (Y): Counter-clockwise (right-handed) rotation around Y axis
+         *  - Roll (X): Counter-clockwise (right-handed) rotation around the X axis
          *  - Rotation: Counter-clockwise positive (right-hand coordinate system)
          *  - Origin: Typically at one corner of the field (see field layout documentation)
          * </pre>

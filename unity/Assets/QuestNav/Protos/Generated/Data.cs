@@ -164,7 +164,7 @@ namespace QuestNav.Protos.Generated {
     public const int Pose3DFieldNumber = 3;
     private global::Wpi.Proto.ProtobufPose3d pose3D_;
     /// <summary>
-    /// The 3d field-relative position of the quest
+    ///*
     /// Quest's 3D pose on the field in WPILib coordinates.
     /// 
     /// This represents the Quest's position and orientation as determined by
@@ -177,7 +177,8 @@ namespace QuestNav.Protos.Generated {
     /// 
     /// Coordinate System Details:
     /// - X: Forward direction (towards opposing alliance)
-    /// - Y: Left direction (when facing forward)  
+    /// - Y: Left direction (when facing forward)
+    /// - Z: Up direction
     /// - Rotation: Counter-clockwise positive (radians)
     /// - Units: meters for translation, radians for rotation
     /// 

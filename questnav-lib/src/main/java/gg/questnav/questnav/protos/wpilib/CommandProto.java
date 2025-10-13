@@ -43,7 +43,7 @@ import us.hebi.quickbuf.Descriptors;
  *   <li>Cross-platform compatibility (Java robot code ↔ C# Quest app)
  * </ul>
  *
- * @see gg.questnav.questnav.QuestNav#setPose(edu.wpi.first.math.geometry.Pose2d)
+ * @see gg.questnav.questnav.QuestNav#setPose(edu.wpi.first.math.geometry.Pose3d)
  * @see gg.questnav.questnav.protos.generated.Commands.ProtobufQuestNavCommand
  * @see edu.wpi.first.util.protobuf.Protobuf
  * @since 2025.1.0

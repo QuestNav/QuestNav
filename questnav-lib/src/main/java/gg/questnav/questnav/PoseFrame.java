@@ -56,7 +56,7 @@ import edu.wpi.first.math.geometry.Pose3d;
  *   <li>Units: Meters for translation, radians for rotation
  * </ul>
  *
- * @param questPose The robot's pose on the field as measured by the Quest tracking system. This
+ * @param questPose3d The robot's pose on the field as measured by the Quest tracking system. This
  *     will only provide meaningful field-relative coordinates after {@link
  *     QuestNav#setPose(Pose2d)} has been called to establish the field reference frame.
  * @param dataTimestamp The NetworkTables timestamp indicating when this frame data was received by

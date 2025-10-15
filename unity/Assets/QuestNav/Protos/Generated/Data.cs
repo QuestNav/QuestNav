@@ -179,7 +179,9 @@ namespace QuestNav.Protos.Generated {
     /// - X: Forward direction (towards opposing alliance)
     /// - Y: Left direction (when facing forward)
     /// - Z: Up direction
-    /// - Rotation: Counter-clockwise positive (radians)
+    /// - Yaw (Z): Counter-clockwise (right-handed) rotation around the Z axis
+    /// - Pitch (Y): Counter-clockwise (right-handed) rotation around Y axis
+    /// - Roll (X): Counter-clockwise (right-handed) rotation around the X axis
     /// - Units: meters for translation, radians for rotation
     /// 
     /// Accuracy depends on:

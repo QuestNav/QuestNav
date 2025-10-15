@@ -16,7 +16,7 @@ import us.hebi.quickbuf.ProtoUtil;
 import us.hebi.quickbuf.RepeatedByte;
 
 public final class Data {
-    private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(6858,
+    private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(7023,
         "CgpkYXRhLnByb3RvEhRxdWVzdG5hdi5wcm90b3MuZGF0YRoQZ2VvbWV0cnkzZC5wcm90byKNAQoZUHJv" + 
         "dG9idWZRdWVzdE5hdkZyYW1lRGF0YRIfCgtmcmFtZV9jb3VudBgBIAEoBVIKZnJhbWVDb3VudBIcCgl0" + 
         "aW1lc3RhbXAYAiABKAFSCXRpbWVzdGFtcBIxCgZwb3NlM2QYAyABKAsyGS53cGkucHJvdG8uUHJvdG9i" + 
@@ -24,7 +24,7 @@ public final class Data {
         "bG9zdF9jb3VudGVyGAEgASgFUhN0cmFja2luZ0xvc3RDb3VudGVyEi0KEmN1cnJlbnRseV90cmFja2lu" + 
         "ZxgCIAEoCFIRY3VycmVudGx5VHJhY2tpbmcSJwoPYmF0dGVyeV9wZXJjZW50GAMgASgFUg5iYXR0ZXJ5" + 
         "UGVyY2VudEJDCiVnZy5xdWVzdG5hdi5xdWVzdG5hdi5wcm90b3MuZ2VuZXJhdGVkqgIZUXVlc3ROYXYu" + 
-        "UHJvdG9zLkdlbmVyYXRlZEqLMgoHEgUAA74BAQoICgEMEgMAAxUK5AYKAQISAxYAHTLZBioKIFF1ZXN0" + 
+        "UHJvdG9zLkdlbmVyYXRlZEqwMwoHEgUAA8ABAQoICgEMEgMAAxUK5AYKAQISAxYAHTLZBioKIFF1ZXN0" + 
         "TmF2IERhdGEgUHJvdG9jb2wgQnVmZmVyIERlZmluaXRpb25zCiAKIFRoaXMgZmlsZSBkZWZpbmVzIHRo" + 
         "ZSBkYXRhIHN0cnVjdHVyZXMgdXNlZCBmb3IgdHJhbnNtaXR0aW5nIHRyYWNraW5nIGFuZCBkZXZpY2UK" + 
         "IGluZm9ybWF0aW9uIGZyb20gdGhlIFF1ZXN0IGhlYWRzZXQgdG8gZXh0ZXJuYWwgc3lzdGVtcyAoc3Vj" + 
@@ -41,7 +41,7 @@ public final class Data {
         "eHRlcm5hbCBzeXN0ZW1zIHJlY2VpdmUgYW5kIHByb2Nlc3MgdGhpcyBkYXRhIGZvciByb2JvdCBsb2Nh" + 
         "bGl6YXRpb24KCggKAQgSAxcANgoJCgIIJRIDFwA2CggKAQgSAxgAPgoJCgIIARIDGAA+Cj0KAgMAEgMb" + 
         "ABoaMiBJbXBvcnQgZ2VvbWV0cnkgbWVzc2FnZXMgZm9yIHBvc2UgcmVwcmVzZW50YXRpb24KCsAFCgIE" + 
-        "ABIELQBnARqzBSoKIEhpZ2gtZnJlcXVlbmN5IHRyYWNraW5nIGRhdGEgc2VudCBmcm9tIFF1ZXN0IHRv" + 
+        "ABIELQBpARqzBSoKIEhpZ2gtZnJlcXVlbmN5IHRyYWNraW5nIGRhdGEgc2VudCBmcm9tIFF1ZXN0IHRv" + 
         "IGV4dGVybmFsIHN5c3RlbXMuCiAKIFRoaXMgbWVzc2FnZSBjb250YWlucyB0aGUgY29yZSB0cmFja2lu" + 
         "ZyBpbmZvcm1hdGlvbiB0aGF0IGV4dGVybmFsIHN5c3RlbXMKIChsaWtlIHJvYm90IGNvZGUpIG5lZWQg" + 
         "Zm9yIHJlYWwtdGltZSBsb2NhbGl6YXRpb24gYW5kIG5hdmlnYXRpb24uIEl0J3Mgc2VudAogYXQgMTAw" + 
@@ -69,7 +69,7 @@ public final class Data {
         "IGRldGVjdGlvbgogCiBUaGUgdGltZXN0YW1wIGlzIHJlbGF0aXZlIHRvIGFwcCBzdGFydHVwLCBub3Qg" + 
         "c3lzdGVtIHRpbWUsIHRvIGF2b2lkCiBjbG9jayBzeW5jaHJvbml6YXRpb24gaXNzdWVzIGJldHdlZW4g" + 
         "ZGV2aWNlcy4KIAogUmVzb2x1dGlvbjogVHlwaWNhbGx5IHN1Yi1taWxsaXNlY29uZCBwcmVjaXNpb24K" + 
-        "CgwKBQQAAgEFEgNMAggKDAoFBAACAQESA0wJEgoMCgUEAAIBAxIDTBUWCpAGCgQEAAICEgNmAiYaggYq" + 
+        "CgwKBQQAAgEFEgNMAggKDAoFBAACAQESA0wJEgoMCgUEAAIBAxIDTBUWCrUHCgQEAAICEgNoAiYapwcq" + 
         "CiBRdWVzdCdzIDNEIHBvc2Ugb24gdGhlIGZpZWxkIGluIFdQSUxpYiBjb29yZGluYXRlcy4KIAogVGhp" + 
         "cyByZXByZXNlbnRzIHRoZSBRdWVzdCdzIHBvc2l0aW9uIGFuZCBvcmllbnRhdGlvbiBhcyBkZXRlcm1p" + 
         "bmVkIGJ5CiB0aGUgUXVlc3QncyB0cmFja2luZyBzeXN0ZW0uIFRoZSBwb3NlIGFjY291bnRzIGZvcjoK" + 
@@ -78,60 +78,63 @@ public final class Data {
         "b3NpdGlvbjsgZW5kIHVzZXIgY29kZSBhcHBsaWVzIG1vdW50aW5nIG9mZnNldAogdG8gZ2V0IHRoZSBy" + 
         "b2JvdCdzIHBvc2l0aW9uLgogCiBDb29yZGluYXRlIFN5c3RlbSBEZXRhaWxzOgogLSBYOiBGb3J3YXJk",
         "IGRpcmVjdGlvbiAodG93YXJkcyBvcHBvc2luZyBhbGxpYW5jZSkKIC0gWTogTGVmdCBkaXJlY3Rpb24g" + 
-        "KHdoZW4gZmFjaW5nIGZvcndhcmQpCiAtIFo6IFVwIGRpcmVjdGlvbgogLSBSb3RhdGlvbjogQ291bnRl" + 
-        "ci1jbG9ja3dpc2UgcG9zaXRpdmUgKHJhZGlhbnMpCiAtIFVuaXRzOiBtZXRlcnMgZm9yIHRyYW5zbGF0" + 
-        "aW9uLCByYWRpYW5zIGZvciByb3RhdGlvbgogCiBBY2N1cmFjeSBkZXBlbmRzIG9uOgogLSBFbnZpcm9u" + 
-        "bWVudGFsIGxpZ2h0aW5nIGFuZCBmZWF0dXJlcwogLSBRdWVzdCB0cmFja2luZyBxdWFsaXR5CiAtIENh" + 
-        "bGlicmF0aW9uIGFjY3VyYWN5CiAtIFRpbWUgc2luY2UgbGFzdCBwb3NlIHJlc2V0CgoMCgUEAAICBhID" + 
-        "ZgIaCgwKBQQAAgIBEgNmGyEKDAoFBAACAgMSA2YkJQryBAoCBAESBXoAvgEBGuQEKgogTG93ZXItZnJl" + 
-        "cXVlbmN5IGRldmljZSBzdGF0dXMgZGF0YSBzZW50IGZyb20gUXVlc3QgdG8gZXh0ZXJuYWwgc3lzdGVt" + 
-        "cy4KIAogVGhpcyBtZXNzYWdlIGNvbnRhaW5zIGRldmljZSBoZWFsdGggYW5kIHN0YXR1cyBpbmZvcm1h" + 
-        "dGlvbiB0aGF0IGRvZXNuJ3QgbmVlZAogdG8gYmUgc2VudCBhcyBmcmVxdWVudGx5IGFzIHRyYWNraW5n" + 
-        "IGRhdGEuIEl0J3Mgc2VudCBhdCAzIEh6IChldmVyeSAzMzMgbWlsbGlzZWNvbmRzKQogdG8gcHJvdmlk" + 
-        "ZSBtb25pdG9yaW5nIGFuZCBkaWFnbm9zdGljIGluZm9ybWF0aW9uIHdpdGhvdXQgY29uc3VtaW5nIGV4" + 
-        "Y2Vzc2l2ZQogYmFuZHdpZHRoLgogCiBUaGlzIGRhdGEgaGVscHMgZXh0ZXJuYWwgc3lzdGVtczoKIC0g" + 
-        "TW9uaXRvciBRdWVzdCBkZXZpY2UgaGVhbHRoCiAtIERldGVjdCB0cmFja2luZyBzeXN0ZW0gaXNzdWVz" + 
-        "CiAtIEltcGxlbWVudCBmYWlsc2FmZSBiZWhhdmlvcnMKIC0gUHJvdmlkZSB1c2VyIGZlZWRiYWNrIGFi" + 
-        "b3V0IHN5c3RlbSBzdGF0dXMKIAogVGhlIGluZm9ybWF0aW9uIGlzIHVzZWZ1bCBmb3IgYm90aCBhdXRv" + 
-        "bm9tb3VzIG9wZXJhdGlvbiBhbmQgZGVidWdnaW5nLwogdHJvdWJsZXNob290aW5nIHNjZW5hcmlvcy4K" + 
-        "CgoKAwQBARIDeggiCoYFCgQEAQIAEgSOAQIiGvcEKgogQ291bnQgb2YgdHJhY2tpbmcgbG9zcyBldmVu" + 
-        "dHMgc2luY2UgYXBwIHN0YXJ0dXAuCiAKIFRoaXMgY291bnRlciBpbmNyZW1lbnRzIGVhY2ggdGltZSB0" + 
-        "aGUgUXVlc3QncyB0cmFja2luZyBzeXN0ZW0gbG9zZXMKIHRyYWNraW5nIGFmdGVyIGhhdmluZyBlc3Rh",
-        "Ymxpc2hlZCBpdC4gVHJhY2tpbmcgbG9zcyBjYW4gb2NjdXIgZHVlIHRvOgogLSBQb29yIGxpZ2h0aW5n" + 
-        "IGNvbmRpdGlvbnMKIC0gTGFjayBvZiB2aXN1YWwgZmVhdHVyZXMgaW4gZW52aXJvbm1lbnQKIC0gUmFw" + 
-        "aWQgbW90aW9uIG9yIGFjY2VsZXJhdGlvbgogLSBPY2NsdXNpb24gb2YgY2FtZXJhcwogLSBIYXJkd2Fy" + 
-        "ZSBpc3N1ZXMKIAogQSBoaWdoIG9yIHJhcGlkbHkgaW5jcmVhc2luZyBjb3VudGVyIG1heSBpbmRpY2F0" + 
-        "ZToKIC0gRW52aXJvbm1lbnRhbCBpc3N1ZXMgKGxpZ2h0aW5nLCBmZWF0dXJlcykKIC0gUXVlc3QgbW91" + 
-        "bnRpbmcgcHJvYmxlbXMgKHZpYnJhdGlvbiwgb2JzdHJ1Y3Rpb24pCiAtIEhhcmR3YXJlIGRlZ3JhZGF0" + 
-        "aW9uCiAKIFRoaXMgbWV0cmljIGhlbHBzIGFzc2VzcyB0cmFja2luZyBzeXN0ZW0gcmVsaWFiaWxpdHkg" + 
-        "YW5kIGNhbiB0cmlnZ2VyCiBhbGVydHMgb3IgZmFsbGJhY2sgYmVoYXZpb3JzIGluIHJvYm90IGNvZGUu" + 
-        "CgoNCgUEAQIABRIEjgECBwoNCgUEAQIAARIEjgEIHQoNCgUEAQIAAxIEjgEgIQq6BQoEBAECARIEpAEC" + 
-        "HhqrBSoKIEN1cnJlbnQgdHJhY2tpbmcgc3RhdHVzIG9mIHRoZSBRdWVzdCBkZXZpY2UuCiAKIHRydWU6" + 
-        "ICBRdWVzdCBpcyBhY3RpdmVseSB0cmFja2luZyBhbmQgcG9zZSBkYXRhIGlzIHJlbGlhYmxlCiBmYWxz" + 
-        "ZTogUXVlc3QgaGFzIGxvc3QgdHJhY2tpbmcgYW5kIHBvc2UgZGF0YSBzaG91bGQgbm90IGJlIHRydXN0" + 
-        "ZWQKIAogV2hlbiB0cmFja2luZyBpcyBsb3N0OgogLSBQb3NlIGRhdGEgYmVjb21lcyBzdGFsZSBhbmQg" + 
-        "dW5yZWxpYWJsZQogLSBSb2JvdCBzaG91bGQgc3dpdGNoIHRvIGFsdGVybmF0aXZlIGxvY2FsaXphdGlv" + 
-        "biBtZXRob2RzCiAtIE1vdmVtZW50IHNob3VsZCBiZSBsaW1pdGVkIG9yIHN0b3BwZWQgZm9yIHNhZmV0" + 
-        "eQogCiBUcmFja2luZyBjYW4gYmUgcmVjb3ZlcmVkIGJ5OgogLSBJbXByb3ZpbmcgbGlnaHRpbmcgY29u" + 
-        "ZGl0aW9ucwogLSBNb3ZpbmcgdG8gYXJlYSB3aXRoIG1vcmUgdmlzdWFsIGZlYXR1cmVzCiAtIFJlZHVj" + 
-        "aW5nIG1vdGlvbiB0byBhbGxvdyBzeXN0ZW0gdG8gcmUtaW5pdGlhbGl6ZQogLSBQZXJmb3JtaW5nIHBv" + 
-        "c2UgcmVzZXQgd2hlbiB0cmFja2luZyByZWNvdmVycwogCiBFeHRlcm5hbCBzeXN0ZW1zIHNob3VsZCBt" + 
-        "b25pdG9yIHRoaXMgZmllbGQgYW5kIGltcGxlbWVudCBhcHByb3ByaWF0ZQogZmFsbGJhY2sgYmVoYXZp",
-        "b3JzIHdoZW4gdHJhY2tpbmcgaXMgbG9zdC4KCg0KBQQBAgEFEgSkAQIGCg0KBQQBAgEBEgSkAQcZCg0K" + 
-        "BQQBAgEDEgSkARwdCtoFCgQEAQICEgS9AQIcGssFKgogUXVlc3QgZGV2aWNlIGJhdHRlcnkgbGV2ZWwg" + 
-        "YXMgYSBwZXJjZW50YWdlICgwLTEwMCkuCiAKIFRoaXMgcHJvdmlkZXMgdGhlIGN1cnJlbnQgYmF0dGVy" + 
-        "eSBjaGFyZ2UgbGV2ZWwgb2YgdGhlIFF1ZXN0IGhlYWRzZXQsCiBhbGxvd2luZyBleHRlcm5hbCBzeXN0" + 
-        "ZW1zIHRvOgogLSBNb25pdG9yIHBvd2VyIHN0YXR1cyBkdXJpbmcgb3BlcmF0aW9uCiAtIEltcGxlbWVu" + 
-        "dCBsb3ctYmF0dGVyeSB3YXJuaW5ncyBvciBiZWhhdmlvcnMKIC0gUGxhbiBvcGVyYXRpb24gZHVyYXRp" + 
-        "b24gYW5kIGNoYXJnaW5nIG5lZWRzCiAtIFRyaWdnZXIgZ3JhY2VmdWwgc2h1dGRvd24gcHJvY2VkdXJl" + 
-        "cwogCiBCYXR0ZXJ5IExldmVsIEd1aWRlbGluZXM6CiAtIDEwMCU6IEZ1bGx5IGNoYXJnZWQKIC0gNTAt" + 
-        "MTAwJTogTm9ybWFsIG9wZXJhdGlvbgogLSAyMC01MCU6IENvbnNpZGVyIGNoYXJnaW5nIHNvb24KIC0g" + 
-        "MTAtMjAlOiBMb3cgYmF0dGVyeSB3YXJuaW5nIHJlY29tbWVuZGVkCiAtIDAtMTAlOiBDcml0aWNhbCAt" + 
-        "IHBsYW4gaW1tZWRpYXRlIHNodXRkb3duL2NoYXJnaW5nCiAKIE5vdGU6IEJhdHRlcnkgZHJhaW4gcmF0" + 
-        "ZSBkZXBlbmRzIG9uOgogLSBQcm9jZXNzaW5nIGxvYWQgKHRyYWNraW5nIGNvbXBsZXhpdHkpCiAtIERp" + 
-        "c3BsYXkgdXNhZ2UgKGlmIGFueSkKIC0gV2lyZWxlc3MgY29tbXVuaWNhdGlvbiBhY3Rpdml0eQogLSBF" + 
-        "bnZpcm9ubWVudGFsIHRlbXBlcmF0dXJlCgoNCgUEAQICBRIEvQECBwoNCgUEAQICARIEvQEIFwoNCgUE" + 
-        "AQICAxIEvQEaG2IGcHJvdG8z");
+        "KHdoZW4gZmFjaW5nIGZvcndhcmQpCiAtIFo6IFVwIGRpcmVjdGlvbgogLSBZYXcgKFopOiBDb3VudGVy" + 
+        "LWNsb2Nrd2lzZSAocmlnaHQtaGFuZGVkKSByb3RhdGlvbiBhcm91bmQgdGhlIFogYXhpcwogLSBQaXRj" + 
+        "aCAoWSk6IENvdW50ZXItY2xvY2t3aXNlIChyaWdodC1oYW5kZWQpIHJvdGF0aW9uIGFyb3VuZCBZIGF4" + 
+        "aXMKIC0gUm9sbCAoWCk6IENvdW50ZXItY2xvY2t3aXNlIChyaWdodC1oYW5kZWQpIHJvdGF0aW9uIGFy" + 
+        "b3VuZCB0aGUgWCBheGlzCiAtIFVuaXRzOiBtZXRlcnMgZm9yIHRyYW5zbGF0aW9uLCByYWRpYW5zIGZv" + 
+        "ciByb3RhdGlvbgogCiBBY2N1cmFjeSBkZXBlbmRzIG9uOgogLSBFbnZpcm9ubWVudGFsIGxpZ2h0aW5n" + 
+        "IGFuZCBmZWF0dXJlcwogLSBRdWVzdCB0cmFja2luZyBxdWFsaXR5CiAtIENhbGlicmF0aW9uIGFjY3Vy" + 
+        "YWN5CiAtIFRpbWUgc2luY2UgbGFzdCBwb3NlIHJlc2V0CgoMCgUEAAICBhIDaAIaCgwKBQQAAgIBEgNo" + 
+        "GyEKDAoFBAACAgMSA2gkJQryBAoCBAESBXwAwAEBGuQEKgogTG93ZXItZnJlcXVlbmN5IGRldmljZSBz" + 
+        "dGF0dXMgZGF0YSBzZW50IGZyb20gUXVlc3QgdG8gZXh0ZXJuYWwgc3lzdGVtcy4KIAogVGhpcyBtZXNz" + 
+        "YWdlIGNvbnRhaW5zIGRldmljZSBoZWFsdGggYW5kIHN0YXR1cyBpbmZvcm1hdGlvbiB0aGF0IGRvZXNu" + 
+        "J3QgbmVlZAogdG8gYmUgc2VudCBhcyBmcmVxdWVudGx5IGFzIHRyYWNraW5nIGRhdGEuIEl0J3Mgc2Vu" + 
+        "dCBhdCAzIEh6IChldmVyeSAzMzMgbWlsbGlzZWNvbmRzKQogdG8gcHJvdmlkZSBtb25pdG9yaW5nIGFu" + 
+        "ZCBkaWFnbm9zdGljIGluZm9ybWF0aW9uIHdpdGhvdXQgY29uc3VtaW5nIGV4Y2Vzc2l2ZQogYmFuZHdp" + 
+        "ZHRoLgogCiBUaGlzIGRhdGEgaGVscHMgZXh0ZXJuYWwgc3lzdGVtczoKIC0gTW9uaXRvciBRdWVzdCBk" + 
+        "ZXZpY2UgaGVhbHRoCiAtIERldGVjdCB0cmFja2luZyBzeXN0ZW0gaXNzdWVzCiAtIEltcGxlbWVudCBm" + 
+        "YWlsc2FmZSBiZWhhdmlvcnMKIC0gUHJvdmlkZSB1c2VyIGZlZWRiYWNrIGFib3V0IHN5c3RlbSBzdGF0" + 
+        "dXMKIAogVGhlIGluZm9ybWF0aW9uIGlzIHVzZWZ1bCBmb3IgYm90aCBhdXRvbm9tb3VzIG9wZXJhdGlv" + 
+        "biBhbmQgZGVidWdnaW5nLwogdHJvdWJsZXNob290aW5nIHNjZW5hcmlvcy4KCgoKAwQBARIDfAgiCoYF",
+        "CgQEAQIAEgSQAQIiGvcEKgogQ291bnQgb2YgdHJhY2tpbmcgbG9zcyBldmVudHMgc2luY2UgYXBwIHN0" + 
+        "YXJ0dXAuCiAKIFRoaXMgY291bnRlciBpbmNyZW1lbnRzIGVhY2ggdGltZSB0aGUgUXVlc3QncyB0cmFj" + 
+        "a2luZyBzeXN0ZW0gbG9zZXMKIHRyYWNraW5nIGFmdGVyIGhhdmluZyBlc3RhYmxpc2hlZCBpdC4gVHJh" + 
+        "Y2tpbmcgbG9zcyBjYW4gb2NjdXIgZHVlIHRvOgogLSBQb29yIGxpZ2h0aW5nIGNvbmRpdGlvbnMKIC0g" + 
+        "TGFjayBvZiB2aXN1YWwgZmVhdHVyZXMgaW4gZW52aXJvbm1lbnQKIC0gUmFwaWQgbW90aW9uIG9yIGFj" + 
+        "Y2VsZXJhdGlvbgogLSBPY2NsdXNpb24gb2YgY2FtZXJhcwogLSBIYXJkd2FyZSBpc3N1ZXMKIAogQSBo" + 
+        "aWdoIG9yIHJhcGlkbHkgaW5jcmVhc2luZyBjb3VudGVyIG1heSBpbmRpY2F0ZToKIC0gRW52aXJvbm1l" + 
+        "bnRhbCBpc3N1ZXMgKGxpZ2h0aW5nLCBmZWF0dXJlcykKIC0gUXVlc3QgbW91bnRpbmcgcHJvYmxlbXMg" + 
+        "KHZpYnJhdGlvbiwgb2JzdHJ1Y3Rpb24pCiAtIEhhcmR3YXJlIGRlZ3JhZGF0aW9uCiAKIFRoaXMgbWV0" + 
+        "cmljIGhlbHBzIGFzc2VzcyB0cmFja2luZyBzeXN0ZW0gcmVsaWFiaWxpdHkgYW5kIGNhbiB0cmlnZ2Vy" + 
+        "CiBhbGVydHMgb3IgZmFsbGJhY2sgYmVoYXZpb3JzIGluIHJvYm90IGNvZGUuCgoNCgUEAQIABRIEkAEC" + 
+        "BwoNCgUEAQIAARIEkAEIHQoNCgUEAQIAAxIEkAEgIQq6BQoEBAECARIEpgECHhqrBSoKIEN1cnJlbnQg" + 
+        "dHJhY2tpbmcgc3RhdHVzIG9mIHRoZSBRdWVzdCBkZXZpY2UuCiAKIHRydWU6ICBRdWVzdCBpcyBhY3Rp" + 
+        "dmVseSB0cmFja2luZyBhbmQgcG9zZSBkYXRhIGlzIHJlbGlhYmxlCiBmYWxzZTogUXVlc3QgaGFzIGxv" + 
+        "c3QgdHJhY2tpbmcgYW5kIHBvc2UgZGF0YSBzaG91bGQgbm90IGJlIHRydXN0ZWQKIAogV2hlbiB0cmFj" + 
+        "a2luZyBpcyBsb3N0OgogLSBQb3NlIGRhdGEgYmVjb21lcyBzdGFsZSBhbmQgdW5yZWxpYWJsZQogLSBS" + 
+        "b2JvdCBzaG91bGQgc3dpdGNoIHRvIGFsdGVybmF0aXZlIGxvY2FsaXphdGlvbiBtZXRob2RzCiAtIE1v" + 
+        "dmVtZW50IHNob3VsZCBiZSBsaW1pdGVkIG9yIHN0b3BwZWQgZm9yIHNhZmV0eQogCiBUcmFja2luZyBj" + 
+        "YW4gYmUgcmVjb3ZlcmVkIGJ5OgogLSBJbXByb3ZpbmcgbGlnaHRpbmcgY29uZGl0aW9ucwogLSBNb3Zp" + 
+        "bmcgdG8gYXJlYSB3aXRoIG1vcmUgdmlzdWFsIGZlYXR1cmVzCiAtIFJlZHVjaW5nIG1vdGlvbiB0byBh",
+        "bGxvdyBzeXN0ZW0gdG8gcmUtaW5pdGlhbGl6ZQogLSBQZXJmb3JtaW5nIHBvc2UgcmVzZXQgd2hlbiB0" + 
+        "cmFja2luZyByZWNvdmVycwogCiBFeHRlcm5hbCBzeXN0ZW1zIHNob3VsZCBtb25pdG9yIHRoaXMgZmll" + 
+        "bGQgYW5kIGltcGxlbWVudCBhcHByb3ByaWF0ZQogZmFsbGJhY2sgYmVoYXZpb3JzIHdoZW4gdHJhY2tp" + 
+        "bmcgaXMgbG9zdC4KCg0KBQQBAgEFEgSmAQIGCg0KBQQBAgEBEgSmAQcZCg0KBQQBAgEDEgSmARwdCtoF" + 
+        "CgQEAQICEgS/AQIcGssFKgogUXVlc3QgZGV2aWNlIGJhdHRlcnkgbGV2ZWwgYXMgYSBwZXJjZW50YWdl" + 
+        "ICgwLTEwMCkuCiAKIFRoaXMgcHJvdmlkZXMgdGhlIGN1cnJlbnQgYmF0dGVyeSBjaGFyZ2UgbGV2ZWwg" + 
+        "b2YgdGhlIFF1ZXN0IGhlYWRzZXQsCiBhbGxvd2luZyBleHRlcm5hbCBzeXN0ZW1zIHRvOgogLSBNb25p" + 
+        "dG9yIHBvd2VyIHN0YXR1cyBkdXJpbmcgb3BlcmF0aW9uCiAtIEltcGxlbWVudCBsb3ctYmF0dGVyeSB3" + 
+        "YXJuaW5ncyBvciBiZWhhdmlvcnMKIC0gUGxhbiBvcGVyYXRpb24gZHVyYXRpb24gYW5kIGNoYXJnaW5n" + 
+        "IG5lZWRzCiAtIFRyaWdnZXIgZ3JhY2VmdWwgc2h1dGRvd24gcHJvY2VkdXJlcwogCiBCYXR0ZXJ5IExl" + 
+        "dmVsIEd1aWRlbGluZXM6CiAtIDEwMCU6IEZ1bGx5IGNoYXJnZWQKIC0gNTAtMTAwJTogTm9ybWFsIG9w" + 
+        "ZXJhdGlvbgogLSAyMC01MCU6IENvbnNpZGVyIGNoYXJnaW5nIHNvb24KIC0gMTAtMjAlOiBMb3cgYmF0" + 
+        "dGVyeSB3YXJuaW5nIHJlY29tbWVuZGVkCiAtIDAtMTAlOiBDcml0aWNhbCAtIHBsYW4gaW1tZWRpYXRl" + 
+        "IHNodXRkb3duL2NoYXJnaW5nCiAKIE5vdGU6IEJhdHRlcnkgZHJhaW4gcmF0ZSBkZXBlbmRzIG9uOgog" + 
+        "LSBQcm9jZXNzaW5nIGxvYWQgKHRyYWNraW5nIGNvbXBsZXhpdHkpCiAtIERpc3BsYXkgdXNhZ2UgKGlm" + 
+        "IGFueSkKIC0gV2lyZWxlc3MgY29tbXVuaWNhdGlvbiBhY3Rpdml0eQogLSBFbnZpcm9ubWVudGFsIHRl" + 
+        "bXBlcmF0dXJlCgoNCgUEAQICBRIEvwECBwoNCgUEAQICARIEvwEIFwoNCgUEAQICAxIEvwEaG2IGcHJv" + 
+        "dG8z");
 
     static final Descriptors.FileDescriptor descriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom("data.proto", "questnav.protos.data", descriptorData, Geometry3D.getDescriptor());
 
@@ -229,7 +232,9 @@ public final class Data {
          *  - X: Forward direction (towards opposing alliance)
          *  - Y: Left direction (when facing forward)
          *  - Z: Up direction
-         *  - Rotation: Counter-clockwise positive (radians)
+         *  - Yaw (Z): Counter-clockwise (right-handed) rotation around the Z axis
+         *  - Pitch (Y): Counter-clockwise (right-handed) rotation around Y axis
+         *  - Roll (X): Counter-clockwise (right-handed) rotation around the X axis
          *  - Units: meters for translation, radians for rotation
          *  
          *  Accuracy depends on:
@@ -490,7 +495,9 @@ public final class Data {
          *  - X: Forward direction (towards opposing alliance)
          *  - Y: Left direction (when facing forward)
          *  - Z: Up direction
-         *  - Rotation: Counter-clockwise positive (radians)
+         *  - Yaw (Z): Counter-clockwise (right-handed) rotation around the Z axis
+         *  - Pitch (Y): Counter-clockwise (right-handed) rotation around Y axis
+         *  - Roll (X): Counter-clockwise (right-handed) rotation around the X axis
          *  - Units: meters for translation, radians for rotation
          *  
          *  Accuracy depends on:
@@ -524,7 +531,9 @@ public final class Data {
          *  - X: Forward direction (towards opposing alliance)
          *  - Y: Left direction (when facing forward)
          *  - Z: Up direction
-         *  - Rotation: Counter-clockwise positive (radians)
+         *  - Yaw (Z): Counter-clockwise (right-handed) rotation around the Z axis
+         *  - Pitch (Y): Counter-clockwise (right-handed) rotation around Y axis
+         *  - Roll (X): Counter-clockwise (right-handed) rotation around the X axis
          *  - Units: meters for translation, radians for rotation
          *  
          *  Accuracy depends on:
@@ -560,7 +569,9 @@ public final class Data {
          *  - X: Forward direction (towards opposing alliance)
          *  - Y: Left direction (when facing forward)
          *  - Z: Up direction
-         *  - Rotation: Counter-clockwise positive (radians)
+         *  - Yaw (Z): Counter-clockwise (right-handed) rotation around the Z axis
+         *  - Pitch (Y): Counter-clockwise (right-handed) rotation around Y axis
+         *  - Roll (X): Counter-clockwise (right-handed) rotation around the X axis
          *  - Units: meters for translation, radians for rotation
          *  
          *  Accuracy depends on:
@@ -600,7 +611,9 @@ public final class Data {
          *  - X: Forward direction (towards opposing alliance)
          *  - Y: Left direction (when facing forward)
          *  - Z: Up direction
-         *  - Rotation: Counter-clockwise positive (radians)
+         *  - Yaw (Z): Counter-clockwise (right-handed) rotation around the Z axis
+         *  - Pitch (Y): Counter-clockwise (right-handed) rotation around Y axis
+         *  - Roll (X): Counter-clockwise (right-handed) rotation around the X axis
          *  - Units: meters for translation, radians for rotation
          *  
          *  Accuracy depends on:
@@ -640,7 +653,9 @@ public final class Data {
          *  - X: Forward direction (towards opposing alliance)
          *  - Y: Left direction (when facing forward)
          *  - Z: Up direction
-         *  - Rotation: Counter-clockwise positive (radians)
+         *  - Yaw (Z): Counter-clockwise (right-handed) rotation around the Z axis
+         *  - Pitch (Y): Counter-clockwise (right-handed) rotation around Y axis
+         *  - Roll (X): Counter-clockwise (right-handed) rotation around the X axis
          *  - Units: meters for translation, radians for rotation
          *  
          *  Accuracy depends on:

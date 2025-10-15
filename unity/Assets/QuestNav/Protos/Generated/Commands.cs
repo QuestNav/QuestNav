@@ -97,6 +97,9 @@ namespace QuestNav.Protos.Generated {
   /// - X-axis: Forward (towards opposing alliance)
   /// - Y-axis: Left (when facing forward)
   /// - Z-axis: Up
+  /// - Yaw (Z): Counter-clockwise (right-handed) rotation around the Z axis
+  /// - Pitch (Y): Counter-clockwise (right-handed) rotation around Y axis
+  /// - Roll (X): Counter-clockwise (right-handed) rotation around the X axis
   /// - Rotation: Counter-clockwise positive (right-hand coordinate system)
   /// - Origin: Typically at one corner of the field (see field layout documentation)
   /// </summary>

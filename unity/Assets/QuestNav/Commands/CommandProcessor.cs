@@ -68,7 +68,10 @@ namespace QuestNav.Commands
         public void ProcessCommands()
         {
             ProtobufQuestNavCommand receivedCommand = networkTableConnection.GetCommandRequest();
-            if (receivedCommand.CommandId != lastCommandIdProcessed)
+            if (
+                receivedCommand.CommandId != 0
+                && receivedCommand.CommandId != lastCommandIdProcessed
+            )
             {
                 switch (receivedCommand.Type)
                 {
@@ -85,9 +88,9 @@ namespace QuestNav.Commands
                         );
                         break;
                 }
+                // Don't double process
+                lastCommandIdProcessed = receivedCommand.CommandId;
             }
-            // Don't double process
-            lastCommandIdProcessed = networkTableConnection.GetCommandRequest().CommandId;
         }
     }
 }

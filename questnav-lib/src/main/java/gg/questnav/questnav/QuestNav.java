@@ -137,7 +137,11 @@ public class QuestNav {
   private final ProtobufSubscriber<Commands.ProtobufQuestNavCommandResponse> responseSubscriber =
       questNavTable
           .getProtobufTopic("response", commandResponseProto)
-          .subscribe(Commands.ProtobufQuestNavCommandResponse.newInstance());
+          .subscribe(
+              Commands.ProtobufQuestNavCommandResponse.newInstance(),
+              PubSubOption.periodic(0.05),
+              PubSubOption.sendAll(true),
+              PubSubOption.pollStorage(20));
 
   /** Subscriber for frame data */
   private final ProtobufSubscriber<Data.ProtobufQuestNavFrameData> frameDataSubscriber =
@@ -173,15 +177,12 @@ public class QuestNav {
   /** Last sent request id */
   private int lastSentRequestId = 0; // Should be the same on the backend
 
-  /** Last processed response id */
-  private int lastProcessedResponseId = 0; // Should be the same on the backend
-
   /**
    * Creates a new QuestNav instance for communicating with a Quest headset.
    *
    * <p>This constructor initializes all necessary NetworkTables subscribers and publishers for
    * communication with the Quest device. The instance is ready to use immediately, but you should
-   * call {@link #setPose(Pose2d)} to establish field-relative tracking before relying on pose data.
+   * call {@link #setPose(Pose3d)} to establish field-relative tracking before relying on pose data.
    *
    * <p>The constructor sets up:
    *
@@ -220,12 +221,12 @@ public class QuestNav {
    *
    * <pre>{@code
    * // Set Quest pose at autonomous start (if you know the Quest's position directly)
-   * Pose2d questPose = new Pose2d(1.5, 5.5, Rotation2d.fromDegrees(0));
+   * Pose3d questPose = new Pose3d(1.5, 5.5, new Rotation3d(0.0, 0.0, 0.0)));
    * questNav.setPose(questPose);
    *
    * // If you know the robot pose, apply mounting offset to get Quest pose
    * Pose2d robotPose = poseEstimator.getEstimatedPosition();
-   * Pose2d questPose = robotPose.plus(mountingOffset); // Apply your mounting offset
+   * Pose3d questPose = new Pose3d(robotPose).transformBy(mountingOffset); // Apply your mounting offset
    * questNav.setPose(questPose);
    * }</pre>
    *
@@ -310,7 +311,7 @@ public class QuestNav {
    *   <li>Move to an area with more visual features
    *   <li>Reduce robot motion to allow re-initialization
    *   <li>Clear any obstructions from Quest cameras
-   *   <li>Call {@link #setPose(Pose2d)} once tracking recovers
+   *   <li>Call {@link #setPose(Pose3d)} once tracking recovers
    * </ul>
    *
    * @return {@code true} if the Quest is actively tracking and pose data is reliable, {@code false}
@@ -481,7 +482,7 @@ public class QuestNav {
    * <p>This method must be called regularly (typically in {@code robotPeriodic()}) to:
    *
    * <ul>
-   *   <li>Process responses to commands sent via {@link #setPose(Pose2d)}
+   *   <li>Process responses to commands sent via {@link #setPose(Pose3d)}
    *   <li>Log command failures to the DriverStation for debugging
    *   <li>Maintain proper command/response synchronization
    *   <li>Prevent command response queue overflow
@@ -514,25 +515,16 @@ public class QuestNav {
    * <p><strong>Performance:</strong> This method is lightweight and safe to call every robot loop
    * (20ms). It only processes new responses and exits quickly when none are available.
    *
-   * @see #setPose(Pose2d)
+   * @see #setPose(Pose3d)
    * @see edu.wpi.first.wpilibj.DriverStation#reportError(String, boolean)
    */
   public void commandPeriodic() {
-    Commands.ProtobufQuestNavCommandResponse latestCommandResponse = responseSubscriber.get();
+    Commands.ProtobufQuestNavCommandResponse[] responses = responseSubscriber.readQueueValues();
 
-    // if we don't have data or for some reason the response we got isn't for the command we sent,
-    // skip for this loop
-    if (latestCommandResponse == null || latestCommandResponse.getCommandId() != lastSentRequestId)
-      return;
-
-    if (lastProcessedResponseId != latestCommandResponse.getCommandId()) {
-
-      if (!latestCommandResponse.getSuccess()) {
-        DriverStation.reportError(
-            "QuestNav command failed!\n" + latestCommandResponse.getErrorMessage(), false);
+    for (Commands.ProtobufQuestNavCommandResponse response : responses) {
+      if (!response.getSuccess()) {
+        DriverStation.reportError("QuestNav command failed!\n" + response.getErrorMessage(), false);
       }
-      // don't double process
-      lastProcessedResponseId = latestCommandResponse.getCommandId();
     }
   }
 }

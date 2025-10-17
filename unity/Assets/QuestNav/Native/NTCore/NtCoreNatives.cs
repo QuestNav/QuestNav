@@ -368,5 +368,14 @@ namespace QuestNav.Native.NTCore
 
         [DllImport("ntcore")]
         public static extern void NT_DisposeEventArray(NativeNtEvent* arr, UIntPtr count);
+
+        [DllImport("ntcore")]
+        public static extern IntPtr NT_ReadQueueValue(uint subentry, out UIntPtr count);
+
+        [DllImport("ntcore")]
+        public static extern void NT_DisposeValueArray(IntPtr arr, UIntPtr count);
+
+        [DllImport("ntcore")]
+        public static extern long NT_Now();
     }
 }

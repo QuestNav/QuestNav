@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-/**
+/*
  * QuestNav Data Protocol Buffer Definitions
  * 
  * This file defines the data structures used for transmitting tracking and device
@@ -27,7 +27,7 @@ option java_package = "gg.questnav.questnav.protos.generated";
 // Import geometry messages for pose representation
 import "geometry3d.proto";
 
-/**
+/*
  * High-frequency tracking data sent from Quest to external systems.
  * 
  * This message contains the core tracking information that external systems
@@ -44,7 +44,7 @@ import "geometry3d.proto";
  *   is applied in end user code
  */
 message ProtobufQuestNavFrameData {
-  /**
+  /*
    * Sequential frame counter for this tracking session.
    * 
    * This counter increments with each frame processed by the Quest's tracking
@@ -59,7 +59,7 @@ message ProtobufQuestNavFrameData {
    */
   int32 frame_count = 1;
   
-  /**
+  /*
    * Timestamp in seconds since QuestNav app startup.
    * 
    * This provides timing information for the tracking data, allowing external
@@ -76,7 +76,7 @@ message ProtobufQuestNavFrameData {
    */
   double timestamp = 2;
   
-  /**
+  /*
    * Quest's 3D pose on the field in WPILib coordinates.
    * 
    * This represents the Quest's position and orientation as determined by
@@ -105,7 +105,7 @@ message ProtobufQuestNavFrameData {
   wpi.proto.ProtobufPose3d pose3d = 3;
 }
 
-/**
+/*
  * Lower-frequency device status data sent from Quest to external systems.
  * 
  * This message contains device health and status information that doesn't need
@@ -123,7 +123,7 @@ message ProtobufQuestNavFrameData {
  * troubleshooting scenarios.
  */
 message ProtobufQuestNavDeviceData {
-  /**
+  /*
    * Count of tracking loss events since app startup.
    * 
    * This counter increments each time the Quest's tracking system loses
@@ -144,7 +144,7 @@ message ProtobufQuestNavDeviceData {
    */
   int32 tracking_lost_counter = 1;
   
-  /**
+  /*
    * Current tracking status of the Quest device.
    * 
    * true:  Quest is actively tracking and pose data is reliable
@@ -166,7 +166,7 @@ message ProtobufQuestNavDeviceData {
    */
   bool currently_tracking = 2;
   
-  /**
+  /*
    * Quest device battery level as a percentage (0-100).
    * 
    * This provides the current battery charge level of the Quest headset,

@@ -1,4 +1,6 @@
-﻿using QuestNav.Commands.Commands;
+﻿using System.Linq;
+using QuestNav.Commands.Commands;
+using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.Utils;
 using UnityEngine;
@@ -24,17 +26,12 @@ namespace QuestNav.Commands
         /// <summary>
         /// Network connection for command communication
         /// </summary>
-        private NetworkTableConnection networkTableConnection;
+        private INetworkTableConnection networkTableConnection;
 
         /// <summary>
         /// Command handler for pose reset operations
         /// </summary>
         private PoseResetCommand poseResetCommand;
-
-        /// <summary>
-        /// ID of the last processed command to prevent duplicate execution
-        /// </summary>
-        private uint lastCommandIdProcessed;
 
         /// <summary>
         /// Initializes a new command processor with required dependencies
@@ -63,34 +60,92 @@ namespace QuestNav.Commands
         }
 
         /// <summary>
-        /// Processes incoming commands from the robot and executes them if they haven't been processed before
+        /// Processes incoming commands from the robot and executes them in order
         /// </summary>
         public void ProcessCommands()
         {
-            ProtobufQuestNavCommand receivedCommand = networkTableConnection.GetCommandRequest();
-            if (
-                receivedCommand.CommandId != 0
-                && receivedCommand.CommandId != lastCommandIdProcessed
-            )
+            var receivedCommands = networkTableConnection.GetCommandRequests();
+            // Collect all but the most recent PoseReset command, they have been superseded
+            var supersededPoseResetCommands = receivedCommands
+                .Where(cmd => cmd.Value.Type == QuestNavCommandType.PoseReset)
+                .SkipLast(1)
+                .ToHashSet();
+
+            foreach (var receivedTimestampedCommand in receivedCommands)
             {
+                var receivedCommand = receivedTimestampedCommand.Value;
                 switch (receivedCommand.Type)
                 {
                     case QuestNavCommandType.CommandTypeUnspecified:
                         break;
                     case QuestNavCommandType.PoseReset:
-                        QueuedLogger.Log("Executing Pose Reset Command");
-                        poseResetCommand.Execute(receivedCommand);
+                        if (supersededPoseResetCommands.Contains(receivedTimestampedCommand))
+                        {
+                            // The command was superseded by a later command, skip it
+                            QueuedLogger.Log(
+                                $"Skipping superseded Pose Reset Command. ID: {receivedCommand.CommandId}"
+                            );
+                            SendErrorResponse(
+                                receivedCommand.CommandId,
+                                "Pose Reset Command superseded"
+                            );
+                        }
+                        else
+                        {
+                            // Get the age of the command, in milliseconds
+                            var ageMs =
+                                (networkTableConnection.Now - receivedTimestampedCommand.LastChange)
+                                / 1000;
+
+                            // Check if the command is fresh
+                            if (ageMs < 50)
+                            {
+                                // The command is fresh, process it
+                                QueuedLogger.Log(
+                                    $"Executing Pose Reset Command. ID: {receivedCommand.CommandId} "
+                                        + $"Age: {ageMs} ms"
+                                );
+                                poseResetCommand.Execute(receivedCommand);
+                            }
+                            else
+                            {
+                                // The command is too old, skip it
+                                QueuedLogger.Log(
+                                    $"Skipping stale Pose Reset Command. ID: {receivedCommand.CommandId} "
+                                        + $"Age: {ageMs} ms"
+                                );
+                                SendErrorResponse(
+                                    receivedCommand.CommandId,
+                                    $"Pose Reset Command too old. Age: {ageMs} ms"
+                                );
+                            }
+                        }
                         break;
                     default:
                         QueuedLogger.Log(
-                            "Execute called with unknown command",
+                            $"Execute called with unknown command. ID: {receivedCommand.CommandId} Type: {receivedCommand.Type}",
                             QueuedLogger.LogLevel.Warning
                         );
                         break;
                 }
-                // Don't double process
-                lastCommandIdProcessed = receivedCommand.CommandId;
             }
+        }
+
+        /// <summary>
+        /// Sends a command processing error response back to the robot
+        /// </summary>
+        /// <param name="commandId">command_id</param>
+        /// <param name="errorMessage">error message</param>
+        private void SendErrorResponse(uint commandId, string errorMessage)
+        {
+            networkTableConnection.SetCommandResponse(
+                new ProtobufQuestNavCommandResponse
+                {
+                    CommandId = commandId,
+                    Success = false,
+                    ErrorMessage = errorMessage,
+                }
+            );
         }
     }
 }

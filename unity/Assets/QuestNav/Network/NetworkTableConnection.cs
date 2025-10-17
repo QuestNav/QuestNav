@@ -25,6 +25,11 @@ namespace QuestNav.Network
         bool IsReadyToConnect { get; }
 
         /// <summary>
+        /// Gets the current NT time
+        /// </summary>
+        long Now { get; }
+
+        /// <summary>
         /// Publishes frame data to NetworkTables.
         /// </summary>
         /// <param name="frameCount">Current frame index</param>
@@ -53,10 +58,10 @@ namespace QuestNav.Network
         void UpdateTeamNumber(int teamNumber);
 
         /// <summary>
-        /// Gets the latest command request from the robot
+        /// Gets all command requests from the robot since the last read, or an empty array if none available
         /// </summary>
-        /// <returns>The command request, or a default command if none available</returns>
-        ProtobufQuestNavCommand GetCommandRequest();
+        /// <returns>All command requests since the last read</returns>
+        TimestampedValue<ProtobufQuestNavCommand>[] GetCommandRequests();
 
         /// <summary>
         /// Sends a command response back to the robot
@@ -183,7 +188,13 @@ public class NetworkTableConnection : INetworkTableConnection
         commandRequestSubscriber = ntInstance.GetProtobufSubscriber<ProtobufQuestNavCommand>(
             QuestNavConstants.Topics.COMMAND_REQUEST,
             "questnav.protos.commands.ProtobufQuestNavCommand",
-            QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+            new PubSubOptions
+            {
+                SendAll = true,
+                KeepDuplicates = true,
+                Periodic = 0.005,
+                PollStorage = 10,
+            }
         );
     }
 
@@ -198,6 +209,11 @@ public class NetworkTableConnection : INetworkTableConnection
     /// Gets whether the connection is currently established.
     /// </summary>
     public bool IsReadyToConnect => teamNumberSet || ipAddressSet;
+
+    /// <summary>
+    /// Gets the current NT time
+    /// </summary>
+    public long Now => ntInstance.Now();
 
     /// <summary>
     /// Updates the team number and configures the NetworkTables connection.
@@ -300,12 +316,12 @@ public class NetworkTableConnection : INetworkTableConnection
     };
 
     /// <summary>
-    /// Gets the latest command request from the robot, or returns a default command if none available
+    /// Gets all command requests from the robot since the last read, or an empty array if none available
     /// </summary>
-    /// <returns>The latest command request</returns>
-    public ProtobufQuestNavCommand GetCommandRequest()
+    /// <returns>All command requests since the last read</returns>
+    public TimestampedValue<ProtobufQuestNavCommand>[] GetCommandRequests()
     {
-        return commandRequestSubscriber.Get(defaultCommand);
+        return commandRequestSubscriber.ReadQueueValues();
     }
 
     /// <summary>

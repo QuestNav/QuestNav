@@ -51,7 +51,7 @@ namespace QuestNav.Protos.Generated {
   }
   #region Enums
   /// <summary>
-  ///*
+  ///
   /// Enumeration of available command types in the QuestNav system.
   /// 
   /// This enum defines all the different types of commands that can be sent to
@@ -69,7 +69,7 @@ namespace QuestNav.Protos.Generated {
     /// </summary>
     [pbr::OriginalName("COMMAND_TYPE_UNSPECIFIED")] CommandTypeUnspecified = 0,
     /// <summary>
-    ///*
+    ///
     /// POSE_RESET: Resets the robot's pose estimation to a specified target pose.
     /// 
     /// This command is used to correct drift in the tracking system by setting
@@ -85,7 +85,7 @@ namespace QuestNav.Protos.Generated {
 
   #region Messages
   /// <summary>
-  ///*
+  ///
   /// Payload message for the POSE_RESET command.
   /// 
   /// This message contains the data needed to execute a pose reset operation.
@@ -151,7 +151,7 @@ namespace QuestNav.Protos.Generated {
     public const int TargetPoseFieldNumber = 1;
     private global::Wpi.Proto.ProtobufPose3d targetPose_;
     /// <summary>
-    ///*
+    ///
     /// The target pose to reset the robot to.
     /// 
     /// This should represent the robot's actual position and orientation on the field
@@ -314,7 +314,7 @@ namespace QuestNav.Protos.Generated {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Main command message sent to the QuestNav system.
   /// 
   /// This is the primary message type used to send commands from external systems
@@ -385,7 +385,7 @@ namespace QuestNav.Protos.Generated {
     public const int TypeFieldNumber = 1;
     private global::QuestNav.Protos.Generated.QuestNavCommandType type_ = global::QuestNav.Protos.Generated.QuestNavCommandType.CommandTypeUnspecified;
     /// <summary>
-    ///*
+    ///
     /// The type of command being sent.
     /// 
     /// This field determines which payload (if any) should be populated and
@@ -405,7 +405,7 @@ namespace QuestNav.Protos.Generated {
     public const int CommandIdFieldNumber = 2;
     private uint commandId_;
     /// <summary>
-    ///*
+    ///
     /// Unique identifier for this command instance.
     /// 
     /// This ID is used to match commands with their responses in asynchronous
@@ -428,7 +428,7 @@ namespace QuestNav.Protos.Generated {
     /// <summary>Field number for the "pose_reset_payload" field.</summary>
     public const int PoseResetPayloadFieldNumber = 10;
     /// <summary>
-    ///*
+    ///
     /// Payload for POSE_RESET commands.
     /// Set this field when type = POSE_RESET.
     /// </summary>
@@ -662,7 +662,7 @@ namespace QuestNav.Protos.Generated {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Response message sent back after processing a command.
   /// 
   /// This message is sent by the Quest back to the client after processing
@@ -730,7 +730,7 @@ namespace QuestNav.Protos.Generated {
     public const int CommandIdFieldNumber = 1;
     private uint commandId_;
     /// <summary>
-    ///*
+    ///
     /// Command ID that matches the original command.
     /// 
     /// This field echoes the command_id from the original ProtobufQuestNavCommand
@@ -750,7 +750,7 @@ namespace QuestNav.Protos.Generated {
     public const int SuccessFieldNumber = 2;
     private bool success_;
     /// <summary>
-    ///*
+    ///
     /// Indicates whether the command was executed successfully.
     /// 
     /// true:  Command completed successfully
@@ -773,7 +773,7 @@ namespace QuestNav.Protos.Generated {
     public const int ErrorMessageFieldNumber = 3;
     private string errorMessage_ = "";
     /// <summary>
-    ///*
+    ///
     /// Human-readable error message when success = false.
     /// 
     /// This field provides detailed information about why a command failed.

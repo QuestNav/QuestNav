@@ -44,7 +44,7 @@ namespace QuestNav.Protos.Generated {
   }
   #region Messages
   /// <summary>
-  ///*
+  ///
   /// High-frequency tracking data sent from Quest to external systems.
   /// 
   /// This message contains the core tracking information that external systems
@@ -110,7 +110,7 @@ namespace QuestNav.Protos.Generated {
     public const int FrameCountFieldNumber = 1;
     private int frameCount_;
     /// <summary>
-    ///*
+    ///
     /// Sequential frame counter for this tracking session.
     /// 
     /// This counter increments with each frame processed by the Quest's tracking
@@ -136,7 +136,7 @@ namespace QuestNav.Protos.Generated {
     public const int TimestampFieldNumber = 2;
     private double timestamp_;
     /// <summary>
-    ///*
+    ///
     /// Timestamp in seconds since QuestNav app startup.
     /// 
     /// This provides timing information for the tracking data, allowing external
@@ -164,7 +164,7 @@ namespace QuestNav.Protos.Generated {
     public const int Pose3DFieldNumber = 3;
     private global::Wpi.Proto.ProtobufPose3d pose3D_;
     /// <summary>
-    ///*
+    ///
     /// Quest's 3D pose on the field in WPILib coordinates.
     /// 
     /// This represents the Quest's position and orientation as determined by
@@ -390,7 +390,7 @@ namespace QuestNav.Protos.Generated {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Lower-frequency device status data sent from Quest to external systems.
   /// 
   /// This message contains device health and status information that doesn't need
@@ -457,7 +457,7 @@ namespace QuestNav.Protos.Generated {
     public const int TrackingLostCounterFieldNumber = 1;
     private int trackingLostCounter_;
     /// <summary>
-    ///*
+    ///
     /// Count of tracking loss events since app startup.
     /// 
     /// This counter increments each time the Quest's tracking system loses
@@ -489,7 +489,7 @@ namespace QuestNav.Protos.Generated {
     public const int CurrentlyTrackingFieldNumber = 2;
     private bool currentlyTracking_;
     /// <summary>
-    ///*
+    ///
     /// Current tracking status of the Quest device.
     /// 
     /// true:  Quest is actively tracking and pose data is reliable
@@ -522,7 +522,7 @@ namespace QuestNav.Protos.Generated {
     public const int BatteryPercentFieldNumber = 3;
     private int batteryPercent_;
     /// <summary>
-    ///*
+    ///
     /// Quest device battery level as a percentage (0-100).
     /// 
     /// This provides the current battery charge level of the Quest headset,

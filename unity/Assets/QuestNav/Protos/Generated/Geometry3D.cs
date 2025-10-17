@@ -54,7 +54,7 @@ namespace Wpi.Proto {
   }
   #region Messages
   /// <summary>
-  ///*
+  ///
   /// Represents a 3D translation (displacement) vector.
   /// 
   /// This message encodes a 3D displacement or position vector using Cartesian
@@ -124,7 +124,7 @@ namespace Wpi.Proto {
     public const int XFieldNumber = 1;
     private double x_;
     /// <summary>
-    ///*
+    ///
     /// X-coordinate (forward/backward displacement).
     /// 
     /// Positive values indicate forward direction.
@@ -144,7 +144,7 @@ namespace Wpi.Proto {
     public const int YFieldNumber = 2;
     private double y_;
     /// <summary>
-    ///*
+    ///
     /// Y-coordinate (left/right displacement).
     /// 
     /// Positive values indicate leftward direction.
@@ -164,7 +164,7 @@ namespace Wpi.Proto {
     public const int ZFieldNumber = 3;
     private double z_;
     /// <summary>
-    ///*
+    ///
     /// Z-coordinate (up/down displacement).
     /// 
     /// Positive values indicate upward direction.
@@ -362,7 +362,7 @@ namespace Wpi.Proto {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Represents a quaternion for 3D rotation.
   /// 
   /// Quaternions provide a mathematically robust way to represent 3D rotations
@@ -440,7 +440,7 @@ namespace Wpi.Proto {
     public const int WFieldNumber = 1;
     private double w_;
     /// <summary>
-    ///*
+    ///
     /// W component (scalar/real part) of the quaternion.
     /// 
     /// This is the "real" or "scalar" component of the quaternion.
@@ -462,7 +462,7 @@ namespace Wpi.Proto {
     public const int XFieldNumber = 2;
     private double x_;
     /// <summary>
-    ///*
+    ///
     /// X component (i coefficient) of the quaternion.
     /// 
     /// This is the coefficient of the i basis quaternion.
@@ -484,7 +484,7 @@ namespace Wpi.Proto {
     public const int YFieldNumber = 3;
     private double y_;
     /// <summary>
-    ///*
+    ///
     /// Y component (j coefficient) of the quaternion.
     /// 
     /// This is the coefficient of the j basis quaternion.
@@ -506,7 +506,7 @@ namespace Wpi.Proto {
     public const int ZFieldNumber = 4;
     private double z_;
     /// <summary>
-    ///*
+    ///
     /// Z component (k coefficient) of the quaternion.
     /// 
     /// This is the coefficient of the k basis quaternion.
@@ -730,7 +730,7 @@ namespace Wpi.Proto {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Represents a 3D rotation using a quaternion.
   /// 
   /// This message wraps a quaternion to represent 3D rotations in a standardized
@@ -801,7 +801,7 @@ namespace Wpi.Proto {
     public const int QFieldNumber = 1;
     private global::Wpi.Proto.ProtobufQuaternion q_;
     /// <summary>
-    ///*
+    ///
     /// Quaternion representing the 3D rotation.
     /// 
     /// This quaternion should be normalized (unit quaternion) to represent
@@ -963,7 +963,7 @@ namespace Wpi.Proto {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Represents a complete 3D pose (position and orientation).
   /// 
   /// This message combines a 3D position (translation) with a 3D orientation
@@ -1040,7 +1040,7 @@ namespace Wpi.Proto {
     public const int TranslationFieldNumber = 1;
     private global::Wpi.Proto.ProtobufTranslation3d translation_;
     /// <summary>
-    ///*
+    ///
     /// Position component of the 3D pose.
     /// 
     /// This specifies where the object is located in 3D space using the
@@ -1060,7 +1060,7 @@ namespace Wpi.Proto {
     public const int RotationFieldNumber = 2;
     private global::Wpi.Proto.ProtobufRotation3d rotation_;
     /// <summary>
-    ///*
+    ///
     /// Orientation component of the 3D pose.
     /// 
     /// This specifies how the object is oriented in 3D space relative to
@@ -1255,7 +1255,7 @@ namespace Wpi.Proto {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Represents a 3D coordinate transformation.
   /// 
   /// This message describes how to transform coordinates from one 3D coordinate
@@ -1331,7 +1331,7 @@ namespace Wpi.Proto {
     public const int TranslationFieldNumber = 1;
     private global::Wpi.Proto.ProtobufTranslation3d translation_;
     /// <summary>
-    ///*
+    ///
     /// Translation component of the 3D transformation.
     /// 
     /// This represents the displacement between the origins of the two
@@ -1351,7 +1351,7 @@ namespace Wpi.Proto {
     public const int RotationFieldNumber = 2;
     private global::Wpi.Proto.ProtobufRotation3d rotation_;
     /// <summary>
-    ///*
+    ///
     /// Rotation component of the 3D transformation.
     /// 
     /// This represents the angular difference between the two coordinate
@@ -1546,7 +1546,7 @@ namespace Wpi.Proto {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Represents a 3D twist (velocity in 3D space).
   /// 
   /// This message encodes the instantaneous velocity of an object in 3D space,
@@ -1625,7 +1625,7 @@ namespace Wpi.Proto {
     public const int DxFieldNumber = 1;
     private double dx_;
     /// <summary>
-    ///*
+    ///
     /// Linear velocity in X direction.
     /// 
     /// Rate of change of X position over time. In world coordinates,
@@ -1648,7 +1648,7 @@ namespace Wpi.Proto {
     public const int DyFieldNumber = 2;
     private double dy_;
     /// <summary>
-    ///*
+    ///
     /// Linear velocity in Y direction.
     /// 
     /// Rate of change of Y position over time. In world coordinates,
@@ -1671,7 +1671,7 @@ namespace Wpi.Proto {
     public const int DzFieldNumber = 3;
     private double dz_;
     /// <summary>
-    ///*
+    ///
     /// Linear velocity in Z direction.
     /// 
     /// Rate of change of Z position over time. In world coordinates,
@@ -1694,7 +1694,7 @@ namespace Wpi.Proto {
     public const int RxFieldNumber = 4;
     private double rx_;
     /// <summary>
-    ///*
+    ///
     /// Angular velocity about X-axis (roll rate).
     /// 
     /// Rate of rotation about the X-axis. This represents how fast
@@ -1717,7 +1717,7 @@ namespace Wpi.Proto {
     public const int RyFieldNumber = 5;
     private double ry_;
     /// <summary>
-    ///*
+    ///
     /// Angular velocity about Y-axis (pitch rate).
     /// 
     /// Rate of rotation about the Y-axis. This represents how fast
@@ -1740,7 +1740,7 @@ namespace Wpi.Proto {
     public const int RzFieldNumber = 6;
     private double rz_;
     /// <summary>
-    ///*
+    ///
     /// Angular velocity about Z-axis (yaw rate).
     /// 
     /// Rate of rotation about the Z-axis. This represents how fast

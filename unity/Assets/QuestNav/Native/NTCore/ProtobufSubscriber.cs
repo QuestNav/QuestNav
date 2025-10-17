@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Google.Protobuf;
 
 namespace QuestNav.Native.NTCore
@@ -53,6 +54,42 @@ namespace QuestNav.Native.NTCore
             {
                 return defaultValue;
             }
+        }
+
+        /// <summary>
+        /// Reads the protobuf message queue for this subscriber, returning only successfully parsed messages.
+        /// </summary>
+        /// <returns>An array of protobuf messages of type T from the queue</returns>
+        public TimestampedValue<T>[] ReadQueueValues()
+        {
+            var rawQueue = rawSubscriber.ReadQueue();
+            if (rawQueue == null)
+            {
+                return Array.Empty<TimestampedValue<T>>();
+            }
+            var list = new List<TimestampedValue<T>>(rawQueue.Length);
+            for (int i = 0; i < rawQueue.Length; i++)
+            {
+                try
+                {
+                    // Extract the byte array from the TimestampedValue
+                    var msg = parser.ParseFrom(rawQueue[i].Value);
+                    if (msg != null)
+                        list.Add(
+                            new TimestampedValue<T>
+                            {
+                                LastChange = rawQueue[i].LastChange,
+                                ServerTime = rawQueue[i].ServerTime,
+                                Value = msg,
+                            }
+                        );
+                }
+                catch (Exception)
+                {
+                    // skip bad values
+                }
+            }
+            return list.ToArray();
         }
     }
 }

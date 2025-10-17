@@ -56,7 +56,7 @@ namespace Wpi.Proto {
   }
   #region Messages
   /// <summary>
-  ///*
+  ///
   /// Represents a 2D translation (displacement) vector.
   /// 
   /// This message encodes a 2D displacement or position vector using Cartesian
@@ -123,7 +123,7 @@ namespace Wpi.Proto {
     public const int XFieldNumber = 1;
     private double x_;
     /// <summary>
-    ///*
+    ///
     /// X-coordinate (forward/backward displacement).
     /// 
     /// Positive values indicate forward direction (towards opposing alliance).
@@ -143,7 +143,7 @@ namespace Wpi.Proto {
     public const int YFieldNumber = 2;
     private double y_;
     /// <summary>
-    ///*
+    ///
     /// Y-coordinate (left/right displacement).
     /// 
     /// Positive values indicate leftward direction (when facing forward).
@@ -317,7 +317,7 @@ namespace Wpi.Proto {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Represents a 2D rotation angle.
   /// 
   /// This message encodes a rotation in the 2D plane using a single angle value.
@@ -385,7 +385,7 @@ namespace Wpi.Proto {
     public const int ValueFieldNumber = 1;
     private double value_;
     /// <summary>
-    ///*
+    ///
     /// Rotation angle in radians.
     /// 
     /// The angle is measured counter-clockwise from the positive X-axis.
@@ -542,7 +542,7 @@ namespace Wpi.Proto {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Represents a complete 2D pose (position and orientation).
   /// 
   /// This message combines a 2D position (translation) with a 2D orientation
@@ -611,7 +611,7 @@ namespace Wpi.Proto {
     public const int TranslationFieldNumber = 1;
     private global::Wpi.Proto.ProtobufTranslation2d translation_;
     /// <summary>
-    ///*
+    ///
     /// Position component of the pose.
     /// 
     /// This specifies where the robot is located on the field using the
@@ -631,7 +631,7 @@ namespace Wpi.Proto {
     public const int RotationFieldNumber = 2;
     private global::Wpi.Proto.ProtobufRotation2d rotation_;
     /// <summary>
-    ///*
+    ///
     /// Orientation component of the pose.
     /// 
     /// This specifies which direction the robot is facing on the field.
@@ -826,7 +826,7 @@ namespace Wpi.Proto {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Represents a 2D coordinate transformation.
   /// 
   /// This message describes how to transform coordinates from one 2D coordinate
@@ -895,7 +895,7 @@ namespace Wpi.Proto {
     public const int TranslationFieldNumber = 1;
     private global::Wpi.Proto.ProtobufTranslation2d translation_;
     /// <summary>
-    ///*
+    ///
     /// Translation component of the transformation.
     /// 
     /// This represents the displacement between the origins of the two
@@ -915,7 +915,7 @@ namespace Wpi.Proto {
     public const int RotationFieldNumber = 2;
     private global::Wpi.Proto.ProtobufRotation2d rotation_;
     /// <summary>
-    ///*
+    ///
     /// Rotation component of the transformation.
     /// 
     /// This represents the angular difference between the two coordinate
@@ -1110,7 +1110,7 @@ namespace Wpi.Proto {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Represents a 2D twist (velocity in 2D space).
   /// 
   /// This message encodes the instantaneous velocity of an object in 2D space,
@@ -1183,7 +1183,7 @@ namespace Wpi.Proto {
     public const int DxFieldNumber = 1;
     private double dx_;
     /// <summary>
-    ///*
+    ///
     /// Linear velocity in X direction.
     /// 
     /// Rate of change of X position over time. In field coordinates,
@@ -1206,7 +1206,7 @@ namespace Wpi.Proto {
     public const int DyFieldNumber = 2;
     private double dy_;
     /// <summary>
-    ///*
+    ///
     /// Linear velocity in Y direction.
     /// 
     /// Rate of change of Y position over time. In field coordinates,
@@ -1229,7 +1229,7 @@ namespace Wpi.Proto {
     public const int DthetaFieldNumber = 3;
     private double dtheta_;
     /// <summary>
-    ///*
+    ///
     /// Angular velocity (rate of rotation).
     /// 
     /// Rate of change of orientation over time. This represents how
@@ -1430,7 +1430,7 @@ namespace Wpi.Proto {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Represents a 2D rectangle with arbitrary orientation.
   /// 
   /// This message defines a rectangular region in 2D space using a center pose
@@ -1500,7 +1500,7 @@ namespace Wpi.Proto {
     public const int CenterFieldNumber = 1;
     private global::Wpi.Proto.ProtobufPose2d center_;
     /// <summary>
-    ///*
+    ///
     /// Center pose of the rectangle.
     /// 
     /// The translation component specifies the center point of the rectangle
@@ -1524,7 +1524,7 @@ namespace Wpi.Proto {
     public const int XWidthFieldNumber = 2;
     private double xWidth_;
     /// <summary>
-    ///*
+    ///
     /// Width of the rectangle along its local X-axis.
     /// 
     /// This is the dimension of the rectangle in the direction of the
@@ -1547,7 +1547,7 @@ namespace Wpi.Proto {
     public const int YWidthFieldNumber = 3;
     private double yWidth_;
     /// <summary>
-    ///*
+    ///
     /// Height of the rectangle along its local Y-axis.
     /// 
     /// This is the dimension of the rectangle in the direction of the
@@ -1757,7 +1757,7 @@ namespace Wpi.Proto {
   }
 
   /// <summary>
-  ///*
+  ///
   /// Represents a 2D ellipse with arbitrary orientation.
   /// 
   /// This message defines an elliptical region in 2D space using a center pose
@@ -1832,7 +1832,7 @@ namespace Wpi.Proto {
     public const int CenterFieldNumber = 1;
     private global::Wpi.Proto.ProtobufPose2d center_;
     /// <summary>
-    ///*
+    ///
     /// Center pose of the ellipse.
     /// 
     /// The translation component specifies the center point of the ellipse
@@ -1856,7 +1856,7 @@ namespace Wpi.Proto {
     public const int XSemiAxisFieldNumber = 2;
     private double xSemiAxis_;
     /// <summary>
-    ///*
+    ///
     /// Semi-axis length along the ellipse's local X-axis.
     /// 
     /// This is half the width of the ellipse in the direction of the
@@ -1882,7 +1882,7 @@ namespace Wpi.Proto {
     public const int YSemiAxisFieldNumber = 3;
     private double ySemiAxis_;
     /// <summary>
-    ///*
+    ///
     /// Semi-axis length along the ellipse's local Y-axis.
     /// 
     /// This is half the height of the ellipse in the direction of the

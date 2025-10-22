@@ -41,7 +41,7 @@ namespace QuestNav.Commands
         /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
         /// <param name="resetTransform">Reference to the reset position transform</param>
         public CommandProcessor(
-            NetworkTableConnection networkTableConnection,
+            INetworkTableConnection networkTableConnection,
             Transform vrCamera,
             Transform vrCameraRoot,
             Transform resetTransform

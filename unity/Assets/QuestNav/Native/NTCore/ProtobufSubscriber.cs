@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Google.Protobuf;
+using QuestNav.Utils;
 
 namespace QuestNav.Native.NTCore
 {
@@ -84,9 +85,13 @@ namespace QuestNav.Native.NTCore
                             }
                         );
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    // skip bad values
+                    // Log and discard messages that fail to parse
+                    QueuedLogger.LogException(
+                        $"ProtobufSubscriber<{typeof(T).Name}>: Failed to parse queued message at index {i}, skipping.",
+                        e
+                    );
                 }
             }
             return list.ToArray();

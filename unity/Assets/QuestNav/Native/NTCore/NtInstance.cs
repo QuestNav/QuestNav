@@ -395,5 +395,18 @@ namespace QuestNav.Native.NTCore
             NtCoreNatives.NT_AddPolledLogger(poller, (uint)minLevel, (uint)maxLevel);
             return new PolledLogger(poller);
         }
+
+        /// <summary>
+        /// Returns monotonic current time in 1 us increments.
+        /// This is the same time base used for entry and connection timestamps.
+        /// This function by default simply wraps WPI_Now(), but if NT_SetNow() is
+        /// called, this function instead returns the value passed to NT_SetNow();
+        /// this can be used to reduce overhead.
+        /// </summary>
+        /// <returns></returns>
+        public long Now()
+        {
+            return NtCoreNatives.NT_Now();
+        }
     }
 }

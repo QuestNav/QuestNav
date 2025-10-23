@@ -1,4 +1,3 @@
-using System;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Network;
@@ -23,6 +22,11 @@ namespace QuestNav.Network
         /// </summary>
         /// <returns>true when either an IP or team number has been set</returns>
         bool IsReadyToConnect { get; }
+
+        /// <summary>
+        /// Gets the current NT time
+        /// </summary>
+        long Now { get; }
 
         /// <summary>
         /// Publishes frame data to NetworkTables.
@@ -53,16 +57,23 @@ namespace QuestNav.Network
         void UpdateTeamNumber(int teamNumber);
 
         /// <summary>
-        /// Gets the latest command request from the robot
+        /// Gets all command requests from the robot since the last read, or an empty array if none available
         /// </summary>
-        /// <returns>The command request, or a default command if none available</returns>
-        ProtobufQuestNavCommand GetCommandRequest();
+        /// <returns>All command requests since the last read</returns>
+        TimestampedValue<ProtobufQuestNavCommand>[] GetCommandRequests();
 
         /// <summary>
-        /// Sends a command response back to the robot
+        /// Sends a command processing success response back to the robot
         /// </summary>
-        /// <param name="response">The response to send</param>
-        void SetCommandResponse(ProtobufQuestNavCommandResponse response);
+        /// <param name="commandId">command_id</param>
+        void SendCommandSuccessResponse(uint commandId);
+
+        /// <summary>
+        /// Sends a command processing error response back to the robot
+        /// </summary>
+        /// <param name="commandId">command_id</param>
+        /// <param name="errorMessage">error message</param>
+        void SendCommandErrorResponse(uint commandId, string errorMessage);
 
         /// <summary>
         /// Processes and logs NetworkTables internal messages
@@ -183,7 +194,13 @@ public class NetworkTableConnection : INetworkTableConnection
         commandRequestSubscriber = ntInstance.GetProtobufSubscriber<ProtobufQuestNavCommand>(
             QuestNavConstants.Topics.COMMAND_REQUEST,
             "questnav.protos.commands.ProtobufQuestNavCommand",
-            QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+            new PubSubOptions
+            {
+                SendAll = true,
+                KeepDuplicates = true,
+                Periodic = 0.005,
+                PollStorage = 20,
+            }
         );
     }
 
@@ -198,6 +215,11 @@ public class NetworkTableConnection : INetworkTableConnection
     /// Gets whether the connection is currently established.
     /// </summary>
     public bool IsReadyToConnect => teamNumberSet || ipAddressSet;
+
+    /// <summary>
+    /// Gets the current NT time
+    /// </summary>
+    public long Now => ntInstance.Now();
 
     /// <summary>
     /// Updates the team number and configures the NetworkTables connection.
@@ -300,21 +322,49 @@ public class NetworkTableConnection : INetworkTableConnection
     };
 
     /// <summary>
-    /// Gets the latest command request from the robot, or returns a default command if none available
+    /// Gets all command requests from the robot since the last read, or an empty array if none available
     /// </summary>
-    /// <returns>The latest command request</returns>
-    public ProtobufQuestNavCommand GetCommandRequest()
+    /// <returns>All command requests since the last read</returns>
+    public TimestampedValue<ProtobufQuestNavCommand>[] GetCommandRequests()
     {
-        return commandRequestSubscriber.Get(defaultCommand);
+        return commandRequestSubscriber.ReadQueueValues();
     }
 
     /// <summary>
     /// Sends a command response back to the robot
     /// </summary>
     /// <param name="response">The response containing success status and any error messages</param>
-    public void SetCommandResponse(ProtobufQuestNavCommandResponse response)
+    private void SetCommandResponse(ProtobufQuestNavCommandResponse response)
     {
         commandResponsePublisher.Set(response);
+    }
+
+    /// <summary>
+    /// Sends a command processing success response back to the robot
+    /// </summary>
+    /// <param name="commandId">command_id</param>
+    public void SendCommandSuccessResponse(uint commandId)
+    {
+        SetCommandResponse(
+            new ProtobufQuestNavCommandResponse { CommandId = commandId, Success = true }
+        );
+    }
+
+    /// <summary>
+    /// Sends a command processing error response back to the robot
+    /// </summary>
+    /// <param name="commandId">command_id</param>
+    /// <param name="errorMessage">error message</param>
+    public void SendCommandErrorResponse(uint commandId, string errorMessage)
+    {
+        SetCommandResponse(
+            new ProtobufQuestNavCommandResponse
+            {
+                CommandId = commandId,
+                Success = false,
+                ErrorMessage = errorMessage,
+            }
+        );
     }
 
     #endregion

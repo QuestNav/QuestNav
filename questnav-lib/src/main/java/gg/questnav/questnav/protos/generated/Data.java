@@ -16,7 +16,7 @@ import us.hebi.quickbuf.ProtoUtil;
 import us.hebi.quickbuf.RepeatedByte;
 
 public final class Data {
-    private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(7023,
+    private static final RepeatedByte descriptorData = ProtoUtil.decodeBase64(7014,
         "CgpkYXRhLnByb3RvEhRxdWVzdG5hdi5wcm90b3MuZGF0YRoQZ2VvbWV0cnkzZC5wcm90byKNAQoZUHJv" + 
         "dG9idWZRdWVzdE5hdkZyYW1lRGF0YRIfCgtmcmFtZV9jb3VudBgBIAEoBVIKZnJhbWVDb3VudBIcCgl0" + 
         "aW1lc3RhbXAYAiABKAFSCXRpbWVzdGFtcBIxCgZwb3NlM2QYAyABKAsyGS53cGkucHJvdG8uUHJvdG9i" + 
@@ -24,117 +24,116 @@ public final class Data {
         "bG9zdF9jb3VudGVyGAEgASgFUhN0cmFja2luZ0xvc3RDb3VudGVyEi0KEmN1cnJlbnRseV90cmFja2lu" + 
         "ZxgCIAEoCFIRY3VycmVudGx5VHJhY2tpbmcSJwoPYmF0dGVyeV9wZXJjZW50GAMgASgFUg5iYXR0ZXJ5" + 
         "UGVyY2VudEJDCiVnZy5xdWVzdG5hdi5xdWVzdG5hdi5wcm90b3MuZ2VuZXJhdGVkqgIZUXVlc3ROYXYu" + 
-        "UHJvdG9zLkdlbmVyYXRlZEqwMwoHEgUAA8ABAQoICgEMEgMAAxUK5AYKAQISAxYAHTLZBioKIFF1ZXN0" + 
-        "TmF2IERhdGEgUHJvdG9jb2wgQnVmZmVyIERlZmluaXRpb25zCiAKIFRoaXMgZmlsZSBkZWZpbmVzIHRo" + 
-        "ZSBkYXRhIHN0cnVjdHVyZXMgdXNlZCBmb3IgdHJhbnNtaXR0aW5nIHRyYWNraW5nIGFuZCBkZXZpY2UK" + 
-        "IGluZm9ybWF0aW9uIGZyb20gdGhlIFF1ZXN0IGhlYWRzZXQgdG8gZXh0ZXJuYWwgc3lzdGVtcyAoc3Vj" + 
-        "aCBhcyByb2JvdCBjb2RlKS4KIFRoZSBkYXRhIGlzIG9yZ2FuaXplZCBpbnRvIHR3byBtYWluIGNhdGVn" + 
-        "b3JpZXMgd2l0aCBkaWZmZXJlbnQgdXBkYXRlIGZyZXF1ZW5jaWVzOgogCiAxLiBGcmFtZSBEYXRhOiBI" + 
-        "aWdoLWZyZXF1ZW5jeSB0cmFja2luZyBpbmZvcm1hdGlvbiAocG9zZSwgdGltZXN0YW1wcykKIDIuIERl" + 
-        "dmljZSBEYXRhOiBMb3dlci1mcmVxdWVuY3kgZGV2aWNlIHN0YXR1cyBpbmZvcm1hdGlvbiAoYmF0dGVy" + 
-        "eSwgdHJhY2tpbmcgc3RhdGUpCiAKIFRoaXMgc2VwYXJhdGlvbiBhbGxvd3MgZm9yIGVmZmljaWVudCBi" + 
-        "YW5kd2lkdGggdXNhZ2UgYnkgc2VuZGluZyBjcml0aWNhbCB0cmFja2luZwogZGF0YSBmcmVxdWVudGx5" + 
-        "IHdoaWxlIHNlbmRpbmcgbGVzcyBjcml0aWNhbCBkZXZpY2Ugc3RhdHVzIGRhdGEgYXQgYSBsb3dlciBy" + 
-        "YXRlLgogCiBEYXRhIEZsb3c6CiAtIFF1ZXN0IGNvbnRpbnVvdXNseSBwcm9jZXNzZXMgY2FtZXJhL3Nl" + 
-        "bnNvciBkYXRhCiAtIEZyYW1lIGRhdGEgaXMgc2VudCBldmVyeSAxMCBtaWxsaXNlY29uZHMgKDEwMCBI",
-        "eikKIC0gRGV2aWNlIGRhdGEgaXMgc2VudCBldmVyeSAzMzMgbWlsbGlzZWNvbmRzICgzIEh6KQogLSBF" + 
-        "eHRlcm5hbCBzeXN0ZW1zIHJlY2VpdmUgYW5kIHByb2Nlc3MgdGhpcyBkYXRhIGZvciByb2JvdCBsb2Nh" + 
-        "bGl6YXRpb24KCggKAQgSAxcANgoJCgIIJRIDFwA2CggKAQgSAxgAPgoJCgIIARIDGAA+Cj0KAgMAEgMb" + 
-        "ABoaMiBJbXBvcnQgZ2VvbWV0cnkgbWVzc2FnZXMgZm9yIHBvc2UgcmVwcmVzZW50YXRpb24KCsAFCgIE" + 
-        "ABIELQBpARqzBSoKIEhpZ2gtZnJlcXVlbmN5IHRyYWNraW5nIGRhdGEgc2VudCBmcm9tIFF1ZXN0IHRv" + 
-        "IGV4dGVybmFsIHN5c3RlbXMuCiAKIFRoaXMgbWVzc2FnZSBjb250YWlucyB0aGUgY29yZSB0cmFja2lu" + 
-        "ZyBpbmZvcm1hdGlvbiB0aGF0IGV4dGVybmFsIHN5c3RlbXMKIChsaWtlIHJvYm90IGNvZGUpIG5lZWQg" + 
-        "Zm9yIHJlYWwtdGltZSBsb2NhbGl6YXRpb24gYW5kIG5hdmlnYXRpb24uIEl0J3Mgc2VudAogYXQgMTAw" + 
-        "IEh6IChldmVyeSAxMCBtaWxsaXNlY29uZHMpIHRvIHByb3ZpZGUgc21vb3RoLCByZXNwb25zaXZlIHRy" + 
-        "YWNraW5nLgogCiBUaGUgZGF0YSByZXByZXNlbnRzIHRoZSBRdWVzdCdzIHBvc2l0aW9uIGFuZCBvcmll" + 
-        "bnRhdGlvbiBvbiB0aGUgZmllbGQsCiBkZXJpdmVkIGZyb20gdmlzdWFsLWluZXJ0aWFsIG9kb21ldHJ5" + 
-        "IHVzaW5nIHRoZSBRdWVzdCdzIGNhbWVyYXMgYW5kIElNVSBzZW5zb3JzLgogCiBDb29yZGluYXRlIFN5" + 
-        "c3RlbToKIC0gVXNlcyBXUElMaWIgZmllbGQtcmVsYXRpdmUgY29vcmRpbmF0ZSBzeXN0ZW0KIC0gT3Jp" + 
-        "Z2luIGFuZCBheGVzIGRlcGVuZCBvbiBmaWVsZCBzZXR1cCBhbmQgY2FsaWJyYXRpb24KIC0gUG9zZSBy" + 
-        "ZXByZXNlbnRzIHRoZSBRdWVzdCdzIHBvc2l0aW9uOyBtb3VudGluZyBvZmZzZXQgdG8gZ2V0IHJvYm90" + 
-        "IHBvc2l0aW9uCiAgIGlzIGFwcGxpZWQgaW4gZW5kIHVzZXIgY29kZQoKCgoDBAABEgMtCCEKuAMKBAQA" + 
-        "AgASAzsCGBqqAyoKIFNlcXVlbnRpYWwgZnJhbWUgY291bnRlciBmb3IgdGhpcyB0cmFja2luZyBzZXNz" + 
-        "aW9uLgogCiBUaGlzIGNvdW50ZXIgaW5jcmVtZW50cyB3aXRoIGVhY2ggZnJhbWUgcHJvY2Vzc2VkIGJ5" + 
-        "IHRoZSBRdWVzdCdzIHRyYWNraW5nCiBzeXN0ZW0uIEl0IGNhbiBiZSB1c2VkIHRvOgogLSBEZXRlY3Qg" + 
-        "ZHJvcHBlZCBtZXNzYWdlcwogLSBDYWxjdWxhdGUgZWZmZWN0aXZlIGZyYW1lIHJhdGUKIC0gU3luY2hy",
-        "b25pemUgd2l0aCBvdGhlciBkYXRhIHN0cmVhbXMKIAogVGhlIGNvdW50ZXIgcmVzZXRzIHRvIDAgd2hl" + 
-        "biB0aGUgUXVlc3ROYXYgYXBwIHN0YXJ0cyBhbmQgaW5jcmVtZW50cwogY29udGludW91c2x5IGR1cmlu" + 
-        "ZyBvcGVyYXRpb24uIEZyYW1lIGRyb3BzIGluIHRyYW5zbWlzc2lvbiB3aWxsIGNyZWF0ZQogZ2FwcyBp" + 
-        "biB0aGUgc2VxdWVuY2UuCgoMCgUEAAIABRIDOwIHCgwKBQQAAgABEgM7CBMKDAoFBAACAAMSAzsWFwrf" + 
-        "AwoEBAACARIDTAIXGtEDKgogVGltZXN0YW1wIGluIHNlY29uZHMgc2luY2UgUXVlc3ROYXYgYXBwIHN0" + 
-        "YXJ0dXAuCiAKIFRoaXMgcHJvdmlkZXMgdGltaW5nIGluZm9ybWF0aW9uIGZvciB0aGUgdHJhY2tpbmcg" + 
-        "ZGF0YSwgYWxsb3dpbmcgZXh0ZXJuYWwKIHN5c3RlbXMgdG86CiAtIENhbGN1bGF0ZSBkYXRhIGFnZSBh" + 
-        "bmQgbGF0ZW5jeQogLSBJbnRlcnBvbGF0ZSBvciBleHRyYXBvbGF0ZSBwb3NlcyBmb3IgcHJlZGljdGlv" + 
-        "bgogLSBTeW5jaHJvbml6ZSB3aXRoIG90aGVyIHNlbnNvciBkYXRhCiAtIEltcGxlbWVudCB0aW1lb3V0" + 
-        "IGRldGVjdGlvbgogCiBUaGUgdGltZXN0YW1wIGlzIHJlbGF0aXZlIHRvIGFwcCBzdGFydHVwLCBub3Qg" + 
-        "c3lzdGVtIHRpbWUsIHRvIGF2b2lkCiBjbG9jayBzeW5jaHJvbml6YXRpb24gaXNzdWVzIGJldHdlZW4g" + 
-        "ZGV2aWNlcy4KIAogUmVzb2x1dGlvbjogVHlwaWNhbGx5IHN1Yi1taWxsaXNlY29uZCBwcmVjaXNpb24K" + 
-        "CgwKBQQAAgEFEgNMAggKDAoFBAACAQESA0wJEgoMCgUEAAIBAxIDTBUWCrUHCgQEAAICEgNoAiYapwcq" + 
-        "CiBRdWVzdCdzIDNEIHBvc2Ugb24gdGhlIGZpZWxkIGluIFdQSUxpYiBjb29yZGluYXRlcy4KIAogVGhp" + 
-        "cyByZXByZXNlbnRzIHRoZSBRdWVzdCdzIHBvc2l0aW9uIGFuZCBvcmllbnRhdGlvbiBhcyBkZXRlcm1p" + 
-        "bmVkIGJ5CiB0aGUgUXVlc3QncyB0cmFja2luZyBzeXN0ZW0uIFRoZSBwb3NlIGFjY291bnRzIGZvcjoK" + 
-        "IC0gQ29vcmRpbmF0ZSBzeXN0ZW0gdHJhbnNmb3JtYXRpb24gdG8gV1BJTGliIHN0YW5kYXJkCiAtIEFu" + 
-        "eSBjYWxpYnJhdGlvbiBvZmZzZXRzIGFwcGxpZWQKIAogTm90ZTogVGhpcyBpcyB0aGUgUXVlc3QncyBw" + 
-        "b3NpdGlvbjsgZW5kIHVzZXIgY29kZSBhcHBsaWVzIG1vdW50aW5nIG9mZnNldAogdG8gZ2V0IHRoZSBy" + 
-        "b2JvdCdzIHBvc2l0aW9uLgogCiBDb29yZGluYXRlIFN5c3RlbSBEZXRhaWxzOgogLSBYOiBGb3J3YXJk",
-        "IGRpcmVjdGlvbiAodG93YXJkcyBvcHBvc2luZyBhbGxpYW5jZSkKIC0gWTogTGVmdCBkaXJlY3Rpb24g" + 
-        "KHdoZW4gZmFjaW5nIGZvcndhcmQpCiAtIFo6IFVwIGRpcmVjdGlvbgogLSBZYXcgKFopOiBDb3VudGVy" + 
-        "LWNsb2Nrd2lzZSAocmlnaHQtaGFuZGVkKSByb3RhdGlvbiBhcm91bmQgdGhlIFogYXhpcwogLSBQaXRj" + 
-        "aCAoWSk6IENvdW50ZXItY2xvY2t3aXNlIChyaWdodC1oYW5kZWQpIHJvdGF0aW9uIGFyb3VuZCBZIGF4" + 
-        "aXMKIC0gUm9sbCAoWCk6IENvdW50ZXItY2xvY2t3aXNlIChyaWdodC1oYW5kZWQpIHJvdGF0aW9uIGFy" + 
-        "b3VuZCB0aGUgWCBheGlzCiAtIFVuaXRzOiBtZXRlcnMgZm9yIHRyYW5zbGF0aW9uLCByYWRpYW5zIGZv" + 
-        "ciByb3RhdGlvbgogCiBBY2N1cmFjeSBkZXBlbmRzIG9uOgogLSBFbnZpcm9ubWVudGFsIGxpZ2h0aW5n" + 
-        "IGFuZCBmZWF0dXJlcwogLSBRdWVzdCB0cmFja2luZyBxdWFsaXR5CiAtIENhbGlicmF0aW9uIGFjY3Vy" + 
-        "YWN5CiAtIFRpbWUgc2luY2UgbGFzdCBwb3NlIHJlc2V0CgoMCgUEAAICBhIDaAIaCgwKBQQAAgIBEgNo" + 
-        "GyEKDAoFBAACAgMSA2gkJQryBAoCBAESBXwAwAEBGuQEKgogTG93ZXItZnJlcXVlbmN5IGRldmljZSBz" + 
-        "dGF0dXMgZGF0YSBzZW50IGZyb20gUXVlc3QgdG8gZXh0ZXJuYWwgc3lzdGVtcy4KIAogVGhpcyBtZXNz" + 
-        "YWdlIGNvbnRhaW5zIGRldmljZSBoZWFsdGggYW5kIHN0YXR1cyBpbmZvcm1hdGlvbiB0aGF0IGRvZXNu" + 
-        "J3QgbmVlZAogdG8gYmUgc2VudCBhcyBmcmVxdWVudGx5IGFzIHRyYWNraW5nIGRhdGEuIEl0J3Mgc2Vu" + 
-        "dCBhdCAzIEh6IChldmVyeSAzMzMgbWlsbGlzZWNvbmRzKQogdG8gcHJvdmlkZSBtb25pdG9yaW5nIGFu" + 
-        "ZCBkaWFnbm9zdGljIGluZm9ybWF0aW9uIHdpdGhvdXQgY29uc3VtaW5nIGV4Y2Vzc2l2ZQogYmFuZHdp" + 
-        "ZHRoLgogCiBUaGlzIGRhdGEgaGVscHMgZXh0ZXJuYWwgc3lzdGVtczoKIC0gTW9uaXRvciBRdWVzdCBk" + 
-        "ZXZpY2UgaGVhbHRoCiAtIERldGVjdCB0cmFja2luZyBzeXN0ZW0gaXNzdWVzCiAtIEltcGxlbWVudCBm" + 
-        "YWlsc2FmZSBiZWhhdmlvcnMKIC0gUHJvdmlkZSB1c2VyIGZlZWRiYWNrIGFib3V0IHN5c3RlbSBzdGF0" + 
-        "dXMKIAogVGhlIGluZm9ybWF0aW9uIGlzIHVzZWZ1bCBmb3IgYm90aCBhdXRvbm9tb3VzIG9wZXJhdGlv" + 
-        "biBhbmQgZGVidWdnaW5nLwogdHJvdWJsZXNob290aW5nIHNjZW5hcmlvcy4KCgoKAwQBARIDfAgiCoYF",
-        "CgQEAQIAEgSQAQIiGvcEKgogQ291bnQgb2YgdHJhY2tpbmcgbG9zcyBldmVudHMgc2luY2UgYXBwIHN0" + 
-        "YXJ0dXAuCiAKIFRoaXMgY291bnRlciBpbmNyZW1lbnRzIGVhY2ggdGltZSB0aGUgUXVlc3QncyB0cmFj" + 
-        "a2luZyBzeXN0ZW0gbG9zZXMKIHRyYWNraW5nIGFmdGVyIGhhdmluZyBlc3RhYmxpc2hlZCBpdC4gVHJh" + 
-        "Y2tpbmcgbG9zcyBjYW4gb2NjdXIgZHVlIHRvOgogLSBQb29yIGxpZ2h0aW5nIGNvbmRpdGlvbnMKIC0g" + 
-        "TGFjayBvZiB2aXN1YWwgZmVhdHVyZXMgaW4gZW52aXJvbm1lbnQKIC0gUmFwaWQgbW90aW9uIG9yIGFj" + 
-        "Y2VsZXJhdGlvbgogLSBPY2NsdXNpb24gb2YgY2FtZXJhcwogLSBIYXJkd2FyZSBpc3N1ZXMKIAogQSBo" + 
-        "aWdoIG9yIHJhcGlkbHkgaW5jcmVhc2luZyBjb3VudGVyIG1heSBpbmRpY2F0ZToKIC0gRW52aXJvbm1l" + 
-        "bnRhbCBpc3N1ZXMgKGxpZ2h0aW5nLCBmZWF0dXJlcykKIC0gUXVlc3QgbW91bnRpbmcgcHJvYmxlbXMg" + 
-        "KHZpYnJhdGlvbiwgb2JzdHJ1Y3Rpb24pCiAtIEhhcmR3YXJlIGRlZ3JhZGF0aW9uCiAKIFRoaXMgbWV0" + 
-        "cmljIGhlbHBzIGFzc2VzcyB0cmFja2luZyBzeXN0ZW0gcmVsaWFiaWxpdHkgYW5kIGNhbiB0cmlnZ2Vy" + 
-        "CiBhbGVydHMgb3IgZmFsbGJhY2sgYmVoYXZpb3JzIGluIHJvYm90IGNvZGUuCgoNCgUEAQIABRIEkAEC" + 
-        "BwoNCgUEAQIAARIEkAEIHQoNCgUEAQIAAxIEkAEgIQq6BQoEBAECARIEpgECHhqrBSoKIEN1cnJlbnQg" + 
-        "dHJhY2tpbmcgc3RhdHVzIG9mIHRoZSBRdWVzdCBkZXZpY2UuCiAKIHRydWU6ICBRdWVzdCBpcyBhY3Rp" + 
-        "dmVseSB0cmFja2luZyBhbmQgcG9zZSBkYXRhIGlzIHJlbGlhYmxlCiBmYWxzZTogUXVlc3QgaGFzIGxv" + 
-        "c3QgdHJhY2tpbmcgYW5kIHBvc2UgZGF0YSBzaG91bGQgbm90IGJlIHRydXN0ZWQKIAogV2hlbiB0cmFj" + 
-        "a2luZyBpcyBsb3N0OgogLSBQb3NlIGRhdGEgYmVjb21lcyBzdGFsZSBhbmQgdW5yZWxpYWJsZQogLSBS" + 
-        "b2JvdCBzaG91bGQgc3dpdGNoIHRvIGFsdGVybmF0aXZlIGxvY2FsaXphdGlvbiBtZXRob2RzCiAtIE1v" + 
-        "dmVtZW50IHNob3VsZCBiZSBsaW1pdGVkIG9yIHN0b3BwZWQgZm9yIHNhZmV0eQogCiBUcmFja2luZyBj" + 
-        "YW4gYmUgcmVjb3ZlcmVkIGJ5OgogLSBJbXByb3ZpbmcgbGlnaHRpbmcgY29uZGl0aW9ucwogLSBNb3Zp" + 
-        "bmcgdG8gYXJlYSB3aXRoIG1vcmUgdmlzdWFsIGZlYXR1cmVzCiAtIFJlZHVjaW5nIG1vdGlvbiB0byBh",
-        "bGxvdyBzeXN0ZW0gdG8gcmUtaW5pdGlhbGl6ZQogLSBQZXJmb3JtaW5nIHBvc2UgcmVzZXQgd2hlbiB0" + 
-        "cmFja2luZyByZWNvdmVycwogCiBFeHRlcm5hbCBzeXN0ZW1zIHNob3VsZCBtb25pdG9yIHRoaXMgZmll" + 
-        "bGQgYW5kIGltcGxlbWVudCBhcHByb3ByaWF0ZQogZmFsbGJhY2sgYmVoYXZpb3JzIHdoZW4gdHJhY2tp" + 
-        "bmcgaXMgbG9zdC4KCg0KBQQBAgEFEgSmAQIGCg0KBQQBAgEBEgSmAQcZCg0KBQQBAgEDEgSmARwdCtoF" + 
-        "CgQEAQICEgS/AQIcGssFKgogUXVlc3QgZGV2aWNlIGJhdHRlcnkgbGV2ZWwgYXMgYSBwZXJjZW50YWdl" + 
-        "ICgwLTEwMCkuCiAKIFRoaXMgcHJvdmlkZXMgdGhlIGN1cnJlbnQgYmF0dGVyeSBjaGFyZ2UgbGV2ZWwg" + 
-        "b2YgdGhlIFF1ZXN0IGhlYWRzZXQsCiBhbGxvd2luZyBleHRlcm5hbCBzeXN0ZW1zIHRvOgogLSBNb25p" + 
-        "dG9yIHBvd2VyIHN0YXR1cyBkdXJpbmcgb3BlcmF0aW9uCiAtIEltcGxlbWVudCBsb3ctYmF0dGVyeSB3" + 
-        "YXJuaW5ncyBvciBiZWhhdmlvcnMKIC0gUGxhbiBvcGVyYXRpb24gZHVyYXRpb24gYW5kIGNoYXJnaW5n" + 
-        "IG5lZWRzCiAtIFRyaWdnZXIgZ3JhY2VmdWwgc2h1dGRvd24gcHJvY2VkdXJlcwogCiBCYXR0ZXJ5IExl" + 
-        "dmVsIEd1aWRlbGluZXM6CiAtIDEwMCU6IEZ1bGx5IGNoYXJnZWQKIC0gNTAtMTAwJTogTm9ybWFsIG9w" + 
-        "ZXJhdGlvbgogLSAyMC01MCU6IENvbnNpZGVyIGNoYXJnaW5nIHNvb24KIC0gMTAtMjAlOiBMb3cgYmF0" + 
-        "dGVyeSB3YXJuaW5nIHJlY29tbWVuZGVkCiAtIDAtMTAlOiBDcml0aWNhbCAtIHBsYW4gaW1tZWRpYXRl" + 
-        "IHNodXRkb3duL2NoYXJnaW5nCiAKIE5vdGU6IEJhdHRlcnkgZHJhaW4gcmF0ZSBkZXBlbmRzIG9uOgog" + 
-        "LSBQcm9jZXNzaW5nIGxvYWQgKHRyYWNraW5nIGNvbXBsZXhpdHkpCiAtIERpc3BsYXkgdXNhZ2UgKGlm" + 
-        "IGFueSkKIC0gV2lyZWxlc3MgY29tbXVuaWNhdGlvbiBhY3Rpdml0eQogLSBFbnZpcm9ubWVudGFsIHRl" + 
-        "bXBlcmF0dXJlCgoNCgUEAQICBRIEvwECBwoNCgUEAQICARIEvwEIFwoNCgUEAQICAxIEvwEaG2IGcHJv" + 
-        "dG8z");
+        "UHJvdG9zLkdlbmVyYXRlZEqnMwoHEgUAA8ABAQoICgEMEgMAAxUK4wYKAQISAxYAHTLYBgogUXVlc3RO" + 
+        "YXYgRGF0YSBQcm90b2NvbCBCdWZmZXIgRGVmaW5pdGlvbnMKIAogVGhpcyBmaWxlIGRlZmluZXMgdGhl" + 
+        "IGRhdGEgc3RydWN0dXJlcyB1c2VkIGZvciB0cmFuc21pdHRpbmcgdHJhY2tpbmcgYW5kIGRldmljZQog" + 
+        "aW5mb3JtYXRpb24gZnJvbSB0aGUgUXVlc3QgaGVhZHNldCB0byBleHRlcm5hbCBzeXN0ZW1zIChzdWNo" + 
+        "IGFzIHJvYm90IGNvZGUpLgogVGhlIGRhdGEgaXMgb3JnYW5pemVkIGludG8gdHdvIG1haW4gY2F0ZWdv" + 
+        "cmllcyB3aXRoIGRpZmZlcmVudCB1cGRhdGUgZnJlcXVlbmNpZXM6CiAKIDEuIEZyYW1lIERhdGE6IEhp" + 
+        "Z2gtZnJlcXVlbmN5IHRyYWNraW5nIGluZm9ybWF0aW9uIChwb3NlLCB0aW1lc3RhbXBzKQogMi4gRGV2" + 
+        "aWNlIERhdGE6IExvd2VyLWZyZXF1ZW5jeSBkZXZpY2Ugc3RhdHVzIGluZm9ybWF0aW9uIChiYXR0ZXJ5" + 
+        "LCB0cmFja2luZyBzdGF0ZSkKIAogVGhpcyBzZXBhcmF0aW9uIGFsbG93cyBmb3IgZWZmaWNpZW50IGJh" + 
+        "bmR3aWR0aCB1c2FnZSBieSBzZW5kaW5nIGNyaXRpY2FsIHRyYWNraW5nCiBkYXRhIGZyZXF1ZW50bHkg" + 
+        "d2hpbGUgc2VuZGluZyBsZXNzIGNyaXRpY2FsIGRldmljZSBzdGF0dXMgZGF0YSBhdCBhIGxvd2VyIHJh" + 
+        "dGUuCiAKIERhdGEgRmxvdzoKIC0gUXVlc3QgY29udGludW91c2x5IHByb2Nlc3NlcyBjYW1lcmEvc2Vu" + 
+        "c29yIGRhdGEKIC0gRnJhbWUgZGF0YSBpcyBzZW50IGV2ZXJ5IDEwIG1pbGxpc2Vjb25kcyAoMTAwIEh6",
+        "KQogLSBEZXZpY2UgZGF0YSBpcyBzZW50IGV2ZXJ5IDMzMyBtaWxsaXNlY29uZHMgKDMgSHopCiAtIEV4" + 
+        "dGVybmFsIHN5c3RlbXMgcmVjZWl2ZSBhbmQgcHJvY2VzcyB0aGlzIGRhdGEgZm9yIHJvYm90IGxvY2Fs" + 
+        "aXphdGlvbgoKCAoBCBIDFwA2CgkKAgglEgMXADYKCAoBCBIDGAA+CgkKAggBEgMYAD4KPQoCAwASAxsA" + 
+        "GhoyIEltcG9ydCBnZW9tZXRyeSBtZXNzYWdlcyBmb3IgcG9zZSByZXByZXNlbnRhdGlvbgoKvwUKAgQA" + 
+        "EgQtAGkBGrIFCiBIaWdoLWZyZXF1ZW5jeSB0cmFja2luZyBkYXRhIHNlbnQgZnJvbSBRdWVzdCB0byBl" + 
+        "eHRlcm5hbCBzeXN0ZW1zLgogCiBUaGlzIG1lc3NhZ2UgY29udGFpbnMgdGhlIGNvcmUgdHJhY2tpbmcg" + 
+        "aW5mb3JtYXRpb24gdGhhdCBleHRlcm5hbCBzeXN0ZW1zCiAobGlrZSByb2JvdCBjb2RlKSBuZWVkIGZv" + 
+        "ciByZWFsLXRpbWUgbG9jYWxpemF0aW9uIGFuZCBuYXZpZ2F0aW9uLiBJdCdzIHNlbnQKIGF0IDEwMCBI" + 
+        "eiAoZXZlcnkgMTAgbWlsbGlzZWNvbmRzKSB0byBwcm92aWRlIHNtb290aCwgcmVzcG9uc2l2ZSB0cmFj" + 
+        "a2luZy4KIAogVGhlIGRhdGEgcmVwcmVzZW50cyB0aGUgUXVlc3QncyBwb3NpdGlvbiBhbmQgb3JpZW50" + 
+        "YXRpb24gb24gdGhlIGZpZWxkLAogZGVyaXZlZCBmcm9tIHZpc3VhbC1pbmVydGlhbCBvZG9tZXRyeSB1" + 
+        "c2luZyB0aGUgUXVlc3QncyBjYW1lcmFzIGFuZCBJTVUgc2Vuc29ycy4KIAogQ29vcmRpbmF0ZSBTeXN0" + 
+        "ZW06CiAtIFVzZXMgV1BJTGliIGZpZWxkLXJlbGF0aXZlIGNvb3JkaW5hdGUgc3lzdGVtCiAtIE9yaWdp" + 
+        "biBhbmQgYXhlcyBkZXBlbmQgb24gZmllbGQgc2V0dXAgYW5kIGNhbGlicmF0aW9uCiAtIFBvc2UgcmVw" + 
+        "cmVzZW50cyB0aGUgUXVlc3QncyBwb3NpdGlvbjsgbW91bnRpbmcgb2Zmc2V0IHRvIGdldCByb2JvdCBw" + 
+        "b3NpdGlvbgogICBpcyBhcHBsaWVkIGluIGVuZCB1c2VyIGNvZGUKCgoKAwQAARIDLQghCrcDCgQEAAIA" + 
+        "EgM7AhgaqQMKIFNlcXVlbnRpYWwgZnJhbWUgY291bnRlciBmb3IgdGhpcyB0cmFja2luZyBzZXNzaW9u" + 
+        "LgogCiBUaGlzIGNvdW50ZXIgaW5jcmVtZW50cyB3aXRoIGVhY2ggZnJhbWUgcHJvY2Vzc2VkIGJ5IHRo" + 
+        "ZSBRdWVzdCdzIHRyYWNraW5nCiBzeXN0ZW0uIEl0IGNhbiBiZSB1c2VkIHRvOgogLSBEZXRlY3QgZHJv" + 
+        "cHBlZCBtZXNzYWdlcwogLSBDYWxjdWxhdGUgZWZmZWN0aXZlIGZyYW1lIHJhdGUKIC0gU3luY2hyb25p",
+        "emUgd2l0aCBvdGhlciBkYXRhIHN0cmVhbXMKIAogVGhlIGNvdW50ZXIgcmVzZXRzIHRvIDAgd2hlbiB0" + 
+        "aGUgUXVlc3ROYXYgYXBwIHN0YXJ0cyBhbmQgaW5jcmVtZW50cwogY29udGludW91c2x5IGR1cmluZyBv" + 
+        "cGVyYXRpb24uIEZyYW1lIGRyb3BzIGluIHRyYW5zbWlzc2lvbiB3aWxsIGNyZWF0ZQogZ2FwcyBpbiB0" + 
+        "aGUgc2VxdWVuY2UuCgoMCgUEAAIABRIDOwIHCgwKBQQAAgABEgM7CBMKDAoFBAACAAMSAzsWFwreAwoE" + 
+        "BAACARIDTAIXGtADCiBUaW1lc3RhbXAgaW4gc2Vjb25kcyBzaW5jZSBRdWVzdE5hdiBhcHAgc3RhcnR1" + 
+        "cC4KIAogVGhpcyBwcm92aWRlcyB0aW1pbmcgaW5mb3JtYXRpb24gZm9yIHRoZSB0cmFja2luZyBkYXRh" + 
+        "LCBhbGxvd2luZyBleHRlcm5hbAogc3lzdGVtcyB0bzoKIC0gQ2FsY3VsYXRlIGRhdGEgYWdlIGFuZCBs" + 
+        "YXRlbmN5CiAtIEludGVycG9sYXRlIG9yIGV4dHJhcG9sYXRlIHBvc2VzIGZvciBwcmVkaWN0aW9uCiAt" + 
+        "IFN5bmNocm9uaXplIHdpdGggb3RoZXIgc2Vuc29yIGRhdGEKIC0gSW1wbGVtZW50IHRpbWVvdXQgZGV0" + 
+        "ZWN0aW9uCiAKIFRoZSB0aW1lc3RhbXAgaXMgcmVsYXRpdmUgdG8gYXBwIHN0YXJ0dXAsIG5vdCBzeXN0" + 
+        "ZW0gdGltZSwgdG8gYXZvaWQKIGNsb2NrIHN5bmNocm9uaXphdGlvbiBpc3N1ZXMgYmV0d2VlbiBkZXZp" + 
+        "Y2VzLgogCiBSZXNvbHV0aW9uOiBUeXBpY2FsbHkgc3ViLW1pbGxpc2Vjb25kIHByZWNpc2lvbgoKDAoF" + 
+        "BAACAQUSA0wCCAoMCgUEAAIBARIDTAkSCgwKBQQAAgEDEgNMFRYKtAcKBAQAAgISA2gCJhqmBwogUXVl" + 
+        "c3QncyAzRCBwb3NlIG9uIHRoZSBmaWVsZCBpbiBXUElMaWIgY29vcmRpbmF0ZXMuCiAKIFRoaXMgcmVw" + 
+        "cmVzZW50cyB0aGUgUXVlc3QncyBwb3NpdGlvbiBhbmQgb3JpZW50YXRpb24gYXMgZGV0ZXJtaW5lZCBi" + 
+        "eQogdGhlIFF1ZXN0J3MgdHJhY2tpbmcgc3lzdGVtLiBUaGUgcG9zZSBhY2NvdW50cyBmb3I6CiAtIENv" + 
+        "b3JkaW5hdGUgc3lzdGVtIHRyYW5zZm9ybWF0aW9uIHRvIFdQSUxpYiBzdGFuZGFyZAogLSBBbnkgY2Fs" + 
+        "aWJyYXRpb24gb2Zmc2V0cyBhcHBsaWVkCiAKIE5vdGU6IFRoaXMgaXMgdGhlIFF1ZXN0J3MgcG9zaXRp" + 
+        "b247IGVuZCB1c2VyIGNvZGUgYXBwbGllcyBtb3VudGluZyBvZmZzZXQKIHRvIGdldCB0aGUgcm9ib3Qn" + 
+        "cyBwb3NpdGlvbi4KIAogQ29vcmRpbmF0ZSBTeXN0ZW0gRGV0YWlsczoKIC0gWDogRm9yd2FyZCBkaXJl",
+        "Y3Rpb24gKHRvd2FyZHMgb3Bwb3NpbmcgYWxsaWFuY2UpCiAtIFk6IExlZnQgZGlyZWN0aW9uICh3aGVu" + 
+        "IGZhY2luZyBmb3J3YXJkKQogLSBaOiBVcCBkaXJlY3Rpb24KIC0gWWF3IChaKTogQ291bnRlci1jbG9j" + 
+        "a3dpc2UgKHJpZ2h0LWhhbmRlZCkgcm90YXRpb24gYXJvdW5kIHRoZSBaIGF4aXMKIC0gUGl0Y2ggKFkp" + 
+        "OiBDb3VudGVyLWNsb2Nrd2lzZSAocmlnaHQtaGFuZGVkKSByb3RhdGlvbiBhcm91bmQgWSBheGlzCiAt" + 
+        "IFJvbGwgKFgpOiBDb3VudGVyLWNsb2Nrd2lzZSAocmlnaHQtaGFuZGVkKSByb3RhdGlvbiBhcm91bmQg" + 
+        "dGhlIFggYXhpcwogLSBVbml0czogbWV0ZXJzIGZvciB0cmFuc2xhdGlvbiwgcmFkaWFucyBmb3Igcm90" + 
+        "YXRpb24KIAogQWNjdXJhY3kgZGVwZW5kcyBvbjoKIC0gRW52aXJvbm1lbnRhbCBsaWdodGluZyBhbmQg" + 
+        "ZmVhdHVyZXMKIC0gUXVlc3QgdHJhY2tpbmcgcXVhbGl0eQogLSBDYWxpYnJhdGlvbiBhY2N1cmFjeQog" + 
+        "LSBUaW1lIHNpbmNlIGxhc3QgcG9zZSByZXNldAoKDAoFBAACAgYSA2gCGgoMCgUEAAICARIDaBshCgwK" + 
+        "BQQAAgIDEgNoJCUK8QQKAgQBEgV8AMABARrjBAogTG93ZXItZnJlcXVlbmN5IGRldmljZSBzdGF0dXMg" + 
+        "ZGF0YSBzZW50IGZyb20gUXVlc3QgdG8gZXh0ZXJuYWwgc3lzdGVtcy4KIAogVGhpcyBtZXNzYWdlIGNv" + 
+        "bnRhaW5zIGRldmljZSBoZWFsdGggYW5kIHN0YXR1cyBpbmZvcm1hdGlvbiB0aGF0IGRvZXNuJ3QgbmVl" + 
+        "ZAogdG8gYmUgc2VudCBhcyBmcmVxdWVudGx5IGFzIHRyYWNraW5nIGRhdGEuIEl0J3Mgc2VudCBhdCAz" + 
+        "IEh6IChldmVyeSAzMzMgbWlsbGlzZWNvbmRzKQogdG8gcHJvdmlkZSBtb25pdG9yaW5nIGFuZCBkaWFn" + 
+        "bm9zdGljIGluZm9ybWF0aW9uIHdpdGhvdXQgY29uc3VtaW5nIGV4Y2Vzc2l2ZQogYmFuZHdpZHRoLgog" + 
+        "CiBUaGlzIGRhdGEgaGVscHMgZXh0ZXJuYWwgc3lzdGVtczoKIC0gTW9uaXRvciBRdWVzdCBkZXZpY2Ug" + 
+        "aGVhbHRoCiAtIERldGVjdCB0cmFja2luZyBzeXN0ZW0gaXNzdWVzCiAtIEltcGxlbWVudCBmYWlsc2Fm" + 
+        "ZSBiZWhhdmlvcnMKIC0gUHJvdmlkZSB1c2VyIGZlZWRiYWNrIGFib3V0IHN5c3RlbSBzdGF0dXMKIAog" + 
+        "VGhlIGluZm9ybWF0aW9uIGlzIHVzZWZ1bCBmb3IgYm90aCBhdXRvbm9tb3VzIG9wZXJhdGlvbiBhbmQg" + 
+        "ZGVidWdnaW5nLwogdHJvdWJsZXNob290aW5nIHNjZW5hcmlvcy4KCgoKAwQBARIDfAgiCoUFCgQEAQIA",
+        "EgSQAQIiGvYECiBDb3VudCBvZiB0cmFja2luZyBsb3NzIGV2ZW50cyBzaW5jZSBhcHAgc3RhcnR1cC4K" + 
+        "IAogVGhpcyBjb3VudGVyIGluY3JlbWVudHMgZWFjaCB0aW1lIHRoZSBRdWVzdCdzIHRyYWNraW5nIHN5" + 
+        "c3RlbSBsb3NlcwogdHJhY2tpbmcgYWZ0ZXIgaGF2aW5nIGVzdGFibGlzaGVkIGl0LiBUcmFja2luZyBs" + 
+        "b3NzIGNhbiBvY2N1ciBkdWUgdG86CiAtIFBvb3IgbGlnaHRpbmcgY29uZGl0aW9ucwogLSBMYWNrIG9m" + 
+        "IHZpc3VhbCBmZWF0dXJlcyBpbiBlbnZpcm9ubWVudAogLSBSYXBpZCBtb3Rpb24gb3IgYWNjZWxlcmF0" + 
+        "aW9uCiAtIE9jY2x1c2lvbiBvZiBjYW1lcmFzCiAtIEhhcmR3YXJlIGlzc3VlcwogCiBBIGhpZ2ggb3Ig" + 
+        "cmFwaWRseSBpbmNyZWFzaW5nIGNvdW50ZXIgbWF5IGluZGljYXRlOgogLSBFbnZpcm9ubWVudGFsIGlz" + 
+        "c3VlcyAobGlnaHRpbmcsIGZlYXR1cmVzKQogLSBRdWVzdCBtb3VudGluZyBwcm9ibGVtcyAodmlicmF0" + 
+        "aW9uLCBvYnN0cnVjdGlvbikKIC0gSGFyZHdhcmUgZGVncmFkYXRpb24KIAogVGhpcyBtZXRyaWMgaGVs" + 
+        "cHMgYXNzZXNzIHRyYWNraW5nIHN5c3RlbSByZWxpYWJpbGl0eSBhbmQgY2FuIHRyaWdnZXIKIGFsZXJ0" + 
+        "cyBvciBmYWxsYmFjayBiZWhhdmlvcnMgaW4gcm9ib3QgY29kZS4KCg0KBQQBAgAFEgSQAQIHCg0KBQQB" + 
+        "AgABEgSQAQgdCg0KBQQBAgADEgSQASAhCrkFCgQEAQIBEgSmAQIeGqoFCiBDdXJyZW50IHRyYWNraW5n" + 
+        "IHN0YXR1cyBvZiB0aGUgUXVlc3QgZGV2aWNlLgogCiB0cnVlOiAgUXVlc3QgaXMgYWN0aXZlbHkgdHJh" + 
+        "Y2tpbmcgYW5kIHBvc2UgZGF0YSBpcyByZWxpYWJsZQogZmFsc2U6IFF1ZXN0IGhhcyBsb3N0IHRyYWNr" + 
+        "aW5nIGFuZCBwb3NlIGRhdGEgc2hvdWxkIG5vdCBiZSB0cnVzdGVkCiAKIFdoZW4gdHJhY2tpbmcgaXMg" + 
+        "bG9zdDoKIC0gUG9zZSBkYXRhIGJlY29tZXMgc3RhbGUgYW5kIHVucmVsaWFibGUKIC0gUm9ib3Qgc2hv" + 
+        "dWxkIHN3aXRjaCB0byBhbHRlcm5hdGl2ZSBsb2NhbGl6YXRpb24gbWV0aG9kcwogLSBNb3ZlbWVudCBz" + 
+        "aG91bGQgYmUgbGltaXRlZCBvciBzdG9wcGVkIGZvciBzYWZldHkKIAogVHJhY2tpbmcgY2FuIGJlIHJl" + 
+        "Y292ZXJlZCBieToKIC0gSW1wcm92aW5nIGxpZ2h0aW5nIGNvbmRpdGlvbnMKIC0gTW92aW5nIHRvIGFy" + 
+        "ZWEgd2l0aCBtb3JlIHZpc3VhbCBmZWF0dXJlcwogLSBSZWR1Y2luZyBtb3Rpb24gdG8gYWxsb3cgc3lz",
+        "dGVtIHRvIHJlLWluaXRpYWxpemUKIC0gUGVyZm9ybWluZyBwb3NlIHJlc2V0IHdoZW4gdHJhY2tpbmcg" + 
+        "cmVjb3ZlcnMKIAogRXh0ZXJuYWwgc3lzdGVtcyBzaG91bGQgbW9uaXRvciB0aGlzIGZpZWxkIGFuZCBp" + 
+        "bXBsZW1lbnQgYXBwcm9wcmlhdGUKIGZhbGxiYWNrIGJlaGF2aW9ycyB3aGVuIHRyYWNraW5nIGlzIGxv" + 
+        "c3QuCgoNCgUEAQIBBRIEpgECBgoNCgUEAQIBARIEpgEHGQoNCgUEAQIBAxIEpgEcHQrZBQoEBAECAhIE" + 
+        "vwECHBrKBQogUXVlc3QgZGV2aWNlIGJhdHRlcnkgbGV2ZWwgYXMgYSBwZXJjZW50YWdlICgwLTEwMCku" + 
+        "CiAKIFRoaXMgcHJvdmlkZXMgdGhlIGN1cnJlbnQgYmF0dGVyeSBjaGFyZ2UgbGV2ZWwgb2YgdGhlIFF1" + 
+        "ZXN0IGhlYWRzZXQsCiBhbGxvd2luZyBleHRlcm5hbCBzeXN0ZW1zIHRvOgogLSBNb25pdG9yIHBvd2Vy" + 
+        "IHN0YXR1cyBkdXJpbmcgb3BlcmF0aW9uCiAtIEltcGxlbWVudCBsb3ctYmF0dGVyeSB3YXJuaW5ncyBv" + 
+        "ciBiZWhhdmlvcnMKIC0gUGxhbiBvcGVyYXRpb24gZHVyYXRpb24gYW5kIGNoYXJnaW5nIG5lZWRzCiAt" + 
+        "IFRyaWdnZXIgZ3JhY2VmdWwgc2h1dGRvd24gcHJvY2VkdXJlcwogCiBCYXR0ZXJ5IExldmVsIEd1aWRl" + 
+        "bGluZXM6CiAtIDEwMCU6IEZ1bGx5IGNoYXJnZWQKIC0gNTAtMTAwJTogTm9ybWFsIG9wZXJhdGlvbgog" + 
+        "LSAyMC01MCU6IENvbnNpZGVyIGNoYXJnaW5nIHNvb24KIC0gMTAtMjAlOiBMb3cgYmF0dGVyeSB3YXJu" + 
+        "aW5nIHJlY29tbWVuZGVkCiAtIDAtMTAlOiBDcml0aWNhbCAtIHBsYW4gaW1tZWRpYXRlIHNodXRkb3du" + 
+        "L2NoYXJnaW5nCiAKIE5vdGU6IEJhdHRlcnkgZHJhaW4gcmF0ZSBkZXBlbmRzIG9uOgogLSBQcm9jZXNz" + 
+        "aW5nIGxvYWQgKHRyYWNraW5nIGNvbXBsZXhpdHkpCiAtIERpc3BsYXkgdXNhZ2UgKGlmIGFueSkKIC0g" + 
+        "V2lyZWxlc3MgY29tbXVuaWNhdGlvbiBhY3Rpdml0eQogLSBFbnZpcm9ubWVudGFsIHRlbXBlcmF0dXJl" + 
+        "CgoNCgUEAQICBRIEvwECBwoNCgUEAQICARIEvwEIFwoNCgUEAQICAxIEvwEaG2IGcHJvdG8z");
 
     static final Descriptors.FileDescriptor descriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom("data.proto", "questnav.protos.data", descriptorData, Geometry3D.getDescriptor());
 
@@ -151,7 +150,7 @@ public final class Data {
 
     /**
      * <pre>
-     * *
+     *
      *  High-frequency tracking data sent from Quest to external systems.
      *  
      *  This message contains the core tracking information that external systems
@@ -175,7 +174,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Timestamp in seconds since QuestNav app startup.
          *  
          *  This provides timing information for the tracking data, allowing external
@@ -197,7 +196,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Sequential frame counter for this tracking session.
          *  
          *  This counter increments with each frame processed by the Quest's tracking
@@ -217,7 +216,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Quest's 3D pose on the field in WPILib coordinates.
          *  
          *  This represents the Quest's position and orientation as determined by
@@ -253,7 +252,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  High-frequency tracking data sent from Quest to external systems.
          *  
          *  This message contains the core tracking information that external systems
@@ -278,7 +277,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Timestamp in seconds since QuestNav app startup.
          *  
          *  This provides timing information for the tracking data, allowing external
@@ -303,7 +302,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Timestamp in seconds since QuestNav app startup.
          *  
          *  This provides timing information for the tracking data, allowing external
@@ -330,7 +329,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Timestamp in seconds since QuestNav app startup.
          *  
          *  This provides timing information for the tracking data, allowing external
@@ -355,7 +354,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Timestamp in seconds since QuestNav app startup.
          *  
          *  This provides timing information for the tracking data, allowing external
@@ -383,7 +382,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Sequential frame counter for this tracking session.
          *  
          *  This counter increments with each frame processed by the Quest's tracking
@@ -406,7 +405,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Sequential frame counter for this tracking session.
          *  
          *  This counter increments with each frame processed by the Quest's tracking
@@ -431,7 +430,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Sequential frame counter for this tracking session.
          *  
          *  This counter increments with each frame processed by the Quest's tracking
@@ -454,7 +453,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Sequential frame counter for this tracking session.
          *  
          *  This counter increments with each frame processed by the Quest's tracking
@@ -480,7 +479,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Quest's 3D pose on the field in WPILib coordinates.
          *  
          *  This represents the Quest's position and orientation as determined by
@@ -516,7 +515,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Quest's 3D pose on the field in WPILib coordinates.
          *  
          *  This represents the Quest's position and orientation as determined by
@@ -554,7 +553,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Quest's 3D pose on the field in WPILib coordinates.
          *  
          *  This represents the Quest's position and orientation as determined by
@@ -596,7 +595,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Quest's 3D pose on the field in WPILib coordinates.
          *  
          *  This represents the Quest's position and orientation as determined by
@@ -638,7 +637,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Quest's 3D pose on the field in WPILib coordinates.
          *  
          *  This represents the Quest's position and orientation as determined by
@@ -951,7 +950,7 @@ public final class Data {
 
     /**
      * <pre>
-     * *
+     *
      *  Lower-frequency device status data sent from Quest to external systems.
      *  
      *  This message contains device health and status information that doesn't need
@@ -976,7 +975,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Count of tracking loss events since app startup.
          *  
          *  This counter increments each time the Quest's tracking system loses
@@ -1002,7 +1001,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Quest device battery level as a percentage (0-100).
          *  
          *  This provides the current battery charge level of the Quest headset,
@@ -1032,7 +1031,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Current tracking status of the Quest device.
          *  
          *  true:  Quest is actively tracking and pose data is reliable
@@ -1062,7 +1061,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Lower-frequency device status data sent from Quest to external systems.
          *  
          *  This message contains device health and status information that doesn't need
@@ -1088,7 +1087,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Count of tracking loss events since app startup.
          *  
          *  This counter increments each time the Quest's tracking system loses
@@ -1117,7 +1116,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Count of tracking loss events since app startup.
          *  
          *  This counter increments each time the Quest's tracking system loses
@@ -1148,7 +1147,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Count of tracking loss events since app startup.
          *  
          *  This counter increments each time the Quest's tracking system loses
@@ -1177,7 +1176,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Count of tracking loss events since app startup.
          *  
          *  This counter increments each time the Quest's tracking system loses
@@ -1209,7 +1208,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Quest device battery level as a percentage (0-100).
          *  
          *  This provides the current battery charge level of the Quest headset,
@@ -1242,7 +1241,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Quest device battery level as a percentage (0-100).
          *  
          *  This provides the current battery charge level of the Quest headset,
@@ -1277,7 +1276,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Quest device battery level as a percentage (0-100).
          *  
          *  This provides the current battery charge level of the Quest headset,
@@ -1310,7 +1309,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Quest device battery level as a percentage (0-100).
          *  
          *  This provides the current battery charge level of the Quest headset,
@@ -1346,7 +1345,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Current tracking status of the Quest device.
          *  
          *  true:  Quest is actively tracking and pose data is reliable
@@ -1376,7 +1375,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Current tracking status of the Quest device.
          *  
          *  true:  Quest is actively tracking and pose data is reliable
@@ -1408,7 +1407,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Current tracking status of the Quest device.
          *  
          *  true:  Quest is actively tracking and pose data is reliable
@@ -1438,7 +1437,7 @@ public final class Data {
 
         /**
          * <pre>
-         * *
+         *
          *  Current tracking status of the Quest device.
          *  
          *  true:  Quest is actively tracking and pose data is reliable

@@ -1,5 +1,3 @@
-using System;
-
 namespace QuestNav.Native.NTCore
 {
     /// <summary>

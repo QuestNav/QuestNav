@@ -1,4 +1,3 @@
-using System;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Network;
@@ -64,10 +63,17 @@ namespace QuestNav.Network
         TimestampedValue<ProtobufQuestNavCommand>[] GetCommandRequests();
 
         /// <summary>
-        /// Sends a command response back to the robot
+        /// Sends a command processing success response back to the robot
         /// </summary>
-        /// <param name="response">The response to send</param>
-        void SetCommandResponse(ProtobufQuestNavCommandResponse response);
+        /// <param name="commandId">command_id</param>
+        void SendCommandSuccessResponse(uint commandId);
+
+        /// <summary>
+        /// Sends a command processing error response back to the robot
+        /// </summary>
+        /// <param name="commandId">command_id</param>
+        /// <param name="errorMessage">error message</param>
+        void SendCommandErrorResponse(uint commandId, string errorMessage);
 
         /// <summary>
         /// Processes and logs NetworkTables internal messages
@@ -193,7 +199,7 @@ public class NetworkTableConnection : INetworkTableConnection
                 SendAll = true,
                 KeepDuplicates = true,
                 Periodic = 0.005,
-                PollStorage = 10,
+                PollStorage = 20,
             }
         );
     }
@@ -328,9 +334,37 @@ public class NetworkTableConnection : INetworkTableConnection
     /// Sends a command response back to the robot
     /// </summary>
     /// <param name="response">The response containing success status and any error messages</param>
-    public void SetCommandResponse(ProtobufQuestNavCommandResponse response)
+    private void SetCommandResponse(ProtobufQuestNavCommandResponse response)
     {
         commandResponsePublisher.Set(response);
+    }
+
+    /// <summary>
+    /// Sends a command processing success response back to the robot
+    /// </summary>
+    /// <param name="commandId">command_id</param>
+    public void SendCommandSuccessResponse(uint commandId)
+    {
+        SetCommandResponse(
+            new ProtobufQuestNavCommandResponse { CommandId = commandId, Success = true }
+        );
+    }
+
+    /// <summary>
+    /// Sends a command processing error response back to the robot
+    /// </summary>
+    /// <param name="commandId">command_id</param>
+    /// <param name="errorMessage">error message</param>
+    public void SendCommandErrorResponse(uint commandId, string errorMessage)
+    {
+        SetCommandResponse(
+            new ProtobufQuestNavCommandResponse
+            {
+                CommandId = commandId,
+                Success = false,
+                ErrorMessage = errorMessage,
+            }
+        );
     }
 
     #endregion

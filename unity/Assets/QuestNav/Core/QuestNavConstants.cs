@@ -104,6 +104,11 @@ namespace QuestNav.Core
             /// Response code for successful heading reset
             /// </summary>
             public const int HEADING_RESET_SUCCESS = 99;
+
+            /// <summary>
+            /// Time to live for pose reset command (ms). Commands older than this will be ignored.
+            /// </summary>
+            public const int POSE_RESET_TTL_MS = 50;
         }
 
         /// <summary>

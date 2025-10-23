@@ -131,27 +131,18 @@ namespace QuestNav.Commands.Commands
                 vrCameraRoot.position = newRootPosition;
 
                 QueuedLogger.Log(
-                    $"Pose reset applied: X={poseX}, Y={poseY}, Z={poseZ} Rotation X={targetCameraRotation.eulerAngles.x}, Y={targetCameraRotation.eulerAngles.y}, Z={targetCameraRotation.eulerAngles.z}"
+                    $"Pose reset applied: X={poseX}, Y={poseY}, Z={poseZ} Rotation X={targetCameraRotation.eulerAngles.x}, "
+                        + $"Y={targetCameraRotation.eulerAngles.y}, Z={targetCameraRotation.eulerAngles.z}"
                 );
 
-                networkTableConnection.SetCommandResponse(
-                    new ProtobufQuestNavCommandResponse
-                    {
-                        CommandId = receivedCommand.CommandId,
-                        Success = true,
-                    }
-                );
+                networkTableConnection.SendCommandSuccessResponse(receivedCommand.CommandId);
                 QueuedLogger.Log("Pose reset completed successfully");
             }
             else
             {
-                networkTableConnection.SetCommandResponse(
-                    new ProtobufQuestNavCommandResponse
-                    {
-                        CommandId = receivedCommand.CommandId,
-                        ErrorMessage = "Failed to get valid pose data (invalid)",
-                        Success = false,
-                    }
+                networkTableConnection.SendCommandErrorResponse(
+                    receivedCommand.CommandId,
+                    "Failed to get valid pose data (invalid)"
                 );
                 QueuedLogger.LogError("Failed to get valid pose data");
             }

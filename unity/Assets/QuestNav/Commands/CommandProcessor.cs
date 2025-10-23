@@ -4,6 +4,7 @@ using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.Utils;
 using UnityEngine;
+using static QuestNav.Core.QuestNavConstants.Commands;
 
 namespace QuestNav.Commands
 {
@@ -85,7 +86,7 @@ namespace QuestNav.Commands
                             QueuedLogger.Log(
                                 $"Skipping superseded Pose Reset Command. ID: {receivedCommand.CommandId}"
                             );
-                            SendErrorResponse(
+                            networkTableConnection.SendCommandErrorResponse(
                                 receivedCommand.CommandId,
                                 "Pose Reset Command superseded"
                             );
@@ -98,7 +99,7 @@ namespace QuestNav.Commands
                                 / 1000;
 
                             // Check if the command is fresh
-                            if (ageMs < 50)
+                            if (ageMs < POSE_RESET_TTL_MS)
                             {
                                 // The command is fresh, process it
                                 QueuedLogger.Log(
@@ -112,11 +113,11 @@ namespace QuestNav.Commands
                                 // The command is too old, skip it
                                 QueuedLogger.Log(
                                     $"Skipping stale Pose Reset Command. ID: {receivedCommand.CommandId} "
-                                        + $"Age: {ageMs} ms"
+                                        + $"Age: {ageMs} ms > {POSE_RESET_TTL_MS} ms"
                                 );
-                                SendErrorResponse(
+                                networkTableConnection.SendCommandErrorResponse(
                                     receivedCommand.CommandId,
-                                    $"Pose Reset Command too old. Age: {ageMs} ms"
+                                    $"Pose Reset Command too old. Age: {ageMs} ms > {POSE_RESET_TTL_MS} ms"
                                 );
                             }
                         }
@@ -129,23 +130,6 @@ namespace QuestNav.Commands
                         break;
                 }
             }
-        }
-
-        /// <summary>
-        /// Sends a command processing error response back to the robot
-        /// </summary>
-        /// <param name="commandId">command_id</param>
-        /// <param name="errorMessage">error message</param>
-        private void SendErrorResponse(uint commandId, string errorMessage)
-        {
-            networkTableConnection.SetCommandResponse(
-                new ProtobufQuestNavCommandResponse
-                {
-                    CommandId = commandId,
-                    Success = false,
-                    ErrorMessage = errorMessage,
-                }
-            );
         }
     }
 }

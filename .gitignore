@@ -6,3 +6,4 @@ oculus-frc-streamer_*/
 *.zip
 
 .idea/
+/.cursor

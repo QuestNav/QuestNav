@@ -24,11 +24,11 @@ Before you begin, make sure you have the following:
 ### Step 1: Install Unity
 
 :::warning
-You must use Unity 6 (6000.0.29f1) LTS for compatibility with the project.
+You must use Unity 6 (6000.2.7f2) LTS for compatibility with the project.
 :::
 
 - Download and install Unity Hub from the [official website](https://unity.com/download)
-- Open Unity Hub, sign in, and install Unity 6 (6000.0.29f1) LTS
+- Open Unity Hub, sign in, and install Unity 6 (6000.2.7f2) LTS
     - Select the following:
         - "Microsoft Visual Studio Community 2022"
         - "Android Build Support"
@@ -80,13 +80,13 @@ These SDKs must be added to your Unity account before you can import the project
 ### Step 6: Restore NuGetForUnity Packages
 - Open a terminal to the root of the cloned repository
 - Install NuGetForUnity
-```
+  ```
   dotnet tool install -g NuGetForUnity.Cli
-```
+  ```
 - Restore the packages
-```
-  dotnet nugetforunity restore unity/
-```
+  ```
+  nugetforunity restore unity
+  ```
 
 ### Step 7: Import the Project into Unity
 
@@ -113,10 +113,25 @@ These SDKs must be added to your Unity account before you can import the project
 
 - Navigate to the root of the git repository
 - Install the C# formatter:
-```
+  ```
   dotnet tool install -g csharpier
-```
+  ```
 
+In Visual Studio, install the csharpier plugin:
+- From the menu, choose `Extensions > Manage Extension`
+- Search for csharpier and install it
+- Close Visual Studio and complete the installation
+
+### Step 11: Generate Visual Studio project (Optional)
+:::tip
+You can generate a C# Visual Studio project to more easily work with the code. This will better enable Intellisense and project navigation in Visual Studio.
+:::
+
+- In Unity, select `Edit > Preferences > External Tools`
+- Choose Visual Studio 2022 as your `External Script Editor`
+- Click `Regenerate project files`
+
+Now you open a .cs script asset, it will open in Visual Studio 2022. You can also choose to open the project by selecting `Assets > Open C# Project` from the menu in Unity.
 
 ## Building and Testing
 

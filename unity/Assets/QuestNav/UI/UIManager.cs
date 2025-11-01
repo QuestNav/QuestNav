@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Utils;
@@ -140,18 +141,15 @@ namespace QuestNav.UI
             this.teamUpdateButton = teamUpdateButton;
             this.autoStartToggle = autoStartToggle;
 
-            teamNumber = PlayerPrefs.GetInt(
-                "TeamNumber",
-                QuestNavConstants.Network.DEFAULT_TEAM_NUMBER
-            );
+            // Load team number from Tunables (synced with web config)
+            teamNumber = Tunables.defaultTeamNumber;
             teamInput.text = teamNumber.ToString();
             setTeamNumberFromUI();
 
             teamUpdateButton.onClick.AddListener(setTeamNumberFromUI);
 
-            // Load/Save auto start preference
-            bool checkboxValue = PlayerPrefs.GetInt("AutoStart", 1) == 1;
-            autoStartToggle.isOn = checkboxValue;
+            // Load auto start from Tunables (synced with web config)
+            autoStartToggle.isOn = Tunables.autoStartOnBoot;
 
             autoStartToggle.onValueChanged.AddListener(updateAutoStart);
         }
@@ -161,6 +159,11 @@ namespace QuestNav.UI
         /// Gets the current team number.
         /// </summary>
         public int TeamNumber => teamNumber;
+
+        /// <summary>
+        /// Gets the current IP address.
+        /// </summary>
+        public string IPAddress => myAddressLocal;
         #endregion
 
         #region Setters
@@ -171,8 +174,10 @@ namespace QuestNav.UI
         {
             QueuedLogger.Log("Updating Team Number");
             teamNumber = int.Parse(teamInput.text);
-            PlayerPrefs.SetInt("TeamNumber", teamNumber);
-            PlayerPrefs.Save();
+
+            // Update Tunables (synced with web config)
+            Tunables.defaultTeamNumber = teamNumber;
+
             updateTeamNumberInputBoxPlaceholder(teamNumber);
 
             // Update the connection with new team number
@@ -253,14 +258,36 @@ namespace QuestNav.UI
         /// <param name="newValue">new AutoStart value</param>
         void updateAutoStart(bool newValue)
         {
-            PlayerPrefs.SetInt("AutoStart", newValue ? 1 : 0);
-            PlayerPrefs.Save();
+            // Update Tunables (synced with web config)
+            Tunables.autoStartOnBoot = newValue;
         }
 
         public void UIPeriodic()
         {
             updateConStateText();
             updateIPAddressText();
+            syncFromTunables();
+        }
+
+        /// <summary>
+        /// Syncs UI elements with Tunables values (updated via web config)
+        /// </summary>
+        private void syncFromTunables()
+        {
+            // Sync team number if changed via web interface
+            if (teamNumber != Tunables.defaultTeamNumber)
+            {
+                teamNumber = Tunables.defaultTeamNumber;
+                teamInput.text = teamNumber.ToString();
+                updateTeamNumberInputBoxPlaceholder(teamNumber);
+                networkTableConnection.UpdateTeamNumber(teamNumber);
+            }
+
+            // Sync auto-start toggle if changed via web interface
+            if (autoStartToggle.isOn != Tunables.autoStartOnBoot)
+            {
+                autoStartToggle.SetIsOnWithoutNotify(Tunables.autoStartOnBoot);
+            }
         }
 
         /// <summary>

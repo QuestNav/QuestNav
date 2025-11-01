@@ -1,4 +1,5 @@
 ﻿using QuestNav.Commands;
+using QuestNav.Config;
 using QuestNav.Network;
 using QuestNav.UI;
 using QuestNav.Utils;
@@ -263,6 +264,9 @@ namespace QuestNav.Core
                 batteryPercent
             );
 
+            // Update status provider for web interface
+            UpdateStatusProvider();
+
             // Flush queued log messages to Unity console
             // Batching log output improves performance and reduces console spam
             QueuedLogger.Flush();
@@ -330,6 +334,22 @@ namespace QuestNav.Core
             }
 
             hadTracking = currentlyTracking;
+        }
+
+        /// <summary>
+        /// Updates the status provider with current runtime data for the web interface
+        /// </summary>
+        private void UpdateStatusProvider()
+        {
+            var statusProvider = StatusProvider.Instance;
+            statusProvider.UpdatePose(position, rotation);
+            statusProvider.UpdateTracking(currentlyTracking, trackingLostEvents);
+            statusProvider.UpdateBattery(SystemInfo.batteryLevel, SystemInfo.batteryStatus);
+            statusProvider.UpdateNetwork(
+                networkTableConnection.IsConnected,
+                uiManager.IPAddress,
+                uiManager.TeamNumber
+            );
         }
         #endregion
     }

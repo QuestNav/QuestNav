@@ -1,0 +1,19 @@
+{
+    "name": "QuestNav.Config",
+    "rootNamespace": "QuestNav.Config",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll",
+        "EmbedIO.dll",
+        "Swan.Lite.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
+

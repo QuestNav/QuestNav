@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>EmbedIO</id>
+    <version>3.5.2</version>
+    <authors>Unosquare,Riccardo De Agostini and Contributors to EmbedIO</authors>
+    <owners>Unosquare and Riccardo De Agostini</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://raw.githubusercontent.com/unosquare/embedio/master/LICENSE</licenseUrl>
+    <projectUrl>http://unosquare.github.io/embedio</projectUrl>
+    <iconUrl>https://unosquare.github.io/embedio/embedio.png</iconUrl>
+    <description>A tiny, cross-platform, module based, MIT-licensed web server. Supporting NET Framework, Net Core, and Mono.</description>
+    <summary>A tiny, cross-platform, module based, MIT-licensed web server.</summary>
+    <releaseNotes>v3.5.2
+Fix SWAN version
+v3.5.0
+Check GitHub for more information.
+v3.4.3
+Fix issue with EndpointListener
+v3.4.2
+Fix issue with content-length
+v3.4.1
+Fix broken v3.4.0 &amp; update to SWAN 3
+v3.4.0
+Changes to JSON Serializer extension methods
+v3.3.2
+Fix FileSystemWatcher issue with macOS
+v3.3.1
+Update SWAN
+v3.3.0
+New refactored IPBanningModule
+v3.2.0
+Add IPBanningModule
+v3.1.4
+Add ignore check to closing connection when using NET48 (Issue #413)
+v3.1.3
+Changed default behavior to IPv6 and Ignore Write Response Errors
+v3.1.2
+Fixed issue with JSON response UTF-8 with BOM
+v3.1.1
+Fixed issue with lowercase Request ContentLength header
+v3.1.0
+Ported to C# 8
+v3.0.8
+Added strong-name assembly
+v3.0.6
+Updated to SWAN 2.2.0
+v3.0.5
+Fixed issue with Response Content Length
+v3.0.3
+Fixed issue with FileSystemProvider paths
+v3.0.2
+Resolve issue with RouteMatcher cache #347
+v3.0.1
+Change some Info level logs to Debug
+v3.0.0
+BREAKING CHANGES. Check our GitHub page for more. Thanks to @rdeago for this major update.
+v2.9.1
+Revert change to MimeTypesProvider as read-only
+v2.9.0
+This version hides some internal classes and methods like WebSocket and mark with Obsolete attribute classes, methods and properties that will be dropped or replaced in the new major version.
+v2.8.0
+Global Exception Handler for IWebServer
+v2.7.4
+Mark Obsolete items and WebSocket subprotocol selector
+v2.7.3
+Minor fix with SWAN
+v2.7.2
+Update WebApiController with support to IDisposable
+v2.7.1
+Breaking Changes in WebApiController. Check README.
+v2.7.0
+Add Items collection to IHttpContext, add virtual methods to WebApiController and minor issues with Virtual Paths.
+v2.6.0
+Improvements to StaticFileModule (Thanks to @rdeago for the PR #275)
+v2.5.0
+Fix issues with Set-Cookie and add WebServerState event
+v2.4.0
+Remove the WebSocket client and fix several issues.
+v2.3.0
+Merge target framework NET452 and NET472 into NET462
+v2.2.9
+Fix issue partial content #247
+v2.2.7
+Fix issue stack overflow #242
+v2.2.6
+Fix issue with chunked streams
+v2.2.4
+Add new async extension methods
+v2.2.3
+Fix issue with closed stream
+v2.2.2
+Fix issue with optional WebAPI parameter
+v2.2.1
+Add Gzip support to text and json extension methods by @Unknown6656
+v2.2.0
+Support for HTTPS and fix IPv6. Remove UWP.
+v2.1.0
+Support for IPv6 and improvements to WebSocket</releaseNotes>
+    <copyright>Copyright © Unosquare 2013-2020</copyright>
+    <tags>webserver websocket webapi http</tags>
+    <repository type="git" url="https://github.com/unosquare/embedio/" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Unosquare.Swan.Lite" version="3.1.0" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

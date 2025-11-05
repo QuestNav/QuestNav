@@ -3153,6 +3153,14 @@ MonoBehaviour:
   vrCamera: {fileID: 653360334}
   vrCameraRoot: {fileID: 324151953}
   resetTransform: {fileID: 336173539}
+  uiFollowDistance: 2
+  uiPositionSpeed: 4
+  uiRotationSpeed: 0
+  uiPositionThresholdX: 0.5
+  uiPositionThresholdY: 0.3
+  uiPositionThresholdZ: 0.5
+  uiMoveThresholdAngle: 0
+  uiTransform: {fileID: 773508528}
 --- !u!1 &336191857
 GameObject:
   m_ObjectHideFlags: 0
@@ -6815,7 +6823,6 @@ GameObject:
   - component: {fileID: 773508531}
   - component: {fileID: 773508530}
   - component: {fileID: 773508529}
-  - component: {fileID: 773508532}
   m_Layer: 3
   m_Name: QuestNavUI
   m_TagString: Untagged
@@ -7093,26 +7100,6 @@ MonoBehaviour:
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
   _canvas: {fileID: 773508527}
---- !u!114 &773508532
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 773508524}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2dcffd042a302894395b779f80feaef2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: QuestNav::QuestNav.UI.TagAlongUIEnhanced
-  head: {fileID: 653360334}
-  followDistance: 2
-  positionSpeed: 4
-  rotationSpeed: 0
-  positionThresholdX: 0.5
-  positionThresholdY: 0.2
-  positionThresholdZ: 0.5
-  moveThresholdAngle: 0
 --- !u!1 &778537177
 GameObject:
   m_ObjectHideFlags: 0

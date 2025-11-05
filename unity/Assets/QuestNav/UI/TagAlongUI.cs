@@ -1,38 +1,64 @@
-﻿using UnityEngine;
+﻿using QuestNav.Utils;
+using UnityEngine;
 
 namespace QuestNav.UI
 {
+    public interface ITagAlongUI
+    {
+        /// <summary>
+        /// Updates the position and rotation of the UI element to follow the user's head.
+        /// </summary>
+        void Periodic();
+    }
+
     /// <summary>
     /// This script makes a UI element follow the user's head position and rotation,
     /// while ensuring it remains within the user's field of view.
     /// </summary>
-    public class TagAlongUIEnhanced : MonoBehaviour
+    public class TagAlongUI : ITagAlongUI
     {
-        [Tooltip("Location of the user's head. Assign OVRCameraRig's CenterEyeAnchor.")]
-        public Transform head;
+        private Transform head;
 
-        [Tooltip("How far the UI should be from the user.")]
-        public float followDistance;
+        private float followDistance;
 
-        [Tooltip("How quickly the UI moves towards the target position.")]
-        public float positionSpeed;
+        private float positionSpeed;
 
-        [Tooltip("How quickly the UI rotates to match the user's rotation.")]
-        public float rotationSpeed;
+        private float rotationSpeed;
 
-        [Tooltip("Distance threshold for movement along the World X-axis (sideways).")]
-        public float positionThresholdX;
+        private float positionThresholdX;
 
-        [Tooltip("Distance threshold for movement along the World Y-axis (up/down).")]
-        public float positionThresholdY;
+        private float positionThresholdY;
 
-        [Tooltip("Distance threshold for movement along the World Z-axis (forward/back).")]
-        public float positionThresholdZ;
+        private float positionThresholdZ;
 
-        [Tooltip("The difference in angle (in degrees) at which the UI starts rotating")]
-        public float moveThresholdAngle;
+        private float moveThresholdAngle;
 
-        void LateUpdate()
+        private Transform transform;
+
+        public TagAlongUI(
+            Transform head,
+            float followDistance,
+            float positionSpeed,
+            float rotationSpeed,
+            float positionThresholdX,
+            float positionThresholdY,
+            float positionThresholdZ,
+            float moveThresholdAngle,
+            Transform transform
+        )
+        {
+            this.head = head;
+            this.followDistance = followDistance;
+            this.positionSpeed = positionSpeed;
+            this.rotationSpeed = rotationSpeed;
+            this.positionThresholdX = positionThresholdX;
+            this.positionThresholdY = positionThresholdY;
+            this.positionThresholdZ = positionThresholdZ;
+            this.moveThresholdAngle = moveThresholdAngle;
+            this.transform = transform;
+        }
+
+        public void Periodic()
         {
             // 1. Calculate the ideal target position
             Vector3 idealPosition = head.position + head.forward * followDistance;

@@ -111,6 +111,7 @@ namespace QuestNav.Core
         /// <summary>
         /// Reference to the VR camera transform
         /// </summary>
+        [Tooltip("Location of the user's head. Assign OVRCameraRig's CenterEyeAnchor.")]
         [SerializeField]
         private Transform vrCamera;
 
@@ -151,23 +152,66 @@ namespace QuestNav.Core
         /// </summary>
         private bool hadTracking;
 
+        #region Tagalong UI fields
+
+        [Tooltip("How far the UI should be from the user.")]
+        [SerializeField]
+        private float uiFollowDistance;
+
+        [Tooltip("How quickly the UI moves towards the target position.")]
+        [SerializeField]
+        private float uiPositionSpeed;
+
+        [Tooltip("How quickly the UI rotates to match the user's rotation.")]
+        [SerializeField]
+        private float uiRotationSpeed;
+
+        [Tooltip("Distance threshold for UI movement along the World X-axis (sideways).")]
+        [SerializeField]
+        private float uiPositionThresholdX;
+
+        [Tooltip("Distance threshold for UI movement along the World Y-axis (up/down).")]
+        [SerializeField]
+        private float uiPositionThresholdY;
+
+        [Tooltip("Distance threshold for UI movement along the World Z-axis (forward/back).")]
+        [SerializeField]
+        private float uiPositionThresholdZ;
+
+        [Tooltip("The difference in angle (in degrees) at which the UI starts rotating")]
+        [SerializeField]
+        private float uiMoveThresholdAngle;
+
+        [Tooltip("The UI to be kept in view.")]
+        [SerializeField]
+        private Transform uiTransform;
+
+        #endregion
+
         #region Component References
 
         /// <summary>
         /// Reference to the network table connection component
         /// </summary>
-        private NetworkTableConnection networkTableConnection;
+        private INetworkTableConnection networkTableConnection;
 
         /// <summary>
         /// Reference to the command processor component
         /// </summary>
-        private CommandProcessor commandProcessor;
+        private ICommandProcessor commandProcessor;
 
         /// <summary>
         /// Reference to the UI manager component
         /// </summary>
-        private UIManager uiManager;
+        private IUIManager uiManager;
+
+        /// <summary>
+        /// Reference to the tag-along UI component to keep the UI in view
+        /// </summary>
+        private ITagAlongUI tagAlongUI;
+
         #endregion
+
         #endregion
 
         #region Unity Lifecycle Methods
@@ -197,6 +241,17 @@ namespace QuestNav.Core
                 zRotText,
                 teamUpdateButton,
                 autoStartToggle
+            );
+            tagAlongUI = new TagAlongUI(
+                vrCamera,
+                uiFollowDistance,
+                uiPositionSpeed,
+                uiRotationSpeed,
+                uiPositionThresholdX,
+                uiPositionThresholdY,
+                uiPositionThresholdZ,
+                uiMoveThresholdAngle,
+                uiTransform
             );
 
             // Set Oculus display frequency
@@ -230,6 +285,9 @@ namespace QuestNav.Core
             // Check for and execute any pending commands from the robot
             // Commands include pose resets, calibration requests, etc.
             commandProcessor.ProcessCommands();
+
+            // Update the UI position to keep it in view of the user
+            tagAlongUI.Periodic();
         }
 
         /// <summary>

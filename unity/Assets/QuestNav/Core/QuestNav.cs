@@ -324,6 +324,7 @@ namespace QuestNav.Core
         /// </summary>
         private void CheckTrackingLoss()
         {
+#if UNITY_ANDROID && !UNITY_EDITOR
             currentlyTracking = OVRManager.tracker.isPositionTracked;
 
             // Increment the tracking loss counter if we have tracking loss
@@ -334,6 +335,7 @@ namespace QuestNav.Core
             }
 
             hadTracking = currentlyTracking;
+#endif
         }
 
         /// <summary>

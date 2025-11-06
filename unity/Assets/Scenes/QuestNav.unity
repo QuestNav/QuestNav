@@ -15096,7 +15096,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1964602097}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4876ed178f657f14192b0501d6e9b0bb, type: 3}
+  m_Script: {fileID: 11500000, guid: 8be81bdd0982c6547aa331390f676e48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: QuestNav.Config::QuestNav.Config.ConfigBootstrap
   m_serverPort: 18080

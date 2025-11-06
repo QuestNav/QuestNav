@@ -215,7 +215,7 @@ namespace QuestNav.Core
             /// <summary>
             /// The rate to run the "MainUpdate" loop at
             /// </summary>
-            public const int MAIN_UPDATE_HZ = 100;
+            public const int MAIN_UPDATE_HZ = 120;
         }
     }
 }

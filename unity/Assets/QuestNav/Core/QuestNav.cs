@@ -174,10 +174,6 @@ namespace QuestNav.Core
         [SerializeField]
         private float uiPositionThresholdY;
 
-        [Tooltip("Distance threshold for UI movement along the World Z-axis (forward/back).")]
-        [SerializeField]
-        private float uiPositionThresholdZ;
-
         [Tooltip("The difference in angle (in degrees) at which the UI starts rotating")]
         [SerializeField]
         private float uiMoveThresholdAngle;
@@ -249,7 +245,6 @@ namespace QuestNav.Core
                 uiRotationSpeed,
                 uiPositionThresholdX,
                 uiPositionThresholdY,
-                uiPositionThresholdZ,
                 uiMoveThresholdAngle,
                 uiTransform
             );

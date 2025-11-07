@@ -67,7 +67,7 @@
   "api/QuestNav.Core.QuestNavConstants.Timing.html": {
     "href": "api/QuestNav.Core.QuestNavConstants.Timing.html",
     "title": "Class QuestNavConstants.Timing | QuestNav API Documentation",
-    "summary": "Class QuestNavConstants.Timing Constants related to non-main loop timing Inheritance object QuestNavConstants.Timing Inherited Members object.Equals(object) object.Equals(object, object) object.GetHashCode() object.GetType() object.MemberwiseClone() object.ReferenceEquals(object, object) object.ToString() Namespace: QuestNav.Core Assembly: QuestNav.dll Syntax public static class QuestNavConstants.Timing Fields MAIN_UPDATE_HZ The rate to run the \"MainUpdate\" loop at Declaration public const int MAIN_UPDATE_HZ = 100 Field Value Type Description int SLOW_UPDATE_HZ The rate to run the \"SlowUpdate\" loop at Declaration public const int SLOW_UPDATE_HZ = 3 Field Value Type Description int"
+    "summary": "Class QuestNavConstants.Timing Constants related to non-main loop timing Inheritance object QuestNavConstants.Timing Inherited Members object.Equals(object) object.Equals(object, object) object.GetHashCode() object.GetType() object.MemberwiseClone() object.ReferenceEquals(object, object) object.ToString() Namespace: QuestNav.Core Assembly: QuestNav.dll Syntax public static class QuestNavConstants.Timing Fields MAIN_UPDATE_HZ The rate to run the \"MainUpdate\" loop at Declaration public const int MAIN_UPDATE_HZ = 120 Field Value Type Description int SLOW_UPDATE_HZ The rate to run the \"SlowUpdate\" loop at Declaration public const int SLOW_UPDATE_HZ = 3 Field Value Type Description int"
   },
   "api/QuestNav.Core.QuestNavConstants.Topics.html": {
     "href": "api/QuestNav.Core.QuestNavConstants.Topics.html",

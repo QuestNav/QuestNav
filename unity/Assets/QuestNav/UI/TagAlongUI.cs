@@ -1,5 +1,5 @@
-﻿using QuestNav.Utils;
-using UnityEngine;
+﻿using UnityEngine;
+using static QuestNav.Core.QuestNavConstants.UITagalong;
 
 namespace QuestNav.UI
 {
@@ -23,36 +23,6 @@ namespace QuestNav.UI
         private Transform head;
 
         /// <summary>
-        /// How far the UI should be from the user.
-        /// </summary>
-        private float followDistance;
-
-        /// <summary>
-        /// How quickly the UI moves towards the target position.
-        /// </summary>
-        private float positionSpeed;
-
-        /// <summary>
-        /// How quickly the UI rotates to match the user's rotation.
-        /// </summary>
-        private float rotationSpeed;
-
-        /// <summary>
-        /// Distance threshold for UI movement along the World X-axis (sideways).
-        /// </summary>
-        private float positionThresholdX;
-
-        /// <summary>
-        /// Distance threshold for UI movement along the World Y-axis (up/down).
-        /// </summary>
-        private float positionThresholdY;
-
-        /// <summary>
-        /// The difference in angle (in degrees) at which the UI starts rotating.
-        /// </summary>
-        private float moveThresholdAngle;
-
-        /// <summary>
         /// The UI to be kept in view.
         /// </summary>
         private Transform transform;
@@ -61,38 +31,17 @@ namespace QuestNav.UI
         /// Initializes a new instance of the TagAlongUI class.
         /// </summary>
         /// <param name="head">Location of the user's head. Assign OVRCameraRig's CenterEyeAnchor.</param>
-        /// <param name="followDistance">How far the UI should be from the user.</param>
-        /// <param name="positionSpeed">How quickly the UI moves towards the target position.</param>
-        /// <param name="rotationSpeed">How quickly the UI rotates to match the user's rotation.</param>
-        /// <param name="positionThresholdX">Distance threshold for UI movement along the World X-axis (sideways).</param>
-        /// <param name="positionThresholdY">Distance threshold for UI movement along the World Y-axis (up/down).</param>
-        /// <param name="moveThresholdAngle">The difference in angle (in degrees) at which the UI starts rotating.</param>
         /// <param name="transform">The UI to be kept in view.</param>
-        public TagAlongUI(
-            Transform head,
-            float followDistance,
-            float positionSpeed,
-            float rotationSpeed,
-            float positionThresholdX,
-            float positionThresholdY,
-            float moveThresholdAngle,
-            Transform transform
-        )
+        public TagAlongUI(Transform head, Transform transform)
         {
             this.head = head;
-            this.followDistance = followDistance;
-            this.positionSpeed = positionSpeed;
-            this.rotationSpeed = rotationSpeed;
-            this.positionThresholdX = positionThresholdX;
-            this.positionThresholdY = positionThresholdY;
-            this.moveThresholdAngle = moveThresholdAngle;
             this.transform = transform;
         }
 
         public void Periodic()
         {
             // 1. Calculate the ideal target position
-            Vector3 idealPosition = head.position + head.forward * followDistance;
+            Vector3 idealPosition = head.position + head.forward * FOLLOW_DISTANCE;
 
             // 2. Calculate the target rotation
             Vector3 lookDirection = transform.position - head.position;
@@ -101,7 +50,8 @@ namespace QuestNav.UI
             // Determine if the UI needs to move based on position thresholds
             Vector3 delta = transform.position - idealPosition;
             bool needsPositionUpdate =
-                Mathf.Abs(delta.x) > positionThresholdX || Mathf.Abs(delta.y) > positionThresholdY;
+                Mathf.Abs(delta.x) > POSITION_THRESHOLD_X
+                || Mathf.Abs(delta.y) > POSITION_THRESHOLD_Y;
 
             if (needsPositionUpdate)
             {
@@ -109,7 +59,7 @@ namespace QuestNav.UI
                 transform.position = Vector3.Lerp(
                     transform.position,
                     idealPosition,
-                    Time.deltaTime * positionSpeed
+                    Time.deltaTime * POSITION_SPEED
                 );
                 // The angle is too large, so we rotate the UI to bring it back into the FOV.
                 transform.rotation = idealRotation;
@@ -120,13 +70,13 @@ namespace QuestNav.UI
                 float angle = Vector3.Angle(head.forward, transform.forward);
 
                 // Determine if the UI needs to rotate based on angle threshold
-                if (angle > moveThresholdAngle)
+                if (angle > ANGLE_THRESHOLD)
                 {
                     // The angle is too large, so we rotate the UI to bring it back into the FOV.
                     transform.rotation = Quaternion.Slerp(
                         transform.rotation,
                         idealRotation,
-                        Time.deltaTime * rotationSpeed
+                        Time.deltaTime * ROTATION_SPEED
                     );
                 }
             }

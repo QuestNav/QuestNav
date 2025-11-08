@@ -3153,13 +3153,7 @@ MonoBehaviour:
   vrCamera: {fileID: 653360334}
   vrCameraRoot: {fileID: 324151953}
   resetTransform: {fileID: 336173539}
-  uiFollowDistance: 2
-  uiPositionSpeed: 4
-  uiRotationSpeed: 4
-  uiPositionThresholdX: 0.5
-  uiPositionThresholdY: 0.3
-  uiMoveThresholdAngle: 0.1
-  uiTransform: {fileID: 773508528}
+  tagalongUiTransform: {fileID: 773508528}
 --- !u!1 &336191857
 GameObject:
   m_ObjectHideFlags: 0

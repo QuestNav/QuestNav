@@ -152,37 +152,9 @@ namespace QuestNav.Core
         /// </summary>
         private bool hadTracking;
 
-        #region Tagalong UI fields
-
-        [Tooltip("How far the UI should be from the user.")]
+        [Tooltip("The UI to be kept in view with the Tagalong feature.")]
         [SerializeField]
-        private float uiFollowDistance;
-
-        [Tooltip("How quickly the UI moves towards the target position.")]
-        [SerializeField]
-        private float uiPositionSpeed;
-
-        [Tooltip("How quickly the UI rotates to match the user's rotation.")]
-        [SerializeField]
-        private float uiRotationSpeed;
-
-        [Tooltip("Distance threshold for UI movement along the World X-axis (sideways).")]
-        [SerializeField]
-        private float uiPositionThresholdX;
-
-        [Tooltip("Distance threshold for UI movement along the World Y-axis (up/down).")]
-        [SerializeField]
-        private float uiPositionThresholdY;
-
-        [Tooltip("The difference in angle (in degrees) at which the UI starts rotating")]
-        [SerializeField]
-        private float uiMoveThresholdAngle;
-
-        [Tooltip("The UI to be kept in view.")]
-        [SerializeField]
-        private Transform uiTransform;
-
-        #endregion
+        private Transform tagalongUiTransform;
 
         #region Component References
 
@@ -238,16 +210,7 @@ namespace QuestNav.Core
                 teamUpdateButton,
                 autoStartToggle
             );
-            tagAlongUI = new TagAlongUI(
-                vrCamera,
-                uiFollowDistance,
-                uiPositionSpeed,
-                uiRotationSpeed,
-                uiPositionThresholdX,
-                uiPositionThresholdY,
-                uiMoveThresholdAngle,
-                uiTransform
-            );
+            tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
 
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;

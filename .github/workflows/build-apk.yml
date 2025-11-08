@@ -91,12 +91,13 @@ jobs:
             "version-code=$VERSION_CODE" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           }
 
-      - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@v1.3.1
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@v10
         with:
-          tool-cache: false
-          android: false
-          dotnet: false
+            remove-dotnet: 'false'
+            remove-android: 'false'
+            remove-haskell: 'true'
+            remove-codeql: 'true'
 
       - name: Setup Caching
         uses: actions/cache@v3

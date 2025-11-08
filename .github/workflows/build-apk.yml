@@ -91,13 +91,8 @@ jobs:
             "version-code=$VERSION_CODE" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           }
 
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@v10
-        with:
-            remove-dotnet: 'false'
-            remove-android: 'false'
-            remove-haskell: 'true'
-            remove-codeql: 'true'
+      - name: Free Disk Space
+        uses: ./.github/workflows/reusable/quest-windows-free-disk-space
 
       - name: Setup Caching
         uses: actions/cache@v3

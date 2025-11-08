@@ -1,0 +1,68 @@
+name: 'Unity Meta Quest Build - Windows Free Disk Space'
+description: 'Frees up ~10-15 GB on GitHub Actions Windows runners for Unity Meta Quest builds'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check initial disk space
+      shell: powershell
+      run: |
+        $drive = Get-PSDrive C
+        $freeGB = [math]::Round($drive.Free / 1GB, 2)
+        Write-Host "Initial free space: $freeGB GB"
+        
+    - name: Remove unnecessary software
+      shell: powershell
+      run: |
+        $pathsToRemove = @(
+          @{Path="C:\hostedtoolcache\windows\Python"; Name="Python"},
+          @{Path="C:\hostedtoolcache\windows\Ruby"; Name="Ruby"},
+          @{Path="C:\hostedtoolcache\windows\go"; Name="Go"},
+          @{Path="C:\hostedtoolcache\windows\node"; Name="Node.js"},
+          @{Path="C:\Rust"; Name="Rust"},
+          @{Path="C:\Program Files\PowerShell\7"; Name="PowerShell 7"},
+          @{Path="C:\Program Files (x86)\Microsoft Visual Studio\2019"; Name="VS 2019"},
+          @{Path="C:\mysql"; Name="MySQL"},
+          @{Path="C:\Program Files\MongoDB"; Name="MongoDB"},
+          @{Path="C:\Program Files\PostgreSQL"; Name="PostgreSQL"},
+          @{Path="C:\selenium"; Name="Selenium"},
+          @{Path="C:\ProgramData\chocolatey\lib"; Name="Chocolatey cache"},
+          @{Path="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake"; Name="CMake"},
+          @{Path="C:\Program Files\Git\mingw64\libexec\git-core"; Name="Git extras"},
+          @{Path="C:\Program Files\Docker"; Name="Docker"},
+          @{Path="C:\ProgramData\DockerDesktop"; Name="Docker Desktop"},
+          @{Path="C:\Program Files (x86)\Microsoft SDKs\Azure"; Name="Azure SDK"},
+          @{Path="C:\Miniconda"; Name="Miniconda"},
+          @{Path="C:\SeleniumWebDrivers"; Name="Selenium WebDrivers"},
+          @{Path="C:\Users\runneradmin\.nuget\packages"; Name="NuGet cache"}
+        )
+        
+        foreach ($item in $pathsToRemove) {
+          if (Test-Path $item.Path) {
+            Remove-Item -Path $item.Path -Recurse -Force -ErrorAction SilentlyContinue
+            Write-Host "Removed: $($item.Name)"
+          }
+        }
+        
+    - name: Clear temp directories
+      shell: powershell
+      run: |
+        $tempPaths = @(
+          "$env:TEMP",
+          "$env:LOCALAPPDATA\Temp",
+          "C:\Windows\Temp",
+          "C:\Temp"
+        )
+        
+        foreach ($path in $tempPaths) {
+          if (Test-Path $path) {
+            Remove-Item -Path "$path\*" -Recurse -Force -ErrorAction SilentlyContinue
+          }
+        }
+        
+    - name: Check final disk space
+      shell: powershell
+      run: |
+        $drive = Get-PSDrive C
+        $freeGB = [math]::Round($drive.Free / 1GB, 2)
+        Write-Host "Final free space: $freeGB GB"

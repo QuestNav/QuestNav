@@ -20,7 +20,6 @@ runs:
           @{Path="C:\hostedtoolcache\windows\go"; Name="Go"},
           @{Path="C:\hostedtoolcache\windows\node"; Name="Node.js"},
           @{Path="C:\Rust"; Name="Rust"},
-          @{Path="C:\Program Files\PowerShell\7"; Name="PowerShell 7"},
           @{Path="C:\Program Files (x86)\Microsoft Visual Studio\2019"; Name="VS 2019"},
           @{Path="C:\mysql"; Name="MySQL"},
           @{Path="C:\Program Files\MongoDB"; Name="MongoDB"},

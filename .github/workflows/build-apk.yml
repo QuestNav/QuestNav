@@ -23,8 +23,8 @@ on:
         required: false
         type: string
     secrets:
-      UNITY_LICENSE:
-        description: 'Unity License'
+      UNITY_SERIAL:
+        description: 'Unity Serial'
         required: true
       UNITY_EMAIL:
         description: 'Unity Email'
@@ -115,7 +115,7 @@ jobs:
         uses: game-ci/unity-builder@v4
         id: buildUnity
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:

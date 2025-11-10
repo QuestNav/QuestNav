@@ -32,6 +32,10 @@ runs:
       shell: pwsh
       run: dotnet tool install --global NuGetForUnity.Cli
 
+    - name: Install DocFX
+      shell: pwsh
+      run: dotnet tool install --global docfx
+
     - name: Restore NuGet Packages
       shell: pwsh
       run: nugetforunity restore ${{ inputs.unity-project-path }}/

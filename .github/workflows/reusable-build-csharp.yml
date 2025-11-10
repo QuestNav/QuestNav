@@ -107,9 +107,8 @@ jobs:
 
       - name: Zip DocFX Site
         if: ${{ inputs.skip-docs == false }}
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r docfx-site.zip unity/DocFX/_site
+        run: |
+          Compress-Archive -Path "unity/DocFX/_site" -DestinationPath "docfx-site.zip" -CompressionLevel Optimal
 
       - name: Upload DocFX Artifact
         if: ${{ inputs.skip-docs == false }}

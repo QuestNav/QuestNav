@@ -324,6 +324,3 @@ jobs:
           echo "- C#: \`${{ needs.detect-changes.outputs.csharp-changed }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- Proto: \`${{ needs.detect-changes.outputs.proto-changed }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- Docs: \`${{ needs.detect-changes.outputs.docs-changed }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Job Status" >> $GITHUB_STEP_SUMMARY
-          echo "✅ All required checks passed" >> $GITHUB_STEP_SUMMARY

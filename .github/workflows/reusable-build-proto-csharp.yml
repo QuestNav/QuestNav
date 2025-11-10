@@ -18,7 +18,9 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Setup .NET
-        uses: ./.github/actions/setup-dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
 
       - name: Install Protobuf Compiler
         run: |

@@ -1,0 +1,48 @@
+name: 'Setup Unity Environment'
+description: 'Sets up .NET, NuGetForUnity, and Unity Library cache'
+
+inputs:
+  unity-project-path:
+    description: 'Path to Unity project'
+    required: false
+    default: 'unity'
+  cache-key-suffix:
+    description: 'Additional suffix for cache key'
+    required: false
+    default: 'Android-Windows'
+  dotnet-version:
+    description: '.NET version to install'
+    required: false
+    default: '8.x'
+
+outputs:
+  cache-hit:
+    description: 'Whether the Unity Library cache was hit'
+    value: ${{ steps.cache-unity.outputs.cache-hit }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Install NuGetForUnity CLI
+      shell: pwsh
+      run: dotnet tool install --global NuGetForUnity.Cli
+
+    - name: Restore NuGet Packages
+      shell: pwsh
+      run: nugetforunity restore ${{ inputs.unity-project-path }}/
+
+    - name: Cache Unity Library
+      id: cache-unity
+      uses: actions/cache@v4
+      with:
+        path: ${{ inputs.unity-project-path }}/Library
+        key: Library-QuestNav-${{ inputs.cache-key-suffix }}-${{ hashFiles(format('{0}/Packages/manifest.json', inputs.unity-project-path)) }}
+        restore-keys: |
+          Library-QuestNav-${{ inputs.cache-key-suffix }}-
+          Library-QuestNav-
+          Library-

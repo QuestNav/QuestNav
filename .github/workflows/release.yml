@@ -1,0 +1,192 @@
+name: Release to GitHub Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      versionYear:
+        description: 'FRC Year (e.g., 2025)'
+        required: true
+        type: string
+      versionMajor:
+        description: 'Major version (e.g., 1)'
+        required: true
+        type: string
+      versionMinor:
+        description: 'Minor version (e.g., 0)'
+        required: true
+        type: string
+      versionPatch:
+        description: 'Patch version (e.g., 0)'
+        required: true
+        type: string
+      versionType:
+        description: 'Release type'
+        required: true
+        type: choice
+        options:
+          - dev
+          - beta
+          - rc
+          - release
+        default: release
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
+
+jobs:
+  validate-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.calculate.outputs.version }}
+      version-code: ${{ steps.calculate.outputs.version-code }}
+    steps:
+      - name: Calculate Version
+        id: calculate
+        run: |
+          VERSION="${{ inputs.versionYear }}-${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}"
+          if [ "${{ inputs.versionType }}" != "release" ]; then
+            VERSION="${VERSION}-${{ inputs.versionType }}"
+          fi
+          
+          # Calculate version code
+          YEAR_NUM=${{ inputs.versionYear }}
+          MAJOR_NUM=${{ inputs.versionMajor }}
+          MINOR_NUM=${{ inputs.versionMinor }}
+          PATCH_NUM=${{ inputs.versionPatch }}
+          
+          TYPE_OFFSET=0
+          case "${{ inputs.versionType }}" in
+            dev) TYPE_OFFSET=0 ;;
+            beta) TYPE_OFFSET=100 ;;
+            rc) TYPE_OFFSET=200 ;;
+            release) TYPE_OFFSET=300 ;;
+          esac
+          
+          VERSION_CODE=$(( ($YEAR_NUM - 2020) * 100000000 + $MAJOR_NUM * 1000000 + $MINOR_NUM * 10000 + $PATCH_NUM * 1000 + $TYPE_OFFSET ))
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version-code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          
+          echo "### Release Version" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version Code:** \`$VERSION_CODE\`" >> $GITHUB_STEP_SUMMARY
+
+  build-java:
+    needs: [validate-version]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: questnav-lib
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java and Gradle
+        uses: ./.github/actions/setup-java-gradle
+        with:
+          working-directory: questnav-lib
+          cache-key-prefix: gradle-release
+
+      - name: Build and Publish to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ./gradlew build publish \
+            -PquestnavVersion="${{ needs.validate-version.outputs.version }}" \
+            -PversionCode="${{ needs.validate-version.outputs.version-code }}" \
+            -PmavenRepository="releases" \
+            -PgithubPackages=true
+
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-java-${{ needs.validate-version.outputs.version }}
+          path: |
+            questnav-lib/build/libs/*.jar
+            questnav-lib/build/generated/vendordeps/*.json
+          retention-days: 90
+
+  build-csharp:
+    needs: [validate-version]
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          sparse-checkout: |
+            unity
+            .github
+          sparse-checkout-cone-mode: false
+
+      - name: Free Disk Space
+        uses: ./.github/actions/quest-windows-free-disk-space
+
+      - name: Setup Unity Environment
+        uses: ./.github/actions/setup-unity-environment
+        with:
+          unity-project-path: unity
+          cache-key-suffix: Release
+
+      - name: Build Unity APK
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: unity
+          targetPlatform: Android
+          versioning: Custom
+          version: ${{ needs.validate-version.outputs.version }}
+          androidVersionCode: ${{ needs.validate-version.outputs.version-code }}
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-${{ needs.validate-version.outputs.version }}
+          path: build/Android/*.apk
+          retention-days: 90
+
+  create-github-release:
+    needs: [validate-version, build-java, build-csharp]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Java Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-java-${{ needs.validate-version.outputs.version }}
+          path: artifacts/java
+
+      - name: Download C# Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-apk-${{ needs.validate-version.outputs.version }}
+          path: artifacts/csharp
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.validate-version.outputs.version }}
+          name: Release ${{ needs.validate-version.outputs.version }}
+          draft: false
+          prerelease: ${{ inputs.versionType != 'release' }}
+          generate_release_notes: true
+          files: |
+            artifacts/java/*.jar
+            artifacts/java/*.json
+            artifacts/csharp/*.apk
+
+      - name: Release Summary
+        run: |
+          echo "## 🚀 Release Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** \`${{ needs.validate-version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Type:** \`${{ inputs.versionType }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **GitHub Packages:** Published" >> $GITHUB_STEP_SUMMARY
+          echo "- **GitHub Release:** Created" >> $GITHUB_STEP_SUMMARY

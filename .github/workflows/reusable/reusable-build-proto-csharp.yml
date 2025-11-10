@@ -1,0 +1,41 @@
+name: Build Proto (C#)
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          sparse-checkout: |
+            unity
+            protos
+          sparse-checkout-cone-mode: false
+
+      - name: Setup .NET
+        uses: ./.github/actions/setup-dotnet
+
+      - name: Install Protobuf Compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+
+      - name: Generate C# Proto Files
+        run: |
+          mkdir -p unity/Assets/QuestNav/Generated
+          protoc --proto_path=protos \
+                 --csharp_out=unity/Assets/QuestNav/Generated \
+                 protos/*.proto
+
+      - name: Verify Generated Files
+        run: |
+          if [ ! -d "unity/Assets/QuestNav/Generated" ] || [ -z "$(ls -A unity/Assets/QuestNav/Generated)" ]; then
+            echo "Error: No proto files generated"
+            exit 1
+          fi
+          echo "Successfully generated proto files"

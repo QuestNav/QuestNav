@@ -1,0 +1,36 @@
+name: Build Proto (Java)
+
+on:
+  workflow_call:
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: questnav-lib
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          sparse-checkout: |
+            questnav-lib
+            protos
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Java and Gradle
+        uses: ./.github/actions/setup-java-gradle
+        with:
+          working-directory: questnav-lib
+          cache-key-prefix: gradle-proto
+
+      - name: Build Proto (Java)
+        run: ./gradlew generateProto
+
+      - name: Test Proto Build
+        run: ./gradlew compileJava

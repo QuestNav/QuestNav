@@ -1,0 +1,72 @@
+name: 'Determine Version Strategy'
+description: 'Determines version and version code from input or generates from commit hash'
+
+inputs:
+  version:
+    description: 'Version string (e.g., 2025-1.0.0-beta). If empty, generates from commit hash.'
+    required: false
+    default: ''
+
+outputs:
+  strategy:
+    description: 'Versioning strategy used (semantic or hash)'
+    value: ${{ steps.version-info.outputs.strategy }}
+  version:
+    description: 'Calculated version string'
+    value: ${{ steps.version-info.outputs.version }}
+  version-code:
+    description: 'Calculated version code for Android/numeric versioning'
+    value: ${{ steps.version-info.outputs.version-code }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Calculate Version Information
+      id: version-info
+      shell: bash
+      run: |
+        VERSION_INPUT="${{ inputs.version }}"
+        
+        if [ -n "$VERSION_INPUT" ]; then
+          # Use provided version
+          VERSION="$VERSION_INPUT"
+          
+          # Try to parse semantic version for version code
+          if [[ "$VERSION" =~ ^([0-9]{4})-([0-9]+)\.([0-9]+)\.([0-9]+)(-(.+))?$ ]]; then
+            YEAR="${BASH_REMATCH[1]}"
+            MAJOR="${BASH_REMATCH[2]}"
+            MINOR="${BASH_REMATCH[3]}"
+            PATCH="${BASH_REMATCH[4]}"
+            TYPE="${BASH_REMATCH[6]}"
+            
+            TYPE_OFFSET=0
+            case "$TYPE" in
+              dev) TYPE_OFFSET=0 ;;
+              beta) TYPE_OFFSET=100 ;;
+              rc) TYPE_OFFSET=200 ;;
+              release|"") TYPE_OFFSET=300 ;;
+            esac
+            
+            VERSION_CODE=$(( ($YEAR - 2020) * 100000000 + $MAJOR * 1000000 + $MINOR * 10000 + $PATCH * 1000 + $TYPE_OFFSET ))
+            
+            echo "strategy=semantic" >> $GITHUB_OUTPUT
+          else
+            # Non-semantic version, use commit count
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+            VERSION_CODE=$(( 1000000 + $COMMIT_COUNT ))
+            
+            echo "strategy=hash" >> $GITHUB_OUTPUT
+          fi
+        else
+          # Generate hash-based version
+          COMMIT_HASH=$(git rev-parse --short=7 HEAD)
+          VERSION="${COMMIT_HASH}-dev"
+          
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          VERSION_CODE=$(( 1000000 + $COMMIT_COUNT ))
+          
+          echo "strategy=hash" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "version-code=$VERSION_CODE" >> $GITHUB_OUTPUT

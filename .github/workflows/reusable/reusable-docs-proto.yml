@@ -1,0 +1,48 @@
+name: Build Proto Docs
+
+on:
+  workflow_call:
+    outputs:
+      artifact-name:
+        description: 'The artifact name for the proto docs'
+        value: ${{ jobs.build-docs.outputs.artifact-name }}
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-name: proto-docs-${{ github.sha }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          sparse-checkout: protos
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install protoc-gen-doc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+          npm install -g protoc-gen-doc
+
+      - name: Generate Proto Documentation
+        run: |
+          mkdir -p proto-docs
+          protoc --proto_path=protos \
+                 --doc_out=proto-docs \
+                 --doc_opt=html,index.html \
+                 protos/*.proto
+
+      - name: Upload Proto Docs Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: proto-docs-${{ github.sha }}
+          path: proto-docs/
+          retention-days: 7

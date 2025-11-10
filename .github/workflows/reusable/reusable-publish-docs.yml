@@ -1,0 +1,88 @@
+name: Publish Documentation
+
+on:
+  workflow_call:
+    inputs:
+      docs-type:
+        description: 'Type of documentation (javadoc, docfx, proto, main)'
+        required: true
+        type: string
+      artifact-name:
+        description: 'Name of the artifact containing the docs'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Download Documentation Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: docs-temp
+
+      - name: Determine Target Path
+        id: target
+        run: |
+          case "${{ inputs.docs-type }}" in
+            javadoc)
+              echo "path=api/java" >> $GITHUB_OUTPUT
+              ;;
+            docfx)
+              echo "path=api/csharp" >> $GITHUB_OUTPUT
+              ;;
+            proto)
+              echo "path=api/proto" >> $GITHUB_OUTPUT
+              ;;
+            main)
+              echo "path=." >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "Unknown docs type: ${{ inputs.docs-type }}"
+              exit 1
+              ;;
+          esac
+
+      - name: Clear Existing Documentation
+        run: |
+          TARGET_PATH="gh-pages/${{ steps.target.outputs.path }}"
+          if [ "${{ steps.target.outputs.path }}" != "." ]; then
+            rm -rf "$TARGET_PATH"
+            mkdir -p "$TARGET_PATH"
+          else
+            # For main docs, preserve api/ directory
+            cd gh-pages
+            find . -maxdepth 1 -not -name '.' -not -name '.git' -not -name 'api' -exec rm -rf {} +
+          fi
+
+      - name: Copy New Documentation
+        run: |
+          TARGET_PATH="gh-pages/${{ steps.target.outputs.path }}"
+          cp -r docs-temp/* "$TARGET_PATH/"
+
+      - name: Create .nojekyll
+        run: touch gh-pages/.nojekyll
+
+      - name: Commit and Push
+        run: |
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update ${{ inputs.docs-type }} documentation"
+            git push
+          fi

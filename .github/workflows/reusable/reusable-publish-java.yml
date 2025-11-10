@@ -1,0 +1,152 @@
+name: Publish QuestNavLib
+
+on:
+  workflow_call:
+    inputs:
+      versionYear:
+        description: 'Current FRC Year'
+        required: false
+        type: string
+      versionMajor:
+        description: 'Major version'
+        required: false
+        type: string
+      versionMinor:
+        description: 'Minor version'
+        required: false
+        type: string
+      versionPatch:
+        description: 'Patch version'
+        required: false
+        type: string
+      versionType:
+        description: 'Type of version'
+        required: false
+        type: string
+      mavenRepository:
+        description: 'Maven repository type (snapshots or releases)'
+        required: true
+        type: string
+    secrets:
+      MAVEN_USERNAME:
+        description: 'QuestNav Maven Username'
+        required: true
+      MAVEN_PASSWORD:
+        description: 'QuestNav Maven Password'
+        required: true
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: questnav-lib
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          sparse-checkout: questnav-lib
+          sparse-checkout-cone-mode: false
+
+      - name: Determine Version Strategy
+        id: version-info
+        run: |
+          # Check if all required version components are provided
+          if [ -n "${{ inputs.versionYear }}" ] && [ -n "${{ inputs.versionMajor }}" ] && [ -n "${{ inputs.versionMinor }}" ] && [ -n "${{ inputs.versionPatch }}" ]; then
+            # Use semantic versioning
+            VERSION="${{ inputs.versionYear }}-${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}"
+            if [ -n "${{ inputs.versionType }}" ] && [ "${{ inputs.versionType }}" != "release" ]; then
+              VERSION="${VERSION}-${{ inputs.versionType }}"
+            fi
+
+            QUESTNAV_VERSION="${{ inputs.versionYear }}-${{ inputs.versionMajor }}.${{ inputs.versionMinor }}.${{ inputs.versionPatch }}"
+            FRC_YEAR="${{ inputs.versionYear }}"
+            RELEASE_TYPE="${{ inputs.versionType }}"
+
+            echo "strategy=semantic" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "questnav-version=$QUESTNAV_VERSION" >> $GITHUB_OUTPUT
+            echo "frc-year=$FRC_YEAR" >> $GITHUB_OUTPUT
+            echo "release-type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          else
+            # Auto-versioning for PR/main builds
+            COMMIT_HASH=$(git rev-parse --short=7 HEAD)
+            CURRENT_YEAR=$(date +%Y)
+            TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+            
+            # Determine build type
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              # PR Build
+              PR_NUMBER="${{ github.event.pull_request.number }}"
+              QUESTNAV_VERSION="PR-${PR_NUMBER}-${COMMIT_HASH}"
+              RELEASE_TYPE="pr"
+              VERSION="PR-${PR_NUMBER}-${COMMIT_HASH}"
+            elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+              # Push to main
+              QUESTNAV_VERSION="main-${TIMESTAMP}"
+              RELEASE_TYPE="snapshot"
+              VERSION="main-${TIMESTAMP}"
+            else
+              # Other branches
+              BRANCH_NAME="${{ github.ref_name }}"
+              QUESTNAV_VERSION="${BRANCH_NAME}-${COMMIT_HASH}"
+              RELEASE_TYPE="dev"
+              VERSION="${BRANCH_NAME}-${COMMIT_HASH}"
+            fi
+            
+            FRC_YEAR="$CURRENT_YEAR"
+
+            echo "strategy=auto" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "questnav-version=$QUESTNAV_VERSION" >> $GITHUB_OUTPUT
+            echo "frc-year=$FRC_YEAR" >> $GITHUB_OUTPUT
+            echo "release-type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-lib-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-lib-
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11'
+
+      - name: Make gradlew Executable
+        run: 'chmod +x ./gradlew'
+
+      - name: Publish to Maven
+        run: |
+          ./gradlew publish \
+            -PquestnavVersion="${{ steps.version-info.outputs.questnav-version }}" \
+            -PreleaseType="${{ steps.version-info.outputs.release-type }}" \
+            -PfrcYear="${{ steps.version-info.outputs.frc-year }}" \
+            -PmavenUsername="${{ secrets.MAVEN_USERNAME }}" \
+            -PmavenPassword="${{ secrets.MAVEN_PASSWORD }}" \
+            -PmavenRepository="${{ inputs.mavenRepository }}"
+
+      - name: Publish Summary
+        run: |
+          echo "## 📦 Published to Maven" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** \`${{ steps.version-info.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Type:** \`${{ steps.version-info.outputs.release-type }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Repository:** \`${{ inputs.mavenRepository }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **FRC Year:** \`${{ steps.version-info.outputs.frc-year }}\`" >> $GITHUB_STEP_SUMMARY

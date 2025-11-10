@@ -1,0 +1,47 @@
+name: 'Setup Java and Gradle'
+description: 'Sets up JDK 17, Gradle 8.11, and caches Gradle dependencies'
+
+inputs:
+  working-directory:
+    description: 'Working directory for the Gradle project'
+    required: false
+    default: 'questnav-lib'
+  cache-key-prefix:
+    description: 'Prefix for the cache key'
+    required: false
+    default: 'gradle-lib'
+
+outputs:
+  cache-hit:
+    description: 'Whether the Gradle cache was hit'
+    value: ${{ steps.cache.outputs.cache-hit }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: '8.11'
+
+    - name: Cache Gradle Dependencies
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-${{ inputs.cache-key-prefix }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ inputs.cache-key-prefix }}-
+
+    - name: Make gradlew Executable
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: chmod +x ./gradlew

@@ -1,0 +1,121 @@
+name: Build C#
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
+        type: string
+      skip-formatting:
+        description: 'Skip formatting check'
+        required: false
+        type: boolean
+        default: false
+      skip-docs:
+        description: 'Skip docs generation'
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      UNITY_LICENSE:
+        description: 'Unity License'
+        required: true
+      UNITY_EMAIL:
+        description: 'Unity Email'
+        required: true
+      UNITY_PASSWORD:
+        description: 'Unity Password'
+        required: true
+    outputs:
+      version:
+        description: 'The version string used for this build'
+        value: ${{ jobs.build.outputs.version }}
+      version-code:
+        description: 'The version code used for this build'
+        value: ${{ jobs.build.outputs.version-code }}
+      apk-artifact-id:
+        description: 'The artifact ID for the APK'
+        value: ${{ jobs.build.outputs.apk-artifact-id }}
+      docfx-artifact-id:
+        description: 'The artifact ID for the DocFX site'
+        value: ${{ jobs.build.outputs.docfx-artifact-id }}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    outputs:
+      version: ${{ steps.version-info.outputs.version }}
+      version-code: ${{ steps.version-info.outputs.version-code }}
+      apk-artifact-id: ${{ steps.upload-apk.outputs.artifact-id }}
+      docfx-artifact-id: ${{ steps.upload-docfx.outputs.artifact-id }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          sparse-checkout: |
+            unity
+            .github
+          sparse-checkout-cone-mode: false
+          lfs: true
+
+      - name: Free Disk Space
+        uses: ./.github/actions/quest-windows-free-disk-space
+
+      - name: Determine Version
+        id: version-info
+        uses: ./.github/actions/determine-version
+        with:
+          version: ${{ inputs.version }}
+
+      - name: Setup Unity Environment
+        uses: ./.github/actions/setup-unity-environment
+        with:
+          unity-project-path: unity
+          cache-key-suffix: Android-Windows
+
+      - name: Build Unity APK
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: unity
+          targetPlatform: Android
+          customParameters: -developmentBuild
+          versioning: Custom
+          version: ${{ steps.version-info.outputs.version }}
+          androidVersionCode: ${{ steps.version-info.outputs.version-code }}
+
+      - name: Upload APK Artifact
+        id: upload-apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: questnav-apk-${{ steps.version-info.outputs.version }}
+          path: build/Android/*.apk
+          retention-days: 7
+
+      - name: Build DocFX
+        if: ${{ inputs.skip-docs == false }}
+        run: |
+          cd unity/DocFX
+          docfx metadata
+          docfx build
+
+      - name: Zip DocFX Site
+        if: ${{ inputs.skip-docs == false }}
+        uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r docfx-site.zip unity/DocFX/_site
+
+      - name: Upload DocFX Artifact
+        if: ${{ inputs.skip-docs == false }}
+        id: upload-docfx
+        uses: actions/upload-artifact@v4
+        with:
+          name: questnav-docfx-${{ steps.version-info.outputs.version }}
+          path: docfx-site.zip
+          retention-days: 7

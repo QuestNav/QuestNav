@@ -1,0 +1,36 @@
+name: Build DocFX
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        description: 'Name of the artifact containing the DocFX site zip'
+        required: true
+        type: string
+    outputs:
+      artifact-name:
+        description: 'The artifact name for the DocFX site'
+        value: ${{ jobs.build-docs.outputs.artifact-name }}
+
+jobs:
+  build-docs:
+    runs-on: windows-latest
+    outputs:
+      artifact-name: ${{ inputs.artifact-name }}
+
+    steps:
+      - name: Download DocFX Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+
+      - name: Extract DocFX Site
+        run: |
+          Expand-Archive -Path docfx-site.zip -DestinationPath docfx-extracted
+
+      - name: Upload Extracted DocFX
+        uses: actions/upload-artifact@v4
+        with:
+          name: docfx-site-${{ github.sha }}
+          path: docfx-extracted/_site/
+          retention-days: 7

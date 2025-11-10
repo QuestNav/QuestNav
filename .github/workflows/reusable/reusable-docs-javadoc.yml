@@ -1,0 +1,44 @@
+name: Build Javadocs
+
+on:
+  workflow_call:
+    outputs:
+      artifact-name:
+        description: 'The artifact name for the Javadocs'
+        value: ${{ jobs.build-docs.outputs.artifact-name }}
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: questnav-lib
+    outputs:
+      artifact-name: javadocs-${{ github.sha }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          sparse-checkout: questnav-lib
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Java and Gradle
+        uses: ./.github/actions/setup-java-gradle
+        with:
+          working-directory: questnav-lib
+          cache-key-prefix: gradle-lib
+
+      - name: Generate Javadocs
+        run: ./gradlew javadoc
+
+      - name: Upload Javadocs Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: javadocs-${{ github.sha }}
+          path: questnav-lib/build/docs/javadoc/
+          retention-days: 7

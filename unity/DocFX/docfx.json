@@ -29,7 +29,7 @@
         "files": ["*.md"]
       }
     ],
-    "output": "../../docs/static/api/csharp",
+    "output": "./build",
     "template": ["default"],
     "globalMetadata": {
       "_appTitle": "QuestNav API Documentation",

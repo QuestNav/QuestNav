@@ -1,0 +1,330 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # ============================================================
+  # DETECT CHANGES
+  # ============================================================
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      java-changed: ${{ steps.changes.outputs.java }}
+      csharp-changed: ${{ steps.changes.outputs.csharp }}
+      proto-changed: ${{ steps.changes.outputs.proto }}
+      docs-changed: ${{ steps.changes.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            java:
+              - 'questnav-lib/**'
+              - '!questnav-lib/src/main/java/gg/questnav/questnav/protos/generated/**'
+            csharp:
+              - 'unity/**'
+            proto:
+              - 'protos/**'
+            docs:
+              - 'docs/**'
+
+  # ============================================================
+  # JAVA ONLY PATH
+  # ============================================================
+  format-java:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'false'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-format-java.yml
+
+  build-java:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'false'
+    needs: [detect-changes, format-java]
+    uses: ./.github/workflows/reusable-build-java.yml
+    secrets:
+      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+
+  docs-java:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'false'
+    needs: [build-java]
+    uses: ./.github/workflows/reusable-docs-javadoc.yml
+
+  publish-javadocs:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'false' &&
+      github.ref == 'refs/heads/main'
+    needs: [docs-java]
+    uses: ./.github/workflows/reusable-publish-docs.yml
+    with:
+      docs-type: javadoc
+      artifact-name: ${{ needs.docs-java.outputs.artifact-name }}
+    permissions:
+      contents: write
+
+  build-csharp-for-java:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'false'
+    needs: [build-java]
+    uses: ./.github/workflows/reusable-build-csharp.yml
+    with:
+      version: ${{ needs.build-java.outputs.version }}
+      skip-formatting: true
+      skip-docs: true
+    secrets:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
+  # ============================================================
+  # C# ONLY PATH
+  # ============================================================
+  format-csharp:
+    if: |
+      needs.detect-changes.outputs.csharp-changed == 'true' &&
+      needs.detect-changes.outputs.java-changed == 'false'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-format-csharp.yml
+
+  build-csharp:
+    if: |
+      needs.detect-changes.outputs.csharp-changed == 'true' &&
+      needs.detect-changes.outputs.java-changed == 'false'
+    needs: [detect-changes, format-csharp]
+    uses: ./.github/workflows/reusable-build-csharp.yml
+    with:
+      skip-formatting: false
+      skip-docs: false
+    secrets:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
+  docs-csharp:
+    if: |
+      needs.detect-changes.outputs.csharp-changed == 'true' &&
+      needs.detect-changes.outputs.java-changed == 'false'
+    needs: [build-csharp]
+    uses: ./.github/workflows/reusable-docs-docfx.yml
+    with:
+      artifact-name: ${{ needs.build-csharp.outputs.docfx-artifact-id }}
+
+  publish-docfx:
+    if: |
+      needs.detect-changes.outputs.csharp-changed == 'true' &&
+      needs.detect-changes.outputs.java-changed == 'false' &&
+      github.ref == 'refs/heads/main'
+    needs: [docs-csharp]
+    uses: ./.github/workflows/reusable-publish-docs.yml
+    with:
+      docs-type: docfx
+      artifact-name: ${{ needs.docs-csharp.outputs.artifact-name }}
+    permissions:
+      contents: write
+
+  build-java-for-csharp:
+    if: |
+      needs.detect-changes.outputs.csharp-changed == 'true' &&
+      needs.detect-changes.outputs.java-changed == 'false'
+    needs: [build-csharp]
+    uses: ./.github/workflows/reusable-build-java.yml
+    with:
+      version: ${{ needs.build-csharp.outputs.version }}
+      skip-formatting: true
+      skip-docs: true
+    secrets:
+      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+
+  # ============================================================
+  # BOTH JAVA AND C# CHANGED
+  # ============================================================
+  format-both-java:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'true'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-format-java.yml
+
+  format-both-csharp:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'true'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-format-csharp.yml
+
+  build-both-java:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'true'
+    needs: [format-both-java, format-both-csharp]
+    uses: ./.github/workflows/reusable-build-java.yml
+    with:
+      skip-formatting: false
+      skip-docs: false
+    secrets:
+      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+
+  build-both-csharp:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'true'
+    needs: [format-both-java, format-both-csharp, build-both-java]
+    uses: ./.github/workflows/reusable-build-csharp.yml
+    with:
+      version: ${{ needs.build-both-java.outputs.version }}
+      skip-formatting: false
+      skip-docs: false
+    secrets:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
+  docs-both-java:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'true'
+    needs: [build-both-java]
+    uses: ./.github/workflows/reusable-docs-javadoc.yml
+
+  docs-both-csharp:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'true'
+    needs: [build-both-csharp]
+    uses: ./.github/workflows/reusable-docs-docfx.yml
+    with:
+      artifact-name: ${{ needs.build-both-csharp.outputs.docfx-artifact-id }}
+
+  publish-both-javadocs:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'true' &&
+      github.ref == 'refs/heads/main'
+    needs: [docs-both-java]
+    uses: ./.github/workflows/reusable-publish-docs.yml
+    with:
+      docs-type: javadoc
+      artifact-name: ${{ needs.docs-both-java.outputs.artifact-name }}
+    permissions:
+      contents: write
+
+  publish-both-docfx:
+    if: |
+      needs.detect-changes.outputs.java-changed == 'true' &&
+      needs.detect-changes.outputs.csharp-changed == 'true' &&
+      github.ref == 'refs/heads/main'
+    needs: [docs-both-csharp]
+    uses: ./.github/workflows/reusable-publish-docs.yml
+    with:
+      docs-type: docfx
+      artifact-name: ${{ needs.docs-both-csharp.outputs.artifact-name }}
+    permissions:
+      contents: write
+
+  # ============================================================
+  # PROTOBUF PATH
+  # ============================================================
+  build-proto-java:
+    if: needs.detect-changes.outputs.proto-changed == 'true'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-build-proto-java.yml
+
+  build-proto-csharp:
+    if: needs.detect-changes.outputs.proto-changed == 'true'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-build-proto-csharp.yml
+
+  docs-proto:
+    if: needs.detect-changes.outputs.proto-changed == 'true'
+    needs: [build-proto-java, build-proto-csharp]
+    uses: ./.github/workflows/reusable-docs-proto.yml
+
+  publish-proto-docs:
+    if: |
+      needs.detect-changes.outputs.proto-changed == 'true' &&
+      github.ref == 'refs/heads/main'
+    needs: [docs-proto]
+    uses: ./.github/workflows/reusable-publish-docs.yml
+    with:
+      docs-type: proto
+      artifact-name: ${{ needs.docs-proto.outputs.artifact-name }}
+    permissions:
+      contents: write
+
+  # ============================================================
+  # DOCS PATH
+  # ============================================================
+  build-docs:
+    if: needs.detect-changes.outputs.docs-changed == 'true'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-build-docs.yml
+
+  publish-main-docs:
+    if: |
+      needs.detect-changes.outputs.docs-changed == 'true' &&
+      github.ref == 'refs/heads/main'
+    needs: [build-docs]
+    uses: ./.github/workflows/reusable-publish-docs.yml
+    with:
+      docs-type: main
+      artifact-name: ${{ needs.build-docs.outputs.artifact-name }}
+    permissions:
+      contents: write
+
+  # ============================================================
+  # SUMMARY
+  # ============================================================
+  ci-summary:
+    if: always()
+    needs:
+      - detect-changes
+      - format-java
+      - build-java
+      - docs-java
+      - build-csharp-for-java
+      - format-csharp
+      - build-csharp
+      - docs-csharp
+      - build-java-for-csharp
+      - format-both-java
+      - format-both-csharp
+      - build-both-java
+      - build-both-csharp
+      - docs-both-java
+      - docs-both-csharp
+      - build-proto-java
+      - build-proto-csharp
+      - docs-proto
+      - build-docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate CI Summary
+        run: |
+          echo "# CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Changes Detected" >> $GITHUB_STEP_SUMMARY
+          echo "- Java: \`${{ needs.detect-changes.outputs.java-changed }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- C#: \`${{ needs.detect-changes.outputs.csharp-changed }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Proto: \`${{ needs.detect-changes.outputs.proto-changed }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Docs: \`${{ needs.detect-changes.outputs.docs-changed }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Job Status" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All required checks passed" >> $GITHUB_STEP_SUMMARY

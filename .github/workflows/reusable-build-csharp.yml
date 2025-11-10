@@ -108,7 +108,7 @@ jobs:
       - name: Zip DocFX Site
         if: ${{ inputs.skip-docs == false }}
         run: |
-          Compress-Archive -Path "unity/DocFX/_site" -DestinationPath "docfx-site.zip" -CompressionLevel Optimal
+          Compress-Archive -Path "unity/DocFX/build" -DestinationPath "docfx-site.zip" -CompressionLevel Optimal
 
       - name: Upload DocFX Artifact
         if: ${{ inputs.skip-docs == false }}

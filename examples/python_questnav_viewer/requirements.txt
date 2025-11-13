@@ -1,0 +1,20 @@
+# QuestNav Viewer Requirements
+# Python 3.8+ required
+
+# Official RobotPy packages from mostrobotpy
+# See: https://github.com/robotpy/mostrobotpy
+
+# NetworkTables support (NT4 protocol)
+pyntcore
+
+# WPILib math utilities (for Pose3d, Translation3d, Rotation3d, Quaternion)
+robotpy-wpimath
+
+# WPILib utilities (protobuf support and struct types)
+robotpy-wpiutil
+
+# Protobuf support for QuestNav custom messages
+protobuf
+
+# NumPy (required by robotpy-wpimath)
+numpy

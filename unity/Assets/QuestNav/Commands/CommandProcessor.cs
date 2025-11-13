@@ -61,6 +61,19 @@ namespace QuestNav.Commands
         }
 
         /// <summary>
+        /// Executes a pose reset command directly (e.g., from web interface).
+        /// Bypasses NetworkTables command queue.
+        /// </summary>
+        /// <param name="command">The pose reset command to execute</param>
+        public void ExecutePoseReset(ProtobufQuestNavCommand command)
+        {
+            if (command.Type == QuestNavCommandType.PoseReset && command.PoseResetPayload != null)
+            {
+                poseResetCommand.Execute(command);
+            }
+        }
+
+        /// <summary>
         /// Processes incoming commands from the robot and executes them in order
         /// </summary>
         public void ProcessCommands()

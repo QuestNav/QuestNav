@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Utils;
@@ -140,18 +141,15 @@ namespace QuestNav.UI
             this.teamUpdateButton = teamUpdateButton;
             this.autoStartToggle = autoStartToggle;
 
-            teamNumber = PlayerPrefs.GetInt(
-                "TeamNumber",
-                QuestNavConstants.Network.DEFAULT_TEAM_NUMBER
-            );
+            // Load team number from Tunables (synced with web config)
+            teamNumber = Tunables.defaultTeamNumber;
             teamInput.text = teamNumber.ToString();
             setTeamNumberFromUI();
 
             teamUpdateButton.onClick.AddListener(setTeamNumberFromUI);
 
-            // Load/Save auto start preference
-            bool checkboxValue = PlayerPrefs.GetInt("AutoStart", 1) == 1;
-            autoStartToggle.isOn = checkboxValue;
+            // Load auto start from Tunables (synced with web config)
+            autoStartToggle.isOn = Tunables.autoStartOnBoot;
 
             autoStartToggle.onValueChanged.AddListener(updateAutoStart);
         }
@@ -161,6 +159,11 @@ namespace QuestNav.UI
         /// Gets the current team number.
         /// </summary>
         public int TeamNumber => teamNumber;
+
+        /// <summary>
+        /// Gets the current IP address.
+        /// </summary>
+        public string IPAddress => myAddressLocal;
         #endregion
 
         #region Setters
@@ -171,8 +174,10 @@ namespace QuestNav.UI
         {
             QueuedLogger.Log("Updating Team Number");
             teamNumber = int.Parse(teamInput.text);
-            PlayerPrefs.SetInt("TeamNumber", teamNumber);
-            PlayerPrefs.Save();
+
+            // Update Tunables (synced with web config)
+            Tunables.defaultTeamNumber = teamNumber;
+
             updateTeamNumberInputBoxPlaceholder(teamNumber);
 
             // Update the connection with new team number
@@ -253,14 +258,78 @@ namespace QuestNav.UI
         /// <param name="newValue">new AutoStart value</param>
         void updateAutoStart(bool newValue)
         {
-            PlayerPrefs.SetInt("AutoStart", newValue ? 1 : 0);
-            PlayerPrefs.Save();
+            // Update Tunables (synced with web config)
+            Tunables.autoStartOnBoot = newValue;
         }
 
         public void UIPeriodic()
         {
             updateConStateText();
             updateIPAddressText();
+            syncFromTunables();
+        }
+
+        private string lastDebugIPOverride = "";
+
+        /// <summary>
+        /// Syncs UI elements with Tunables values (updated via web config)
+        /// </summary>
+        private void syncFromTunables()
+        {
+            // Check if debug IP override changed - triggers reconnection
+            if (lastDebugIPOverride != Tunables.debugNTServerAddressOverride)
+            {
+                string newValue = Tunables.debugNTServerAddressOverride ?? "";
+
+                // Only trigger reconnection if the value is empty (cleared) or a valid IP
+                bool shouldReconnect = string.IsNullOrEmpty(newValue) || IsValidIPAddress(newValue);
+
+                if (shouldReconnect)
+                {
+                    lastDebugIPOverride = newValue;
+                    // Trigger reconnection with current team number (which checks debug override internally)
+                    networkTableConnection.UpdateTeamNumber(teamNumber);
+                }
+            }
+
+            // Sync team number if changed via web interface
+            if (teamNumber != Tunables.defaultTeamNumber)
+            {
+                teamNumber = Tunables.defaultTeamNumber;
+                teamInput.text = teamNumber.ToString();
+                updateTeamNumberInputBoxPlaceholder(teamNumber);
+                networkTableConnection.UpdateTeamNumber(teamNumber);
+            }
+
+            // Sync auto-start toggle if changed via web interface
+            if (autoStartToggle.isOn != Tunables.autoStartOnBoot)
+            {
+                autoStartToggle.SetIsOnWithoutNotify(Tunables.autoStartOnBoot);
+            }
+        }
+
+        /// <summary>
+        /// Validates if a string is a valid IPv4 address
+        /// </summary>
+        private bool IsValidIPAddress(string ipString)
+        {
+            if (string.IsNullOrEmpty(ipString))
+                return false;
+
+            string[] parts = ipString.Split('.');
+            if (parts.Length != 4)
+                return false;
+
+            foreach (string part in parts)
+            {
+                if (!int.TryParse(part, out int num))
+                    return false;
+
+                if (num < 0 || num > 255)
+                    return false;
+            }
+
+            return true;
         }
 
         /// <summary>

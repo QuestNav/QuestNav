@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Unosquare.Swan.Lite</id>
+    <version>3.1.0</version>
+    <title>Unosquare SWAN Lite</title>
+    <authors>Unosquare,and Contributors to SWAN</authors>
+    <owners>Mario Di Vece,Geo Perez</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://raw.githubusercontent.com/unosquare/swan/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/unosquare/swan</projectUrl>
+    <iconUrl>https://github.com/unosquare/swan/raw/master/swan-logo-32.png</iconUrl>
+    <description>Repeating code and reinventing the wheel is generally considered bad practice. At Unosquare we are committed to beautiful code and great software. Swan is a collection of classes and extension methods that we and other good developers have developed and evolved over the years. We found ourselves copying and pasting the same code for every project every time we started it. We decide to kill that cycle once and for all. This is the result of that idea. Our philosophy is that SWAN should have no external dependencies, it should be cross-platform, and it should be useful.</description>
+    <summary>Swan stands for Stuff We All Need</summary>
+    <releaseNotes>v3.1.0
+Fix JSON parsing - #236 
+Add new default argument for console apps #223
+v3.0.0
+Check GitHub releases
+v2.6.2
+Fixed issue serializa JSON string
+v2.6.1
+Minor fixes @rdeago
+v2.6.0
+Thanks to @rdeago for some IP Address utilities.
+v2.5.1
+Fix namespaces and restore NET461 as target framework.
+v2.5.0
+Add CompositeHashCode from EmbedIO, thanks @rdeago
+v2.4.4
+Fix issue with Ignore Properties in JSON serializer.
+v2.4.3
+Fix issue with headless ubuntu running WinService
+v2.4.2
+Maintenance
+v2.4.1
+Remove dependency to CodePages
+v2.4.0
+Port to C# 8
+v2.3.0
+Change Loggers and fix issues JSON serializer.
+v2.2.6
+Change Terminal output and FileLogger File Path property
+v2.2.5
+Add Strong-name assemblie and fix issue with FileLogger
+v2.2.2
+Fix issue with CopyPropertiesTo.
+v2.2.1
+Changes Terminal Border to Unicode
+v2.2.0
+Fixed issues with JSON Serializer/Deserializer
+v2.1.0
+Changes to ConsoleLogger and Terminal
+v2.0.0
+BREAKING CHANGES - Check our GH for more.
+v1.3.1
+Add Extension Method string.ReadLine(prompt)
+v1.3.0
+Add some extensions methods to Task and DateTime
+v1.2.3
+Update JSON Formatter to support camel Case
+v1.1.2
+Downgrade to NET461
+v1.1.1
+Update Runtime Caches
+v1.1.0
+Add FileLogger Component and Upgrade target NET452 to NET462
+v1.0.0
+New Abstractions for IWorker
+v0.39..0
+Remove UWP
+v0.38.1
+Fix ExclusiveTimer behavior
+v0.38.0
+Add TimerControl class.
+v0.37.0
+Add RunnerBase class.
+v0.36.0
+Add ExclusiveTimer and use it to improve logging.
+v0.35.0
+Refactor to Cache and fix issues with JSON race-condition.
+v0.34.2
+Add Global Log Level to Terminal Settings
+v0.34.0
+Minor adjustments
+v0.33.4
+Improve JSON Formatter performance
+v0.33.0
+Implements RFC8259 for JSON
+v0.32.3
+Fix error with ObjectMappper and boolean properties
+v0.32.0
+Add new logic to CsvWriter to allow format output and use null-value string representations
+v0.31.0
+Add MethodInfoCache
+v0.30.5
+Add Wall notation to Tokenizer
+v0.30.3
+Fix minor issue with Tokenizer
+v0.30.0
+Add new Tokenizer and ParseExpression classes
+v0.29.0
+Fix issue with ProcessRunner output buffer
+v0.28.3
+Minor issue with JSON Deserializer
+v0.28.0
+Add new methods (GetFlagNames) to EnumHelper
+v0.27.0
+Add methods to EnumHelper to use with Flags
+v0.26.0
+Add Object Validator (Issue #87)
+v0.25.0
+New classes (Issue #78)
+New log type (PR #79)
+v0.24.0
+New SWAN Lite
+v0.23.0
+Add OverrideIsConsolePresent Terminal Setting to allow bypass the console present check.
+v0.22.0
+Add CSProj file parser.
+v0.21.0
+Resolve issue with ArgumentParser
+v0.19.0
+Add CLI Verbs support
+v0.18.0
+Regular revision, minor changes.
+v0.17.1
+Minor fix ObjectMapper
+v0.17.0
+Add NET Standard 2.0
+v0.16.1
+Add LDAP Modify operator
+v0.16.0
+General review and minor fixes
+v0.15.0
+First beta version of LDAP Client based on Novell LDAP Client
+-- See full log at our site --</releaseNotes>
+    <copyright>Copyright (c) 2016-2020 - Unosquare</copyright>
+    <tags>best-practices netcore network objectmapper json-serialization</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.6.1">
+        <dependency id="System.ValueTuple" version="4.5.0" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

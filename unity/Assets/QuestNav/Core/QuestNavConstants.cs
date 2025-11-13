@@ -217,5 +217,41 @@ namespace QuestNav.Core
             /// </summary>
             public const int MAIN_UPDATE_HZ = 120;
         }
+
+        /// <summary>
+        /// Constants for the UI Tagalong behavior
+        /// </summary>
+        public static class UITagalong
+        {
+            /// <summary>
+            /// The distance the UI should follow the user at (in meters).
+            /// </summary>
+            public const float FOLLOW_DISTANCE = 2.0f;
+
+            /// <summary>
+            /// How quickly the UI moves towards the target position.
+            /// </summary>
+            public const float POSITION_SPEED = 4.0f;
+
+            /// <summary>
+            /// How quickly the UI rotates to match the user's rotation.
+            /// </summary>
+            public const float ROTATION_SPEED = 4.0f;
+
+            /// <summary>
+            /// Distance threshold for UI movement along the World X-axis (sideways).
+            /// </summary>
+            public const float POSITION_THRESHOLD_X = 0.5f;
+
+            /// <summary>
+            /// Distance threshold for UI movement along the World Y-axis (up/down).
+            /// </summary>
+            public const float POSITION_THRESHOLD_Y = 0.3f;
+
+            /// <summary>
+            /// The difference in angle at which the UI starts rotating.
+            /// </summary>
+            public const float ANGLE_THRESHOLD = 0.1f;
+        }
     }
 }

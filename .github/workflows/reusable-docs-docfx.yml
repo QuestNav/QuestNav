@@ -52,14 +52,10 @@ jobs:
           docfx metadata
           docfx build
 
-      - name: Zip DocFX Site
-        run: |
-          zip -r docfx-site.zip unity/DocFX/build
-
       - name: Upload DocFX Artifact
         id: upload-docfx
         uses: actions/upload-artifact@v4
         with:
           name: questnav-docfx-${{ steps.version-info.outputs.version }}
-          path: docfx-site.zip
+          path: unity/DocFX/build
           retention-days: 7

@@ -58,6 +58,7 @@ jobs:
 
   build-java:
     if: |
+      always() &&
       (needs.detect-changes.outputs.java-changed == 'true' ||
       needs.detect-changes.outputs.csharp-changed == 'true') &&
       (needs.format-java.result != 'failed' ||
@@ -99,6 +100,7 @@ jobs:
 
   build-csharp:
     if: |
+      always() &&
       (needs.detect-changes.outputs.csharp-changed == 'true' ||
       needs.detect-changes.outputs.java-changed == 'true') &&
       (needs.format-csharp.result != 'failed' ||

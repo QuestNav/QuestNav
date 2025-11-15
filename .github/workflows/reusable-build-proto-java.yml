@@ -35,13 +35,6 @@ jobs:
         with:
           version: ${{ inputs.version }}
 
-      - name: Setup Java and Gradle
-        uses: ./.github/actions/setup-java-gradle
-        with:
-          version: ${{ steps.version-info.outputs.version }}
-          working-directory: questnav-lib
-          cache-key-prefix: gradle-proto
-
       - name: Install Protobuf Compiler
         run: |
           sudo apt-get update

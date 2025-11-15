@@ -29,13 +29,6 @@ jobs:
         with:
           version: ${{ inputs.version }}
 
-      - name: Setup Unity Environmen
-        uses: ./.github/actions/setup-unity-environment
-        with:
-          version: ${{ steps.version-info.outputs.version }}
-          unity-project-path: unity
-          cache-key-suffix: Proto-CSharp
-
       - name: Install Protobuf Compiler
         run: |
           sudo apt-get update

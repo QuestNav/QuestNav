@@ -38,6 +38,14 @@ jobs:
 
 
 # ----------------------- JAVA ----------------------- #
+  build-proto-java:
+    if: |
+      needs.detect-changes.outputs.proto-changed == 'true' ||
+      needs.detect-changes.outputs.csharp-changed == 'true' ||
+      needs.detect-changes.outputs.java-changed == 'true'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-build-proto-java.yml
+
   format-java:
     if: needs.detect-changes.outputs.java-changed == 'true'
     needs: [detect-changes]
@@ -71,6 +79,14 @@ jobs:
   #     contents: write
 
 # ----------------------- C# ----------------------- #
+  build-proto-csharp:
+    if: |
+      needs.detect-changes.outputs.proto-changed == 'true' ||
+      needs.detect-changes.outputs.csharp-changed == 'true' ||
+      needs.detect-changes.outputs.java-changed == 'true'
+    needs: [detect-changes]
+    uses: ./.github/workflows/reusable-build-proto-csharp.yml
+    
   format-csharp:
     if: needs.detect-changes.outputs.csharp-changed == 'true'
     needs: [detect-changes]
@@ -112,20 +128,6 @@ jobs:
     if: needs.detect-changes.outputs.proto-changed == 'true'
     needs: [detect-changes]
     uses: ./.github/workflows/reusable-docs-proto.yml
-
-  build-proto-java:
-    if: |
-      needs.detect-changes.outputs.proto-changed == 'true' &&
-      needs.docs-proto.result != 'failed'
-    needs: [detect-changes, docs-proto]
-    uses: ./.github/workflows/reusable-build-proto-java.yml
-
-  build-proto-csharp:
-    if: |
-      needs.detect-changes.outputs.proto-changed == 'true' &&
-      needs.docs-proto.result != 'failed'
-    needs: [detect-changes, docs-proto]
-    uses: ./.github/workflows/reusable-build-proto-csharp.yml
 
   # publish-proto-docs:
   #   if: |

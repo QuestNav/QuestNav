@@ -2,6 +2,10 @@ name: 'Setup Java and Gradle'
 description: 'Sets up JDK 17, Gradle 8.11, and caches Gradle dependencies'
 
 inputs:
+  version:
+    description: 'Version string to use (optional, auto-generated if not provided)'
+    required: false
+    type: string
   working-directory:
     description: 'Working directory for the Gradle project'
     required: false
@@ -29,6 +33,17 @@ runs:
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: '8.11'
+
+    - name: Determine Version
+      id: version-info
+      uses: ./.github/actions/determine-version
+      with:
+        version: ${{ inputs.version }}
+
+    - name: Restore Generated Protobufs
+      uses: actions/download-artifact@v5
+      with:
+        name: questnav-proto-java-${{ steps.version-info.outputs.version }}
 
     - name: Cache Gradle Dependencies
       id: cache

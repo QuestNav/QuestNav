@@ -2,6 +2,11 @@ name: Build Proto (Java)
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
+        type: string
 
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
@@ -23,14 +28,50 @@ jobs:
             protos
           sparse-checkout-cone-mode: false
 
+      - name: Determine Version
+        id: version-info
+        uses: ./.github/actions/determine-version
+        with:
+          version: ${{ inputs.version }}
+
       - name: Setup Java and Gradle
         uses: ./.github/actions/setup-java-gradle
         with:
+          version: ${{ steps.version-info.outputs.version }}
           working-directory: questnav-lib
           cache-key-prefix: gradle-proto
 
-      - name: Build Proto (Java)
-        run: ./gradlew generateProto
+      - name: Install Protobuf Compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
 
-      - name: Test Proto Build
-        run: ./gradlew compileJava
+      - name: Download QuickBuf plugin
+        id: download-quickbuf
+        uses: clausnz/github-action-download-maven-artifact@master
+        with:
+          url: 'https://repo1.maven.org'
+          repository: 'maven2'
+          groupId: 'us.hebi.quickbuf'
+          artifactId: 'protoc-gen-quickbuf'
+          version: '1.4'
+          extension: 'exe'
+          classifier: 'linux-x86_64'
+
+      - name: Setup QuickBuf
+        run: chmod +x ${{ steps.download-quickbuf.outputs.file }}
+
+      - name: Generate Java QuickBuffers
+        run: |
+          protoc \
+            -I="protos" \
+            --plugin=protoc-gen-quickbuf=${{ steps.download-quickbuf.outputs.file }} \
+            --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ \
+            protos/*.proto
+
+      - name: Upload Generated Proto Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: questnav-proto-java-${{ steps.version-info.outputs.version }}
+          path: questnav-lib/src/main/java/gg/questnav/questnav/protos/generated
+          retention-days: 7

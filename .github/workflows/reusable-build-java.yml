@@ -7,23 +7,6 @@ on:
         description: 'Version string to use (optional, auto-generated if not provided)'
         required: false
         type: string
-      skip-formatting:
-        description: 'Skip formatting check'
-        required: false
-        type: boolean
-        default: false
-      skip-docs:
-        description: 'Skip docs generation'
-        required: false
-        type: boolean
-        default: false
-    secrets:
-      MAVEN_USERNAME:
-        description: 'Maven Username'
-        required: true
-      MAVEN_PASSWORD:
-        description: 'Maven Password'
-        required: true
     outputs:
       version:
         description: 'The version string used for this build'
@@ -31,9 +14,6 @@ on:
       artifact-id:
         description: 'The artifact ID for the JAR'
         value: ${{ jobs.build.outputs.artifact-id }}
-      vendordep-artifact-id:
-        description: 'The artifact ID for the vendordep'
-        value: ${{ jobs.build.outputs.vendordep-artifact-id }}
 
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
@@ -47,7 +27,6 @@ jobs:
     outputs:
       version: ${{ steps.version-info.outputs.version }}
       artifact-id: ${{ steps.upload-jar.outputs.artifact-id }}
-      vendordep-artifact-id: ${{ steps.upload-vendordep.outputs.artifact-id }}
 
     steps:
       - name: Checkout Repository
@@ -68,39 +47,21 @@ jobs:
       - name: Setup Java and Gradle
         uses: ./.github/actions/setup-java-gradle
         with:
+          version: ${{ steps.version-info.outputs.version }}
           working-directory: questnav-lib
           cache-key-prefix: gradle-lib
+
+      - name: Download Protobufs
+        uses: actions/download-artifact@v5
+        with:
+          name: questnav-proto-java-${{ steps.version-info.outputs.version }}
+          path: questnav-lib/src/main/java/gg/questnav/questnav/protos/generated
 
       - name: Build Library
         run: |
           ./gradlew build \
             -PquestnavVersion="${{ steps.version-info.outputs.version }}" \
-            -PversionCode="${{ steps.version-info.outputs.version-code }}"
-
-      - name: Build Javadocs
-        if: ${{ inputs.skip-docs == false }}
-        run: |
-          ./gradlew javadoc \
-            -PquestnavVersion="${{ steps.version-info.outputs.version }}" \
-            -PversionCode="${{ steps.version-info.outputs.version-code }}"
-
-      - name: Publish to Maven Snapshots
-        run: |
-          MAVEN_REPO="snapshots"
-          MAVEN_VERSION="${{ steps.version-info.outputs.version }}"
-          
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            MAVEN_VERSION="PR-${{ github.event.pull_request.number }}-SNAPSHOT"
-          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            MAVEN_VERSION="main-SNAPSHOT"
-          fi
-          
-          ./gradlew publish \
-            -PquestnavVersion="${MAVEN_VERSION}" \
-            -PversionCode="${{ steps.version-info.outputs.version-code }}" \
-            -PmavenUsername="${{ secrets.MAVEN_USERNAME }}" \
-            -PmavenPassword="${{ secrets.MAVEN_PASSWORD }}" \
-            -PmavenRepository="${MAVEN_REPO}"
+            -PreleaseType="${{ steps.version-info.outputs.version-type }}"
 
       - name: Upload JAR Artifact
         id: upload-jar
@@ -108,12 +69,4 @@ jobs:
         with:
           name: questnavlib-jar-${{ steps.version-info.outputs.version }}
           path: questnav-lib/build/libs/*.jar
-          retention-days: 7
-
-      - name: Upload VendorDep Artifact
-        id: upload-vendordep
-        uses: actions/upload-artifact@v4
-        with:
-          name: questnavlib-vendordep-${{ steps.version-info.outputs.version }}
-          path: questnav-lib/build/generated/vendordeps/*.json
           retention-days: 7

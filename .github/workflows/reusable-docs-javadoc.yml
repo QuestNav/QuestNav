@@ -2,10 +2,15 @@ name: Build Javadocs
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
+        type: string
     outputs:
-      artifact-name:
-        description: 'The artifact name for the Javadocs'
-        value: ${{ jobs.build-docs.outputs.artifact-name }}
+      artifact-id:
+        description: 'The artifact ID for the Javadocs'
+        value: ${{ jobs.build-docs.outputs.artifact-id }}
 
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
@@ -17,7 +22,7 @@ jobs:
       run:
         working-directory: questnav-lib
     outputs:
-      artifact-name: javadocs-${{ github.sha }}
+      artifact-id: steps.upload-javadocs.outputs.artifact-id
 
     steps:
       - name: Checkout Repository
@@ -27,9 +32,16 @@ jobs:
           sparse-checkout: questnav-lib
           sparse-checkout-cone-mode: false
 
+      - name: Determine Version
+        id: version-info
+        uses: ./.github/actions/determine-version
+        with:
+          version: ${{ inputs.version }}
+
       - name: Setup Java and Gradle
         uses: ./.github/actions/setup-java-gradle
         with:
+          version: ${{ steps.version-info.outputs.version }}
           working-directory: questnav-lib
           cache-key-prefix: gradle-lib
 
@@ -39,6 +51,6 @@ jobs:
       - name: Upload Javadocs Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: javadocs-${{ github.sha }}
+          name: questnav-javadocs-${{ steps.version-info.outputs.version }}
           path: questnav-lib/build/docs/javadoc/
           retention-days: 7

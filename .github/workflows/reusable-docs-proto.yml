@@ -2,6 +2,11 @@ name: Build Proto Docs
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
+        type: string
     outputs:
       artifact-name:
         description: 'The artifact name for the proto docs'
@@ -20,6 +25,12 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           sparse-checkout: protos
           sparse-checkout-cone-mode: false
+
+      - name: Determine Version
+        id: version-info
+        uses: ./.github/actions/determine-version
+        with:
+          version: ${{ inputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -43,6 +54,6 @@ jobs:
       - name: Upload Proto Docs Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: proto-docs-${{ github.sha }}
+          name: questnav-proto-docs-${{ steps.version-info.outputs.version }}
           path: proto-docs/
           retention-days: 7

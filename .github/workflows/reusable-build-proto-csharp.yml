@@ -2,6 +2,11 @@ name: Build Proto (C#)
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
+        type: string
 
 jobs:
   build:
@@ -17,10 +22,18 @@ jobs:
             protos
           sparse-checkout-cone-mode: false
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Determine Version
+        id: version-info
+        uses: ./.github/actions/determine-version
         with:
-          dotnet-version: '8.x'
+          version: ${{ inputs.version }}
+
+      - name: Setup Unity Environmen
+        uses: ./.github/actions/setup-unity-environment
+        with:
+          version: ${{ steps.version-info.outputs.version }}
+          unity-project-path: unity
+          cache-key-suffix: Proto-CSharp
 
       - name: Install Protobuf Compiler
         run: |
@@ -34,10 +47,9 @@ jobs:
                  --csharp_out=unity/Assets/QuestNav/Generated \
                  protos/*.proto
 
-      - name: Verify Generated Files
-        run: |
-          if [ ! -d "unity/Assets/QuestNav/Generated" ] || [ -z "$(ls -A unity/Assets/QuestNav/Generated)" ]; then
-            echo "Error: No proto files generated"
-            exit 1
-          fi
-          echo "Successfully generated proto files"
+      - name: Upload Generated Proto Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: questnav-proto-csharp-${{ steps.version-info.outputs.version }}
+          path: unity/Assets/QuestNav/Generated
+          retention-days: 7

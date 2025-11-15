@@ -2,6 +2,10 @@ name: 'Setup Unity Environment'
 description: 'Sets up .NET, NuGetForUnity, and Unity Library cache'
 
 inputs:
+  version:
+    description: 'Version string to use (optional, auto-generated if not provided)'
+    required: false
+    type: string
   unity-project-path:
     description: 'Path to Unity project'
     required: false
@@ -28,6 +32,12 @@ runs:
       with:
         dotnet-version: ${{ inputs.dotnet-version }}
 
+    - name: Determine Version
+       id: version-info
+       uses: ./.github/actions/determine-version
+       with:
+        version: ${{ inputs.version }}
+
     - name: Install NuGetForUnity CLI
       shell: pwsh
       run: dotnet tool install --global NuGetForUnity.Cli
@@ -39,6 +49,12 @@ runs:
     - name: Restore NuGet Packages
       shell: pwsh
       run: nugetforunity restore ${{ inputs.unity-project-path }}/
+
+    - name: Restore Generated Protobufs
+      uses: actions/download-artifact@v5
+      with:
+        name: questnav-proto-csharp-${{ steps.version-info.outputs.version }}
+        path: ${{ inputs.unity-project-path }}/Assets/QuestNav/Generated
 
     - name: Cache Unity Library
       id: cache-unity

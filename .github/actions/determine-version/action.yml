@@ -14,6 +14,9 @@ outputs:
   version:
     description: 'Calculated version string'
     value: ${{ steps.version-info.outputs.version }}
+  version-type:
+    description: 'Version type (dev, beta, rc, release)'
+    value: ${{ steps.version-info.outputs.version-type }}
   version-code:
     description: 'Calculated version code for Android/numeric versioning'
     value: ${{ steps.version-info.outputs.version-code }}
@@ -65,8 +68,10 @@ runs:
           COMMIT_COUNT=$(git rev-list --count HEAD)
           VERSION_CODE=$(( 1000000 + $COMMIT_COUNT ))
           
+          echo "version-type=dev" >> $GITHUB_OUTPUT
           echo "strategy=hash" >> $GITHUB_OUTPUT
         fi
         
         echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "version-type=$TYPE" >> $GITHUB_OUTPUT
         echo "version-code=$VERSION_CODE" >> $GITHUB_OUTPUT

@@ -3,34 +3,63 @@ name: Build DocFX
 on:
   workflow_call:
     inputs:
-      artifact-name:
-        description: 'Name of the artifact containing the DocFX site zip'
-        required: true
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
         type: string
     outputs:
-      artifact-name:
-        description: 'The artifact name for the DocFX site'
-        value: ${{ jobs.build-docs.outputs.artifact-name }}
+      version:
+        description: 'The version string used for this build'
+        value: ${{ jobs.build.outputs.version }}
+      docfx-artifact-id:
+        description: 'The artifact ID for the DocFX site'
+        value: ${{ jobs.build.outputs.docfx-artifact-id }}
 
 jobs:
   build-docs:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     outputs:
-      artifact-name: ${{ inputs.artifact-name }}
+      version: ${{ steps.version-info.outputs.version }}
+      docfx-artifact-id: ${{ steps.upload-docfx.outputs.artifact-id }}
 
     steps:
-      - name: Download DocFX Artifact
-        uses: actions/download-artifact@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         with:
-          name: ${{ inputs.artifact-name }}
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          sparse-checkout: |
+            unity
+            .github
+          sparse-checkout-cone-mode: false
+          lfs: true
 
-      - name: Extract DocFX Site
+      - name: Determine Version
+        id: version-info
+        uses: ./.github/actions/determine-version
+        with:
+          version: ${{ inputs.version }}
+
+      - name: Setup Unity Environment
+        uses: ./.github/actions/setup-unity-environment
+        with:
+          version: ${{ steps.version-info.outputs.version }}
+          unity-project-path: unity
+          cache-key-suffix: DocFX
+
+      - name: Build DocFX
         run: |
-          Expand-Archive -Path docfx-site.zip -DestinationPath docfx-extracted
+          cd unity/DocFX
+          docfx metadata
+          docfx build
 
-      - name: Upload Extracted DocFX
+      - name: Zip DocFX Site
+        run: |
+          zip -r docfx-site.zip unity/DocFX/build
+
+      - name: Upload DocFX Artifact
+        id: upload-docfx
         uses: actions/upload-artifact@v4
         with:
-          name: docfx-site-${{ github.sha }}
-          path: docfx-extracted/_site/
+          name: questnav-docfx-${{ steps.version-info.outputs.version }}
+          path: docfx-site.zip
           retention-days: 7

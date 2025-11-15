@@ -8,12 +8,12 @@ plugins {
 // Version and build configuration
 ext {
     baseVersion = project.findProperty('questnavVersion') ?: '2025-1.0.0'
-    releaseType = project.findProperty('releaseType') ?: 'dev'
+    versionType = project.findProperty('versionType') ?: 'dev'
     frcYear = project.findProperty('frcYear') ?: '2025'
     wpilibVersion = project.findProperty('wpilibVersion') ?: '2025.3.2'
 
     // Construct full version from base + release type
-    questnavVersion = releaseType == 'release' ? baseVersion : "${baseVersion}-${releaseType}"
+    questnavVersion = versionType == 'release' ? baseVersion : "${baseVersion}-${versionType}"
 
     // Vendor dependency configuration
     vendorUuid = 'a706fe68-86e5-4aed-92c5-ce05aca007f0'
@@ -26,7 +26,7 @@ ext {
     // Determine if snapshot based on mavenRepository parameter (from CI) or release type
     mavenRepository = project.findProperty('mavenRepository') ?: null
     isSnapshot = mavenRepository == 'snapshots' || 
-                 (mavenRepository == null && (releaseType in ['dev', 'snapshot', 'pr'] || questnavVersion.contains('-SNAPSHOT')))
+                 (mavenRepository == null && (versionType in ['dev', 'snapshot', 'pr'] || questnavVersion.contains('-SNAPSHOT')))
 }
 
 // Set the base name for all archives globally
@@ -89,13 +89,13 @@ task generateVendorJson() {
 
     inputs.file vendorJsonInput
     inputs.property("baseVersion", baseVersion)
-    inputs.property("releaseType", releaseType)
+    inputs.property("versionType", versionType)
     inputs.property("version", questnavVersion)
     inputs.property("frcYear", frcYear)
     outputs.file vendorJsonOutput
 
     doLast {
-        println "Generating vendor JSON ${questnavVersion} (${baseVersion} + ${releaseType}) to ${vendorJsonOutput}"
+        println "Generating vendor JSON ${questnavVersion} (${baseVersion} + ${versionType}) to ${vendorJsonOutput}"
 
         vendorJsonOutput.parentFile.mkdirs()
 
@@ -222,7 +222,7 @@ task buildInfo {
     doLast {
         println "QuestNavLib Build Information:"
         println "  Base Version: ${baseVersion}"
-        println "  Release Type: ${releaseType}"
+        println "  Release Type: ${versionType}"
         println "  Full Version: ${questnavVersion}"
         println "  FRC Year: ${frcYear}"
         println "  WPILib Version: ${wpilibVersion}"

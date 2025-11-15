@@ -2,6 +2,11 @@ name: Format Check (Java)
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
+        type: string
 
 jobs:
   format:
@@ -18,9 +23,16 @@ jobs:
           sparse-checkout: questnav-lib
           sparse-checkout-cone-mode: false
 
+      - name: Determine Version
+        id: version-info
+        uses: ./.github/actions/determine-version
+        with:
+          version: ${{ inputs.version }}
+    
       - name: Setup Java and Gradle
         uses: ./.github/actions/setup-java-gradle
         with:
+          version: ${{ steps.version-info.outputs.version }}
           working-directory: questnav-lib
           cache-key-prefix: gradle-lib
 

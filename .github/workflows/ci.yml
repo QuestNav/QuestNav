@@ -48,12 +48,12 @@ jobs:
 
   format-java:
     if: needs.detect-changes.outputs.java-changed == 'true'
-    needs: [detect-changes]
+    needs: [detect-changes, build-proto-java]
     uses: ./.github/workflows/reusable-format-java.yml
 
   docs-java:
     if: needs.detect-changes.outputs.java-changed == 'true'
-    needs: [detect-changes]
+    needs: [detect-changes, build-proto-java]
     uses: ./.github/workflows/reusable-docs-javadoc.yml
 
   build-java:
@@ -89,12 +89,12 @@ jobs:
     
   format-csharp:
     if: needs.detect-changes.outputs.csharp-changed == 'true'
-    needs: [detect-changes]
+    needs: [detect-changes, build-proto-csharp]
     uses: ./.github/workflows/reusable-format-csharp.yml
 
   docs-csharp:
     if: needs.detect-changes.outputs.csharp-changed == 'true'
-    needs: [detect-changes]
+    needs: [detect-changes, build-proto-csharp]
     uses: ./.github/workflows/reusable-docs-docfx.yml
 
   build-csharp:

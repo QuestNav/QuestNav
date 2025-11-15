@@ -26,6 +26,7 @@ jobs:
           sparse-checkout: |
             questnav-lib
             protos
+            .github
           sparse-checkout-cone-mode: false
 
       - name: Determine Version

@@ -33,9 +33,9 @@ runs:
         dotnet-version: ${{ inputs.dotnet-version }}
 
     - name: Determine Version
-       id: version-info
-       uses: ./.github/actions/determine-version
-       with:
+      id: version-info
+      uses: ./.github/actions/determine-version
+      with:
         version: ${{ inputs.version }}
 
     - name: Install NuGetForUnity CLI

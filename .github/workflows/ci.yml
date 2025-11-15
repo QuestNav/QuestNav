@@ -39,25 +39,23 @@ jobs:
 
 # ----------------------- JAVA ----------------------- #
   format-java:
-    if: |
-      needs.detect-changes.outputs.java-changed == 'true' &&
-      needs.detect-changes.outputs.csharp-changed == 'false'
+    if: needs.detect-changes.outputs.java-changed == 'true'
     needs: [detect-changes]
     uses: ./.github/workflows/reusable-format-java.yml
 
-  build-java:
-    if: |
-      needs.detect-changes.outputs.java-changed == 'true' &&
-      needs.detect-changes.outputs.csharp-changed == 'false'
-    needs: [detect-changes, format-java]
-    uses: ./.github/workflows/reusable-build-java.yml
-
   docs-java:
-    if: |
-      needs.detect-changes.outputs.java-changed == 'true' &&
-      needs.detect-changes.outputs.csharp-changed == 'false'
+    if: needs.detect-changes.outputs.java-changed == 'true'
     needs: [detect-changes, build-java]
     uses: ./.github/workflows/reusable-docs-javadoc.yml
+
+  build-java:
+    if: |
+      (needs.detect-changes.outputs.java-changed == 'true' ||
+      needs.detect-changes.outputs.csharp-changed == 'true') &&
+      (needs.format-java.result != 'failed' ||
+      needs.docs-java.result != 'failed')
+    needs: [detect-changes, format-java]
+    uses: ./.github/workflows/reusable-build-java.yml
 
   # publish-javadocs:
   #   if: |

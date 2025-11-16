@@ -23,7 +23,7 @@ ext {
     // Determine if snapshot based on mavenRepository parameter (from CI) or release type
     mavenRepository = project.findProperty('mavenRepository') ?: null
     isSnapshot = mavenRepository == 'snapshots' ||
-            (mavenRepository == null && (versionType in ['dev', 'snapshot', 'pr'] || questnavVersion.contains('-SNAPSHOT')))
+            (mavenRepository == null && (versionType in ['dev', 'snapshot', 'pr'] || version.contains('-SNAPSHOT')))
 }
 
 // Set the base name for all archives globally
@@ -123,7 +123,6 @@ publishing {
         questnavlib(MavenPublication) {
             groupId = mavenGroupId
             artifactId = 'questnavlib-java'
-            version = questnavVersion
 
             from components.java
 
@@ -150,7 +149,6 @@ publishing {
         questnavlibJson(MavenPublication) {
             groupId = mavenGroupId
             artifactId = 'questnavlib-json'
-            version = questnavVersion
 
             artifact vendorJsonArtifact
 
@@ -219,7 +217,7 @@ task buildInfo {
         println "QuestNavLib Build Information:"
         println "  Base Version: ${baseVersion}"
         println "  Release Type: ${versionType}"
-        println "  Full Version: ${questnavVersion}"
+        println "  Full Version: ${version}"
         println "  FRC Year: ${frcYear}"
         println "  WPILib Version: ${wpilibVersion}"
         println "  Group ID: ${mavenGroupId}"
@@ -230,7 +228,7 @@ task buildInfo {
         if (project.hasProperty('mavenRepoUrl')) {
             println "  Repository: ${mavenRepoUrl}"
         }
-        def jsonUrl = "https://maven.questnav.gg/repository/${isSnapshot ? 'snapshots' : 'release'}/gg/questnav/questnavlib-json/${questnavVersion}/questnavlib-json-${questnavVersion}.json"
+        def jsonUrl = "https://maven.questnav.gg/repository/${isSnapshot ? 'snapshots' : 'release'}/gg/questnav/questnavlib-json/${version}/questnavlib-json-${version}.json"
         println "  Vendor JSON URL: ${jsonUrl}"
     }
 }

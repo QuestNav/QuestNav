@@ -44,6 +44,7 @@ jobs:
       version: ${{ inputs.version }}
   
   publish-java:
+    needs: [build-proto-java]
     uses: ./.github/workflows/reusable-publish-java.yml
     with:
       version: ${{ inputs.version }}

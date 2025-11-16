@@ -128,6 +128,13 @@ namespace QuestNav.Core
         private Transform resetTransform;
 
         /// <summary>
+        /// The UI transform to keep in view with Tagalong
+        /// </summary>
+        [Tooltip("The UI to be kept in view with the Tagalong feature.")]
+        [SerializeField]
+        private Transform tagalongUiTransform;
+
+        /// <summary>
         /// Current battery percentage of the device
         /// </summary>
         private int batteryPercent;
@@ -151,10 +158,6 @@ namespace QuestNav.Core
         /// Whether we had tracking
         /// </summary>
         private bool hadTracking;
-
-        [Tooltip("The UI to be kept in view with the Tagalong feature.")]
-        [SerializeField]
-        private Transform tagalongUiTransform;
 
         #region Component References
 

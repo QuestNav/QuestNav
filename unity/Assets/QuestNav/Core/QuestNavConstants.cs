@@ -219,9 +219,9 @@ namespace QuestNav.Core
         }
 
         /// <summary>
-        /// Constants for the UI Tagalong behavior
+        /// Constants for the Tagalong UI behavior
         /// </summary>
-        public static class UITagalong
+        public static class TagalongUI
         {
             /// <summary>
             /// The distance the UI should follow the user at (in meters).

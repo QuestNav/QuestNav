@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using static QuestNav.Core.QuestNavConstants.UITagalong;
+using static QuestNav.Core.QuestNavConstants.TagalongUI;
 
 namespace QuestNav.UI
 {

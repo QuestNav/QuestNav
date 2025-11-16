@@ -51,12 +51,6 @@ jobs:
           working-directory: questnav-lib
           cache-key-prefix: gradle-lib
 
-      - name: Download Protobufs
-        uses: actions/download-artifact@v5
-        with:
-          name: questnav-proto-java-${{ steps.version-info.outputs.version }}
-          path: questnav-lib/src/main/java/gg/questnav/questnav/protos/generated
-
       - name: Build Library
         run: |
           ./gradlew build \

@@ -10,9 +10,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # ============================================================
-  # DETECT CHANGES
-  # ============================================================
+# ----------------------- DETECT CHANGES ----------------------- #
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
@@ -65,6 +63,13 @@ jobs:
       needs.docs-java.result != 'failure')
     needs: [detect-changes, format-java, docs-java]
     uses: ./.github/workflows/reusable-build-java.yml
+
+  publish-java:
+    needs: [detect-changes, build-java]
+    uses: ./.github/workflows/reusable-publish-java.yml
+    secrets:
+      MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+      MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
 
 # ----------------------- C# ----------------------- #
   build-proto-csharp:

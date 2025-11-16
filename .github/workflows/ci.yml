@@ -72,8 +72,8 @@ jobs:
     needs: [detect-changes, build-java]
     uses: ./.github/workflows/reusable-publish-java.yml
     secrets:
-      MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-      MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
 
 # ----------------------- C# ----------------------- #
   build-proto-csharp:

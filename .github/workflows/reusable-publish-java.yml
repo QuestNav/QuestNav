@@ -52,7 +52,7 @@ jobs:
         run: |
           ./gradlew publish \
             -PquestnavVersion="${{ steps.version-info.outputs.version }}" \
-            -PreleaseType="${{ steps.version-info.outputs.version-type }}" \
+            -PversionType="${{ steps.version-info.outputs.version-type }}" \
             -PmavenUsername="${{ secrets.MAVEN_USERNAME }}" \
             -PmavenPassword="${{ secrets.MAVEN_PASSWORD }}" \
 

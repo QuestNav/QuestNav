@@ -20,7 +20,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
-          sparse-checkout: questnav-lib
+          sparse-checkout: |
+            questnav-lib
+            .github
           sparse-checkout-cone-mode: false
 
       - name: Determine Version

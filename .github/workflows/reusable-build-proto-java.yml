@@ -55,10 +55,10 @@ jobs:
       - name: Generate Java QuickBuffers
         run: |
           protoc \
-            -I="protos" \
-            --plugin=protoc-gen-quickbuf=${{ steps.download-quickbuf.outputs.file }} \
-            --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ \
-            protos/*.proto
+          -I="protos" \
+          --plugin=protoc-gen-quickbuf=protoc-gen-quickbuf-1.4-linux-x86_64.exe \
+          --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ \
+          protos/data.proto protos/commands.proto
 
       - name: Upload Generated Proto Files
         uses: actions/upload-artifact@v4

@@ -1,6 +1,3 @@
-# Ignore folders named 'oculus-frc-streamer_' and any variations
-oculus-frc-streamer_*/
-
 # Ignore .apk and .zip files
 *.apk
 *.zip
@@ -8,6 +5,11 @@ oculus-frc-streamer_*/
 .secrets
 .idea/
 .DS_Store
+
+# Generated files
+**/Generated/*.cs
+**/generated/*.java
+
 
 # CMake/NDK build artifacts
 .utmp/

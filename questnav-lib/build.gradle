@@ -22,11 +22,11 @@ ext {
 
     // Repository configuration
     mavenRepoUrl = project.findProperty('mavenRepoUrl') ?: 'https://maven.questnav.gg/'
-    
+
     // Determine if snapshot based on mavenRepository parameter (from CI) or release type
     mavenRepository = project.findProperty('mavenRepository') ?: null
-    isSnapshot = mavenRepository == 'snapshots' || 
-                 (mavenRepository == null && (versionType in ['dev', 'snapshot', 'pr'] || questnavVersion.contains('-SNAPSHOT')))
+    isSnapshot = mavenRepository == 'snapshots' ||
+            (mavenRepository == null && (versionType in ['dev', 'snapshot', 'pr'] || questnavVersion.contains('-SNAPSHOT')))
 }
 
 // Set the base name for all archives globally

@@ -65,6 +65,8 @@ jobs:
     uses: ./.github/workflows/reusable-build-java.yml
 
   publish-java:
+    if: |
+      needs.build-java.result == 'success'
     needs: [build-java]
     uses: ./.github/workflows/reusable-publish-java.yml
     secrets:

@@ -63,12 +63,20 @@ runs:
         else
           # Generate hash-based version
           COMMIT_HASH=$(git rev-parse --short=7 HEAD)
-          VERSION="${COMMIT_HASH}-dev"
+          VERSION="${COMMIT_HASH}"
+          
+          # Append PR suffix if in PR context
+          if [ -n "${{ github.event.pull_request.number }}" ]; then
+            VERSION="${VERSION}-pr-${{ github.event.pull_request.number }}"
+          fi
+          
+          # Add dev suffix
+          VERSION="${VERSION}-dev"
           
           COMMIT_COUNT=$(git rev-list --count HEAD)
           VERSION_CODE=$(( 1000000 + $COMMIT_COUNT ))
           
-          echo "version-type=dev" >> $GITHUB_OUTPUT
+          TYPE="dev"
           echo "strategy=hash" >> $GITHUB_OUTPUT
         fi
         

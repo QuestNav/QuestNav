@@ -51,7 +51,7 @@ jobs:
       - name: Publish to Maven
         run: |
           ./gradlew publish \
-            -PquestnavVersion="${{ steps.version-info.outputs.version }}" \
+            -Pversion="${{ steps.version-info.outputs.version }}" \
             -PversionType="${{ steps.version-info.outputs.version-type }}" \
             -PmavenUsername="${{ secrets.MAVEN_USERNAME }}" \
             -PmavenPassword="${{ secrets.MAVEN_PASSWORD }}" \

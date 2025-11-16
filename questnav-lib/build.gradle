@@ -7,13 +7,10 @@ plugins {
 
 // Version and build configuration
 ext {
-    baseVersion = project.findProperty('questnavVersion') ?: '2025-1.0.0'
+    version = project.findProperty('version') ?: '2025-1.0.0-dev'
     versionType = project.findProperty('versionType') ?: 'dev'
     frcYear = project.findProperty('frcYear') ?: '2025'
     wpilibVersion = project.findProperty('wpilibVersion') ?: '2025.3.2'
-
-    // Construct full version from base + release type
-    questnavVersion = versionType == 'release' ? baseVersion : "${baseVersion}-${versionType}"
 
     // Vendor dependency configuration
     vendorUuid = 'a706fe68-86e5-4aed-92c5-ce05aca007f0'
@@ -88,23 +85,22 @@ task generateVendorJson() {
     group = "QuestNavLib"
 
     inputs.file vendorJsonInput
-    inputs.property("baseVersion", baseVersion)
+    inputs.property("version", version)
     inputs.property("versionType", versionType)
-    inputs.property("version", questnavVersion)
     inputs.property("frcYear", frcYear)
     outputs.file vendorJsonOutput
 
     doLast {
-        println "Generating vendor JSON ${questnavVersion} (${baseVersion} + ${versionType}) to ${vendorJsonOutput}"
+        println "Generating vendor JSON ${version} to ${vendorJsonOutput}"
 
         vendorJsonOutput.parentFile.mkdirs()
 
         // Determine repository URL based on release type
         def repoType = isSnapshot ? "snapshots" : "releases"
-        def jsonUrl = "https://maven.questnav.gg/${repoType}/gg/questnav/questnavlib-json/${questnavVersion}/questnavlib-json-${questnavVersion}.json"
+        def jsonUrl = "https://maven.questnav.gg/${repoType}/gg/questnav/questnavlib-json/${version}/questnavlib-json-${version}.json"
 
         def content = vendorJsonInput.text
-                .replace('${questnav_version}', questnavVersion)
+                .replace('${questnav_version}', version)
                 .replace('${frc_year}', frcYear)
                 .replace('${questnav_uuid}', vendorUuid)
                 .replace('${json_url}', jsonUrl)

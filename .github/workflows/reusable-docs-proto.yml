@@ -35,21 +35,23 @@ jobs:
         with:
           version: ${{ inputs.version }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
+
+      - name: Download protoc-gen-doc
+        uses: robinraju/release-downloader@v1
         with:
-          node-version: '20'
-
-      - name: Install protoc-gen-doc
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y protobuf-compiler
-          npm install -g protoc-gen-doc
-
+          repository: 'pseudomuto/protoc-gen-doc'
+          latest: true
+          fileName: 'protoc-gen-doc_*_linux_amd64.tar.gz '
+          extract: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Generate Proto Documentation
         run: |
           mkdir -p proto-docs
           protoc --proto_path=protos \
+          --plugin=protoc-gen-doc=./protoc-gen-doc \
                  --doc_out=proto-docs \
                  --doc_opt=html,index.html \
                  protos/*.proto

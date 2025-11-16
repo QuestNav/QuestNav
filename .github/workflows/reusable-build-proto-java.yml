@@ -32,10 +32,8 @@ jobs:
         with:
           version: ${{ inputs.version }}
 
-      - name: Install Protobuf Compiler
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y protobuf-compiler
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
 
       - name: Download QuickBuf plugin
         id: download-quickbuf

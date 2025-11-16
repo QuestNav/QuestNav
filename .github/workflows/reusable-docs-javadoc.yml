@@ -17,6 +17,7 @@ env:
 
 jobs:
   build-docs:
+    name: Build Javadocs
     runs-on: ubuntu-latest
     defaults:
       run:

@@ -33,6 +33,7 @@ jobs:
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
   publish-docs:
+    needs: [build-proto-java, build-proto-csharp]
     uses: ./.github/workflows/reusable-publish-docs.yml
     with:
       version: ${{ inputs.version }}

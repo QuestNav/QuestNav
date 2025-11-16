@@ -14,6 +14,7 @@ on:
 
 jobs:
   build-docs:
+    name: Build Proto Docs
     runs-on: ubuntu-latest
     outputs:
       artifact-id: ${{ steps.upload-proto-docs.outputs.artifact-id }}

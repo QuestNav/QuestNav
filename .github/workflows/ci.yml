@@ -65,11 +65,7 @@ jobs:
     uses: ./.github/workflows/reusable-build-java.yml
 
   publish-java:
-    if: |
-      needs.build-java.result == 'success' &&
-      (needs.detect-changes.outputs.java-changed == 'true' ||
-      needs.detect-changes.outputs.csharp-changed == 'true')
-    needs: [detect-changes, build-java]
+    needs: [build-java]
     uses: ./.github/workflows/reusable-publish-java.yml
     secrets:
       MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}

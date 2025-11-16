@@ -12,7 +12,18 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build-proto-java:
+    uses: ./.github/workflows/reusable-build-proto-java.yml
+    with:
+      version: ${{ inputs.version }}
+
+  build-proto-csharp:
+    uses: ./.github/workflows/reusable-build-proto-csharp.yml
+    with:
+      version: ${{ inputs.version }}
+
   build-apk:
+    needs: [build-proto-csharp]
     uses: ./.github/workflows/reusable-build-csharp.yml
     with:
       version: ${{ inputs.version }}
@@ -22,6 +33,7 @@ jobs:
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
   build-lib:
+    needs: [build-proto-java]
     uses: ./.github/workflows/reusable-build-java.yml
     with:
       version: ${{ inputs.version }}

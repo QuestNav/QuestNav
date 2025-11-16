@@ -24,6 +24,11 @@ public class BootReceiver extends BroadcastReceiver {
                     context.getPackageName() + ".v2.playerprefs", Context.MODE_PRIVATE);
             if (prefs.getInt("AutoStart", 1) == 1) {
                 Log.d(TAG, "Starting QuestNav");
+                
+                // Disable sleep mode
+                Intent sleepIntent = new Intent("com.oculus.vrpowermanager.automation_disable");
+                context.sendBroadcast(sleepIntent);
+                
                 Intent launchIntent = new Intent(context, com.unity3d.player.UnityPlayerGameActivity.class);
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(launchIntent);

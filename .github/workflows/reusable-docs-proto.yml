@@ -8,15 +8,15 @@ on:
         required: false
         type: string
     outputs:
-      artifact-name:
-        description: 'The artifact name for the proto docs'
-        value: ${{ jobs.build-docs.outputs.artifact-name }}
+      artifact-id:
+        description: 'The artifact ID for the proto docs'
+        value: ${{ jobs.build-docs.outputs.artifact-id }}
 
 jobs:
   build-docs:
     runs-on: ubuntu-latest
     outputs:
-      artifact-name: proto-docs-${{ github.sha }}
+      artifact-id: ${{ steps.upload-proto-docs.outputs.artifact-id }}
 
     steps:
       - name: Checkout Repository
@@ -54,6 +54,7 @@ jobs:
                  protos/*.proto
 
       - name: Upload Proto Docs Artifact
+        id: upload-proto-docs
         uses: actions/upload-artifact@v4
         with:
           name: questnav-proto-docs-${{ steps.version-info.outputs.version }}

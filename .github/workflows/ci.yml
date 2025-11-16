@@ -66,19 +66,6 @@ jobs:
     needs: [detect-changes, format-java, docs-java]
     uses: ./.github/workflows/reusable-build-java.yml
 
-  # publish-javadocs:
-  #   if: |
-  #     needs.detect-changes.outputs.java-changed == 'true' &&
-  #     needs.detect-changes.outputs.csharp-changed == 'false' &&
-  #     github.ref == 'refs/heads/main'
-  #   needs: [detect-changes, docs-java]
-  #   uses: ./.github/workflows/reusable-publish-docs.yml
-  #   with:
-  #     docs-type: javadoc
-  #     artifact-name: ${{ needs.docs-java.outputs.artifact-name }}
-  #   permissions:
-  #     contents: write
-
 # ----------------------- C# ----------------------- #
   build-proto-csharp:
     if: |
@@ -112,54 +99,17 @@ jobs:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
-  # publish-docfx:
-  #   if: |
-  #     needs.detect-changes.outputs.csharp-changed == 'true' &&
-  #     needs.detect-changes.outputs.java-changed == 'false' &&
-  #     github.ref == 'refs/heads/main'
-  #   needs: [detect-changes, docs-csharp]
-  #   uses: ./.github/workflows/reusable-publish-docs.yml
-  #   with:
-  #     docs-type: docfx
-  #     artifact-name: ${{ needs.docs-csharp.outputs.artifact-name }}
-  #   permissions:
-  #     contents: write
-
 # ----------------------- PROTOBUF ----------------------- #
   docs-proto:
     if: needs.detect-changes.outputs.proto-changed == 'true'
     needs: [detect-changes]
     uses: ./.github/workflows/reusable-docs-proto.yml
 
-  # publish-proto-docs:
-  #   if: |
-  #     needs.detect-changes.outputs.proto-changed == 'true' &&
-  #     github.ref == 'refs/heads/main'
-  #   needs: [detect-changes, docs-proto]
-  #   uses: ./.github/workflows/reusable-publish-docs.yml
-  #   with:
-  #     docs-type: proto
-  #     artifact-name: ${{ needs.docs-proto.outputs.artifact-name }}
-  #   permissions:
-  #     contents: write
-
   # ----------------------- DOCS ----------------------- #
   build-docs:
     if: needs.detect-changes.outputs.docs-changed == 'true'
     needs: [detect-changes]
     uses: ./.github/workflows/reusable-build-docs.yml
-
-  # publish-main-docs:
-  #   if: |
-  #     needs.detect-changes.outputs.docs-changed == 'true' &&
-  #     github.ref == 'refs/heads/main'
-  #   needs: [detect-changes, build-docs]
-  #   uses: ./.github/workflows/reusable-publish-docs.yml
-  #   with:
-  #     docs-type: main
-  #     artifact-name: ${{ needs.build-docs.outputs.artifact-name }}
-  #   permissions:
-  #     contents: write
 
   # ----------------------- SUMMARY ----------------------- #
   ci-summary:

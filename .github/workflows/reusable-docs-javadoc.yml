@@ -22,7 +22,7 @@ jobs:
       run:
         working-directory: questnav-lib
     outputs:
-      artifact-id: steps.upload-javadocs.outputs.artifact-id
+      artifact-id: ${{ steps.upload-javadocs.outputs.artifact-id }}
 
     steps:
       - name: Checkout Repository
@@ -51,6 +51,7 @@ jobs:
         run: ./gradlew javadoc
 
       - name: Upload Javadocs Artifact
+        id: upload-javadocs
         uses: actions/upload-artifact@v4
         with:
           name: questnav-javadocs-${{ steps.version-info.outputs.version }}

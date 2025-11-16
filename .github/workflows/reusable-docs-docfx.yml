@@ -8,19 +8,16 @@ on:
         required: false
         type: string
     outputs:
-      version:
-        description: 'The version string used for this build'
-        value: ${{ jobs.build.outputs.version }}
       docfx-artifact-id:
         description: 'The artifact ID for the DocFX site'
-        value: ${{ jobs.build.outputs.docfx-artifact-id }}
+        value: ${{ jobs.build-docs.outputs.artifact-id }}
 
 jobs:
   build-docs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version-info.outputs.version }}
-      docfx-artifact-id: ${{ steps.upload-docfx.outputs.artifact-id }}
+      artifact-id: ${{ steps.upload-docfx.outputs.artifact-id }}
 
     steps:
       - name: Checkout Repository

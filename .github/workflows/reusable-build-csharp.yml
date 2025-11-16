@@ -27,10 +27,6 @@ on:
       apk-artifact-id:
         description: 'The artifact ID for the APK'
         value: ${{ jobs.build.outputs.apk-artifact-id }}
-      docfx-artifact-id:
-        description: 'The artifact ID for the DocFX site'
-        value: ${{ jobs.build.outputs.docfx-artifact-id }}
-
 jobs:
   build:
     runs-on: windows-latest

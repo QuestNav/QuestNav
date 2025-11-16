@@ -1,88 +1,88 @@
-name: Publish Documentation
+name: Publish Docs
 
 on:
   workflow_call:
     inputs:
-      docs-type:
-        description: 'Type of documentation (javadoc, docfx, proto, main)'
-        required: true
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
         type: string
-      artifact-name:
-        description: 'Name of the artifact containing the docs'
-        required: true
-        type: string
-
-permissions:
-  contents: write
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: true
 
 jobs:
+  build-docs:
+    uses: ./.github/workflows/reusable-docs-docs.yml
+    with:
+      version: ${{ inputs.version }}
+  build-docfx:
+    uses: ./.github/workflows/reusable-docs-docfx.yml
+    with:
+      version: ${{ inputs.version }}
+  build-javadoc:
+    uses: ./.github/workflows/reusable-docs-javadoc.yml
+    with:
+      version: ${{ inputs.version }}
+  build-docs-proto:
+    uses: ./.github/workflows/reusable-docs-proto.yml
+    with:
+      version: ${{ inputs.version }}
   publish:
+    needs: [build-docs, build-docfx, build-javadoc, build-docs-proto]
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     steps:
-      - name: Checkout gh-pages
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
-          path: gh-pages
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          sparse-checkout: |
+            .github
+          sparse-checkout-cone-mode: false
 
-      - name: Download Documentation Artifact
+      - name: Determine Version
+        id: version-info
+        uses: ./.github/actions/determine-version
+        with:
+          version: ${{ inputs.version }}
+          
+      - name: Restore Docs Artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.artifact-name }}
-          path: docs-temp
+          name: 'questnav-docs-${{ steps.version-info.outputs.version }}'
+          path: docs/
 
-      - name: Determine Target Path
-        id: target
-        run: |
-          case "${{ inputs.docs-type }}" in
-            javadoc)
-              echo "path=api/java" >> $GITHUB_OUTPUT
-              ;;
-            docfx)
-              echo "path=api/csharp" >> $GITHUB_OUTPUT
-              ;;
-            proto)
-              echo "path=api/proto" >> $GITHUB_OUTPUT
-              ;;
-            main)
-              echo "path=." >> $GITHUB_OUTPUT
-              ;;
-            *)
-              echo "Unknown docs type: ${{ inputs.docs-type }}"
-              exit 1
-              ;;
-          esac
+      - name: Restore DocFX Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: 'questnav-docfx-${{ steps.version-info.outputs.version }}'
+          path: docs/static/api/csharp
 
-      - name: Clear Existing Documentation
-        run: |
-          TARGET_PATH="gh-pages/${{ steps.target.outputs.path }}"
-          if [ "${{ steps.target.outputs.path }}" != "." ]; then
-            rm -rf "$TARGET_PATH"
-            mkdir -p "$TARGET_PATH"
-          else
-            # For main docs, preserve api/ directory
-            cd gh-pages
-            find . -maxdepth 1 -not -name '.' -not -name '.git' -not -name 'api' -exec rm -rf {} +
-          fi
+      - name: Restore Javadoc Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: 'questnav-javadocs-${{ steps.version-info.outputs.version }}'
+          path: docs/static/api/java
 
-      - name: Copy New Documentation
-        run: |
-          TARGET_PATH="gh-pages/${{ steps.target.outputs.path }}"
-          cp -r docs-temp/* "$TARGET_PATH/"
+      - name: Restore Proto Docs Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: 'questnav-proto-docs-${{ steps.version-info.outputs.version }}'
+          path: docs/static/api/proto
+      
+      - name: Upload Combined Docs Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'questnav-combined-docs-${{ steps.version-info.outputs.version }}'
+          path: docs/
 
-      - name: Create .nojekyll
-        run: touch gh-pages/.nojekyll
-
-      - name: Commit and Push
-        run: |
-          cd gh-pages
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Update ${{ inputs.docs-type }} documentation"
-            git push
-          fi
+      - name: Publish to GitHub Pages
+        uses: actions/deploy-pages@v4
+        id: deployment
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifact_name: 'questnav-combined-docs-${{ steps.version-info.outputs.version }}'

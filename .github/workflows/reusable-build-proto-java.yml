@@ -56,7 +56,7 @@ jobs:
         run: |
           protoc \
           -I="protos" \
-          --plugin=protoc-gen-quickbuf=protoc-gen-quickbuf-1.4-linux-x86_64.exe \
+          --plugin=protoc-gen-quickbuf=${{ steps.download-quickbuf.outputs.file }} \
           --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ \
           protos/data.proto protos/commands.proto
 

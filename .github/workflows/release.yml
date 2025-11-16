@@ -3,9 +3,10 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version string to use (optional, auto-generated if not provided)'
+        description: 'Version string to use [YEAR]-[MAJOR].[MINOR].[PATCH]-[TYPE] (optional, auto-generated if not provided)'
         required: false
         type: string
+        default: '2025-1.0.0-beta'
 concurrency:
   group: publish-release
   cancel-in-progress: false
@@ -34,6 +35,9 @@ jobs:
     uses: ./.github/workflows/reusable-publish-java.yml
     with:
       version: ${{ inputs.version }}
+    secrets:
+      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
 
   github-release:
     runs-on: ubuntu-latest

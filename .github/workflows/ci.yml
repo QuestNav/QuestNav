@@ -66,6 +66,7 @@ jobs:
 
   publish-java:
     if: |
+      always() &&
       needs.build-java.result == 'success'
     needs: [build-java]
     uses: ./.github/workflows/reusable-publish-java.yml

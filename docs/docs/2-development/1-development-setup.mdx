@@ -1,0 +1,236 @@
+---
+title: Development Environment Setup
+---
+:::warning
+**This section is not necessary for most teams. Only use this guide if you plan to make custom changes to the QuestNav backend!**
+:::
+
+# Development Environment Setup
+
+This guide will help you set up your development environment for working with the QuestNav headset application.
+
+## Prerequisites
+
+:::info
+Before you begin, make sure you have the following:
+- A Meta Quest 3 or 3s headset
+- A Windows PC with a GPU capable of running Unity
+- Basic knowledge of Unity and C# programming
+- Git installed on your computer
+  :::
+
+## Installation Process
+
+### Step 1: Install Unity
+
+:::warning
+You must use Unity 6 (6000.2.7f2) LTS for compatibility with the project.
+:::
+
+- Download and install Unity Hub from the [official website](https://unity.com/download)
+- Open Unity Hub, sign in, and install Unity 6 (6000.2.7f2) LTS
+    - Select the following:
+        - "Microsoft Visual Studio Community 2022"
+        - "Android Build Support"
+        - "OpenJDK"
+        - "Android SDK & NDK Tools"
+- Click "Install" and wait for the installation to finish
+
+### Step 2: Add Unity Support to Visual Studio (Optional)
+
+:::note
+This step is only necessary if you already have Visual Studio 2022 installed and the Unity installer fails to add Unity support.
+:::
+
+- Download the Visual Studio 2022 Community installer from [Microsoft](https://visualstudio.microsoft.com/downloads/)
+- Run the installer and select `Modify`
+- Scroll down to the `Gaming` subsection and select `Game development with Unity`
+- Click `Install` to add Unity support
+
+### Step 3: Install Quest Link (Optional)
+
+:::tip
+Installing Quest Link makes debugging on the headset much easier, though it's not strictly required.
+:::
+
+- Download the Quest Link software [here](https://www.meta.com/help/quest/articles/headsets-and-accessories/oculus-rift-s/install-app-for-link/)
+- Double-click the installer and proceed through the installation
+- Once installed, enable the beta/debug options by navigating to `Settings > Beta > Developer Runtime Features`
+
+### Step 4: Add Meta SDKs to Your Unity Account
+
+:::warning
+These SDKs must be added to your Unity account before you can import the project.
+:::
+
+- Log into your Unity [account](https://id.unity.com) in your browser
+- Add the following free SDKs to your account:
+    - [Meta XR All-in-One SDK](https://assetstore.unity.com/packages/tools/integration/meta-xr-all-in-one-sdk-269657)
+    - [Meta XR Interaction SDK Essentials](https://assetstore.unity.com/packages/tools/integration/meta-xr-interaction-sdk-essentials-264559)
+    - [Meta MR Utility Kit](https://assetstore.unity.com/packages/tools/integration/meta-mr-utility-kit-272450)
+
+### Step 5: Clone the Repository
+
+1. Fork the QuestNav repository on GitHub
+2. Clone your fork to your local machine:
+   ```
+   git clone https://github.com/YOUR-USERNAME/QuestNav.git
+   ```
+
+### Step 6: Restore NuGetForUnity Packages
+- Open a terminal to the root of the cloned repository
+- Install NuGetForUnity
+  ```
+  dotnet tool install -g NuGetForUnity.Cli
+  ```
+- Restore the packages
+  ```
+  nugetforunity restore unity
+  ```
+
+### Step 7: Build Protobufs
+
+#### Prerequisites
+- Install Protocol Buffers compiler (protoc): https://github.com/protocolbuffers/protobuf/releases
+
+#### C# (Unity)
+
+Generate C# files from proto definitions:
+
+<Tabs>
+  <TabItem value="windows" label="Windows">
+```bash
+    mkdir unity\Assets\QuestNav\Generated
+    protoc --proto_path=protos --csharp_out=unity\Assets\QuestNav\Generated protos\*.proto
+```
+  </TabItem>
+  <TabItem value="linux-mac" label="Linux/Mac">
+```bash
+    mkdir -p unity/Assets/QuestNav/Generated
+    protoc --proto_path=protos --csharp_out=unity/Assets/QuestNav/Generated protos/*.proto
+```
+  </TabItem>
+</Tabs>
+
+#### Java (QuickBuf)
+
+<Tabs>
+  <TabItem value="windows" label="Windows">
+    1. Download the QuickBuf plugin:
+```powershell
+    curl -o protoc-gen-quickbuf.exe https://repo1.maven.org/maven2/us/hebi/quickbuf/protoc-gen-quickbuf/1.4/protoc-gen-quickbuf-1.4-windows-x86_64.exe
+```
+
+    2. Generate Java files:
+```bash
+    protoc -I="protos" --plugin=protoc-gen-quickbuf=protoc-gen-quickbuf.exe --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib\src\main\java\ protos\data.proto protos\commands.proto
+```
+  </TabItem>
+  <TabItem value="linux-mac" label="Linux/Mac">
+    1. Download the QuickBuf plugin:
+```bash
+    wget https://repo1.maven.org/maven2/us/hebi/quickbuf/protoc-gen-quickbuf/1.4/protoc-gen-quickbuf-1.4-linux-x86_64.exe -O protoc-gen-quickbuf
+    chmod +x protoc-gen-quickbuf
+```
+
+    2. Generate Java files:
+```bash
+    protoc -I="protos" --plugin=protoc-gen-quickbuf=./protoc-gen-quickbuf --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ protos/data.proto protos/commands.proto
+```
+  </TabItem>
+</Tabs>
+
+### Step 8: Import the Project into Unity
+
+- Open Unity Hub
+- Click `Add > Add project from disk` and select the unity subfolder in the cloned repository
+- Click on the newly imported project
+- Wait for Unity to compile assets and open the main interface
+
+### Step 9: Configure Build Settings for Android
+
+- Navigate to `File > Build Profiles`
+- Under `Platforms` select `Android`
+- Click on `Switch Platform`
+- Wait for Unity to recompile assets
+
+### Step 10: Set Up Project for Meta Quest
+
+- Navigate to `Meta > Tools > Project Setup Tool`
+- Apply all the recommended fixes on the default tab (Android)
+- Cycle through the rest of the tabs and apply all fixes
+- Ensure the Android tab shows a green ✅ and reports its status as "XR Ready for Android"
+
+### Step 11: Install Formatting Tools
+
+- Navigate to the root of the git repository
+- Install the C# formatter:
+  ```
+  dotnet tool install -g csharpier
+  ```
+
+In Visual Studio, install the csharpier plugin:
+- From the menu, choose `Extensions > Manage Extension`
+- Search for csharpier and install it
+- Close Visual Studio and complete the installation
+
+### Step 12: Generate Visual Studio project (Optional)
+:::tip
+You can generate a C# Visual Studio project to more easily work with the code. This will better enable Intellisense and project navigation in Visual Studio.
+:::
+
+- In Unity, select `Edit > Preferences > External Tools`
+- Choose Visual Studio 2022 as your `External Script Editor`
+- Click `Regenerate project files`
+
+Now you open a .cs script asset, it will open in Visual Studio 2022. You can also choose to open the project by selecting `Assets > Open C# Project` from the menu in Unity.
+
+## Building and Testing
+
+### Building the Project
+
+#### Using Unity's Standard Build Tool:
+
+- Navigate to `File > Build Profiles`
+- Make sure you're on the Android platform
+- **IMPORTANT:** Check ✅ `Development Build` option
+- Click `Build and Run`
+
+:::warning
+If you do not check the `Development Build` option, the build will fail to run on the headset.
+:::
+
+#### Using OVR Build (Faster):
+
+:::tip
+The OVR Build tool provides much faster build times but will consume more system resources during the build process.
+:::
+
+- Navigate to `Meta > OVR Build > OVR Build APK...`
+- **IMPORTANT:** Check ✅ `Development Build?` option
+- Set your build path and click `Build`
+
+:::warning
+If you do not check the `Development Build` option, the build will fail to run on the headset.
+:::
+
+### Installing on Your Quest Headset
+
+- Connect your Quest headset to your PC
+- Enable developer mode on your headset if you haven't already
+- Use SideQuest, the Meta Developer Hub, or ADB to install the APK
+:::tip
+Check the getting started guide for a step-by-step tutorial on how to install the APK [here](../1-getting-started/4-app-setup.md#installing-questnav).
+:::
+
+## Troubleshooting Common Issues
+
+:::note
+If you encounter any issues during setup, check this section before reaching out for help.
+:::
+
+- **Unity Crashes During Import**: Try closing and reopening Unity Hub, then reimport the project
+- **Missing SDK References**: Ensure you've added all required SDKs to your Unity account
+- **Build Fails**: Make sure you've enabled the Development Build option
+- **APK Doesn't Install**: Verify developer mode is enabled on your Quest headset
+- **App Crashes on Launch**: Check that you've restored all packages from NuGetForUnity

@@ -135,15 +135,24 @@ namespace QuestNav.Commands.Commands
                         + $"Y={targetCameraRotation.eulerAngles.y}, Z={targetCameraRotation.eulerAngles.z}"
                 );
 
-                networkTableConnection.SendCommandSuccessResponse(receivedCommand.CommandId);
+                // Send success response only if NetworkTables connection exists
+                // (web-initiated resets don't use NetworkTables)
+                if (networkTableConnection != null)
+                {
+                    networkTableConnection.SendCommandSuccessResponse(receivedCommand.CommandId);
+                }
                 QueuedLogger.Log("Pose reset completed successfully");
             }
             else
             {
-                networkTableConnection.SendCommandErrorResponse(
-                    receivedCommand.CommandId,
-                    "Failed to get valid pose data (invalid)"
-                );
+                // Send error response only if NetworkTables connection exists
+                if (networkTableConnection != null)
+                {
+                    networkTableConnection.SendCommandErrorResponse(
+                        receivedCommand.CommandId,
+                        "Failed to get valid pose data (invalid)"
+                    );
+                }
                 QueuedLogger.LogError("Failed to get valid pose data");
             }
         }

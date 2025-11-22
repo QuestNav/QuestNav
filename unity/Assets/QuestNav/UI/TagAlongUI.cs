@@ -40,6 +40,10 @@ namespace QuestNav.UI
 
         public void Periodic()
         {
+            // Early exit if required references are not set
+            if (head == null || transform == null)
+                return;
+
             // 1. Calculate the ideal target position
             Vector3 idealPosition = head.position + head.forward * FOLLOW_DISTANCE;
 

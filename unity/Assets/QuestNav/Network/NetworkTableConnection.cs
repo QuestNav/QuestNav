@@ -3,6 +3,7 @@ using QuestNav.Native.NTCore;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.Utils;
+using QuestNav.WebServer;
 using UnityEngine;
 
 namespace QuestNav.Network
@@ -223,33 +224,35 @@ public class NetworkTableConnection : INetworkTableConnection
 
     /// <summary>
     /// Updates the team number and configures the NetworkTables connection.
-    /// Uses team number for standard operation or debug IP override if configured.
+    /// Checks Tunables.debugNTServerAddressOverride - if set, uses direct IP connection instead of team number.
+    /// NetworkTables automatically handles reconnection when server configuration changes.
     /// </summary>
-    /// <param name="teamNumber">The new team number</param>
+    /// <param name="teamNumber">The FRC team number (ignored if debug IP override is set)</param>
     public void UpdateTeamNumber(int teamNumber)
     {
-        // Set team number/ip if in debug mode
-        if (QuestNavConstants.Network.DEBUG_NT_SERVER_ADDRESS_OVERRIDE.Length == 0)
+        // Check if using debug IP override or standard team number mode
+        if (string.IsNullOrEmpty(Tunables.debugNTServerAddressOverride))
         {
+            // Standard mode: Use team number to resolve robot address
             QueuedLogger.Log($"Setting Team number to {teamNumber}");
-            ntInstance.SetTeamNumber(teamNumber);
+            ntInstance.SetTeamNumber(teamNumber, Tunables.ntServerPort);
             teamNumberSet = true;
+            ipAddressSet = false;
         }
         else
         {
-            QueuedLogger.Log(
-                "Running with NetworkTables IP Override! This should only be used for debugging!"
+            // Debug mode: Use direct IP address (bypasses team number resolution)
+            QueuedLogger.LogWarning(
+                $"[DEBUG MODE] Using IP Override: {Tunables.debugNTServerAddressOverride} - This should only be used for debugging!"
             );
             ntInstance.SetAddresses(
                 new (string addr, int port)[]
                 {
-                    (
-                        QuestNavConstants.Network.DEBUG_NT_SERVER_ADDRESS_OVERRIDE,
-                        QuestNavConstants.Network.NT_SERVER_PORT
-                    ),
+                    (Tunables.debugNTServerAddressOverride, Tunables.ntServerPort),
                 }
             );
             ipAddressSet = true;
+            teamNumberSet = false;
         }
     }
     #endregion

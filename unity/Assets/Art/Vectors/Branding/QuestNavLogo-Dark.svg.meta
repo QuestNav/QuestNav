@@ -8,18 +8,18 @@ ScriptedImporter:
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: a57477913897c46af95d590f580878bd, type: 3}
-  svgType: 4
+  svgType: 0
   texturedSpriteMeshType: 0
-  svgPixelsPerUnit: 1000
-  gradientResolution: 128
+  svgPixelsPerUnit: 100
+  gradientResolution: 64
   alignment: 0
   customPivot: {x: 0, y: 0}
   generatePhysicsShape: 0
   viewportOptions: 0
   preserveViewport: 0
   advancedMode: 0
-  predefinedResolutionIndex: 0
-  targetResolution: 2160
+  predefinedResolutionIndex: 1
+  targetResolution: 1080
   resolutionMultiplier: 1
   stepDistance: 10
   samplingStepDistance: 100
@@ -28,13 +28,13 @@ ScriptedImporter:
   maxTangentAngleEnabled: 0
   maxTangentAngle: 5
   keepTextureAspectRatio: 1
-  textureSize: 1080
+  textureSize: 256
   textureWidth: 256
   textureHeight: 256
   wrapMode: 0
-  filterMode: 2
-  sampleCount: 8
-  preserveSVGImageAspect: 1
+  filterMode: 1
+  sampleCount: 4
+  preserveSVGImageAspect: 0
   useSVGPixelsPerUnit: 0
   spriteData:
     TessellationDetail: 0
@@ -51,5 +51,5 @@ ScriptedImporter:
         y: 0
         width: 0
         height: 0
-      spriteID: 612df65a2d2f69e41b945e0ff51f269d
+      spriteID: 221f12656c1207b4586a333bdab0f153
     PhysicsOutlines: []

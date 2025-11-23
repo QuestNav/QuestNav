@@ -233,14 +233,14 @@ function draw() {
   // Vertical axis (X world): top = +1, bottom = -1
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
-  ctx.fillText('1', size / 2, 4)
+  ctx.fillText('Forward (+1)', size / 2, 6)
   ctx.textBaseline = 'bottom'
   ctx.fillText('-1', size / 2, size - 4)
 
   // Horizontal axis (Y world): left = +1, right = -1
   ctx.textAlign = 'left'
   ctx.textBaseline = 'middle'
-  ctx.fillText('1', 4, size / 2)
+  ctx.fillText('Left (+1)', 6, size / 2)
   ctx.textAlign = 'right'
   ctx.fillText('-1', size - 4, size / 2)
 

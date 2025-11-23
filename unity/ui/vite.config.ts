@@ -10,7 +10,8 @@ export default defineConfig({
   // Build configuration
   build: {
     outDir: '../Assets/StreamingAssets/ui',
-    emptyOutDir: true,
+    // Don't delete fallback.html or meta files in the output dir
+    emptyOutDir: false,
     assetsDir: 'assets',
     rollupOptions: {
       input: {

@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@mytskine/curve-fitting':
+        specifier: ^1.2.0
+        version: 1.2.0(esbuild@0.21.5)
       pinia:
         specifier: ^2.1.7
         version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
@@ -187,6 +190,11 @@ packages:
 
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
+
+  '@mytskine/curve-fitting@1.2.0':
+    resolution: {integrity: sha512-hscwrEmMqXsxcg8caPMX/eL+LkyAdbvIcSk3G+yio1RO/37Ssx4FENf3McyVCTRMFc6oQwCUsZvMOtwiQ8j5tw==}
+    peerDependencies:
+      esbuild: ^0.20.1
 
   '@rollup/rollup-android-arm-eabi@4.52.5':
     resolution: {integrity: sha512-8c1vW4ocv3UOMp9K+gToY5zL2XiiVw3k7f1ksf4yO1FlDFQ1C2u72iACFnSOceJFsWskc2WZNqeRhFRPzv+wtQ==}
@@ -590,6 +598,10 @@ snapshots:
     optional: true
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
+
+  '@mytskine/curve-fitting@1.2.0(esbuild@0.21.5)':
+    dependencies:
+      esbuild: 0.21.5
 
   '@rollup/rollup-android-arm-eabi@4.52.5':
     optional: true

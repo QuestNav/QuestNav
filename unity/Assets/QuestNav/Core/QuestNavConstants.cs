@@ -66,41 +66,6 @@ namespace QuestNav.Core
         public static class Commands
         {
             /// <summary>
-            /// Command code for no request/response
-            /// </summary>
-            public const int IDLE = 0;
-
-            /// <summary>
-            /// Command code for heading reset request
-            /// </summary>
-            public const int HEADING_RESET = 1;
-
-            /// <summary>
-            /// Command code for pose reset request
-            /// </summary>
-            public const int POSE_RESET = 2;
-
-            /// <summary>
-            /// Command code for ping request
-            /// </summary>
-            public const int PING = 3;
-
-            /// <summary>
-            /// Response code for ping
-            /// </summary>
-            public const int PING_RESPONSE = 97;
-
-            /// <summary>
-            /// Response code for successful pose reset
-            /// </summary>
-            public const int POSE_RESET_SUCCESS = 98;
-
-            /// <summary>
-            /// Response code for successful heading reset
-            /// </summary>
-            public const int HEADING_RESET_SUCCESS = 99;
-
-            /// <summary>
             /// Time to live for pose reset command (ms). Commands older than this will be ignored.
             /// </summary>
             public const int POSE_RESET_TTL_MS = 50;
@@ -131,21 +96,6 @@ namespace QuestNav.Core
             /// FRC field width in meters
             /// </summary>
             public const float FIELD_WIDTH = 8.02f;
-
-            /// <summary>
-            /// Maximum number of attempts to read pose data
-            /// </summary>
-            public const int MAX_POSE_READ_RETRIES = 3;
-
-            /// <summary>
-            /// Delay between retry attempts (ms)
-            /// </summary>
-            public const float POSE_RETRY_DELAY_MS = 50f;
-
-            /// <summary>
-            /// Position error threshold for warning (meters)
-            /// </summary>
-            public const float POSITION_ERROR_THRESHOLD = 0.01f; // 1cm
         }
 
         /// <summary>

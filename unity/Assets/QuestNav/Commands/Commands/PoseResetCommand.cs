@@ -1,5 +1,4 @@
 ﻿using QuestNav.Core;
-using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.Utils;
 using UnityEngine;
@@ -12,7 +11,7 @@ namespace QuestNav.Commands.Commands
     /// </summary>
     public class PoseResetCommand : ICommand
     {
-        private readonly INetworkTableConnection networkTableConnection;
+        private readonly ICommandContext commandContext;
         private readonly Transform vrCamera;
         private readonly Transform vrCameraRoot;
         private readonly Transform resetTransform;
@@ -20,18 +19,18 @@ namespace QuestNav.Commands.Commands
         /// <summary>
         /// Initializes a new instance of the PoseResetCommand
         /// </summary>
-        /// <param name="networkTableConnection">The network connection to use for command communication</param>
+        /// <param name="commandContext">The command context to use for sending responses</param>
         /// <param name="vrCamera">Reference to the VR camera transform</param>
         /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
         /// <param name="resetTransform">Reference to the reset position transform</param>
         public PoseResetCommand(
-            INetworkTableConnection networkTableConnection,
+            ICommandContext commandContext,
             Transform vrCamera,
             Transform vrCameraRoot,
             Transform resetTransform
         )
         {
-            this.networkTableConnection = networkTableConnection;
+            this.commandContext = commandContext;
             this.vrCamera = vrCamera;
             this.vrCameraRoot = vrCameraRoot;
             this.resetTransform = resetTransform;
@@ -135,24 +134,19 @@ namespace QuestNav.Commands.Commands
                         + $"Y={targetCameraRotation.eulerAngles.y}, Z={targetCameraRotation.eulerAngles.z}"
                 );
 
-                // Send success response only if NetworkTables connection exists
-                // (web-initiated resets don't use NetworkTables)
-                if (networkTableConnection != null)
-                {
-                    networkTableConnection.SendCommandSuccessResponse(receivedCommand.CommandId);
-                }
+                // Send success response via command context
+                // (NetworkTables context sends to robot, Local context is no-op)
+                commandContext.SendSuccessResponse(receivedCommand.CommandId);
                 QueuedLogger.Log("Pose reset completed successfully");
             }
             else
             {
-                // Send error response only if NetworkTables connection exists
-                if (networkTableConnection != null)
-                {
-                    networkTableConnection.SendCommandErrorResponse(
-                        receivedCommand.CommandId,
-                        "Failed to get valid pose data (invalid)"
-                    );
-                }
+                // Send error response via command context
+                // (NetworkTables context sends to robot, Local context is no-op)
+                commandContext.SendErrorResponse(
+                    receivedCommand.CommandId,
+                    "Failed to get valid pose data (invalid)"
+                );
                 QueuedLogger.LogError("Failed to get valid pose data");
             }
         }

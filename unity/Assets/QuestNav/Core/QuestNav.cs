@@ -424,10 +424,13 @@ namespace QuestNav.Core
                 PoseResetPayload = new ProtobufQuestNavPoseResetPayload { TargetPose = resetPose },
             };
 
+            // Create local command context for web-initiated reset
+            // (no NetworkTables response needed for web interface)
+            var localContext = new LocalCommandContext();
+
             // Create a temporary command instance for web-initiated reset
-            // Pass null for networkTableConnection since web resets don't use NetworkTables
             var webPoseResetCommand = new PoseResetCommand(
-                null, // No NetworkTables response for web-initiated resets
+                localContext, // Local context is no-op (no NetworkTables responses)
                 vrCamera,
                 vrCameraRoot,
                 resetTransform

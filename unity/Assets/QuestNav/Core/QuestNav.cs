@@ -435,9 +435,7 @@ namespace QuestNav.Core
                 }
                 else
                 {
-                    QueuedLogger.LogError(
-                        "[QuestNav] Update loops stopped - attempting restart"
-                    );
+                    QueuedLogger.LogError("[QuestNav] Update loops stopped - attempting restart");
                 }
             }
 

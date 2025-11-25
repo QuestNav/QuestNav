@@ -105,12 +105,6 @@
               </div>
             </div>
           </div>
-          <div class="status-item">
-            <span class="label">Status:</span>
-            <span class="value">
-              {{ status.batteryCharging ? '⚡ Charging' : status.batteryStatus }}
-            </span>
-          </div>
         </div>
       </div>
 

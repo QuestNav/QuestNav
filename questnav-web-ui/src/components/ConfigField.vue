@@ -123,8 +123,8 @@ const localValue = ref(props.value)
 const pendingTeamNumber = ref<number | null>(null)
 const pendingDebugIP = ref<string | null>(null)
 
-const isDebugIPField = computed(() => props.field.path === 'Tunables/debugNTServerAddressOverride')
-const isTeamNumberField = computed(() => props.field.path === 'Tunables/webConfigTeamNumber')
+const isDebugIPField = computed(() => props.field.path === 'WebServerConstants/debugNTServerAddressOverride')
+const isTeamNumberField = computed(() => props.field.path === 'WebServerConstants/webConfigTeamNumber')
 const isDebugIPActive = computed(() => {
   return props.debugIPOverride !== undefined && props.debugIPOverride !== null && props.debugIPOverride !== ''
 })

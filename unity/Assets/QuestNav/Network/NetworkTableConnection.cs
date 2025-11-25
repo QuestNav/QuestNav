@@ -248,7 +248,10 @@ public class NetworkTableConnection : INetworkTableConnection
             ntInstance.SetAddresses(
                 new (string addr, int port)[]
                 {
-                    (WebServerConstants.debugNTServerAddressOverride, WebServerConstants.ntServerPort),
+                    (
+                        WebServerConstants.debugNTServerAddressOverride,
+                        WebServerConstants.ntServerPort
+                    ),
                 }
             );
             ipAddressSet = true;

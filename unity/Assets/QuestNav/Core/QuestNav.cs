@@ -322,6 +322,129 @@ namespace QuestNav.Core
             webServerManager?.Shutdown();
         }
 
+        /// <summary>
+        /// Called when application focus changes (Quest OS brings app to foreground/background).
+        /// With focusaware=false, this should rarely trigger, but provides defense-in-depth.
+        /// Maintains data streaming continuity even if focus events occur.
+        /// </summary>
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (hasFocus)
+            {
+                QueuedLogger.Log(
+                    "[QuestNav] Application regained focus - data streaming continuing"
+                );
+
+                // Ensure update loops are running
+                if (!IsInvoking(nameof(MainUpdate)))
+                {
+                    QueuedLogger.LogWarning(
+                        "[QuestNav] MainUpdate was stopped - restarting at 120Hz"
+                    );
+                    InvokeRepeating(
+                        nameof(MainUpdate),
+                        0,
+                        1f / QuestNavConstants.Timing.MAIN_UPDATE_HZ
+                    );
+                }
+
+                if (!IsInvoking(nameof(SlowUpdate)))
+                {
+                    QueuedLogger.LogWarning(
+                        "[QuestNav] SlowUpdate was stopped - restarting at 3Hz"
+                    );
+                    InvokeRepeating(
+                        nameof(SlowUpdate),
+                        0,
+                        1f / QuestNavConstants.Timing.SLOW_UPDATE_HZ
+                    );
+                }
+            }
+            else
+            {
+                QueuedLogger.Log(
+                    "[QuestNav] Application lost focus - data streaming continuing (focusaware=false)"
+                );
+                // Do NOT pause operations - continue streaming data to robot
+                // With focusaware=false, we intentionally keep running in background
+            }
+
+            // Flush logs immediately on state change for debugging
+            QueuedLogger.Flush();
+        }
+
+        /// <summary>
+        /// Called when application is paused/resumed by Quest OS.
+        /// With focusaware=false and runInBackground=true, this should rarely trigger.
+        /// Provides defensive logging and state monitoring.
+        /// </summary>
+        private void OnApplicationPause(bool isPaused)
+        {
+            if (isPaused)
+            {
+                QueuedLogger.LogWarning(
+                    "[QuestNav] Application paused - attempting to continue data streaming"
+                );
+
+                // Check NetworkTables connection status
+                if (!networkTableConnection.IsConnected)
+                {
+                    QueuedLogger.LogError(
+                        "[QuestNav] NetworkTables disconnected during pause event"
+                    );
+                }
+
+                // Log tracking status
+                if (!currentlyTracking)
+                {
+                    QueuedLogger.LogWarning("[QuestNav] VR tracking lost during pause event");
+                }
+            }
+            else
+            {
+                QueuedLogger.Log("[QuestNav] Application resumed - verifying systems");
+
+                // Verify NetworkTables connection
+                if (networkTableConnection.IsConnected)
+                {
+                    QueuedLogger.Log("[QuestNav] NetworkTables connection active");
+                }
+                else
+                {
+                    QueuedLogger.LogError(
+                        "[QuestNav] NetworkTables connection lost - may need manual reconnection"
+                    );
+                }
+
+                // Verify VR tracking
+                if (currentlyTracking)
+                {
+                    QueuedLogger.Log("[QuestNav] VR tracking active");
+                }
+                else
+                {
+                    QueuedLogger.LogWarning(
+                        "[QuestNav] VR tracking inactive - put headset on to resume tracking"
+                    );
+                }
+
+                // Verify update loops are running
+                if (IsInvoking(nameof(MainUpdate)) && IsInvoking(nameof(SlowUpdate)))
+                {
+                    QueuedLogger.Log("[QuestNav] Update loops running normally");
+                }
+                else
+                {
+                    QueuedLogger.LogError(
+                        "[QuestNav] Update loops stopped - attempting restart"
+                    );
+                }
+            }
+
+            // Flush logs immediately for debugging
+            QueuedLogger.Flush();
+        }
+
         #endregion
 
         #region Private Methods

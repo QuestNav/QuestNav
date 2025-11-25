@@ -135,14 +135,14 @@ namespace QuestNav.Commands.Commands
                 );
 
                 // Send success response via command context
-                // (NetworkTables context sends to robot, Local context is no-op)
+                // (NetworkTables context sends to robot, Web context is no-op)
                 commandContext.SendSuccessResponse(receivedCommand.CommandId);
                 QueuedLogger.Log("Pose reset completed successfully");
             }
             else
             {
                 // Send error response via command context
-                // (NetworkTables context sends to robot, Local context is no-op)
+                // (NetworkTables context sends to robot, Web context is no-op)
                 commandContext.SendErrorResponse(
                     receivedCommand.CommandId,
                     "Failed to get valid pose data (invalid)"

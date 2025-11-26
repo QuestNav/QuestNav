@@ -42,6 +42,11 @@
           <div v-show="activeTab === 'Logs'" class="tab-panel">
             <LogsView />
           </div>
+
+          <!-- Calibration Tab -->
+          <div v-show="activeTab === 'Calibration'" class="tab-panel">
+            <CalibrationForm />
+          </div>
           
           <!-- Config Tabs -->
           <div
@@ -79,13 +84,14 @@ import { useConfigStore } from '../stores/config'
 import ConfigField from './ConfigField.vue'
 import StatusView from './StatusView.vue'
 import LogsView from './LogsView.vue'
+import CalibrationForm from './CalibrationForm.vue'
 
 const configStore = useConfigStore()
 const activeTab = ref<string>('Status')
 let pollInterval: number | null = null
 
-// Add Status and Logs as first tabs
-const allTabs = computed(() => ['Status', 'Logs', ...configStore.categories])
+// Add Status, Logs, and Calibration as first tabs
+const allTabs = computed(() => ['Status', 'Logs', 'Calibration', ...configStore.categories])
 
 onMounted(async () => {
   await loadData()

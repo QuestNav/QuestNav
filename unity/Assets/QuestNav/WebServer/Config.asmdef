@@ -1,7 +1,10 @@
 {
     "name": "QuestNav.WebServer",
     "rootNamespace": "QuestNav.WebServer",
-    "references": [],
+    "references": [
+        "GUID:f5eda1afa2a1241a59c4db6830e1c890",
+        "GUID:f12aafacab75a87499e7e45c873ffab8"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -16,4 +19,3 @@
     "versionDefines": [],
     "noEngineReferences": false
 }
-

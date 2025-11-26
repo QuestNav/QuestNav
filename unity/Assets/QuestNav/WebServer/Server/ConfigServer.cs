@@ -253,7 +253,11 @@ namespace QuestNav.WebServer
                 o.WithUrlPrefix($"http://*:{port}/").WithMode(HttpListenerMode.EmbedIO)
             )
                 .WithModule(new ActionModule("/api", HttpVerbs.Any, HandleApiRequest))
+                .WithModule(new ActionModule("/video", HttpVerbs.Get, HandleVideoStream))
                 .WithStaticFolder("/", staticPath, true);
+
+            // Disable silent handling of write exceptions to allow handling disconnects
+            server.Listener.IgnoreWriteExceptions = false;
 
             // Disable verbose EmbedIO logging (only if not already unregistered)
             server.StateChanged += (s, e) => { }; // Suppress state change logs
@@ -280,6 +284,11 @@ namespace QuestNav.WebServer
             });
 
             logger?.Log($"[ConfigServer] Server started at {BaseUrl}");
+        }
+
+        private Task HandleVideoStream(IHttpContext context)
+        {
+            return VideoStreamProvider.Instance.HandleMjpegAsync(context);
         }
 
         /// <summary>

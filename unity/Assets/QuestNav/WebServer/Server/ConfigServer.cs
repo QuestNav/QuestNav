@@ -1,4 +1,6 @@
 using System;
+using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EmbedIO;
@@ -136,6 +138,11 @@ namespace QuestNav.WebServer
         private readonly LogCollector logCollector;
 
         /// <summary>
+        /// Stream provider instance (injected)
+        /// </summary>
+        private readonly VideoStreamProvider streamProvider;
+
+        /// <summary>
         /// Dictionary tracking last activity time for each client IP
         /// </summary>
         private readonly System.Collections.Generic.Dictionary<string, DateTime> activeClients =
@@ -179,6 +186,7 @@ namespace QuestNav.WebServer
         /// <param name="poseResetCallback">Callback to reset VR pose</param>
         /// <param name="statusProvider">Status provider instance for runtime data</param>
         /// <param name="logCollector">Log collector instance for log messages</param>
+        /// <param name="streamProvider">Stream provider instance for video streaming</param>
         public ConfigServer(
             ReflectionBinding binding,
             ConfigStore store,
@@ -189,7 +197,8 @@ namespace QuestNav.WebServer
             MainThreadAction restartCallback,
             MainThreadAction poseResetCallback,
             StatusProvider statusProvider,
-            LogCollector logCollector
+            LogCollector logCollector,
+            VideoStreamProvider streamProvider
         )
         {
             this.binding = binding;
@@ -202,6 +211,7 @@ namespace QuestNav.WebServer
             this.poseResetCallback = poseResetCallback;
             this.statusProvider = statusProvider;
             this.logCollector = logCollector;
+            this.streamProvider = streamProvider;
 
             // Cache server info on main thread (before server starts on background thread)
             CacheServerInfo();
@@ -286,9 +296,19 @@ namespace QuestNav.WebServer
             logger?.Log($"[ConfigServer] Server started at {BaseUrl}");
         }
 
-        private Task HandleVideoStream(IHttpContext context)
+        private async Task HandleVideoStream(IHttpContext context)
         {
-            return VideoStreamProvider.Instance.HandleMjpegAsync(context);
+            if (streamProvider is not null)
+            {
+                await streamProvider.HandleStreamAsync(context);
+            }
+            else
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.NoContent;
+                context.Response.StatusDescription = nameof(HttpStatusCode.NoContent);
+                await context.SendStringAsync("streamProvider is not initialized", "application/text",
+                    Encoding.Default);
+            }
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using QuestNav.Commands;
+﻿using Meta.XR;
+using QuestNav.Commands;
 using QuestNav.Commands.Commands;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
@@ -139,6 +140,13 @@ namespace QuestNav.Core
         private Transform tagalongUiTransform;
 
         /// <summary>
+        /// An object that manages access to the headset camera.
+        /// </summary>
+        [Header("Passthrough Camera")]
+        [SerializeField]
+        private PassthroughCameraAccess cameraAccess;
+
+        /// <summary>
         /// Current battery percentage of the device
         /// </summary>
         private int batteryPercent;
@@ -228,6 +236,8 @@ namespace QuestNav.Core
             webServerManager = new WebServerManager(
                 vrCamera,
                 vrCameraRoot,
+                new PassthroughOptions(),
+                cameraAccess,
                 this,
                 WebServerConstants.serverPort,
                 WebServerConstants.enableCORSDevMode,

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using Meta.XR;
 using UnityEngine;
 
 namespace QuestNav.WebServer
@@ -33,6 +34,11 @@ namespace QuestNav.WebServer
         /// Status provider for web interface
         /// </summary>
         private StatusProvider statusProvider;
+
+        /// <summary>
+        /// Mjpeg stream provider for web interface
+        /// </summary>
+        private readonly VideoStreamProvider streamProvider;
 
         /// <summary>
         /// Log collector for web interface
@@ -83,11 +89,14 @@ namespace QuestNav.WebServer
         #endregion
 
         #region Constructor
+
         /// <summary>
         /// Initializes a new WebServerManager with injected dependencies.
         /// </summary>
         /// <param name="vrCamera">Transform of the VR camera (center eye anchor)</param>
         /// <param name="vrCameraRoot">Transform of the VR camera root</param>
+        /// <param name="passthroughOptions">Provides access to settings for video streaming</param>
+        /// <param name="cameraAccess">Provides access to the headset cameras</param>
         /// <param name="coroutineHost">MonoBehaviour to use for coroutine execution</param>
         /// <param name="serverPort">HTTP server port for web interface</param>
         /// <param name="enableCORSDevMode">Enable CORS for localhost development</param>
@@ -95,6 +104,8 @@ namespace QuestNav.WebServer
         public WebServerManager(
             Transform vrCamera,
             Transform vrCameraRoot,
+            IPassthroughOptions passthroughOptions,
+            PassthroughCameraAccess cameraAccess,
             MonoBehaviour coroutineHost,
             int serverPort,
             bool enableCORSDevMode,
@@ -109,6 +120,7 @@ namespace QuestNav.WebServer
             // Initialize services
             statusProvider = new StatusProvider();
             logCollector = new LogCollector();
+            streamProvider = new VideoStreamProvider(cameraAccess, passthroughOptions);
         }
         #endregion
 
@@ -132,6 +144,9 @@ namespace QuestNav.WebServer
 
             // Start initialization coroutine
             coroutineHost.StartCoroutine(InitializeCoroutine());
+            
+            // Start video stream coroutine
+            coroutineHost.StartCoroutine(streamProvider.FrameCaptureCoroutine());
         }
 
         /// <summary>
@@ -305,7 +320,8 @@ namespace QuestNav.WebServer
                 RestartApplication,
                 RequestPoseReset, // Pass flag-setter method instead of direct callback
                 statusProvider,
-                logCollector
+                logCollector,
+                streamProvider
             );
 
             if (server == null)

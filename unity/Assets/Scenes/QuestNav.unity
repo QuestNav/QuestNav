@@ -3155,6 +3155,7 @@ MonoBehaviour:
   vrCameraRoot: {fileID: 324151953}
   resetTransform: {fileID: 336173539}
   tagalongUiTransform: {fileID: 773508528}
+  cameraAccess: {fileID: 385846344}
 --- !u!1 &336191857
 GameObject:
   m_ObjectHideFlags: 0
@@ -3665,27 +3666,13 @@ GameObject:
   m_Component:
   - component: {fileID: 385846345}
   - component: {fileID: 385846344}
-  - component: {fileID: 385846343}
   m_Layer: 0
-  m_Name: MjpegProvider
+  m_Name: PassthroughCameraAccess
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &385846343
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 385846342}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ead629ccc42045e0a05405427fa8e500, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: QuestNav.WebServer::QuestNav.WebServer.VideoStreamProvider
-  cameraAccess: {fileID: 385846344}
 --- !u!114 &385846344
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -195,7 +195,7 @@ namespace QuestNav.Core
         )]
         public static int ntLogLevelMin = 9;
         #endregion
-        
+
         #region Video Configuration
         /// <summary>
         /// Enable passthrough video stream.
@@ -208,7 +208,7 @@ namespace QuestNav.Core
             Order = 1
         )]
         public static bool enablePassThrough = false;
-        
+
         /// <summary>
         /// Maximum frame rate for MJPEG video stream.
         /// Higher frame rates provide smoother display but have a larger impact on performance.

@@ -144,7 +144,7 @@ namespace QuestNav.WebServer
 
             // Start initialization coroutine
             coroutineHost.StartCoroutine(InitializeCoroutine());
-            
+
             // Start video stream coroutine
             coroutineHost.StartCoroutine(streamProvider.FrameCaptureCoroutine());
         }

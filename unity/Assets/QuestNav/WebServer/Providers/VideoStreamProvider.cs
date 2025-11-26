@@ -20,13 +20,13 @@ namespace QuestNav.WebServer
         /// If true, enable streaming the passthrough camera
         /// </summary>
         bool Enable { get; }
-        
+
         /// <summary>
         /// The maximum frame rate for the passthrough camera
         /// </summary>
         int MaxFrameRate { get; }
     }
-    
+
     internal class EncodedFrame
     {
         public readonly int FrameNumber;
@@ -38,7 +38,7 @@ namespace QuestNav.WebServer
             FrameData = frameData;
         }
     }
-    
+
     public class VideoStreamProvider
     {
         #region Fields
@@ -56,7 +56,10 @@ namespace QuestNav.WebServer
         private EncodedFrame currentFrame;
         private int connectedClients;
 
-        public VideoStreamProvider(PassthroughCameraAccess cameraAccess, IPassthroughOptions options)
+        public VideoStreamProvider(
+            PassthroughCameraAccess cameraAccess,
+            IPassthroughOptions options
+        )
         {
             this.cameraAccess = cameraAccess;
             this.options = options;
@@ -64,14 +67,14 @@ namespace QuestNav.WebServer
         }
 
         #endregion
-        
+
         #region Properties
 
         private float FrameDelaySeconds => 1.0f / options.MaxFrameRate;
         private TimeSpan FrameDelay => TimeSpan.FromSeconds(FrameDelaySeconds);
-        
+
         #endregion
-        
+
         #region Public Methods
 
         public IEnumerator FrameCaptureCoroutine()
@@ -81,7 +84,7 @@ namespace QuestNav.WebServer
                 Debug.Log("[VideoStreamProvider] Disabled - cameraAccess is unset");
                 yield break;
             }
-            
+
             Debug.Log("[VideoStreamProvider] Initialized");
 
             while (true)
@@ -92,7 +95,7 @@ namespace QuestNav.WebServer
                     yield return new WaitUntil(() => options.Enable);
                     Debug.Log("[VideoStreamProvider] Enabled");
                 }
-                
+
                 if (!cameraAccess.enabled)
                 {
                     yield return new WaitForSeconds(FrameDelaySeconds);
@@ -112,19 +115,20 @@ namespace QuestNav.WebServer
 
                     currentFrame = new EncodedFrame(Time.frameCount, texture2D.EncodeToJPG());
                 }
-                catch (NullReferenceException ex) 
+                catch (NullReferenceException ex)
                 {
                     // This probably means the app hasn't been given permission to access the headset camera.
                     // If we inject StatusProvider we can add an error on the dashboard for this.
                     Debug.LogError(
-                        $"[VideoStreamProvider] Error capturing frame - verify 'Headset Cameras' app permission is enabled. {ex.Message}");
+                        $"[VideoStreamProvider] Error capturing frame - verify 'Headset Cameras' app permission is enabled. {ex.Message}"
+                    );
                     yield break;
                 }
-                
+
                 yield return new WaitForSeconds(FrameDelaySeconds);
             }
         }
-        
+
         public async Task HandleStreamAsync(IHttpContext context)
         {
             Interlocked.Increment(ref connectedClients);
@@ -134,7 +138,7 @@ namespace QuestNav.WebServer
 
             Debug.Log("[VideoStreamProvider] Starting mjpeg stream");
             using Stream responseStream = context.OpenResponseStream(preferCompression: false);
-            
+
             // Create a buffer that we'll use to build the data structure for each frame
             MemoryStream memStream = new(InitialBufferSize);
             int lastFrame = 0;
@@ -188,7 +192,7 @@ namespace QuestNav.WebServer
             stream.Write(jpegData);
             stream.Flush();
         }
-        
+
         #endregion
     }
 }

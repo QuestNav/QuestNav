@@ -306,8 +306,11 @@ namespace QuestNav.WebServer
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NoContent;
                 context.Response.StatusDescription = nameof(HttpStatusCode.NoContent);
-                await context.SendStringAsync("streamProvider is not initialized", "application/text",
-                    Encoding.Default);
+                await context.SendStringAsync(
+                    "streamProvider is not initialized",
+                    "application/text",
+                    Encoding.Default
+                );
             }
         }
 

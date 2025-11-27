@@ -73,6 +73,7 @@
   <uses-permission android:name="com.oculus.permission.USE_SCENE" />
   <uses-permission android:name="android.permission.CAMERA" />
   <uses-permission android:name="horizonos.permission.HEADSET_CAMERA" />
+  <uses-feature android:name="android.hardware.camera2.any" android:required="true" />
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

@@ -196,6 +196,32 @@ namespace QuestNav.Core
         public static int ntLogLevelMin = 9;
         #endregion
 
+        #region Video Configuration
+        /// <summary>
+        /// Enable passthrough video stream.
+        /// </summary>
+        [Config(
+            DisplayName = "Enable Passthrough Camera",
+            Description = "",
+            Category = "Camera",
+            ControlType = "checkbox",
+            Order = 1
+        )]
+        public static bool enablePassThrough = false;
+
+        /// <summary>
+        /// Displays the passthrough video stream.
+        /// </summary>
+        [Config(
+            DisplayName = "Video Stream",
+            Description = "",
+            Category = "Camera",
+            ControlType = "image",
+            Order = 2
+        )]
+        public static string passthroughVideo = "./video";
+        #endregion
+
         #region General Configuration
         /// <summary>
         /// HTTP server port for web configuration interface (default: 5801).

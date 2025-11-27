@@ -40,6 +40,11 @@ namespace QuestNav.Core
             public const string NT_BASE_PATH = "/QuestNav";
 
             /// <summary>
+            /// Base path for all QuestNav topics
+            /// </summary>
+            public const string CAMERA_PUBLISHER = "/CameraPublisher";
+
+            /// <summary>
             /// Command response topic (Quest to robot)
             /// </summary>
             public const string COMMAND_RESPONSE = NT_BASE_PATH + "/response";
@@ -58,6 +63,11 @@ namespace QuestNav.Core
             /// Device data topic
             /// </summary>
             public const string DEVICE_DATA = NT_BASE_PATH + "/deviceData";
+
+            /// <summary>
+            /// Video streams topic
+            /// </summary>
+            public const string VIDEO_STREAMS = NT_BASE_PATH + "/streams";
         }
 
         /// <summary>

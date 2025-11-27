@@ -107,6 +107,36 @@ namespace QuestNav.Native.NTCore
             return NtCoreNatives.NT_IsConnected(handle) != 0;
         }
 
+        public BooleanPublisher GetBooleanPublisher(string name, PubSubOptions options)
+        {
+            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
+
+            uint topicHandle;
+
+            fixed (byte* ptr = nameUtf8)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
+
+                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
+            }
+
+            byte[] typeStr = Encoding.UTF8.GetBytes("boolean");
+
+            uint subHandle;
+            fixed (byte* ptr = typeStr)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
+                NativePubSubOptions nOptions = options.ToNative();
+                subHandle = NtCoreNatives.NT_Publish(
+                    topicHandle,
+                    NtType.NT_BOOLEAN,
+                    &str,
+                    &nOptions
+                );
+            }
+            return new BooleanPublisher(subHandle);
+        }
+
         public DoubleSubscriber GetDoubleSubscriber(string name, PubSubOptions options)
         {
             byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
@@ -285,6 +315,66 @@ namespace QuestNav.Native.NTCore
                 );
             }
             return new FloatArraySubscriber(subHandle);
+        }
+
+        public StringPublisher GetStringPublisher(string name, PubSubOptions options)
+        {
+            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
+
+            uint topicHandle;
+
+            fixed (byte* ptr = nameUtf8)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
+
+                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
+            }
+
+            byte[] typeStr = Encoding.UTF8.GetBytes("string");
+
+            uint subHandle;
+            fixed (byte* ptr = typeStr)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
+                NativePubSubOptions nOptions = options.ToNative();
+                subHandle = NtCoreNatives.NT_Publish(
+                    topicHandle,
+                    NtType.NT_STRING,
+                    &str,
+                    &nOptions
+                );
+            }
+            return new StringPublisher(subHandle);
+        }
+
+        public StringArrayPublisher GetStringArrayPublisher(string name, PubSubOptions options)
+        {
+            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
+
+            uint topicHandle;
+
+            fixed (byte* ptr = nameUtf8)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
+
+                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
+            }
+
+            byte[] typeStr = Encoding.UTF8.GetBytes("string[]");
+
+            uint subHandle;
+            fixed (byte* ptr = typeStr)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
+                NativePubSubOptions nOptions = options.ToNative();
+                subHandle = NtCoreNatives.NT_Publish(
+                    topicHandle,
+                    NtType.NT_STRING_ARRAY,
+                    &str,
+                    &nOptions
+                );
+            }
+            return new StringArrayPublisher(subHandle);
         }
 
         public unsafe RawPublisher GetRawPublisher(

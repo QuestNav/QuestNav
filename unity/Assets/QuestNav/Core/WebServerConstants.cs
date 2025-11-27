@@ -208,23 +208,6 @@ namespace QuestNav.Core
             Order = 1
         )]
         public static bool enablePassThrough = false;
-
-        /// <summary>
-        /// Maximum frame rate for MJPEG video stream.
-        /// Higher frame rates provide smoother display but have a larger impact on performance.
-        /// </summary>
-        [Config(
-            DisplayName = "Video Frame Rate",
-            Description = "Maximum frame rate for Mjpeg video stream",
-            Category = "Passthrough",
-            Min = 1,
-            Max = 60,
-            Step = 1,
-            ControlType = "slider",
-            RequiresRestart = false,
-            Order = 2
-        )]
-        public static int maxVideoFrameRate = 15;
         #endregion
 
         #region General Configuration

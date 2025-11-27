@@ -11,126 +11,84 @@ using UnityEngine;
 
 namespace QuestNav.WebServer
 {
-    /// <summary>
-    /// Provides access to settings for video streaming
-    /// </summary>
-    public interface IPassthroughOptions
+    public struct EncodedFrame
     {
         /// <summary>
-        /// If true, enable streaming the passthrough camera
+        /// The frame number. Corresponds with Time.frameCount.
         /// </summary>
-        bool Enable { get; }
+        public readonly int frameNumber;
 
         /// <summary>
-        /// The maximum frame rate for the passthrough camera
+        /// A JPEG encoded frame.
         /// </summary>
-        int MaxFrameRate { get; }
-    }
-
-    internal class EncodedFrame
-    {
-        public readonly int FrameNumber;
-        public readonly byte[] FrameData;
+        public readonly byte[] frameData;
 
         public EncodedFrame(int frameNumber, byte[] frameData)
         {
-            FrameNumber = frameNumber;
-            FrameData = frameData;
+            this.frameNumber = frameNumber;
+            this.frameData = frameData;
         }
     }
 
     public class VideoStreamProvider
     {
+        public interface IFrameSource
+        {
+            /// <summary>
+            /// Maximum desired framerate for capture/stream pacing
+            /// </summary>
+            int MaxFrameRate { get; }
+
+            /// <summary>
+            /// The current frame
+            /// </summary>
+            EncodedFrame CurrentFrame { get; }
+        }
+
         #region Fields
         private const string Boundary = "frame";
         private const int InitialBufferSize = 32 * 1024;
-        private static readonly Encoding DefaultEncoding = Encoding.ASCII;
-
+        private static readonly Encoding DefaultEncoding = Encoding.UTF8;
         private static readonly byte[] HeaderStartBytes = DefaultEncoding.GetBytes(
             "\r\n--" + Boundary + "\r\n" + "Content-Type: image/jpeg\r\n" + "Content-Length: "
         );
         private static readonly byte[] HeaderEndBytes = DefaultEncoding.GetBytes("\r\n\r\n");
-
-        private readonly PassthroughCameraAccess cameraAccess;
-        private readonly IPassthroughOptions options;
-        private EncodedFrame currentFrame;
+        private readonly IFrameSource frameSource;
         private int connectedClients;
-
-        public VideoStreamProvider(
-            PassthroughCameraAccess cameraAccess,
-            IPassthroughOptions options
-        )
-        {
-            this.cameraAccess = cameraAccess;
-            this.options = options;
-            Debug.Log("[VideoStreamProvider] Created");
-        }
 
         #endregion
 
         #region Properties
 
-        private float FrameDelaySeconds => 1.0f / options.MaxFrameRate;
-        private TimeSpan FrameDelay => TimeSpan.FromSeconds(FrameDelaySeconds);
+        private int MaxFrameRate => frameSource?.MaxFrameRate ?? 15;
+        private TimeSpan FrameDelay => TimeSpan.FromSeconds(1.0f / MaxFrameRate);
 
         #endregion
 
+        public VideoStreamProvider(IFrameSource frameSource)
+        {
+            this.frameSource = frameSource;
+            Debug.Log("[VideoStreamProvider] Created");
+        }
+
         #region Public Methods
 
-        public IEnumerator FrameCaptureCoroutine()
-        {
-            if (cameraAccess is null)
-            {
-                Debug.Log("[VideoStreamProvider] Disabled - cameraAccess is unset");
-                yield break;
-            }
-
-            Debug.Log("[VideoStreamProvider] Initialized");
-
-            while (true)
-            {
-                if (!options.Enable)
-                {
-                    Debug.Log("[VideoStreamProvider] Disabled");
-                    yield return new WaitUntil(() => options.Enable);
-                    Debug.Log("[VideoStreamProvider] Enabled");
-                }
-
-                if (!cameraAccess.enabled)
-                {
-                    yield return new WaitForSeconds(FrameDelaySeconds);
-                    continue;
-                }
-
-                try
-                {
-                    var texture = cameraAccess.GetTexture();
-                    if (texture is not Texture2D texture2D)
-                    {
-                        Debug.LogError(
-                            $"[VideoStreamProvider] GetTexture returned an incompatible object ({texture.GetType().Name})"
-                        );
-                        yield break;
-                    }
-
-                    currentFrame = new EncodedFrame(Time.frameCount, texture2D.EncodeToJPG());
-                }
-                catch (NullReferenceException ex)
-                {
-                    // This probably means the app hasn't been given permission to access the headset camera.
-                    // If we inject StatusProvider we can add an error on the dashboard for this.
-                    Debug.LogError(
-                        $"[VideoStreamProvider] Error capturing frame - verify 'Headset Cameras' app permission is enabled. {ex.Message}"
-                    );
-                    yield break;
-                }
-
-                yield return new WaitForSeconds(FrameDelaySeconds);
-            }
-        }
+        // Frame capture has been extracted to QuestNav.Camera.PassthroughCapture
 
         public async Task HandleStreamAsync(IHttpContext context)
         {
+            if (frameSource is null)
+            {
+                context.Response.StatusCode = 503;
+                context.Response.StatusDescription = "Service unavailable";
+                await context.SendStringAsync(
+                    "The stream is unavailable",
+                    "text/plain",
+                    Encoding.UTF8
+                );
+                return;
+            }
+
             Interlocked.Increment(ref connectedClients);
             context.Response.StatusCode = 200;
             context.Response.ContentType = "multipart/x-mixed-replace; boundary=--" + Boundary;
@@ -144,15 +102,15 @@ namespace QuestNav.WebServer
             int lastFrame = 0;
             while (!context.CancellationToken.IsCancellationRequested)
             {
-                var frame = currentFrame;
-                if (lastFrame < frame.FrameNumber)
+                var frame = frameSource.CurrentFrame;
+                if (lastFrame < frame.frameNumber)
                 {
                     try
                     {
                         Stream frameStream = memStream;
                         // Reset the content of memStream
                         memStream.SetLength(0);
-                        WriteFrame(frameStream, frame.FrameData);
+                        WriteFrame(frameStream, frame.frameData);
 
                         // Copy the buffer into the response stream
                         memStream.Position = 0;
@@ -160,7 +118,7 @@ namespace QuestNav.WebServer
                         responseStream.Flush();
 
                         // Don't re-send the same frame
-                        lastFrame = frame.FrameNumber;
+                        lastFrame = frame.frameNumber;
                     }
                     catch
                     {

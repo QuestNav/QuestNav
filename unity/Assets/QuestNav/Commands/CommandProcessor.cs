@@ -48,12 +48,15 @@ namespace QuestNav.Commands
             Transform resetTransform
         )
         {
-            // Command context
+            // Store network connection for command processing
             this.networkTableConnection = networkTableConnection;
 
-            // Commands
+            // Create NetworkTables command context for sending responses to robot
+            var commandContext = new NetworkTablesCommandContext(networkTableConnection);
+
+            // Initialize commands with NetworkTables context
             poseResetCommand = new PoseResetCommand(
-                networkTableConnection,
+                commandContext,
                 vrCamera,
                 vrCameraRoot,
                 resetTransform

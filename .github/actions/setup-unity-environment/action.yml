@@ -56,6 +56,12 @@ runs:
         name: questnav-proto-csharp-${{ steps.version-info.outputs.version }}
         path: ${{ inputs.unity-project-path }}/Assets/QuestNav/Generated
 
+    - name: Restore Generated Web UI
+      uses: actions/download-artifact@v5
+      with:
+        name: questnav-web-ui-${{ steps.version-info.outputs.version }}
+        path: ${{ inputs.unity-project-path }}/Assets/StreamingAssets/ui
+
     - name: Cache Unity Library
       id: cache-unity
       uses: actions/cache@v4

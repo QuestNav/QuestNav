@@ -110,3 +110,7 @@ DocFX/api
 # Generated files
 **/Generated/*.cs
 **/Generated/*.meta
+
+# Ignore web UI build output
+Assets/StreamingAssets/ui/**
+!/Assets/StreamingAssets/ui/.gitkeep

@@ -236,7 +236,7 @@ namespace QuestNav.WebServer
         #region Private Methods - Initialization
         /// <summary>
         /// Initializes the configuration system: reflection binding, config store, and HTTP server.
-        /// Loads saved configuration and applies values to tunables.
+        /// Loads saved configuration and applies values to WebServerConstants fields.
         /// Must run on main thread for Unity API access.
         /// </summary>
         private IEnumerator InitializeCoroutine()

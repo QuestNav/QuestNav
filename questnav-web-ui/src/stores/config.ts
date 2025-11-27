@@ -12,6 +12,7 @@ export const useConfigStore = defineStore('config', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const lastUpdated = ref<number>(0)
+  const restartRequired = ref(false)
 
   // Computed
   const categories = computed(() => {
@@ -41,11 +42,8 @@ export const useConfigStore = defineStore('config', () => {
       lastUpdated.value = Date.now()
       return true
     } catch (err) {
-      // Don't set error if it's just a network error (server suspended/offline)
-      if (err instanceof Error && err.message.includes('Failed to fetch')) {
-        // Silent fail - connection status indicator will show it's disconnected
-        error.value = null
-      } else {
+      // Only show error on initial load, not on reconnection attempts
+      if (!schema.value) {
         error.value = err instanceof Error ? err.message : 'Failed to load schema'
       }
       return false
@@ -63,13 +61,8 @@ export const useConfigStore = defineStore('config', () => {
       lastUpdated.value = Date.now()
       return true
     } catch (err) {
-      // Don't set error if it's just a network error (server suspended/offline)
-      if (err instanceof Error && err.message.includes('Failed to fetch')) {
-        // Silent fail - connection status indicator will show it's disconnected
-        error.value = null
-      } else {
-        error.value = err instanceof Error ? err.message : 'Failed to load config'
-      }
+      // Silently fail - don't set error to keep old data visible
+      // Connection state overlay will handle showing disconnect status
       return false
     }
   }
@@ -81,6 +74,12 @@ export const useConfigStore = defineStore('config', () => {
       if (response.success) {
         values.value[path] = response.newValue
         lastUpdated.value = Date.now()
+        
+        // Check if this field requires restart
+        const field = schema.value?.fields.find(f => f.path === path)
+        if (field?.requiresRestart) {
+          restartRequired.value = true
+        }
       }
       
       return response.success
@@ -88,6 +87,10 @@ export const useConfigStore = defineStore('config', () => {
       error.value = err instanceof Error ? err.message : 'Failed to update value'
       return false
     }
+  }
+  
+  function clearRestartFlag() {
+    restartRequired.value = false
   }
 
   return {
@@ -97,6 +100,7 @@ export const useConfigStore = defineStore('config', () => {
     isLoading,
     error,
     lastUpdated,
+    restartRequired,
     
     // Computed
     categories,
@@ -105,7 +109,8 @@ export const useConfigStore = defineStore('config', () => {
     // Actions
     loadSchema,
     loadConfig,
-    updateValue
+    updateValue,
+    clearRestartFlag
   }
 })
 

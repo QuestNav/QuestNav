@@ -1,5 +1,21 @@
 <template>
   <div class="config-form">
+    <!-- Restart Required Banner -->
+    <transition name="slide-down">
+      <div v-if="configStore.restartRequired" class="restart-banner">
+        <div class="restart-content">
+          <div class="restart-icon">⚠️</div>
+          <div class="restart-message">
+            <strong>Restart Required</strong>
+            <p>Some settings require an application restart to take effect.</p>
+          </div>
+          <button @click="handleRestart" class="restart-button">
+            Restart App
+          </button>
+        </div>
+      </div>
+    </transition>
+
     <!-- Loading State -->
     <div v-if="configStore.isLoading" class="loading-container">
       <div class="spinner"></div>
@@ -25,9 +41,6 @@
             @click="activeTab = tab"
           >
             {{ tab }}
-            <span v-if="tab !== 'Status' && tab !== 'Logs'" class="tab-count">
-              {{ configStore.fieldsByCategory[tab]?.length || 0 }}
-            </span>
           </button>
         </div>
 
@@ -56,7 +69,7 @@
                 :key="field.path"
                 :field="field"
                 :value="configStore.values[field.path]"
-                :debugIPOverride="configStore.values['Tunables/debugNTServerAddressOverride']"
+                :debugIPOverride="configStore.values['WebServerConstants/debugNTServerAddressOverride']"
                 @update="handleUpdate"
               />
             </div>
@@ -78,13 +91,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useConfigStore } from '../stores/config'
+import { useConnectionState } from '../composables/useConnectionState'
+import { configApi } from '../api/config'
 import ConfigField from './ConfigField.vue'
 import StatusView from './StatusView.vue'
 import LogsView from './LogsView.vue'
 
 const configStore = useConfigStore()
+const { isConnected } = useConnectionState()
 const activeTab = ref<string>('Status')
 let pollInterval: number | null = null
 
@@ -95,14 +111,25 @@ onMounted(async () => {
   await loadData()
   
   // Poll config values every 3 seconds to sync with VR UI changes
+  // Only poll when connected
   pollInterval = setInterval(async () => {
-    await configStore.loadConfig()
+    if (isConnected.value) {
+      await configStore.loadConfig()
+    }
   }, 3000) as unknown as number
 })
 
 onUnmounted(() => {
   if (pollInterval !== null) {
     clearInterval(pollInterval)
+  }
+})
+
+// Watch connection state and reload when reconnected
+watch(isConnected, async (connected, wasConnected) => {
+  if (connected && !wasConnected) {
+    console.log('[ConfigForm] Connection restored, reloading data')
+    await loadData()
   }
 })
 
@@ -114,6 +141,21 @@ async function loadData() {
 async function handleUpdate(path: string, value: any) {
   await configStore.updateValue(path, value)
 }
+
+async function handleRestart() {
+  if (!confirm('Are you sure you want to restart the QuestNav application? This will close the app and reopen it.')) {
+    return
+  }
+  
+  try {
+    await configApi.restartApp()
+    configStore.clearRestartFlag()
+    // Show a message that restart is in progress
+    alert('Restart initiated. The app will close and reopen shortly.')
+  } catch (error) {
+    alert('Failed to restart application: ' + (error instanceof Error ? error.message : 'Unknown error'))
+  }
+}
 </script>
 
 <style scoped>
@@ -122,6 +164,99 @@ async function handleUpdate(path: string, value: any) {
   max-width: 1400px;
   margin: 0 auto;
 }
+
+/* Restart Banner Styles */
+.restart-banner {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 193, 7, 0.1);
+  border: 2px solid var(--warning-color);
+  border-left: 4px solid var(--warning-color);
+  border-radius: 6px;
+  animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.4s ease;
+}
+
+.slide-down-enter-from {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.restart-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.875rem 1rem;
+}
+
+.restart-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.restart-message {
+  flex: 1;
+  color: var(--text-primary);
+}
+
+.restart-message strong {
+  display: block;
+  font-size: 1rem; /* Base text: 16px */
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.restart-message p {
+  margin: 0;
+  font-size: 0.875rem; /* Small text: 14px */
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.restart-button {
+  padding: 0.6rem 1.5rem;
+  background: var(--warning-color);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.875rem; /* Small text: 14px */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.restart-button:hover {
+  background: var(--amber-dark);
+}
+
+.restart-button:active {
+  transform: translateY(0);
+}
+
 
 .loading-container {
   display: flex;
@@ -134,7 +269,7 @@ async function handleUpdate(path: string, value: any) {
 
 .loading-container p {
   color: var(--primary-color);
-  font-size: 1.1rem;
+  font-size: 1rem; /* Base body text: 16px */
   font-weight: 500;
 }
 
@@ -146,7 +281,7 @@ async function handleUpdate(path: string, value: any) {
 
 .error-container h3 {
   color: var(--danger-color);
-  font-size: 1.5rem;
+  font-size: 1.5rem; /* Consistent h2 size: 24px */
   margin-bottom: 1rem;
 }
 
@@ -158,14 +293,15 @@ async function handleUpdate(path: string, value: any) {
 .tabs-container {
   padding: 0;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
 }
 
 .tabs-nav {
   display: flex;
   gap: 0;
-  background: linear-gradient(to right, rgba(51, 161, 253, 0.05), rgba(0, 188, 212, 0.05));
+  background: var(--bg-tertiary);
   border-bottom: 2px solid var(--border-color);
   overflow-x: auto;
   scrollbar-width: thin;
@@ -188,15 +324,15 @@ async function handleUpdate(path: string, value: any) {
 .tab-button {
   flex: 1;
   min-width: 120px;
-  padding: 1.2rem 1.5rem;
+  padding: 1rem 1.5rem;
   background-color: transparent;
   border: none;
   border-bottom: 3px solid transparent;
   color: var(--text-secondary);
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 1rem; /* Base text: 16px (increased from 14px) */
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -208,23 +344,23 @@ async function handleUpdate(path: string, value: any) {
 .tab-button::before {
   content: '';
   position: absolute;
-  bottom: -2px;
+  bottom: -3px;
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--primary-color), var(--teal));
+  background: var(--primary-color);
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
 
 .tab-button:hover {
-  background: linear-gradient(180deg, rgba(51, 161, 253, 0.1), transparent);
-  color: var(--primary-light);
+  background: var(--card-bg);
+  color: var(--primary-color);
 }
 
 .tab-button.active {
-  color: var(--primary-color);
-  background: linear-gradient(180deg, rgba(51, 161, 253, 0.15), transparent);
+  color: var(--text-primary);
+  background: var(--card-bg);
 }
 
 .tab-button.active::before {
@@ -234,7 +370,7 @@ async function handleUpdate(path: string, value: any) {
 .tab-count {
   font-size: 0.75rem;
   padding: 0.2rem 0.6rem;
-  background: var(--primary-color);
+  background: var(--text-secondary);
   border-radius: 12px;
   color: white;
   font-weight: 700;
@@ -243,15 +379,14 @@ async function handleUpdate(path: string, value: any) {
 }
 
 .tab-button.active .tab-count {
-  background: white;
-  color: var(--primary-color);
-  box-shadow: 0 2px 8px rgba(51, 161, 253, 0.4);
+  background: var(--primary-color);
+  color: white;
 }
 
 .tab-content {
-  padding: 2.5rem;
+  padding: 2rem;
   min-height: 500px;
-  background: var(--bg-secondary);
+  background: var(--card-bg);
 }
 
 .tab-panel {

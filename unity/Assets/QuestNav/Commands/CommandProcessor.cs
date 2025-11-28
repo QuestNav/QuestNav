@@ -65,7 +65,7 @@ namespace QuestNav.Commands
         /// </summary>
         public void ProcessCommands()
         {
-            var receivedCommands = networkTableConnection.GetCommandRequests();
+            var receivedCommands = networkTableConnection.getCommandRequests();
             // Collect all but the most recent PoseReset command, they have been superseded
             var supersededPoseResetCommands = receivedCommands
                 .Where(cmd => cmd.Value.Type == QuestNavCommandType.PoseReset)
@@ -86,7 +86,7 @@ namespace QuestNav.Commands
                             QueuedLogger.Log(
                                 $"Skipping superseded Pose Reset Command. ID: {receivedCommand.CommandId}"
                             );
-                            networkTableConnection.SendCommandErrorResponse(
+                            networkTableConnection.sendCommandErrorResponse(
                                 receivedCommand.CommandId,
                                 "Pose Reset Command superseded"
                             );
@@ -95,7 +95,7 @@ namespace QuestNav.Commands
                         {
                             // Get the age of the command, in milliseconds
                             var ageMs =
-                                (networkTableConnection.Now - receivedTimestampedCommand.LastChange)
+                                (networkTableConnection.ntNow - receivedTimestampedCommand.LastChange)
                                 / 1000;
 
                             // Check if the command is fresh
@@ -115,7 +115,7 @@ namespace QuestNav.Commands
                                     $"Skipping stale Pose Reset Command. ID: {receivedCommand.CommandId} "
                                         + $"Age: {ageMs} ms > {POSE_RESET_TTL_MS} ms"
                                 );
-                                networkTableConnection.SendCommandErrorResponse(
+                                networkTableConnection.sendCommandErrorResponse(
                                     receivedCommand.CommandId,
                                     $"Pose Reset Command too old. Age: {ageMs} ms > {POSE_RESET_TTL_MS} ms"
                                 );

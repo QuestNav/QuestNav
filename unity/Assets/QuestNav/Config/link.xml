@@ -1,0 +1,14 @@
+<linker>
+    <!-- Preserve SQLite assemblies -->
+    <assembly fullname="SQLite-net" preserve="all"/>
+    <assembly fullname="SQLitePCLRaw.core" preserve="all"/>
+    <assembly fullname="SQLitePCLRaw.batteries_v2" preserve="all"/>
+    <assembly fullname="SQLitePCLRaw.provider.e_sqlite3" preserve="all"/>
+
+    <!-- Preserve your config classes -->
+    <assembly fullname="Assembly-CSharp">
+        <type fullname="QuestNav.Config.Config/Network" preserve="all"/>
+        <type fullname="QuestNav.Config.Config/System" preserve="all"/>
+        <type fullname="QuestNav.Config.Config/Logging" preserve="all"/>
+    </assembly>
+</linker>

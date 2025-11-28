@@ -4,7 +4,7 @@ namespace QuestNav.Core
 {
     /// <summary>
     /// Contains all constants used by the QuestNav application.
-    /// Organized by functional category for easier maintenance.
+    /// These are constants meant NOT to change by the user or during runtime.
     /// </summary>
     public static class QuestNavConstants
     {
@@ -27,6 +27,21 @@ namespace QuestNav.Core
             /// Default team number when none is provided
             /// </summary>
             public const int DEFAULT_TEAM_NUMBER = 9999;
+
+            /// <summary>
+            /// Team number to be set when IP override is being used
+            /// </summary>
+            public const int TEAM_NUMBER_DISABLED = -1;
+
+            /// <summary>
+            /// Minimum team number allowed to be set
+            /// </summary>
+            public const int MIN_TEAM_NUMBER = 1;
+
+            /// <summary>
+            /// Maximum team number allowed to be set
+            /// </summary>
+            public const int MAX_TEAM_NUMBER = 99999;
         }
 
         /// <summary>
@@ -137,12 +152,17 @@ namespace QuestNav.Core
             }
 
             /// <summary>
-            /// The lowest level to log. Usually this is INFO, or DEBUG1
+            /// The lowest level to log when using DEBUG logging. Usually this is INFO, or DEBUG1
             /// </summary>
-            public const int NT_LOG_LEVEL_MIN = NTLogLevel.DEBUG1;
+            public const int NT_LOG_LEVEL_MIN_DEBUG = NTLogLevel.DEBUG1;
 
             /// <summary>
-            /// The lowest level to log. Almost ALWAYS this is CRITICAL.
+            /// The lowest level to log when using STANDARD logging. Usually this is WARNING
+            /// </summary>
+            public const int NT_LOG_LEVEL_MIN_STANDARD = NTLogLevel.WARNING;
+
+            /// <summary>
+            /// The highest level to log. Almost ALWAYS this is CRITICAL.
             /// </summary>
             public const int NT_LOG_LEVEL_MAX = NTLogLevel.CRITICAL;
         }

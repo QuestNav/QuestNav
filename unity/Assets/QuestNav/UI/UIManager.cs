@@ -1,5 +1,8 @@
+using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
+using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Utils;
@@ -15,25 +18,17 @@ namespace QuestNav.UI
     /// </summary>
     public interface IUIManager
     {
-        /// <summary>
-        /// Gets the current IP address
-        /// </summary>
-        string IPAddress { get; }
-
-        /// <summary>
-        /// Gets the current team number
-        /// </summary>
-        int TeamNumber { get; }
-
+        Task initializeAsync();
+        
         /// <summary>
         /// Updates the connection state and ip address in the UI
         /// </summary>
-        void UIPeriodic();
+        void uiPeriodic();
 
         /// <summary>
         /// Updates the position and rotation text in the UI.
         /// </summary>
-        void UpdatePositionText(Vector3 position, Quaternion rotation);
+        void updatePositionText(Vector3 position, Quaternion rotation);
     }
 
     /// <summary>
@@ -42,6 +37,10 @@ namespace QuestNav.UI
     public class UIManager : IUIManager
     {
         #region Fields
+        /// <summary>
+        /// Reference to the ConfigManager to handle config changes
+        /// </summary>
+        private IConfigManager configManager;
         /// <summary>
         /// Reference to NetworkTables connection
         /// </summary>
@@ -106,16 +105,22 @@ namespace QuestNav.UI
         /// Current team number
         /// </summary>
         private int teamNumber;
+        
+        /// <summary>
+        /// Current auto start value
+        /// </summary>
+        private bool autoStartValue;
 
         /// <summary>
         /// Holds the detected local IP address of the HMD
         /// </summary>
-        private string myAddressLocal = "0.0.0.0";
+        private string ipAddress = "0.0.0.0";
         #endregion
 
         /// <summary>
         /// Initializes the UI manager with required UI components.
         /// </summary>
+        /// <param name="configManager">Config manager for writing config changes</param>
         /// <param name="networkTableConnection">Network connection reference for updating state</param>
         /// <param name="teamInput">Input field for team number</param>
         /// <param name="ipAddressText">Text for IP address display</param>
@@ -129,6 +134,7 @@ namespace QuestNav.UI
         /// <param name="teamUpdateButton">Button for updating team number</param>
         /// <param name="autoStartToggle">Button for turning auto start on/off</param>
         public UIManager(
+            IConfigManager configManager,
             INetworkTableConnection networkTableConnection,
             TMP_InputField teamInput,
             TMP_Text ipAddressText,
@@ -143,6 +149,7 @@ namespace QuestNav.UI
             Toggle autoStartToggle
         )
         {
+            this.configManager = configManager;
             this.networkTableConnection = networkTableConnection;
             this.teamInput = teamInput;
             this.ipAddressText = ipAddressText;
@@ -155,55 +162,29 @@ namespace QuestNav.UI
             this.zRotText = zRotText;
             this.teamUpdateButton = teamUpdateButton;
             this.autoStartToggle = autoStartToggle;
+            
+            teamUpdateButton.onClick.AddListener(setTeamNumberFromUIAsync);
+            autoStartToggle.onValueChanged.AddListener(setAutoStartValueFromUIAsync);
 
-            // Load team number from WebServerConstants (synced with web config)
-            teamNumber = WebServerConstants.webConfigTeamNumber;
-            teamInput.text = teamNumber.ToString();
-            setTeamNumberFromUI();
-
-            teamUpdateButton.onClick.AddListener(setTeamNumberFromUI);
-
-            // Load auto start from WebServerConstants (synced with web config)
-            autoStartToggle.isOn = WebServerConstants.autoStartOnBoot;
-
-            autoStartToggle.onValueChanged.AddListener(updateAutoStart);
+            // Attach local methods to config event methods
+            configManager.onTeamNumberChanged += onTeamNumberChanged;
+            configManager.onDebugIpOverrideChanged += onDebugIpOverrideChanged;
+            configManager.onEnableAutoStartOnBootChanged += onEnableAutoStartOnBootChanged;
         }
 
-        #region Properties
-        /// <summary>
-        /// Gets the current team number.
-        /// </summary>
-        public int TeamNumber => teamNumber;
-
-        /// <summary>
-        /// Gets the current IP address.
-        /// </summary>
-        public string IPAddress => myAddressLocal;
-        #endregion
-
-        #region Setters
-        /// <summary>
-        /// Updates the team number based on user input and triggers an asynchronous connection reset.
-        /// </summary>
-        private void setTeamNumberFromUI()
+        public async Task initializeAsync()
         {
-            QueuedLogger.Log("Updating Team Number");
-            teamNumber = int.Parse(teamInput.text);
-
-            // Update WebServerConstants (synced with web config)
-            WebServerConstants.webConfigTeamNumber = teamNumber;
-
-            updateTeamNumberInputBoxPlaceholder(teamNumber);
-
-            // Update the connection with new team number
-            networkTableConnection.UpdateTeamNumber(teamNumber);
+            // Load saved values from config
+            onTeamNumberChanged(await configManager.getTeamNumberAsync());
+            onEnableAutoStartOnBootChanged(await configManager.getEnableAutoStartOnBootAsync());
         }
 
+        #region Event Subscribers
         /// <summary>
         /// Sets the input box placeholder text with the current team number.
         /// </summary>
         /// <param name="teamNumber">The team number to display</param>
-        private void updateTeamNumberInputBoxPlaceholder(int teamNumber)
+        private void onTeamNumberChanged(int teamNumber)
         {
             teamInput.text = "";
             var placeholderText = teamInput.placeholder as TextMeshProUGUI;
@@ -213,6 +194,55 @@ namespace QuestNav.UI
             }
         }
 
+        private void onDebugIpOverrideChanged(string ipOverride)
+        {
+            // No handling right now
+        }
+
+        private void onEnableAutoStartOnBootChanged(bool newValue)
+        {
+            autoStartToggle.isOn = newValue;
+        }
+        #endregion
+        
+        #region Setters
+        /// <summary>
+        /// Updates the team number based on user input and saves to config
+        /// </summary>
+        private async void setTeamNumberFromUIAsync()
+        {
+            QueuedLogger.Log("Updating Team Number from UI");
+            teamNumber = int.Parse(teamInput.text);
+
+            try
+            {
+                // Update config
+                await configManager.setTeamNumberAsync(teamNumber);
+            }
+            catch (Exception e)
+            {
+                QueuedLogger.LogException(e);
+            }
+        }
+
+        private async void setAutoStartValueFromUIAsync(bool newValue)
+        {
+            QueuedLogger.Log("Updating Auto Start Value from UI");
+            autoStartValue = newValue;
+
+            try
+            {
+                // Update config
+                await configManager.setEnableAutoStartOnBootAsync(autoStartValue);
+            }
+            catch (Exception e)
+            {
+                QueuedLogger.LogException(e);
+            }
+        }
+        #endregion
+
+        #region Periodic
         /// <summary>
         /// Updates the default IP address shown in the UI with the current HMD IP address
         /// </summary>
@@ -224,17 +254,17 @@ namespace QuestNav.UI
             {
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    myAddressLocal = ip.ToString();
+                    ipAddress = ip.ToString();
                     if (ipAddressText is not TextMeshProUGUI ipText)
                         return;
-                    if (myAddressLocal == "127.0.0.1")
+                    if (ipAddress == "127.0.0.1")
                     {
                         ipText.text = "No Adapter Found";
                         ipText.color = Color.red;
                     }
                     else
                     {
-                        ipText.text = myAddressLocal;
+                        ipText.text = ipAddress;
                         ipText.color = Color.green;
                     }
                 }
@@ -250,7 +280,7 @@ namespace QuestNav.UI
             TextMeshProUGUI conText = conStateText as TextMeshProUGUI;
             if (conText is null)
                 return;
-            if (networkTableConnection.IsConnected)
+            if (networkTableConnection.isConnected)
             {
                 conText.text = "Connected to NT4";
                 conText.color = Color.green;
@@ -260,109 +290,23 @@ namespace QuestNav.UI
                 conText.text = "Warning! Default Team Number still set! Trying to connect!";
                 conText.color = Color.red;
             }
-            else if (networkTableConnection.IsReadyToConnect)
+            else if (networkTableConnection.isReadyToConnect)
             {
                 conText.text = "Trying to connect to NT4";
                 conText.color = Color.yellow;
             }
         }
 
-        /// <summary>
-        /// Updates the auto start preference.
-        /// Saves to both WebServerConstants (synced with web config) and PlayerPrefs (for Android boot receiver).
-        /// </summary>
-        /// <param name="newValue">new AutoStart value</param>
-        void updateAutoStart(bool newValue)
-        {
-            // Update WebServerConstants (synced with web config)
-            WebServerConstants.autoStartOnBoot = newValue;
-
-            // Save to PlayerPrefs for Android BootReceiver
-            // BootReceiver reads "AutoStart" from PlayerPrefs to determine if app should start on boot
-            PlayerPrefs.SetInt("AutoStart", newValue ? 1 : 0);
-            PlayerPrefs.Save();
-        }
-
-        public void UIPeriodic()
+        public void uiPeriodic()
         {
             updateConStateText();
             updateIPAddressText();
-            syncFromWebServerConstants();
-        }
-
-        private string lastDebugIPOverride = "";
-
-        /// <summary>
-        /// Syncs UI elements with WebServerConstants values (updated via web config)
-        /// </summary>
-        private void syncFromWebServerConstants()
-        {
-            // Check if debug IP override changed - triggers reconnection
-            if (lastDebugIPOverride != WebServerConstants.debugNTServerAddressOverride)
-            {
-                string newDebugIPOverride = WebServerConstants.debugNTServerAddressOverride ?? "";
-
-                // Only trigger reconnection if the value is empty (cleared) or a valid IP
-                bool shouldReconnect =
-                    string.IsNullOrEmpty(newDebugIPOverride)
-                    || IsValidIPAddress(newDebugIPOverride);
-
-                if (shouldReconnect)
-                {
-                    lastDebugIPOverride = newDebugIPOverride;
-                    // Trigger reconnection with current team number (which checks debug override internally)
-                    networkTableConnection.UpdateTeamNumber(teamNumber);
-                }
-            }
-
-            // Sync team number if changed via web interface
-            if (teamNumber != WebServerConstants.webConfigTeamNumber)
-            {
-                teamNumber = WebServerConstants.webConfigTeamNumber;
-                teamInput.text = teamNumber.ToString();
-                updateTeamNumberInputBoxPlaceholder(teamNumber);
-                networkTableConnection.UpdateTeamNumber(teamNumber);
-            }
-
-            // Sync auto-start toggle if changed via web interface
-            if (autoStartToggle.isOn != WebServerConstants.autoStartOnBoot)
-            {
-                autoStartToggle.SetIsOnWithoutNotify(WebServerConstants.autoStartOnBoot);
-
-                // Also save to PlayerPrefs to keep BootReceiver in sync
-                PlayerPrefs.SetInt("AutoStart", WebServerConstants.autoStartOnBoot ? 1 : 0);
-                PlayerPrefs.Save();
-            }
-        }
-
-        /// <summary>
-        /// Validates if a string is a valid IPv4 address
-        /// </summary>
-        private bool IsValidIPAddress(string ipString)
-        {
-            if (string.IsNullOrEmpty(ipString))
-                return false;
-
-            string[] parts = ipString.Split('.');
-            if (parts.Length != 4)
-                return false;
-
-            foreach (string part in parts)
-            {
-                if (!int.TryParse(part, out int num))
-                    return false;
-
-                if (num < 0 || num > 255)
-                    return false;
-            }
-
-            return true;
         }
 
         /// <summary>
         /// Updates the connection state text display.
         /// </summary>
-        public void UpdatePositionText(Vector3 position, Quaternion rotation)
+        public void updatePositionText(Vector3 position, Quaternion rotation)
         {
             TextMeshProUGUI xText = posXText as TextMeshProUGUI;
             TextMeshProUGUI yText = posYText as TextMeshProUGUI;

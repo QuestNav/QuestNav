@@ -139,7 +139,7 @@ namespace QuestNav.Commands.Commands
                 // (web-initiated resets don't use NetworkTables)
                 if (networkTableConnection != null)
                 {
-                    networkTableConnection.SendCommandSuccessResponse(receivedCommand.CommandId);
+                    networkTableConnection.sendCommandSuccessResponse(receivedCommand.CommandId);
                 }
                 QueuedLogger.Log("Pose reset completed successfully");
             }
@@ -148,7 +148,7 @@ namespace QuestNav.Commands.Commands
                 // Send error response only if NetworkTables connection exists
                 if (networkTableConnection != null)
                 {
-                    networkTableConnection.SendCommandErrorResponse(
+                    networkTableConnection.sendCommandErrorResponse(
                         receivedCommand.CommandId,
                         "Failed to get valid pose data (invalid)"
                     );

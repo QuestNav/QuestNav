@@ -1,5 +1,7 @@
-﻿using QuestNav.Commands;
+﻿using System;
+using QuestNav.Commands;
 using QuestNav.Commands.Commands;
+using QuestNav.Config;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.UI;
@@ -186,6 +188,11 @@ namespace QuestNav.Core
         private ITagAlongUI tagAlongUI;
 
         /// <summary>
+        /// Reference to the database manager to manage setting changes
+        /// </summary>
+        private IConfigManager configManager;
+        
+        /// <summary>
         /// Reference to the web server manager component
         /// </summary>
         private IWebServerManager webServerManager;
@@ -198,17 +205,33 @@ namespace QuestNav.Core
         /// <summary>
         /// Initializes the connection and UI components
         /// </summary>
-        private void Awake()
+        private async void Awake()
         {
             // Initializes components
-            networkTableConnection = new NetworkTableConnection();
-            commandProcessor = new CommandProcessor(
-                networkTableConnection,
-                vrCamera,
-                vrCameraRoot,
-                resetTransform
-            );
+            configManager = new ConfigManager();
+            // Use try-catch here due to async
+            try
+            {
+                await configManager.initializeAsync();
+            }
+            catch(Exception e)
+            {
+                QueuedLogger.LogException(e);
+            }
+            
+            networkTableConnection = new NetworkTableConnection(configManager);
+            // Use try-catch here due to async
+            try
+            {
+                await networkTableConnection.initializeAsync();
+            }
+            catch (Exception e)
+            {
+                QueuedLogger.LogException(e);
+            }
+            
             uiManager = new UIManager(
+                configManager,
                 networkTableConnection,
                 teamInput,
                 ipAddressText,
@@ -222,18 +245,34 @@ namespace QuestNav.Core
                 teamUpdateButton,
                 autoStartToggle
             );
-            tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
-
-            // Initialize web server manager with settings from WebServerConstants
-            webServerManager = new WebServerManager(
+            // Use try-catch here due to async
+            try
+            {
+                await uiManager.initializeAsync();
+            }
+            catch (Exception e)
+            {
+                QueuedLogger.LogException(e);
+            }
+            
+            commandProcessor = new CommandProcessor(
+                networkTableConnection,
                 vrCamera,
                 vrCameraRoot,
-                this,
-                WebServerConstants.serverPort,
-                WebServerConstants.enableCORSDevMode,
-                ExecutePoseResetToOrigin // Pass callback for web-initiated pose resets
+                resetTransform
             );
-            webServerManager.Initialize();
+            tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
+            
+            // // Initialize web server manager with settings from WebServerConstants
+            // webServerManager = new WebServerManager(
+            //     vrCamera,
+            //     vrCameraRoot,
+            //     this,
+            //     WebServerConstants.serverPort,
+            //     WebServerConstants.enableCORSDevMode,
+            //     ExecutePoseResetToOrigin // Pass callback for web-initiated pose resets
+            // );
+            // webServerManager.Initialize();
 
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
@@ -261,7 +300,7 @@ namespace QuestNav.Core
 
             // Convert Unity coordinates to FRC field coordinates and publish to NetworkTables
             // The robot subscribes to this data to know where the headset is on the field
-            networkTableConnection.PublishFrameData(frameCount, timeStamp, position, rotation);
+            networkTableConnection.publishFrameData(frameCount, timeStamp, position, rotation);
 
             // Check for and execute any pending commands from the robot
             // Commands include pose resets, calibration requests, etc.
@@ -286,27 +325,27 @@ namespace QuestNav.Core
         {
             // Process and display NetworkTables internal messages (connection status, errors, etc.)
             // This helps with debugging connection issues without impacting performance
-            networkTableConnection.LoggerPeriodic();
+            networkTableConnection.loggerPeriodic();
 
             // Update UI elements like connection status, IP address display, team number validation
             // UI updates don't need to be real-time, 3Hz provides smooth visual feedback
-            uiManager.UIPeriodic();
-            uiManager.UpdatePositionText(position, rotation);
+            uiManager.uiPeriodic();
+            uiManager.updatePositionText(position, rotation);
 
             // Monitor device health: tracking status, battery level, tracking loss events
             // This data helps diagnose issues but doesn't need high-frequency updates
             UpdateDeviceData();
-            networkTableConnection.PublishDeviceData(
+            networkTableConnection.publishDeviceData(
                 currentlyTracking,
                 trackingLostEvents,
                 batteryPercent
             );
 
             // Update status provider for web interface
-            UpdateStatusProvider();
+            // UpdateStatusProvider();
 
             // Update web server manager periodic operations
-            webServerManager?.Periodic();
+            // webServerManager?.Periodic();
 
             // Flush queued log messages to Unity console
             // Batching log output improves performance and reduces console spam
@@ -319,6 +358,7 @@ namespace QuestNav.Core
         /// </summary>
         private void OnDestroy()
         {
+            configManager.closeAsync();
             webServerManager?.Shutdown();
         }
 
@@ -443,47 +483,47 @@ namespace QuestNav.Core
         /// Updates the status provider with current runtime data for the web interface.
         /// Converts Unity coordinates to FRC robot coordinates before passing to StatusProvider.
         /// </summary>
-        private void UpdateStatusProvider()
-        {
-            // Convert Unity coordinates to FRC robot coordinates for web interface display
-            var frcPose = Conversions.UnityToFrc3d(position, rotation);
-
-            // Convert protobuf pose to Unity types for StatusProvider
-            var (frcPosition, frcRotation) = Conversions.ProtobufPose3dToUnity(frcPose);
-
-            // Get robot IP address from configuration
-            string robotIp = "";
-            if (!string.IsNullOrEmpty(WebServerConstants.debugNTServerAddressOverride))
-            {
-                // Using debug IP override
-                robotIp = WebServerConstants.debugNTServerAddressOverride;
-            }
-            else if (uiManager.TeamNumber > 0)
-            {
-                // Calculate from team number using FRC convention
-                int team = uiManager.TeamNumber;
-                robotIp = $"10.{team / 100}.{team % 100}.2"; // roboRIO-2 standard address
-            }
-
-            // Calculate current FPS
-            float currentFps = 1f / Time.deltaTime;
-
-            // Update web server manager with current status
-            webServerManager?.UpdateStatus(
-                frcPosition,
-                frcRotation,
-                currentlyTracking,
-                trackingLostEvents,
-                SystemInfo.batteryLevel,
-                SystemInfo.batteryStatus,
-                networkTableConnection.IsConnected,
-                uiManager.IPAddress,
-                uiManager.TeamNumber,
-                robotIp,
-                currentFps,
-                Time.frameCount
-            );
-        }
+        // private void UpdateStatusProvider()
+        // {
+        //     // Convert Unity coordinates to FRC robot coordinates for web interface display
+        //     var frcPose = Conversions.UnityToFrc3d(position, rotation);
+        //
+        //     // Convert protobuf pose to Unity types for StatusProvider
+        //     var (frcPosition, frcRotation) = Conversions.ProtobufPose3dToUnity(frcPose);
+        //
+        //     // Get robot IP address from configuration
+        //     string robotIp = "";
+        //     if (!string.IsNullOrEmpty(WebServerConstants.debugNTServerAddressOverride))
+        //     {
+        //         // Using debug IP override
+        //         robotIp = WebServerConstants.debugNTServerAddressOverride;
+        //     }
+        //     else if (uiManager.TeamNumber > 0)
+        //     {
+        //         // Calculate from team number using FRC convention
+        //         int team = uiManager.TeamNumber;
+        //         robotIp = $"10.{team / 100}.{team % 100}.2"; // roboRIO-2 standard address
+        //     }
+        //
+        //     // Calculate current FPS
+        //     float currentFps = 1f / Time.deltaTime;
+        //
+        //     // Update web server manager with current status
+        //     webServerManager?.UpdateStatus(
+        //         frcPosition,
+        //         frcRotation,
+        //         currentlyTracking,
+        //         trackingLostEvents,
+        //         SystemInfo.batteryLevel,
+        //         SystemInfo.batteryStatus,
+        //         networkTableConnection.isConnected,
+        //         uiManager.IPAddress,
+        //         uiManager.TeamNumber,
+        //         robotIp,
+        //         currentFps,
+        //         Time.frameCount
+        //     );
+        // }
         #endregion
     }
 }

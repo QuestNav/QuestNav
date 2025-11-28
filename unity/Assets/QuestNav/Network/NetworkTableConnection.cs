@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Network;
@@ -16,19 +18,21 @@ namespace QuestNav.Network
         /// <summary>
         /// Gets whether the connection is currently established.
         /// </summary>
-        bool IsConnected { get; }
+        bool isConnected { get; }
 
         /// <summary>
         /// Gets whether the connection is ready to connect.
         /// </summary>
         /// <returns>true when either an IP or team number has been set</returns>
-        bool IsReadyToConnect { get; }
+        bool isReadyToConnect { get; }
 
         /// <summary>
         /// Gets the current NT time
         /// </summary>
-        long Now { get; }
+        long ntNow { get; }
 
+        public Task initializeAsync();
+        
         /// <summary>
         /// Publishes frame data to NetworkTables.
         /// </summary>
@@ -36,7 +40,7 @@ namespace QuestNav.Network
         /// <param name="timeStamp">Current timestamp</param>
         /// <param name="position">Current field-relative position of the Quest headset</param>
         /// <param name="rotation">The rotation of the quest headset</param>
-        void PublishFrameData(
+        void publishFrameData(
             int frameCount,
             double timeStamp,
             Vector3 position,
@@ -49,46 +53,44 @@ namespace QuestNav.Network
         /// <param name="currentlyTracking">Is the quest tracking currently</param>
         /// <param name="trackingLostCounter">Number of tracking lost events this session</param>
         /// <param name="batteryPercent">Current battery percentage</param>
-        void PublishDeviceData(bool currentlyTracking, int trackingLostCounter, int batteryPercent);
-
-        /// <summary>
-        /// Updates the team number.
-        /// </summary>
-        /// <param name="teamNumber">The team number</param>
-        void UpdateTeamNumber(int teamNumber);
+        void publishDeviceData(bool currentlyTracking, int trackingLostCounter, int batteryPercent);
 
         /// <summary>
         /// Gets all command requests from the robot since the last read, or an empty array if none available
         /// </summary>
         /// <returns>All command requests since the last read</returns>
-        TimestampedValue<ProtobufQuestNavCommand>[] GetCommandRequests();
+        TimestampedValue<ProtobufQuestNavCommand>[] getCommandRequests();
 
         /// <summary>
         /// Sends a command processing success response back to the robot
         /// </summary>
         /// <param name="commandId">command_id</param>
-        void SendCommandSuccessResponse(uint commandId);
+        void sendCommandSuccessResponse(uint commandId);
 
         /// <summary>
         /// Sends a command processing error response back to the robot
         /// </summary>
         /// <param name="commandId">command_id</param>
         /// <param name="errorMessage">error message</param>
-        void SendCommandErrorResponse(uint commandId, string errorMessage);
+        void sendCommandErrorResponse(uint commandId, string errorMessage);
 
         /// <summary>
         /// Processes and logs NetworkTables internal messages
         /// </summary>
-        void LoggerPeriodic();
+        void loggerPeriodic();
     }
-}
-
-/// <summary>
+    
+    /// <summary>
 /// Manages NetworkTables connections for communication with an FRC robot.
 /// </summary>
-public class NetworkTableConnection : INetworkTableConnection
+    public class NetworkTableConnection : INetworkTableConnection
 {
     #region Fields
+    /// <summary>
+    /// ConfigManager for reading team number and IP override
+    /// </summary>
+    private IConfigManager configManager;
+    
     /// <summary>
     /// NetworkTables connection for FRC data communication
     /// </summary>
@@ -146,18 +148,14 @@ public class NetworkTableConnection : INetworkTableConnection
     /// Uses Protocol Buffers for efficient, versioned message serialization.
     /// This provides type safety, backward compatibility, and compact encoding.
     /// </summary>
-    public NetworkTableConnection()
+    public NetworkTableConnection(
+        IConfigManager configManager)
     {
+        this.configManager = configManager;
+        
         // Create NetworkTables instance with QuestNav namespace
         // This isolates QuestNav topics from other NetworkTables data
         ntInstance = new NtInstance(QuestNavConstants.Topics.NT_BASE_PATH);
-
-        // Set up logging to capture NetworkTables internal messages
-        // Helps diagnose connection issues, protocol errors, etc.
-        ntInstanceLogger = ntInstance.CreateLogger(
-            QuestNavConstants.Logging.NT_LOG_LEVEL_MIN,
-            QuestNavConstants.Logging.NT_LOG_LEVEL_MAX
-        );
 
         /*
          * PUBLISHER SETUP - Quest sends data TO robot
@@ -167,7 +165,7 @@ public class NetworkTableConnection : INetworkTableConnection
          * - Publisher options: Reliability, frequency, etc.
          */
 
-        // High-frequency pose data (100Hz) - robot needs this for real-time tracking
+        // High-frequency pose data (120Hz) - robot needs this for real-time tracking
         frameDataPublisher = ntInstance.GetProtobufPublisher<ProtobufQuestNavFrameData>(
             QuestNavConstants.Topics.FRAME_DATA,
             "questnav.protos.data.ProtobufQuestNavFrameData",
@@ -203,6 +201,19 @@ public class NetworkTableConnection : INetworkTableConnection
                 PollStorage = 20,
             }
         );
+        
+        // Attach local methods to config event methods
+        configManager.onTeamNumberChanged += onTeamNumberChanged;
+        configManager.onDebugIpOverrideChanged += onDebugIpOverrideChanged;
+        configManager.onEnableDebugLoggingChanged += onEnableDebugLoggingChanged;
+    }
+
+    public async Task initializeAsync()
+    {
+        // Load saved values from config
+        onTeamNumberChanged(await configManager.getTeamNumberAsync());
+        onDebugIpOverrideChanged(await configManager.getDebugIpOverrideAsync());
+        onEnableDebugLoggingChanged(await configManager.getEnableDebugLoggingAsync());
     }
 
     #region Properties
@@ -210,52 +221,71 @@ public class NetworkTableConnection : INetworkTableConnection
     /// <summary>
     /// Gets whether the connection is currently established.
     /// </summary>
-    public bool IsConnected => ntInstance.IsConnected();
+    public bool isConnected => ntInstance.IsConnected();
 
     /// <summary>
     /// Gets whether the connection is currently established.
     /// </summary>
-    public bool IsReadyToConnect => teamNumberSet || ipAddressSet;
+    public bool isReadyToConnect => teamNumberSet || ipAddressSet;
 
     /// <summary>
     /// Gets the current NT time
     /// </summary>
-    public long Now => ntInstance.Now();
+    public long ntNow => ntInstance.Now();
+    #endregion
 
+    #region Event Subscribers
     /// <summary>
-    /// Updates the team number and configures the NetworkTables connection.
-    /// Checks WebServerConstants.debugNTServerAddressOverride - if set, uses direct IP connection instead of team number.
-    /// NetworkTables automatically handles reconnection when server configuration changes.
+    /// Changes to team number resolution mode and triggers an asynchronous connection reset
     /// </summary>
-    /// <param name="teamNumber">The FRC team number (ignored if debug IP override is set)</param>
-    public void UpdateTeamNumber(int teamNumber)
+    /// <param name="teamNumber">The team number to resolve</param>
+    private void onTeamNumberChanged(int teamNumber)
     {
-        // Check if using debug IP override or standard team number mode
-        if (string.IsNullOrEmpty(WebServerConstants.debugNTServerAddressOverride))
+        // Skip if -1 (indicates debug IP override in use)
+        if (teamNumber.Equals(-1)) return;
+        
+        // Standard mode: Use team number to resolve robot address
+        QueuedLogger.Log($"Setting Team number to {teamNumber}");
+        ntInstance.SetTeamNumber(teamNumber, QuestNavConstants.Network.NT_SERVER_PORT);
+        teamNumberSet = true;
+        ipAddressSet = false;
+    }
+    private void onDebugIpOverrideChanged(string ipOverride)
+    {
+        // Skip if empty (indicates team number being used)
+        if (string.IsNullOrEmpty(ipOverride)) return;
+        
+        // Debug mode: Use direct IP address (bypasses team number resolution)
+        QueuedLogger.LogWarning(
+            $"[DEBUG MODE] Using IP Override: {ipOverride} - This should only be used for debugging!"
+        );
+        ntInstance.SetAddresses(
+            new (string addr, int port)[]
+            {
+                (
+                    ipOverride,
+                    QuestNavConstants.Network.NT_SERVER_PORT
+                ),
+            }
+        );
+        ipAddressSet = true;
+        teamNumberSet = false;
+    }
+    private void onEnableDebugLoggingChanged(bool enableDebugLogging)
+    {
+        if (enableDebugLogging)
         {
-            // Standard mode: Use team number to resolve robot address
-            QueuedLogger.Log($"Setting Team number to {teamNumber}");
-            ntInstance.SetTeamNumber(teamNumber, WebServerConstants.ntServerPort);
-            teamNumberSet = true;
-            ipAddressSet = false;
+            ntInstanceLogger = ntInstance.CreateLogger(
+                QuestNavConstants.Logging.NT_LOG_LEVEL_MIN_DEBUG,
+                QuestNavConstants.Logging.NT_LOG_LEVEL_MAX
+            );
         }
         else
         {
-            // Debug mode: Use direct IP address (bypasses team number resolution)
-            QueuedLogger.LogWarning(
-                $"[DEBUG MODE] Using IP Override: {WebServerConstants.debugNTServerAddressOverride} - This should only be used for debugging!"
+            ntInstanceLogger = ntInstance.CreateLogger(
+                QuestNavConstants.Logging.NT_LOG_LEVEL_MIN_STANDARD,
+                QuestNavConstants.Logging.NT_LOG_LEVEL_MAX
             );
-            ntInstance.SetAddresses(
-                new (string addr, int port)[]
-                {
-                    (
-                        WebServerConstants.debugNTServerAddressOverride,
-                        WebServerConstants.ntServerPort
-                    ),
-                }
-            );
-            ipAddressSet = true;
-            teamNumberSet = false;
         }
     }
     #endregion
@@ -274,7 +304,7 @@ public class NetworkTableConnection : INetworkTableConnection
     /// <param name="timeStamp">Unity time stamp</param>
     /// <param name="position">Current VR headset position</param>
     /// <param name="rotation">Current VR headset rotation</param>
-    public void PublishFrameData(
+    public void publishFrameData(
         int frameCount,
         double timeStamp,
         Vector3 position,
@@ -300,7 +330,7 @@ public class NetworkTableConnection : INetworkTableConnection
     /// <param name="currentlyTracking">Whether the headset is currently tracking</param>
     /// <param name="trackingLostCounter">Number of times tracking was lost this session</param>
     /// <param name="batteryPercent">Current battery percentage</param>
-    public void PublishDeviceData(
+    public void publishDeviceData(
         bool currentlyTracking,
         int trackingLostCounter,
         int batteryPercent
@@ -331,7 +361,7 @@ public class NetworkTableConnection : INetworkTableConnection
     /// Gets all command requests from the robot since the last read, or an empty array if none available
     /// </summary>
     /// <returns>All command requests since the last read</returns>
-    public TimestampedValue<ProtobufQuestNavCommand>[] GetCommandRequests()
+    public TimestampedValue<ProtobufQuestNavCommand>[] getCommandRequests()
     {
         return commandRequestSubscriber.ReadQueueValues();
     }
@@ -349,7 +379,7 @@ public class NetworkTableConnection : INetworkTableConnection
     /// Sends a command processing success response back to the robot
     /// </summary>
     /// <param name="commandId">command_id</param>
-    public void SendCommandSuccessResponse(uint commandId)
+    public void sendCommandSuccessResponse(uint commandId)
     {
         SetCommandResponse(
             new ProtobufQuestNavCommandResponse { CommandId = commandId, Success = true }
@@ -361,7 +391,7 @@ public class NetworkTableConnection : INetworkTableConnection
     /// </summary>
     /// <param name="commandId">command_id</param>
     /// <param name="errorMessage">error message</param>
-    public void SendCommandErrorResponse(uint commandId, string errorMessage)
+    public void sendCommandErrorResponse(uint commandId, string errorMessage)
     {
         SetCommandResponse(
             new ProtobufQuestNavCommandResponse
@@ -381,26 +411,19 @@ public class NetworkTableConnection : INetworkTableConnection
     /// Processes and logs any pending NetworkTables internal messages.
     /// Respects the enableDebugLogging tunable - when disabled, only WARNING and above are logged.
     /// </summary>
-    public void LoggerPeriodic()
+    public void loggerPeriodic()
     {
         var messages = ntInstanceLogger.PollForMessages();
         if (messages == null)
             return;
 
-        // Determine minimum log level based on debug logging setting
-        int minLevel = WebServerConstants.enableDebugLogging
-            ? QuestNavConstants.Logging.NTLogLevel.DEBUG1 // Show all debug messages
-            : QuestNavConstants.Logging.NTLogLevel.WARNING; // Only show warnings and errors
-
         foreach (var message in messages)
         {
-            // Filter messages based on log level
-            if (message.level >= minLevel)
-            {
-                QueuedLogger.Log($"[NTCoreInternal/{message.filename}] {message.message}");
-            }
+            QueuedLogger.Log($"[NTCoreInternal/{message.filename}] {message.message}");
         }
     }
 
     #endregion
 }
+}
+

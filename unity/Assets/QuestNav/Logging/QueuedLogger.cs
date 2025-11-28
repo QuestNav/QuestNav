@@ -202,17 +202,9 @@ namespace QuestNav.Utils
                     case LogLevel.Error:
                         if (entry.Exception != null)
                         {
+                            // Log the custom message with prefix and count
+                            Debug.LogError(entry.ToString());
                             Debug.LogException(entry.Exception);
-                            // If multiple identical exceptions were queued, log an additional error message.
-                            if (entry.Count > 1)
-                            {
-                                string prefix = string.IsNullOrEmpty(entry.CallingFileName)
-                                    ? ""
-                                    : $"[{entry.CallingFileName}] ";
-                                Debug.LogError(
-                                    $"{prefix}{entry.Message} (repeated {entry.Count} times)"
-                                );
-                            }
                         }
                         else
                         {

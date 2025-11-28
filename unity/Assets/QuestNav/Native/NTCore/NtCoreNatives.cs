@@ -278,7 +278,8 @@ namespace QuestNav.Native.NTCore
             uint topic,
             NtType type,
             WpiString* typeStr,
-            NativePubSubOptions* options);
+            NativePubSubOptions* options
+        );
 
         [DllImport("ntcore")]
         public static extern void NT_StartClient4(uint inst, WpiString* identity);
@@ -330,7 +331,11 @@ namespace QuestNav.Native.NTCore
         public static extern int NT_SetString(uint publisher, long time, WpiString* value);
 
         [DllImport("ntcore")]
-        public static extern void NT_GetString(uint publisher, WpiString* defaultValue, WpiString* value);
+        public static extern void NT_GetString(
+            uint publisher,
+            WpiString* defaultValue,
+            WpiString* value
+        );
 
         [DllImport("ntcore")]
         public static extern int NT_SetStringArray(

@@ -109,85 +109,132 @@ namespace QuestNav.Native.NTCore
 
         public BooleanPublisher GetBooleanPublisher(string name, PubSubOptions options)
         {
-            var pubHandle = Publish(name, NtType.NT_STRING, GetTypeString(NtType.NT_STRING), options);
-            return new BooleanPublisher(pubHandle);   
+            var pubHandle = Publish(
+                name,
+                NtType.NT_STRING,
+                GetTypeString(NtType.NT_STRING),
+                options
+            );
+            return new BooleanPublisher(pubHandle);
         }
 
         public DoubleSubscriber GetDoubleSubscriber(string name, PubSubOptions options)
         {
-            var pubHandle = Subscribe(name, NtType.NT_DOUBLE, GetTypeString(NtType.NT_DOUBLE), options);
+            var pubHandle = Subscribe(
+                name,
+                NtType.NT_DOUBLE,
+                GetTypeString(NtType.NT_DOUBLE),
+                options
+            );
             return new DoubleSubscriber(pubHandle);
         }
 
         public DoublePublisher GetDoublePublisher(string name, PubSubOptions options)
         {
-            var pubHandle = Publish(name, NtType.NT_DOUBLE, GetTypeString(NtType.NT_DOUBLE), options);
+            var pubHandle = Publish(
+                name,
+                NtType.NT_DOUBLE,
+                GetTypeString(NtType.NT_DOUBLE),
+                options
+            );
             return new DoublePublisher(pubHandle);
         }
 
         public IntegerPublisher GetIntegerPublisher(string name, PubSubOptions options)
         {
-            var pubHandle = Publish(name, NtType.NT_INTEGER, GetTypeString(NtType.NT_INTEGER), options);
+            var pubHandle = Publish(
+                name,
+                NtType.NT_INTEGER,
+                GetTypeString(NtType.NT_INTEGER),
+                options
+            );
             return new IntegerPublisher(pubHandle);
         }
 
         public IntegerSubscriber GetIntegerSubscriber(string name, PubSubOptions options)
         {
-            var subHandle = Subscribe(name, NtType.NT_INTEGER, GetTypeString(NtType.NT_INTEGER), options);
+            var subHandle = Subscribe(
+                name,
+                NtType.NT_INTEGER,
+                GetTypeString(NtType.NT_INTEGER),
+                options
+            );
             return new IntegerSubscriber(subHandle);
         }
 
         public FloatArrayPublisher GetFloatArrayPublisher(string name, PubSubOptions options)
         {
-            var pubHandle = Publish(name, NtType.NT_FLOAT_ARRAY, GetTypeString(NtType.NT_FLOAT_ARRAY), options);
+            var pubHandle = Publish(
+                name,
+                NtType.NT_FLOAT_ARRAY,
+                GetTypeString(NtType.NT_FLOAT_ARRAY),
+                options
+            );
             return new FloatArrayPublisher(pubHandle);
         }
 
         public FloatArraySubscriber GetFloatArraySubscriber(string name, PubSubOptions options)
         {
-            var subHandle = Subscribe(name, NtType.NT_FLOAT_ARRAY, GetTypeString(NtType.NT_FLOAT_ARRAY), options);
+            var subHandle = Subscribe(
+                name,
+                NtType.NT_FLOAT_ARRAY,
+                GetTypeString(NtType.NT_FLOAT_ARRAY),
+                options
+            );
             return new FloatArraySubscriber(subHandle);
         }
 
         public StringPublisher GetStringPublisher(string name, PubSubOptions options)
         {
-            var subHandle = Publish(name, NtType.NT_STRING, GetTypeString(NtType.NT_STRING), options);
+            var subHandle = Publish(
+                name,
+                NtType.NT_STRING,
+                GetTypeString(NtType.NT_STRING),
+                options
+            );
             return new StringPublisher(subHandle);
         }
 
         public StringSubscriber GetStringSubscriber(string name, PubSubOptions options)
         {
-            var subHandle = Subscribe(name, NtType.NT_STRING, GetTypeString(NtType.NT_STRING), options);
+            var subHandle = Subscribe(
+                name,
+                NtType.NT_STRING,
+                GetTypeString(NtType.NT_STRING),
+                options
+            );
             return new StringSubscriber(subHandle);
         }
 
         public StringEntry GetStringEntry(string name, PubSubOptions options)
         {
-            var subHandle = GetEntry(name, NtType.NT_STRING, GetTypeString(NtType.NT_STRING), options);
+            var subHandle = GetEntry(
+                name,
+                NtType.NT_STRING,
+                GetTypeString(NtType.NT_STRING),
+                options
+            );
             return new StringEntry(subHandle);
         }
 
         public StringArrayPublisher GetStringArrayPublisher(string name, PubSubOptions options)
         {
-            var subHandle = Subscribe(name, NtType.NT_STRING_ARRAY, GetTypeString(NtType.NT_STRING_ARRAY), options);
+            var subHandle = Subscribe(
+                name,
+                NtType.NT_STRING_ARRAY,
+                GetTypeString(NtType.NT_STRING_ARRAY),
+                options
+            );
             return new StringArrayPublisher(subHandle);
         }
 
-        public RawPublisher GetRawPublisher(
-            string name,
-            string typeString,
-            PubSubOptions options
-        )
+        public RawPublisher GetRawPublisher(string name, string typeString, PubSubOptions options)
         {
             var pubHandle = Publish(name, NtType.NT_RAW, typeString, options);
             return new RawPublisher(pubHandle);
         }
 
-        public RawSubscriber GetRawSubscriber(
-            string name,
-            string typeString,
-            PubSubOptions options
-        )
+        public RawSubscriber GetRawSubscriber(string name, string typeString, PubSubOptions options)
         {
             var subHandle = Subscribe(name, NtType.NT_RAW, typeString, options);
             return new RawSubscriber(subHandle);
@@ -277,7 +324,7 @@ namespace QuestNav.Native.NTCore
                 NtType.NT_FLOAT => "float",
                 NtType.NT_INTEGER_ARRAY => "int[]",
                 NtType.NT_FLOAT_ARRAY => "float",
-                _ => "raw"
+                _ => "raw",
             };
         }
 

@@ -1,7 +1,7 @@
 namespace QuestNav.Native.NTCore
 {
     public class BooleanSubscriber
-    {   
+    {
         private readonly uint handle;
 
         internal BooleanSubscriber(uint handle)

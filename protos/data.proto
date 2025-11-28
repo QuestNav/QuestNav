@@ -105,8 +105,25 @@ message ProtobufQuestNavFrameData {
   wpi.proto.ProtobufPose3d pose3d = 3;
 
   /*
-  * Indicates if QuestNav is actively tracking its position.
-  */
+   * Tracking status of the Quest device when this frame was captured.
+   * 
+   * true:  Quest is actively tracking and pose data is reliable
+   * false: Quest has lost tracking and pose data should not be trusted
+   * 
+   * When tracking is lost:
+   * - Pose data becomes stale and unreliable
+   * - Robot should switch to alternative localization methods
+   * - Movement should be limited or stopped for safety
+   * 
+   * Tracking can be recovered by:
+   * - Improving lighting conditions
+   * - Moving to area with more visual features
+   * - Reducing motion to allow system to re-initialize
+   * - Performing pose reset when tracking recovers
+   * 
+   * External systems should monitor this field and implement appropriate
+   * fallback behaviors when tracking is lost.
+   */
   bool isTracking = 4;
 }
 

@@ -151,8 +151,20 @@ namespace QuestNav.Native.NTCore
 
         public StringPublisher GetStringPublisher(string name, PubSubOptions options)
         {
-            var subHandle = Subscribe(name, NtType.NT_STRING, GetTypeString(NtType.NT_STRING), options);
+            var subHandle = Publish(name, NtType.NT_STRING, GetTypeString(NtType.NT_STRING), options);
             return new StringPublisher(subHandle);
+        }
+
+        public StringSubscriber GetStringSubscriber(string name, PubSubOptions options)
+        {
+            var subHandle = Subscribe(name, NtType.NT_STRING, GetTypeString(NtType.NT_STRING), options);
+            return new StringSubscriber(subHandle);
+        }
+
+        public StringEntry GetStringEntry(string name, PubSubOptions options)
+        {
+            var subHandle = GetEntry(name, NtType.NT_STRING, GetTypeString(NtType.NT_STRING), options);
+            return new StringEntry(subHandle);
         }
 
         public StringArrayPublisher GetStringArrayPublisher(string name, PubSubOptions options)
@@ -327,6 +339,30 @@ namespace QuestNav.Native.NTCore
                 WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
                 NativePubSubOptions nOptions = options.ToNative();
                 subHandle = NtCoreNatives.NT_Subscribe(topicHandle, type, &str, &nOptions);
+            }
+            return subHandle;
+        }
+
+        private uint GetEntry(string name, NtType type, string typeString, PubSubOptions options)
+        {
+            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
+
+            uint topicHandle;
+
+            fixed (byte* ptr = nameUtf8)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
+                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
+            }
+
+            byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
+
+            uint subHandle;
+            fixed (byte* ptr = typeStr)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
+                NativePubSubOptions nOptions = options.ToNative();
+                subHandle = NtCoreNatives.NT_GetEntryEx(topicHandle, type, &str, &nOptions);
             }
             return subHandle;
         }

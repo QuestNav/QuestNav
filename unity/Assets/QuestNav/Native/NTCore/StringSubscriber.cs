@@ -32,9 +32,15 @@ namespace QuestNav.Native.NTCore
                 }
                 else if (outValue.str != null)
                 {
-                    // Marshal string back to managed memory
-                    result = Encoding.UTF8.GetString(outValue.str, (int)outValue.len);
-                    NtCoreNatives.NT_FreeRaw(outValue.str);
+                    try
+                    {
+                        // Marshal string back to managed memory
+                        result = Encoding.UTF8.GetString(outValue.str, (int)outValue.len);
+                    }
+                    finally
+                    {
+                        NtCoreNatives.NT_FreeRaw(outValue.str);
+                    }
                 }
             }
 

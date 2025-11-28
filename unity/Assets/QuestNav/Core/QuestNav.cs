@@ -306,7 +306,6 @@ namespace QuestNav.Core
             // This data helps diagnose issues but doesn't need high-frequency updates
             UpdateDeviceData();
             networkTableConnection.PublishDeviceData(
-                currentlyTracking,
                 trackingLostEvents,
                 batteryPercent
             );

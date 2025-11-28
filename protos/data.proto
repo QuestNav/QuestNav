@@ -150,28 +150,6 @@ message ProtobufQuestNavDeviceData {
   int32 tracking_lost_counter = 1;
   
   /*
-   * Current tracking status of the Quest device.
-   * 
-   * true:  Quest is actively tracking and pose data is reliable
-   * false: Quest has lost tracking and pose data should not be trusted
-   * 
-   * When tracking is lost:
-   * - Pose data becomes stale and unreliable
-   * - Robot should switch to alternative localization methods
-   * - Movement should be limited or stopped for safety
-   * 
-   * Tracking can be recovered by:
-   * - Improving lighting conditions
-   * - Moving to area with more visual features
-   * - Reducing motion to allow system to re-initialize
-   * - Performing pose reset when tracking recovers
-   * 
-   * External systems should monitor this field and implement appropriate
-   * fallback behaviors when tracking is lost.
-   */
-  bool currently_tracking = 2;
-  
-  /*
    * Quest device battery level as a percentage (0-100).
    * 
    * This provides the current battery charge level of the Quest headset,

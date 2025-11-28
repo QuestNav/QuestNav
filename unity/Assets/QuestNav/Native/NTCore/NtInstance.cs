@@ -337,18 +337,8 @@ namespace QuestNav.Native.NTCore
         /// <param name="options">Publisher options.</param>
         private uint Publish(string name, NtType type, string typeString, PubSubOptions options)
         {
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
-
-            uint topicHandle;
-
-            fixed (byte* ptr = nameUtf8)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
-                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
-            }
-
+            uint topicHandle = GetTopic(name);
             byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
-
             uint pubHandle;
             fixed (byte* ptr = typeStr)
             {
@@ -368,18 +358,8 @@ namespace QuestNav.Native.NTCore
         /// <param name="options">Subscriber options.</param>
         private uint Subscribe(string name, NtType type, string typeString, PubSubOptions options)
         {
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
-
-            uint topicHandle;
-
-            fixed (byte* ptr = nameUtf8)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
-                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
-            }
-
+            uint topicHandle = GetTopic(name);
             byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
-
             uint subHandle;
             fixed (byte* ptr = typeStr)
             {
@@ -390,20 +370,17 @@ namespace QuestNav.Native.NTCore
             return subHandle;
         }
 
+        /// <summary>
+        /// Retrieves the entry handle for a specified entry in the system, identified by its name, type, and options.
+        /// </summary>
+        /// <param name="name">Topic name.</param>
+        /// <param name="type">NetworkTables value type.</param>
+        /// <param name="typeString">NetworkTables type string (e.g., "double", "int[]").</param>
+        /// <param name="options">Subscriber options.</param>
         private uint GetEntry(string name, NtType type, string typeString, PubSubOptions options)
         {
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
-
-            uint topicHandle;
-
-            fixed (byte* ptr = nameUtf8)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
-                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
-            }
-
+            uint topicHandle = GetTopic(name);
             byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
-
             uint subHandle;
             fixed (byte* ptr = typeStr)
             {
@@ -412,6 +389,20 @@ namespace QuestNav.Native.NTCore
                 subHandle = NtCoreNatives.NT_GetEntryEx(topicHandle, type, &str, &nOptions);
             }
             return subHandle;
+        }
+
+        private uint GetTopic(string name)
+        {
+            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
+            uint topicHandle;
+
+            fixed (byte* ptr = nameUtf8)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
+                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
+            }
+
+            return topicHandle;
         }
     }
 }

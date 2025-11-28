@@ -302,10 +302,7 @@ public class NetworkTableConnection : INetworkTableConnection
     /// </summary>
     /// <param name="trackingLostCounter">Number of times tracking was lost this session</param>
     /// <param name="batteryPercent">Current battery percentage</param>
-    public void PublishDeviceData(
-        int trackingLostCounter,
-        int batteryPercent
-    )
+    public void PublishDeviceData(int trackingLostCounter, int batteryPercent)
     {
         deviceData.TrackingLostCounter = trackingLostCounter;
         deviceData.BatteryPercent = batteryPercent;

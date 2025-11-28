@@ -305,10 +305,7 @@ namespace QuestNav.Core
             // Monitor device health: tracking status, battery level, tracking loss events
             // This data helps diagnose issues but doesn't need high-frequency updates
             UpdateDeviceData();
-            networkTableConnection.PublishDeviceData(
-                trackingLostEvents,
-                batteryPercent
-            );
+            networkTableConnection.PublishDeviceData(trackingLostEvents, batteryPercent);
 
             // Update status provider for web interface
             UpdateStatusProvider();

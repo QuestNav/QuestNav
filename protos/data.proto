@@ -103,6 +103,11 @@ message ProtobufQuestNavFrameData {
    * - Time since last pose reset
    */
   wpi.proto.ProtobufPose3d pose3d = 3;
+
+  /*
+  * Indicates if QuestNav is actively tracking its position.
+  */
+  bool isTracking = 4;
 }
 
 /*

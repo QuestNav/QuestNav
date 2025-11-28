@@ -3,7 +3,6 @@ using QuestNav.Native.NTCore;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.Utils;
-using QuestNav.WebServer;
 using UnityEngine;
 
 namespace QuestNav.Network
@@ -36,11 +35,13 @@ namespace QuestNav.Network
         /// <param name="timeStamp">Current timestamp</param>
         /// <param name="position">Current field-relative position of the Quest headset</param>
         /// <param name="rotation">The rotation of the quest headset</param>
+        /// <param name="isTracking">Is the headset is currently tracking its position</param>
         void PublishFrameData(
             int frameCount,
             double timeStamp,
             Vector3 position,
-            Quaternion rotation
+            Quaternion rotation,
+            bool isTracking
         );
 
         /// <summary>
@@ -274,16 +275,19 @@ public class NetworkTableConnection : INetworkTableConnection
     /// <param name="timeStamp">Unity time stamp</param>
     /// <param name="position">Current VR headset position</param>
     /// <param name="rotation">Current VR headset rotation</param>
+    /// <param name="isTracking">Is the headset is currently tracking its position</param>
     public void PublishFrameData(
         int frameCount,
         double timeStamp,
         Vector3 position,
-        Quaternion rotation
+        Quaternion rotation,
+        bool isTracking
     )
     {
         frameData.FrameCount = frameCount;
         frameData.Timestamp = timeStamp;
         frameData.Pose3D = Conversions.UnityToFrc3d(position, rotation);
+        frameData.IsTracking = isTracking;
 
         // Publish data
         frameDataPublisher.Set(frameData);

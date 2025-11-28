@@ -70,6 +70,7 @@ import edu.wpi.first.math.geometry.Pose3d;
  * @param frameCount Sequential frame number from the Quest tracking system. This counter increments
  *     with each tracking frame and can be used to detect dropped frames or measure effective frame
  *     rate. Resets to 0 when the Quest app restarts.
+ * @param isTracking Indicates whether the Quest is currently tracking its position
  * @see QuestNav#getAllUnreadPoseFrames()
  * @see QuestNav#setPose(Pose2d)
  * @see edu.wpi.first.math.estimator.PoseEstimator
@@ -77,4 +78,8 @@ import edu.wpi.first.math.geometry.Pose3d;
  * @since 2025.1.0
  */
 public record PoseFrame(
-    Pose3d questPose3d, double dataTimestamp, double appTimestamp, int frameCount) {}
+    Pose3d questPose3d,
+    double dataTimestamp,
+    double appTimestamp,
+    int frameCount,
+    boolean isTracking) {}

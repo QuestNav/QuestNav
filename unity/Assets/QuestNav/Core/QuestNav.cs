@@ -255,13 +255,22 @@ namespace QuestNav.Core
         /// </summary>
         private void MainUpdate()
         {
+            // Update tracking status and count tracking loss events
+            CheckTrackingLoss();
+
             // Collect current VR headset pose data from Oculus tracking system
             // This includes position (x,y,z) and rotation (quaternion) in Unity world space
             UpdateFrameData();
 
             // Convert Unity coordinates to FRC field coordinates and publish to NetworkTables
             // The robot subscribes to this data to know where the headset is on the field
-            networkTableConnection.PublishFrameData(frameCount, timeStamp, position, rotation);
+            networkTableConnection.PublishFrameData(
+                frameCount,
+                timeStamp,
+                position,
+                rotation,
+                currentlyTracking
+            );
 
             // Check for and execute any pending commands from the robot
             // Commands include pose resets, calibration requests, etc.
@@ -486,7 +495,6 @@ namespace QuestNav.Core
         /// </summary>
         private void UpdateDeviceData()
         {
-            CheckTrackingLoss();
             batteryPercent = (int)(SystemInfo.batteryLevel * 100);
         }
 

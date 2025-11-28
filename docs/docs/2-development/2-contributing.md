@@ -8,7 +8,7 @@ Thank you for your interest in contributing to QuestNav! This document outlines 
 ## Getting Started
 
 :::info
-Before contributing, please make sure you've completed the [Development Environment Setup](./1-development-setup.md) guide.
+Before contributing, please make sure you've completed the [Development Environment Setup](./1-development-setup.mdx) guide.
 :::
 
 ## Code of Conduct
@@ -72,16 +72,16 @@ Example: `feature/add-path-visualization`
 
 ### 5. Format your code
 :::note
-QuestNav uses Csharpier and Spotless to ensure code formatting is universal. Installation instructions are located in the [Development Environment Setup](./1-development-setup.md) guide.
+QuestNav uses Csharpier and Spotless to ensure code formatting is universal. Installation instructions are located in the [Development Environment Setup](./1-development-setup.mdx) guide.
 :::
 Format your C# code prior to submitting your pull request by running the following from the repository root
-```shell
+  ```shell
   csharpier format unity/Assets/QuestNav/
-```
+  ```
 Format your Java code prior to submitting your pull request by running the following from the `questnav-lib` directory
-```shell
+  ```shell
   ./gradlew spotlessApply
-```
+  ```
 
 ### 6. Test Your Changes
 

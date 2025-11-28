@@ -471,7 +471,8 @@ public class QuestNav {
               pose3dProto.unpack(frameData.value.getPose3D()),
               Microseconds.of(frameData.serverTime).in(Seconds),
               frameData.value.getTimestamp(),
-              frameData.value.getFrameCount());
+              frameData.value.getFrameCount(),
+              frameData.value.getIsTracking());
     }
     return result;
   }

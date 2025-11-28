@@ -21,3 +21,4 @@ unity/Assets/StreamingAssets/RuntimeActionBindings.*
 /unity/.cursor
 unity/ProjectSettings/ProjectSettings.asset
 /.docs
+/docs/static/api

@@ -147,8 +147,12 @@ function handleScroll() {
   const { scrollTop, scrollHeight, clientHeight } = logsContainer.value
   const isAtBottom = scrollHeight - scrollTop - clientHeight < 10 // 10px threshold
   
-  // If user scrolled up and auto-scroll is on, disable it
-  if (!isAtBottom && autoScroll.value) {
+  // Only disable auto-scroll if:
+  // 1. Not at bottom
+  // 2. Auto-scroll is enabled
+  // 3. There's actual scrollable content (prevents false triggers on empty/loading state)
+  // 4. User has scrolled down at least a bit (prevents initial load triggers)
+  if (!isAtBottom && autoScroll.value && scrollHeight > clientHeight && scrollTop > 50) {
     autoScroll.value = false
   }
 }
@@ -218,10 +222,9 @@ onUnmounted(() => {
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
   padding: 1rem;
-  background: white;
-  border-radius: 12px;
+  background: var(--card-bg);
+  border-radius: 8px;
   border: 1px solid var(--border-color);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .controls-left,
@@ -238,32 +241,31 @@ onUnmounted(() => {
   gap: 0.6rem;
   color: var(--text-primary);
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 0.875rem; /* Small text: 14px */
   font-weight: 600;
   padding: 0.5rem 1rem;
   background: var(--bg-tertiary);
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.2s ease;
   border: 1px solid var(--border-color);
 }
 
 .auto-scroll-label:hover {
-  background: var(--border-color);
-  color: var(--primary-color);
+  background: var(--bg-secondary);
+  border-color: var(--primary-color);
 }
 
 .auto-scroll-label input[type="checkbox"] {
   width: 1.2rem;
   height: 1.2rem;
   cursor: pointer;
-  accent-color: var(--primary-color);
 }
 
 .filter-select {
   padding: 0.6rem 1rem;
-  background: white;
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   color: var(--text-primary);
   font-weight: 600;
   cursor: pointer;
@@ -272,20 +274,21 @@ onUnmounted(() => {
 
 .filter-select:hover {
   border-color: var(--primary-color);
-  background: white;
 }
 
 .filter-select:focus {
-  box-shadow: 0 0 12px rgba(51, 161, 253, 0.3);
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(51, 161, 253, 0.1);
 }
 
 .log-count {
-  font-size: 0.9rem;
-  color: var(--primary-color);
+  font-size: 0.875rem; /* Small text: 14px */
+  color: var(--text-secondary);
   font-weight: 700;
-  background: rgba(51, 161, 253, 0.15);
+  background: var(--bg-tertiary);
   padding: 0.5rem 1rem;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .loading-container {
@@ -299,31 +302,28 @@ onUnmounted(() => {
 
 .loading-container p {
   color: var(--primary-color);
-  font-size: 1.1rem;
+  font-size: 1rem; /* Base body text: 16px */
   font-weight: 500;
 }
 
 .error-message {
-  padding: 2rem;
-  background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), rgba(220, 53, 69, 0.05));
+  padding: 1.5rem;
+  background: rgba(220, 53, 69, 0.1);
   border: 2px solid var(--danger-color);
-  border-radius: 12px;
+  border-radius: 8px;
   color: var(--danger-color);
   text-align: center;
   font-weight: 600;
-  box-shadow: 0 4px 20px rgba(220, 53, 69, 0.2);
 }
 
 .logs-container {
   max-height: 600px;
   overflow-y: auto;
   padding: 1.5rem;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   font-size: 0.875rem;
   background: #1e1e1e;
   color: #d4d4d4;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
   border: 1px solid #333;
   scrollbar-width: thin;
   scrollbar-color: #555 #2a2a2a;
@@ -335,17 +335,17 @@ onUnmounted(() => {
 }
 
 .logs-container::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 .logs-container::-webkit-scrollbar-track {
   background: #2a2a2a;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 
 .logs-container::-webkit-scrollbar-thumb {
   background: #555;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 
 .logs-container::-webkit-scrollbar-thumb:hover {
@@ -355,8 +355,8 @@ onUnmounted(() => {
 .empty-logs {
   text-align: center;
   padding: 3rem;
-  color: #666;
-  font-size: 1.1rem;
+  color: #888;
+  font-size: 1rem; /* Base text: 16px */
   font-style: italic;
 }
 
@@ -413,7 +413,7 @@ onUnmounted(() => {
   background: rgba(0, 0, 0, 0.3);
   border-left: 3px solid #f48771;
   color: #ce9178;
-  font-size: 0.8rem;
+  font-size: 0.75rem; /* Extra small: 12px */
   line-height: 1.4;
   overflow-x: auto;
   border-radius: 4px;

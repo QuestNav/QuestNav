@@ -61,6 +61,6 @@ jobs:
         id: upload-jar
         uses: actions/upload-artifact@v4
         with:
-          name: questnavlib-jar-${{ steps.version-info.outputs.version }}
+          name: questnav-jar-${{ steps.version-info.outputs.version }}
           path: questnav-lib/build/libs/*.jar
           retention-days: 7

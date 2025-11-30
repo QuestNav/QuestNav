@@ -102,16 +102,16 @@ Generate C# files from proto definitions:
 
 <Tabs>
   <TabItem value="windows" label="Windows">
-```powershell
-    # From the base directory of the repository
-    protoc --proto_path=protos --csharp_out=unity\Assets\QuestNav\Protos\Generated protos\*.proto
-```
+  From the base directory of the repository
+  ```powershell
+  protoc --proto_path=protos --csharp_out=unity\Assets\QuestNav\Protos\Generated protos\*.proto
+  ```
   </TabItem>
   <TabItem value="linux-mac" label="Linux/Mac">
-```bash
-    # From the base directory of the repository
-    protoc --proto_path=protos --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/*.proto
-```
+  From the base directory of the repository
+  ```bash  
+  protoc --proto_path=protos --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/*.proto
+  ```
   </TabItem>
 </Tabs>
 
@@ -120,53 +120,64 @@ Generate C# files from proto definitions:
 <Tabs>
   <TabItem value="windows" label="Windows">
     1. Download the QuickBuf plugin:
-```powershell
+    ```powershell
     curl -o protoc-gen-quickbuf.exe https://repo1.maven.org/maven2/us/hebi/quickbuf/protoc-gen-quickbuf/1.4/protoc-gen-quickbuf-1.4-windows-x86_64.exe
-```
+    ```
 
     2. Generate Java files:
-```powershell
     # From the base directory of the repository
+    ```powershell
     protoc -I="protos" --plugin=protoc-gen-quickbuf=protoc-gen-quickbuf.exe --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib\src\main\java\ protos\data.proto protos\commands.proto
-```
+    ```
   </TabItem>
   <TabItem value="linux-mac" label="Linux/Mac">
     1. Download the QuickBuf plugin:
-```bash
+    ```bash
     wget https://repo1.maven.org/maven2/us/hebi/quickbuf/protoc-gen-quickbuf/1.4/protoc-gen-quickbuf-1.4-linux-x86_64.exe -O protoc-gen-quickbuf
     chmod +x protoc-gen-quickbuf
-```
+    ```
 
     2. Generate Java files:
-```bash
-    # From the base directory of the repository
+    From the base directory of the repository
+    ```bash
     protoc -I="protos" --plugin=protoc-gen-quickbuf=./protoc-gen-quickbuf --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ protos/data.proto protos/commands.proto
-```
+    ```
   </TabItem>
 </Tabs>
 
-### Step 8: Import the Project into Unity
+### Step 8: Build Web UI
+- Navigate to the `questnav-web-ui` folder in a terminal
+- Install dependencies:
+  ```bash
+  npm install
+  ```
+- Build the web UI:
+  ```bash
+  npm run build
+  ```
+
+### Step 9: Import the Project into Unity
 
 - Open Unity Hub
 - Click `Add > Add project from disk` and select the unity subfolder in the cloned repository
 - Click on the newly imported project
 - Wait for Unity to compile assets and open the main interface
 
-### Step 9: Configure Build Settings for Android
+### Step 10: Configure Build Settings for Android
 
 - Navigate to `File > Build Profiles`
 - Under `Platforms` select `Android`
 - Click on `Switch Platform`
 - Wait for Unity to recompile assets
 
-### Step 10: Set Up Project for Meta Quest
+### Step 11: Set Up Project for Meta Quest
 
 - Navigate to `Meta > Tools > Project Setup Tool`
 - Apply all the recommended fixes on the default tab (Android)
 - Cycle through the rest of the tabs and apply all fixes
 - Ensure the Android tab shows a green ✅ and reports its status as "XR Ready for Android"
 
-### Step 11: Install Formatting Tools
+### Step 12: Install Formatting Tools
 
 - Navigate to the root of the git repository
 - Install the C# formatter:
@@ -179,7 +190,7 @@ In Visual Studio, install the csharpier plugin:
 - Search for csharpier and install it
 - Close Visual Studio and complete the installation
 
-### Step 12: Generate Visual Studio project (Optional)
+### Step 13: Generate Visual Studio project (Optional)
 :::tip
 You can generate a C# Visual Studio project to more easily work with the code. This will better enable Intellisense and project navigation in Visual Studio.
 :::

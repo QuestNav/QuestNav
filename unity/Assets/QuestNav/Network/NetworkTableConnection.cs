@@ -5,7 +5,6 @@ using QuestNav.Native.NTCore;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.Utils;
-using QuestNav.WebServer;
 using UnityEngine;
 
 namespace QuestNav.Network
@@ -40,20 +39,21 @@ namespace QuestNav.Network
         /// <param name="timeStamp">Current timestamp</param>
         /// <param name="position">Current field-relative position of the Quest headset</param>
         /// <param name="rotation">The rotation of the quest headset</param>
-        void publishFrameData(
+        /// <param name="isTracking">Is the headset is currently tracking its position</param>
+        void PublishFrameData(
             int frameCount,
             double timeStamp,
             Vector3 position,
-            Quaternion rotation
+            Quaternion rotation,
+            bool isTracking
         );
 
         /// <summary>
         /// Publishes device data to NetworkTables.
         /// </summary>
-        /// <param name="currentlyTracking">Is the quest tracking currently</param>
         /// <param name="trackingLostCounter">Number of tracking lost events this session</param>
         /// <param name="batteryPercent">Current battery percentage</param>
-        void publishDeviceData(bool currentlyTracking, int trackingLostCounter, int batteryPercent);
+        void PublishDeviceData(int trackingLostCounter, int batteryPercent);
 
         /// <summary>
         /// Gets all command requests from the robot since the last read, or an empty array if none available
@@ -304,16 +304,19 @@ namespace QuestNav.Network
     /// <param name="timeStamp">Unity time stamp</param>
     /// <param name="position">Current VR headset position</param>
     /// <param name="rotation">Current VR headset rotation</param>
-    public void publishFrameData(
+    /// <param name="isTracking">Is the headset is currently tracking its position</param>
+    public void PublishFrameData(
         int frameCount,
         double timeStamp,
         Vector3 position,
-        Quaternion rotation
+        Quaternion rotation,
+        bool isTracking
     )
     {
         frameData.FrameCount = frameCount;
         frameData.Timestamp = timeStamp;
         frameData.Pose3D = Conversions.UnityToFrc3d(position, rotation);
+        frameData.IsTracking = isTracking;
 
         // Publish data
         frameDataPublisher.Set(frameData);
@@ -327,16 +330,10 @@ namespace QuestNav.Network
     /// <summary>
     /// Publishes current device data to NetworkTables including tracking status and battery level
     /// </summary>
-    /// <param name="currentlyTracking">Whether the headset is currently tracking</param>
     /// <param name="trackingLostCounter">Number of times tracking was lost this session</param>
     /// <param name="batteryPercent">Current battery percentage</param>
-    public void publishDeviceData(
-        bool currentlyTracking,
-        int trackingLostCounter,
-        int batteryPercent
-    )
+    public void PublishDeviceData(int trackingLostCounter, int batteryPercent)
     {
-        deviceData.CurrentlyTracking = currentlyTracking;
         deviceData.TrackingLostCounter = trackingLostCounter;
         deviceData.BatteryPercent = batteryPercent;
 

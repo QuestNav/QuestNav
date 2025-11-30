@@ -7,7 +7,7 @@
       <label :for="field.path" class="field-label">
         {{ field.displayName }}
         <span v-if="field.requiresRestart" class="restart-badge">Requires Restart</span>
-        <span v-if="isDebugIPField && localValue" class="debug-badge">DEBUG MODE ACTIVE</span>
+        <span v-if="isDebugIPField && localValue" class="debug-badge">DEBUG OVERRIDE ENABLED</span>
         <span v-if="isTeamNumberField && isDebugIPActive" class="override-badge">OVERRIDDEN</span>
       </label>
       <span v-if="field.description" class="field-description">
@@ -123,8 +123,8 @@ const localValue = ref(props.value)
 const pendingTeamNumber = ref<number | null>(null)
 const pendingDebugIP = ref<string | null>(null)
 
-const isDebugIPField = computed(() => props.field.path === 'Tunables/debugNTServerAddressOverride')
-const isTeamNumberField = computed(() => props.field.path === 'Tunables/webConfigTeamNumber')
+const isDebugIPField = computed(() => props.field.path === 'WebServerConstants/debugNTServerAddressOverride')
+const isTeamNumberField = computed(() => props.field.path === 'WebServerConstants/webConfigTeamNumber')
 const isDebugIPActive = computed(() => {
   return props.debugIPOverride !== undefined && props.debugIPOverride !== null && props.debugIPOverride !== ''
 })
@@ -312,57 +312,27 @@ function formatColorRGBA(color: any): string {
   flex-direction: column;
   gap: 1rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(0, 0, 0, 0.2) 100%);
+  background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.config-field::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary-color), var(--teal));
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .config-field:hover {
   border-color: var(--primary-color);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-}
-
-.config-field:hover::before {
-  opacity: 1;
+  box-shadow: 0 4px 12px rgba(51, 161, 253, 0.15);
 }
 
 .config-field.field-warning {
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%);
+  background: rgba(255, 193, 7, 0.1);
   border: 2px solid var(--warning-color);
-  box-shadow: 0 4px 20px rgba(255, 193, 7, 0.2);
-}
-
-.config-field.field-warning::before {
-  background: var(--warning-color);
-  opacity: 1;
 }
 
 .config-field.field-disabled {
   opacity: 0.6;
   pointer-events: none;
-  background: linear-gradient(135deg, rgba(128, 128, 128, 0.1) 0%, rgba(128, 128, 128, 0.05) 100%);
-  border-color: #999;
-}
-
-.config-field.field-disabled::before {
-  background: #999;
-  opacity: 0.5;
+  background: var(--bg-tertiary);
+  border-color: var(--text-muted);
 }
 
 .field-header {
@@ -372,8 +342,8 @@ function formatColorRGBA(color: any): string {
 }
 
 .field-label {
-  font-weight: 700;
-  font-size: 1.05rem;
+  font-weight: 600;
+  font-size: 0.875rem; /* Small text: 14px */
   color: var(--text-primary);
   display: flex;
   align-items: center;
@@ -382,80 +352,68 @@ function formatColorRGBA(color: any): string {
 }
 
 .restart-badge {
-  font-size: 0.7rem;
+  font-size: 0.75rem; /* Extra small: 12px */
   padding: 0.25rem 0.65rem;
-  background: linear-gradient(135deg, var(--warning-color), #ffa000);
+  background: var(--warning-color);
   color: #000;
   border-radius: 12px;
+  border: 2px solid var(--amber-dark);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 6px rgba(255, 193, 7, 0.3);
+  box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
 }
 
 .debug-badge {
-  font-size: 0.7rem;
+  font-size: 0.75rem; /* Extra small: 12px */
   padding: 0.25rem 0.65rem;
-  background: linear-gradient(135deg, var(--danger-color), #c82333);
+  background: var(--danger-color);
   color: #fff;
   border-radius: 12px;
+  border: 2px solid #c82333;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  animation: pulseGlow 2s ease-in-out infinite;
-  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.4);
-}
-
-@keyframes pulseGlow {
-  0%, 100% { 
-    opacity: 1;
-    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.4);
-  }
-  50% { 
-    opacity: 0.8;
-    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.6);
-  }
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
 }
 
 .override-badge {
-  font-size: 0.7rem;
+  font-size: 0.75rem; /* Extra small: 12px */
   padding: 0.25rem 0.65rem;
-  background: linear-gradient(135deg, #6c757d, #5a6268);
+  background: var(--secondary-color);
   color: #fff;
   border-radius: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 6px rgba(108, 117, 125, 0.4);
 }
 
 .override-notice {
   margin-top: 0.5rem;
-  padding: 1rem;
+  padding: 0.875rem;
   background: rgba(108, 117, 125, 0.1);
-  border-left: 4px solid #6c757d;
-  border-radius: 8px;
-  color: #6c757d;
+  border-left: 3px solid var(--secondary-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.875rem; /* Small text: 14px */
   line-height: 1.5;
 }
 
 .debug-warning {
   margin-top: 0.5rem;
-  padding: 1rem;
+  padding: 0.875rem;
   background: rgba(255, 193, 7, 0.1);
-  border-left: 4px solid var(--warning-color);
-  border-radius: 8px;
-  color: #ffc107;
+  border-left: 3px solid var(--warning-color);
+  border-radius: 6px;
+  color: var(--text-primary);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.875rem; /* Small text: 14px */
   line-height: 1.5;
-  box-shadow: inset 0 2px 8px rgba(255, 193, 7, 0.1);
 }
 
 .field-description {
-  font-size: 0.9rem;
+  font-size: 0.875rem; /* Small text: 14px */
   color: var(--text-secondary);
   line-height: 1.6;
 }
@@ -469,25 +427,25 @@ function formatColorRGBA(color: any): string {
   align-items: center;
   gap: 1rem;
   padding: 0.75rem;
-  background: rgba(51, 161, 253, 0.05);
-  border-radius: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  border: 1px solid transparent;
   transition: all 0.2s ease;
 }
 
 .checkbox-control:hover {
-  background: rgba(51, 161, 253, 0.1);
+  border-color: var(--primary-color);
 }
 
 .checkbox-control input[type="checkbox"] {
   width: 1.5rem;
   height: 1.5rem;
   cursor: pointer;
-  accent-color: var(--primary-color);
 }
 
 .checkbox-label {
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.875rem; /* Small text: 14px */
   color: var(--text-primary);
 }
 
@@ -498,9 +456,10 @@ function formatColorRGBA(color: any): string {
 }
 
 .slider-control input[type="range"] {
-  height: 8px;
-  border-radius: 4px;
-  background: linear-gradient(to right, var(--primary-color), var(--teal));
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
 }
 
 .slider-value {
@@ -512,17 +471,20 @@ function formatColorRGBA(color: any): string {
   width: 120px;
   text-align: center;
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1rem; /* Base text: 16px */
   padding: 0.6rem;
-  background: white;
-  border: 2px solid var(--border-color);
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
   transition: all 0.2s ease;
+}
+
+.value-input:hover {
+  border-color: var(--primary-color);
 }
 
 .value-input:focus {
   border-color: var(--primary-color);
-  background: white;
-  box-shadow: 0 0 12px rgba(51, 161, 253, 0.3);
+  box-shadow: 0 0 0 3px rgba(51, 161, 253, 0.1);
 }
 
 .color-control {
@@ -530,22 +492,21 @@ function formatColorRGBA(color: any): string {
   align-items: center;
   gap: 1.5rem;
   padding: 0.75rem;
-  background: rgba(51, 161, 253, 0.05);
-  border-radius: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
 }
 
 .color-control input[type="color"] {
   width: 80px;
   height: 50px;
-  border: 3px solid var(--border-color);
-  border-radius: 8px;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .color-control input[type="color"]:hover {
   border-color: var(--primary-color);
-  box-shadow: 0 4px 12px rgba(51, 161, 253, 0.3);
 }
 
 .color-values {
@@ -555,29 +516,27 @@ function formatColorRGBA(color: any): string {
 }
 
 .color-value {
-  font-size: 0.9rem;
+  font-size: 0.875rem; /* Small text: 14px */
   color: var(--text-secondary);
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   font-weight: 500;
 }
 
 .select-control select {
   width: 100%;
   padding: 0.75rem;
-  background: white;
-  border: 2px solid var(--border-color);
-  font-size: 1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  font-size: 0.875rem; /* Small text: 14px */
   font-weight: 500;
   transition: all 0.2s ease;
 }
 
 .select-control select:hover {
   border-color: var(--primary-color);
-  background: white;
 }
 
 .select-control select:focus {
-  box-shadow: 0 0 12px rgba(51, 161, 253, 0.3);
+  box-shadow: 0 0 0 3px rgba(51, 161, 253, 0.1);
 }
 
 .input-control {
@@ -589,45 +548,40 @@ function formatColorRGBA(color: any): string {
 .input-control input {
   flex: 1;
   padding: 0.75rem;
-  background: white;
-  border: 2px solid var(--border-color);
-  font-size: 1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  font-size: 0.875rem; /* Small text: 14px */
   font-weight: 500;
   transition: all 0.2s ease;
 }
 
 .submit-button {
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, var(--primary-color), var(--teal));
+  background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.95rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.875rem; /* Small text: 14px */
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(51, 161, 253, 0.3);
 }
 
 .submit-button:hover {
-  background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(51, 161, 253, 0.4);
+  background: var(--primary-dark);
 }
 
 .submit-button:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(51, 161, 253, 0.3);
 }
 
 .input-control input:hover {
   border-color: var(--primary-color);
-  background: white;
 }
 
 .input-control input:focus {
-  box-shadow: 0 0 12px rgba(51, 161, 253, 0.3);
+  box-shadow: 0 0 0 3px rgba(51, 161, 253, 0.1);
 }
 </style>
 

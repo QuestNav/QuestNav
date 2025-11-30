@@ -5,10 +5,6 @@
       <p>Loading status...</p>
     </div>
 
-    <div v-else-if="error" class="error-message">
-      {{ error }}
-    </div>
-
     <div v-else-if="status" class="status-grid">
       <!-- Network Status -->
       <div class="status-card card">
@@ -20,9 +16,12 @@
               {{ status.networkConnected ? 'Connected' : 'Disconnected' }}
             </span>
           </div>
-          <div class="status-item">
+          <div class="status-item" :class="{ 'debug-override-active': isDebugIPActive }">
             <span class="label">Robot IP Address:</span>
-            <span class="value mono">{{ status.robotIpAddress || 'N/A' }}</span>
+            <div class="value-with-badge">
+              <span class="value mono">{{ status.robotIpAddress || 'N/A' }}</span>
+              <span v-if="isDebugIPActive" class="debug-override-badge">DEBUG OVERRIDE ENABLED</span>
+            </div>
           </div>
           <div class="status-item">
             <span class="label">Headset IP Address:</span>
@@ -105,12 +104,6 @@
               </div>
             </div>
           </div>
-          <div class="status-item">
-            <span class="label">Status:</span>
-            <span class="value">
-              {{ status.batteryCharging ? '⚡ Charging' : status.batteryStatus }}
-            </span>
-          </div>
         </div>
       </div>
 
@@ -137,22 +130,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { configApi } from '../api/config'
+import { useConfigStore } from '../stores/config'
+import { useConnectionState } from '../composables/useConnectionState'
 import type { HeadsetStatus } from '../types'
 
+const configStore = useConfigStore()
+const { isConnected } = useConnectionState()
 const status = ref<HeadsetStatus | null>(null)
 const loading = ref(true)
-const error = ref<string | null>(null)
 let intervalId: number | null = null
 
+// Check if debug IP override is active
+const isDebugIPActive = computed(() => {
+  const debugIP = configStore.values['WebServerConstants/debugNTServerAddressOverride']
+  return debugIP !== undefined && debugIP !== null && debugIP !== ''
+})
+
 async function loadStatus() {
+  // Skip loading if disconnected
+  if (!isConnected.value) {
+    return
+  }
+  
   try {
-    error.value = null
     status.value = await configApi.getHeadsetStatus()
     loading.value = false
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load status'
+    // Silently fail - don't show error, keep old data visible
+    // Connection state overlay will handle showing disconnect status
     loading.value = false
   }
 }
@@ -172,13 +179,21 @@ async function handleResetPose() {
 
 onMounted(async () => {
   await loadStatus()
-  // Update every second
+  // Update every second, but only when connected
   intervalId = setInterval(loadStatus, 1000) as unknown as number
 })
 
 onUnmounted(() => {
   if (intervalId !== null) {
     clearInterval(intervalId)
+  }
+})
+
+// Watch connection state and reload when reconnected
+watch(isConnected, async (connected, wasConnected) => {
+  if (connected && !wasConnected) {
+    console.log('[StatusView] Connection restored, reloading status')
+    await loadStatus()
   }
 })
 </script>
@@ -201,7 +216,7 @@ onUnmounted(() => {
 
 .loading-container p {
   color: var(--primary-color);
-  font-size: 1.1rem;
+  font-size: 1rem; /* Base body text: 16px */
   font-weight: 500;
 }
 
@@ -223,42 +238,25 @@ onUnmounted(() => {
 }
 
 .status-card {
-  padding: 1.75rem;
-  background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(0, 0, 0, 0.2) 100%);
+  padding: 1.5rem;
+  background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
 }
 
-.status-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary-color), var(--teal));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
 .status-card:hover {
   border-color: var(--primary-color);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.status-card:hover::before {
-  opacity: 1;
+  box-shadow: 0 4px 12px rgba(51, 161, 253, 0.15);
 }
 
 .status-card h3 {
-  margin-bottom: 1.25rem;
-  color: var(--primary-color);
-  font-size: 1.3rem;
-  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-size: 1.125rem; /* Consistent h3 size: 18px */
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -267,7 +265,7 @@ onUnmounted(() => {
 .status-items {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
+  gap: 0.75rem;
 }
 
 .status-item {
@@ -275,37 +273,31 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  background: white;
-  border-radius: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
   border-left: 3px solid transparent;
   transition: all 0.2s ease;
-  border: 1px solid var(--border-color);
 }
 
 .status-item:hover {
-  background: var(--bg-tertiary);
   border-left-color: var(--primary-color);
-  transform: translateX(3px);
 }
 
 .status-item .label {
   font-weight: 600;
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 0.875rem; /* Small text: 14px */
 }
 
 .status-item .value {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-primary);
-  font-size: 1rem;
+  font-size: 0.875rem; /* Small text: 14px */
 }
 
 .status-item .value.mono {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 0.95rem;
-  background: var(--bg-tertiary);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  font-size: 0.875rem; /* Small text: 14px */
+  font-weight: 500;
 }
 
 .status-item .value.success {
@@ -318,25 +310,70 @@ onUnmounted(() => {
   text-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
 }
 
+.status-item.debug-override-active {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.05));
+  border: 2px solid var(--warning-color);
+  border-left: 3px solid var(--warning-color);
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+}
+
+.status-item.debug-override-active:hover {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1));
+  border-left-color: var(--warning-color);
+}
+
+.value-with-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.debug-override-badge {
+  font-size: 0.75rem; /* Extra small: 12px */
+  padding: 0.25rem 0.65rem;
+  background: linear-gradient(135deg, var(--danger-color), #c82333);
+  color: #fff;
+  border-radius: 12px;
+  border: 2px solid #c82333;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: pulseGlow 2s ease-in-out infinite;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.4);
+  white-space: nowrap;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { 
+    opacity: 1;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.4);
+  }
+  50% { 
+    opacity: 0.8;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.6);
+  }
+}
+
+
 .battery-bar {
   flex: 1;
-  height: 32px;
-  background-color: #E5E7EB;
-  border-radius: 16px;
+  height: 28px;
+  background-color: var(--bg-tertiary);
+  border-radius: 14px;
   overflow: hidden;
   margin-left: 1rem;
-  border: 2px solid var(--border-color);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
 }
 
 .battery-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+  background: linear-gradient(90deg, var(--teal-dark), var(--teal), var(--primary-color));
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.875rem; /* Small text: 14px */
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   transition: width 0.5s ease;
@@ -360,7 +397,7 @@ onUnmounted(() => {
 }
 
 .battery-fill.battery-charging {
-  background: linear-gradient(90deg, var(--warning-color), var(--primary-color));
+  background: linear-gradient(90deg, var(--amber), var(--amber-light), var(--primary-color));
   animation: chargingShine 2s linear infinite;
 }
 
@@ -386,17 +423,21 @@ onUnmounted(() => {
 
 .reset-button {
   width: 100%;
-  margin-top: 1.25rem;
-  background: linear-gradient(135deg, var(--warning-color), #ffa000);
-  color: #000;
-  font-weight: 700;
-  padding: 0.75rem 1rem;
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  margin-top: 1rem;
+  background: var(--primary-color);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1rem;
+  transition: all 0.2s ease;
+  font-size: 0.875rem; /* Small text: 14px */
+  border: 2px solid var(--primary-dark);
+  box-shadow: 0 2px 4px rgba(51, 161, 253, 0.3);
 }
 
 .reset-button:hover {
-  background: linear-gradient(135deg, #e0a800, #ff8f00);
-  box-shadow: 0 6px 16px rgba(255, 193, 7, 0.4);
+  background: var(--primary-dark);
+  border-color: var(--primary-darker);
+  box-shadow: 0 4px 8px rgba(51, 161, 253, 0.4);
 }
 
 @media (max-width: 768px) {

@@ -98,8 +98,10 @@ namespace QuestNav.Commands
                         {
                             // Get the age of the command, in milliseconds
                             var ageMs =
-                                (networkTableConnection.ntNow - receivedTimestampedCommand.LastChange)
-                                / 1000;
+                                (
+                                    networkTableConnection.ntNow
+                                    - receivedTimestampedCommand.LastChange
+                                ) / 1000;
 
                             // Check if the command is fresh
                             if (ageMs < POSE_RESET_TTL_MS)

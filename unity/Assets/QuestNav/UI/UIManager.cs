@@ -19,7 +19,7 @@ namespace QuestNav.UI
     public interface IUIManager
     {
         Task initializeAsync();
-        
+
         /// <summary>
         /// Updates the connection state and ip address in the UI
         /// </summary>
@@ -41,6 +41,7 @@ namespace QuestNav.UI
         /// Reference to the ConfigManager to handle config changes
         /// </summary>
         private IConfigManager configManager;
+
         /// <summary>
         /// Reference to NetworkTables connection
         /// </summary>
@@ -105,7 +106,7 @@ namespace QuestNav.UI
         /// Current team number
         /// </summary>
         private int teamNumber;
-        
+
         /// <summary>
         /// Current auto start value
         /// </summary>
@@ -162,7 +163,7 @@ namespace QuestNav.UI
             this.zRotText = zRotText;
             this.teamUpdateButton = teamUpdateButton;
             this.autoStartToggle = autoStartToggle;
-            
+
             teamUpdateButton.onClick.AddListener(setTeamNumberFromUIAsync);
             autoStartToggle.onValueChanged.AddListener(setAutoStartValueFromUIAsync);
 
@@ -204,7 +205,7 @@ namespace QuestNav.UI
             autoStartToggle.isOn = newValue;
         }
         #endregion
-        
+
         #region Setters
         /// <summary>
         /// Updates the team number based on user input and saves to config

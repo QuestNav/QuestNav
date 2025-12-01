@@ -191,7 +191,7 @@ namespace QuestNav.Core
         /// Reference to the database manager to manage setting changes
         /// </summary>
         private IConfigManager configManager;
-        
+
         /// <summary>
         /// Reference to the web server manager component
         /// </summary>
@@ -214,11 +214,11 @@ namespace QuestNav.Core
             {
                 await configManager.initializeAsync();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 QueuedLogger.LogException(e);
             }
-            
+
             networkTableConnection = new NetworkTableConnection(configManager);
             // Use try-catch here due to async
             try
@@ -229,7 +229,7 @@ namespace QuestNav.Core
             {
                 QueuedLogger.LogException(e);
             }
-            
+
             uiManager = new UIManager(
                 configManager,
                 networkTableConnection,
@@ -254,7 +254,7 @@ namespace QuestNav.Core
             {
                 QueuedLogger.LogException(e);
             }
-            
+
             commandProcessor = new CommandProcessor(
                 networkTableConnection,
                 vrCamera,
@@ -262,17 +262,15 @@ namespace QuestNav.Core
                 resetTransform
             );
             tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
-            
-            // // Initialize web server manager with settings from WebServerConstants
-            // webServerManager = new WebServerManager(
-            //     vrCamera,
-            //     vrCameraRoot,
-            //     this,
-            //     WebServerConstants.serverPort,
-            //     WebServerConstants.enableCORSDevMode,
-            //     ExecutePoseResetToOrigin // Pass callback for web-initiated pose resets
-            // );
-            // webServerManager.Initialize();
+
+            // Initialize web server manager with dependencies (same pattern as UIManager)
+            webServerManager = new WebServerManager(
+                configManager,
+                networkTableConnection,
+                this,
+                ExecutePoseResetToOrigin
+            );
+            webServerManager.Initialize();
 
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
@@ -346,11 +344,15 @@ namespace QuestNav.Core
             UpdateDeviceData();
             networkTableConnection.PublishDeviceData(trackingLostEvents, batteryPercent);
 
-            // Update status provider for web interface
-            // UpdateStatusProvider();
-
-            // Update web server manager periodic operations
-            // webServerManager?.Periodic();
+            // Update web server with current pose data (it handles everything else internally)
+            var frcPose = Conversions.UnityToFrc3d(position, rotation);
+            var (frcPosition, frcRotation) = Conversions.ProtobufPose3dToUnity(frcPose);
+            webServerManager?.Periodic(
+                frcPosition,
+                frcRotation,
+                currentlyTracking,
+                trackingLostEvents
+            );
 
             // Flush queued log messages to Unity console
             // Batching log output improves performance and reduces console spam
@@ -432,7 +434,7 @@ namespace QuestNav.Core
                 );
 
                 // Check NetworkTables connection status
-                if (!networkTableConnection.IsConnected)
+                if (!networkTableConnection.isConnected)
                 {
                     QueuedLogger.LogError(
                         "[QuestNav] NetworkTables disconnected during pause event"
@@ -450,7 +452,7 @@ namespace QuestNav.Core
                 QueuedLogger.Log("[QuestNav] Application resumed - verifying systems");
 
                 // Verify NetworkTables connection
-                if (networkTableConnection.IsConnected)
+                if (networkTableConnection.isConnected)
                 {
                     QueuedLogger.Log("[QuestNav] NetworkTables connection active");
                 }
@@ -606,52 +608,6 @@ namespace QuestNav.Core
 
             QueuedLogger.Log("[QuestNav] Pose reset to origin completed");
         }
-
-        /// <summary>
-        /// Updates the status provider with current runtime data for the web interface.
-        /// Converts Unity coordinates to FRC robot coordinates before passing to StatusProvider.
-        /// </summary>
-        // private void UpdateStatusProvider()
-        // {
-        //     // Convert Unity coordinates to FRC robot coordinates for web interface display
-        //     var frcPose = Conversions.UnityToFrc3d(position, rotation);
-        //
-        //     // Convert protobuf pose to Unity types for StatusProvider
-        //     var (frcPosition, frcRotation) = Conversions.ProtobufPose3dToUnity(frcPose);
-        //
-        //     // Get robot IP address from configuration
-        //     string robotIp = "";
-        //     if (!string.IsNullOrEmpty(WebServerConstants.debugNTServerAddressOverride))
-        //     {
-        //         // Using debug IP override
-        //         robotIp = WebServerConstants.debugNTServerAddressOverride;
-        //     }
-        //     else if (uiManager.TeamNumber > 0)
-        //     {
-        //         // Calculate from team number using FRC convention
-        //         int team = uiManager.TeamNumber;
-        //         robotIp = $"10.{team / 100}.{team % 100}.2"; // roboRIO-2 standard address
-        //     }
-        //
-        //     // Calculate current FPS
-        //     float currentFps = 1f / Time.deltaTime;
-        //
-        //     // Update web server manager with current status
-        //     webServerManager?.UpdateStatus(
-        //         frcPosition,
-        //         frcRotation,
-        //         currentlyTracking,
-        //         trackingLostEvents,
-        //         SystemInfo.batteryLevel,
-        //         SystemInfo.batteryStatus,
-        //         networkTableConnection.isConnected,
-        //         uiManager.IPAddress,
-        //         uiManager.TeamNumber,
-        //         robotIp,
-        //         currentFps,
-        //         Time.frameCount
-        //     );
-        // }
         #endregion
     }
 }

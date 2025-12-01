@@ -8,17 +8,17 @@ namespace QuestNav.Config
     {
         public class Network
         {
-            [PrimaryKey] 
+            [PrimaryKey]
             public int id { get; set; }
 
             public int teamNumber { get; set; } = QuestNavConstants.Network.DEFAULT_TEAM_NUMBER;
-            
+
             public string debugIpOverride { get; set; } = "";
         }
 
         public class System
         {
-            [PrimaryKey] 
+            [PrimaryKey]
             public int id { get; set; }
 
             public bool enableAutoStartOnBoot { get; set; } = true;
@@ -26,9 +26,9 @@ namespace QuestNav.Config
 
         public class Logging
         {
-            [PrimaryKey] 
+            [PrimaryKey]
             public int id { get; set; }
-            
+
             public bool enableDebugLogging { get; set; } = false;
         }
     }

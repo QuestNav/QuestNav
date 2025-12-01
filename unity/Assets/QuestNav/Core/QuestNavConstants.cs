@@ -184,6 +184,22 @@ namespace QuestNav.Core
         }
 
         /// <summary>
+        /// Constants for the web server configuration
+        /// </summary>
+        public static class WebServer
+        {
+            /// <summary>
+            /// The port the web server listens on
+            /// </summary>
+            public const int SERVER_PORT = 5801;
+
+            /// <summary>
+            /// Whether to enable CORS headers for development mode
+            /// </summary>
+            public const bool ENABLE_CORS_DEV_MODE = true;
+        }
+
+        /// <summary>
         /// Constants for the Tagalong UI behavior
         /// </summary>
         public static class TagalongUI

@@ -1,10 +1,12 @@
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using EmbedIO;
 using EmbedIO.Actions;
 using Newtonsoft.Json;
 using QuestNav.Config;
+using UnityEngine;
 
 namespace QuestNav.WebServer
 {
@@ -42,6 +44,7 @@ namespace QuestNav.WebServer
         private CachedServerInfo cachedServerInfo;
         private MainThreadAction restartCallback;
         private MainThreadAction poseResetCallback;
+        private MainThreadAction resetToDefaultsCallback;
         private readonly Action<ConfigUpdateRequest> configUpdateCallback;
         private readonly StatusProvider statusProvider;
         private readonly LogCollector logCollector;
@@ -61,6 +64,7 @@ namespace QuestNav.WebServer
             ILogger logger,
             MainThreadAction restartCallback,
             MainThreadAction poseResetCallback,
+            MainThreadAction resetToDefaultsCallback,
             Action<ConfigUpdateRequest> configUpdateCallback,
             StatusProvider statusProvider,
             LogCollector logCollector
@@ -73,12 +77,18 @@ namespace QuestNav.WebServer
             this.logger = logger;
             this.restartCallback = restartCallback;
             this.poseResetCallback = poseResetCallback;
+            this.resetToDefaultsCallback = resetToDefaultsCallback;
             this.configUpdateCallback = configUpdateCallback;
             this.statusProvider = statusProvider;
             this.logCollector = logCollector;
 
+            // Cache paths that require main thread access
+            cachedDatabasePath = Path.Combine(Application.persistentDataPath, "config.db");
+
             CacheServerInfo();
         }
+
+        private string cachedDatabasePath;
 
         private void CacheServerInfo()
         {
@@ -208,6 +218,16 @@ namespace QuestNav.WebServer
                     await HandlePostConfig(context);
                 else if (path == "/api/reset-config" && context.Request.HttpVerb == HttpVerbs.Post)
                     await HandleResetConfig(context);
+                else if (
+                    path == "/api/download-database"
+                    && context.Request.HttpVerb == HttpVerbs.Get
+                )
+                    await HandleDownloadDatabase(context);
+                else if (
+                    path == "/api/upload-database"
+                    && context.Request.HttpVerb == HttpVerbs.Post
+                )
+                    await HandleUploadDatabase(context);
                 else if (path == "/api/info" && context.Request.HttpVerb == HttpVerbs.Get)
                     await HandleGetInfo(context);
                 else if (path == "/api/status" && context.Request.HttpVerb == HttpVerbs.Get)
@@ -279,19 +299,90 @@ namespace QuestNav.WebServer
 
         private async Task HandleResetConfig(IHttpContext context)
         {
-            // Queue a reset as a config update with default values
-            var resetRequest = new ConfigUpdateRequest
-            {
-                teamNumber = 0,
-                debugIpOverride = "",
-                enableAutoStartOnBoot = false,
-                enableDebugLogging = false,
-            };
-            configUpdateCallback?.Invoke(resetRequest);
+            resetToDefaultsCallback?.Invoke();
             await SendJsonResponse(
                 context,
                 new SimpleResponse { success = true, message = "Configuration reset to defaults" }
             );
+        }
+
+        private async Task HandleDownloadDatabase(IHttpContext context)
+        {
+            if (!File.Exists(cachedDatabasePath))
+            {
+                context.Response.StatusCode = 404;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = false, message = "Database file not found" }
+                );
+                return;
+            }
+
+            try
+            {
+                byte[] fileBytes = File.ReadAllBytes(cachedDatabasePath);
+                context.Response.ContentType = "application/octet-stream";
+                context.Response.Headers.Add(
+                    "Content-Disposition",
+                    "attachment; filename=\"config.db\""
+                );
+                context.Response.ContentLength64 = fileBytes.Length;
+                await context.Response.OutputStream.WriteAsync(fileBytes, 0, fileBytes.Length);
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 500;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = false, message = ex.Message }
+                );
+            }
+        }
+
+        private async Task HandleUploadDatabase(IHttpContext context)
+        {
+            try
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await context.Request.InputStream.CopyToAsync(memoryStream);
+                    byte[] fileBytes = memoryStream.ToArray();
+
+                    if (fileBytes.Length == 0)
+                    {
+                        context.Response.StatusCode = 400;
+                        await SendJsonResponse(
+                            context,
+                            new SimpleResponse
+                            {
+                                success = false,
+                                message = "No file data received",
+                            }
+                        );
+                        return;
+                    }
+
+                    // Write the uploaded database
+                    File.WriteAllBytes(cachedDatabasePath, fileBytes);
+
+                    await SendJsonResponse(
+                        context,
+                        new SimpleResponse
+                        {
+                            success = true,
+                            message = "Database uploaded. Restart app to apply changes.",
+                        }
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 500;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = false, message = ex.Message }
+                );
+            }
         }
 
         private async Task HandleGetInfo(IHttpContext context)

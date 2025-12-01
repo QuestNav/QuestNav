@@ -292,6 +292,12 @@ namespace QuestNav.Core
         /// </summary>
         private void MainUpdate()
         {
+            // Guard against early calls before Awake() completes initialization
+            if (networkTableConnection == null || commandProcessor == null || tagAlongUI == null)
+            {
+                return;
+            }
+
             // Update tracking status and count tracking loss events
             CheckTrackingLoss();
 
@@ -330,6 +336,12 @@ namespace QuestNav.Core
         /// </summary>
         private void SlowUpdate()
         {
+            // Guard against early calls before Awake() completes initialization
+            if (networkTableConnection == null || uiManager == null)
+            {
+                return;
+            }
+
             // Process and display NetworkTables internal messages (connection status, errors, etc.)
             // This helps with debugging connection issues without impacting performance
             networkTableConnection.loggerPeriodic();
@@ -427,6 +439,12 @@ namespace QuestNav.Core
         /// </summary>
         private void OnApplicationPause(bool isPaused)
         {
+            // Guard against early calls before Awake() completes initialization
+            if (networkTableConnection == null)
+            {
+                return;
+            }
+
             if (isPaused)
             {
                 QueuedLogger.LogWarning(

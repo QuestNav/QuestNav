@@ -58,9 +58,13 @@ namespace QuestNav.Config
 
         public async Task resetToDefaultsAsync()
         {
-            await saveNetworkConfigAsync(new Config.Network());
-            await saveSystemConfigAsync(new Config.System());
-            await saveLoggingConfigAsync(new Config.Logging());
+            var networkDefaults = new Config.Network();
+            var systemDefaults = new Config.System();
+            var loggingDefaults = new Config.Logging();
+
+            await setTeamNumberAsync(networkDefaults.teamNumber);
+            await setEnableAutoStartOnBootAsync(systemDefaults.enableAutoStartOnBoot);
+            await setEnableDebugLoggingAsync(loggingDefaults.enableDebugLogging);
 
             QueuedLogger.Log("Database reset to defaults");
         }

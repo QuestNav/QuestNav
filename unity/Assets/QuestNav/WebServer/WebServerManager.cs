@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using QuestNav.Config;
+using QuestNav.Core;
 using QuestNav.Network;
 using UnityEngine;
 
@@ -25,12 +26,10 @@ namespace QuestNav.WebServer
         private StatusProvider statusProvider;
         private LogCollector logCollector;
 
-        private const int SERVER_PORT = 8080;
-        private const bool ENABLE_CORS_DEV_MODE = true;
-
         private bool isInitialized = false;
         private bool restartRequested = false;
         private volatile bool poseResetRequested = false;
+        private volatile bool resetToDefaultsRequested = false;
 
         // Pending config update to be applied on main thread
         private volatile ConfigUpdateRequest pendingConfigUpdate = null;
@@ -137,6 +136,13 @@ namespace QuestNav.WebServer
                 poseResetCallback?.Invoke();
             }
 
+            if (resetToDefaultsRequested)
+            {
+                resetToDefaultsRequested = false;
+                Debug.Log("[WebServerManager] Executing reset to defaults on main thread");
+                ProcessResetToDefaults();
+            }
+
             // Process pending config update on main thread
             ProcessPendingConfigUpdate();
 
@@ -203,6 +209,26 @@ namespace QuestNav.WebServer
             lock (configUpdateLock)
             {
                 pendingConfigUpdate = request;
+            }
+        }
+
+        /// <summary>
+        /// Requests a reset to defaults to be processed on the main thread.
+        /// </summary>
+        public void RequestResetToDefaults()
+        {
+            resetToDefaultsRequested = true;
+        }
+
+        private async void ProcessResetToDefaults()
+        {
+            try
+            {
+                await configManager.resetToDefaultsAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[WebServerManager] Failed to reset to defaults: {ex.Message}");
             }
         }
 
@@ -277,12 +303,13 @@ namespace QuestNav.WebServer
             var logger = new UnityLogger();
             server = new ConfigServer(
                 configManager,
-                SERVER_PORT,
-                ENABLE_CORS_DEV_MODE,
+                QuestNavConstants.WebServer.SERVER_PORT,
+                QuestNavConstants.WebServer.ENABLE_CORS_DEV_MODE,
                 staticPath,
                 logger,
                 RequestRestart,
                 RequestPoseReset,
+                RequestResetToDefaults,
                 QueueConfigUpdate,
                 statusProvider,
                 logCollector
@@ -411,9 +438,9 @@ namespace QuestNav.WebServer
             Debug.Log("╔═══════════════════════════════════════════════════════════╗");
             Debug.Log("║          QuestNav Configuration Server                    ║");
             Debug.Log("╠═══════════════════════════════════════════════════════════╣");
-            Debug.Log($"║ Port: {SERVER_PORT}");
+            Debug.Log($"║ Port: {QuestNavConstants.WebServer.SERVER_PORT}");
             Debug.Log("╠═══════════════════════════════════════════════════════════╣");
-            Debug.Log($"║ Connect: http://<quest-ip>:{SERVER_PORT}/");
+            Debug.Log($"║ Connect: http://<quest-ip>:{QuestNavConstants.WebServer.SERVER_PORT}/");
             Debug.Log("╚═══════════════════════════════════════════════════════════╝");
         }
 

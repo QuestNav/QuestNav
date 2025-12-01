@@ -57,6 +57,34 @@ class ConfigApi {
     return this.request<SimpleResponse>('/api/reset-config', { method: 'POST' })
   }
 
+  async downloadDatabase(): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/api/download-database`)
+    if (!response.ok) {
+      throw new Error('Failed to download database')
+    }
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'config.db'
+    document.body.appendChild(a)
+    a.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+  }
+
+  async uploadDatabase(file: File): Promise<SimpleResponse> {
+    const response = await fetch(`${this.baseUrl}/api/upload-database`, {
+      method: 'POST',
+      body: file
+    })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: response.statusText }))
+      throw new Error(error.message || `HTTP ${response.status}`)
+    }
+    return response.json()
+  }
+
   async getServerInfo(): Promise<ServerInfo> {
     return this.request<ServerInfo>('/api/info')
   }

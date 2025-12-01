@@ -147,6 +147,21 @@
                   <button @click="handleReset" class="reset-button">Reset to Defaults</button>
                 </div>
               </div>
+
+              <!-- Database Management -->
+              <div class="config-field database-field">
+                <div class="field-header">
+                  <label class="field-label">Database Management</label>
+                  <span class="field-description">Download or upload the configuration database</span>
+                </div>
+                <div class="field-control database-buttons">
+                  <button @click="handleDownloadDatabase" class="database-button">Download Database</button>
+                  <label class="database-button upload-label">
+                    Upload Database
+                    <input type="file" accept=".db" @change="handleUploadDatabase" hidden />
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -164,6 +179,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useConfigStore } from '../stores/config'
+import { configApi } from '../api/config'
 import StatusView from './StatusView.vue'
 import LogsView from './LogsView.vue'
 
@@ -246,6 +262,33 @@ async function handleReset() {
   if (confirm('Reset all settings to defaults?')) {
     await configStore.resetToDefaults()
   }
+}
+
+async function handleDownloadDatabase() {
+  try {
+    await configApi.downloadDatabase()
+  } catch (error) {
+    alert('Failed to download database: ' + (error as Error).message)
+  }
+}
+
+async function handleUploadDatabase(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+  
+  if (!confirm('Upload this database? The app will need to restart to apply changes.')) {
+    target.value = ''
+    return
+  }
+  
+  try {
+    const result = await configApi.uploadDatabase(file)
+    alert(result.message)
+  } catch (error) {
+    alert('Failed to upload database: ' + (error as Error).message)
+  }
+  target.value = ''
 }
 </script>
 
@@ -424,6 +467,34 @@ async function handleReset() {
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.database-field {
+  grid-column: 1 / -1;
+}
+
+.database-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.database-button {
+  padding: 0.75rem 1.5rem;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.database-button:hover {
+  background: var(--border-color);
+}
+
+.upload-label {
+  display: inline-block;
 }
 
 @media (max-width: 768px) {

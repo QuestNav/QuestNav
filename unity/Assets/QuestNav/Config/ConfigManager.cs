@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using QuestNav.Core;
@@ -37,10 +38,14 @@ namespace QuestNav.Config
             "config.db"
         );
         private SQLiteAsyncConnection connection;
+        private SynchronizationContext mainThreadContext;
 
         #region Lifecycle Methods
         public async Task initializeAsync()
         {
+            // Capture the main thread context for event callbacks
+            mainThreadContext = SynchronizationContext.Current;
+            
             SQLitePCL.Batteries_V2.Init();
 
             if (connection != null)
@@ -146,9 +151,9 @@ namespace QuestNav.Config
             config.debugIpOverride = ""; // Blank out IP override
             await saveNetworkConfigAsync(config);
 
-            // Notify subscribed methods
-            onTeamNumberChanged?.Invoke(config.teamNumber);
-            onDebugIpOverrideChanged?.Invoke(config.debugIpOverride);
+            // Notify subscribed methods on the main thread
+            invokeOnMainThread(() => onTeamNumberChanged?.Invoke(config.teamNumber));
+            invokeOnMainThread(() => onDebugIpOverrideChanged?.Invoke(config.debugIpOverride));
             QueuedLogger.Log($"Updated Key 'teamNumber' to {teamNumber}");
         }
 
@@ -168,9 +173,9 @@ namespace QuestNav.Config
             config.teamNumber = QuestNavConstants.Network.TEAM_NUMBER_DISABLED; // Team number -1 indicates IP override in use
             await saveNetworkConfigAsync(config);
 
-            // Notify subscribed methods
-            onDebugIpOverrideChanged?.Invoke(config.debugIpOverride);
-            onTeamNumberChanged?.Invoke(config.teamNumber);
+            // Notify subscribed methods on the main thread
+            invokeOnMainThread(() => onDebugIpOverrideChanged?.Invoke(config.debugIpOverride));
+            invokeOnMainThread(() => onTeamNumberChanged?.Invoke(config.teamNumber));
             QueuedLogger.Log($"Updated Key 'debugIpOverride' to {ipOverride}");
         }
         #endregion
@@ -182,8 +187,8 @@ namespace QuestNav.Config
             config.enableAutoStartOnBoot = autoStart;
             await saveSystemConfigAsync(config);
 
-            // Notify subscribed methods
-            onEnableAutoStartOnBootChanged?.Invoke(autoStart);
+            // Notify subscribed methods on the main thread
+            invokeOnMainThread(() => onEnableAutoStartOnBootChanged?.Invoke(autoStart));
             QueuedLogger.Log($"Updated Key 'autoStartOnBoot' to {autoStart}");
         }
         #endregion
@@ -195,8 +200,8 @@ namespace QuestNav.Config
             config.enableDebugLogging = enableDebugLogging;
             await saveLoggingConfigAsync(config);
 
-            // Notify subscribed methods
-            onEnableDebugLoggingChanged?.Invoke(enableDebugLogging);
+            // Notify subscribed methods on the main thread
+            invokeOnMainThread(() => onEnableDebugLoggingChanged?.Invoke(enableDebugLogging));
             QueuedLogger.Log($"Updated Key 'enableDebugLogging' to {enableDebugLogging}");
         }
         #endregion
@@ -301,6 +306,22 @@ namespace QuestNav.Config
                     and <= QuestNavConstants.Network.MAX_TEAM_NUMBER;
         }
         #endregion
+
+        /// <summary>
+        /// Invokes an action on the main thread using the captured SynchronizationContext.
+        /// Falls back to direct invocation if no context was captured.
+        /// </summary>
+        private void invokeOnMainThread(Action action)
+        {
+            if (mainThreadContext != null)
+            {
+                mainThreadContext.Post(_ => action(), null);
+            }
+            else
+            {
+                action();
+            }
+        }
         #endregion
     }
 }

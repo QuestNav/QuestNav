@@ -228,11 +228,17 @@ namespace QuestNav.WebServer.Server
                 {
                     await HandleResetConfig(context);
                 }
-                else if (path == "/api/download-database" && context.Request.HttpVerb == HttpVerbs.Get)
+                else if (
+                    path == "/api/download-database"
+                    && context.Request.HttpVerb == HttpVerbs.Get
+                )
                 {
                     await HandleDownloadDatabase(context);
                 }
-                else if (path == "/api/upload-database" && context.Request.HttpVerb == HttpVerbs.Post)
+                else if (
+                    path == "/api/upload-database"
+                    && context.Request.HttpVerb == HttpVerbs.Post
+                )
                 {
                     await HandleUploadDatabase(context);
                 }
@@ -321,11 +327,15 @@ namespace QuestNav.WebServer.Server
                 }
                 if (request.EnableAutoStartOnBoot.HasValue)
                 {
-                    await configManager.setEnableAutoStartOnBootAsync(request.EnableAutoStartOnBoot.Value);
+                    await configManager.setEnableAutoStartOnBootAsync(
+                        request.EnableAutoStartOnBoot.Value
+                    );
                 }
                 if (request.EnableDebugLogging.HasValue)
                 {
-                    await configManager.SetEnableDebugLoggingAsync(request.EnableDebugLogging.Value);
+                    await configManager.SetEnableDebugLoggingAsync(
+                        request.EnableDebugLogging.Value
+                    );
                 }
 
                 await SendJsonResponse(
@@ -351,7 +361,11 @@ namespace QuestNav.WebServer.Server
                 await configManager.ResetToDefaultsAsync();
                 await SendJsonResponse(
                     context,
-                    new SimpleResponse { success = true, message = "Configuration reset to defaults" }
+                    new SimpleResponse
+                    {
+                        success = true,
+                        message = "Configuration reset to defaults",
+                    }
                 );
             }
             catch (Exception ex)

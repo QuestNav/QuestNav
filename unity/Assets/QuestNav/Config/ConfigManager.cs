@@ -45,7 +45,7 @@ namespace QuestNav.Config
         {
             // Capture the main thread context for event callbacks
             mainThreadContext = SynchronizationContext.Current;
-            
+
             SQLitePCL.Batteries_V2.Init();
 
             if (connection != null)

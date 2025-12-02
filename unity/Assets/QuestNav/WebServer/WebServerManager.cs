@@ -283,10 +283,16 @@ namespace QuestNav.WebServer
             Directory.CreateDirectory(assetsDir);
 
             await ExtractAndroidFileAsync("ui/index.html", Path.Combine(targetPath, "index.html"));
-            await ExtractAndroidFileAsync("ui/assets/main.css", Path.Combine(assetsDir, "main.css"));
+            await ExtractAndroidFileAsync(
+                "ui/assets/main.css",
+                Path.Combine(assetsDir, "main.css")
+            );
             await ExtractAndroidFileAsync("ui/assets/main.js", Path.Combine(assetsDir, "main.js"));
             await ExtractAndroidFileAsync("ui/logo.svg", Path.Combine(targetPath, "logo.svg"));
-            await ExtractAndroidFileAsync("ui/logo-dark.svg", Path.Combine(targetPath, "logo-dark.svg"));
+            await ExtractAndroidFileAsync(
+                "ui/logo-dark.svg",
+                Path.Combine(targetPath, "logo-dark.svg")
+            );
 
             Debug.Log("[WebServerManager] UI extraction complete");
         }
@@ -308,7 +314,9 @@ namespace QuestNav.WebServer
                 }
                 else
                 {
-                    Debug.LogWarning($"[WebServerManager] Failed to extract {sourceRelative}: {www.error}");
+                    Debug.LogWarning(
+                        $"[WebServerManager] Failed to extract {sourceRelative}: {www.error}"
+                    );
                 }
             }
         }
@@ -321,7 +329,11 @@ namespace QuestNav.WebServer
 
             Directory.CreateDirectory(path);
 
-            string fallbackSourcePath = Path.Combine(Application.streamingAssetsPath, "ui", "fallback.html");
+            string fallbackSourcePath = Path.Combine(
+                Application.streamingAssetsPath,
+                "ui",
+                "fallback.html"
+            );
             string fallbackTargetPath = Path.Combine(path, "index.html");
 
             try
@@ -376,16 +388,26 @@ namespace QuestNav.WebServer
                 using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
                 using (var activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
                 using (var pm = activity.Call<AndroidJavaObject>("getPackageManager"))
-                using (var intent = pm.Call<AndroidJavaObject>("getLaunchIntentForPackage", Application.identifier))
+                using (
+                    var intent = pm.Call<AndroidJavaObject>(
+                        "getLaunchIntentForPackage",
+                        Application.identifier
+                    )
+                )
                 {
                     const int FLAG_ACTIVITY_NEW_TASK = 0x10000000;
                     const int FLAG_ACTIVITY_CLEAR_TASK = 0x00008000;
                     const int FLAG_ACTIVITY_CLEAR_TOP = 0x04000000;
 
-                    intent.Call<AndroidJavaObject>("addFlags", FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK | FLAG_ACTIVITY_CLEAR_TOP);
+                    intent.Call<AndroidJavaObject>(
+                        "addFlags",
+                        FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK | FLAG_ACTIVITY_CLEAR_TOP
+                    );
                     activity.Call("startActivity", intent);
 
-                    Debug.Log("[WebServerManager] New instance started, killing current process...");
+                    Debug.Log(
+                        "[WebServerManager] New instance started, killing current process..."
+                    );
                 }
 
                 using (var process = new AndroidJavaClass("android.os.Process"))

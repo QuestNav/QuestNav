@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using QuestNav.Config;
 using UnityEngine;
 
-namespace QuestNav.WebServer
+namespace QuestNav.WebServer.Server
 {
     /// <summary>
     /// Cached server information captured on main thread.
@@ -25,11 +25,6 @@ namespace QuestNav.WebServer
     }
 
     /// <summary>
-    /// Callback delegate for main thread actions from background thread.
-    /// </summary>
-    public delegate void MainThreadAction();
-
-    /// <summary>
     /// HTTP server for configuration management using SQLite-based ConfigManager.
     /// </summary>
     public class ConfigServer
@@ -41,13 +36,13 @@ namespace QuestNav.WebServer
         private readonly bool enableCORSDevMode;
         private readonly string staticPath;
         private readonly ILogger logger;
-        private CachedServerInfo cachedServerInfo;
-        private MainThreadAction restartCallback;
-        private MainThreadAction poseResetCallback;
-        private MainThreadAction resetToDefaultsCallback;
-        private readonly Action<ConfigUpdateRequest> configUpdateCallback;
+        private readonly WebServerManager webServerManager;
         private readonly StatusProvider statusProvider;
         private readonly LogCollector logCollector;
+
+        private CachedServerInfo cachedServerInfo;
+        private readonly string cachedDatabasePath;
+
         private readonly System.Collections.Generic.Dictionary<string, DateTime> activeClients =
             new System.Collections.Generic.Dictionary<string, DateTime>();
         private readonly object clientsLock = new object();
@@ -62,10 +57,7 @@ namespace QuestNav.WebServer
             bool enableCORSDevMode,
             string staticPath,
             ILogger logger,
-            MainThreadAction restartCallback,
-            MainThreadAction poseResetCallback,
-            MainThreadAction resetToDefaultsCallback,
-            Action<ConfigUpdateRequest> configUpdateCallback,
+            WebServerManager webServerManager,
             StatusProvider statusProvider,
             LogCollector logCollector
         )
@@ -75,20 +67,14 @@ namespace QuestNav.WebServer
             this.enableCORSDevMode = enableCORSDevMode;
             this.staticPath = staticPath;
             this.logger = logger;
-            this.restartCallback = restartCallback;
-            this.poseResetCallback = poseResetCallback;
-            this.resetToDefaultsCallback = resetToDefaultsCallback;
-            this.configUpdateCallback = configUpdateCallback;
+            this.webServerManager = webServerManager;
             this.statusProvider = statusProvider;
             this.logCollector = logCollector;
 
-            // Cache paths that require main thread access
             cachedDatabasePath = Path.Combine(Application.persistentDataPath, "config.db");
 
             CacheServerInfo();
         }
-
-        private string cachedDatabasePath;
 
         private void CacheServerInfo()
         {
@@ -106,7 +92,7 @@ namespace QuestNav.WebServer
             };
         }
 
-        public void Start()
+        public async Task StartAsync()
         {
             if (IsRunning)
             {
@@ -119,20 +105,29 @@ namespace QuestNav.WebServer
             logger?.Log($"[ConfigServer] Starting server on port {port}");
             logger?.Log($"[ConfigServer] Static files path: {staticPath}");
 
+            var listeningTcs = new TaskCompletionSource<bool>();
+
             server = new EmbedIO.WebServer(o =>
                 o.WithUrlPrefix($"http://*:{port}/").WithMode(HttpListenerMode.EmbedIO)
             )
                 .WithModule(new ActionModule("/api", HttpVerbs.Any, HandleApiRequest))
                 .WithStaticFolder("/", staticPath, true);
 
-            server.StateChanged += (s, e) => { };
+            server.StateChanged += (s, e) =>
+            {
+                if (e.NewState == WebServerState.Listening)
+                {
+                    listeningTcs.TrySetResult(true);
+                }
+            };
+
             try
             {
                 Swan.Logging.Logger.UnregisterLogger<Swan.Logging.ConsoleLogger>();
             }
             catch { }
 
-            Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 try
                 {
@@ -141,8 +136,11 @@ namespace QuestNav.WebServer
                 catch (Exception ex)
                 {
                     logger?.LogError($"[ConfigServer] Server error: {ex.Message}");
+                    listeningTcs.TrySetResult(false);
                 }
             });
+
+            await listeningTcs.Task;
 
             logger?.Log($"[ConfigServer] Server started at {BaseUrl}");
         }
@@ -177,10 +175,14 @@ namespace QuestNav.WebServer
                 foreach (var kvp in activeClients)
                 {
                     if (now - kvp.Value > activeClientWindow)
+                    {
                         staleClients.Add(kvp.Key);
+                    }
                 }
                 foreach (var client in staleClients)
+                {
                     activeClients.Remove(client);
+                }
                 return activeClients.Count;
             }
         }
@@ -200,7 +202,9 @@ namespace QuestNav.WebServer
                 RecordClientActivity(clientIp);
 
                 if (enableCORSDevMode)
+                {
                     context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+                }
                 context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
                 context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
 
@@ -213,33 +217,49 @@ namespace QuestNav.WebServer
                 string path = context.Request.Url.AbsolutePath;
 
                 if (path == "/api/config" && context.Request.HttpVerb == HttpVerbs.Get)
+                {
                     await HandleGetConfig(context);
+                }
                 else if (path == "/api/config" && context.Request.HttpVerb == HttpVerbs.Post)
+                {
                     await HandlePostConfig(context);
+                }
                 else if (path == "/api/reset-config" && context.Request.HttpVerb == HttpVerbs.Post)
+                {
                     await HandleResetConfig(context);
-                else if (
-                    path == "/api/download-database"
-                    && context.Request.HttpVerb == HttpVerbs.Get
-                )
+                }
+                else if (path == "/api/download-database" && context.Request.HttpVerb == HttpVerbs.Get)
+                {
                     await HandleDownloadDatabase(context);
-                else if (
-                    path == "/api/upload-database"
-                    && context.Request.HttpVerb == HttpVerbs.Post
-                )
+                }
+                else if (path == "/api/upload-database" && context.Request.HttpVerb == HttpVerbs.Post)
+                {
                     await HandleUploadDatabase(context);
+                }
                 else if (path == "/api/info" && context.Request.HttpVerb == HttpVerbs.Get)
+                {
                     await HandleGetInfo(context);
+                }
                 else if (path == "/api/status" && context.Request.HttpVerb == HttpVerbs.Get)
+                {
                     await HandleGetStatus(context);
+                }
                 else if (path == "/api/logs" && context.Request.HttpVerb == HttpVerbs.Get)
+                {
                     await HandleGetLogs(context);
+                }
                 else if (path == "/api/logs" && context.Request.HttpVerb == HttpVerbs.Delete)
+                {
                     await HandleClearLogs(context);
+                }
                 else if (path == "/api/restart" && context.Request.HttpVerb == HttpVerbs.Post)
+                {
                     await HandleRestart(context);
+                }
                 else if (path == "/api/reset-pose" && context.Request.HttpVerb == HttpVerbs.Post)
+                {
                     await HandleResetPose(context);
+                }
                 else
                 {
                     context.Response.StatusCode = 404;
@@ -289,21 +309,60 @@ namespace QuestNav.WebServer
                 return;
             }
 
-            // Queue the config update to be processed on the main thread
-            configUpdateCallback?.Invoke(request);
-            await SendJsonResponse(
-                context,
-                new SimpleResponse { success = true, message = "Configuration updated" }
-            );
+            try
+            {
+                if (request.teamNumber.HasValue)
+                {
+                    await configManager.setTeamNumberAsync(request.teamNumber.Value);
+                }
+                if (request.debugIpOverride != null)
+                {
+                    await configManager.setDebugIpOverrideAsync(request.debugIpOverride);
+                }
+                if (request.enableAutoStartOnBoot.HasValue)
+                {
+                    await configManager.setEnableAutoStartOnBootAsync(request.enableAutoStartOnBoot.Value);
+                }
+                if (request.enableDebugLogging.HasValue)
+                {
+                    await configManager.setEnableDebugLoggingAsync(request.enableDebugLogging.Value);
+                }
+
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = true, message = "Configuration updated" }
+                );
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError($"[ConfigServer] Failed to apply config update: {ex.Message}");
+                context.Response.StatusCode = 500;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = false, message = ex.Message }
+                );
+            }
         }
 
         private async Task HandleResetConfig(IHttpContext context)
         {
-            resetToDefaultsCallback?.Invoke();
-            await SendJsonResponse(
-                context,
-                new SimpleResponse { success = true, message = "Configuration reset to defaults" }
-            );
+            try
+            {
+                await configManager.resetToDefaultsAsync();
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = true, message = "Configuration reset to defaults" }
+                );
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError($"[ConfigServer] Failed to reset config: {ex.Message}");
+                context.Response.StatusCode = 500;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = false, message = ex.Message }
+                );
+            }
         }
 
         private async Task HandleDownloadDatabase(IHttpContext context)
@@ -414,7 +473,9 @@ namespace QuestNav.WebServer
         {
             int count = 100;
             if (context.Request.QueryString["count"] != null)
+            {
                 int.TryParse(context.Request.QueryString["count"], out count);
+            }
 
             var logs = logCollector.GetRecentLogs(count);
             await SendJsonResponse(context, new LogsResponse { success = true, logs = logs });
@@ -435,12 +496,12 @@ namespace QuestNav.WebServer
                 context,
                 new SimpleResponse { success = true, message = "Restart initiated" }
             );
-            restartCallback?.Invoke();
+            webServerManager.RequestRestart();
         }
 
         private async Task HandleResetPose(IHttpContext context)
         {
-            poseResetCallback?.Invoke();
+            webServerManager.RequestPoseReset();
             await SendJsonResponse(
                 context,
                 new SimpleResponse { success = true, message = "Pose reset initiated" }

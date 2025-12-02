@@ -223,7 +223,7 @@ namespace QuestNav.Core
             // Use try-catch here due to async
             try
             {
-                await networkTableConnection.initializeAsync();
+                await networkTableConnection.InitializeAsync();
             }
             catch (Exception e)
             {
@@ -267,10 +267,9 @@ namespace QuestNav.Core
             webServerManager = new WebServerManager(
                 configManager,
                 networkTableConnection,
-                this,
                 ExecutePoseResetToOrigin
             );
-            webServerManager.Initialize();
+            _ = webServerManager.InitializeAsync();
 
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
@@ -344,7 +343,7 @@ namespace QuestNav.Core
 
             // Process and display NetworkTables internal messages (connection status, errors, etc.)
             // This helps with debugging connection issues without impacting performance
-            networkTableConnection.loggerPeriodic();
+            networkTableConnection.LoggerPeriodic();
 
             // Update UI elements like connection status, IP address display, team number validation
             // UI updates don't need to be real-time, 3Hz provides smooth visual feedback
@@ -452,7 +451,7 @@ namespace QuestNav.Core
                 );
 
                 // Check NetworkTables connection status
-                if (!networkTableConnection.isConnected)
+                if (!networkTableConnection.IsConnected)
                 {
                     QueuedLogger.LogError(
                         "[QuestNav] NetworkTables disconnected during pause event"
@@ -470,7 +469,7 @@ namespace QuestNav.Core
                 QueuedLogger.Log("[QuestNav] Application resumed - verifying systems");
 
                 // Verify NetworkTables connection
-                if (networkTableConnection.isConnected)
+                if (networkTableConnection.IsConnected)
                 {
                     QueuedLogger.Log("[QuestNav] NetworkTables connection active");
                 }

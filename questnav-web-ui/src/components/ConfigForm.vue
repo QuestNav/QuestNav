@@ -44,124 +44,115 @@
           <div v-show="activeTab === 'Settings'" class="tab-panel">
             <div class="settings-grid">
               <!-- Team Number -->
-              <div class="config-field" :class="{ 'field-override-active': isDebugIPActive }">
-                <div class="field-header">
-                  <label class="field-label">
-                    Team Number
-                    <span v-if="isDebugIPActive" class="override-badge">OVERRIDDEN</span>
-                  </label>
-                  <span class="field-description">
-                    <template v-if="isDebugIPActive">
-                      <strong>Enter a team number and click Apply to clear the IP override</strong>
-                    </template>
-                    <template v-else>
-                      FRC team number (1-25599)
-                    </template>
-                  </span>
-                </div>
-                <div class="field-control input-control">
-                  <input
-                    type="number"
-                    :value="pendingTeamNumber ?? configStore.config.teamNumber"
-                    @input="handleTeamNumberInput"
-                    @keyup.enter="submitTeamNumber"
-                    min="1"
-                    max="25599"
-                  />
-                  <button 
-                    v-if="hasTeamNumberChanged"
-                    @click="submitTeamNumber"
-                    class="submit-button"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
+              <ConfigField
+                title="Team Number"
+                :field-class="{ 'field-override-active': isDebugIPActive }"
+                control-class="input-control"
+              >
+                <template #badge>
+                  <span v-if="isDebugIPActive" class="override-badge">OVERRIDDEN</span>
+                </template>
+                <template #description>
+                  <template v-if="isDebugIPActive">
+                    <strong>Enter a team number and click Apply to clear the IP override</strong>
+                  </template>
+                  <template v-else>
+                    FRC team number (1-25599)
+                  </template>
+                </template>
+                <input
+                  type="number"
+                  :value="pendingTeamNumber ?? configStore.config.teamNumber"
+                  @input="handleTeamNumberInput"
+                  @keyup.enter="submitTeamNumber"
+                  min="1"
+                  max="25599"
+                />
+                <button 
+                  v-if="hasTeamNumberChanged"
+                  @click="submitTeamNumber"
+                  class="submit-button"
+                >
+                  Apply
+                </button>
+              </ConfigField>
 
               <!-- Debug IP Override -->
-              <div class="config-field" :class="{ 'field-warning': isDebugIPActive }">
-                <div class="field-header">
-                  <label class="field-label">
-                    Debug IP Override
-                    <span v-if="isDebugIPActive" class="debug-badge">DEBUG MODE</span>
-                  </label>
-                  <span class="field-description">Override robot IP for testing (leave empty for team number)</span>
-                </div>
-                <div class="field-control input-control">
-                  <input
-                    type="text"
-                    :value="pendingDebugIP ?? configStore.config.debugIpOverride"
-                    @input="handleDebugIPInput"
-                    @keyup.enter="submitDebugIP"
-                    placeholder="e.g., 10.0.0.2"
-                  />
-                  <button 
-                    v-if="hasDebugIPChanged"
-                    @click="submitDebugIP"
-                    class="submit-button"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
+              <ConfigField
+                title="Debug IP Override"
+                description="Override robot IP for testing (leave empty for team number)"
+                :field-class="{ 'field-warning': isDebugIPActive }"
+                control-class="input-control"
+              >
+                <template #badge>
+                  <span v-if="isDebugIPActive" class="debug-badge">DEBUG MODE</span>
+                </template>
+                <input
+                  type="text"
+                  :value="pendingDebugIP ?? configStore.config.debugIpOverride"
+                  @input="handleDebugIPInput"
+                  @keyup.enter="submitDebugIP"
+                  placeholder="e.g., 10.0.0.2"
+                />
+                <button 
+                  v-if="hasDebugIPChanged"
+                  @click="submitDebugIP"
+                  class="submit-button"
+                >
+                  Apply
+                </button>
+              </ConfigField>
 
               <!-- Auto Start on Boot -->
-              <div class="config-field">
-                <div class="field-header">
-                  <label class="field-label">Auto Start on Boot</label>
-                  <span class="field-description">Start QuestNav when headset boots</span>
-                </div>
-                <div class="field-control checkbox-control">
-                  <input
-                    type="checkbox"
-                    :checked="configStore.config.enableAutoStartOnBoot"
-                    @change="handleAutoStartChange"
-                  />
-                  <span class="checkbox-label">{{ configStore.config.enableAutoStartOnBoot ? 'Enabled' : 'Disabled' }}</span>
-                </div>
-              </div>
+              <ConfigField
+                title="Auto Start on Boot"
+                description="Start QuestNav when headset boots"
+                control-class="checkbox-control"
+              >
+                <input
+                  type="checkbox"
+                  :checked="configStore.config.enableAutoStartOnBoot"
+                  @change="handleAutoStartChange"
+                />
+                <span class="checkbox-label">{{ configStore.config.enableAutoStartOnBoot ? 'Enabled' : 'Disabled' }}</span>
+              </ConfigField>
 
               <!-- Debug Logging -->
-              <div class="config-field">
-                <div class="field-header">
-                  <label class="field-label">Debug Logging</label>
-                  <span class="field-description">Enable verbose debug logging</span>
-                </div>
-                <div class="field-control checkbox-control">
-                  <input
-                    type="checkbox"
-                    :checked="configStore.config.enableDebugLogging"
-                    @change="handleDebugLoggingChange"
-                  />
-                  <span class="checkbox-label">{{ configStore.config.enableDebugLogging ? 'Enabled' : 'Disabled' }}</span>
-                </div>
-              </div>
+              <ConfigField
+                title="Debug Logging"
+                description="Enable verbose debug logging"
+                control-class="checkbox-control"
+              >
+                <input
+                  type="checkbox"
+                  :checked="configStore.config.enableDebugLogging"
+                  @change="handleDebugLoggingChange"
+                />
+                <span class="checkbox-label">{{ configStore.config.enableDebugLogging ? 'Enabled' : 'Disabled' }}</span>
+              </ConfigField>
 
               <!-- Reset to Defaults -->
-              <div class="config-field reset-field">
-                <div class="field-header">
-                  <label class="field-label">Reset Configuration</label>
-                  <span class="field-description">Reset all settings to defaults</span>
-                </div>
-                <div class="field-control">
-                  <button @click="handleReset" class="reset-button">Reset to Defaults</button>
-                </div>
-              </div>
+              <ConfigField
+                title="Reset Configuration"
+                description="Reset all settings to defaults"
+                field-class="reset-field"
+              >
+                <button @click="handleReset" class="reset-button">Reset to Defaults</button>
+              </ConfigField>
 
               <!-- Database Management -->
-              <div class="config-field database-field">
-                <div class="field-header">
-                  <label class="field-label">Database Management</label>
-                  <span class="field-description">Download or upload the configuration database</span>
-                </div>
-                <div class="field-control database-buttons">
-                  <button @click="handleDownloadDatabase" class="database-button">Download Database</button>
-                  <label class="database-button upload-label">
-                    Upload Database
-                    <input type="file" accept=".db" @change="handleUploadDatabase" hidden />
-                  </label>
-                </div>
-              </div>
+              <ConfigField
+                title="Database Management"
+                description="Download or upload the configuration database"
+                field-class="database-field"
+                control-class="database-buttons"
+              >
+                <button @click="handleDownloadDatabase" class="database-button">Download Database</button>
+                <label class="database-button upload-label">
+                  Upload Database
+                  <input type="file" accept=".db" @change="handleUploadDatabase" hidden />
+                </label>
+              </ConfigField>
             </div>
           </div>
         </div>
@@ -182,6 +173,7 @@ import { useConfigStore } from '../stores/config'
 import { configApi } from '../api/config'
 import StatusView from './StatusView.vue'
 import LogsView from './LogsView.vue'
+import ConfigField from './ConfigField.vue'
 
 const configStore = useConfigStore()
 const activeTab = ref<string>('Status')
@@ -362,44 +354,6 @@ async function handleUploadDatabase(event: Event) {
   gap: 1.5rem;
 }
 
-.config-field {
-  padding: 1.5rem;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-}
-
-.config-field.field-warning {
-  border-color: var(--warning-color);
-  background: rgba(255, 193, 7, 0.1);
-}
-
-.config-field.field-override-active {
-  border-color: var(--warning-color);
-  background: rgba(255, 193, 7, 0.15);
-}
-
-.config-field.field-override-active .field-description {
-  color: var(--warning-color);
-}
-
-.field-header {
-  margin-bottom: 1rem;
-}
-
-.field-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.field-description {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
 .debug-badge, .override-badge {
   font-size: 0.7rem;
   padding: 0.2rem 0.5rem;
@@ -417,19 +371,6 @@ async function handleUploadDatabase(event: Event) {
   color: white;
 }
 
-.input-control {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.input-control input {
-  flex: 1;
-  padding: 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
 .submit-button {
   padding: 0.75rem 1.25rem;
   background: var(--primary-color);
@@ -440,23 +381,8 @@ async function handleUploadDatabase(event: Event) {
   cursor: pointer;
 }
 
-.checkbox-control {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.checkbox-control input {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
 .checkbox-label {
   font-weight: 500;
-}
-
-.reset-field {
-  grid-column: 1 / -1;
 }
 
 .reset-button {
@@ -467,16 +393,6 @@ async function handleUploadDatabase(event: Event) {
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-}
-
-.database-field {
-  grid-column: 1 / -1;
-}
-
-.database-buttons {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
 }
 
 .database-button {

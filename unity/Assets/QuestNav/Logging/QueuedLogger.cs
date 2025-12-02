@@ -17,13 +17,13 @@ namespace QuestNav.Utils
         public enum LogLevel
         {
             /// <summary>Informational messages</summary>
-            Info,
+            NT_INFO,
 
             /// <summary>Warning messages</summary>
-            Warning,
+            NT_WARNING,
 
             /// <summary>Error messages</summary>
-            Error,
+            NT_ERROR,
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace QuestNav.Utils
         /// <param name="callerFilePath">Automatically populated with the calling file path</param>
         public static void Log(
             string message,
-            LogLevel level = LogLevel.Info,
+            LogLevel level = LogLevel.NT_INFO,
             [CallerFilePath] string callerFilePath = ""
         )
         {
@@ -128,7 +128,7 @@ namespace QuestNav.Utils
         /// <param name="callerFilePath">Automatically populated with the calling file path</param>
         public static void LogWarning(string message, [CallerFilePath] string callerFilePath = "")
         {
-            Log(message, LogLevel.Warning, callerFilePath);
+            Log(message, LogLevel.NT_WARNING, callerFilePath);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace QuestNav.Utils
         /// <param name="callerFilePath">Automatically populated with the calling file path</param>
         public static void LogError(string message, [CallerFilePath] string callerFilePath = "")
         {
-            Log(message, LogLevel.Error, callerFilePath);
+            Log(message, LogLevel.NT_ERROR, callerFilePath);
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace QuestNav.Utils
 
             if (
                 lastEntry != null
-                && lastEntry.Level == LogLevel.Error
+                && lastEntry.Level == LogLevel.NT_ERROR
                 && lastEntry.Exception != null
                 && lastEntry.Message == message
                 && lastEntry.CallingFileName == callingFileName
@@ -180,7 +180,7 @@ namespace QuestNav.Utils
             }
             else
             {
-                lastEntry = new LogEntry(message, LogLevel.Error, callingFileName, exception);
+                lastEntry = new LogEntry(message, LogLevel.NT_ERROR, callingFileName, exception);
                 logQueue.Enqueue(lastEntry);
             }
         }
@@ -196,10 +196,10 @@ namespace QuestNav.Utils
                 LogEntry entry = logQueue.Dequeue();
                 switch (entry.Level)
                 {
-                    case LogLevel.Warning:
+                    case LogLevel.NT_WARNING:
                         Debug.LogWarning(entry.ToString());
                         break;
-                    case LogLevel.Error:
+                    case LogLevel.NT_ERROR:
                         if (entry.Exception != null)
                         {
                             // Log the custom message with prefix and count

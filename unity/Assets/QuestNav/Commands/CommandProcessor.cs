@@ -68,7 +68,7 @@ namespace QuestNav.Commands
         /// </summary>
         public void ProcessCommands()
         {
-            var receivedCommands = networkTableConnection.getCommandRequests();
+            var receivedCommands = networkTableConnection.GetCommandRequests();
             // Collect all but the most recent PoseReset command, they have been superseded
             var supersededPoseResetCommands = receivedCommands
                 .Where(cmd => cmd.Value.Type == QuestNavCommandType.PoseReset)
@@ -89,7 +89,7 @@ namespace QuestNav.Commands
                             QueuedLogger.Log(
                                 $"Skipping superseded Pose Reset Command. ID: {receivedCommand.CommandId}"
                             );
-                            networkTableConnection.sendCommandErrorResponse(
+                            networkTableConnection.SendCommandErrorResponse(
                                 receivedCommand.CommandId,
                                 "Pose Reset Command superseded"
                             );
@@ -99,7 +99,7 @@ namespace QuestNav.Commands
                             // Get the age of the command, in milliseconds
                             var ageMs =
                                 (
-                                    networkTableConnection.ntNow
+                                    networkTableConnection.NtNow
                                     - receivedTimestampedCommand.LastChange
                                 ) / 1000;
 
@@ -120,7 +120,7 @@ namespace QuestNav.Commands
                                     $"Skipping stale Pose Reset Command. ID: {receivedCommand.CommandId} "
                                         + $"Age: {ageMs} ms > {POSE_RESET_TTL_MS} ms"
                                 );
-                                networkTableConnection.sendCommandErrorResponse(
+                                networkTableConnection.SendCommandErrorResponse(
                                     receivedCommand.CommandId,
                                     $"Pose Reset Command too old. Age: {ageMs} ms > {POSE_RESET_TTL_MS} ms"
                                 );
@@ -130,7 +130,7 @@ namespace QuestNav.Commands
                     default:
                         QueuedLogger.Log(
                             $"Execute called with unknown command. ID: {receivedCommand.CommandId} Type: {receivedCommand.Type}",
-                            QueuedLogger.LogLevel.Warning
+                            QueuedLogger.LogLevel.NT_WARNING
                         );
                         break;
                 }

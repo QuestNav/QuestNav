@@ -16,7 +16,7 @@ namespace QuestNav.Core
             /// <summary>
             /// Default NetworkTables publisher/subscriber options
             /// </summary>
-            public static PubSubOptions NT_PUBLISHER_SETTINGS = PubSubOptions.AllDefault;
+            public static PubSubOptions NtPublisherSettings = PubSubOptions.AllDefault;
 
             /// <summary>
             /// NetworkTables server port
@@ -121,7 +121,7 @@ namespace QuestNav.Core
             /// <summary>
             /// NetworkTables logging levels constants
             /// </summary>
-            public static class NTLogLevel
+            public static class NtLogLevel
             {
                 /// <summary>Critical level logging</summary>
                 internal const int CRITICAL = 50;
@@ -154,17 +154,17 @@ namespace QuestNav.Core
             /// <summary>
             /// The lowest level to log when using DEBUG logging. Usually this is INFO, or DEBUG1
             /// </summary>
-            public const int NT_LOG_LEVEL_MIN_DEBUG = NTLogLevel.DEBUG1;
+            public const int NT_LOG_LEVEL_MIN_DEBUG = NtLogLevel.DEBUG1;
 
             /// <summary>
             /// The lowest level to log when using STANDARD logging. Usually this is WARNING
             /// </summary>
-            public const int NT_LOG_LEVEL_MIN_STANDARD = NTLogLevel.WARNING;
+            public const int NT_LOG_LEVEL_MIN_STANDARD = NtLogLevel.WARNING;
 
             /// <summary>
             /// The highest level to log. Almost ALWAYS this is CRITICAL.
             /// </summary>
-            public const int NT_LOG_LEVEL_MAX = NTLogLevel.CRITICAL;
+            public const int NT_LOG_LEVEL_MAX = NtLogLevel.CRITICAL;
         }
 
         /// <summary>

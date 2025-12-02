@@ -74,41 +74,41 @@ namespace QuestNav.Native.NTCore
 
             public unsafe struct NtValueRaw
             {
-                public byte* data;
-                public UIntPtr size;
+                public byte* Data;
+                public UIntPtr Size;
             }
 
             public unsafe struct NtValueBooleanArray
             {
-                public int* arr;
-                public UIntPtr size;
+                public int* Arr;
+                public UIntPtr Size;
             }
 
             public unsafe struct NtValueDoubleArray
             {
-                public double* arr;
+                public double* Arr;
 
-                public UIntPtr size;
+                public UIntPtr Size;
             }
 
             public unsafe struct NtValueFloatArray
             {
-                public float* arr;
+                public float* Arr;
 
-                public UIntPtr size;
+                public UIntPtr Size;
             }
 
             public unsafe struct NtValueIntArray
             {
-                public long* arr;
+                public long* Arr;
 
-                public UIntPtr size;
+                public UIntPtr Size;
             }
 
             public unsafe struct NtValueStringArray
             {
-                public WpiString* arr;
-                public UIntPtr size;
+                public WpiString* Arr;
+                public UIntPtr Size;
             }
         }
     }
@@ -350,7 +350,7 @@ namespace QuestNav.Native.NTCore
         public static extern void NT_SetServerMulti(
             uint inst,
             UIntPtr count,
-            WpiString* server_names,
+            WpiString* serverNames,
             uint* ports
         );
 

@@ -23,10 +23,10 @@ namespace QuestNav.WebServer
     [Serializable]
     public class ConfigUpdateRequest
     {
-        public int? teamNumber;
+        public int? TeamNumber;
         public string debugIpOverride;
-        public bool? enableAutoStartOnBoot;
-        public bool? enableDebugLogging;
+        public bool? EnableAutoStartOnBoot;
+        public bool? EnableDebugLogging;
     }
 
     /// <summary>

@@ -12,23 +12,23 @@ namespace QuestNav.Config
 {
     public interface IConfigManager
     {
-        public Task initializeAsync();
-        public Task closeAsync();
+        public Task InitializeAsync();
+        public Task CloseAsync();
 
-        public event Action<int> onTeamNumberChanged;
-        public event Action<string> onDebugIpOverrideChanged;
-        public event Action<bool> onEnableAutoStartOnBootChanged;
-        public event Action<bool> onEnableDebugLoggingChanged;
+        public event Action<int> OnTeamNumberChanged;
+        public event Action<string> OnDebugIpOverrideChanged;
+        public event Action<bool> OnEnableAutoStartOnBootChanged;
+        public event Action<bool> OnEnableDebugLoggingChanged;
 
-        public Task<int> getTeamNumberAsync();
-        public Task<string> getDebugIpOverrideAsync();
+        public Task<int> GetTeamNumberAsync();
+        public Task<string> GetDebugIpOverrideAsync();
         public Task<bool> getEnableAutoStartOnBootAsync();
-        public Task<bool> getEnableDebugLoggingAsync();
-        public Task setTeamNumberAsync(int teamNumber);
-        public Task setDebugIpOverrideAsync(string ipOverride);
+        public Task<bool> GetEnableDebugLoggingAsync();
+        public Task SetTeamNumberAsync(int teamNumber);
+        public Task SetDebugIpOverrideAsync(string ipOverride);
         public Task setEnableAutoStartOnBootAsync(bool autoStart);
-        public Task setEnableDebugLoggingAsync(bool enableDebugLogging);
-        public Task resetToDefaultsAsync();
+        public Task SetEnableDebugLoggingAsync(bool enableDebugLogging);
+        public Task ResetToDefaultsAsync();
     }
 
     public class ConfigManager : IConfigManager
@@ -41,7 +41,7 @@ namespace QuestNav.Config
         private SynchronizationContext mainThreadContext;
 
         #region Lifecycle Methods
-        public async Task initializeAsync()
+        public async Task InitializeAsync()
         {
             // Capture the main thread context for event callbacks
             mainThreadContext = SynchronizationContext.Current;
@@ -61,20 +61,20 @@ namespace QuestNav.Config
             QueuedLogger.Log($"Database initialized at: {dbPath}");
         }
 
-        public async Task resetToDefaultsAsync()
+        public async Task ResetToDefaultsAsync()
         {
             var networkDefaults = new Config.Network();
             var systemDefaults = new Config.System();
             var loggingDefaults = new Config.Logging();
 
-            await setTeamNumberAsync(networkDefaults.teamNumber);
-            await setEnableAutoStartOnBootAsync(systemDefaults.enableAutoStartOnBoot);
-            await setEnableDebugLoggingAsync(loggingDefaults.enableDebugLogging);
+            await SetTeamNumberAsync(networkDefaults.TeamNumber);
+            await setEnableAutoStartOnBootAsync(systemDefaults.EnableAutoStartOnBoot);
+            await SetEnableDebugLoggingAsync(loggingDefaults.EnableDebugLogging);
 
             QueuedLogger.Log("Database reset to defaults");
         }
 
-        public async Task closeAsync()
+        public async Task CloseAsync()
         {
             if (connection != null)
             {
@@ -86,48 +86,48 @@ namespace QuestNav.Config
 
         #region Events
         // Network events
-        public event Action<int> onTeamNumberChanged;
-        public event Action<string> onDebugIpOverrideChanged;
+        public event Action<int> OnTeamNumberChanged;
+        public event Action<string> OnDebugIpOverrideChanged;
 
         // System events
-        public event Action<bool> onEnableAutoStartOnBootChanged;
+        public event Action<bool> OnEnableAutoStartOnBootChanged;
 
         // Logging events
-        public event Action<bool> onEnableDebugLoggingChanged;
+        public event Action<bool> OnEnableDebugLoggingChanged;
         #endregion
 
         #region Getters
         #region Network
-        public async Task<int> getTeamNumberAsync()
+        public async Task<int> GetTeamNumberAsync()
         {
-            var config = await getNetworkConfigAsync();
+            var config = await GetNetworkConfigAsync();
 
-            return config.teamNumber;
+            return config.TeamNumber;
         }
 
-        public async Task<string> getDebugIpOverrideAsync()
+        public async Task<string> GetDebugIpOverrideAsync()
         {
-            var config = await getNetworkConfigAsync();
+            var config = await GetNetworkConfigAsync();
 
-            return config.debugIpOverride;
+            return config.DebugIpOverride;
         }
         #endregion
 
         #region System
         public async Task<bool> getEnableAutoStartOnBootAsync()
         {
-            var config = await getSystemConfigAsync();
+            var config = await GetSystemConfigAsync();
 
-            return config.enableAutoStartOnBoot;
+            return config.EnableAutoStartOnBoot;
         }
         #endregion
 
         #region Logging
-        public async Task<bool> getEnableDebugLoggingAsync()
+        public async Task<bool> GetEnableDebugLoggingAsync()
         {
-            var config = await getLoggingConfigAsync();
+            var config = await GetLoggingConfigAsync();
 
-            return config.enableDebugLogging;
+            return config.EnableDebugLogging;
         }
         #endregion
         #endregion
@@ -135,10 +135,10 @@ namespace QuestNav.Config
         #region Setters
 
         #region Network
-        public async Task setTeamNumberAsync(int teamNumber)
+        public async Task SetTeamNumberAsync(int teamNumber)
         {
             // Validate new value
-            if (!isValidTeamNumber(teamNumber))
+            if (!IsValidTeamNumber(teamNumber))
             {
                 QueuedLogger.LogError(
                     "Attempted to write a non-valid team number to the config! Aborting..."
@@ -146,21 +146,21 @@ namespace QuestNav.Config
                 return;
             }
 
-            var config = await getNetworkConfigAsync();
-            config.teamNumber = teamNumber;
-            config.debugIpOverride = ""; // Blank out IP override
-            await saveNetworkConfigAsync(config);
+            var config = await GetNetworkConfigAsync();
+            config.TeamNumber = teamNumber;
+            config.DebugIpOverride = ""; // Blank out IP override
+            await SaveNetworkConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => onTeamNumberChanged?.Invoke(config.teamNumber));
-            invokeOnMainThread(() => onDebugIpOverrideChanged?.Invoke(config.debugIpOverride));
+            invokeOnMainThread(() => OnTeamNumberChanged?.Invoke(config.TeamNumber));
+            invokeOnMainThread(() => OnDebugIpOverrideChanged?.Invoke(config.DebugIpOverride));
             QueuedLogger.Log($"Updated Key 'teamNumber' to {teamNumber}");
         }
 
-        public async Task setDebugIpOverrideAsync(string ipOverride)
+        public async Task SetDebugIpOverrideAsync(string ipOverride)
         {
             // Validate new value (blank means disable)
-            if (!isValidIPAddress(ipOverride))
+            if (!IsValidIPAddress(ipOverride))
             {
                 QueuedLogger.LogError(
                     "Attempted to write a non-valid debug IP override to the config! Aborting..."
@@ -168,14 +168,14 @@ namespace QuestNav.Config
                 return;
             }
 
-            var config = await getNetworkConfigAsync();
-            config.debugIpOverride = ipOverride;
-            config.teamNumber = QuestNavConstants.Network.TEAM_NUMBER_DISABLED; // Team number -1 indicates IP override in use
-            await saveNetworkConfigAsync(config);
+            var config = await GetNetworkConfigAsync();
+            config.DebugIpOverride = ipOverride;
+            config.TeamNumber = QuestNavConstants.Network.TEAM_NUMBER_DISABLED; // Team number -1 indicates IP override in use
+            await SaveNetworkConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => onDebugIpOverrideChanged?.Invoke(config.debugIpOverride));
-            invokeOnMainThread(() => onTeamNumberChanged?.Invoke(config.teamNumber));
+            invokeOnMainThread(() => OnDebugIpOverrideChanged?.Invoke(config.DebugIpOverride));
+            invokeOnMainThread(() => OnTeamNumberChanged?.Invoke(config.TeamNumber));
             QueuedLogger.Log($"Updated Key 'debugIpOverride' to {ipOverride}");
         }
         #endregion
@@ -183,25 +183,25 @@ namespace QuestNav.Config
         #region System
         public async Task setEnableAutoStartOnBootAsync(bool autoStart)
         {
-            var config = await getSystemConfigAsync();
-            config.enableAutoStartOnBoot = autoStart;
-            await saveSystemConfigAsync(config);
+            var config = await GetSystemConfigAsync();
+            config.EnableAutoStartOnBoot = autoStart;
+            await SaveSystemConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => onEnableAutoStartOnBootChanged?.Invoke(autoStart));
+            invokeOnMainThread(() => OnEnableAutoStartOnBootChanged?.Invoke(autoStart));
             QueuedLogger.Log($"Updated Key 'autoStartOnBoot' to {autoStart}");
         }
         #endregion
 
         #region Logging
-        public async Task setEnableDebugLoggingAsync(bool enableDebugLogging)
+        public async Task SetEnableDebugLoggingAsync(bool enableDebugLogging)
         {
-            var config = await getLoggingConfigAsync();
-            config.enableDebugLogging = enableDebugLogging;
-            await saveLoggingConfigAsync(config);
+            var config = await GetLoggingConfigAsync();
+            config.EnableDebugLogging = enableDebugLogging;
+            await SaveLoggingConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => onEnableDebugLoggingChanged?.Invoke(enableDebugLogging));
+            invokeOnMainThread(() => OnEnableDebugLoggingChanged?.Invoke(enableDebugLogging));
             QueuedLogger.Log($"Updated Key 'enableDebugLogging' to {enableDebugLogging}");
         }
         #endregion
@@ -209,7 +209,7 @@ namespace QuestNav.Config
 
         #region Private Methods
         #region Getters
-        private async Task<Config.Network> getNetworkConfigAsync()
+        private async Task<Config.Network> GetNetworkConfigAsync()
         {
             var config = await connection.FindAsync<Config.Network>(1);
 
@@ -217,12 +217,12 @@ namespace QuestNav.Config
             if (config == null)
             {
                 config = new Config.Network();
-                await saveNetworkConfigAsync(config);
+                await SaveNetworkConfigAsync(config);
             }
             return config;
         }
 
-        private async Task<Config.System> getSystemConfigAsync()
+        private async Task<Config.System> GetSystemConfigAsync()
         {
             var config = await connection.FindAsync<Config.System>(1);
 
@@ -230,12 +230,12 @@ namespace QuestNav.Config
             if (config == null)
             {
                 config = new Config.System();
-                await saveSystemConfigAsync(config);
+                await SaveSystemConfigAsync(config);
             }
             return config;
         }
 
-        private async Task<Config.Logging> getLoggingConfigAsync()
+        private async Task<Config.Logging> GetLoggingConfigAsync()
         {
             var config = await connection.FindAsync<Config.Logging>(1);
 
@@ -243,28 +243,28 @@ namespace QuestNav.Config
             if (config == null)
             {
                 config = new Config.Logging();
-                await saveLoggingConfigAsync(config);
+                await SaveLoggingConfigAsync(config);
             }
             return config;
         }
         #endregion
 
         #region Setters
-        private async Task saveSystemConfigAsync(Config.System config)
+        private async Task SaveSystemConfigAsync(Config.System config)
         {
-            config.id = 1;
+            config.ID = 1;
             await connection.InsertOrReplaceAsync(config);
         }
 
-        private async Task saveNetworkConfigAsync(Config.Network config)
+        private async Task SaveNetworkConfigAsync(Config.Network config)
         {
-            config.id = 1;
+            config.ID = 1;
             await connection.InsertOrReplaceAsync(config);
         }
 
-        private async Task saveLoggingConfigAsync(Config.Logging config)
+        private async Task SaveLoggingConfigAsync(Config.Logging config)
         {
-            config.id = 1;
+            config.ID = 1;
             await connection.InsertOrReplaceAsync(config);
         }
         #endregion
@@ -273,7 +273,7 @@ namespace QuestNav.Config
         /// <summary>
         /// Validates if a string is a valid IPv4 address
         /// </summary>
-        private bool isValidIPAddress(string ipString)
+        private bool IsValidIPAddress(string ipString)
         {
             if (string.IsNullOrEmpty(ipString))
                 return false;
@@ -299,7 +299,7 @@ namespace QuestNav.Config
         /// </summary>
         /// <param name="teamNumber">The team number to check</param>
         /// <returns>Whether a team number is valid or not</returns>
-        private bool isValidTeamNumber(int teamNumber)
+        private bool IsValidTeamNumber(int teamNumber)
         {
             return teamNumber
                 is >= QuestNavConstants.Network.MIN_TEAM_NUMBER

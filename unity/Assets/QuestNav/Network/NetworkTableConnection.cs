@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
-using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.Utils;
 using UnityEngine;
@@ -17,20 +16,20 @@ namespace QuestNav.Network
         /// <summary>
         /// Gets whether the connection is currently established.
         /// </summary>
-        bool isConnected { get; }
+        bool IsConnected { get; }
 
         /// <summary>
         /// Gets whether the connection is ready to connect.
         /// </summary>
         /// <returns>true when either an IP or team number has been set</returns>
-        bool isReadyToConnect { get; }
+        bool IsReadyToConnect { get; }
 
         /// <summary>
         /// Gets the current NT time
         /// </summary>
-        long ntNow { get; }
+        long NtNow { get; }
 
-        public Task initializeAsync();
+        public Task InitializeAsync();
 
         /// <summary>
         /// Publishes frame data to NetworkTables.
@@ -59,25 +58,25 @@ namespace QuestNav.Network
         /// Gets all command requests from the robot since the last read, or an empty array if none available
         /// </summary>
         /// <returns>All command requests since the last read</returns>
-        TimestampedValue<ProtobufQuestNavCommand>[] getCommandRequests();
+        TimestampedValue<ProtobufQuestNavCommand>[] GetCommandRequests();
 
         /// <summary>
         /// Sends a command processing success response back to the robot
         /// </summary>
         /// <param name="commandId">command_id</param>
-        void sendCommandSuccessResponse(uint commandId);
+        void SendCommandSuccessResponse(uint commandId);
 
         /// <summary>
         /// Sends a command processing error response back to the robot
         /// </summary>
         /// <param name="commandId">command_id</param>
         /// <param name="errorMessage">error message</param>
-        void sendCommandErrorResponse(uint commandId, string errorMessage);
+        void SendCommandErrorResponse(uint commandId, string errorMessage);
 
         /// <summary>
         /// Processes and logs NetworkTables internal messages
         /// </summary>
-        void loggerPeriodic();
+        void LoggerPeriodic();
     }
 
     /// <summary>
@@ -168,14 +167,14 @@ namespace QuestNav.Network
             frameDataPublisher = ntInstance.GetProtobufPublisher<ProtobufQuestNavFrameData>(
                 QuestNavConstants.Topics.FRAME_DATA,
                 "questnav.protos.data.ProtobufQuestNavFrameData",
-                QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+                QuestNavConstants.Network.NtPublisherSettings
             );
 
             // Low-frequency device status (3Hz) - robot uses this for diagnostics
             deviceDataPublisher = ntInstance.GetProtobufPublisher<ProtobufQuestNavDeviceData>(
                 QuestNavConstants.Topics.DEVICE_DATA,
                 "questnav.protos.data.ProtobufQuestNavDeviceData",
-                QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+                QuestNavConstants.Network.NtPublisherSettings
             );
 
             // Command responses - Quest confirms command execution to robot
@@ -183,7 +182,7 @@ namespace QuestNav.Network
                 ntInstance.GetProtobufPublisher<ProtobufQuestNavCommandResponse>(
                     QuestNavConstants.Topics.COMMAND_RESPONSE,
                     "questnav.protos.commands.ProtobufQuestNavCommandResponse",
-                    QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+                    QuestNavConstants.Network.NtPublisherSettings
                 );
 
             /*
@@ -203,17 +202,17 @@ namespace QuestNav.Network
             );
 
             // Attach local methods to config event methods
-            configManager.onTeamNumberChanged += onTeamNumberChanged;
-            configManager.onDebugIpOverrideChanged += onDebugIpOverrideChanged;
-            configManager.onEnableDebugLoggingChanged += onEnableDebugLoggingChanged;
+            configManager.OnTeamNumberChanged += OnTeamNumberChanged;
+            configManager.OnDebugIpOverrideChanged += OnDebugIpOverrideChanged;
+            configManager.OnEnableDebugLoggingChanged += OnEnableDebugLoggingChanged;
         }
 
-        public async Task initializeAsync()
+        public async Task InitializeAsync()
         {
             // Load saved values from config
-            onTeamNumberChanged(await configManager.getTeamNumberAsync());
-            onDebugIpOverrideChanged(await configManager.getDebugIpOverrideAsync());
-            onEnableDebugLoggingChanged(await configManager.getEnableDebugLoggingAsync());
+            OnTeamNumberChanged(await configManager.GetTeamNumberAsync());
+            OnDebugIpOverrideChanged(await configManager.GetDebugIpOverrideAsync());
+            OnEnableDebugLoggingChanged(await configManager.GetEnableDebugLoggingAsync());
         }
 
         #region Properties
@@ -221,17 +220,17 @@ namespace QuestNav.Network
         /// <summary>
         /// Gets whether the connection is currently established.
         /// </summary>
-        public bool isConnected => ntInstance.IsConnected();
+        public bool IsConnected => ntInstance.IsConnected();
 
         /// <summary>
         /// Gets whether the connection is currently established.
         /// </summary>
-        public bool isReadyToConnect => teamNumberSet || ipAddressSet;
+        public bool IsReadyToConnect => teamNumberSet || ipAddressSet;
 
         /// <summary>
         /// Gets the current NT time
         /// </summary>
-        public long ntNow => ntInstance.Now();
+        public long NtNow => ntInstance.Now();
         #endregion
 
         #region Event Subscribers
@@ -239,7 +238,7 @@ namespace QuestNav.Network
         /// Changes to team number resolution mode and triggers an asynchronous connection reset
         /// </summary>
         /// <param name="teamNumber">The team number to resolve</param>
-        private void onTeamNumberChanged(int teamNumber)
+        private void OnTeamNumberChanged(int teamNumber)
         {
             // Skip if -1 (indicates debug IP override in use)
             if (teamNumber.Equals(-1))
@@ -252,7 +251,7 @@ namespace QuestNav.Network
             ipAddressSet = false;
         }
 
-        private void onDebugIpOverrideChanged(string ipOverride)
+        private void OnDebugIpOverrideChanged(string ipOverride)
         {
             // Skip if empty (indicates team number being used)
             if (string.IsNullOrEmpty(ipOverride))
@@ -272,7 +271,7 @@ namespace QuestNav.Network
             teamNumberSet = false;
         }
 
-        private void onEnableDebugLoggingChanged(bool enableDebugLogging)
+        private void OnEnableDebugLoggingChanged(bool enableDebugLogging)
         {
             if (enableDebugLogging)
             {
@@ -359,7 +358,7 @@ namespace QuestNav.Network
         /// Gets all command requests from the robot since the last read, or an empty array if none available
         /// </summary>
         /// <returns>All command requests since the last read</returns>
-        public TimestampedValue<ProtobufQuestNavCommand>[] getCommandRequests()
+        public TimestampedValue<ProtobufQuestNavCommand>[] GetCommandRequests()
         {
             return commandRequestSubscriber.ReadQueueValues();
         }
@@ -377,7 +376,7 @@ namespace QuestNav.Network
         /// Sends a command processing success response back to the robot
         /// </summary>
         /// <param name="commandId">command_id</param>
-        public void sendCommandSuccessResponse(uint commandId)
+        public void SendCommandSuccessResponse(uint commandId)
         {
             SetCommandResponse(
                 new ProtobufQuestNavCommandResponse { CommandId = commandId, Success = true }
@@ -389,7 +388,7 @@ namespace QuestNav.Network
         /// </summary>
         /// <param name="commandId">command_id</param>
         /// <param name="errorMessage">error message</param>
-        public void sendCommandErrorResponse(uint commandId, string errorMessage)
+        public void SendCommandErrorResponse(uint commandId, string errorMessage)
         {
             SetCommandResponse(
                 new ProtobufQuestNavCommandResponse
@@ -409,7 +408,7 @@ namespace QuestNav.Network
         /// Processes and logs any pending NetworkTables internal messages.
         /// Respects the enableDebugLogging tunable - when disabled, only WARNING and above are logged.
         /// </summary>
-        public void loggerPeriodic()
+        public void LoggerPeriodic()
         {
             var messages = ntInstanceLogger.PollForMessages();
             if (messages == null)

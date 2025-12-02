@@ -88,8 +88,8 @@ namespace QuestNav.WebServer
             logCollector = new LogCollector();
 
             // Subscribe to config change events
-            configManager.onTeamNumberChanged += OnTeamNumberChanged;
-            configManager.onDebugIpOverrideChanged += OnDebugIpOverrideChanged;
+            configManager.OnTeamNumberChanged += OnTeamNumberChanged;
+            configManager.OnDebugIpOverrideChanged += OnDebugIpOverrideChanged;
         }
 
         #region Properties
@@ -138,8 +138,8 @@ namespace QuestNav.WebServer
             Debug.Log("[WebServerManager] Initializing...");
 
             // Load initial cached values from config
-            OnTeamNumberChanged(await configManager.getTeamNumberAsync());
-            OnDebugIpOverrideChanged(await configManager.getDebugIpOverrideAsync());
+            OnTeamNumberChanged(await configManager.GetTeamNumberAsync());
+            OnDebugIpOverrideChanged(await configManager.GetDebugIpOverrideAsync());
 
             logCollector.Initialize();
 
@@ -153,8 +153,8 @@ namespace QuestNav.WebServer
         {
             Debug.Log("[WebServerManager] Shutting down...");
 
-            configManager.onTeamNumberChanged -= OnTeamNumberChanged;
-            configManager.onDebugIpOverrideChanged -= OnDebugIpOverrideChanged;
+            configManager.OnTeamNumberChanged -= OnTeamNumberChanged;
+            configManager.OnDebugIpOverrideChanged -= OnDebugIpOverrideChanged;
 
             server?.Stop();
             server = null;

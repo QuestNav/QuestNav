@@ -212,7 +212,7 @@ namespace QuestNav.Core
             // Use try-catch here due to async
             try
             {
-                await configManager.initializeAsync();
+                await configManager.InitializeAsync();
             }
             catch (Exception e)
             {
@@ -248,7 +248,7 @@ namespace QuestNav.Core
             // Use try-catch here due to async
             try
             {
-                await uiManager.initializeAsync();
+                await uiManager.InitializeAsync();
             }
             catch (Exception e)
             {
@@ -347,8 +347,8 @@ namespace QuestNav.Core
 
             // Update UI elements like connection status, IP address display, team number validation
             // UI updates don't need to be real-time, 3Hz provides smooth visual feedback
-            uiManager.uiPeriodic();
-            uiManager.updatePositionText(position, rotation);
+            uiManager.UIPeriodic();
+            uiManager.UpdatePositionText(position, rotation);
 
             // Monitor device health: tracking status, battery level, tracking loss events
             // This data helps diagnose issues but doesn't need high-frequency updates
@@ -376,7 +376,7 @@ namespace QuestNav.Core
         /// </summary>
         private void OnDestroy()
         {
-            configManager.closeAsync();
+            configManager.CloseAsync();
             webServerManager?.Shutdown();
         }
 

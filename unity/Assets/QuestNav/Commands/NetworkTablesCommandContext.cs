@@ -25,7 +25,7 @@ namespace QuestNav.Commands
         /// <param name="commandId">The unique identifier of the command that succeeded (uint32 from protobuf)</param>
         public void SendSuccessResponse(uint commandId)
         {
-            networkTableConnection.sendCommandSuccessResponse(commandId);
+            networkTableConnection.SendCommandSuccessResponse(commandId);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace QuestNav.Commands
         /// <param name="errorMessage">Description of the error that occurred</param>
         public void SendErrorResponse(uint commandId, string errorMessage)
         {
-            networkTableConnection.sendCommandErrorResponse(commandId, errorMessage);
+            networkTableConnection.SendCommandErrorResponse(commandId, errorMessage);
         }
     }
 }

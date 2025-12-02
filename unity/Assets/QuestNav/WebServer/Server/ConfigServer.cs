@@ -15,13 +15,13 @@ namespace QuestNav.WebServer.Server
     /// </summary>
     public class CachedServerInfo
     {
-        public string appName;
-        public string version;
-        public string unityVersion;
-        public string buildDate;
-        public string platform;
-        public string deviceModel;
-        public string operatingSystem;
+        public string AppName;
+        public string Version;
+        public string UnityVersion;
+        public string BuildDate;
+        public string Platform;
+        public string DeviceModel;
+        public string OperatingSystem;
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ namespace QuestNav.WebServer.Server
         private CancellationTokenSource cancellationTokenSource;
         private readonly IConfigManager configManager;
         private readonly int port;
-        private readonly bool enableCORSDevMode;
+        private readonly bool enableCorsDevMode;
         private readonly string staticPath;
         private readonly ILogger logger;
         private readonly WebServerManager webServerManager;
@@ -54,7 +54,7 @@ namespace QuestNav.WebServer.Server
         public ConfigServer(
             IConfigManager configManager,
             int port,
-            bool enableCORSDevMode,
+            bool enableCorsDevMode,
             string staticPath,
             ILogger logger,
             WebServerManager webServerManager,
@@ -64,7 +64,7 @@ namespace QuestNav.WebServer.Server
         {
             this.configManager = configManager;
             this.port = port;
-            this.enableCORSDevMode = enableCORSDevMode;
+            this.enableCorsDevMode = enableCorsDevMode;
             this.staticPath = staticPath;
             this.logger = logger;
             this.webServerManager = webServerManager;
@@ -80,15 +80,15 @@ namespace QuestNav.WebServer.Server
         {
             cachedServerInfo = new CachedServerInfo
             {
-                appName = UnityEngine.Application.productName,
-                version = UnityEngine.Application.version,
-                unityVersion = UnityEngine.Application.unityVersion,
-                buildDate = System
+                AppName = UnityEngine.Application.productName,
+                Version = UnityEngine.Application.version,
+                UnityVersion = UnityEngine.Application.unityVersion,
+                BuildDate = System
                     .IO.File.GetLastWriteTime(UnityEngine.Application.dataPath)
                     .ToString("yyyy-MM-dd HH:mm:ss"),
-                platform = UnityEngine.Application.platform.ToString(),
-                deviceModel = UnityEngine.SystemInfo.deviceModel,
-                operatingSystem = UnityEngine.SystemInfo.operatingSystem,
+                Platform = UnityEngine.Application.platform.ToString(),
+                DeviceModel = UnityEngine.SystemInfo.deviceModel,
+                OperatingSystem = UnityEngine.SystemInfo.operatingSystem,
             };
         }
 
@@ -201,7 +201,7 @@ namespace QuestNav.WebServer.Server
                 string clientIp = context.Request.RemoteEndPoint?.Address?.ToString();
                 RecordClientActivity(clientIp);
 
-                if (enableCORSDevMode)
+                if (enableCorsDevMode)
                 {
                     context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
                 }
@@ -285,10 +285,10 @@ namespace QuestNav.WebServer.Server
             var response = new ConfigResponse
             {
                 success = true,
-                teamNumber = await configManager.getTeamNumberAsync(),
-                debugIpOverride = await configManager.getDebugIpOverrideAsync(),
+                teamNumber = await configManager.GetTeamNumberAsync(),
+                debugIpOverride = await configManager.GetDebugIpOverrideAsync(),
                 enableAutoStartOnBoot = await configManager.getEnableAutoStartOnBootAsync(),
-                enableDebugLogging = await configManager.getEnableDebugLoggingAsync(),
+                enableDebugLogging = await configManager.GetEnableDebugLoggingAsync(),
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             };
             await SendJsonResponse(context, response);
@@ -311,21 +311,21 @@ namespace QuestNav.WebServer.Server
 
             try
             {
-                if (request.teamNumber.HasValue)
+                if (request.TeamNumber.HasValue)
                 {
-                    await configManager.setTeamNumberAsync(request.teamNumber.Value);
+                    await configManager.SetTeamNumberAsync(request.TeamNumber.Value);
                 }
                 if (request.debugIpOverride != null)
                 {
-                    await configManager.setDebugIpOverrideAsync(request.debugIpOverride);
+                    await configManager.SetDebugIpOverrideAsync(request.debugIpOverride);
                 }
-                if (request.enableAutoStartOnBoot.HasValue)
+                if (request.EnableAutoStartOnBoot.HasValue)
                 {
-                    await configManager.setEnableAutoStartOnBootAsync(request.enableAutoStartOnBoot.Value);
+                    await configManager.setEnableAutoStartOnBootAsync(request.EnableAutoStartOnBoot.Value);
                 }
-                if (request.enableDebugLogging.HasValue)
+                if (request.EnableDebugLogging.HasValue)
                 {
-                    await configManager.setEnableDebugLoggingAsync(request.enableDebugLogging.Value);
+                    await configManager.SetEnableDebugLoggingAsync(request.EnableDebugLogging.Value);
                 }
 
                 await SendJsonResponse(
@@ -348,7 +348,7 @@ namespace QuestNav.WebServer.Server
         {
             try
             {
-                await configManager.resetToDefaultsAsync();
+                await configManager.ResetToDefaultsAsync();
                 await SendJsonResponse(
                     context,
                     new SimpleResponse { success = true, message = "Configuration reset to defaults" }
@@ -448,13 +448,13 @@ namespace QuestNav.WebServer.Server
         {
             var info = new SystemInfoResponse
             {
-                appName = cachedServerInfo.appName,
-                version = cachedServerInfo.version,
-                unityVersion = cachedServerInfo.unityVersion,
-                buildDate = cachedServerInfo.buildDate,
-                platform = cachedServerInfo.platform,
-                deviceModel = cachedServerInfo.deviceModel,
-                operatingSystem = cachedServerInfo.operatingSystem,
+                appName = cachedServerInfo.AppName,
+                version = cachedServerInfo.Version,
+                unityVersion = cachedServerInfo.UnityVersion,
+                buildDate = cachedServerInfo.BuildDate,
+                platform = cachedServerInfo.Platform,
+                deviceModel = cachedServerInfo.DeviceModel,
+                operatingSystem = cachedServerInfo.OperatingSystem,
                 connectedClients = GetActiveClientCount(),
                 serverPort = port,
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),

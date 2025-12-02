@@ -18,17 +18,17 @@ namespace QuestNav.UI
     /// </summary>
     public interface IUIManager
     {
-        Task initializeAsync();
+        Task InitializeAsync();
 
         /// <summary>
         /// Updates the connection state and ip address in the UI
         /// </summary>
-        void uiPeriodic();
+        void UIPeriodic();
 
         /// <summary>
         /// Updates the position and rotation text in the UI.
         /// </summary>
-        void updatePositionText(Vector3 position, Quaternion rotation);
+        void UpdatePositionText(Vector3 position, Quaternion rotation);
     }
 
     /// <summary>
@@ -164,19 +164,19 @@ namespace QuestNav.UI
             this.teamUpdateButton = teamUpdateButton;
             this.autoStartToggle = autoStartToggle;
 
-            teamUpdateButton.onClick.AddListener(setTeamNumberFromUIAsync);
-            autoStartToggle.onValueChanged.AddListener(setAutoStartValueFromUIAsync);
+            teamUpdateButton.onClick.AddListener(SetTeamNumberFromUIAsync);
+            autoStartToggle.onValueChanged.AddListener(SetAutoStartValueFromUIAsync);
 
             // Attach local methods to config event methods
-            configManager.onTeamNumberChanged += onTeamNumberChanged;
-            configManager.onDebugIpOverrideChanged += onDebugIpOverrideChanged;
-            configManager.onEnableAutoStartOnBootChanged += onEnableAutoStartOnBootChanged;
+            configManager.OnTeamNumberChanged += OnTeamNumberChanged;
+            configManager.OnDebugIpOverrideChanged += OnDebugIpOverrideChanged;
+            configManager.OnEnableAutoStartOnBootChanged += onEnableAutoStartOnBootChanged;
         }
 
-        public async Task initializeAsync()
+        public async Task InitializeAsync()
         {
             // Load saved values from config
-            onTeamNumberChanged(await configManager.getTeamNumberAsync());
+            OnTeamNumberChanged(await configManager.GetTeamNumberAsync());
             onEnableAutoStartOnBootChanged(await configManager.getEnableAutoStartOnBootAsync());
         }
 
@@ -185,7 +185,7 @@ namespace QuestNav.UI
         /// Sets the input box placeholder text with the current team number.
         /// </summary>
         /// <param name="teamNumber">The team number to display</param>
-        private void onTeamNumberChanged(int teamNumber)
+        private void OnTeamNumberChanged(int teamNumber)
         {
             teamInput.text = "";
             var placeholderText = teamInput.placeholder as TextMeshProUGUI;
@@ -195,7 +195,7 @@ namespace QuestNav.UI
             }
         }
 
-        private void onDebugIpOverrideChanged(string ipOverride)
+        private void OnDebugIpOverrideChanged(string ipOverride)
         {
             // No handling right now
         }
@@ -210,7 +210,7 @@ namespace QuestNav.UI
         /// <summary>
         /// Updates the team number based on user input and saves to config
         /// </summary>
-        private async void setTeamNumberFromUIAsync()
+        private async void SetTeamNumberFromUIAsync()
         {
             QueuedLogger.Log("Updating Team Number from UI");
             teamNumber = int.Parse(teamInput.text);
@@ -218,7 +218,7 @@ namespace QuestNav.UI
             try
             {
                 // Update config
-                await configManager.setTeamNumberAsync(teamNumber);
+                await configManager.SetTeamNumberAsync(teamNumber);
             }
             catch (Exception e)
             {
@@ -226,7 +226,7 @@ namespace QuestNav.UI
             }
         }
 
-        private async void setAutoStartValueFromUIAsync(bool newValue)
+        private async void SetAutoStartValueFromUIAsync(bool newValue)
         {
             QueuedLogger.Log("Updating Auto Start Value from UI");
             autoStartValue = newValue;
@@ -247,7 +247,7 @@ namespace QuestNav.UI
         /// <summary>
         /// Updates the default IP address shown in the UI with the current HMD IP address
         /// </summary>
-        private void updateIPAddressText()
+        private void UpdateIPAddressText()
         {
             // Get the local IP
             var hostEntry = Dns.GetHostEntry(Dns.GetHostName());
@@ -276,12 +276,12 @@ namespace QuestNav.UI
         /// <summary>
         /// Updates the connection state text display.
         /// </summary>
-        private void updateConStateText()
+        private void UpdateConStateText()
         {
             TextMeshProUGUI conText = conStateText as TextMeshProUGUI;
             if (conText is null)
                 return;
-            if (networkTableConnection.isConnected)
+            if (networkTableConnection.IsConnected)
             {
                 conText.text = "Connected to NT4";
                 conText.color = Color.green;
@@ -291,23 +291,23 @@ namespace QuestNav.UI
                 conText.text = "Warning! Default Team Number still set! Trying to connect!";
                 conText.color = Color.red;
             }
-            else if (networkTableConnection.isReadyToConnect)
+            else if (networkTableConnection.IsReadyToConnect)
             {
                 conText.text = "Trying to connect to NT4";
                 conText.color = Color.yellow;
             }
         }
 
-        public void uiPeriodic()
+        public void UIPeriodic()
         {
-            updateConStateText();
-            updateIPAddressText();
+            UpdateConStateText();
+            UpdateIPAddressText();
         }
 
         /// <summary>
         /// Updates the connection state text display.
         /// </summary>
-        public void updatePositionText(Vector3 position, Quaternion rotation)
+        public void UpdatePositionText(Vector3 position, Quaternion rotation)
         {
             TextMeshProUGUI xText = posXText as TextMeshProUGUI;
             TextMeshProUGUI yText = posYText as TextMeshProUGUI;

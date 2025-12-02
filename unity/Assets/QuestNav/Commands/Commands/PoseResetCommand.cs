@@ -39,7 +39,7 @@ namespace QuestNav.Commands.Commands
         /// <summary>
         /// The formatted name for PoseResetCommand
         /// </summary>
-        public string commandNiceName => "PoseReset";
+        public string CommandNiceName => "PoseReset";
 
         /// <summary>
         /// Executes the pose reset command by applying the target pose to the VR camera system
@@ -54,9 +54,9 @@ namespace QuestNav.Commands.Commands
             double poseX = resetPose.Translation.X;
             double poseY = resetPose.Translation.Y;
             double poseZ = resetPose.Translation.Z;
-            double poseQX = resetPose.Rotation.Q.X;
-            double poseQY = resetPose.Rotation.Q.Y;
-            double poseQZ = resetPose.Rotation.Q.Z;
+            double poseQx = resetPose.Rotation.Q.X;
+            double poseQy = resetPose.Rotation.Q.Y;
+            double poseQz = resetPose.Rotation.Q.Z;
             double poseQW = resetPose.Rotation.Q.W;
 
             // Validate pose data
@@ -64,9 +64,9 @@ namespace QuestNav.Commands.Commands
                 !double.IsNaN(poseX)
                 && !double.IsNaN(poseY)
                 && !double.IsNaN(poseZ)
-                && !double.IsNaN(poseQX)
-                && !double.IsNaN(poseQY)
-                && !double.IsNaN(poseQZ)
+                && !double.IsNaN(poseQx)
+                && !double.IsNaN(poseQy)
+                && !double.IsNaN(poseQz)
                 && !double.IsNaN(poseQW);
 
             // Additional validation for field boundaries

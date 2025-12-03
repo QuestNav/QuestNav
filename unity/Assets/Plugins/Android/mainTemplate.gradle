@@ -3,8 +3,12 @@ apply from: '../shared/common.gradle'
 apply from: '../shared/keepUnitySymbols.gradle'
 **APPLY_PLUGINS**
 
+def roomVersion = "2.4.2"
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "androidx.room:room-runtime:$roomVersion"
+    annotationProcessor "androidx.room:room-compiler:$roomVersion"
 **DEPS**}
 
 android {
@@ -26,6 +30,13 @@ android {
         ndk {
             abiFilters **ABIFILTERS**
             debugSymbolLevel **DEBUGSYMBOLLEVEL**
+        }
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [
+                    "room.schemaLocation": "$projectDir/schemas".toString()
+                ]
+            }
         }
         versionCode **VERSIONCODE**
         versionName '**VERSIONNAME**'

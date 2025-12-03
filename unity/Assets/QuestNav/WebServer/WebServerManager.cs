@@ -4,11 +4,16 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using QuestNav.Commands;
+using QuestNav.Commands.Commands;
 using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Network;
+using QuestNav.Protos.Generated;
+using QuestNav.Utils;
 using QuestNav.WebServer.Server;
 using UnityEngine;
+using Wpi.Proto;
 
 namespace QuestNav.WebServer
 {
@@ -52,8 +57,10 @@ namespace QuestNav.WebServer
         #region Fields
         private readonly IConfigManager configManager;
         private readonly INetworkTableConnection networkTableConnection;
-        private readonly Action poseResetCallback;
-        private readonly SynchronizationContext mainThreadContext;
+        private readonly Transform vrCamera;
+        private readonly Transform vrCameraRoot;
+        private readonly Transform resetTransform;
+        private SynchronizationContext mainThreadContext;
 
         private ConfigServer server;
         private StatusProvider statusProvider;
@@ -72,17 +79,22 @@ namespace QuestNav.WebServer
         /// </summary>
         /// <param name="configManager">Config manager for reading/writing settings</param>
         /// <param name="networkTableConnection">Network connection for status updates</param>
-        /// <param name="poseResetCallback">Callback to invoke when pose reset is requested</param>
+        /// <param name="vrCamera">Reference to the VR camera transform</param>
+        /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
+        /// <param name="resetTransform">Reference to the reset position transform</param>
         public WebServerManager(
             IConfigManager configManager,
             INetworkTableConnection networkTableConnection,
-            Action poseResetCallback
+            Transform vrCamera,
+            Transform vrCameraRoot,
+            Transform resetTransform
         )
         {
             this.configManager = configManager;
             this.networkTableConnection = networkTableConnection;
-            this.poseResetCallback = poseResetCallback;
-            this.mainThreadContext = SynchronizationContext.Current;
+            this.vrCamera = vrCamera;
+            this.vrCameraRoot = vrCameraRoot;
+            this.resetTransform = resetTransform;
 
             statusProvider = new StatusProvider();
             logCollector = new LogCollector();
@@ -129,13 +141,15 @@ namespace QuestNav.WebServer
         #region Lifecycle Methods
         public async Task InitializeAsync()
         {
+            mainThreadContext = SynchronizationContext.Current;
+            
             if (isInitialized)
             {
-                Debug.Log("[WebServerManager] Already initialized, skipping");
+                QueuedLogger.Log("Already initialized, skipping");
                 return;
             }
 
-            Debug.Log("[WebServerManager] Initializing...");
+            QueuedLogger.Log("Initializing...");
 
             // Load initial cached values from config
             OnTeamNumberChanged(await configManager.GetTeamNumberAsync());
@@ -146,12 +160,12 @@ namespace QuestNav.WebServer
             await StartServerAsync();
 
             isInitialized = true;
-            Debug.Log("[WebServerManager] Initialization complete");
+            QueuedLogger.Log("Initialization complete");
         }
 
         public void Shutdown()
         {
-            Debug.Log("[WebServerManager] Shutting down...");
+            QueuedLogger.Log("Shutting down...");
 
             configManager.OnTeamNumberChanged -= OnTeamNumberChanged;
             configManager.OnDebugIpOverrideChanged -= OnDebugIpOverrideChanged;
@@ -160,7 +174,7 @@ namespace QuestNav.WebServer
             server = null;
             logCollector?.Dispose();
 
-            Debug.Log("[WebServerManager] Shutdown complete");
+            QueuedLogger.Log("Shutdown complete");
         }
         #endregion
 
@@ -199,8 +213,62 @@ namespace QuestNav.WebServer
         /// </summary>
         internal void RequestPoseReset()
         {
-            Debug.Log("[WebServerManager] Pose reset requested from web interface");
-            mainThreadContext.Post(_ => poseResetCallback?.Invoke(), null);
+            QueuedLogger.Log("Pose reset requested from web interface");
+            mainThreadContext.Post(_ => ExecutePoseResetToOrigin(), null);
+        }
+
+        /// <summary>
+        /// Executes pose reset to origin (0,0,0) with no rotation.
+        /// Uses the existing PoseResetCommand implementation to ensure single source of truth.
+        /// </summary>
+        private void ExecutePoseResetToOrigin()
+        {
+            QueuedLogger.Log("Web interface requested pose reset to origin");
+
+            // Create a protobuf command payload for origin reset in FRC coordinates
+            var resetPose = new ProtobufPose3d
+            {
+                Translation = new ProtobufTranslation3d
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+                Rotation = new ProtobufRotation3d
+                {
+                    Q = new ProtobufQuaternion
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0,
+                        W = 1,
+                    },
+                },
+            };
+
+            var command = new ProtobufQuestNavCommand
+            {
+                Type = QuestNavCommandType.PoseReset,
+                CommandId = (uint)DateTime.UtcNow.Ticks,
+                PoseResetPayload = new ProtobufQuestNavPoseResetPayload { TargetPose = resetPose },
+            };
+
+            // Create web command context for web-initiated reset
+            // (no NetworkTables response needed for web interface)
+            var webContext = new WebCommandContext();
+
+            // Create a temporary command instance for web-initiated reset
+            var webPoseResetCommand = new PoseResetCommand(
+                webContext, // Web context is no-op (no NetworkTables responses)
+                vrCamera,
+                vrCameraRoot,
+                resetTransform
+            );
+
+            // Execute the pose reset using the existing command implementation
+            webPoseResetCommand.Execute(command);
+
+            QueuedLogger.Log("[QuestNav] Pose reset to origin completed");
         }
 
         /// <summary>
@@ -209,7 +277,7 @@ namespace QuestNav.WebServer
         /// </summary>
         internal void RequestRestart()
         {
-            Debug.Log("[WebServerManager] Restart requested from web interface");
+            QueuedLogger.Log("Restart requested from web interface");
             mainThreadContext.Post(_ => RestartApp(), null);
         }
         #endregion
@@ -217,12 +285,12 @@ namespace QuestNav.WebServer
         #region Server Setup
         private async Task StartServerAsync()
         {
-            Debug.Log("[WebServerManager] Starting configuration server...");
+            QueuedLogger.Log("Starting configuration server...");
 
             string staticPath = GetStaticFilesPath();
             if (string.IsNullOrEmpty(staticPath))
             {
-                Debug.LogError("[WebServerManager] Failed to get static files path");
+                QueuedLogger.LogError("Failed to get static files path");
                 return;
             }
 
@@ -248,12 +316,12 @@ namespace QuestNav.WebServer
 
             if (!server.IsRunning)
             {
-                Debug.LogError("[WebServerManager] Server did not start successfully");
+                QueuedLogger.LogError("Server did not start successfully");
                 return;
             }
 
             ShowConnectionInfo();
-            Debug.Log("[WebServerManager] Server started successfully");
+            QueuedLogger.Log("Server started successfully");
         }
 
         private string GetStaticFilesPath()
@@ -272,11 +340,11 @@ namespace QuestNav.WebServer
         {
             if (Directory.Exists(targetPath))
             {
-                Debug.Log("[WebServerManager] Clearing old UI files...");
+                QueuedLogger.Log("Clearing old UI files...");
                 Directory.Delete(targetPath, true);
             }
 
-            Debug.Log("[WebServerManager] Extracting UI files from APK...");
+            QueuedLogger.Log("Extracting UI files from APK...");
 
             Directory.CreateDirectory(targetPath);
             string assetsDir = Path.Combine(targetPath, "assets");
@@ -294,7 +362,7 @@ namespace QuestNav.WebServer
                 Path.Combine(targetPath, "logo-dark.svg")
             );
 
-            Debug.Log("[WebServerManager] UI extraction complete");
+            QueuedLogger.Log("UI extraction complete");
         }
 
         private async Task ExtractAndroidFileAsync(string sourceRelative, string targetAbsolute)
@@ -310,12 +378,12 @@ namespace QuestNav.WebServer
                 if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
                 {
                     File.WriteAllBytes(targetAbsolute, www.downloadHandler.data);
-                    Debug.Log($"[WebServerManager] Extracted: {sourceRelative}");
+                    QueuedLogger.Log($"Extracted: {sourceRelative}");
                 }
                 else
                 {
-                    Debug.LogWarning(
-                        $"[WebServerManager] Failed to extract {sourceRelative}: {www.error}"
+                    QueuedLogger.LogWarning(
+                        $"Failed to extract {sourceRelative}: {www.error}"
                     );
                 }
             }
@@ -341,12 +409,12 @@ namespace QuestNav.WebServer
                 if (File.Exists(fallbackSourcePath))
                 {
                     File.Copy(fallbackSourcePath, fallbackTargetPath);
-                    Debug.Log($"[WebServerManager] Copied fallback HTML from {fallbackSourcePath}");
+                    QueuedLogger.Log($"Copied fallback HTML from {fallbackSourcePath}");
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[WebServerManager] Failed to copy fallback HTML: {ex.Message}");
+                QueuedLogger.LogError($"Failed to copy fallback HTML: {ex.Message}");
             }
         }
         #endregion
@@ -371,13 +439,7 @@ namespace QuestNav.WebServer
 
         private void ShowConnectionInfo()
         {
-            Debug.Log("╔═══════════════════════════════════════════════════════════╗");
-            Debug.Log("║          QuestNav Configuration Server                    ║");
-            Debug.Log("╠═══════════════════════════════════════════════════════════╣");
-            Debug.Log($"║ Port: {QuestNavConstants.WebServer.SERVER_PORT}");
-            Debug.Log("╠═══════════════════════════════════════════════════════════╣");
-            Debug.Log($"║ Connect: http://<quest-ip>:{QuestNavConstants.WebServer.SERVER_PORT}/");
-            Debug.Log("╚═══════════════════════════════════════════════════════════╝");
+            QueuedLogger.Log($"Connect to WebUI at http://{GetLocalIPAddress()}:{QuestNavConstants.WebServer.SERVER_PORT}");
         }
 
         private void RestartApp()
@@ -405,8 +467,8 @@ namespace QuestNav.WebServer
                     );
                     activity.Call("startActivity", intent);
 
-                    Debug.Log(
-                        "[WebServerManager] New instance started, killing current process..."
+                    QueuedLogger.Log(
+                        "New instance started, killing current process..."
                     );
                 }
 
@@ -418,7 +480,7 @@ namespace QuestNav.WebServer
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[WebServerManager] Failed to restart: {ex.Message}");
+                QueuedLogger.LogError($"Failed to restart: {ex.Message}");
                 Application.Quit();
             }
 #else

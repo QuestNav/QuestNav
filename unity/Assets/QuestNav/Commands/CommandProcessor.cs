@@ -130,7 +130,7 @@ namespace QuestNav.Commands
                     default:
                         QueuedLogger.Log(
                             $"Execute called with unknown command. ID: {receivedCommand.CommandId} Type: {receivedCommand.Type}",
-                            QueuedLogger.LogLevel.NT_WARNING
+                            QueuedLogger.LogLevel.WARNING
                         );
                         break;
                 }

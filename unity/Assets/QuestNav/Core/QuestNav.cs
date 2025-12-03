@@ -1,16 +1,13 @@
 using System;
 using QuestNav.Commands;
-using QuestNav.Commands.Commands;
 using QuestNav.Config;
 using QuestNav.Network;
-using QuestNav.Protos.Generated;
 using QuestNav.UI;
 using QuestNav.Utils;
 using QuestNav.WebServer;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Wpi.Proto;
 
 namespace QuestNav.Core
 {
@@ -207,6 +204,8 @@ namespace QuestNav.Core
         /// </summary>
         private async void Awake()
         {
+            QueuedLogger.Initialize();
+            
             // Initializes components
             configManager = new ConfigManager();
             // Use try-catch here due to async
@@ -267,10 +266,14 @@ namespace QuestNav.Core
             webServerManager = new WebServerManager(
                 configManager,
                 networkTableConnection,
-                ExecutePoseResetToOrigin
+                vrCamera,
+                vrCameraRoot,
+                resetTransform
             );
             _ = webServerManager.InitializeAsync();
-
+            
+            // Disable stack traces for Log-level logging
+            Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
             // Schedule "SlowUpdate" loop for non loop critical applications
@@ -568,62 +571,6 @@ namespace QuestNav.Core
             }
 
             hadTracking = currentlyTracking;
-        }
-
-        /// <summary>
-        /// Executes pose reset to origin (0,0,0) with no rotation.
-        /// Called from web interface via WebServerManager callback.
-        /// Uses the existing PoseResetCommand implementation to ensure single source of truth.
-        /// This avoids duplicating the pose reset algorithm in PoseResetProvider.
-        /// </summary>
-        public void ExecutePoseResetToOrigin()
-        {
-            QueuedLogger.Log("[QuestNav] Web interface requested pose reset to origin");
-
-            // Create a protobuf command payload for origin reset in FRC coordinates
-            var resetPose = new ProtobufPose3d
-            {
-                Translation = new ProtobufTranslation3d
-                {
-                    X = 0,
-                    Y = 0,
-                    Z = 0,
-                },
-                Rotation = new ProtobufRotation3d
-                {
-                    Q = new ProtobufQuaternion
-                    {
-                        X = 0,
-                        Y = 0,
-                        Z = 0,
-                        W = 1,
-                    },
-                },
-            };
-
-            var command = new ProtobufQuestNavCommand
-            {
-                Type = QuestNavCommandType.PoseReset,
-                CommandId = (uint)System.DateTime.UtcNow.Ticks,
-                PoseResetPayload = new ProtobufQuestNavPoseResetPayload { TargetPose = resetPose },
-            };
-
-            // Create web command context for web-initiated reset
-            // (no NetworkTables response needed for web interface)
-            var webContext = new WebCommandContext();
-
-            // Create a temporary command instance for web-initiated reset
-            var webPoseResetCommand = new PoseResetCommand(
-                webContext, // Web context is no-op (no NetworkTables responses)
-                vrCamera,
-                vrCameraRoot,
-                resetTransform
-            );
-
-            // Execute the pose reset using the existing command implementation
-            webPoseResetCommand.Execute(command);
-
-            QueuedLogger.Log("[QuestNav] Pose reset to origin completed");
         }
         #endregion
     }

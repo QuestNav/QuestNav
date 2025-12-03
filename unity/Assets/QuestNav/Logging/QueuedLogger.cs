@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using QuestNav.Core;
 using UnityEngine;
 
 namespace QuestNav.Utils
@@ -11,20 +14,16 @@ namespace QuestNav.Utils
     /// </summary>
     public static class QueuedLogger
     {
+        #region Fields
         /// <summary>
-        /// Defines the supported log levels for the queued logger
+        /// Thread context to always log in main thread
         /// </summary>
-        public enum LogLevel
-        {
-            /// <summary>Informational messages</summary>
-            NT_INFO,
+        private static SynchronizationContext mainThreadContext;
 
-            /// <summary>Warning messages</summary>
-            NT_WARNING,
-
-            /// <summary>Error messages</summary>
-            NT_ERROR,
-        }
+        /// <summary>
+        /// Lock object for thread-safe access to logQueue and lastEntry
+        /// </summary>
+        private static readonly object logLock = new object();
 
         /// <summary>
         /// Queue to hold log entries before they are flushed
@@ -32,28 +31,61 @@ namespace QuestNav.Utils
         private static readonly Queue<LogEntry> logQueue = new Queue<LogEntry>();
 
         /// <summary>
-        /// Cache the last entry to support deduplication of identical messages
+        /// Cache the last entry to support deduplication of identical messages.
+        /// Access must be synchronized with logLock.
         /// </summary>
         private static LogEntry lastEntry = null;
+        #endregion
 
+        #region Enums
+        /// <summary>
+        /// Defines the supported log levels for the queued logger
+        /// </summary>
+        public enum LogLevel
+        {
+            /// <summary>Informational messages</summary>
+            INFO,
+
+            /// <summary>Warning messages</summary>
+            WARNING,
+
+            /// <summary>Error messages</summary>
+            ERROR,
+        }
+        #endregion
+
+        #region Nested Types
         /// <summary>
         /// Internal class to represent a single log entry with metadata
         /// </summary>
-        private class LogEntry
+        public class LogEntry
         {
             /// <summary>The log message content</summary>
             public string Message { get; private set; }
-
-            /// <summary>The filename where the log was called from</summary>
+            
+            /// <summary>
+            /// Unix timestamp in milliseconds when log was created
+            /// </summary>
+            public long Timestamp { get; set; }
+            
+            /// <summary>
+            /// The filename where the log was called from
+            /// </summary>
             public string CallingFileName { get; private set; }
 
-            /// <summary>Number of times this identical message was logged</summary>
+            /// <summary>
+            /// Number of times this identical message was logged
+            /// </summary>
             public int Count { get; set; }
 
-            /// <summary>The log level of this entry</summary>
+            /// <summary>
+            /// The log level of this entry
+            /// </summary>
             public LogLevel Level { get; private set; }
 
-            /// <summary>Associated exception if this is an exception log</summary>
+            /// <summary>
+            /// Associated exception if this is an exception log
+            /// </summary>
             public System.Exception Exception { get; private set; }
 
             /// <summary>
@@ -66,11 +98,12 @@ namespace QuestNav.Utils
             public LogEntry(
                 string message,
                 LogLevel level,
-                string callingFileName,
+                [CallerFilePath] string callingFileName = "",
                 System.Exception exception = null
             )
             {
                 Message = message;
+                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 Level = level;
                 CallingFileName = callingFileName;
                 Exception = exception;
@@ -88,7 +121,20 @@ namespace QuestNav.Utils
                     : messageWithPrefix;
             }
         }
+        #endregion
 
+        #region Lifecycle Methods
+        /// <summary>
+        /// Initializes the main thread context. Must be called from the main thread (e.g., from a MonoBehaviour's Awake).
+        /// </summary>
+        public static void Initialize()
+        {
+            mainThreadContext = SynchronizationContext.Current;
+            
+        }
+        #endregion
+
+        #region Public Methods
         /// <summary>
         /// Queues a message with the given log level.
         /// If the message is identical (and has no associated exception) to the previous entry, its count is increased.
@@ -98,26 +144,35 @@ namespace QuestNav.Utils
         /// <param name="callerFilePath">Automatically populated with the calling file path</param>
         public static void Log(
             string message,
-            LogLevel level = LogLevel.NT_INFO,
+            LogLevel level = LogLevel.INFO,
             [CallerFilePath] string callerFilePath = ""
         )
         {
             string callingFileName = GetFileNameFromPath(callerFilePath);
 
-            if (
-                lastEntry != null
-                && lastEntry.Message == message
-                && lastEntry.Level == level
-                && lastEntry.CallingFileName == callingFileName
-                && lastEntry.Exception == null
-            )
+            lock (logLock)
             {
-                lastEntry.Count++;
-            }
-            else
-            {
-                lastEntry = new LogEntry(message, level, callingFileName);
-                logQueue.Enqueue(lastEntry);
+                if (
+                    lastEntry != null
+                    && lastEntry.Message == message
+                    && lastEntry.Level == level
+                    && lastEntry.CallingFileName == callingFileName
+                    && lastEntry.Exception == null
+                )
+                {
+                    lastEntry.Count++;
+                }
+                else
+                {
+                    lastEntry = new LogEntry(message, level, callingFileName);
+                    logQueue.Enqueue(lastEntry);
+
+                    // Maintain circular buffer - keep only the most recent logs
+                    while (logQueue.Count > QuestNavConstants.Logging.MAX_LOGS)
+                    {
+                        logQueue.Dequeue();
+                    }
+                }
             }
         }
 
@@ -128,7 +183,7 @@ namespace QuestNav.Utils
         /// <param name="callerFilePath">Automatically populated with the calling file path</param>
         public static void LogWarning(string message, [CallerFilePath] string callerFilePath = "")
         {
-            Log(message, LogLevel.NT_WARNING, callerFilePath);
+            Log(message, LogLevel.WARNING, callerFilePath);
         }
 
         /// <summary>
@@ -138,7 +193,7 @@ namespace QuestNav.Utils
         /// <param name="callerFilePath">Automatically populated with the calling file path</param>
         public static void LogError(string message, [CallerFilePath] string callerFilePath = "")
         {
-            Log(message, LogLevel.NT_ERROR, callerFilePath);
+            Log(message, LogLevel.ERROR, callerFilePath);
         }
 
         /// <summary>
@@ -168,20 +223,29 @@ namespace QuestNav.Utils
         {
             string callingFileName = GetFileNameFromPath(callerFilePath);
 
-            if (
-                lastEntry != null
-                && lastEntry.Level == LogLevel.NT_ERROR
-                && lastEntry.Exception != null
-                && lastEntry.Message == message
-                && lastEntry.CallingFileName == callingFileName
-            )
+            lock (logLock)
             {
-                lastEntry.Count++;
-            }
-            else
-            {
-                lastEntry = new LogEntry(message, LogLevel.NT_ERROR, callingFileName, exception);
-                logQueue.Enqueue(lastEntry);
+                if (
+                    lastEntry != null
+                    && lastEntry.Level == LogLevel.ERROR
+                    && lastEntry.Exception != null
+                    && lastEntry.Message == message
+                    && lastEntry.CallingFileName == callingFileName
+                )
+                {
+                    lastEntry.Count++;
+                }
+                else
+                {
+                    lastEntry = new LogEntry(message, LogLevel.ERROR, callingFileName, exception);
+                    logQueue.Enqueue(lastEntry);
+
+                    // Maintain circular buffer - keep only the most recent logs
+                    while (logQueue.Count > QuestNavConstants.Logging.MAX_LOGS)
+                    {
+                        logQueue.Dequeue();
+                    }
+                }
             }
         }
 
@@ -191,34 +255,66 @@ namespace QuestNav.Utils
         /// </summary>
         public static void Flush()
         {
-            while (logQueue.Count > 0)
+            // Copy entries under lock, then log outside lock to avoid holding lock during Debug calls
+            List<LogEntry> entriesToFlush;
+            lock (logLock)
             {
-                LogEntry entry = logQueue.Dequeue();
-                switch (entry.Level)
-                {
-                    case LogLevel.NT_WARNING:
-                        Debug.LogWarning(entry.ToString());
-                        break;
-                    case LogLevel.NT_ERROR:
-                        if (entry.Exception != null)
-                        {
-                            // Log the custom message with prefix and count
-                            Debug.LogError(entry.ToString());
-                            Debug.LogException(entry.Exception);
-                        }
-                        else
-                        {
-                            Debug.LogError(entry.ToString());
-                        }
-                        break;
-                    default:
-                        Debug.Log(entry.ToString());
-                        break;
-                }
+                entriesToFlush = new List<LogEntry>(logQueue);
+                logQueue.Clear();
+                lastEntry = null;
             }
-            lastEntry = null;
+            
+            // Only flush on main thread
+            invokeOnMainThread(() =>
+            {
+                foreach (LogEntry entry in entriesToFlush)
+                {
+                    switch (entry.Level)
+                    {
+                        case LogLevel.WARNING:
+                            Debug.LogWarning(entry.ToString());
+                            break;
+                        case LogLevel.ERROR:
+                            if (entry.Exception != null)
+                            {
+                                // Log the custom message with prefix and count
+                                Debug.LogError(entry.ToString());
+                                Debug.LogException(entry.Exception);
+                            }
+                            else
+                            {
+                                Debug.LogError(entry.ToString());
+                            }
+                            break;
+                        default:
+                            Debug.Log(entry.ToString());
+                            break;
+                    }
+                }
+            });
         }
 
+        /// <summary>
+        /// Gets the most recent log entries.
+        /// Returns logs in chronological order (oldest first).
+        /// Thread-safe for access from background thread (ConfigServer).
+        /// </summary>
+        /// <param name="count">Maximum number of logs to return (default: 100)</param>
+        /// <returns>List of recent log entries</returns>
+        public static List<LogEntry> GetRecentLogs(int count = 100)
+        {
+            lock (logLock)
+            {
+                var logs = new List<LogEntry>(logQueue);
+
+                // Return most recent logs (up to count)
+                int startIndex = Math.Max(0, logs.Count - count);
+                return logs.GetRange(startIndex, logs.Count - startIndex);
+            }
+        }
+        #endregion
+
+        #region Private Methods
         /// <summary>
         /// Extracts the filename from a full file path for cleaner log output.
         /// </summary>
@@ -228,8 +324,28 @@ namespace QuestNav.Utils
         {
             if (string.IsNullOrEmpty(filePath))
                 return "";
-
-            return Path.GetFileName(filePath);
+            
+            // Windows paths compiled with [CallerFilePath] use backslashes,
+            // but Path.GetFileName on Unix doesn't recognize \ as a separator
+            string normalizedPath = filePath.Replace('\\', '/');
+            return Path.GetFileName(normalizedPath);
         }
+        
+        /// <summary>
+        /// Invokes an action on the main thread using the captured SynchronizationContext.
+        /// Falls back to direct invocation if no context was captured.
+        /// </summary>
+        private static void invokeOnMainThread(Action action)
+        {
+            if (mainThreadContext != null)
+            {
+                mainThreadContext.Post(_ => action(), null);
+            }
+            else
+            {
+                action();
+            }
+        }
+        #endregion
     }
 }

@@ -142,7 +142,7 @@ namespace QuestNav.WebServer
         public async Task InitializeAsync()
         {
             mainThreadContext = SynchronizationContext.Current;
-            
+
             if (isInitialized)
             {
                 QueuedLogger.Log("Already initialized, skipping");
@@ -382,9 +382,7 @@ namespace QuestNav.WebServer
                 }
                 else
                 {
-                    QueuedLogger.LogWarning(
-                        $"Failed to extract {sourceRelative}: {www.error}"
-                    );
+                    QueuedLogger.LogWarning($"Failed to extract {sourceRelative}: {www.error}");
                 }
             }
         }
@@ -439,7 +437,9 @@ namespace QuestNav.WebServer
 
         private void ShowConnectionInfo()
         {
-            QueuedLogger.Log($"Connect to WebUI at http://{GetLocalIPAddress()}:{QuestNavConstants.WebServer.SERVER_PORT}");
+            QueuedLogger.Log(
+                $"Connect to WebUI at http://{GetLocalIPAddress()}:{QuestNavConstants.WebServer.SERVER_PORT}"
+            );
         }
 
         private void RestartApp()
@@ -467,9 +467,7 @@ namespace QuestNav.WebServer
                     );
                     activity.Call("startActivity", intent);
 
-                    QueuedLogger.Log(
-                        "New instance started, killing current process..."
-                    );
+                    QueuedLogger.Log("New instance started, killing current process...");
                 }
 
                 using (var process = new AndroidJavaClass("android.os.Process"))

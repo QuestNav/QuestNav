@@ -62,12 +62,12 @@ namespace QuestNav.Utils
         {
             /// <summary>The log message content</summary>
             public string Message { get; private set; }
-            
+
             /// <summary>
             /// Unix timestamp in milliseconds when log was created
             /// </summary>
             public long Timestamp { get; set; }
-            
+
             /// <summary>
             /// The filename where the log was called from
             /// </summary>
@@ -130,7 +130,6 @@ namespace QuestNav.Utils
         public static void Initialize()
         {
             mainThreadContext = SynchronizationContext.Current;
-            
         }
         #endregion
 
@@ -263,7 +262,7 @@ namespace QuestNav.Utils
                 logQueue.Clear();
                 lastEntry = null;
             }
-            
+
             // Only flush on main thread
             invokeOnMainThread(() =>
             {
@@ -324,13 +323,13 @@ namespace QuestNav.Utils
         {
             if (string.IsNullOrEmpty(filePath))
                 return "";
-            
+
             // Windows paths compiled with [CallerFilePath] use backslashes,
             // but Path.GetFileName on Unix doesn't recognize \ as a separator
             string normalizedPath = filePath.Replace('\\', '/');
             return Path.GetFileName(normalizedPath);
         }
-        
+
         /// <summary>
         /// Invokes an action on the main thread using the captured SynchronizationContext.
         /// Falls back to direct invocation if no context was captured.

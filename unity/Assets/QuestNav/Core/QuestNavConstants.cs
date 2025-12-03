@@ -165,7 +165,7 @@ namespace QuestNav.Core
             /// The highest level to log. Almost ALWAYS this is CRITICAL.
             /// </summary>
             public const int NT_LOG_LEVEL_MAX = NtLogLevel.CRITICAL;
-            
+
             /// <summary>
             /// Maximum number of logs to keep in memory
             /// </summary>

@@ -205,7 +205,7 @@ namespace QuestNav.Core
         private async void Awake()
         {
             QueuedLogger.Initialize();
-            
+
             // Initializes components
             configManager = new ConfigManager();
             // Use try-catch here due to async
@@ -271,7 +271,7 @@ namespace QuestNav.Core
                 resetTransform
             );
             _ = webServerManager.InitializeAsync();
-            
+
             // Disable stack traces for Log-level logging
             Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
             // Set Oculus display frequency

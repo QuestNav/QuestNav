@@ -161,7 +161,7 @@ namespace QuestNav.Core
         /// Whether we had tracking
         /// </summary>
         private bool hadTracking;
-        
+
         ///<summary>
         /// Whether awake has completed
         /// </summary>
@@ -212,7 +212,7 @@ namespace QuestNav.Core
             QueuedLogger.Initialize();
             // Disable stack traces for Log-level logging
             Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
-            
+
             configManager = new ConfigManager();
 
             networkTableConnection = new NetworkTableConnection(configManager);
@@ -232,7 +232,7 @@ namespace QuestNav.Core
                 teamUpdateButton,
                 autoStartToggle
             );
-            
+
             webServerManager = new WebServerManager(
                 configManager,
                 networkTableConnection,
@@ -259,7 +259,7 @@ namespace QuestNav.Core
             {
                 QueuedLogger.LogException(e);
             }
-            
+
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
             // Schedule "SlowUpdate" loop for non loop critical applications
@@ -366,8 +366,9 @@ namespace QuestNav.Core
         /// </summary>
         private void OnApplicationFocus(bool hasFocus)
         {
-            if (!initialized) return;
-            
+            if (!initialized)
+                return;
+
             if (hasFocus)
             {
                 QueuedLogger.Log(
@@ -419,7 +420,8 @@ namespace QuestNav.Core
         /// </summary>
         private void OnApplicationPause(bool isPaused)
         {
-            if (!initialized) return;
+            if (!initialized)
+                return;
 
             if (isPaused)
             {

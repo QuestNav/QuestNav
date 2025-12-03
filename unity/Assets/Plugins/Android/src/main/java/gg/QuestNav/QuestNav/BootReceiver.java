@@ -50,7 +50,7 @@ public class BootReceiver extends BroadcastReceiver {
         }
         
         String dbPath = new File(externalFilesDir, DB_NAME).getAbsolutePath();
-        Log.d(TAG, "Looking for database at: " + dbPath);  // Add this for debugging
+        Log.d(TAG, "Looking for database at: " + dbPath);
         
         if (!new File(dbPath).exists()) {
             Log.d(TAG, "Database not found, defaulting to auto-start enabled");

@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
@@ -28,8 +27,6 @@ namespace QuestNav.Network
         /// Gets the current NT time
         /// </summary>
         long NtNow { get; }
-
-        public Task InitializeAsync();
 
         /// <summary>
         /// Publishes frame data to NetworkTables.
@@ -205,14 +202,6 @@ namespace QuestNav.Network
             configManager.OnTeamNumberChanged += OnTeamNumberChanged;
             configManager.OnDebugIpOverrideChanged += OnDebugIpOverrideChanged;
             configManager.OnEnableDebugLoggingChanged += OnEnableDebugLoggingChanged;
-        }
-
-        public async Task InitializeAsync()
-        {
-            // Load saved values from config
-            OnTeamNumberChanged(await configManager.GetTeamNumberAsync());
-            OnDebugIpOverrideChanged(await configManager.GetDebugIpOverrideAsync());
-            OnEnableDebugLoggingChanged(await configManager.GetEnableDebugLoggingAsync());
         }
 
         #region Properties

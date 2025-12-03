@@ -293,7 +293,7 @@ namespace QuestNav.WebServer.Server
                 success = true,
                 teamNumber = await configManager.GetTeamNumberAsync(),
                 debugIpOverride = await configManager.GetDebugIpOverrideAsync(),
-                enableAutoStartOnBoot = await configManager.getEnableAutoStartOnBootAsync(),
+                enableAutoStartOnBoot = await configManager.GetEnableAutoStartOnBootAsync(),
                 enableDebugLogging = await configManager.GetEnableDebugLoggingAsync(),
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             };

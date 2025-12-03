@@ -22,7 +22,7 @@ namespace QuestNav.Config
 
         public Task<int> GetTeamNumberAsync();
         public Task<string> GetDebugIpOverrideAsync();
-        public Task<bool> getEnableAutoStartOnBootAsync();
+        public Task<bool> GetEnableAutoStartOnBootAsync();
         public Task<bool> GetEnableDebugLoggingAsync();
         public Task SetTeamNumberAsync(int teamNumber);
         public Task SetDebugIpOverrideAsync(string ipOverride);
@@ -59,6 +59,12 @@ namespace QuestNav.Config
             await connection.CreateTableAsync<Config.Logging>();
 
             QueuedLogger.Log($"Database initialized at: {dbPath}");
+
+            // Fire initial values to all current subscribers
+            OnTeamNumberChanged?.Invoke(await GetTeamNumberAsync());
+            OnDebugIpOverrideChanged?.Invoke(await GetDebugIpOverrideAsync());
+            OnEnableAutoStartOnBootChanged?.Invoke(await GetEnableAutoStartOnBootAsync());
+            OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
         }
 
         public async Task ResetToDefaultsAsync()
@@ -114,7 +120,7 @@ namespace QuestNav.Config
         #endregion
 
         #region System
-        public async Task<bool> getEnableAutoStartOnBootAsync()
+        public async Task<bool> GetEnableAutoStartOnBootAsync()
         {
             var config = await GetSystemConfigAsync();
 

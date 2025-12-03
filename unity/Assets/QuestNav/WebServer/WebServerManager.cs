@@ -151,10 +151,6 @@ namespace QuestNav.WebServer
 
             QueuedLogger.Log("Initializing...");
 
-            // Load initial cached values from config
-            OnTeamNumberChanged(await configManager.GetTeamNumberAsync());
-            OnDebugIpOverrideChanged(await configManager.GetDebugIpOverrideAsync());
-
             logCollector.Initialize();
 
             await StartServerAsync();

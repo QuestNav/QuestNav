@@ -18,8 +18,6 @@ namespace QuestNav.UI
     /// </summary>
     public interface IUIManager
     {
-        Task InitializeAsync();
-
         /// <summary>
         /// Updates the connection state and ip address in the UI
         /// </summary>
@@ -171,13 +169,6 @@ namespace QuestNav.UI
             configManager.OnTeamNumberChanged += OnTeamNumberChanged;
             configManager.OnDebugIpOverrideChanged += OnDebugIpOverrideChanged;
             configManager.OnEnableAutoStartOnBootChanged += onEnableAutoStartOnBootChanged;
-        }
-
-        public async Task InitializeAsync()
-        {
-            // Load saved values from config
-            OnTeamNumberChanged(await configManager.GetTeamNumberAsync());
-            onEnableAutoStartOnBootChanged(await configManager.getEnableAutoStartOnBootAsync());
         }
 
         #region Event Subscribers

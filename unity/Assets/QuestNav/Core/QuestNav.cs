@@ -161,6 +161,11 @@ namespace QuestNav.Core
         /// Whether we had tracking
         /// </summary>
         private bool hadTracking;
+        
+        ///<summary>
+        /// Whether awake has completed
+        /// </summary>
+        private bool initialized;
 
         #region Component References
 
@@ -205,29 +210,12 @@ namespace QuestNav.Core
         private async void Awake()
         {
             QueuedLogger.Initialize();
-
-            // Initializes components
+            // Disable stack traces for Log-level logging
+            Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+            
             configManager = new ConfigManager();
-            // Use try-catch here due to async
-            try
-            {
-                await configManager.InitializeAsync();
-            }
-            catch (Exception e)
-            {
-                QueuedLogger.LogException(e);
-            }
 
             networkTableConnection = new NetworkTableConnection(configManager);
-            // Use try-catch here due to async
-            try
-            {
-                await networkTableConnection.InitializeAsync();
-            }
-            catch (Exception e)
-            {
-                QueuedLogger.LogException(e);
-            }
 
             uiManager = new UIManager(
                 configManager,
@@ -244,15 +232,14 @@ namespace QuestNav.Core
                 teamUpdateButton,
                 autoStartToggle
             );
-            // Use try-catch here due to async
-            try
-            {
-                await uiManager.InitializeAsync();
-            }
-            catch (Exception e)
-            {
-                QueuedLogger.LogException(e);
-            }
+            
+            webServerManager = new WebServerManager(
+                configManager,
+                networkTableConnection,
+                vrCamera,
+                vrCameraRoot,
+                resetTransform
+            );
 
             commandProcessor = new CommandProcessor(
                 networkTableConnection,
@@ -262,23 +249,24 @@ namespace QuestNav.Core
             );
             tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
 
-            // Initialize web server manager with dependencies (same pattern as UIManager)
-            webServerManager = new WebServerManager(
-                configManager,
-                networkTableConnection,
-                vrCamera,
-                vrCameraRoot,
-                resetTransform
-            );
-            _ = webServerManager.InitializeAsync();
-
-            // Disable stack traces for Log-level logging
-            Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+            // Use try-catch due to async
+            try
+            {
+                await configManager.InitializeAsync();
+                await webServerManager.InitializeAsync();
+            }
+            catch (Exception e)
+            {
+                QueuedLogger.LogException(e);
+            }
+            
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
             // Schedule "SlowUpdate" loop for non loop critical applications
             InvokeRepeating(nameof(SlowUpdate), 0, 1f / QuestNavConstants.Timing.SLOW_UPDATE_HZ);
             InvokeRepeating(nameof(MainUpdate), 0, 1f / QuestNavConstants.Timing.MAIN_UPDATE_HZ);
+
+            initialized = true;
         }
 
         /// <summary>
@@ -294,12 +282,6 @@ namespace QuestNav.Core
         /// </summary>
         private void MainUpdate()
         {
-            // Guard against early calls before Awake() completes initialization
-            if (networkTableConnection == null || commandProcessor == null || tagAlongUI == null)
-            {
-                return;
-            }
-
             // Update tracking status and count tracking loss events
             CheckTrackingLoss();
 
@@ -338,12 +320,6 @@ namespace QuestNav.Core
         /// </summary>
         private void SlowUpdate()
         {
-            // Guard against early calls before Awake() completes initialization
-            if (networkTableConnection == null || uiManager == null)
-            {
-                return;
-            }
-
             // Process and display NetworkTables internal messages (connection status, errors, etc.)
             // This helps with debugging connection issues without impacting performance
             networkTableConnection.LoggerPeriodic();
@@ -390,6 +366,8 @@ namespace QuestNav.Core
         /// </summary>
         private void OnApplicationFocus(bool hasFocus)
         {
+            if (!initialized) return;
+            
             if (hasFocus)
             {
                 QueuedLogger.Log(
@@ -441,11 +419,7 @@ namespace QuestNav.Core
         /// </summary>
         private void OnApplicationPause(bool isPaused)
         {
-            // Guard against early calls before Awake() completes initialization
-            if (networkTableConnection == null)
-            {
-                return;
-            }
+            if (!initialized) return;
 
             if (isPaused)
             {

@@ -47,9 +47,10 @@ namespace QuestNav.Network
         /// <summary>
         /// Publishes device data to NetworkTables.
         /// </summary>
+        /// <param name="currentlyTracking">Is the quest tracking currently</param>
         /// <param name="trackingLostCounter">Number of tracking lost events this session</param>
         /// <param name="batteryPercent">Current battery percentage</param>
-        void PublishDeviceData(int trackingLostCounter, int batteryPercent);
+        void PublishDeviceData(bool currentlyTracking, int trackingLostCounter, int batteryPercent);
 
         /// <summary>
         /// Updates the team number.
@@ -300,10 +301,16 @@ public class NetworkTableConnection : INetworkTableConnection
     /// <summary>
     /// Publishes current device data to NetworkTables including tracking status and battery level
     /// </summary>
+    /// <param name="currentlyTracking">Whether the headset is currently tracking</param>
     /// <param name="trackingLostCounter">Number of times tracking was lost this session</param>
     /// <param name="batteryPercent">Current battery percentage</param>
-    public void PublishDeviceData(int trackingLostCounter, int batteryPercent)
+    public void PublishDeviceData(
+        bool currentlyTracking,
+        int trackingLostCounter,
+        int batteryPercent
+    )
     {
+        deviceData.CurrentlyTracking = currentlyTracking;
         deviceData.TrackingLostCounter = trackingLostCounter;
         deviceData.BatteryPercent = batteryPercent;
 

@@ -102,16 +102,16 @@ Generate C# files from proto definitions:
 
 <Tabs>
   <TabItem value="windows" label="Windows">
-```powershell
-    # From the base directory of the repository
-    protoc --proto_path=protos --csharp_out=unity\Assets\QuestNav\Protos\Generated protos\*.proto
-```
+  From the base directory of the repository
+  ```powershell
+  protoc --proto_path=protos --csharp_out=unity\Assets\QuestNav\Protos\Generated protos\*.proto
+  ```
   </TabItem>
   <TabItem value="linux-mac" label="Linux/Mac">
-```bash
-    # From the base directory of the repository
-    protoc --proto_path=protos --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/*.proto
-```
+  From the base directory of the repository
+  ```bash  
+  protoc --proto_path=protos --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/*.proto
+  ```
   </TabItem>
 </Tabs>
 
@@ -120,28 +120,28 @@ Generate C# files from proto definitions:
 <Tabs>
   <TabItem value="windows" label="Windows">
     1. Download the QuickBuf plugin:
-```powershell
+    ```powershell
     curl -o protoc-gen-quickbuf.exe https://repo1.maven.org/maven2/us/hebi/quickbuf/protoc-gen-quickbuf/1.4/protoc-gen-quickbuf-1.4-windows-x86_64.exe
-```
+    ```
 
     2. Generate Java files:
-```powershell
     # From the base directory of the repository
+    ```powershell
     protoc -I="protos" --plugin=protoc-gen-quickbuf=protoc-gen-quickbuf.exe --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib\src\main\java\ protos\data.proto protos\commands.proto
-```
+    ```
   </TabItem>
   <TabItem value="linux-mac" label="Linux/Mac">
     1. Download the QuickBuf plugin:
-```bash
+    ```bash
     wget https://repo1.maven.org/maven2/us/hebi/quickbuf/protoc-gen-quickbuf/1.4/protoc-gen-quickbuf-1.4-linux-x86_64.exe -O protoc-gen-quickbuf
     chmod +x protoc-gen-quickbuf
-```
+    ```
 
     2. Generate Java files:
-```bash
-    # From the base directory of the repository
+    From the base directory of the repository
+    ```bash
     protoc -I="protos" --plugin=protoc-gen-quickbuf=./protoc-gen-quickbuf --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ protos/data.proto protos/commands.proto
-```
+    ```
   </TabItem>
 </Tabs>
 

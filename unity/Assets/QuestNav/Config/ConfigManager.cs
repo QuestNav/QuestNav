@@ -433,7 +433,6 @@ namespace QuestNav.Config
             if (mainThreadContext == null)
             {
                 action();
-                
             }
             else
             {

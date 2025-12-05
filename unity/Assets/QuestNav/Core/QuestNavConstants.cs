@@ -41,7 +41,7 @@ namespace QuestNav.Core
             /// <summary>
             /// Maximum team number allowed to be set
             /// </summary>
-            public const int MAX_TEAM_NUMBER = 99999;
+            public const int MAX_TEAM_NUMBER = 25599;
         }
 
         /// <summary>

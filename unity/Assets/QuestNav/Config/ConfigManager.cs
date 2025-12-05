@@ -383,7 +383,7 @@ namespace QuestNav.Config
         }
         #endregion
 
-        #region Validatiors
+        #region Validators
         /// <summary>
         /// Validates if a string is a valid IPv4 address.
         /// </summary>

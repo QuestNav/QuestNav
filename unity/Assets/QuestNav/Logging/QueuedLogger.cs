@@ -336,13 +336,13 @@ namespace QuestNav.Utils
         /// </summary>
         private static void invokeOnMainThread(Action action)
         {
-            if (mainThreadContext != null)
+            if (mainThreadContext == null)
             {
-                mainThreadContext.Post(_ => action(), null);
+                action();
             }
             else
             {
-                action();
+                mainThreadContext.Post(_ => action(), null);
             }
         }
         #endregion

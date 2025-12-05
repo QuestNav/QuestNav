@@ -76,6 +76,11 @@ namespace QuestNav.Native.NTCore
                 }
             }
 
+            if (result)
+            {
+                currentValue = (string[])values.Clone();
+            }
+
             return result;
         }
     }

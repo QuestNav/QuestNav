@@ -10,27 +10,104 @@ using UnityEngine;
 
 namespace QuestNav.Config
 {
+    /// <summary>
+    /// Interface for managing application configuration settings.
+    /// </summary>
     public interface IConfigManager
     {
+        /// <summary>
+        /// Initializes the configuration database and fires initial values.
+        /// </summary>
         public Task InitializeAsync();
+
+        /// <summary>
+        /// Closes the database connection.
+        /// </summary>
         public Task CloseAsync();
 
+        /// <summary>
+        /// Raised when team number changes.
+        /// </summary>
         public event Action<int> OnTeamNumberChanged;
+
+        /// <summary>
+        /// Raised when debug IP override changes.
+        /// </summary>
         public event Action<string> OnDebugIpOverrideChanged;
+
+        /// <summary>
+        /// Raised when auto-start on boot setting changes.
+        /// </summary>
         public event Action<bool> OnEnableAutoStartOnBootChanged;
+
+        /// <summary>
+        /// Raised when debug logging setting changes.
+        /// </summary>
         public event Action<bool> OnEnableDebugLoggingChanged;
 
+        /// <summary>
+        /// Gets the configured team number.
+        /// </summary>
+        /// <returns>
+        /// The team number, or -1 if using IP override.
+        /// </returns>
         public Task<int> GetTeamNumberAsync();
+
+        /// <summary>
+        /// Gets the debug IP override address.
+        /// </summary>
+        /// <returns>
+        /// The IP address string, or empty if using team number.
+        /// </returns>
         public Task<string> GetDebugIpOverrideAsync();
+
+        /// <summary>
+        /// Gets whether auto-start on boot is enabled.
+        /// </summary>
+        /// <returns>
+        /// True if auto-start is enabled.
+        /// </returns>
         public Task<bool> GetEnableAutoStartOnBootAsync();
+
+        /// <summary>
+        /// Gets whether debug logging is enabled.
+        /// </summary>
+        /// <returns>
+        /// True if debug logging is enabled.
+        /// </returns>
         public Task<bool> GetEnableDebugLoggingAsync();
+
+        /// <summary>
+        /// Sets the team number and clears IP override
+        /// .</summary>
+        /// <seealso cref="SetDebugIpOverrideAsync"/>
         public Task SetTeamNumberAsync(int teamNumber);
+
+        /// <summary>
+        /// Sets the debug IP override and disables team number.
+        /// </summary>
+        /// <seealso cref="SetTeamNumberAsync"/>
         public Task SetDebugIpOverrideAsync(string ipOverride);
+
+        /// <summary>
+        /// Sets whether to auto-start on boot.
+        /// </summary>
         public Task setEnableAutoStartOnBootAsync(bool autoStart);
+
+        /// <summary>
+        /// Sets whether debug logging is enabled.
+        /// </summary>
         public Task SetEnableDebugLoggingAsync(bool enableDebugLogging);
+
+        /// <summary>
+        /// Resets all settings to defaults.
+        /// </summary>
         public Task ResetToDefaultsAsync();
     }
 
+    /// <summary>
+    /// Manages application configuration using SQLite persistence.
+    /// </summary>
     public class ConfigManager : IConfigManager
     {
         private static readonly string dbPath = Path.Combine(
@@ -41,6 +118,7 @@ namespace QuestNav.Config
         private SynchronizationContext mainThreadContext;
 
         #region Lifecycle Methods
+        /// <inheritdoc/>
         public async Task InitializeAsync()
         {
             // Capture the main thread context for event callbacks
@@ -67,6 +145,7 @@ namespace QuestNav.Config
             OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
         }
 
+        /// <inheritdoc/>
         public async Task ResetToDefaultsAsync()
         {
             var networkDefaults = new Config.Network();
@@ -80,6 +159,7 @@ namespace QuestNav.Config
             QueuedLogger.Log("Database reset to defaults");
         }
 
+        /// <inheritdoc/>
         public async Task CloseAsync()
         {
             if (connection != null)
@@ -91,19 +171,22 @@ namespace QuestNav.Config
         #endregion
 
         #region Events
-        // Network events
+        /// <inheritdoc/>
         public event Action<int> OnTeamNumberChanged;
+
+        /// <inheritdoc/>
         public event Action<string> OnDebugIpOverrideChanged;
 
-        // System events
+        /// <inheritdoc/>
         public event Action<bool> OnEnableAutoStartOnBootChanged;
 
-        // Logging events
+        /// <inheritdoc/>
         public event Action<bool> OnEnableDebugLoggingChanged;
         #endregion
 
         #region Getters
         #region Network
+        /// <inheritdoc/>
         public async Task<int> GetTeamNumberAsync()
         {
             var config = await GetNetworkConfigAsync();
@@ -111,6 +194,7 @@ namespace QuestNav.Config
             return config.TeamNumber;
         }
 
+        /// <inheritdoc/>
         public async Task<string> GetDebugIpOverrideAsync()
         {
             var config = await GetNetworkConfigAsync();
@@ -120,6 +204,7 @@ namespace QuestNav.Config
         #endregion
 
         #region System
+        /// <inheritdoc/>
         public async Task<bool> GetEnableAutoStartOnBootAsync()
         {
             var config = await GetSystemConfigAsync();
@@ -129,6 +214,7 @@ namespace QuestNav.Config
         #endregion
 
         #region Logging
+        /// <inheritdoc/>
         public async Task<bool> GetEnableDebugLoggingAsync()
         {
             var config = await GetLoggingConfigAsync();
@@ -141,6 +227,7 @@ namespace QuestNav.Config
         #region Setters
 
         #region Network
+        /// <inheritdoc/>
         public async Task SetTeamNumberAsync(int teamNumber)
         {
             // Validate new value
@@ -163,6 +250,7 @@ namespace QuestNav.Config
             QueuedLogger.Log($"Updated Key 'teamNumber' to {teamNumber}");
         }
 
+        /// <inheritdoc/>
         public async Task SetDebugIpOverrideAsync(string ipOverride)
         {
             // Validate new value (blank means disable)
@@ -187,6 +275,7 @@ namespace QuestNav.Config
         #endregion
 
         #region System
+        /// <inheritdoc/>
         public async Task setEnableAutoStartOnBootAsync(bool autoStart)
         {
             var config = await GetSystemConfigAsync();
@@ -200,6 +289,7 @@ namespace QuestNav.Config
         #endregion
 
         #region Logging
+        /// <inheritdoc/>
         public async Task SetEnableDebugLoggingAsync(bool enableDebugLogging)
         {
             var config = await GetLoggingConfigAsync();
@@ -215,6 +305,9 @@ namespace QuestNav.Config
 
         #region Private Methods
         #region Getters
+        /// <summary>
+        /// Gets network config from DB, creating defaults if not found.
+        /// </summary>
         private async Task<Config.Network> GetNetworkConfigAsync()
         {
             var config = await connection.FindAsync<Config.Network>(1);
@@ -228,6 +321,9 @@ namespace QuestNav.Config
             return config;
         }
 
+        /// <summary>
+        /// Gets system config from DB, creating defaults if not found.
+        /// </summary>
         private async Task<Config.System> GetSystemConfigAsync()
         {
             var config = await connection.FindAsync<Config.System>(1);
@@ -241,6 +337,9 @@ namespace QuestNav.Config
             return config;
         }
 
+        /// <summary>
+        /// Gets logging config from DB, creating defaults if not found.
+        /// </summary>
         private async Task<Config.Logging> GetLoggingConfigAsync()
         {
             var config = await connection.FindAsync<Config.Logging>(1);
@@ -256,18 +355,27 @@ namespace QuestNav.Config
         #endregion
 
         #region Setters
+        /// <summary>
+        /// Persists system config to the database.
+        /// </summary>
         private async Task SaveSystemConfigAsync(Config.System config)
         {
             config.ID = 1;
             await connection.InsertOrReplaceAsync(config);
         }
 
+        /// <summary>
+        /// Persists network config to the database.
+        /// </summary>
         private async Task SaveNetworkConfigAsync(Config.Network config)
         {
             config.ID = 1;
             await connection.InsertOrReplaceAsync(config);
         }
 
+        /// <summary>
+        /// Persists logging config to the database.
+        /// </summary>
         private async Task SaveLoggingConfigAsync(Config.Logging config)
         {
             config.ID = 1;
@@ -277,8 +385,11 @@ namespace QuestNav.Config
 
         #region Validatiors
         /// <summary>
-        /// Validates if a string is a valid IPv4 address
+        /// Validates if a string is a valid IPv4 address.
         /// </summary>
+        /// <returns>
+        /// True if the string is a valid IPv4 address.
+        /// </returns>
         private bool IsValidIPAddress(string ipString)
         {
             if (string.IsNullOrEmpty(ipString))
@@ -319,13 +430,14 @@ namespace QuestNav.Config
         /// </summary>
         private void invokeOnMainThread(Action action)
         {
-            if (mainThreadContext != null)
+            if (mainThreadContext == null)
             {
-                mainThreadContext.Post(_ => action(), null);
+                action();
+                
             }
             else
             {
-                action();
+                mainThreadContext.Post(_ => action(), null);
             }
         }
         #endregion

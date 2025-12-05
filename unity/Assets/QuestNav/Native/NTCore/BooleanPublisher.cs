@@ -1,4 +1,4 @@
-﻿namespace QuestNav.Native.NTCore
+namespace QuestNav.Native.NTCore
 {
     public class BooleanPublisher
     {

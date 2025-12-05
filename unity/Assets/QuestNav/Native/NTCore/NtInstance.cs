@@ -117,7 +117,7 @@ namespace QuestNav.Native.NTCore
             );
             return new BooleanPublisher(pubHandle);
         }
-        
+
         public BooleanSubscriber GetBooleanSubscriber(string name, PubSubOptions options)
         {
             var subHandle = Subscribe(

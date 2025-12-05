@@ -10,7 +10,7 @@ namespace QuestNav.Commands
         /// <summary>
         /// Gets the nice name of the command
         /// </summary>
-        string commandNiceName { get; }
+        string CommandNiceName { get; }
 
         /// <summary>
         /// Executes this command with the provided command data

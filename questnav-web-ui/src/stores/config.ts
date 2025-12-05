@@ -1,50 +1,35 @@
 // Pinia store for configuration state management
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { ConfigSchema } from '../types'
+import { ref } from 'vue'
+import type { ConfigResponse } from '../types'
 import { configApi } from '../api/config'
 
 export const useConfigStore = defineStore('config', () => {
   // State
-  const schema = ref<ConfigSchema | null>(null)
-  const values = ref<Record<string, any>>({})
+  const config = ref<ConfigResponse | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const lastUpdated = ref<number>(0)
-  const restartRequired = ref(false)
-
-  // Computed
-  const categories = computed(() => {
-    if (!schema.value) return []
-    return Object.keys(schema.value.categories).sort()
-  })
-
-  const fieldsByCategory = computed(() => {
-    if (!schema.value) return {}
-    return schema.value.categories
-  })
 
   // Actions
-  async function loadSchema() {
-    isLoading.value = true
+  async function loadConfig(showLoading = true) {
+    // Only show loading spinner on initial load, not during polling
+    if (showLoading && config.value === null) {
+      isLoading.value = true
+    }
     error.value = null
     
     try {
-      const data = await configApi.getSchema()
-      schema.value = data
-      
-      // Initialize values from schema
-      data.fields.forEach(field => {
-        values.value[field.path] = field.currentValue
-      })
-      
+      const data = await configApi.getConfig()
+      config.value = data
       lastUpdated.value = Date.now()
       return true
     } catch (err) {
-      // Only show error on initial load, not on reconnection attempts
-      if (!schema.value) {
-        error.value = err instanceof Error ? err.message : 'Failed to load schema'
+      if (err instanceof Error && err.message.includes('Failed to fetch')) {
+        error.value = null
+      } else {
+        error.value = err instanceof Error ? err.message : 'Failed to load config'
       }
       return false
     } finally {
@@ -52,65 +37,85 @@ export const useConfigStore = defineStore('config', () => {
     }
   }
 
-  async function loadConfig() {
-    error.value = null
-    
+  async function updateTeamNumber(value: number) {
     try {
-      const data = await configApi.getConfig()
-      values.value = { ...values.value, ...data.values }
-      lastUpdated.value = Date.now()
-      return true
+      const response = await configApi.updateConfig({ teamNumber: value })
+      if (response.success) {
+        await loadConfig(false)
+      }
+      return response.success
     } catch (err) {
-      // Silently fail - don't set error to keep old data visible
-      // Connection state overlay will handle showing disconnect status
+      error.value = err instanceof Error ? err.message : 'Failed to update'
       return false
     }
   }
 
-  async function updateValue(path: string, value: any) {
+  async function updateDebugIpOverride(value: string) {
     try {
-      const response = await configApi.updateConfig(path, value)
-      
+      const response = await configApi.updateConfig({ debugIpOverride: value })
       if (response.success) {
-        values.value[path] = response.newValue
-        lastUpdated.value = Date.now()
-        
-        // Check if this field requires restart
-        const field = schema.value?.fields.find(f => f.path === path)
-        if (field?.requiresRestart) {
-          restartRequired.value = true
-        }
+        await loadConfig(false)
       }
-      
       return response.success
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to update value'
+      error.value = err instanceof Error ? err.message : 'Failed to update'
       return false
     }
   }
-  
-  function clearRestartFlag() {
-    restartRequired.value = false
+
+  async function updateEnableAutoStartOnBoot(value: boolean) {
+    try {
+      const response = await configApi.updateConfig({ enableAutoStartOnBoot: value })
+      if (response.success) {
+        await loadConfig(false)
+      }
+      return response.success
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update'
+      return false
+    }
+  }
+
+  async function updateEnableDebugLogging(value: boolean) {
+    try {
+      const response = await configApi.updateConfig({ enableDebugLogging: value })
+      if (response.success) {
+        await loadConfig(false)
+      }
+      return response.success
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update'
+      return false
+    }
+  }
+
+  async function resetToDefaults() {
+    try {
+      const response = await configApi.resetConfig()
+      if (response.success) {
+        await loadConfig(false)
+      }
+      return response.success
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to reset'
+      return false
+    }
   }
 
   return {
     // State
-    schema,
-    values,
+    config,
     isLoading,
     error,
     lastUpdated,
-    restartRequired,
-    
-    // Computed
-    categories,
-    fieldsByCategory,
     
     // Actions
-    loadSchema,
     loadConfig,
-    updateValue,
-    clearRestartFlag
+    updateTeamNumber,
+    updateDebugIpOverride,
+    updateEnableAutoStartOnBoot,
+    updateEnableDebugLogging,
+    resetToDefaults
   }
 })
 

@@ -138,10 +138,6 @@
             <span class="info-label">Port:</span>
             <span class="info-value">{{ serverInfo.serverPort }}</span>
           </div>
-          <div class="info-item">
-            <span class="info-label">Config Path:</span>
-            <span class="info-value">{{ serverInfo.configPath }}</span>
-          </div>
         </div>
         
         <button @click="showInfoModal = false" class="mt-2">Close</button>
@@ -257,7 +253,6 @@ onUnmounted(() => {
 })
 
 async function refreshData() {
-  await configStore.loadSchema()
   await configStore.loadConfig()
 }
 

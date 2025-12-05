@@ -44,22 +44,22 @@ namespace QuestNav.WebServer
             /// <summary>
             /// The log message content
             /// </summary>
-            public string message { get; set; }
+            public string Message { get; set; }
 
             /// <summary>
             /// Stack trace (for errors and exceptions)
             /// </summary>
-            public string stackTrace { get; set; }
+            public string StackTrace { get; set; }
 
             /// <summary>
             /// Log type (Log, Warning, Error, Assert, Exception)
             /// </summary>
-            public string type { get; set; }
+            public string Type { get; set; }
 
             /// <summary>
             /// Unix timestamp in milliseconds when log was created
             /// </summary>
-            public long timestamp { get; set; }
+            public long Timestamp { get; set; }
         }
         #endregion
 
@@ -102,10 +102,10 @@ namespace QuestNav.WebServer
         {
             var entry = new LogEntry
             {
-                message = CleanFilePaths(message),
-                stackTrace = CleanStackTrace(stackTrace),
-                type = type.ToString(),
-                timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                Message = CleanFilePaths(message),
+                StackTrace = CleanStackTrace(stackTrace),
+                Type = type.ToString(),
+                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             };
 
             lock (logQueue)

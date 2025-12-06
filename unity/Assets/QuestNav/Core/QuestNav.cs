@@ -1,4 +1,7 @@
-﻿using QuestNav.Commands;
+﻿using System;
+using Meta.XR;
+using QuestNav.Camera;
+using QuestNav.Commands;
 using QuestNav.Commands.Commands;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
@@ -139,6 +142,13 @@ namespace QuestNav.Core
         private Transform tagalongUiTransform;
 
         /// <summary>
+        /// An object that manages access to the headset camera.
+        /// </summary>
+        [Header("Passthrough Camera")]
+        [SerializeField]
+        private PassthroughCameraAccess cameraAccess;
+
+        /// <summary>
         /// Current battery percentage of the device
         /// </summary>
         private int batteryPercent;
@@ -190,6 +200,11 @@ namespace QuestNav.Core
         /// </summary>
         private IWebServerManager webServerManager;
 
+        /// <summary>
+        /// Captures passthrough frames for streaming.
+        /// </summary>
+        private PassthroughFrameSource passthroughFrameSource;
+
         #endregion
 
         #endregion
@@ -224,10 +239,19 @@ namespace QuestNav.Core
             );
             tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
 
+            // Initialize passthrough capture and start capture coroutine
+            passthroughFrameSource = new PassthroughFrameSource(
+                this,
+                cameraAccess,
+                networkTableConnection.CreateCameraSource("Passthrough")
+            );
+            passthroughFrameSource.Initialize();
+
             // Initialize web server manager with settings from WebServerConstants
             webServerManager = new WebServerManager(
                 vrCamera,
                 vrCameraRoot,
+                passthroughFrameSource,
                 this,
                 WebServerConstants.serverPort,
                 WebServerConstants.enableCORSDevMode,
@@ -309,6 +333,9 @@ namespace QuestNav.Core
 
             // Update status provider for web interface
             UpdateStatusProvider();
+
+            // Update the list of video streams
+            UpdateCameraServers();
 
             // Update web server manager periodic operations
             webServerManager?.Periodic();
@@ -611,6 +638,16 @@ namespace QuestNav.Core
                 currentFps,
                 Time.frameCount
             );
+        }
+
+        private static readonly int[] FpsOptions = { 1, 5, 15, 20, 30, 30, 60 };
+
+        /// <summary>
+        /// Updates the list of streams
+        /// </summary>
+        private void UpdateCameraServers()
+        {
+            passthroughFrameSource.BaseUrl = webServerManager.BaseUrl;
         }
         #endregion
     }

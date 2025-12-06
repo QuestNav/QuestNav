@@ -13,6 +13,11 @@ namespace QuestNav.WebServer
         bool IsServerRunning { get; }
 
         /// <summary>
+        /// Gets the base URL of the server
+        /// </summary>
+        string BaseUrl { get; }
+
+        /// <summary>
         /// Initializes the web server system.
         /// Must be called on Unity main thread during application startup.
         /// </summary>

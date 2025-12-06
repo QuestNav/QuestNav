@@ -302,7 +302,7 @@ namespace QuestNav.Network
                 String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "connected"),
                 QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
             );
-            
+
             modeEntry = ntInstance.GetStringEntry(
                 String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "mode"),
                 QuestNavConstants.Network.NT_PUBLISHER_SETTINGS

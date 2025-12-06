@@ -111,11 +111,22 @@ namespace QuestNav.Native.NTCore
         {
             var pubHandle = Publish(
                 name,
-                NtType.NT_STRING,
-                GetTypeString(NtType.NT_STRING),
+                NtType.NT_BOOLEAN,
+                GetTypeString(NtType.NT_BOOLEAN),
                 options
             );
             return new BooleanPublisher(pubHandle);
+        }
+
+        public BooleanSubscriber GetBooleanSubscriber(string name, PubSubOptions options)
+        {
+            var subHandle = Subscribe(
+                name,
+                NtType.NT_BOOLEAN,
+                GetTypeString(NtType.NT_BOOLEAN),
+                options
+            );
+            return new BooleanSubscriber(subHandle);
         }
 
         public DoubleSubscriber GetDoubleSubscriber(string name, PubSubOptions options)
@@ -323,7 +334,7 @@ namespace QuestNav.Native.NTCore
                 NtType.NT_INTEGER => "int",
                 NtType.NT_FLOAT => "float",
                 NtType.NT_INTEGER_ARRAY => "int[]",
-                NtType.NT_FLOAT_ARRAY => "float",
+                NtType.NT_FLOAT_ARRAY => "float[]",
                 _ => "raw",
             };
         }

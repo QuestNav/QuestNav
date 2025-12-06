@@ -298,7 +298,14 @@ PlayerSettings:
   AndroidAppBundleSizeToValidate: 150
   AndroidReportGooglePlayAppDependencies: 1
   androidSymbolsSizeThreshold: 800
-  m_BuildTargetIcons: []
+  m_BuildTargetIcons:
+  - m_BuildTarget: 
+    m_Icons:
+    - serializedVersion: 2
+      m_Icon: {fileID: 2800000, guid: dd042fff2c1e2fe4abd0b16e734011c0, type: 3}
+      m_Width: 128
+      m_Height: 128
+      m_Kind: 0
   m_BuildTargetPlatformIcons:
   - m_BuildTarget: iPhone
     m_Icons:
@@ -459,32 +466,44 @@ PlayerSettings:
       m_Height: 36
       m_Kind: 1
       m_SubKind: 
-    - m_Textures: []
+    - m_Textures:
+      - {fileID: 2800000, guid: 07a4dc7d9024a65439c423af9e0b05ec, type: 3}
+      - {fileID: 2800000, guid: dd042fff2c1e2fe4abd0b16e734011c0, type: 3}
       m_Width: 432
       m_Height: 432
       m_Kind: 2
       m_SubKind: 
-    - m_Textures: []
+    - m_Textures:
+      - {fileID: 2800000, guid: 07a4dc7d9024a65439c423af9e0b05ec, type: 3}
+      - {fileID: 2800000, guid: dd042fff2c1e2fe4abd0b16e734011c0, type: 3}
       m_Width: 324
       m_Height: 324
       m_Kind: 2
       m_SubKind: 
-    - m_Textures: []
+    - m_Textures:
+      - {fileID: 2800000, guid: 07a4dc7d9024a65439c423af9e0b05ec, type: 3}
+      - {fileID: 2800000, guid: dd042fff2c1e2fe4abd0b16e734011c0, type: 3}
       m_Width: 216
       m_Height: 216
       m_Kind: 2
       m_SubKind: 
-    - m_Textures: []
+    - m_Textures:
+      - {fileID: 2800000, guid: 07a4dc7d9024a65439c423af9e0b05ec, type: 3}
+      - {fileID: 2800000, guid: dd042fff2c1e2fe4abd0b16e734011c0, type: 3}
       m_Width: 162
       m_Height: 162
       m_Kind: 2
       m_SubKind: 
-    - m_Textures: []
+    - m_Textures:
+      - {fileID: 2800000, guid: 07a4dc7d9024a65439c423af9e0b05ec, type: 3}
+      - {fileID: 2800000, guid: dd042fff2c1e2fe4abd0b16e734011c0, type: 3}
       m_Width: 108
       m_Height: 108
       m_Kind: 2
       m_SubKind: 
-    - m_Textures: []
+    - m_Textures:
+      - {fileID: 2800000, guid: 07a4dc7d9024a65439c423af9e0b05ec, type: 3}
+      - {fileID: 2800000, guid: dd042fff2c1e2fe4abd0b16e734011c0, type: 3}
       m_Width: 81
       m_Height: 81
       m_Kind: 2

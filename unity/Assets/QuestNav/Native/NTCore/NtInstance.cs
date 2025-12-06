@@ -120,13 +120,13 @@ namespace QuestNav.Native.NTCore
 
         public DoubleSubscriber GetDoubleSubscriber(string name, PubSubOptions options)
         {
-            var pubHandle = Subscribe(
+            var subHandle = Subscribe(
                 name,
                 NtType.NT_DOUBLE,
                 GetTypeString(NtType.NT_DOUBLE),
                 options
             );
-            return new DoubleSubscriber(pubHandle);
+            return new DoubleSubscriber(subHandle);
         }
 
         public DoublePublisher GetDoublePublisher(string name, PubSubOptions options)
@@ -186,13 +186,13 @@ namespace QuestNav.Native.NTCore
 
         public StringPublisher GetStringPublisher(string name, PubSubOptions options)
         {
-            var subHandle = Publish(
+            var pubHandle = Publish(
                 name,
                 NtType.NT_STRING,
                 GetTypeString(NtType.NT_STRING),
                 options
             );
-            return new StringPublisher(subHandle);
+            return new StringPublisher(pubHandle);
         }
 
         public StringSubscriber GetStringSubscriber(string name, PubSubOptions options)
@@ -219,13 +219,13 @@ namespace QuestNav.Native.NTCore
 
         public StringArrayPublisher GetStringArrayPublisher(string name, PubSubOptions options)
         {
-            var subHandle = Subscribe(
+            var pubHandle = Publish(
                 name,
                 NtType.NT_STRING_ARRAY,
                 GetTypeString(NtType.NT_STRING_ARRAY),
                 options
             );
-            return new StringArrayPublisher(subHandle);
+            return new StringArrayPublisher(pubHandle);
         }
 
         public RawPublisher GetRawPublisher(string name, string typeString, PubSubOptions options)

@@ -208,18 +208,6 @@ namespace QuestNav.Core
             Order = 1
         )]
         public static bool enablePassThrough = false;
-
-        /// <summary>
-        /// Displays the passthrough video stream.
-        /// </summary>
-        [Config(
-            DisplayName = "Video Stream",
-            Description = "",
-            Category = "Camera",
-            ControlType = "image",
-            Order = 2
-        )]
-        public static string passthroughVideo = "./video";
         #endregion
 
         #region General Configuration

@@ -142,7 +142,7 @@ namespace QuestNav.Network
         private readonly StringArrayPublisher streamsPublisher;
         private readonly StringPublisher descriptionPublisher;
         private readonly BooleanPublisher connectedPublisher;
-        private readonly StringPublisher modePublisher;
+        private readonly StringEntry modeEntry;
         private readonly StringArrayPublisher modesPublisher;
         private string description;
         private bool isConnected;
@@ -224,7 +224,6 @@ namespace QuestNav.Network
         /// <summary>
         /// Current video mode.
         /// </summary>
-        /// TODO: React to this being set through network tables
         public VideoMode Mode
         {
             get => mode;
@@ -233,7 +232,7 @@ namespace QuestNav.Network
                 if (!mode.Equals(value))
                 {
                     mode = value;
-                    modePublisher.Set(Mode.ToString());
+                    modeEntry.Set(Mode.ToString());
                     SelectedModeChanged?.Invoke(mode);
                 }
             }
@@ -296,19 +295,18 @@ namespace QuestNav.Network
                 QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
             );
             descriptionPublisher = ntInstance.GetStringPublisher(
-                String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "source"),
+                String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "description"),
                 QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
             );
             connectedPublisher = ntInstance.GetBooleanPublisher(
                 String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "connected"),
                 QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
             );
-            // TODO: This is supposed to be an Entry which allows bidirectional control
-            modePublisher = ntInstance.GetStringPublisher(
+            
+            modeEntry = ntInstance.GetStringEntry(
                 String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "mode"),
                 QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
             );
-            // TODO: modeEntry. Unsure if this is required for Elastic, etc to recognize this as a camera feed
             modesPublisher = ntInstance.GetStringArrayPublisher(
                 String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "modes"),
                 QuestNavConstants.Network.NT_PUBLISHER_SETTINGS

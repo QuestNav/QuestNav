@@ -85,11 +85,11 @@ namespace QuestNav.Camera
         {
             if (isInitialized)
             {
-                QueuedLogger.Log("[PasshthroughFrameSource] Already initialized, skipping");
+                QueuedLogger.Log("Already initialized, skipping");
                 return;
             }
 
-            QueuedLogger.Log("[PasshthroughFrameSource] Initializing passthrough camera...");
+            QueuedLogger.Log("Initializing passthrough camera...");
 
             if (cameraSource is not null)
             {
@@ -130,7 +130,7 @@ namespace QuestNav.Camera
             cameraAccess.enabled = false;
             cameraAccess.RequestedResolution = new Vector2Int(mode.Width, mode.Height);
             cameraAccess.enabled = true;
-            QueuedLogger.Log($"[PassthroughCapture] Changed mode: {mode}");
+            QueuedLogger.Log($"Changed mode: {mode}");
         }
 
         /// <summary>
@@ -140,20 +140,20 @@ namespace QuestNav.Camera
         {
             if (cameraAccess is null)
             {
-                QueuedLogger.Log("[PassthroughCapture] Disabled - cameraAccess is unset");
+                QueuedLogger.Log("Disabled - cameraAccess is unset");
                 yield break;
             }
 
-            QueuedLogger.Log("[PassthroughCapture] Initialized");
+            QueuedLogger.Log("Initialized");
 
             while (true)
             {
                 if (!WebServerConstants.enablePassThrough)
                 {
                     cameraSource.IsConnected = false;
-                    QueuedLogger.Log("[PassthroughCapture] Disabled");
+                    QueuedLogger.Log("Disabled");
                     yield return new WaitUntil(() => WebServerConstants.enablePassThrough);
-                    QueuedLogger.Log("[PassthroughCapture] Enabled");
+                    QueuedLogger.Log("Enabled");
                 }
 
                 if (!cameraAccess.enabled)
@@ -170,7 +170,7 @@ namespace QuestNav.Camera
                     if (texture is not Texture2D texture2D)
                     {
                         QueuedLogger.LogError(
-                            $"[PassthroughCapture] GetTexture returned an incompatible object ({texture.GetType().Name})"
+                            $"GetTexture returned an incompatible object ({texture.GetType().Name})"
                         );
                         yield break;
                     }
@@ -181,7 +181,7 @@ namespace QuestNav.Camera
                 {
                     // This probably means the app hasn't been given permission to access the headset camera.
                     QueuedLogger.LogError(
-                        $"[PassthroughCapture] Error capturing frame - verify 'Headset Cameras' app permission is enabled. {ex.Message}"
+                        $"Error capturing frame - verify 'Headset Cameras' app permission is enabled. {ex.Message}"
                     );
                     yield break;
                 }

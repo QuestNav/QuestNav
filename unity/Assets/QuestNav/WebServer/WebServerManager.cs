@@ -35,6 +35,11 @@ namespace QuestNav.WebServer
         private StatusProvider statusProvider;
 
         /// <summary>
+        /// Mjpeg stream provider for web interface
+        /// </summary>
+        private readonly VideoStreamProvider streamProvider;
+
+        /// <summary>
         /// Log collector for web interface
         /// </summary>
         private LogCollector logCollector;
@@ -80,14 +85,22 @@ namespace QuestNav.WebServer
         /// Gets whether the server is currently running
         /// </summary>
         public bool IsServerRunning => server != null && server.IsRunning;
+
+        /// <summary>
+        /// Gets the base public URL of the server
+        /// Does not include a trailing slash
+        /// </summary>
+        public string BaseUrl { get; private set; }
         #endregion
 
         #region Constructor
+
         /// <summary>
         /// Initializes a new WebServerManager with injected dependencies.
         /// </summary>
         /// <param name="vrCamera">Transform of the VR camera (center eye anchor)</param>
         /// <param name="vrCameraRoot">Transform of the VR camera root</param>
+        /// <param name="frameSource">Provides access to captured MJPEG frames</param>
         /// <param name="coroutineHost">MonoBehaviour to use for coroutine execution</param>
         /// <param name="serverPort">HTTP server port for web interface</param>
         /// <param name="enableCORSDevMode">Enable CORS for localhost development</param>
@@ -95,6 +108,7 @@ namespace QuestNav.WebServer
         public WebServerManager(
             Transform vrCamera,
             Transform vrCameraRoot,
+            VideoStreamProvider.IFrameSource frameSource,
             MonoBehaviour coroutineHost,
             int serverPort,
             bool enableCORSDevMode,
@@ -109,6 +123,7 @@ namespace QuestNav.WebServer
             // Initialize services
             statusProvider = new StatusProvider();
             logCollector = new LogCollector();
+            streamProvider = new VideoStreamProvider(frameSource);
         }
         #endregion
 
@@ -132,6 +147,8 @@ namespace QuestNav.WebServer
 
             // Start initialization coroutine
             coroutineHost.StartCoroutine(InitializeCoroutine());
+
+            // Note: Frame capture coroutine should be started by the owner of the frame source (QuestNav).
         }
 
         /// <summary>
@@ -191,6 +208,7 @@ namespace QuestNav.WebServer
                 fps,
                 frameCount
             );
+            BaseUrl = $"http://{ipAddress}:{serverPort}";
         }
 
         /// <summary>
@@ -305,7 +323,8 @@ namespace QuestNav.WebServer
                 RestartApplication,
                 RequestPoseReset, // Pass flag-setter method instead of direct callback
                 statusProvider,
-                logCollector
+                logCollector,
+                streamProvider
             );
 
             if (server == null)

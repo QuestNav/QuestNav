@@ -64,6 +64,7 @@ namespace QuestNav.Native.NTCore
                         NtCoreNatives.NT_SetStringArray(handle, 0, ptr, (UIntPtr)values.Length)
                         != 0;
                 }
+                currentValue = values;
             }
             finally
             {

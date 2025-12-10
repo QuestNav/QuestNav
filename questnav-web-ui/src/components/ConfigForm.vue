@@ -68,15 +68,19 @@
             v-show="activeTab === category"
             class="tab-panel"
           >
-        <div class="fields-grid">
-          <ConfigField
-            v-for="field in configStore.fieldsByCategory[category]"
-            :key="field.path"
-            :field="field"
-            :value="configStore.values[field.path]"
-            :debugIPOverride="configStore.values['WebServerConstants/debugNTServerAddressOverride']"
-            @update="handleUpdate"
-          />
+            <div class="fields-grid">
+              <ConfigField
+                v-for="field in configStore.fieldsByCategory[category]"
+                :key="field.path"
+                :field="field"
+                :value="configStore.values[field.path]"
+                :debugIPOverride="configStore.values['WebServerConstants/debugNTServerAddressOverride']"
+                @update="handleUpdate"
+              />
+            </div>
+
+            <div v-if="category === 'Camera' && configStore.values['WebServerConstants/enablePassThrough'] === true" class="camera-stream">
+              <img :src="'./video'" />
             </div>
           </div>
         </div>
@@ -410,6 +414,19 @@ async function handleRestart() {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
+}
+
+.camera-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(0, 0, 0, 0.2) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 @media (max-width: 1024px) {

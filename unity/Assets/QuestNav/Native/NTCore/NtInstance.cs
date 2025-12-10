@@ -107,241 +107,147 @@ namespace QuestNav.Native.NTCore
             return NtCoreNatives.NT_IsConnected(handle) != 0;
         }
 
+        public BooleanPublisher GetBooleanPublisher(string name, PubSubOptions options)
+        {
+            var pubHandle = Publish(
+                name,
+                NtType.NT_BOOLEAN,
+                GetTypeString(NtType.NT_BOOLEAN),
+                options
+            );
+            return new BooleanPublisher(pubHandle);
+        }
+
+        public BooleanSubscriber GetBooleanSubscriber(string name, PubSubOptions options)
+        {
+            var subHandle = Subscribe(
+                name,
+                NtType.NT_BOOLEAN,
+                GetTypeString(NtType.NT_BOOLEAN),
+                options
+            );
+            return new BooleanSubscriber(subHandle);
+        }
+
         public DoubleSubscriber GetDoubleSubscriber(string name, PubSubOptions options)
         {
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
-
-            uint topicHandle;
-
-            fixed (byte* ptr = nameUtf8)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
-
-                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
-            }
-
-            byte[] typeStr = Encoding.UTF8.GetBytes("double");
-
-            uint subHandle;
-            fixed (byte* ptr = typeStr)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
-                NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Subscribe(
-                    topicHandle,
-                    NtType.NT_DOUBLE,
-                    &str,
-                    &nOptions
-                );
-            }
+            var subHandle = Subscribe(
+                name,
+                NtType.NT_DOUBLE,
+                GetTypeString(NtType.NT_DOUBLE),
+                options
+            );
             return new DoubleSubscriber(subHandle);
         }
 
         public DoublePublisher GetDoublePublisher(string name, PubSubOptions options)
         {
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
-
-            uint topicHandle;
-
-            fixed (byte* ptr = nameUtf8)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
-
-                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
-            }
-
-            byte[] typeStr = Encoding.UTF8.GetBytes("double");
-
-            uint subHandle;
-            fixed (byte* ptr = typeStr)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
-                NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Publish(
-                    topicHandle,
-                    NtType.NT_DOUBLE,
-                    &str,
-                    &nOptions
-                );
-            }
-            return new DoublePublisher(subHandle);
+            var pubHandle = Publish(
+                name,
+                NtType.NT_DOUBLE,
+                GetTypeString(NtType.NT_DOUBLE),
+                options
+            );
+            return new DoublePublisher(pubHandle);
         }
 
         public IntegerPublisher GetIntegerPublisher(string name, PubSubOptions options)
         {
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
-
-            uint topicHandle;
-
-            fixed (byte* ptr = nameUtf8)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
-
-                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
-            }
-
-            byte[] typeStr = Encoding.UTF8.GetBytes("int");
-
-            uint subHandle;
-            fixed (byte* ptr = typeStr)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
-                NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Publish(
-                    topicHandle,
-                    NtType.NT_INTEGER,
-                    &str,
-                    &nOptions
-                );
-            }
-            return new IntegerPublisher(subHandle);
+            var pubHandle = Publish(
+                name,
+                NtType.NT_INTEGER,
+                GetTypeString(NtType.NT_INTEGER),
+                options
+            );
+            return new IntegerPublisher(pubHandle);
         }
 
         public IntegerSubscriber GetIntegerSubscriber(string name, PubSubOptions options)
         {
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
-
-            uint topicHandle;
-
-            fixed (byte* ptr = nameUtf8)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
-
-                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
-            }
-
-            byte[] typeStr = Encoding.UTF8.GetBytes("int");
-
-            uint subHandle;
-            fixed (byte* ptr = typeStr)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
-                NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Subscribe(
-                    topicHandle,
-                    NtType.NT_INTEGER,
-                    &str,
-                    &nOptions
-                );
-            }
+            var subHandle = Subscribe(
+                name,
+                NtType.NT_INTEGER,
+                GetTypeString(NtType.NT_INTEGER),
+                options
+            );
             return new IntegerSubscriber(subHandle);
         }
 
         public FloatArrayPublisher GetFloatArrayPublisher(string name, PubSubOptions options)
         {
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
-
-            uint topicHandle;
-
-            fixed (byte* ptr = nameUtf8)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
-
-                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
-            }
-
-            byte[] typeStr = Encoding.UTF8.GetBytes("float[]");
-
-            uint subHandle;
-            fixed (byte* ptr = typeStr)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
-                NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Publish(
-                    topicHandle,
-                    NtType.NT_FLOAT_ARRAY,
-                    &str,
-                    &nOptions
-                );
-            }
-            return new FloatArrayPublisher(subHandle);
+            var pubHandle = Publish(
+                name,
+                NtType.NT_FLOAT_ARRAY,
+                GetTypeString(NtType.NT_FLOAT_ARRAY),
+                options
+            );
+            return new FloatArrayPublisher(pubHandle);
         }
 
         public FloatArraySubscriber GetFloatArraySubscriber(string name, PubSubOptions options)
         {
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
-
-            uint topicHandle;
-
-            fixed (byte* ptr = nameUtf8)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
-
-                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
-            }
-
-            byte[] typeStr = Encoding.UTF8.GetBytes("float[]");
-
-            uint subHandle;
-            fixed (byte* ptr = typeStr)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
-                NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Subscribe(
-                    topicHandle,
-                    NtType.NT_FLOAT_ARRAY,
-                    &str,
-                    &nOptions
-                );
-            }
+            var subHandle = Subscribe(
+                name,
+                NtType.NT_FLOAT_ARRAY,
+                GetTypeString(NtType.NT_FLOAT_ARRAY),
+                options
+            );
             return new FloatArraySubscriber(subHandle);
         }
 
-        public unsafe RawPublisher GetRawPublisher(
-            string name,
-            string typeString,
-            PubSubOptions options
-        )
+        public StringPublisher GetStringPublisher(string name, PubSubOptions options)
         {
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
+            var pubHandle = Publish(
+                name,
+                NtType.NT_STRING,
+                GetTypeString(NtType.NT_STRING),
+                options
+            );
+            return new StringPublisher(pubHandle);
+        }
 
-            uint topicHandle;
+        public StringSubscriber GetStringSubscriber(string name, PubSubOptions options)
+        {
+            var subHandle = Subscribe(
+                name,
+                NtType.NT_STRING,
+                GetTypeString(NtType.NT_STRING),
+                options
+            );
+            return new StringSubscriber(subHandle);
+        }
 
-            fixed (byte* ptr = nameUtf8)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
+        public StringEntry GetStringEntry(string name, PubSubOptions options)
+        {
+            var subHandle = GetEntry(
+                name,
+                NtType.NT_STRING,
+                GetTypeString(NtType.NT_STRING),
+                options
+            );
+            return new StringEntry(subHandle);
+        }
 
-                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
-            }
+        public StringArrayPublisher GetStringArrayPublisher(string name, PubSubOptions options)
+        {
+            var pubHandle = Publish(
+                name,
+                NtType.NT_STRING_ARRAY,
+                GetTypeString(NtType.NT_STRING_ARRAY),
+                options
+            );
+            return new StringArrayPublisher(pubHandle);
+        }
 
-            byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
-
-            uint pubHandle;
-            fixed (byte* ptr = typeStr)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
-                NativePubSubOptions nOptions = options.ToNative();
-                pubHandle = NtCoreNatives.NT_Publish(topicHandle, NtType.NT_RAW, &str, &nOptions);
-            }
+        public RawPublisher GetRawPublisher(string name, string typeString, PubSubOptions options)
+        {
+            var pubHandle = Publish(name, NtType.NT_RAW, typeString, options);
             return new RawPublisher(pubHandle);
         }
 
-        public unsafe RawSubscriber GetRawSubscriber(
-            string name,
-            string typeString,
-            PubSubOptions options
-        )
+        public RawSubscriber GetRawSubscriber(string name, string typeString, PubSubOptions options)
         {
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
-
-            uint topicHandle;
-
-            fixed (byte* ptr = nameUtf8)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
-
-                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
-            }
-
-            byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
-
-            uint subHandle;
-            fixed (byte* ptr = typeStr)
-            {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
-                NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Subscribe(topicHandle, NtType.NT_RAW, &str, &nOptions);
-            }
+            var subHandle = Subscribe(name, NtType.NT_RAW, typeString, options);
             return new RawSubscriber(subHandle);
         }
 
@@ -407,6 +313,107 @@ namespace QuestNav.Native.NTCore
         public long Now()
         {
             return NtCoreNatives.NT_Now();
+        }
+
+        /// <summary>
+        /// Maps an NtType to its NetworkTables type string representation (e.g., "boolean", "string[]").
+        /// </summary>
+        /// <param name="type">The NetworkTables type.</param>
+        /// <returns>The string representation for the specified type.</returns>
+        private static string GetTypeString(NtType type)
+        {
+            return type switch
+            {
+                NtType.NT_BOOLEAN => "boolean",
+                NtType.NT_DOUBLE => "double",
+                NtType.NT_STRING => "string",
+                NtType.NT_BOOLEAN_ARRAY => "boolean[]",
+                NtType.NT_DOUBLE_ARRAY => "double[]",
+                NtType.NT_STRING_ARRAY => "string[]",
+                NtType.NT_RPC => "rpc",
+                NtType.NT_INTEGER => "int",
+                NtType.NT_FLOAT => "float",
+                NtType.NT_INTEGER_ARRAY => "int[]",
+                NtType.NT_FLOAT_ARRAY => "float[]",
+                _ => "raw",
+            };
+        }
+
+        /// <summary>
+        /// Creates a native publisher handle for the given topic and type.
+        /// </summary>
+        /// <param name="name">Topic name.</param>
+        /// <param name="type">NetworkTables value type.</param>
+        /// <param name="typeString">NetworkTables type string (e.g., "double", "int[]").</param>
+        /// <param name="options">Publisher options.</param>
+        private uint Publish(string name, NtType type, string typeString, PubSubOptions options)
+        {
+            uint topicHandle = GetTopic(name);
+            byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
+            uint pubHandle;
+            fixed (byte* ptr = typeStr)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
+                NativePubSubOptions nOptions = options.ToNative();
+                pubHandle = NtCoreNatives.NT_Publish(topicHandle, type, &str, &nOptions);
+            }
+            return pubHandle;
+        }
+
+        /// <summary>
+        /// Creates a native subscriber handle for the given topic and type.
+        /// </summary>
+        /// <param name="name">Topic name.</param>
+        /// <param name="type">NetworkTables value type.</param>
+        /// <param name="typeString">NetworkTables type string (e.g., "double", "int[]").</param>
+        /// <param name="options">Subscriber options.</param>
+        private uint Subscribe(string name, NtType type, string typeString, PubSubOptions options)
+        {
+            uint topicHandle = GetTopic(name);
+            byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
+            uint subHandle;
+            fixed (byte* ptr = typeStr)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
+                NativePubSubOptions nOptions = options.ToNative();
+                subHandle = NtCoreNatives.NT_Subscribe(topicHandle, type, &str, &nOptions);
+            }
+            return subHandle;
+        }
+
+        /// <summary>
+        /// Retrieves the entry handle for a specified entry in the system, identified by its name, type, and options.
+        /// </summary>
+        /// <param name="name">Topic name.</param>
+        /// <param name="type">NetworkTables value type.</param>
+        /// <param name="typeString">NetworkTables type string (e.g., "double", "int[]").</param>
+        /// <param name="options">Subscriber options.</param>
+        private uint GetEntry(string name, NtType type, string typeString, PubSubOptions options)
+        {
+            uint topicHandle = GetTopic(name);
+            byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
+            uint subHandle;
+            fixed (byte* ptr = typeStr)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
+                NativePubSubOptions nOptions = options.ToNative();
+                subHandle = NtCoreNatives.NT_GetEntryEx(topicHandle, type, &str, &nOptions);
+            }
+            return subHandle;
+        }
+
+        private uint GetTopic(string name)
+        {
+            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
+            uint topicHandle;
+
+            fixed (byte* ptr = nameUtf8)
+            {
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
+                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
+            }
+
+            return topicHandle;
         }
     }
 }

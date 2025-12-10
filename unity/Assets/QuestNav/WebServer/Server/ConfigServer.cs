@@ -1,4 +1,6 @@
 using System;
+using System.Net;
+using System.Text;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,6 +45,10 @@ namespace QuestNav.WebServer.Server
         private CachedServerInfo cachedServerInfo;
         private readonly string cachedDatabasePath;
 
+        private readonly VideoStreamProvider streamProvider;
+        /// </summary>
+        /// Stream provider instance (injected)
+        /// <summary>
         private readonly System.Collections.Generic.Dictionary<string, DateTime> activeClients =
             new System.Collections.Generic.Dictionary<string, DateTime>();
         private readonly object clientsLock = new object();
@@ -51,6 +57,22 @@ namespace QuestNav.WebServer.Server
         public bool IsRunning => server != null && server.State == WebServerState.Listening;
         public string BaseUrl => $"http://localhost:{port}/";
 
+        #region Constructor
+        /// <summary>
+        /// Initializes a new ConfigServer instance.
+        /// Must be called from Unity main thread to cache Unity-specific information.
+        /// </summary>
+        /// <param name="binding">Reflection binding for configuration fields</param>
+        /// <param name="store">Configuration persistence store</param>
+        /// <param name="port">HTTP server port</param>
+        /// <param name="enableCORSDevMode">Enable CORS for development</param>
+        /// <param name="staticPath">Path to static web UI files</param>
+        /// <param name="logger">Logger implementation for background thread</param>
+        /// <param name="restartCallback">Callback to restart application</param>
+        /// <param name="poseResetCallback">Callback to reset VR pose</param>
+        /// <param name="statusProvider">Status provider instance for runtime data</param>
+        /// <param name="logCollector">Log collector instance for log messages</param>
+        /// <param name="streamProvider">Stream provider instance for video streaming</param>
         public ConfigServer(
             IConfigManager configManager,
             int port,
@@ -59,7 +81,8 @@ namespace QuestNav.WebServer.Server
             ILogger logger,
             WebServerManager webServerManager,
             StatusProvider statusProvider,
-            LogCollector logCollector
+            LogCollector logCollector,
+            VideoStreamProvider streamProvider
         )
         {
             this.configManager = configManager;
@@ -70,6 +93,7 @@ namespace QuestNav.WebServer.Server
             this.webServerManager = webServerManager;
             this.statusProvider = statusProvider;
             this.logCollector = logCollector;
+            this.streamProvider = streamProvider;
 
             cachedDatabasePath = Path.Combine(Application.persistentDataPath, "config.db");
 
@@ -111,6 +135,7 @@ namespace QuestNav.WebServer.Server
                 o.WithUrlPrefix($"http://*:{port}/").WithMode(HttpListenerMode.EmbedIO)
             )
                 .WithModule(new ActionModule("/api", HttpVerbs.Any, HandleApiRequest))
+                .WithModule(new ActionModule("/video", HttpVerbs.Get, HandleVideoStream))
                 .WithStaticFolder("/", staticPath, true);
 
             server.StateChanged += (s, e) =>
@@ -145,6 +170,27 @@ namespace QuestNav.WebServer.Server
             logger?.Log($"[ConfigServer] Server started at {BaseUrl}");
         }
 
+        private async Task HandleVideoStream(IHttpContext context)
+        {
+            if (streamProvider is not null)
+            {
+                await streamProvider.HandleStreamAsync(context);
+            }
+            else
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.NoContent;
+                context.Response.StatusDescription = nameof(HttpStatusCode.NoContent);
+                await context.SendStringAsync(
+                    "streamProvider is not initialized",
+                    "application/text",
+                    Encoding.Default
+                );
+            }
+        }
+
+        /// <summary>
+        /// Stops the HTTP server and releases resources.
+        /// </summary>
         public void Stop()
         {
             if (!IsRunning)

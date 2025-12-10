@@ -154,6 +154,10 @@
                 </label>
               </ConfigField>
             </div>
+
+            <div v-if="category === 'Camera' && configStore.values['WebServerConstants/enablePassThrough'] === true" class="camera-stream">
+              <img :src="'./video'" />
+            </div>
           </div>
         </div>
       </div>

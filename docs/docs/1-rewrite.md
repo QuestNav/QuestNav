@@ -27,7 +27,7 @@ This will come with significant implementation changes, most likely breaking.
     - Essential for accurate positioning
     - Due Date: August 2025
 
-7. **Enable streaming passthrough video to devices on the robot network** (#40)
+✅ 7. **Enable streaming passthrough video to devices on the robot network** (#40)
    - Remote visualization capability
    - Due Date: September 2025
 

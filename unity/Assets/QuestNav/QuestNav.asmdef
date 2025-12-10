@@ -4,7 +4,8 @@
     "references": [
         "Unity.TextMeshPro",
         "Unity.InputSystem",
-        "Oculus.VR"
+        "Oculus.VR",
+        "meta.xr.mrutilitykit"
     ],
     "includePlatforms": [
         "Android",

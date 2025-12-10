@@ -1,4 +1,6 @@
 using System;
+using Meta.XR;
+using QuestNav.Camera;
 using QuestNav.Commands;
 using QuestNav.Config;
 using QuestNav.Network;
@@ -138,6 +140,13 @@ namespace QuestNav.Core
         private Transform tagalongUiTransform;
 
         /// <summary>
+        /// An object that manages access to the headset camera.
+        /// </summary>
+        [Header("Passthrough Camera")]
+        [SerializeField]
+        private PassthroughCameraAccess cameraAccess;
+
+        /// <summary>
         /// Current battery percentage of the device
         /// </summary>
         private int batteryPercent;
@@ -199,6 +208,11 @@ namespace QuestNav.Core
         /// </summary>
         private IWebServerManager webServerManager;
 
+        /// <summary>
+        /// Captures passthrough frames for streaming.
+        /// </summary>
+        private PassthroughFrameSource passthroughFrameSource;
+
         #endregion
 
         #endregion
@@ -233,12 +247,22 @@ namespace QuestNav.Core
                 autoStartToggle
             );
 
+            // Initialize passthrough capture and start capture coroutine
+            passthroughFrameSource = new PassthroughFrameSource(
+                this,
+                cameraAccess,
+                networkTableConnection.CreateCameraSource("Passthrough")
+            );
+            passthroughFrameSource.Initialize();
+
+            // Initialize web server manager with settings from WebServerConstants
             webServerManager = new WebServerManager(
                 configManager,
                 networkTableConnection,
                 vrCamera,
                 vrCameraRoot,
                 resetTransform
+                passthroughFrameSource,
             );
 
             commandProcessor = new CommandProcessor(
@@ -343,6 +367,9 @@ namespace QuestNav.Core
                 currentlyTracking,
                 trackingLostEvents
             );
+
+            // Update the list of video streams
+            UpdateCameraServers();
 
             // Flush queued log messages to Unity console
             // Batching log output improves performance and reduces console spam

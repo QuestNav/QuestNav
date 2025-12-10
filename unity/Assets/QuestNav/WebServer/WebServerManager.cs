@@ -48,22 +48,23 @@ namespace QuestNav.WebServer
         void Shutdown();
     }
 
-    /// <summary>
-    /// Manages the QuestNav configuration web server.
-    /// Provides HTTP endpoints for configuration, status, and control.
-    /// </summary>
-    public class WebServerManager : IWebServerManager
-    {
-        #region Fields
-        private readonly IConfigManager configManager;
+        /// <summary>
+        /// Mjpeg stream provider for web interface
+        /// </summary>
+        private readonly VideoStreamProvider streamProvider;
+
+        /// <summary>
+        /// Log collector for web interface
+        /// </summary>
+        private StatusProvider statusProvider;
+        private ConfigServer server;
+
+        private SynchronizationContext mainThreadContext;
+        private readonly Transform resetTransform;
+        private readonly Transform vrCameraRoot;
         private readonly INetworkTableConnection networkTableConnection;
         private readonly Transform vrCamera;
-        private readonly Transform vrCameraRoot;
-        private readonly Transform resetTransform;
-        private SynchronizationContext mainThreadContext;
-
-        private ConfigServer server;
-        private StatusProvider statusProvider;
+        private readonly IConfigManager configManager;
         private LogCollector logCollector;
 
         private bool isInitialized;
@@ -87,6 +88,7 @@ namespace QuestNav.WebServer
             INetworkTableConnection networkTableConnection,
             Transform vrCamera,
             Transform vrCameraRoot,
+            VideoStreamProvider.IFrameSource frameSource,
             Transform resetTransform
         )
         {
@@ -98,6 +100,7 @@ namespace QuestNav.WebServer
 
             statusProvider = new StatusProvider();
             logCollector = new LogCollector();
+            streamProvider = new VideoStreamProvider(frameSource);
 
             // Subscribe to config change events
             configManager.OnTeamNumberChanged += OnTeamNumberChanged;
@@ -199,6 +202,7 @@ namespace QuestNav.WebServer
                 currentFps,
                 Time.frameCount
             );
+            BaseUrl = $"http://{ipAddress}:{serverPort}";
         }
         #endregion
 
@@ -305,7 +309,8 @@ namespace QuestNav.WebServer
                 new UnityLogger(),
                 this,
                 statusProvider,
-                logCollector
+                logCollector,
+                streamProvider
             );
 
             await server.StartAsync();

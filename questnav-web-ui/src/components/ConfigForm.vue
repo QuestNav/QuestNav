@@ -40,6 +40,11 @@
             <LogsView />
           </div>
           
+          <!-- Camera Tab -->
+          <div v-show="activeTab === 'Camera'" class="tab-panel">
+            <CameraView />
+          </div>
+          
           <!-- Settings Tab -->
           <div v-show="activeTab === 'Settings'" class="tab-panel">
             <div class="settings-grid">
@@ -169,9 +174,7 @@
               </ConfigField>
             </div>
 
-            <div v-if="configStore.config.enablePassthroughStream" class="camera-stream">
-              <img :src="'./video'" />
-            </div>
+
           </div>
         </div>
       </div>
@@ -191,11 +194,12 @@ import { useConfigStore } from '../stores/config'
 import { configApi } from '../api/config'
 import StatusView from './StatusView.vue'
 import LogsView from './LogsView.vue'
+import CameraView from './CameraView.vue'
 import ConfigField from './ConfigField.vue'
 
 const configStore = useConfigStore()
 const activeTab = ref<string>('Status')
-const tabs = ['Status', 'Logs', 'Settings']
+const tabs = ['Status', 'Logs', 'Camera', 'Settings']
 let pollInterval: number | null = null
 
 const pendingTeamNumber = ref<number | null>(null)

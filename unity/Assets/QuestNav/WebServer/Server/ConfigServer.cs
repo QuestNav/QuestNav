@@ -47,9 +47,9 @@ namespace QuestNav.WebServer.Server
 
         private readonly VideoStreamProvider streamProvider;
 
-        /// </summary>
-        /// Stream provider instance (injected)
         /// <summary>
+        /// Stream provider instance (injected)
+        /// </summary>
         private readonly System.Collections.Generic.Dictionary<string, DateTime> activeClients =
             new System.Collections.Generic.Dictionary<string, DateTime>();
         private readonly object clientsLock = new object();
@@ -62,17 +62,15 @@ namespace QuestNav.WebServer.Server
         /// Initializes a new ConfigServer instance.
         /// Must be called from Unity main thread to cache Unity-specific information.
         /// </summary>
-        /// <param name="binding">Reflection binding for configuration fields</param>
-        /// <param name="store">Configuration persistence store</param>
-        /// <param name="port">HTTP server port</param>
-        /// <param name="enableCORSDevMode">Enable CORS for development</param>
-        /// <param name="staticPath">Path to static web UI files</param>
-        /// <param name="logger">Logger implementation for background thread</param>
-        /// <param name="restartCallback">Callback to restart application</param>
-        /// <param name="poseResetCallback">Callback to reset VR pose</param>
-        /// <param name="statusProvider">Status provider instance for runtime data</param>
-        /// <param name="logCollector">Log collector instance for log messages</param>
-        /// <param name="streamProvider">Stream provider instance for video streaming</param>
+        /// <param name="configManager">Configuration manager for reading/writing settings.</param>
+        /// <param name="port">HTTP server port.</param>
+        /// <param name="enableCorsDevMode">Enable CORS for development.</param>
+        /// <param name="staticPath">Path to static web UI files.</param>
+        /// <param name="logger">Logger implementation for background thread.</param>
+        /// <param name="webServerManager">Web server manager for restart/reset callbacks.</param>
+        /// <param name="statusProvider">Status provider instance for runtime data.</param>
+        /// <param name="logCollector">Log collector instance for log messages.</param>
+        /// <param name="streamProvider">Stream provider instance for video streaming.</param>
         public ConfigServer(
             IConfigManager configManager,
             int port,
@@ -340,6 +338,7 @@ namespace QuestNav.WebServer.Server
                 teamNumber = await configManager.GetTeamNumberAsync(),
                 debugIpOverride = await configManager.GetDebugIpOverrideAsync(),
                 enableAutoStartOnBoot = await configManager.GetEnableAutoStartOnBootAsync(),
+                enablePassthroughStream = await configManager.GetEnablePassthroughStreamAsync(),
                 enableDebugLogging = await configManager.GetEnableDebugLoggingAsync(),
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             };
@@ -375,6 +374,12 @@ namespace QuestNav.WebServer.Server
                 {
                     await configManager.SetEnableAutoStartOnBootAsync(
                         request.EnableAutoStartOnBoot.Value
+                    );
+                }
+                if (request.EnablePassthroughStream.HasValue)
+                {
+                    await configManager.SetEnablePassthroughStreamAsync(
+                        request.EnablePassthroughStream.Value
                     );
                 }
                 if (request.EnableDebugLogging.HasValue)

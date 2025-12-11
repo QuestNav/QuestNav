@@ -131,6 +131,20 @@
                 <span class="checkbox-label">{{ configStore.config.enableDebugLogging ? 'Enabled' : 'Disabled' }}</span>
               </ConfigField>
 
+              <!-- Passthrough Stream -->
+              <ConfigField
+                title="Passthrough Camera Stream"
+                description="Stream headset camera over network"
+                control-class="checkbox-control"
+              >
+                <input
+                  type="checkbox"
+                  :checked="configStore.config.enablePassthroughStream"
+                  @change="handlePassthroughStreamChange"
+                />
+                <span class="checkbox-label">{{ configStore.config.enablePassthroughStream ? 'Enabled' : 'Disabled' }}</span>
+              </ConfigField>
+
               <!-- Reset to Defaults -->
               <ConfigField
                 title="Reset Configuration"
@@ -155,7 +169,7 @@
               </ConfigField>
             </div>
 
-            <div v-if="category === 'Camera' && configStore.values['WebServerConstants/enablePassThrough'] === true" class="camera-stream">
+            <div v-if="configStore.config.enablePassthroughStream" class="camera-stream">
               <img :src="'./video'" />
             </div>
           </div>
@@ -252,6 +266,11 @@ async function handleAutoStartChange(event: Event) {
 async function handleDebugLoggingChange(event: Event) {
   const target = event.target as HTMLInputElement
   await configStore.updateEnableDebugLogging(target.checked)
+}
+
+async function handlePassthroughStreamChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  await configStore.updateEnablePassthroughStream(target.checked)
 }
 
 async function handleReset() {

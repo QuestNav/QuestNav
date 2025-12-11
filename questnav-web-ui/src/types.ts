@@ -5,6 +5,7 @@ export interface ConfigResponse {
   teamNumber: number
   debugIpOverride: string
   enableAutoStartOnBoot: boolean
+  enablePassthroughStream: boolean
   enableDebugLogging: boolean
   timestamp: number
 }
@@ -13,6 +14,7 @@ export interface ConfigUpdateRequest {
   teamNumber?: number
   debugIpOverride?: string
   enableAutoStartOnBoot?: boolean
+  enablePassthroughStream?: boolean
   enableDebugLogging?: boolean
 }
 

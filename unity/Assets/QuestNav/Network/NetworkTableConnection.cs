@@ -58,6 +58,7 @@ namespace QuestNav.Network
         /// <returns>An ICameraSource for the given topic or null</returns>
         INtCameraSource CreateCameraSource(string name);
 
+        /// <summary>
         /// Gets all command requests from the robot since the last read, or an empty array if none available
         /// </summary>
         /// <returns>All command requests since the last read</returns>

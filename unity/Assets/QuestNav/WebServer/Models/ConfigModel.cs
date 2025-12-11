@@ -13,6 +13,7 @@ namespace QuestNav.WebServer
         public int teamNumber;
         public string debugIpOverride;
         public bool enableAutoStartOnBoot;
+        public bool enablePassthroughStream;
         public bool enableDebugLogging;
         public long timestamp;
     }
@@ -26,6 +27,7 @@ namespace QuestNav.WebServer
         public int? TeamNumber;
         public string debugIpOverride;
         public bool? EnableAutoStartOnBoot;
+        public bool? EnablePassthroughStream;
         public bool? EnableDebugLogging;
     }
 

@@ -16,18 +16,39 @@ namespace QuestNav.Camera
     /// </summary>
     public class PassthroughFrameSource : VideoStreamProvider.IFrameSource
     {
+        /// <summary>
+        /// Available FPS options for video streaming.
+        /// </summary>
         private static readonly int[] FpsOptions = { 1, 5, 15, 24, 30, 48, 60 };
 
         /// <summary>
-        /// MonoBehaviour for coroutine execution
+        /// MonoBehaviour host for running coroutines.
         /// </summary>
         private readonly MonoBehaviour coroutineHost;
 
+        /// <summary>
+        /// Meta SDK passthrough camera accessor.
+        /// </summary>
         private readonly PassthroughCameraAccess cameraAccess;
+
+        /// <summary>
+        /// NetworkTables camera source for publishing stream info.
+        /// </summary>
         private readonly INtCameraSource cameraSource;
+
+        /// <summary>
+        /// Configuration manager for settings.
+        /// </summary>
         private readonly IConfigManager configManager;
 
+        /// <summary>
+        /// Whether the frame source has been initialized.
+        /// </summary>
         private bool isInitialized;
+
+        /// <summary>
+        /// Cached base URL for stream endpoints.
+        /// </summary>
         private string baseUrl;
 
         /// <summary>
@@ -60,8 +81,14 @@ namespace QuestNav.Camera
             }
         }
 
+        /// <summary>
+        /// Delay between frame captures in seconds.
+        /// </summary>
         private float FrameDelaySeconds => 1.0f / Math.Max(1, MaxFrameRate);
 
+        /// <summary>
+        /// Reference to the running frame capture coroutine.
+        /// </summary>
         private Coroutine frameCaptureCoroutine;
 
         /// <summary>
@@ -87,6 +114,10 @@ namespace QuestNav.Camera
             configManager.OnEnablePassthroughStreamChanged += OnEnablePassthroughStreamChanged;
         }
 
+        /// <summary>
+        /// Handles video mode changes by updating the camera resolution.
+        /// </summary>
+        /// <param name="mode">The new video mode.</param>
         private void OnSelectedModeChanged(VideoMode mode)
         {
             cameraAccess.enabled = false;
@@ -95,6 +126,10 @@ namespace QuestNav.Camera
             QueuedLogger.Log($"Changed mode: {mode}");
         }
 
+        /// <summary>
+        /// Handles passthrough stream enable/disable config changes.
+        /// </summary>
+        /// <param name="enabled">Whether streaming should be enabled.</param>
         private void OnEnablePassthroughStreamChanged(bool enabled)
         {
             if (cameraAccess is null || !cameraAccess.enabled)

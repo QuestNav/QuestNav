@@ -6,6 +6,9 @@ using QuestNav.Network;
 
 namespace QuestNav.Network
 {
+    /// <summary>
+    /// Pixel format for video frames.
+    /// </summary>
     public enum PixelFormat
     {
         /// <summary>
@@ -19,6 +22,9 @@ namespace QuestNav.Network
         MJPEG,
     }
 
+    /// <summary>
+    /// Represents a video mode configuration with resolution, format, and framerate.
+    /// </summary>
     public struct VideoMode : IEquatable<VideoMode>
     {
         public bool Equals(VideoMode other)
@@ -138,12 +144,36 @@ namespace QuestNav.Network
     /// <remarks>See CameraServer.java in allwpilib</remarks>
     public class NtCameraSource : INtCameraSource
     {
+        /// <summary>
+        /// Publisher for the source identifier string.
+        /// </summary>
         private readonly StringPublisher sourcePublisher;
+
+        /// <summary>
+        /// Publisher for available stream URLs.
+        /// </summary>
         private readonly StringArrayPublisher streamsPublisher;
+
+        /// <summary>
+        /// Publisher for source description.
+        /// </summary>
         private readonly StringPublisher descriptionPublisher;
+
+        /// <summary>
+        /// Publisher for connection status.
+        /// </summary>
         private readonly BooleanPublisher connectedPublisher;
+
+        /// <summary>
+        /// Entry for current video mode.
+        /// </summary>
         private readonly StringEntry modeEntry;
+
+        /// <summary>
+        /// Publisher for available video modes.
+        /// </summary>
         private readonly StringArrayPublisher modesPublisher;
+
         private string description;
         private bool isConnected;
         private string[] streams = Array.Empty<string>();
@@ -315,6 +345,13 @@ namespace QuestNav.Network
             Source = "unknown:";
         }
 
+        /// <summary>
+        /// Compares two arrays for element-wise equality.
+        /// </summary>
+        /// <typeparam name="T">Element type.</typeparam>
+        /// <param name="s1">First array.</param>
+        /// <param name="s2">Second array.</param>
+        /// <returns>True if arrays have equal length and elements.</returns>
         private static bool SequenceEqual<T>(T[] s1, T[] s2)
         {
             if (s1.Length != s2.Length)

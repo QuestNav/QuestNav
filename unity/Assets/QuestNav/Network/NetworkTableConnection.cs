@@ -57,6 +57,7 @@ namespace QuestNav.Network
         /// <param name="name">The name of the camera source</param>
         /// <returns>An ICameraSource for the given topic or null</returns>
         INtCameraSource CreateCameraSource(string name);
+
         /// Gets all command requests from the robot since the last read, or an empty array if none available
         /// </summary>
         /// <returns>All command requests since the last read</returns>
@@ -121,11 +122,11 @@ namespace QuestNav.Network
         /// Subscriber for command requests (robot to Quest)
         /// </summary>
         private ProtobufSubscriber<ProtobufQuestNavCommand> commandRequestSubscriber;
-    /// <summary>
-    /// Publisher for video streams
-    /// </summary>
-    private StringArrayPublisher streamsPublisher;
 
+        /// <summary>
+        /// Publisher for video streams
+        /// </summary>
+        private StringArrayPublisher streamsPublisher;
 
         /// <summary>
         /// Flag indicating if a team number has been set
@@ -192,11 +193,11 @@ namespace QuestNav.Network
                     QuestNavConstants.Network.NtPublisherSettings
                 );
 
-        // Video streams - dashboards use this to expose video streams
-        streamsPublisher = ntInstance.GetStringArrayPublisher(
-            QuestNavConstants.Topics.VIDEO_STREAMS,
-            QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
-        );
+            // Video streams - dashboards use this to expose video streams
+            streamsPublisher = ntInstance.GetStringArrayPublisher(
+                QuestNavConstants.Topics.VIDEO_STREAMS,
+                QuestNavConstants.Network.NtPublisherSettings
+            );
 
             /*
              * SUBSCRIBER SETUP - Quest receives data FROM robot
@@ -345,16 +346,16 @@ namespace QuestNav.Network
             // Publish data
             deviceDataPublisher.Set(deviceData);
         }
-    /// <summary>
-    /// Returns a camera source with the given sub-topic
-    /// </summary>
-    /// <param name="name">The sub-topic for the camera source</param>
-    /// <returns>An ICameraSource for the given topic or null</returns>
-    public INtCameraSource CreateCameraSource(string name)
-    {
-        return new NtCameraSource(ntInstance, name);
-    }
 
+        /// <summary>
+        /// Returns a camera source with the given sub-topic
+        /// </summary>
+        /// <param name="name">The sub-topic for the camera source</param>
+        /// <returns>An ICameraSource for the given topic or null</returns>
+        public INtCameraSource CreateCameraSource(string name)
+        {
+            return new NtCameraSource(ntInstance, name);
+        }
 
         #endregion
 

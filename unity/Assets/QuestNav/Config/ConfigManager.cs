@@ -41,6 +41,11 @@ namespace QuestNav.Config
         public event Action<bool> OnEnableAutoStartOnBootChanged;
 
         /// <summary>
+        /// Raised when passthrough stream setting changes.
+        /// </summary>
+        public event Action<bool> OnEnablePassthroughStreamChanged;
+
+        /// <summary>
         /// Raised when debug logging setting changes.
         /// </summary>
         public event Action<bool> OnEnableDebugLoggingChanged;
@@ -70,6 +75,14 @@ namespace QuestNav.Config
         public Task<bool> GetEnableAutoStartOnBootAsync();
 
         /// <summary>
+        /// Gets whether streaming the passthrough camera feed over NT and
+        /// </summary>
+        /// <returns>
+        /// True if streaming is enabled.
+        /// </returns>
+        public Task<bool> GetEnablePassthroughStreamAsync();
+
+        /// <summary>
         /// Gets whether debug logging is enabled.
         /// </summary>
         /// <returns>
@@ -92,7 +105,12 @@ namespace QuestNav.Config
         /// <summary>
         /// Sets whether to auto-start on boot.
         /// </summary>
-        public Task setEnableAutoStartOnBootAsync(bool autoStart);
+        public Task SetEnableAutoStartOnBootAsync(bool autoStart);
+
+        /// <summary>
+        /// Sets whether to stream passthrough camera over NT and WebUI
+        /// </summary>
+        public Task SetEnablePassthroughStreamAsync(bool autoStart);
 
         /// <summary>
         /// Sets whether debug logging is enabled.
@@ -134,6 +152,7 @@ namespace QuestNav.Config
             // Create with defaults if they don't already exist
             await connection.CreateTableAsync<Config.Network>();
             await connection.CreateTableAsync<Config.System>();
+            await connection.CreateTableAsync<Config.Camera>();
             await connection.CreateTableAsync<Config.Logging>();
 
             QueuedLogger.Log($"Database initialized at: {dbPath}");
@@ -142,6 +161,7 @@ namespace QuestNav.Config
             OnTeamNumberChanged?.Invoke(await GetTeamNumberAsync());
             OnDebugIpOverrideChanged?.Invoke(await GetDebugIpOverrideAsync());
             OnEnableAutoStartOnBootChanged?.Invoke(await GetEnableAutoStartOnBootAsync());
+            OnEnablePassthroughStreamChanged?.Invoke(await GetEnablePassthroughStreamAsync());
             OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
         }
 
@@ -150,10 +170,12 @@ namespace QuestNav.Config
         {
             var networkDefaults = new Config.Network();
             var systemDefaults = new Config.System();
+            var cameraDefaults = new Config.Camera();
             var loggingDefaults = new Config.Logging();
 
             await SetTeamNumberAsync(networkDefaults.TeamNumber);
-            await setEnableAutoStartOnBootAsync(systemDefaults.EnableAutoStartOnBoot);
+            await SetEnableAutoStartOnBootAsync(systemDefaults.EnableAutoStartOnBoot);
+            await SetEnablePassthroughStreamAsync(cameraDefaults.EnablePassthroughStream);
             await SetEnableDebugLoggingAsync(loggingDefaults.EnableDebugLogging);
 
             QueuedLogger.Log("Database reset to defaults");
@@ -179,6 +201,9 @@ namespace QuestNav.Config
 
         /// <inheritdoc/>
         public event Action<bool> OnEnableAutoStartOnBootChanged;
+
+        /// <inheritdoc/>
+        public event Action<bool> OnEnablePassthroughStreamChanged;
 
         /// <inheritdoc/>
         public event Action<bool> OnEnableDebugLoggingChanged;
@@ -210,6 +235,16 @@ namespace QuestNav.Config
             var config = await GetSystemConfigAsync();
 
             return config.EnableAutoStartOnBoot;
+        }
+        #endregion
+
+        #region Camera
+        /// <inheritdoc/>
+        public async Task<bool> GetEnablePassthroughStreamAsync()
+        {
+            var config = await GetCameraConfigAsync();
+
+            return config.EnablePassthroughStream;
         }
         #endregion
 
@@ -276,7 +311,7 @@ namespace QuestNav.Config
 
         #region System
         /// <inheritdoc/>
-        public async Task setEnableAutoStartOnBootAsync(bool autoStart)
+        public async Task SetEnableAutoStartOnBootAsync(bool autoStart)
         {
             var config = await GetSystemConfigAsync();
             config.EnableAutoStartOnBoot = autoStart;
@@ -285,6 +320,20 @@ namespace QuestNav.Config
             // Notify subscribed methods on the main thread
             invokeOnMainThread(() => OnEnableAutoStartOnBootChanged?.Invoke(autoStart));
             QueuedLogger.Log($"Updated Key 'autoStartOnBoot' to {autoStart}");
+        }
+        #endregion
+
+        #region Camera
+        /// <inheritdoc/>
+        public async Task SetEnablePassthroughStreamAsync(bool enabled)
+        {
+            var config = await GetCameraConfigAsync();
+            config.EnablePassthroughStream = enabled;
+            await SaveCameraConfigAsync(config);
+
+            // Notify subscribed methods on the main thread
+            invokeOnMainThread(() => OnEnablePassthroughStreamChanged?.Invoke(enabled));
+            QueuedLogger.Log($"Updated Key 'enablePassthroughStream' to {enabled}");
         }
         #endregion
 
@@ -338,6 +387,22 @@ namespace QuestNav.Config
         }
 
         /// <summary>
+        /// Gets camera config from DB, creating defaults if not found.
+        /// </summary>
+        private async Task<Config.Camera> GetCameraConfigAsync()
+        {
+            var config = await connection.FindAsync<Config.Camera>(1);
+
+            // If we don't find one, create a new one with defaults
+            if (config == null)
+            {
+                config = new Config.Camera();
+                await SaveCameraConfigAsync(config);
+            }
+            return config;
+        }
+
+        /// <summary>
         /// Gets logging config from DB, creating defaults if not found.
         /// </summary>
         private async Task<Config.Logging> GetLoggingConfigAsync()
@@ -368,6 +433,15 @@ namespace QuestNav.Config
         /// Persists network config to the database.
         /// </summary>
         private async Task SaveNetworkConfigAsync(Config.Network config)
+        {
+            config.ID = 1;
+            await connection.InsertOrReplaceAsync(config);
+        }
+
+        /// <summary>
+        /// Persists camera config to the database.
+        /// </summary>
+        private async Task SaveCameraConfigAsync(Config.Camera config)
         {
             config.ID = 1;
             await connection.InsertOrReplaceAsync(config);

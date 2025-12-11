@@ -1,7 +1,7 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Text;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using EmbedIO;
@@ -46,6 +46,7 @@ namespace QuestNav.WebServer.Server
         private readonly string cachedDatabasePath;
 
         private readonly VideoStreamProvider streamProvider;
+
         /// </summary>
         /// Stream provider instance (injected)
         /// <summary>
@@ -57,7 +58,6 @@ namespace QuestNav.WebServer.Server
         public bool IsRunning => server != null && server.State == WebServerState.Listening;
         public string BaseUrl => $"http://localhost:{port}/";
 
-        #region Constructor
         /// <summary>
         /// Initializes a new ConfigServer instance.
         /// Must be called from Unity main thread to cache Unity-specific information.
@@ -373,7 +373,7 @@ namespace QuestNav.WebServer.Server
                 }
                 if (request.EnableAutoStartOnBoot.HasValue)
                 {
-                    await configManager.setEnableAutoStartOnBootAsync(
+                    await configManager.SetEnableAutoStartOnBootAsync(
                         request.EnableAutoStartOnBoot.Value
                     );
                 }

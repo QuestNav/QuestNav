@@ -28,6 +28,11 @@ namespace QuestNav.WebServer
         bool IsServerRunning { get; }
 
         /// <summary>
+        /// Gets the base URL of the server
+        /// </summary>
+        string BaseUrl { get; }
+
+        /// <summary>
         /// Initializes the web server asynchronously.
         /// </summary>
         Task InitializeAsync();
@@ -48,14 +53,13 @@ namespace QuestNav.WebServer
         void Shutdown();
     }
 
-        /// <summary>
-        /// Mjpeg stream provider for web interface
-        /// </summary>
+    /// <summary>
+    /// Manages the QuestNav configuration web server.
+    /// Provides HTTP endpoints for configuration, status, and control.
+    /// </summary>
+    public class WebServerManager : IWebServerManager
+    {
         private readonly VideoStreamProvider streamProvider;
-
-        /// <summary>
-        /// Log collector for web interface
-        /// </summary>
         private StatusProvider statusProvider;
         private ConfigServer server;
 
@@ -73,16 +77,7 @@ namespace QuestNav.WebServer
         private int cachedTeamNumber;
         private string cachedDebugIpOverride = "";
         private string cachedRobotIpAddress = "";
-        #endregion
 
-        /// <summary>
-        /// Creates a new WebServerManager with required dependencies.
-        /// </summary>
-        /// <param name="configManager">Config manager for reading/writing settings</param>
-        /// <param name="networkTableConnection">Network connection for status updates</param>
-        /// <param name="vrCamera">Reference to the VR camera transform</param>
-        /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
-        /// <param name="resetTransform">Reference to the reset position transform</param>
         public WebServerManager(
             IConfigManager configManager,
             INetworkTableConnection networkTableConnection,
@@ -109,6 +104,12 @@ namespace QuestNav.WebServer
 
         #region Properties
         public bool IsServerRunning => server?.IsRunning ?? false;
+
+        /// <summary>
+        /// Gets the base public URL of the server
+        /// Does not include a trailing slash
+        /// </summary>
+        public string BaseUrl { get; private set; }
         #endregion
 
         #region Event Subscribers
@@ -202,7 +203,8 @@ namespace QuestNav.WebServer
                 currentFps,
                 Time.frameCount
             );
-            BaseUrl = $"http://{ipAddress}:{serverPort}";
+
+            BaseUrl = $"http://{ipAddress}:{QuestNavConstants.WebServer.SERVER_PORT}";
         }
         #endregion
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using Meta.XR;
+using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Utils;
@@ -24,6 +25,7 @@ namespace QuestNav.Camera
 
         private readonly PassthroughCameraAccess cameraAccess;
         private readonly INtCameraSource cameraSource;
+        private readonly IConfigManager configManager;
 
         private bool isInitialized;
         private string baseUrl;
@@ -60,69 +62,29 @@ namespace QuestNav.Camera
 
         private float FrameDelaySeconds => 1.0f / Math.Max(1, MaxFrameRate);
 
+        private Coroutine frameCaptureCoroutine;
+
         /// <summary>
         /// Creates a new PassthroughFrameSource.
         /// </summary>
         /// <param name="coroutineHost">MonoBehaviour for coroutine execution</param>
         /// <param name="cameraAccess">Provides access to the PassthroughCamera through Meta's SDK</param>
         /// <param name="cameraSource">The network table source that will expose this camera stream</param>
+        /// <param name="configManager">The config manager to update/querry config values</param>
         public PassthroughFrameSource(
             MonoBehaviour coroutineHost,
             PassthroughCameraAccess cameraAccess,
-            INtCameraSource cameraSource
+            INtCameraSource cameraSource,
+            IConfigManager configManager
         )
         {
             this.coroutineHost = coroutineHost;
             this.cameraAccess = cameraAccess;
             this.cameraSource = cameraSource;
-        }
+            this.configManager = configManager;
 
-        /// <summary>
-        /// Initializes the passthrough camera.
-        /// Must be called on Unity main thread during application startup.
-        /// </summary>
-        public void Initialize()
-        {
-            if (isInitialized)
-            {
-                QueuedLogger.Log("Already initialized, skipping");
-                return;
-            }
-
-            QueuedLogger.Log("Initializing passthrough camera...");
-
-            if (cameraSource is not null)
-            {
-                cameraSource.Description = "Quest Headset Camera";
-
-                // Populate the list of modes from the supported resolutions
-                var supportedResolutions = PassthroughCameraAccess.GetSupportedResolutions(
-                    cameraAccess.CameraPosition
-                );
-                var modes = new VideoMode[supportedResolutions.Length * FpsOptions.Length];
-                int i = 0;
-                foreach (var resolution in supportedResolutions)
-                {
-                    foreach (var fps in FpsOptions)
-                    {
-                        modes[i++] = new VideoMode(
-                            PixelFormat.MJPEG,
-                            resolution.x,
-                            resolution.y,
-                            fps
-                        );
-                    }
-                }
-
-                cameraSource.Modes = modes;
-                cameraSource.SelectedModeChanged += OnSelectedModeChanged;
-                // Arbitrarily pick the first, I guess?
-                // TODO: This should be stored in playerPrefs so that it doesn't reset
-                cameraSource.Mode = cameraSource.Modes[3];
-            }
-
-            // Start initialization coroutine
-            coroutineHost.StartCoroutine(FrameCaptureCoroutine());
+            // Attach to ConfigManager callbacks
+            configManager.OnEnablePassthroughStreamChanged += OnEnablePassthroughStreamChanged;
         }
 
         private void OnSelectedModeChanged(VideoMode mode)
@@ -133,37 +95,106 @@ namespace QuestNav.Camera
             QueuedLogger.Log($"Changed mode: {mode}");
         }
 
+        private void OnEnablePassthroughStreamChanged(bool enabled)
+        {
+            if (cameraAccess is null || !cameraAccess.enabled)
+            {
+                QueuedLogger.Log("Disabled - cameraAccess is unset or disabled");
+                return;
+            }
+
+            switch (enabled)
+            {
+                // Setting to enabled when already running
+                case true when isInitialized:
+                {
+                    QueuedLogger.Log("Already initialized, skipping");
+                    break;
+                }
+                // Setting to disabled when already not running
+                case false when !isInitialized:
+                {
+                    QueuedLogger.Log("Already disabled, skipping");
+                    break;
+                }
+                // Setting to enabled when not running
+                case true when !isInitialized:
+                {
+                    if (cameraSource is null)
+                    {
+                        QueuedLogger.LogError(
+                            "CameraSource was null! Cannot initialize passthrough"
+                        );
+                        break;
+                    }
+
+                    QueuedLogger.Log("Initializing passthrough camera...");
+
+                    cameraSource.Description = "Quest Headset Camera";
+
+                    // Populate the list of modes from the supported resolutions
+                    var supportedResolutions = PassthroughCameraAccess.GetSupportedResolutions(
+                        cameraAccess.CameraPosition
+                    );
+                    var modes = new VideoMode[supportedResolutions.Length * FpsOptions.Length];
+                    int i = 0;
+                    foreach (var resolution in supportedResolutions)
+                    {
+                        foreach (var fps in FpsOptions)
+                        {
+                            modes[i++] = new VideoMode(
+                                PixelFormat.MJPEG,
+                                resolution.x,
+                                resolution.y,
+                                fps
+                            );
+                        }
+                    }
+
+                    cameraSource.Modes = modes;
+                    cameraSource.SelectedModeChanged += OnSelectedModeChanged;
+                    // Arbitrarily pick the first, I guess?
+                    // TODO: This should be stored in playerPrefs so that it doesn't reset
+                    cameraSource.Mode = cameraSource.Modes[3];
+
+                    // Start initialization coroutine
+                    frameCaptureCoroutine = coroutineHost.StartCoroutine(FrameCaptureCoroutine());
+                    isInitialized = true;
+                    cameraSource.IsConnected = true;
+
+                    break;
+                }
+                // Setting to disabled when running
+                case false when isInitialized:
+                {
+                    QueuedLogger.Log("Disabling Passthrough");
+
+                    // Remove callback from cameraSource
+                    cameraSource.SelectedModeChanged -= OnSelectedModeChanged;
+
+                    // Stop Coroutine
+                    if (frameCaptureCoroutine != null)
+                    {
+                        coroutineHost.StopCoroutine(frameCaptureCoroutine);
+                        frameCaptureCoroutine = null;
+                    }
+
+                    isInitialized = false;
+                    cameraSource.IsConnected = false;
+                    break;
+                }
+            }
+        }
+
         /// <summary>
         /// Captures frames from the passthrough camera at the requested frame rate and encodes them as JPEG.
         /// </summary>
         public IEnumerator FrameCaptureCoroutine()
         {
-            if (cameraAccess is null)
-            {
-                QueuedLogger.Log("Disabled - cameraAccess is unset");
-                yield break;
-            }
-
             QueuedLogger.Log("Initialized");
 
             while (true)
             {
-                if (!WebServerConstants.enablePassThrough)
-                {
-                    cameraSource.IsConnected = false;
-                    QueuedLogger.Log("Disabled");
-                    yield return new WaitUntil(() => WebServerConstants.enablePassThrough);
-                    QueuedLogger.Log("Enabled");
-                }
-
-                if (!cameraAccess.enabled)
-                {
-                    cameraSource.IsConnected = false;
-                    yield return new WaitForSeconds(FrameDelaySeconds);
-                    continue;
-                }
-
-                cameraSource.IsConnected = true;
                 try
                 {
                     var texture = cameraAccess.GetTexture();

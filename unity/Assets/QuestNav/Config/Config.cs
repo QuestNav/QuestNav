@@ -43,6 +43,20 @@ namespace QuestNav.Config
             public bool EnableAutoStartOnBoot { get; set; } = true;
         }
 
+        public class Camera
+        {
+            /// <summary>
+            /// The ID to be used as the primary key of this column in the database
+            /// </summary>
+            [PrimaryKey]
+            public int ID { get; set; }
+
+            /// <summary>
+            /// Whether the passthrough camera should be streamed over NT and WebUI
+            /// </summary>
+            public bool EnablePassthroughStream { get; set; } = false;
+        }
+
         public class Logging
         {
             /// <summary>

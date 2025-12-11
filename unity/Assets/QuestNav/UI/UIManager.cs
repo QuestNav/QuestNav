@@ -225,7 +225,7 @@ namespace QuestNav.UI
             try
             {
                 // Update config
-                await configManager.setEnableAutoStartOnBootAsync(autoStartValue);
+                await configManager.SetEnableAutoStartOnBootAsync(autoStartValue);
             }
             catch (Exception e)
             {

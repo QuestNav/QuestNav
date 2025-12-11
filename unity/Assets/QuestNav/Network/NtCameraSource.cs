@@ -288,28 +288,28 @@ namespace QuestNav.Network
             Name = name;
             sourcePublisher = ntInstance.GetStringPublisher(
                 String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "source"),
-                QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+                QuestNavConstants.Network.NtPublisherSettings
             );
             streamsPublisher = ntInstance.GetStringArrayPublisher(
                 String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "streams"),
-                QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+                QuestNavConstants.Network.NtPublisherSettings
             );
             descriptionPublisher = ntInstance.GetStringPublisher(
                 String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "description"),
-                QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+                QuestNavConstants.Network.NtPublisherSettings
             );
             connectedPublisher = ntInstance.GetBooleanPublisher(
                 String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "connected"),
-                QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+                QuestNavConstants.Network.NtPublisherSettings
             );
 
             modeEntry = ntInstance.GetStringEntry(
                 String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "mode"),
-                QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+                QuestNavConstants.Network.NtPublisherSettings
             );
             modesPublisher = ntInstance.GetStringArrayPublisher(
                 String.Join('/', QuestNavConstants.Topics.CAMERA_PUBLISHER, name, "modes"),
-                QuestNavConstants.Network.NT_PUBLISHER_SETTINGS
+                QuestNavConstants.Network.NtPublisherSettings
             );
 
             Source = "unknown:";

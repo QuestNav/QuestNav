@@ -251,9 +251,9 @@ namespace QuestNav.Core
             passthroughFrameSource = new PassthroughFrameSource(
                 this,
                 cameraAccess,
-                networkTableConnection.CreateCameraSource("Passthrough")
+                networkTableConnection.CreateCameraSource("Passthrough"),
+                configManager
             );
-            passthroughFrameSource.Initialize();
 
             // Initialize web server manager with settings from WebServerConstants
             webServerManager = new WebServerManager(
@@ -261,8 +261,8 @@ namespace QuestNav.Core
                 networkTableConnection,
                 vrCamera,
                 vrCameraRoot,
-                resetTransform
                 passthroughFrameSource,
+                resetTransform
             );
 
             commandProcessor = new CommandProcessor(
@@ -574,6 +574,14 @@ namespace QuestNav.Core
             }
 
             hadTracking = currentlyTracking;
+        }
+
+        /// <summary>
+        /// Updates the list of streams
+        /// </summary>
+        private void UpdateCameraServers()
+        {
+            passthroughFrameSource.BaseUrl = webServerManager.BaseUrl;
         }
         #endregion
     }

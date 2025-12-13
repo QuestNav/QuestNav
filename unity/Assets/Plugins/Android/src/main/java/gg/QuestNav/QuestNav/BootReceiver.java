@@ -57,29 +57,21 @@ public class BootReceiver extends BroadcastReceiver {
             return true;
         }
 
-        SQLiteDatabase db = null;
-        Cursor cursor = null;
+        try (SQLiteDatabase db = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
+            Cursor cursor = db.query(TABLE_NAME, new String[]{COLUMN_AUTO_START}, "id = 1", null, null, null, null)) {
         
-        try {
-            db = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
-            cursor = db.query(TABLE_NAME, new String[]{COLUMN_AUTO_START}, "id = 1", null, null, null, null);
-            
             if (cursor != null && cursor.moveToFirst()) {
                 int value = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_AUTO_START));
                 Log.d(TAG, "Read enableAutoStartOnBoot: " + value);
                 return value == 1;
             }
-            
+                    
             Log.d(TAG, "No config found, defaulting to auto-start enabled");
             return true;
-            
+                    
         } catch (Exception e) {
             Log.e(TAG, "Error reading database: " + e.getMessage());
             return true; // Default to enabled on error
-            
-        } finally {
-            if (cursor != null) cursor.close();
-            if (db != null) db.close();
         }
     }
 }

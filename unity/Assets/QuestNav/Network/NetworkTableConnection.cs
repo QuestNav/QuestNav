@@ -92,12 +92,12 @@ namespace QuestNav.Network
         /// <summary>
         /// ConfigManager for reading team number and IP override
         /// </summary>
-        private IConfigManager configManager;
+        private readonly IConfigManager configManager;
 
         /// <summary>
         /// NetworkTables connection for FRC data communication
         /// </summary>
-        private NtInstance ntInstance;
+        private readonly NtInstance ntInstance;
 
         /// <summary>
         /// Logger for NetworkTables internal messages
@@ -107,22 +107,22 @@ namespace QuestNav.Network
         /// <summary>
         /// Publisher for frame data (position/rotation updates)
         /// </summary>
-        private ProtobufPublisher<ProtobufQuestNavFrameData> frameDataPublisher;
+        private readonly ProtobufPublisher<ProtobufQuestNavFrameData> frameDataPublisher;
 
         /// <summary>
         /// Publisher for device data (tracking status, battery, etc.)
         /// </summary>
-        private ProtobufPublisher<ProtobufQuestNavDeviceData> deviceDataPublisher;
+        private readonly ProtobufPublisher<ProtobufQuestNavDeviceData> deviceDataPublisher;
 
         /// <summary>
         /// Publisher for command responses (Quest to robot)
         /// </summary>
-        private ProtobufPublisher<ProtobufQuestNavCommandResponse> commandResponsePublisher;
+        private readonly ProtobufPublisher<ProtobufQuestNavCommandResponse> commandResponsePublisher;
 
         /// <summary>
         /// Subscriber for command requests (robot to Quest)
         /// </summary>
-        private ProtobufSubscriber<ProtobufQuestNavCommand> commandRequestSubscriber;
+        private readonly ProtobufSubscriber<ProtobufQuestNavCommand> commandRequestSubscriber;
 
         /// <summary>
         /// Publisher for video streams
@@ -280,20 +280,12 @@ namespace QuestNav.Network
 
         private void OnEnableDebugLoggingChanged(bool enableDebugLogging)
         {
-            if (enableDebugLogging)
-            {
-                ntInstanceLogger = ntInstance.CreateLogger(
-                    QuestNavConstants.Logging.NT_LOG_LEVEL_MIN_DEBUG,
-                    QuestNavConstants.Logging.NT_LOG_LEVEL_MAX
-                );
-            }
-            else
-            {
-                ntInstanceLogger = ntInstance.CreateLogger(
-                    QuestNavConstants.Logging.NT_LOG_LEVEL_MIN_STANDARD,
-                    QuestNavConstants.Logging.NT_LOG_LEVEL_MAX
-                );
-            }
+            ntInstanceLogger = ntInstance.CreateLogger(
+                enableDebugLogging
+                    ? QuestNavConstants.Logging.NT_LOG_LEVEL_MIN_DEBUG
+                    : QuestNavConstants.Logging.NT_LOG_LEVEL_MIN_STANDARD,
+                QuestNavConstants.Logging.NT_LOG_LEVEL_MAX
+            );
         }
         #endregion
 

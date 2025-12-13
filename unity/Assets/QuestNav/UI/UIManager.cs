@@ -38,62 +38,62 @@ namespace QuestNav.UI
         /// <summary>
         /// Reference to the ConfigManager to handle config changes
         /// </summary>
-        private IConfigManager configManager;
+        private readonly IConfigManager configManager;
 
         /// <summary>
         /// Reference to NetworkTables connection
         /// </summary>
-        private INetworkTableConnection networkTableConnection;
+        private readonly INetworkTableConnection networkTableConnection;
 
         /// <summary>
         /// Input field for team number entry
         /// </summary>
-        private TMP_InputField teamInput;
+        private readonly TMP_InputField teamInput;
 
         /// <summary>
         /// Checkbox for auto start on boot
         /// </summary>
-        private Toggle autoStartToggle;
+        private readonly Toggle autoStartToggle;
 
         /// <summary>
         /// IP address text
         /// </summary>
-        private TMP_Text ipAddressText;
+        private readonly TMP_Text ipAddressText;
 
         /// <summary>
         /// ConState text
         /// </summary>
-        private TMP_Text conStateText;
+        private readonly TMP_Text conStateText;
 
         /// <summary>
         /// posXText text
         /// </summary>
-        private TMP_Text posXText;
+        private readonly TMP_Text posXText;
 
         /// <summary>
         /// posYText text
         /// </summary>
-        private TMP_Text posYText;
+        private readonly TMP_Text posYText;
 
         /// <summary>
         /// posZText text
         /// </summary>
-        private TMP_Text posZText;
+        private readonly TMP_Text posZText;
 
         /// <summary>
         /// X rotation text
         /// </summary>
-        private TMP_Text xRotText;
+        private readonly TMP_Text xRotText;
 
         /// <summary>
         /// Y rotation text
         /// </summary>
-        private TMP_Text yRotText;
+        private readonly TMP_Text yRotText;
 
         /// <summary>
         /// Z rotation text
         /// </summary>
-        private TMP_Text zRotText;
+        private readonly TMP_Text zRotText;
 
         /// <summary>
         /// Button to update team number

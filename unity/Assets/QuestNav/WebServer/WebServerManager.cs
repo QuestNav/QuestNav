@@ -60,7 +60,7 @@ namespace QuestNav.WebServer
     public class WebServerManager : IWebServerManager
     {
         private readonly VideoStreamProvider streamProvider;
-        private StatusProvider statusProvider;
+        private readonly StatusProvider statusProvider;
         private ConfigServer server;
 
         private SynchronizationContext mainThreadContext;
@@ -69,7 +69,7 @@ namespace QuestNav.WebServer
         private readonly INetworkTableConnection networkTableConnection;
         private readonly Transform vrCamera;
         private readonly IConfigManager configManager;
-        private LogCollector logCollector;
+        private readonly LogCollector logCollector;
 
         private bool isInitialized;
 

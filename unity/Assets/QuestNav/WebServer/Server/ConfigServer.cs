@@ -148,7 +148,10 @@ namespace QuestNav.WebServer.Server
             {
                 Swan.Logging.Logger.UnregisterLogger<Swan.Logging.ConsoleLogger>();
             }
-            catch { }
+            catch
+            {
+                logger?.Log("[ConfigServer] Failed to unregister logger!");
+            }
 
             _ = Task.Run(async () =>
             {

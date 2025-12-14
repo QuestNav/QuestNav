@@ -66,7 +66,7 @@ Alternatively, you can use ADB with this command:
 adb shell svc bluetooth disable
 ```
 
-:::note
+:::tip
 Disabling Bluetooth will break the companion app functionality, but this is necessary for competition reliability.
 :::
 

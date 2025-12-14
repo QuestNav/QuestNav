@@ -1,12 +1,8 @@
 using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading.Tasks;
 using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Utils;
-using QuestNav.WebServer;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,11 +14,6 @@ namespace QuestNav.UI
     /// </summary>
     public interface IUIManager
     {
-        /// <summary>
-        /// Updates the connection state and ip address in the UI
-        /// </summary>
-        void UIPeriodic();
-
         /// <summary>
         /// Updates the position and rotation text in the UI.
         /// </summary>
@@ -61,22 +52,22 @@ namespace QuestNav.UI
         private readonly TMP_Text ipAddressText;
 
         /// <summary>
-        /// ConState text
+        /// Connection state text
         /// </summary>
         private readonly TMP_Text conStateText;
 
         /// <summary>
-        /// posXText text
+        /// X position text
         /// </summary>
         private readonly TMP_Text posXText;
 
         /// <summary>
-        /// posYText text
+        /// Y position text
         /// </summary>
         private readonly TMP_Text posYText;
 
         /// <summary>
-        /// posZText text
+        /// Z position text
         /// </summary>
         private readonly TMP_Text posZText;
 
@@ -109,11 +100,6 @@ namespace QuestNav.UI
         /// Current auto start value
         /// </summary>
         private bool autoStartValue;
-
-        /// <summary>
-        /// Holds the detected local IP address of the HMD
-        /// </summary>
-        private string ipAddress = "0.0.0.0";
         #endregion
 
         /// <summary>
@@ -168,16 +154,24 @@ namespace QuestNav.UI
             // Attach local methods to config event methods
             configManager.OnTeamNumberChanged += OnTeamNumberChanged;
             configManager.OnDebugIpOverrideChanged += OnDebugIpOverrideChanged;
-            configManager.OnEnableAutoStartOnBootChanged += onEnableAutoStartOnBootChanged;
+            configManager.OnEnableAutoStartOnBootChanged += OnEnableAutoStartOnBootChanged;
+
+            // Attach local methods to network table event methods
+            networkTableConnection.OnConnect += OnConnect;
+            networkTableConnection.OnDisconnect += OnDisconnect;
+            networkTableConnection.OnIpAddressChanged += OnIpAddressChanged;
         }
 
         #region Event Subscribers
+
+        // ConfigManager
         /// <summary>
         /// Sets the input box placeholder text with the current team number.
         /// </summary>
         /// <param name="teamNumber">The team number to display</param>
         private void OnTeamNumberChanged(int teamNumber)
         {
+            this.teamNumber = teamNumber;
             teamInput.text = "";
             var placeholderText = teamInput.placeholder as TextMeshProUGUI;
             if (placeholderText != null)
@@ -186,14 +180,75 @@ namespace QuestNav.UI
             }
         }
 
+        /// <summary>
+        /// Handles debug IP override changes.
+        /// </summary>
+        /// <param name="ipOverride">The new IP override value</param>
         private void OnDebugIpOverrideChanged(string ipOverride)
         {
             // No handling right now
         }
 
-        private void onEnableAutoStartOnBootChanged(bool newValue)
+        /// <summary>
+        /// Updates the auto start toggle to match the config value.
+        /// </summary>
+        /// <param name="newValue">The new auto start setting</param>
+        private void OnEnableAutoStartOnBootChanged(bool newValue)
         {
             autoStartToggle.isOn = newValue;
+        }
+
+        // NetworkTableConnection
+        /// <summary>
+        /// Updates IP address display and color based on validity.
+        /// </summary>
+        /// <param name="newIp">The new IP address</param>
+        private void OnIpAddressChanged(string newIp)
+        {
+            if (ipAddressText is not TextMeshProUGUI ipText)
+                return;
+            if (newIp == "127.0.0.1")
+            {
+                ipText.text = "No Adapter Found";
+                ipText.color = Color.red;
+            }
+            else
+            {
+                ipText.text = newIp;
+                ipText.color = Color.green;
+            }
+        }
+
+        /// <summary>
+        /// Updates connection state display to show connected status.
+        /// </summary>
+        private void OnConnect()
+        {
+            if (conStateText is not TextMeshProUGUI conText)
+                return;
+
+            conText.text = "Connected to NT4";
+            conText.color = Color.green;
+        }
+
+        /// <summary>
+        /// Updates connection state display to show disconnected status with appropriate warnings.
+        /// </summary>
+        private void OnDisconnect()
+        {
+            if (conStateText is not TextMeshProUGUI conText)
+                return;
+
+            if (teamNumber == QuestNavConstants.Network.DEFAULT_TEAM_NUMBER)
+            {
+                conText.text = "Warning! Default Team Number still set! Trying to connect!";
+                conText.color = Color.red;
+            }
+            else if (networkTableConnection.IsReadyToConnect)
+            {
+                conText.text = "Trying to connect to NT4";
+                conText.color = Color.yellow;
+            }
         }
         #endregion
 
@@ -217,6 +272,10 @@ namespace QuestNav.UI
             }
         }
 
+        /// <summary>
+        /// Updates the auto start setting based on toggle value and saves to config.
+        /// </summary>
+        /// <param name="newValue">The new auto start value</param>
         private async void SetAutoStartValueFromUIAsync(bool newValue)
         {
             QueuedLogger.Log("Updating Auto Start Value from UI");
@@ -235,69 +294,12 @@ namespace QuestNav.UI
         #endregion
 
         #region Periodic
-        /// <summary>
-        /// Updates the default IP address shown in the UI with the current HMD IP address
-        /// </summary>
-        private void UpdateIPAddressText()
-        {
-            // Get the local IP
-            var hostEntry = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in hostEntry.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    ipAddress = ip.ToString();
-                    if (ipAddressText is not TextMeshProUGUI ipText)
-                        return;
-                    if (ipAddress == "127.0.0.1")
-                    {
-                        ipText.text = "No Adapter Found";
-                        ipText.color = Color.red;
-                    }
-                    else
-                    {
-                        ipText.text = ipAddress;
-                        ipText.color = Color.green;
-                    }
-                }
-                break;
-            }
-        }
 
         /// <summary>
-        /// Updates the connection state text display.
+        /// Updates the position and rotation text displays with current values.
         /// </summary>
-        private void UpdateConStateText()
-        {
-            TextMeshProUGUI conText = conStateText as TextMeshProUGUI;
-            if (conText is null)
-                return;
-            if (networkTableConnection.IsConnected)
-            {
-                conText.text = "Connected to NT4";
-                conText.color = Color.green;
-            }
-            else if (teamNumber == QuestNavConstants.Network.DEFAULT_TEAM_NUMBER)
-            {
-                conText.text = "Warning! Default Team Number still set! Trying to connect!";
-                conText.color = Color.red;
-            }
-            else if (networkTableConnection.IsReadyToConnect)
-            {
-                conText.text = "Trying to connect to NT4";
-                conText.color = Color.yellow;
-            }
-        }
-
-        public void UIPeriodic()
-        {
-            UpdateConStateText();
-            UpdateIPAddressText();
-        }
-
-        /// <summary>
-        /// Updates the connection state text display.
-        /// </summary>
+        /// <param name="position">Current position vector</param>
+        /// <param name="rotation">Current rotation quaternion</param>
         public void UpdatePositionText(Vector3 position, Quaternion rotation)
         {
             TextMeshProUGUI xText = posXText as TextMeshProUGUI;

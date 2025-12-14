@@ -283,6 +283,8 @@ namespace QuestNav.Core
             {
                 QueuedLogger.LogException(e);
             }
+            
+            networkTableConnection.Initialize();
 
             // Set Oculus display frequency
             OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
@@ -344,13 +346,11 @@ namespace QuestNav.Core
         /// </summary>
         private void SlowUpdate()
         {
-            // Process and display NetworkTables internal messages (connection status, errors, etc.)
-            // This helps with debugging connection issues without impacting performance
-            networkTableConnection.LoggerPeriodic();
+            // Poll for connection status, logging, ip address changes, etc.
+            networkTableConnection.Periodic();
 
             // Update UI elements like connection status, IP address display, team number validation
             // UI updates don't need to be real-time, 3Hz provides smooth visual feedback
-            uiManager.UIPeriodic();
             uiManager.UpdatePositionText(position, rotation);
 
             // Monitor device health: tracking status, battery level, tracking loss events

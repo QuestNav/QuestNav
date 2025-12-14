@@ -1,3 +1,6 @@
+using System;
+using System.Net;
+using System.Net.Sockets;
 using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
@@ -13,6 +16,21 @@ namespace QuestNav.Network
     public interface INetworkTableConnection
     {
         /// <summary>
+        /// Fired when connection is established.
+        /// </summary>
+        public event Action OnConnect;
+
+        /// <summary>
+        /// Fired when connection is lost.
+        /// </summary>
+        public event Action OnDisconnect;
+
+        /// <summary>
+        /// Fired when the local IP address changes.
+        /// </summary>
+        public event Action<string> OnIpAddressChanged;
+
+        /// <summary>
         /// Gets whether the connection is currently established.
         /// </summary>
         bool IsConnected { get; }
@@ -27,6 +45,11 @@ namespace QuestNav.Network
         /// Gets the current NT time
         /// </summary>
         long NtNow { get; }
+
+        /// <summary>
+        /// Caches the last known IP address to detect changes
+        /// </summary>
+        string IpAddress { get; }
 
         /// <summary>
         /// Publishes frame data to NetworkTables.
@@ -78,9 +101,14 @@ namespace QuestNav.Network
         void SendCommandErrorResponse(uint commandId, string errorMessage);
 
         /// <summary>
-        /// Processes and logs NetworkTables internal messages
+        /// Performs periodic updates including connection polling and logging.
         /// </summary>
-        void LoggerPeriodic();
+        void Periodic();
+
+        /// <summary>
+        /// Populates subscribed events with initial values
+        /// </summary>
+        void Initialize();
     }
 
     /// <summary>
@@ -138,6 +166,11 @@ namespace QuestNav.Network
         /// Flag indicating if an IP address has been set
         /// </summary>
         private bool ipAddressSet = false;
+
+        /// <summary>
+        /// Tracks previous connection state for change detection
+        /// </summary>
+        private bool wasConnected;
         #endregion
 
         /// <summary>
@@ -225,6 +258,11 @@ namespace QuestNav.Network
         #region Properties
 
         /// <summary>
+        /// Caches the last known IP address to detect changes
+        /// </summary>
+        public string IpAddress { get; private set; } = "127.0.0.1";
+
+        /// <summary>
         /// Gets whether the connection is currently established.
         /// </summary>
         public bool IsConnected => ntInstance.IsConnected();
@@ -238,6 +276,23 @@ namespace QuestNav.Network
         /// Gets the current NT time
         /// </summary>
         public long NtNow => ntInstance.Now();
+        #endregion
+
+        #region Event Publishers
+        /// <summary>
+        /// Fired when connection is established.
+        /// </summary>
+        public event Action OnConnect;
+
+        /// <summary>
+        /// Fired when connection is lost.
+        /// </summary>
+        public event Action OnDisconnect;
+
+        /// <summary>
+        /// Fired when the local IP address changes.
+        /// </summary>
+        public event Action<string> OnIpAddressChanged;
         #endregion
 
         #region Event Subscribers
@@ -258,6 +313,10 @@ namespace QuestNav.Network
             ipAddressSet = false;
         }
 
+        /// <summary>
+        /// Changes to direct IP override mode for debugging.
+        /// </summary>
+        /// <param name="ipOverride">The IP address to connect to directly</param>
         private void OnDebugIpOverrideChanged(string ipOverride)
         {
             // Skip if empty (indicates team number being used)
@@ -278,6 +337,10 @@ namespace QuestNav.Network
             teamNumberSet = false;
         }
 
+        /// <summary>
+        /// Updates the internal logger's verbosity level.
+        /// </summary>
+        /// <param name="enableDebugLogging">Whether to enable debug-level logging</param>
         private void OnEnableDebugLoggingChanged(bool enableDebugLogging)
         {
             ntInstanceLogger = ntInstance.CreateLogger(
@@ -411,13 +474,83 @@ namespace QuestNav.Network
 
         #endregion
 
-        #region Logging
+        #region Lifecycle
+        /// <summary>
+        /// Populates event subscribers with initial data. Should be called AFTER all other classes subscribe.
+        /// </summary>
+        public void Initialize()
+        {
+            OnIpAddressChanged?.Invoke(IpAddress);
+            if (IsConnected)
+            {
+                OnConnect?.Invoke();
+            }
+            else
+            {
+                OnDisconnect?.Invoke();
+            }
+        }
+
+        /// <summary>
+        /// Performs periodic updates including connection polling and logging.
+        /// </summary>
+        public void Periodic()
+        {
+            PollForNewIpAddress();
+            PollForConnectionStatus();
+            PollInternalNtLog();
+        }
+
+        /// <summary>
+        /// Checks for changes in the local IP address and raises event if changed.
+        /// </summary>
+        private void PollForNewIpAddress()
+        {
+            var hostEntry = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in hostEntry.AddressList)
+            {
+                // We only care about local IP address
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    // If it is the same as the previous, ignore
+                    if (IpAddress.Equals(ip.ToString()))
+                        continue;
+
+                    IpAddress = ip.ToString();
+                    QueuedLogger.Log($"Got new IP Address: {IpAddress}");
+                    OnIpAddressChanged?.Invoke(IpAddress);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Monitors connection state and raises connect/disconnect events.
+        /// </summary>
+        private void PollForConnectionStatus()
+        {
+            switch (IsConnected)
+            {
+                case true when !wasConnected:
+                    // If we connected and weren't previously
+                    QueuedLogger.Log("Connected to NT4");
+                    wasConnected = true;
+                    OnConnect?.Invoke();
+                    break;
+                case false when wasConnected:
+                    // If we disconnected and were previously
+                    QueuedLogger.Log("Disconnected from NT4");
+                    wasConnected = false;
+                    OnDisconnect?.Invoke();
+                    break;
+            }
+        }
 
         /// <summary>
         /// Processes and logs any pending NetworkTables internal messages.
         /// Respects the enableDebugLogging tunable - when disabled, only WARNING and above are logged.
         /// </summary>
-        public void LoggerPeriodic()
+        private void PollInternalNtLog()
         {
             var messages = ntInstanceLogger.PollForMessages();
             if (messages == null)
@@ -428,7 +561,6 @@ namespace QuestNav.Network
                 QueuedLogger.Log($"[NTCoreInternal/{message.filename}] {message.message}");
             }
         }
-
         #endregion
     }
 }

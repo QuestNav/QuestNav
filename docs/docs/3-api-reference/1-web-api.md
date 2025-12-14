@@ -3,7 +3,7 @@
 This document describes the HTTP endpoints exposed by ConfigServer for QuestNav. It includes the path to each endpoint, supported methods, parameters, request/response formats, and response codes.
 
 # Overview
-- Base URL: http://<device-ip>:<port>/
+- Base URL: `http://<device-ip>:<port>/`
   - Default port is 5801 and is configurable via WebServerConstants.serverPort.
 - Content Type: application/json for all /api endpoints, unless otherwise noted.
 - CORS: When WebServerConstants.enableCORSDevMode is true, the server sets `Access-Control-Allow-Origin: *` and supports preflight with `OPTIONS` (responds 200).
@@ -34,7 +34,7 @@ This document describes the HTTP endpoints exposed by ConfigServer for QuestNav.
       - requiresRestart: `boolean`
       - order: `number`
       - options: `string`[] | null
-    - categories: { [category: `string`]: ConfigFieldSchema[] }
+    - categories: `{ category(string): ConfigFieldSchema[] }`
     - version: `string`
 ```json
 {
@@ -86,7 +86,7 @@ This document describes the HTTP endpoints exposed by ConfigServer for QuestNav.
 - Request: none
 - Response: 200 OK → `ConfigValuesResponse`
   - success: `boolean`
-  - values: { [path: `string`]: `any` }
+  - values: `{ [path: string]: any }`
   - timestamp: `number` (Unix seconds)
 ```json
 {
@@ -130,8 +130,8 @@ This document describes the HTTP endpoints exposed by ConfigServer for QuestNav.
     - oldValue: `any`
     - newValue: `any`
   - 400 Bad Request →
-    - If request is missing/invalid: SimpleResponse { success:false, message:"Invalid request" }
-    - If update fails: ConfigUpdateResponse { success:false, message:"Failed to update configuration" }
+    - If request is missing/invalid: SimpleResponse `{ success:false, message:"Invalid request" }`
+    - If update fails: ConfigUpdateResponse `{ success:false, message:"Failed to update configuration" }`
   - 500 Internal Server Error → SimpleResponse
 
 ## GET /api/info
@@ -170,9 +170,9 @@ This document describes the HTTP endpoints exposed by ConfigServer for QuestNav.
 - Description: Returns current runtime status from StatusProvider.
 - Request: none
 - Response: 200 OK → `Status`
-  - position: { x: `number`, y: `number`, z: `number` }
-  - rotation: { x: `number`, y: `number`, z: `number`, w: `number` } (quaternion)
-  - eulerAngles: { pitch: `number`, yaw: `number`, roll: `number` }
+  - position: `{ x: number, y: number, z: number }`
+  - rotation: `{ x: number, y: number, z: number, w: number }` (quaternion)
+  - eulerAngles: `{ pitch: number, yaw: number, roll: number }`
   - isTracking: `boolean`
   - trackingLostEvents: `number`
   - batteryPercent: `number` (0–100)
@@ -292,27 +292,41 @@ Other behaviors
 
 Examples
 - Get schema:
+```
   curl -s http://<device-ip>:5801/api/schema
+```
 
 - Get config values:
+```
   curl -s http://<device-ip>:5801/api/config
+```
 
 - Update config value:
+```
   curl -s -X POST http://<device-ip>:5801/api/config \
        -H "Content-Type: application/json" \
        -d '{"path":"WebServerConstants/webConfigTeamNumber","value":1234}'
+```
 
 - Fetch logs (last 200):
+```
   curl -s "http://<device-ip>:5801/api/logs?count=200"
+```
 
 - Clear logs:
+```
   curl -s -X DELETE http://<device-ip>:5801/api/logs
+```
 
 - Restart app:
+```
   curl -s -X POST http://<device-ip>:5801/api/restart
+```
 
 - Reset pose:
+```
   curl -s -X POST http://<device-ip>:5801/api/reset-pose
+```
 
 - View MJPEG stream (in a browser):
-  http://<device-ip>:5801/video
+  `http://<device-ip>:5801/video`

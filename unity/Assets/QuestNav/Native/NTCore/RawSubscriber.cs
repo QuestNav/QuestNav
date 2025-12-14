@@ -63,11 +63,11 @@ namespace QuestNav.Native.NTCore
                         elementPtr
                     );
                     var raw = value.data.valueRaw;
-                    int arrLen = (int)raw.size;
+                    int arrLen = (int)raw.Size;
                     byte[] arr = new byte[arrLen];
                     if (arrLen > 0)
                     {
-                        Marshal.Copy((IntPtr)raw.data, arr, 0, arrLen);
+                        Marshal.Copy((IntPtr)raw.Data, arr, 0, arrLen);
                     }
 
                     // Create TimestampedValue with the byte array and timestamp information

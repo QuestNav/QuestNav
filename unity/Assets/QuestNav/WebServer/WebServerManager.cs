@@ -1,90 +1,109 @@
 using System;
-using System.Collections;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
+using QuestNav.Commands;
+using QuestNav.Commands.Commands;
+using QuestNav.Config;
+using QuestNav.Core;
+using QuestNav.Network;
+using QuestNav.Protos.Generated;
+using QuestNav.Utils;
+using QuestNav.WebServer.Server;
 using UnityEngine;
+using Wpi.Proto;
 
 namespace QuestNav.WebServer
 {
     /// <summary>
-    /// Main orchestrator for the WebServer subsystem.
-    /// Manages configuration server, status provider, log collector, and pose reset provider.
-    /// Designed for dependency injection from QuestNav.cs, replacing ConfigBootstrap MonoBehaviour.
-    /// Handles server lifecycle, file extraction on Android, and main thread coordination.
+    /// Interface for WebServer management.
+    /// </summary>
+    public interface IWebServerManager
+    {
+        /// <summary>
+        /// Gets whether the HTTP server is currently running.
+        /// </summary>
+        bool IsServerRunning { get; }
+
+        /// <summary>
+        /// Gets the base URL of the server
+        /// </summary>
+        string BaseUrl { get; }
+
+        /// <summary>
+        /// Initializes the web server asynchronously.
+        /// </summary>
+        Task InitializeAsync();
+
+        /// <summary>
+        /// Periodic update method. Called from QuestNav.SlowUpdate() at 3Hz.
+        /// </summary>
+        void Periodic(
+            Vector3 position,
+            Quaternion rotation,
+            bool isTracking,
+            int trackingLostEvents
+        );
+
+        /// <summary>
+        /// Stops the web server and cleans up resources.
+        /// </summary>
+        void Shutdown();
+    }
+
+    /// <summary>
+    /// Manages the QuestNav configuration web server.
+    /// Provides HTTP endpoints for configuration, status, and control.
     /// </summary>
     public class WebServerManager : IWebServerManager
     {
-        #region Fields
-        /// <summary>
-        /// HTTP configuration server instance
-        /// </summary>
+        private readonly VideoStreamProvider streamProvider;
+        private readonly StatusProvider statusProvider;
         private ConfigServer server;
 
-        /// <summary>
-        /// Reflection binding for configuration fields
-        /// </summary>
-        private ReflectionBinding binding;
+        private SynchronizationContext mainThreadContext;
+        private readonly Transform resetTransform;
+        private readonly Transform vrCameraRoot;
+        private readonly INetworkTableConnection networkTableConnection;
+        private readonly Transform vrCamera;
+        private readonly IConfigManager configManager;
+        private readonly LogCollector logCollector;
 
-        /// <summary>
-        /// Configuration persistence store
-        /// </summary>
-        private ConfigStore store;
+        private bool isInitialized;
 
-        /// <summary>
-        /// Status provider for web interface
-        /// </summary>
-        private StatusProvider statusProvider;
+        // Cached values updated via config events
+        private int cachedTeamNumber;
+        private string cachedDebugIpOverride = "";
+        private string cachedRobotIpAddress = "";
 
-        /// <summary>
-        /// Mjpeg stream provider for web interface
-        /// </summary>
-        private readonly VideoStreamProvider streamProvider;
+        public WebServerManager(
+            IConfigManager configManager,
+            INetworkTableConnection networkTableConnection,
+            Transform vrCamera,
+            Transform vrCameraRoot,
+            VideoStreamProvider.IFrameSource frameSource,
+            Transform resetTransform
+        )
+        {
+            this.configManager = configManager;
+            this.networkTableConnection = networkTableConnection;
+            this.vrCamera = vrCamera;
+            this.vrCameraRoot = vrCameraRoot;
+            this.resetTransform = resetTransform;
 
-        /// <summary>
-        /// Log collector for web interface
-        /// </summary>
-        private LogCollector logCollector;
+            statusProvider = new StatusProvider();
+            logCollector = new LogCollector();
+            streamProvider = new VideoStreamProvider(frameSource);
 
-        /// <summary>
-        /// Callback for pose reset requests from web interface
-        /// </summary>
-        private MainThreadAction poseResetCallback;
-
-        /// <summary>
-        /// HTTP server port for configuration UI
-        /// </summary>
-        private readonly int serverPort;
-
-        /// <summary>
-        /// Enable CORS for localhost development
-        /// </summary>
-        private readonly bool enableCORSDevMode;
-
-        /// <summary>
-        /// Flag indicating if initialization is complete
-        /// </summary>
-        private bool isInitialized = false;
-
-        /// <summary>
-        /// Flag for app restart request from background thread
-        /// </summary>
-        private bool restartRequested = false;
-
-        /// <summary>
-        /// Flag for pose reset request from background thread
-        /// </summary>
-        private volatile bool poseResetRequested = false;
-
-        /// <summary>
-        /// MonoBehaviour for coroutine execution
-        /// </summary>
-        private readonly MonoBehaviour coroutineHost;
-        #endregion
+            // Subscribe to config change events
+            configManager.OnTeamNumberChanged += OnTeamNumberChanged;
+            configManager.OnDebugIpOverrideChanged += OnDebugIpOverrideChanged;
+        }
 
         #region Properties
-        /// <summary>
-        /// Gets whether the server is currently running
-        /// </summary>
-        public bool IsServerRunning => server != null && server.IsRunning;
+        public bool IsServerRunning => server?.IsRunning ?? false;
 
         /// <summary>
         /// Gets the base public URL of the server
@@ -93,483 +112,349 @@ namespace QuestNav.WebServer
         public string BaseUrl { get; private set; }
         #endregion
 
-        #region Constructor
-
-        /// <summary>
-        /// Initializes a new WebServerManager with injected dependencies.
-        /// </summary>
-        /// <param name="vrCamera">Transform of the VR camera (center eye anchor)</param>
-        /// <param name="vrCameraRoot">Transform of the VR camera root</param>
-        /// <param name="frameSource">Provides access to captured MJPEG frames</param>
-        /// <param name="coroutineHost">MonoBehaviour to use for coroutine execution</param>
-        /// <param name="serverPort">HTTP server port for web interface</param>
-        /// <param name="enableCORSDevMode">Enable CORS for localhost development</param>
-        /// <param name="poseResetCallback">Callback to execute pose reset on main thread</param>
-        public WebServerManager(
-            Transform vrCamera,
-            Transform vrCameraRoot,
-            VideoStreamProvider.IFrameSource frameSource,
-            MonoBehaviour coroutineHost,
-            int serverPort,
-            bool enableCORSDevMode,
-            MainThreadAction poseResetCallback
-        )
+        #region Event Subscribers
+        private void OnTeamNumberChanged(int teamNumber)
         {
-            this.coroutineHost = coroutineHost;
-            this.serverPort = serverPort;
-            this.enableCORSDevMode = enableCORSDevMode;
-            this.poseResetCallback = poseResetCallback;
+            cachedTeamNumber = teamNumber;
+            UpdateRobotIpAddress();
+        }
 
-            // Initialize services
-            statusProvider = new StatusProvider();
-            logCollector = new LogCollector();
-            streamProvider = new VideoStreamProvider(frameSource);
+        private void OnDebugIpOverrideChanged(string debugIpOverride)
+        {
+            cachedDebugIpOverride = debugIpOverride ?? "";
+            UpdateRobotIpAddress();
+        }
+
+        private void UpdateRobotIpAddress()
+        {
+            if (!string.IsNullOrEmpty(cachedDebugIpOverride))
+            {
+                cachedRobotIpAddress = cachedDebugIpOverride;
+            }
+            else if (cachedTeamNumber > 0)
+            {
+                cachedRobotIpAddress = $"10.{cachedTeamNumber / 100}.{cachedTeamNumber % 100}.2";
+            }
+            else
+            {
+                cachedRobotIpAddress = "";
+            }
         }
         #endregion
 
-        #region Public Methods
-        /// <summary>
-        /// Initializes the web server system.
-        /// Must be called on Unity main thread during application startup.
-        /// </summary>
-        public void Initialize()
+        #region Lifecycle Methods
+        public async Task InitializeAsync()
         {
+            mainThreadContext = SynchronizationContext.Current;
+
             if (isInitialized)
             {
-                Debug.Log("[WebServerManager] Already initialized, skipping");
+                QueuedLogger.Log("Already initialized, skipping");
                 return;
             }
 
-            Debug.Log("[WebServerManager] Initializing configuration system...");
+            QueuedLogger.Log("Initializing...");
 
-            // Initialize log collector (subscribes to Unity log events)
             logCollector.Initialize();
 
-            // Start initialization coroutine
-            coroutineHost.StartCoroutine(InitializeCoroutine());
+            await StartServerAsync();
 
-            // Note: Frame capture coroutine should be started by the owner of the frame source (QuestNav).
+            isInitialized = true;
+            QueuedLogger.Log("Initialization complete");
         }
 
-        /// <summary>
-        /// Periodic update method for web server operations.
-        /// Should be called from QuestNav.SlowUpdate() at 3Hz.
-        /// Handles pending operations that need to run on the main thread.
-        /// </summary>
-        public void Periodic()
+        public void Shutdown()
         {
-            // Check for restart request from web interface
-            if (restartRequested)
-            {
-                restartRequested = false;
-                Debug.Log("[WebServerManager] Executing restart on main thread");
-                RestartApp();
-            }
+            QueuedLogger.Log("Shutting down...");
 
-            // Check for pose reset request from web interface
-            if (poseResetRequested)
-            {
-                poseResetRequested = false;
-                Debug.Log("[WebServerManager] Executing pose reset on main thread");
-                poseResetCallback?.Invoke();
-            }
+            configManager.OnTeamNumberChanged -= OnTeamNumberChanged;
+            configManager.OnDebugIpOverrideChanged -= OnDebugIpOverrideChanged;
+
+            server?.Stop();
+            server = null;
+            logCollector?.Dispose();
+
+            QueuedLogger.Log("Shutdown complete");
         }
+        #endregion
 
-        /// <summary>
-        /// Updates status information for the web interface.
-        /// Should be called from QuestNav.SlowUpdate() at 3Hz.
-        /// </summary>
-        public void UpdateStatus(
+        #region Periodic
+        public void Periodic(
             Vector3 position,
             Quaternion rotation,
             bool isTracking,
-            int trackingLostEvents,
-            float batteryLevel,
-            BatteryStatus batteryStatus,
-            bool isConnected,
-            string ipAddress,
-            int teamNumber,
-            string robotIpAddress,
-            float fps,
-            int frameCount
+            int trackingLostEvents
         )
         {
+            string ipAddress = GetLocalIPAddress();
+            float currentFps = 1f / Time.deltaTime;
+
             statusProvider?.UpdateStatus(
                 position,
                 rotation,
                 isTracking,
                 trackingLostEvents,
-                batteryLevel,
-                batteryStatus,
-                isConnected,
+                SystemInfo.batteryLevel,
+                SystemInfo.batteryStatus,
+                networkTableConnection.IsConnected,
                 ipAddress,
-                teamNumber,
-                robotIpAddress,
-                fps,
-                frameCount
+                cachedTeamNumber,
+                cachedRobotIpAddress,
+                currentFps,
+                Time.frameCount
             );
-            BaseUrl = $"http://{ipAddress}:{serverPort}";
-        }
 
-        /// <summary>
-        /// Stops the web server and cleans up resources.
-        /// Should be called on application shutdown.
-        /// </summary>
-        public void Shutdown()
-        {
-            Debug.Log("[WebServerManager] Shutting down...");
-
-            // Stop HTTP server
-            if (server != null)
-            {
-                server.Stop();
-                server = null;
-            }
-
-            // Dispose log collector
-            logCollector?.Dispose();
-
-            Debug.Log("[WebServerManager] Shutdown complete");
+            BaseUrl = $"http://{ipAddress}:{QuestNavConstants.WebServer.SERVER_PORT}";
         }
         #endregion
 
-        #region Private Methods - Initialization
+        #region Main Thread Callbacks
         /// <summary>
-        /// Initializes the configuration system: reflection binding, config store, and HTTP server.
-        /// Loads saved configuration and applies values to WebServerConstants fields.
-        /// Must run on main thread for Unity API access.
+        /// Requests a pose reset to be executed on the main thread.
+        /// Called from ConfigServer on background HTTP thread.
         /// </summary>
-        private IEnumerator InitializeCoroutine()
+        internal void RequestPoseReset()
         {
-            Debug.Log("[WebServerManager] Starting initialization coroutine...");
-
-            // Initialize reflection binding to scan for [Config] attributes
-            binding = new ReflectionBinding();
-            if (binding == null)
-            {
-                Debug.LogError("[WebServerManager] Failed to create ReflectionBinding");
-                yield break;
-            }
-            Debug.Log($"[WebServerManager] Found {binding.FieldCount} configurable fields");
-
-            // Initialize configuration store for persistence
-            store = new ConfigStore();
-            if (store == null)
-            {
-                Debug.LogError("[WebServerManager] Failed to create ConfigStore");
-                yield break;
-            }
-
-            // Load saved configuration from disk
-            var savedConfig = store.LoadConfig();
-            if (savedConfig != null && savedConfig.values != null && savedConfig.values.Count > 0)
-            {
-                Debug.Log($"[WebServerManager] Applying {savedConfig.values.Count} saved values");
-                binding.ApplyValues(savedConfig.values);
-            }
-
-            isInitialized = true;
-            Debug.Log("[WebServerManager] Initialization complete");
-
-            // Start HTTP server
-            yield return StartServerCoroutine();
+            QueuedLogger.Log("Pose reset requested from web interface");
+            mainThreadContext.Post(_ => ExecutePoseResetToOrigin(), null);
         }
 
         /// <summary>
-        /// Starts the HTTP configuration server.
-        /// Extracts web UI files on Android, then starts EmbedIO server.
+        /// Executes pose reset to origin (0,0,0) with no rotation.
+        /// Uses the existing PoseResetCommand implementation to ensure single source of truth.
         /// </summary>
-        private IEnumerator StartServerCoroutine()
+        private void ExecutePoseResetToOrigin()
         {
-            if (!isInitialized)
+            QueuedLogger.Log("Web interface requested pose reset to origin");
+
+            // Create a protobuf command payload for origin reset in FRC coordinates
+            var resetPose = new ProtobufPose3d
             {
-                Debug.LogError("[WebServerManager] Cannot start server - not initialized");
-                yield break;
-            }
+                Translation = new ProtobufTranslation3d
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+                Rotation = new ProtobufRotation3d
+                {
+                    Q = new ProtobufQuaternion
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0,
+                        W = 1,
+                    },
+                },
+            };
 
-            if (server != null && server.IsRunning)
+            var command = new ProtobufQuestNavCommand
             {
-                Debug.LogWarning("[WebServerManager] Server already running");
-                yield break;
-            }
+                Type = QuestNavCommandType.PoseReset,
+                CommandId = (uint)DateTime.UtcNow.Ticks,
+                PoseResetPayload = new ProtobufQuestNavPoseResetPayload { TargetPose = resetPose },
+            };
 
-            Debug.Log("[WebServerManager] Starting configuration server...");
+            // Create web command context for web-initiated reset
+            // (no NetworkTables response needed for web interface)
+            var webContext = new WebCommandContext();
 
-            // Get static files path
+            // Create a temporary command instance for web-initiated reset
+            var webPoseResetCommand = new PoseResetCommand(
+                webContext, // Web context is no-op (no NetworkTables responses)
+                vrCamera,
+                vrCameraRoot,
+                resetTransform
+            );
+
+            // Execute the pose reset using the existing command implementation
+            webPoseResetCommand.Execute(command);
+
+            QueuedLogger.Log("[QuestNav] Pose reset to origin completed");
+        }
+
+        /// <summary>
+        /// Requests an app restart to be executed on the main thread.
+        /// Called from ConfigServer on background HTTP thread.
+        /// </summary>
+        internal void RequestRestart()
+        {
+            QueuedLogger.Log("Restart requested from web interface");
+            mainThreadContext.Post(_ => RestartApp(), null);
+        }
+        #endregion
+
+        #region Server Setup
+        private async Task StartServerAsync()
+        {
+            QueuedLogger.Log("Starting configuration server...");
+
             string staticPath = GetStaticFilesPath();
             if (string.IsNullOrEmpty(staticPath))
             {
-                Debug.LogError("[WebServerManager] Failed to get static files path");
-                yield break;
+                QueuedLogger.LogError("Failed to get static files path");
+                return;
             }
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-            // On Android, extract UI files from APK first
-            yield return ExtractAndroidUIFiles(staticPath);
+            await ExtractAndroidUIFilesAsync(staticPath);
 #else
-            // On other platforms, ensure static files directory exists
             EnsureStaticFilesExist(staticPath);
+            await Task.CompletedTask;
 #endif
 
-            // Create server with logger interface
-            var logger = new UnityLogger();
             server = new ConfigServer(
-                binding,
-                store,
-                serverPort,
-                enableCORSDevMode,
+                configManager,
+                QuestNavConstants.WebServer.SERVER_PORT,
+                QuestNavConstants.WebServer.ENABLE_CORS_DEV_MODE,
                 staticPath,
-                logger,
-                RestartApplication,
-                RequestPoseReset, // Pass flag-setter method instead of direct callback
+                new UnityLogger(),
+                this,
                 statusProvider,
                 logCollector,
                 streamProvider
             );
 
-            if (server == null)
-            {
-                Debug.LogError("[WebServerManager] Failed to create ConfigServer");
-                yield break;
-            }
-
-            // Start server on background thread
-            server.Start();
-
-            // Wait a frame to let server start
-            yield return null;
+            await server.StartAsync();
 
             if (!server.IsRunning)
             {
-                Debug.LogError("[WebServerManager] Server did not start successfully");
-                yield break;
+                QueuedLogger.LogError("Server did not start successfully");
+                return;
             }
 
             ShowConnectionInfo();
-            Debug.Log("[WebServerManager] Server started successfully");
+            QueuedLogger.Log("Server started successfully");
         }
-        #endregion
 
-        #region Private Methods - Static Files Management
-        /// <summary>
-        /// Gets the appropriate static files path for the current platform.
-        /// On Android: Application.persistentDataPath/ui (extracted from APK)
-        /// On other platforms: Application.streamingAssetsPath/ui
-        /// </summary>
-        /// <returns>Path to static UI files</returns>
         private string GetStaticFilesPath()
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
-            // On Android, must extract from APK to persistentDataPath
-            string persistentPath = Path.Combine(Application.persistentDataPath, "ui");
-            Debug.Log($"[WebServerManager] Using persistent path for Android: {persistentPath}");
-            return persistentPath;
+            return Path.Combine(Application.persistentDataPath, "ui");
 #else
-            string streamingPath = Path.Combine(Application.streamingAssetsPath, "ui");
-            Debug.Log($"[WebServerManager] Using StreamingAssets path: {streamingPath}");
-            return streamingPath;
+            return Path.Combine(Application.streamingAssetsPath, "ui");
 #endif
         }
+        #endregion
 
-        /// <summary>
-        /// Extracts UI files from Android APK to persistent storage.
-        /// Android cannot serve files directly from APK, so we extract them first.
-        /// Forces fresh extraction on each app start to ensure UI is up-to-date.
-        /// </summary>
-        /// <param name="targetPath">Destination path for extracted files</param>
-        private IEnumerator ExtractAndroidUIFiles(string targetPath)
+        #region Static File Management
+#if UNITY_ANDROID && !UNITY_EDITOR
+        private async Task ExtractAndroidUIFilesAsync(string targetPath)
         {
-            // Force delete old UI files to ensure fresh extraction
             if (Directory.Exists(targetPath))
             {
-                Debug.Log("[WebServerManager] Clearing old UI files...");
+                QueuedLogger.Log("Clearing old UI files...");
                 Directory.Delete(targetPath, true);
             }
 
-            string indexPath = Path.Combine(targetPath, "index.html");
+            QueuedLogger.Log("Extracting UI files from APK...");
+
+            Directory.CreateDirectory(targetPath);
             string assetsDir = Path.Combine(targetPath, "assets");
+            Directory.CreateDirectory(assetsDir);
 
-            // Delete old fallback files if they exist
-            if (File.Exists(indexPath))
-            {
-                File.Delete(indexPath);
-            }
-
-            Debug.Log("[WebServerManager] Extracting UI files from APK to persistent storage...");
-
-            if (!Directory.Exists(targetPath))
-            {
-                Directory.CreateDirectory(targetPath);
-            }
-
-            // Extract index.html
-            yield return ExtractAndroidFile("ui/index.html", indexPath);
-
-            // Create assets directory
-            if (!Directory.Exists(assetsDir))
-            {
-                Directory.CreateDirectory(assetsDir);
-            }
-
-            Debug.Log($"[WebServerManager] Extracting assets to: {assetsDir}");
-
-            // Extract Vite output files (using consistent naming without hashes)
-            yield return ExtractAndroidFile(
+            await ExtractAndroidFileAsync("ui/index.html", Path.Combine(targetPath, "index.html"));
+            await ExtractAndroidFileAsync(
                 "ui/assets/main.css",
                 Path.Combine(assetsDir, "main.css")
             );
-            yield return ExtractAndroidFile(
-                "ui/assets/main.js",
-                Path.Combine(assetsDir, "main.js")
-            );
-
-            // Extract logo files
-            yield return ExtractAndroidFile("ui/logo.svg", Path.Combine(targetPath, "logo.svg"));
-            yield return ExtractAndroidFile(
+            await ExtractAndroidFileAsync("ui/assets/main.js", Path.Combine(assetsDir, "main.js"));
+            await ExtractAndroidFileAsync("ui/logo.svg", Path.Combine(targetPath, "logo.svg"));
+            await ExtractAndroidFileAsync(
                 "ui/logo-dark.svg",
                 Path.Combine(targetPath, "logo-dark.svg")
             );
 
-            Debug.Log("[WebServerManager] UI extraction complete");
+            QueuedLogger.Log("UI extraction complete");
         }
 
-        /// <summary>
-        /// Extracts a single file from Android APK using UnityWebRequest.
-        /// Required because Android assets are compressed in APK.
-        /// </summary>
-        /// <param name="sourceRelative">Relative path in StreamingAssets</param>
-        /// <param name="targetAbsolute">Absolute destination path</param>
-        private IEnumerator ExtractAndroidFile(string sourceRelative, string targetAbsolute)
+        private async Task ExtractAndroidFileAsync(string sourceRelative, string targetAbsolute)
         {
             string sourcePath = Path.Combine(Application.streamingAssetsPath, sourceRelative);
 
-            using (
-                UnityEngine.Networking.UnityWebRequest www =
-                    UnityEngine.Networking.UnityWebRequest.Get(sourcePath)
-            )
+            using (var www = UnityEngine.Networking.UnityWebRequest.Get(sourcePath))
             {
-                yield return www.SendWebRequest();
+                var operation = www.SendWebRequest();
+                while (!operation.isDone)
+                    await Task.Yield();
 
                 if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
                 {
                     File.WriteAllBytes(targetAbsolute, www.downloadHandler.data);
-                    Debug.Log($"[WebServerManager] Extracted: {sourceRelative}");
+                    QueuedLogger.Log($"Extracted: {sourceRelative}");
                 }
                 else
                 {
-                    Debug.LogWarning(
-                        $"[WebServerManager] Failed to extract {sourceRelative}: {www.error}"
-                    );
+                    QueuedLogger.LogWarning($"Failed to extract {sourceRelative}: {www.error}");
                 }
             }
         }
+#endif
 
-        /// <summary>
-        /// Ensures static files directory exists and creates a fallback index.html if needed.
-        /// Used on non-Android platforms where StreamingAssets can be accessed directly.
-        /// Copies fallback HTML from StreamingAssets if the UI directory doesn't exist.
-        /// </summary>
-        /// <param name="path">Path to static files directory</param>
         private void EnsureStaticFilesExist(string path)
         {
-            if (!Directory.Exists(path))
+            if (Directory.Exists(path))
+                return;
+
+            Directory.CreateDirectory(path);
+
+            string fallbackSourcePath = Path.Combine(
+                Application.streamingAssetsPath,
+                "ui",
+                "fallback.html"
+            );
+            string fallbackTargetPath = Path.Combine(path, "index.html");
+
+            try
             {
-                Directory.CreateDirectory(path);
-
-                // Copy fallback HTML page from StreamingAssets
-                string fallbackSourcePath = Path.Combine(
-                    Application.streamingAssetsPath,
-                    "ui",
-                    "fallback.html"
-                );
-                string fallbackTargetPath = Path.Combine(path, "index.html");
-
-                try
+                if (File.Exists(fallbackSourcePath))
                 {
-                    if (File.Exists(fallbackSourcePath))
-                    {
-                        File.Copy(fallbackSourcePath, fallbackTargetPath);
-                        Debug.Log(
-                            $"[WebServerManager] Copied fallback HTML from {fallbackSourcePath}"
-                        );
-                    }
-                    else
-                    {
-                        Debug.LogWarning(
-                            $"[WebServerManager] Fallback HTML not found at {fallbackSourcePath}"
-                        );
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError(
-                        $"[WebServerManager] Failed to copy fallback HTML: {ex.Message}"
-                    );
+                    File.Copy(fallbackSourcePath, fallbackTargetPath);
+                    QueuedLogger.Log($"Copied fallback HTML from {fallbackSourcePath}");
                 }
             }
-        }
-
-        /// <summary>
-        /// Displays connection information in Unity console.
-        /// Shows server URL and configuration path for user reference.
-        /// </summary>
-        private void ShowConnectionInfo()
-        {
-            Debug.Log("╔═══════════════════════════════════════════════════════════╗");
-            Debug.Log("║          QuestNav Configuration Server                    ║");
-            Debug.Log("╠═══════════════════════════════════════════════════════════╣");
-            Debug.Log($"║ Port: {serverPort}");
-            Debug.Log($"║ Config Path: {store.GetConfigPath()}");
-            Debug.Log("╠═══════════════════════════════════════════════════════════╣");
-            Debug.Log($"║ Connect: http://<quest-ip>:{serverPort}/");
-            Debug.Log("╚═══════════════════════════════════════════════════════════╝");
+            catch (Exception ex)
+            {
+                QueuedLogger.LogError($"Failed to copy fallback HTML: {ex.Message}");
+            }
         }
         #endregion
 
-        #region Private Methods - Application Restart
-        /// <summary>
-        /// Restarts the application. Called from background thread via ConfigServer callback.
-        /// Sets flag that will be checked on main thread in Periodic().
-        /// </summary>
-        private void RestartApplication()
+        #region Utility Methods
+        private string GetLocalIPAddress()
         {
-            Debug.Log("[WebServerManager] Restart requested from web interface");
-            restartRequested = true;
+            try
+            {
+                using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
+                {
+                    socket.Connect("8.8.8.8", 65530);
+                    IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
+                    return endPoint?.Address.ToString() ?? "0.0.0.0";
+                }
+            }
+            catch
+            {
+                return "0.0.0.0";
+            }
         }
 
-        /// <summary>
-        /// Requests pose reset to origin. Called from background thread via ConfigServer callback.
-        /// Sets flag that will be checked on main thread in Periodic().
-        /// Uses volatile flag for thread-safe communication between background and main threads.
-        /// </summary>
-        private void RequestPoseReset()
+        private void ShowConnectionInfo()
         {
-            Debug.Log("[WebServerManager] Pose reset requested from web interface");
-            poseResetRequested = true;
+            QueuedLogger.Log(
+                $"Connect to WebUI at http://{GetLocalIPAddress()}:{QuestNavConstants.WebServer.SERVER_PORT}"
+            );
         }
 
-        /// <summary>
-        /// Restarts the application on Android/Quest by launching new instance then killing current process.
-        /// On editor, just quits the application.
-        /// </summary>
         private void RestartApp()
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
             try
             {
+                using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using (var activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+                using (var pm = activity.Call<AndroidJavaObject>("getPackageManager"))
                 using (
-                    AndroidJavaClass unityPlayer = new AndroidJavaClass(
-                        "com.unity3d.player.UnityPlayer"
-                    )
-                )
-                using (
-                    AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>(
-                        "currentActivity"
-                    )
-                )
-                using (AndroidJavaObject pm = activity.Call<AndroidJavaObject>("getPackageManager"))
-                using (
-                    AndroidJavaObject intent = pm.Call<AndroidJavaObject>(
+                    var intent = pm.Call<AndroidJavaObject>(
                         "getLaunchIntentForPackage",
                         Application.identifier
                     )
@@ -585,13 +470,10 @@ namespace QuestNav.WebServer
                     );
                     activity.Call("startActivity", intent);
 
-                    Debug.Log(
-                        "[WebServerManager] New instance started, killing current process..."
-                    );
+                    QueuedLogger.Log("New instance started, killing current process...");
                 }
 
-                // Kill current process immediately after starting new instance
-                using (AndroidJavaClass process = new AndroidJavaClass("android.os.Process"))
+                using (var process = new AndroidJavaClass("android.os.Process"))
                 {
                     int pid = process.CallStatic<int>("myPid");
                     process.CallStatic("killProcess", pid);
@@ -599,8 +481,7 @@ namespace QuestNav.WebServer
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[WebServerManager] Failed to restart: {ex.Message}");
-                // Fallback to normal quit
+                QueuedLogger.LogError($"Failed to restart: {ex.Message}");
                 Application.Quit();
             }
 #else

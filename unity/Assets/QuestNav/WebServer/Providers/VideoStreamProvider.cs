@@ -11,6 +11,9 @@ using UnityEngine;
 
 namespace QuestNav.WebServer
 {
+    /// <summary>
+    /// A JPEG-encoded video frame with frame number.
+    /// </summary>
     public struct EncodedFrame
     {
         /// <summary>
@@ -23,6 +26,11 @@ namespace QuestNav.WebServer
         /// </summary>
         public readonly byte[] frameData;
 
+        /// <summary>
+        /// Creates a new encoded frame.
+        /// </summary>
+        /// <param name="frameNumber">Unity frame count.</param>
+        /// <param name="frameData">JPEG encoded image data.</param>
         public EncodedFrame(int frameNumber, byte[] frameData)
         {
             this.frameNumber = frameNumber;
@@ -30,8 +38,14 @@ namespace QuestNav.WebServer
         }
     }
 
+    /// <summary>
+    /// Provides MJPEG video streaming over HTTP.
+    /// </summary>
     public class VideoStreamProvider
     {
+        /// <summary>
+        /// Interface for frame sources that provide encoded video frames.
+        /// </summary>
         public interface IFrameSource
         {
             /// <summary>
@@ -46,25 +60,64 @@ namespace QuestNav.WebServer
         }
 
         #region Fields
+
+        /// <summary>
+        /// MIME boundary string for multipart responses.
+        /// </summary>
         private const string Boundary = "frame";
+
+        /// <summary>
+        /// Initial buffer size for frame data.
+        /// </summary>
         private const int InitialBufferSize = 32 * 1024;
+
+        /// <summary>
+        /// UTF-8 encoding for header strings.
+        /// </summary>
         private static readonly Encoding DefaultEncoding = Encoding.UTF8;
+
+        /// <summary>
+        /// Pre-encoded header start bytes for MJPEG frames.
+        /// </summary>
         private static readonly byte[] HeaderStartBytes = DefaultEncoding.GetBytes(
             "\r\n--" + Boundary + "\r\n" + "Content-Type: image/jpeg\r\n" + "Content-Length: "
         );
+
+        /// <summary>
+        /// Pre-encoded header end bytes.
+        /// </summary>
         private static readonly byte[] HeaderEndBytes = DefaultEncoding.GetBytes("\r\n\r\n");
+
+        /// <summary>
+        /// Source providing encoded video frames.
+        /// </summary>
         private readonly IFrameSource frameSource;
+
+        /// <summary>
+        /// Count of currently connected streaming clients.
+        /// </summary>
         private int connectedClients;
 
         #endregion
 
         #region Properties
 
+        /// <summary>
+        /// Maximum framerate from the frame source, defaults to 15 fps.
+        /// </summary>
         private int MaxFrameRate => frameSource?.MaxFrameRate ?? 15;
+
+        /// <summary>
+        /// Delay between frames based on max framerate.
+        /// </summary>
         private TimeSpan FrameDelay => TimeSpan.FromSeconds(1.0f / MaxFrameRate);
 
         #endregion
 
+        /// <summary>
+        /// Creates a new video stream provider.
+        /// </summary>
+        /// <param name="frameSource">Source providing encoded frames.</param>
         public VideoStreamProvider(IFrameSource frameSource)
         {
             this.frameSource = frameSource;
@@ -73,8 +126,11 @@ namespace QuestNav.WebServer
 
         #region Public Methods
 
-        // Frame capture has been extracted to QuestNav.Camera.PassthroughCapture
-
+        /// <summary>
+        /// Handles an HTTP request by streaming MJPEG frames.
+        /// </summary>
+        /// <param name="context">The HTTP context to stream to.</param>
+        /// <returns>A task that completes when streaming ends.</returns>
         public async Task HandleStreamAsync(IHttpContext context)
         {
             if (frameSource is null)
@@ -133,6 +189,11 @@ namespace QuestNav.WebServer
             Debug.Log("[VideoStreamProvider] Done streaming");
         }
 
+        /// <summary>
+        /// Writes a single MJPEG frame to the stream.
+        /// </summary>
+        /// <param name="stream">Output stream.</param>
+        /// <param name="jpegData">JPEG encoded image data.</param>
         private static void WriteFrame(Stream stream, byte[] jpegData)
         {
             // Use Utf8Formatter to avoid memory allocations each frame for ToString() and GetBytes()

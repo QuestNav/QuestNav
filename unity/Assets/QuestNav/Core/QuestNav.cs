@@ -283,7 +283,7 @@ namespace QuestNav.Core
             {
                 QueuedLogger.LogException(e);
             }
-            
+
             networkTableConnection.Initialize();
 
             // Set Oculus display frequency

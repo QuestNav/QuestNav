@@ -40,6 +40,12 @@ DocFX documentation for the Unity C# components, including:
 
 This documentation covers the Unity application that runs on the Quest headset.
 
+### 🌐 Web API
+**[View Web API Documentation →](./1-web-api.md)**
+
+QuestNav provides a web-based user interface for controlling Quest devices.
+This documentation covers the API used by the web application that runs on the Quest headset.
+
 ## Documentation Generation
 
 All API documentation is automatically generated from source code:

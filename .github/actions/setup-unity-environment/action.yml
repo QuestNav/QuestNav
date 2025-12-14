@@ -39,15 +39,15 @@ runs:
         version: ${{ inputs.version }}
 
     - name: Install NuGetForUnity CLI
-      shell: pwsh
+      shell: powershell
       run: dotnet tool install --global NuGetForUnity.Cli
 
     - name: Install DocFX
-      shell: pwsh
+      shell: powershell
       run: dotnet tool install --global docfx
 
     - name: Restore NuGet Packages
-      shell: pwsh
+      shell: powershell
       run: nugetforunity restore ${{ inputs.unity-project-path }}/
 
     - name: Restore Generated Protobufs

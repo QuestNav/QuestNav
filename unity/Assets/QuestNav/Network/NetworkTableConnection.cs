@@ -50,7 +50,12 @@ namespace QuestNav.Network
         /// Caches the last known IP address to detect changes
         /// </summary>
         string IpAddress { get; }
-
+        
+        /// <summary>
+        /// Main periodic loop to run at the max rate. Flushes all queued updates immediately for maximum performance.
+        /// </summary>
+        void MainPeriodic();
+        
         /// <summary>
         /// Publishes frame data to NetworkTables.
         /// </summary>
@@ -103,7 +108,7 @@ namespace QuestNav.Network
         /// <summary>
         /// Performs periodic updates including connection polling and logging.
         /// </summary>
-        void Periodic();
+        void SlowPeriodic();
 
         /// <summary>
         /// Populates subscribed events with initial values
@@ -308,6 +313,7 @@ namespace QuestNav.Network
 
             // Standard mode: Use team number to resolve robot address
             QueuedLogger.Log($"Setting Team number to {teamNumber}");
+            ntInstance.SetAddresses(new (string addr, int port)[]{});
             ntInstance.SetTeamNumber(teamNumber, QuestNavConstants.Network.NT_SERVER_PORT);
             teamNumberSet = true;
             ipAddressSet = false;
@@ -492,9 +498,16 @@ namespace QuestNav.Network
         }
 
         /// <summary>
+        /// Main periodic loop to run at the max rate. Flushes all queued updates immediately for maximum performance.
+        /// </summary>
+        public void MainPeriodic()
+        {
+            ntInstance.Flush();
+        }
+        /// <summary>
         /// Performs periodic updates including connection polling and logging.
         /// </summary>
-        public void Periodic()
+        public void SlowPeriodic()
         {
             PollForNewIpAddress();
             PollForConnectionStatus();

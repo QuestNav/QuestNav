@@ -324,6 +324,9 @@ namespace QuestNav.Core
                 rotation,
                 currentlyTracking
             );
+            
+            // Immediately flush new data to NT
+            networkTableConnection.MainPeriodic();
 
             // Check for and execute any pending commands from the robot
             // Commands include pose resets, calibration requests, etc.
@@ -347,7 +350,7 @@ namespace QuestNav.Core
         private void SlowUpdate()
         {
             // Poll for connection status, logging, ip address changes, etc.
-            networkTableConnection.Periodic();
+            networkTableConnection.SlowPeriodic();
 
             // Update UI elements like connection status, IP address display, team number validation
             // UI updates don't need to be real-time, 3Hz provides smooth visual feedback

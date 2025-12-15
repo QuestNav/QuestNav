@@ -324,7 +324,7 @@ namespace QuestNav.Core
                 rotation,
                 currentlyTracking
             );
-            
+
             // Immediately flush new data to NT
             networkTableConnection.MainPeriodic();
 

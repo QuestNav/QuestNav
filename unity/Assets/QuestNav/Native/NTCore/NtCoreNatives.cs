@@ -409,7 +409,7 @@ namespace QuestNav.Native.NTCore
 
         [DllImport("ntcore")]
         public static extern long NT_Now();
-        
+
         [DllImport("ntcore")]
         public static extern void NT_Flush(uint inst);
     }

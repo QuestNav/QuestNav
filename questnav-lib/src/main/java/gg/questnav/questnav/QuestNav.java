@@ -139,7 +139,7 @@ public class QuestNav {
           .getProtobufTopic("response", commandResponseProto)
           .subscribe(
               Commands.ProtobufQuestNavCommandResponse.newInstance(),
-              PubSubOption.periodic(0.05),
+              PubSubOption.periodic(0.005),
               PubSubOption.sendAll(true),
               PubSubOption.pollStorage(20));
 
@@ -149,7 +149,7 @@ public class QuestNav {
           .getProtobufTopic("frameData", frameDataProto)
           .subscribe(
               Data.ProtobufQuestNavFrameData.newInstance(),
-              PubSubOption.periodic(0.01),
+              PubSubOption.periodic(0.005),
               PubSubOption.sendAll(true),
               PubSubOption.pollStorage(20));
 
@@ -157,11 +157,11 @@ public class QuestNav {
   private final ProtobufSubscriber<Data.ProtobufQuestNavDeviceData> deviceDataSubscriber =
       questNavTable
           .getProtobufTopic("deviceData", deviceDataProto)
-          .subscribe(Data.ProtobufQuestNavDeviceData.newInstance());
+          .subscribe(Data.ProtobufQuestNavDeviceData.newInstance(), PubSubOption.periodic(0.02));
 
   /** Publisher for command requests */
   private final ProtobufPublisher<Commands.ProtobufQuestNavCommand> requestPublisher =
-      questNavTable.getProtobufTopic("request", commandProto).publish();
+      questNavTable.getProtobufTopic("request", commandProto).publish(PubSubOption.periodic(0.005));
 
   /** Cached request to lessen GC pressure */
   private final Commands.ProtobufQuestNavCommand cachedCommandRequest =

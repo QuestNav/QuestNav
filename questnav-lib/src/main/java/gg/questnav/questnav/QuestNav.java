@@ -161,7 +161,7 @@ public class QuestNav {
 
   /** Publisher for command requests */
   private final ProtobufPublisher<Commands.ProtobufQuestNavCommand> requestPublisher =
-      questNavTable.getProtobufTopic("request", commandProto).publish(PubSubOption.periodic(0.005));
+      questNavTable.getProtobufTopic("request", commandProto).publish(PubSubOption.periodic(0.02));
 
   /** Cached request to lessen GC pressure */
   private final Commands.ProtobufQuestNavCommand cachedCommandRequest =
@@ -248,6 +248,7 @@ public class QuestNav {
             .setPoseResetPayload(cachedPoseResetPayload.clear().setTargetPose(cachedProtoPose));
 
     requestPublisher.set(requestToSend);
+    nt4Instance.flush();
   }
 
   /**

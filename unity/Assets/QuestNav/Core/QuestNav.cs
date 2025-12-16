@@ -324,10 +324,10 @@ namespace QuestNav.Core
                 rotation,
                 currentlyTracking
             );
-
-            // Immediately flush new data to NT
-            networkTableConnection.MainPeriodic();
-
+            
+            // Update position reset FIFO Queue
+            commandProcessor.PoseResetCommand.UpdatePoseHistory(networkTableConnection.NtNow);
+            
             // Check for and execute any pending commands from the robot
             // Commands include pose resets, calibration requests, etc.
             commandProcessor.ProcessCommands();

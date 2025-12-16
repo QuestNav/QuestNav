@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using QuestNav.Core;
+using QuestNav.Native.NTCore;
 using QuestNav.Protos.Generated;
 using QuestNav.Utils;
 using UnityEngine;
@@ -15,6 +18,8 @@ namespace QuestNav.Commands.Commands
         private readonly Transform vrCamera;
         private readonly Transform vrCameraRoot;
         private readonly Transform resetTransform;
+
+        private Queue<KeyValuePair<double, ProtobufPose3d>> poseHistoryQueue;
 
         /// <summary>
         /// Initializes a new instance of the PoseResetCommand
@@ -34,6 +39,7 @@ namespace QuestNav.Commands.Commands
             this.vrCamera = vrCamera;
             this.vrCameraRoot = vrCameraRoot;
             this.resetTransform = resetTransform;
+            poseHistoryQueue = new Queue<KeyValuePair<double, ProtobufPose3d>>(QuestNavConstants.Commands.MAX_POSE_HISTORY);
         }
 
         /// <summary>
@@ -131,7 +137,7 @@ namespace QuestNav.Commands.Commands
 
                 QueuedLogger.Log(
                     $"Pose reset applied: X={poseX}, Y={poseY}, Z={poseZ} Rotation X={targetCameraRotation.eulerAngles.x}, "
-                        + $"Y={targetCameraRotation.eulerAngles.y}, Z={targetCameraRotation.eulerAngles.z}"
+                    + $"Y={targetCameraRotation.eulerAngles.y}, Z={targetCameraRotation.eulerAngles.z}"
                 );
 
                 // Send success response via command context

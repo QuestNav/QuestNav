@@ -52,11 +52,6 @@ namespace QuestNav.Network
         string IpAddress { get; }
 
         /// <summary>
-        /// Main periodic loop to run at the max rate. Flushes all queued updates immediately for maximum performance.
-        /// </summary>
-        void MainPeriodic();
-
-        /// <summary>
         /// Publishes frame data to NetworkTables.
         /// </summary>
         /// <param name="frameCount">Current frame index</param>
@@ -388,6 +383,7 @@ namespace QuestNav.Network
 
             // Publish data
             frameDataPublisher.Set(frameData);
+            ntInstance.Flush();
         }
 
         /// <summary>
@@ -407,6 +403,7 @@ namespace QuestNav.Network
 
             // Publish data
             deviceDataPublisher.Set(deviceData);
+            // Don't flush here, it will be flushed anyways next frame when we call PublishFrameData
         }
 
         /// <summary>
@@ -495,14 +492,6 @@ namespace QuestNav.Network
             {
                 OnDisconnect?.Invoke();
             }
-        }
-
-        /// <summary>
-        /// Main periodic loop to run at the max rate. Flushes all queued updates immediately for maximum performance.
-        /// </summary>
-        public void MainPeriodic()
-        {
-            ntInstance.Flush();
         }
 
         /// <summary>

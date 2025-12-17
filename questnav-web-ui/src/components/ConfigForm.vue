@@ -1,21 +1,5 @@
 <template>
   <div class="config-form">
-    <!-- Restart Required Banner -->
-    <transition name="slide-down">
-      <div v-if="configStore.restartRequired" class="restart-banner">
-        <div class="restart-content">
-          <div class="restart-icon">⚠️</div>
-          <div class="restart-message">
-            <strong>Restart Required</strong>
-            <p>Some settings require an application restart to take effect.</p>
-          </div>
-          <button @click="handleRestart" class="restart-button">
-            Restart App
-          </button>
-        </div>
-      </div>
-    </transition>
-
     <!-- Loading State -->
     <div v-if="configStore.isLoading" class="loading-container">
       <div class="spinner"></div>
@@ -30,12 +14,12 @@
     </div>
 
     <!-- Configuration Form with Tabs -->
-    <div v-else-if="configStore.schema" class="config-content">
+    <div v-else-if="configStore.config" class="config-content">
       <!-- Tab Navigation -->
       <div class="tabs-container card">
         <div class="tabs-nav">
           <button
-            v-for="tab in allTabs"
+            v-for="tab in tabs"
             :key="tab"
             :class="['tab-button', { active: activeTab === tab }]"
             @click="activeTab = tab"
@@ -56,27 +40,141 @@
             <LogsView />
           </div>
           
-          <!-- Config Tabs -->
-          <div
-            v-for="category in configStore.categories"
-            :key="category"
-            v-show="activeTab === category"
-            class="tab-panel"
-          >
-            <div class="fields-grid">
+          <!-- Camera Tab -->
+          <div v-show="activeTab === 'Camera'" class="tab-panel">
+            <CameraView />
+          </div>
+          
+          <!-- Settings Tab -->
+          <div v-show="activeTab === 'Settings'" class="tab-panel">
+            <div class="settings-grid">
+              <!-- Team Number -->
               <ConfigField
-                v-for="field in configStore.fieldsByCategory[category]"
-                :key="field.path"
-                :field="field"
-                :value="configStore.values[field.path]"
-                :debugIPOverride="configStore.values['WebServerConstants/debugNTServerAddressOverride']"
-                @update="handleUpdate"
-              />
+                title="Team Number"
+                :field-class="{ 'field-override-active': isDebugIPActive }"
+                control-class="input-control"
+              >
+                <template #badge>
+                  <span v-if="isDebugIPActive" class="override-badge">OVERRIDDEN</span>
+                </template>
+                <template #description>
+                  <template v-if="isDebugIPActive">
+                    <strong>Enter a team number and click Apply to clear the IP override</strong>
+                  </template>
+                  <template v-else>
+                    FRC team number (1-25599)
+                  </template>
+                </template>
+                <input
+                  type="number"
+                  :value="pendingTeamNumber ?? configStore.config.teamNumber"
+                  @input="handleTeamNumberInput"
+                  @keyup.enter="submitTeamNumber"
+                  min="1"
+                  max="25599"
+                />
+                <button 
+                  v-if="hasTeamNumberChanged"
+                  @click="submitTeamNumber"
+                  class="submit-button"
+                >
+                  Apply
+                </button>
+              </ConfigField>
+
+              <!-- Debug IP Override -->
+              <ConfigField
+                title="Debug IP Override"
+                description="Override robot IP for testing (leave empty for team number)"
+                :field-class="{ 'field-warning': isDebugIPActive }"
+                control-class="input-control"
+              >
+                <template #badge>
+                  <span v-if="isDebugIPActive" class="debug-badge">DEBUG MODE</span>
+                </template>
+                <input
+                  type="text"
+                  :value="pendingDebugIP ?? configStore.config.debugIpOverride"
+                  @input="handleDebugIPInput"
+                  @keyup.enter="submitDebugIP"
+                  placeholder="e.g., 10.0.0.2"
+                />
+                <button 
+                  v-if="hasDebugIPChanged"
+                  @click="submitDebugIP"
+                  class="submit-button"
+                >
+                  Apply
+                </button>
+              </ConfigField>
+
+              <!-- Auto Start on Boot -->
+              <ConfigField
+                title="Auto Start on Boot"
+                description="Start QuestNav when headset boots"
+                control-class="checkbox-control"
+              >
+                <input
+                  type="checkbox"
+                  :checked="configStore.config.enableAutoStartOnBoot"
+                  @change="handleAutoStartChange"
+                />
+                <span class="checkbox-label">{{ configStore.config.enableAutoStartOnBoot ? 'Enabled' : 'Disabled' }}</span>
+              </ConfigField>
+
+              <!-- Debug Logging -->
+              <ConfigField
+                title="Debug Logging"
+                description="Enable verbose debug logging"
+                control-class="checkbox-control"
+              >
+                <input
+                  type="checkbox"
+                  :checked="configStore.config.enableDebugLogging"
+                  @change="handleDebugLoggingChange"
+                />
+                <span class="checkbox-label">{{ configStore.config.enableDebugLogging ? 'Enabled' : 'Disabled' }}</span>
+              </ConfigField>
+
+              <!-- Passthrough Stream -->
+              <ConfigField
+                title="Passthrough Camera Stream"
+                description="Stream headset camera over network"
+                control-class="checkbox-control"
+              >
+                <input
+                  type="checkbox"
+                  :checked="configStore.config.enablePassthroughStream"
+                  @change="handlePassthroughStreamChange"
+                />
+                <span class="checkbox-label">{{ configStore.config.enablePassthroughStream ? 'Enabled' : 'Disabled' }}</span>
+              </ConfigField>
+
+              <!-- Reset to Defaults -->
+              <ConfigField
+                title="Reset Configuration"
+                description="Reset all settings to defaults"
+                field-class="reset-field"
+              >
+                <button @click="handleReset" class="reset-button">Reset to Defaults</button>
+              </ConfigField>
+
+              <!-- Database Management -->
+              <ConfigField
+                title="Database Management"
+                description="Download or upload the configuration database"
+                field-class="database-field"
+                control-class="database-buttons"
+              >
+                <button @click="handleDownloadDatabase" class="database-button">Download Database</button>
+                <label class="database-button upload-label">
+                  Upload Database
+                  <input type="file" accept=".db" @change="handleUploadDatabase" hidden />
+                </label>
+              </ConfigField>
             </div>
 
-            <div v-if="category === 'Camera' && configStore.values['WebServerConstants/enablePassThrough'] === true" class="camera-stream">
-              <img :src="'./video'" />
-            </div>
+
           </div>
         </div>
       </div>
@@ -91,70 +189,125 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useConfigStore } from '../stores/config'
-import { useConnectionState } from '../composables/useConnectionState'
 import { configApi } from '../api/config'
-import ConfigField from './ConfigField.vue'
 import StatusView from './StatusView.vue'
 import LogsView from './LogsView.vue'
+import CameraView from './CameraView.vue'
+import ConfigField from './ConfigField.vue'
 
 const configStore = useConfigStore()
-const { isConnected } = useConnectionState()
 const activeTab = ref<string>('Status')
+const tabs = ['Status', 'Logs', 'Camera', 'Settings']
 let pollInterval: number | null = null
 
-// Add Status and Logs as first tabs
-const allTabs = computed(() => ['Status', 'Logs', ...configStore.categories])
+const pendingTeamNumber = ref<number | null>(null)
+const pendingDebugIP = ref<string | null>(null)
+
+const isDebugIPActive = computed(() => {
+  return configStore.config?.debugIpOverride && configStore.config.debugIpOverride.length > 0
+})
+
+const hasTeamNumberChanged = computed(() => {
+  return pendingTeamNumber.value !== null && pendingTeamNumber.value !== configStore.config?.teamNumber
+})
+
+const hasDebugIPChanged = computed(() => {
+  return pendingDebugIP.value !== null && pendingDebugIP.value !== configStore.config?.debugIpOverride
+})
 
 onMounted(async () => {
   await loadData()
   
-  // Poll config values every 3 seconds to sync with VR UI changes
-  // Only poll when connected
   pollInterval = setInterval(async () => {
-    if (isConnected.value) {
-      await configStore.loadConfig()
+    await configStore.loadConfig(false)
+    if (configStore.config) {
+      if (pendingTeamNumber.value === configStore.config.teamNumber) pendingTeamNumber.value = null
+      if (pendingDebugIP.value === configStore.config.debugIpOverride) pendingDebugIP.value = null
     }
   }, 3000) as unknown as number
 })
 
 onUnmounted(() => {
-  if (pollInterval !== null) {
-    clearInterval(pollInterval)
-  }
-})
-
-// Watch connection state and reload when reconnected
-watch(isConnected, async (connected, wasConnected) => {
-  if (connected && !wasConnected) {
-    console.log('[ConfigForm] Connection restored, reloading data')
-    await loadData()
-  }
+  if (pollInterval !== null) clearInterval(pollInterval)
 })
 
 async function loadData() {
-  await configStore.loadSchema()
   await configStore.loadConfig()
 }
 
-async function handleUpdate(path: string, value: any) {
-  await configStore.updateValue(path, value)
+function handleTeamNumberInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  const value = parseInt(target.value)
+  if (!isNaN(value)) pendingTeamNumber.value = value
 }
 
-async function handleRestart() {
-  if (!confirm('Are you sure you want to restart the QuestNav application? This will close the app and reopen it.')) {
+async function submitTeamNumber() {
+  if (pendingTeamNumber.value !== null) {
+    await configStore.updateTeamNumber(pendingTeamNumber.value)
+    pendingTeamNumber.value = null
+  }
+}
+
+function handleDebugIPInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  pendingDebugIP.value = target.value
+}
+
+async function submitDebugIP() {
+  if (pendingDebugIP.value !== null) {
+    await configStore.updateDebugIpOverride(pendingDebugIP.value)
+    pendingDebugIP.value = null
+  }
+}
+
+async function handleAutoStartChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  await configStore.updateEnableAutoStartOnBoot(target.checked)
+}
+
+async function handleDebugLoggingChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  await configStore.updateEnableDebugLogging(target.checked)
+}
+
+async function handlePassthroughStreamChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  await configStore.updateEnablePassthroughStream(target.checked)
+}
+
+async function handleReset() {
+  if (confirm('Reset all settings to defaults?')) {
+    await configStore.resetToDefaults()
+  }
+}
+
+async function handleDownloadDatabase() {
+  try {
+    await configApi.downloadDatabase()
+  } catch (error) {
+    alert('Failed to download database: ' + (error as Error).message)
+  }
+}
+
+async function handleUploadDatabase(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+  
+  if (!confirm('Upload this database? The app will need to restart to apply changes.')) {
+    target.value = ''
     return
   }
   
   try {
-    await configApi.restartApp()
-    configStore.clearRestartFlag()
-    // Show a message that restart is in progress
-    alert('Restart initiated. The app will close and reopen shortly.')
+    const result = await configApi.uploadDatabase(file)
+    alert(result.message)
   } catch (error) {
-    alert('Failed to restart application: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    alert('Failed to upload database: ' + (error as Error).message)
   }
+  target.value = ''
 }
 </script>
 
@@ -165,192 +318,45 @@ async function handleRestart() {
   margin: 0 auto;
 }
 
-/* Restart Banner Styles */
-.restart-banner {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  margin-bottom: 1.5rem;
-  background: rgba(255, 193, 7, 0.1);
-  border: 2px solid var(--warning-color);
-  border-left: 4px solid var(--warning-color);
-  border-radius: 6px;
-  animation: slideDown 0.4s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.4s ease;
-}
-
-.slide-down-enter-from {
-  opacity: 0;
-  transform: translateY(-20px);
-}
-
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-20px);
-}
-
-.restart-content {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 0.875rem 1rem;
-}
-
-.restart-icon {
-  font-size: 1.5rem;
-  flex-shrink: 0;
-}
-
-.restart-message {
-  flex: 1;
-  color: var(--text-primary);
-}
-
-.restart-message strong {
-  display: block;
-  font-size: 1rem; /* Base text: 16px */
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-
-.restart-message p {
-  margin: 0;
-  font-size: 0.875rem; /* Small text: 14px */
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.restart-button {
-  padding: 0.6rem 1.5rem;
-  background: var(--warning-color);
-  color: #000;
-  border: none;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 0.875rem; /* Small text: 14px */
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.restart-button:hover {
-  background: var(--amber-dark);
-}
-
-.restart-button:active {
-  transform: translateY(0);
-}
-
-
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   padding: 4rem 2rem;
   gap: 1.5rem;
 }
 
-.loading-container p {
-  color: var(--primary-color);
-  font-size: 1rem; /* Base body text: 16px */
-  font-weight: 500;
-}
-
-.error-container,
-.empty-container {
+.error-container, .empty-container {
   padding: 3rem 2rem;
   text-align: center;
 }
 
 .error-container h3 {
   color: var(--danger-color);
-  font-size: 1.5rem; /* Consistent h2 size: 24px */
   margin-bottom: 1rem;
-}
-
-.config-content {
-  display: flex;
-  flex-direction: column;
 }
 
 .tabs-container {
   padding: 0;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
 }
 
 .tabs-nav {
   display: flex;
-  gap: 0;
   background: var(--bg-tertiary);
   border-bottom: 2px solid var(--border-color);
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--primary-color) var(--bg-tertiary);
-}
-
-.tabs-nav::-webkit-scrollbar {
-  height: 4px;
-}
-
-.tabs-nav::-webkit-scrollbar-track {
-  background: var(--bg-tertiary);
-}
-
-.tabs-nav::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
-  border-radius: 2px;
 }
 
 .tab-button {
   flex: 1;
-  min-width: 120px;
   padding: 1rem 1.5rem;
-  background-color: transparent;
+  background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
   color: var(--text-secondary);
   font-weight: 600;
-  font-size: 1rem; /* Base text: 16px (increased from 14px) */
   cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  position: relative;
-  white-space: nowrap;
-}
-
-.tab-button::before {
-  content: '';
-  position: absolute;
-  bottom: -3px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--primary-color);
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
+  transition: all 0.2s;
 }
 
 .tab-button:hover {
@@ -361,106 +367,81 @@ async function handleRestart() {
 .tab-button.active {
   color: var(--text-primary);
   background: var(--card-bg);
-}
-
-.tab-button.active::before {
-  transform: scaleX(1);
-}
-
-.tab-count {
-  font-size: 0.75rem;
-  padding: 0.2rem 0.6rem;
-  background: var(--text-secondary);
-  border-radius: 12px;
-  color: white;
-  font-weight: 700;
-  min-width: 24px;
-  text-align: center;
-}
-
-.tab-button.active .tab-count {
-  background: var(--primary-color);
-  color: white;
+  border-bottom-color: var(--primary-color);
 }
 
 .tab-content {
   padding: 2rem;
-  min-height: 500px;
-  background: var(--card-bg);
+  min-height: 400px;
 }
 
-.tab-panel {
-  animation: fadeInSlide 0.3s ease;
-}
-
-@keyframes fadeInSlide {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fields-grid {
+.settings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
 }
 
-.camera-stream {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(0, 0, 0, 0.2) 100%);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+.debug-badge, .override-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 700;
 }
 
-@media (max-width: 1024px) {
-  .fields-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
+.debug-badge {
+  background: var(--danger-color);
+  color: white;
+}
+
+.override-badge {
+  background: var(--text-secondary);
+  color: white;
+}
+
+.submit-button {
+  padding: 0.75rem 1.25rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.checkbox-label {
+  font-weight: 500;
+}
+
+.reset-button {
+  padding: 0.75rem 1.5rem;
+  background: var(--danger-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.database-button {
+  padding: 0.75rem 1.5rem;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.database-button:hover {
+  background: var(--border-color);
+}
+
+.upload-label {
+  display: inline-block;
 }
 
 @media (max-width: 768px) {
-  .tabs-nav {
-    flex-direction: column;
-    border-bottom: none;
-    border-right: 2px solid var(--border-color);
-  }
-  
-  .tab-button {
-    border-bottom: none;
-    border-left: 3px solid transparent;
-    justify-content: flex-start;
-    padding-left: 2rem;
-  }
-  
-  .tab-button::before {
-    left: -2px;
-    right: auto;
-    width: 3px;
-    height: 100%;
-    bottom: 0;
-    transform: scaleY(0);
-  }
-  
-  .tab-button.active::before {
-    transform: scaleY(1);
-  }
-  
-  .tab-content {
-    padding: 1.5rem;
-  }
-  
-  .fields-grid {
+  .settings-grid {
     grid-template-columns: 1fr;
   }
 }

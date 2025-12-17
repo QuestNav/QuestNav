@@ -38,12 +38,12 @@
       <div
         v-for="(log, index) in filteredLogs"
         :key="index"
-        :class="['log-line', `log-${log.type.toLowerCase()}`]"
+        :class="['log-line', `log-${log.Type.toLowerCase()}`]"
       >
-        <span class="log-timestamp">{{ formatTime(log.timestamp) }}</span>
-        <span :class="['log-level', `level-${log.type.toLowerCase()}`]">{{ getLogPrefix(log.type) }}</span>
-        <span class="log-text">{{ log.message }}</span>
-        <pre v-if="log.stackTrace && log.type !== 'Log'" class="log-stacktrace">{{ log.stackTrace }}</pre>
+        <span class="log-timestamp">{{ formatTime(log.Timestamp) }}</span>
+        <span :class="['log-level', `level-${log.Type.toLowerCase()}`]">{{ getLogPrefix(log.Type) }}</span>
+        <span class="log-text">{{ log.Message }}</span>
+        <pre v-if="log.StackTrace && log.Type !== 'Log'" class="log-stacktrace">{{ log.StackTrace }}</pre>
       </div>
     </div>
   </div>
@@ -54,10 +54,10 @@ import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { configApi } from '../api/config'
 
 interface LogEntry {
-  message: string
-  stackTrace: string
-  type: string
-  timestamp: number
+  Message: string
+  StackTrace: string
+  Type: string
+  Timestamp: number
 }
 
 const logs = ref<LogEntry[]>([])
@@ -70,7 +70,7 @@ let intervalId: number | null = null
 
 const filteredLogs = computed(() => {
   if (filterLevel.value === 'all') return logs.value
-  return logs.value.filter(log => log.type === filterLevel.value)
+  return logs.value.filter(log => log.Type === filterLevel.value)
 })
 
 async function loadLogs() {
@@ -113,12 +113,13 @@ function exportLogs() {
   content += `${'='.repeat(80)}\n\n`
   
   filteredLogs.value.forEach((log, index) => {
-    const time = new Date(log.timestamp).toLocaleString()
-    content += `[${index + 1}] ${time} [${log.type}]\n`
-    content += `${log.message}\n`
+    const time = new Date(log.Timestamp).toLocaleString()
+    const logType = log.Type
+    content += `[${index + 1}] ${time} [${logType}]\n`
+    content += `${log.Message}\n`
     
-    if (log.stackTrace && log.type !== 'Log') {
-      content += `\nStack Trace:\n${log.stackTrace}\n`
+    if (log.StackTrace && logType !== 'Log') {
+      content += `\nStack Trace:\n${log.StackTrace}\n`
     }
     
     content += `${'-'.repeat(80)}\n\n`

@@ -7,8 +7,8 @@ plugins {
 
 // Version and build configuration
 ext {
-    version = project.findProperty('version') ?: '2025-1.0.0-dev'
-    versionType = project.findProperty('versionType') ?: 'dev'
+    version = project.findProperty('questnavVersion') ?: '2025-1.0.0-dev'
+    versionType = project.findProperty('releaseType') ?: 'dev'
     frcYear = project.findProperty('frcYear') ?: '2025'
     wpilibVersion = project.findProperty('wpilibVersion') ?: '2025.3.2'
 

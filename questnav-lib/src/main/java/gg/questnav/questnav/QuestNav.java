@@ -242,7 +242,7 @@ public class QuestNav {
     if (!questNavVersion.equals(libVersion)) {
       String warningMessage =
           String.format(
-              "WARNING FROM QUESTNAV: QuestNavLib version (%s) on your robot does not match QuestNav app version (%s) on your headset."
+              "WARNING FROM QUESTNAV: QuestNavLib version (%s) on your robot does not match QuestNav app version (%s) on your headset. "
                   + "This may cause compatibility issues. Check the version of your vendordep and the app running on your headset.",
               libVersion, questNavVersion);
 

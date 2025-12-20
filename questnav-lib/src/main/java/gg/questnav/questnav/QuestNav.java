@@ -20,6 +20,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.ProtobufPublisher;
 import edu.wpi.first.networktables.ProtobufSubscriber;
 import edu.wpi.first.networktables.PubSubOption;
+import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import gg.questnav.questnav.protos.generated.Commands;
@@ -112,6 +113,11 @@ import java.util.OptionalInt;
  */
 public class QuestNav {
 
+  /**
+   * Interval at which to check and log if the QuestNavLib version matches the QuestNav app version
+   */
+  private static final double VERSION_CHECK_INTERVAL_SECONDS = 5.0;
+
   /** NetworkTable instance used for communication */
   private final NetworkTableInstance nt4Instance = NetworkTableInstance.getDefault();
 
@@ -159,6 +165,10 @@ public class QuestNav {
           .getProtobufTopic("deviceData", deviceDataProto)
           .subscribe(Data.ProtobufQuestNavDeviceData.newInstance());
 
+  /** Subscriber for QuestNav app version */
+  private final StringSubscriber versionSubscriber =
+      questNavTable.getStringTopic("version").subscribe("unknown");
+
   /** Publisher for command requests */
   private final ProtobufPublisher<Commands.ProtobufQuestNavCommand> requestPublisher =
       questNavTable.getProtobufTopic("request", commandProto).publish();
@@ -176,6 +186,12 @@ public class QuestNav {
 
   /** Last sent request id */
   private int lastSentRequestId = 0; // Should be the same on the backend
+
+  /** True to check for QuestNavLib and QuestNav version match at an interval */
+  private boolean versionCheckEnabled = true;
+
+  /** The last time QuestNavLib and QuestNav were checked for a match */
+  private double lastVersionCheckTime = 0.0;
 
   /**
    * Creates a new QuestNav instance for communicating with a Quest headset.
@@ -195,6 +211,54 @@ public class QuestNav {
    * </ul>
    */
   public QuestNav() {}
+
+  /**
+   * Checks the version of QuestNavLib and compares it to the version of QuestNav on the headset. If
+   * the headset is connected and the versions don't match, a warning will be sent to the
+   * driverstation at an interval.
+   *
+   * @see #VERSION_CHECK_INTERVAL_SECONDS
+   * @see #getLibVersion()
+   * @see #getQuestNavVersion()
+   */
+  private void checkVersionMatch() {
+    if (!versionCheckEnabled || !isConnected()) {
+      // Check is disabled or no QuestNav is connected
+      return;
+    }
+
+    // Check that the interval has passed, so we don't flood the DS with warnings
+    var currentTime = Timer.getFPGATimestamp();
+    if ((currentTime - lastVersionCheckTime) < VERSION_CHECK_INTERVAL_SECONDS) {
+      return;
+    }
+    lastVersionCheckTime = currentTime;
+
+    // Retreive the version info
+    var libVersion = getLibVersion();
+    var questNavVersion = getQuestNavVersion();
+
+    // Check if the versions match
+    if (!questNavVersion.equals(libVersion)) {
+      String warningMessage =
+          String.format(
+              "WARNING FROM QUESTNAV: QuestNavLib version (%s) on your robot does not match QuestNav app version (%s) on your headset."
+                  + "This may cause compatibility issues. Check the version of your vendordep and the app running on your headset.",
+              libVersion, questNavVersion);
+
+      DriverStation.reportWarning(warningMessage, false);
+    }
+  }
+
+  /**
+   * Turns the version check on or off. When on, a warning will be reported to the DriverStation if
+   * the QuestNavLib and QuestNav app versions do not match.
+   *
+   * @param enabled true to enable version checking, false to disable it. Default is true.
+   */
+  public void setVersionCheckEnabled(boolean enabled) {
+    this.versionCheckEnabled = enabled;
+  }
 
   /**
    * Sets the field-relative pose of the Quest headset by commanding it to reset its tracking.
@@ -520,6 +584,7 @@ public class QuestNav {
    * @see edu.wpi.first.wpilibj.DriverStation#reportError(String, boolean)
    */
   public void commandPeriodic() {
+    checkVersionMatch();
     Commands.ProtobufQuestNavCommandResponse[] responses = responseSubscriber.readQueueValues();
 
     for (Commands.ProtobufQuestNavCommandResponse response : responses) {
@@ -527,5 +592,27 @@ public class QuestNav {
         DriverStation.reportError("QuestNav command failed!\n" + response.getErrorMessage(), false);
       }
     }
+  }
+
+  /**
+   * Retrieves the QuestNav-lib version number.
+   *
+   * @return The version number as a String, or "0-0.0.0" if unable to retrieve.
+   */
+  public String getLibVersion() {
+    var version = QuestNav.class.getPackage().getImplementationVersion();
+    if (version == null) {
+      return "0-0.0.0";
+    }
+    return version;
+  }
+
+  /**
+   * Retrieves the QuestNav app version running on the Quest headset.
+   *
+   * @return The version number as a String, or "unknown" if unable to retrieve.
+   */
+  public String getQuestNavVersion() {
+    return versionSubscriber.get();
   }
 }

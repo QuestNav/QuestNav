@@ -83,6 +83,11 @@ namespace QuestNav.Core
             /// Video streams topic
             /// </summary>
             public const string VIDEO_STREAMS = NT_BASE_PATH + "/streams";
+
+            /// <summary>
+            /// QuestNav version topic
+            /// </summary>
+            public const string VERSION = NT_BASE_PATH + "/version";
         }
 
         /// <summary>

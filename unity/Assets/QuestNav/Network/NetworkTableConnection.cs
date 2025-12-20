@@ -233,6 +233,14 @@ namespace QuestNav.Network
                 QuestNavConstants.Network.NtPublisherSettings
             );
 
+            // Publish the QuestNav application version
+            ntInstance
+                .GetStringEntry(
+                    QuestNavConstants.Topics.VERSION,
+                    new PubSubOptions { Periodic = 0.01 }
+                )
+                .Set(Application.version);
+
             /*
              * SUBSCRIBER SETUP - Quest receives data FROM robot
              * Robot can send commands like pose resets, calibration requests, etc.

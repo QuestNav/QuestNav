@@ -244,6 +244,16 @@ clean {
     delete "$buildDir/outputs"
 }
 
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': version,
+                'Build-Timestamp': new Date().format("yyyy-MM-dd HH:mm:ss")
+                )
+    }
+}
+
 spotless {
     java {
         target fileTree(".") {

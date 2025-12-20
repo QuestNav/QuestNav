@@ -12,6 +12,8 @@ ext {
     frcYear = project.findProperty('frcYear') ?: '2025'
     wpilibVersion = project.findProperty('wpilibVersion') ?: '2025.3.2'
 
+    project.version = version
+
     // Vendor dependency configuration
     vendorUuid = 'a706fe68-86e5-4aed-92c5-ce05aca007f0'
     mavenGroupId = 'gg.questnav'

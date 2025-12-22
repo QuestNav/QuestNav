@@ -14,6 +14,11 @@ namespace QuestNav.Commands
     public interface ICommandProcessor
     {
         /// <summary>
+        /// Command handler for pose reset operations
+        /// </summary>
+        public PoseResetCommand PoseResetCommand { get; }
+        
+        /// <summary>
         /// Processes commands received from the robot.
         /// </summary>
         void ProcessCommands();
@@ -32,7 +37,7 @@ namespace QuestNav.Commands
         /// <summary>
         /// Command handler for pose reset operations
         /// </summary>
-        private PoseResetCommand poseResetCommand;
+        public PoseResetCommand PoseResetCommand { get; private set; }
 
         /// <summary>
         /// Initializes a new command processor with required dependencies
@@ -55,7 +60,7 @@ namespace QuestNav.Commands
             var commandContext = new NetworkTablesCommandContext(networkTableConnection);
 
             // Initialize commands with NetworkTables context
-            poseResetCommand = new PoseResetCommand(
+            PoseResetCommand = new PoseResetCommand(
                 commandContext,
                 vrCamera,
                 vrCameraRoot,
@@ -111,7 +116,7 @@ namespace QuestNav.Commands
                                     $"Executing Pose Reset Command. ID: {receivedCommand.CommandId} "
                                         + $"Age: {ageMs} ms"
                                 );
-                                poseResetCommand.Execute(receivedCommand);
+                                PoseResetCommand.Execute(receivedCommand);
                             }
                             else
                             {

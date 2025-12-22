@@ -98,7 +98,12 @@ namespace QuestNav.Core
             /// <summary>
             /// Time to live for pose reset command (ms). Commands older than this will be ignored.
             /// </summary>
-            public const int POSE_RESET_TTL_MS = 50;
+            public const int POSE_RESET_TTL_MS = 75;
+            
+            /// <summary>
+            /// The max history to store for latency compensation pose queue. Shouldn't be larger than POSE_RESET_TTL_MS / 6.33ms 
+            /// </summary>
+            public const int MAX_POSE_HISTORY = 10;
         }
 
         /// <summary>

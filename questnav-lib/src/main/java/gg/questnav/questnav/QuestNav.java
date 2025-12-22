@@ -145,7 +145,7 @@ public class QuestNav {
           .getProtobufTopic("response", commandResponseProto)
           .subscribe(
               Commands.ProtobufQuestNavCommandResponse.newInstance(),
-              PubSubOption.periodic(0.05),
+              PubSubOption.periodic(0.005),
               PubSubOption.sendAll(true),
               PubSubOption.pollStorage(20));
 
@@ -155,7 +155,7 @@ public class QuestNav {
           .getProtobufTopic("frameData", frameDataProto)
           .subscribe(
               Data.ProtobufQuestNavFrameData.newInstance(),
-              PubSubOption.periodic(0.01),
+              PubSubOption.periodic(0.005),
               PubSubOption.sendAll(true),
               PubSubOption.pollStorage(20));
 
@@ -163,7 +163,7 @@ public class QuestNav {
   private final ProtobufSubscriber<Data.ProtobufQuestNavDeviceData> deviceDataSubscriber =
       questNavTable
           .getProtobufTopic("deviceData", deviceDataProto)
-          .subscribe(Data.ProtobufQuestNavDeviceData.newInstance());
+          .subscribe(Data.ProtobufQuestNavDeviceData.newInstance(), PubSubOption.periodic(0.02));
 
   /** Subscriber for QuestNav app version */
   private final StringSubscriber versionSubscriber =
@@ -312,6 +312,7 @@ public class QuestNav {
             .setPoseResetPayload(cachedPoseResetPayload.clear().setTargetPose(cachedProtoPose));
 
     requestPublisher.set(requestToSend);
+    nt4Instance.flush();
   }
 
   /**

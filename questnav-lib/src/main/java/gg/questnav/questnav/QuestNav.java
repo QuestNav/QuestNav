@@ -228,7 +228,7 @@ public class QuestNav {
     }
 
     // Check that the interval has passed, so we don't flood the DS with warnings
-    var currentTime = Timer.getFPGATimestamp();
+    var currentTime = Timer.getTimestamp();
     if ((currentTime - lastVersionCheckTime) < VERSION_CHECK_INTERVAL_SECONDS) {
       return;
     }

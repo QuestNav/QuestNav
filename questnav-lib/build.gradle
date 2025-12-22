@@ -7,12 +7,10 @@ plugins {
 
 // Version and build configuration
 ext {
-    version = project.findProperty('questnavVersion') ?: '2025-1.0.0-dev'
-    versionType = project.findProperty('releaseType') ?: 'dev'
+    version = project.findProperty('version') ?: '2025-1.0.0-dev'
+    versionType = project.findProperty('versionType') ?: 'dev'
     frcYear = project.findProperty('frcYear') ?: '2025'
     wpilibVersion = project.findProperty('wpilibVersion') ?: '2025.3.2'
-
-    project.version = version
 
     // Vendor dependency configuration
     vendorUuid = 'a706fe68-86e5-4aed-92c5-ce05aca007f0'
@@ -28,8 +26,9 @@ ext {
             (mavenRepository == null && (versionType in ['dev', 'snapshot', 'pr'] || version.contains('-SNAPSHOT')))
 }
 
-// Set the base name for all archives globally
-archivesBaseName = artifactId
+// Set the project version and base name for all archives globally
+version = ext.version
+archivesBaseName = ext.artifactId
 
 // Java configuration
 java {
@@ -217,7 +216,6 @@ task buildInfo {
 
     doLast {
         println "QuestNavLib Build Information:"
-        println "  Base Version: ${baseVersion}"
         println "  Release Type: ${versionType}"
         println "  Full Version: ${version}"
         println "  FRC Year: ${frcYear}"

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
+using LibJpegTurboUnity;
 using Meta.XR;
 using QuestNav.Config;
 using QuestNav.Core;
+using QuestNav.Native.AprilTag;
 using QuestNav.Network;
 using QuestNav.Utils;
 using QuestNav.WebServer;
@@ -190,7 +192,7 @@ namespace QuestNav.Camera
                     cameraSource.SelectedModeChanged += OnSelectedModeChanged;
                     // Arbitrarily pick the first, I guess?
                     // TODO: This should be stored in playerPrefs so that it doesn't reset
-                    cameraSource.Mode = cameraSource.Modes[3];
+                    cameraSource.Mode = cameraSource.Modes[76];
 
                     // Start initialization coroutine
                     frameCaptureCoroutine = coroutineHost.StartCoroutine(FrameCaptureCoroutine());
@@ -226,22 +228,59 @@ namespace QuestNav.Camera
         /// </summary>
         public IEnumerator FrameCaptureCoroutine()
         {
-            QueuedLogger.Log("Initialized");
+            // START DEBUG:
+            Debug.Log("Starting AprilTag");
+            Debug.Log("Creating detector");
+            AprilTagDetector aprilTagDetector = new AprilTagDetector();
+
+            Debug.Log("Creating family");
+            AprilTagFamily family = new Tag36h11();
+
+            Debug.Log("Adding family to detector");
+            aprilTagDetector.AddFamily(family);
+
+            Debug.Log("Initializing LJPGT");
+            var compressor = new LJTCompressor();
+            Debug.Log("Initialized");
 
             while (true)
             {
                 try
                 {
-                    var texture = cameraAccess.GetTexture();
-                    if (texture is not Texture2D texture2D)
-                    {
-                        QueuedLogger.LogError(
-                            $"GetTexture returned an incompatible object ({texture.GetType().Name})"
-                        );
-                        yield break;
-                    }
+                    // var texture = cameraAccess.GetTexture();
+                    // if (texture is not Texture2D texture2D)
+                    // {
+                    //     QueuedLogger.LogError(
+                    //         $"GetTexture returned an incompatible object ({texture.GetType().Name})"
+                    //     );
+                    //     yield break;
+                    // }
+                    // // rawJpeg = compressor.EncodeJPG(texture2D, 30);
+                    // CurrentFrame = new EncodedFrame(Time.frameCount, rawJpeg);
+                    // Debug.Log("Encoding frame to pjpeg");
+                    // pJpegImg = PJpeg.FromRawJpeg(rawJpeg);
+                    // // Debug.Log("Encoding frame to imgU8");
+                    // nativeImg = ImageU8.FromPjpeg(pJpegImg);
+                    var colors = cameraAccess.GetColors();
+                    var resolution = cameraAccess.CurrentResolution;
+                    using var nativeImg = ImageU8.FromPassthroughCamera(
+                        colors,
+                        resolution.x,
+                        resolution.y,
+                        flipVertically: true
+                    );
 
-                    CurrentFrame = new EncodedFrame(Time.frameCount, texture2D.EncodeToJPG());
+                    // Debug.Log("Passing frame into detector");
+                    var results = aprilTagDetector.Detect(nativeImg);
+                    // Debug.Log("Printing results");
+                    foreach (var result in results)
+                    {
+                        Debug.Log(result);
+                        // Debug.Log("Cleaning up detection");
+                        result.Dispose();
+                    }
+                    // Debug.Log("Cleaning up frames");
+                    // pJpegImg.Dispose();
                 }
                 catch (NullReferenceException ex)
                 {

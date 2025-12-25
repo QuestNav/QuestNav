@@ -1,0 +1,239 @@
+# Remove the line below if you want to inherit .editorconfig settings from higher directories
+root = true
+
+# All files
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+end_of_line = lf
+
+# C# files
+[*.cs]
+# CSharpier settings (note: max_line_length requires .csharpierrc for CSharpier)
+indent_style = space
+indent_size = 4
+tab_width = 4
+
+# Copyright header
+file_header_template = QUESTNAV\nhttps://github.com/QuestNav\nCopyright (C) 2024 QuestNav\nSPDX-License-Identifier: LGPL-3.0-or-later\n\nThis file is part of QuestNav.\n\nQuestNav is free software: you can redistribute it and/or modify\nit under the terms of the GNU Lesser General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nQuestNav is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the\nGNU Lesser General Public License for more details.\n\nYou should have received a copy of the GNU Lesser General Public License\nalong with QuestNav. If not, see https://www.gnu.org/licenses/.
+
+# C# code style settings
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_prefer_braces = true:warning
+
+# Modern C# preferences
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_style_prefer_method_group_conversion = true:silent
+csharp_style_prefer_top_level_statements = true:silent
+csharp_style_expression_bodied_methods = false:silent
+csharp_style_expression_bodied_constructors = false:silent
+csharp_style_expression_bodied_operators = false:silent
+csharp_style_expression_bodied_properties = true:silent
+csharp_style_expression_bodied_indexers = true:silent
+csharp_style_expression_bodied_accessors = true:silent
+
+#### Naming Conventions ####
+#### Rules are ordered by priority (higher number = evaluated first) ####
+
+# Constant fields (not private) - ALL_UPPER (Priority: 200)
+dotnet_naming_rule.public_constants_should_be_all_upper.severity = warning
+dotnet_naming_rule.public_constants_should_be_all_upper.symbols = public_constants
+dotnet_naming_rule.public_constants_should_be_all_upper.style = all_upper
+dotnet_naming_rule.public_constants_should_be_all_upper.priority = 200
+
+dotnet_naming_symbols.public_constants.applicable_kinds = field
+dotnet_naming_symbols.public_constants.applicable_accessibilities = public, internal, protected, protected_internal, private_protected
+dotnet_naming_symbols.public_constants.required_modifiers = const
+
+dotnet_naming_style.all_upper.capitalization = all_upper
+dotnet_naming_style.all_upper.word_separator = _
+
+# Constant fields (private) - ALL_UPPER (Priority: 200)
+dotnet_naming_rule.private_constants_should_be_all_upper.severity = warning
+dotnet_naming_rule.private_constants_should_be_all_upper.symbols = private_constants
+dotnet_naming_rule.private_constants_should_be_all_upper.style = all_upper
+dotnet_naming_rule.private_constants_should_be_all_upper.priority = 200
+
+dotnet_naming_symbols.private_constants.applicable_kinds = field
+dotnet_naming_symbols.private_constants.applicable_accessibilities = private
+dotnet_naming_symbols.private_constants.required_modifiers = const
+
+# Local constants - UpperCamelCase (Priority: 200)
+dotnet_naming_rule.local_constants_should_be_upper_camel_case.severity = warning
+dotnet_naming_rule.local_constants_should_be_upper_camel_case.symbols = local_constants
+dotnet_naming_rule.local_constants_should_be_upper_camel_case.style = upper_camel_case
+dotnet_naming_rule.local_constants_should_be_upper_camel_case.priority = 200
+
+dotnet_naming_symbols.local_constants.applicable_kinds = local
+dotnet_naming_symbols.local_constants.applicable_accessibilities = local
+dotnet_naming_symbols.local_constants.required_modifiers = const
+
+# Static readonly fields (not private) - lowerCamelCase (Priority: 150)
+dotnet_naming_rule.static_readonly_should_be_lower_camel_case.severity = warning
+dotnet_naming_rule.static_readonly_should_be_lower_camel_case.symbols = static_readonly
+dotnet_naming_rule.static_readonly_should_be_lower_camel_case.style = lower_camel_case
+dotnet_naming_rule.static_readonly_should_be_lower_camel_case.priority = 150
+
+dotnet_naming_symbols.static_readonly.applicable_kinds = field
+dotnet_naming_symbols.static_readonly.applicable_accessibilities = public, internal, protected, protected_internal, private_protected
+dotnet_naming_symbols.static_readonly.required_modifiers = static, readonly
+
+# Static readonly fields (private) - lowerCamelCase (Priority: 150)
+dotnet_naming_rule.static_readonly_private_should_be_lower_camel_case.severity = warning
+dotnet_naming_rule.static_readonly_private_should_be_lower_camel_case.symbols = static_readonly_private
+dotnet_naming_rule.static_readonly_private_should_be_lower_camel_case.style = lower_camel_case
+dotnet_naming_rule.static_readonly_private_should_be_lower_camel_case.priority = 150
+
+dotnet_naming_symbols.static_readonly_private.applicable_kinds = field
+dotnet_naming_symbols.static_readonly_private.applicable_accessibilities = private
+dotnet_naming_symbols.static_readonly_private.required_modifiers = static, readonly
+
+# Static fields (not private) - UpperCamelCase (Priority: 100)
+dotnet_naming_rule.static_fields_should_be_upper_camel_case.severity = warning
+dotnet_naming_rule.static_fields_should_be_upper_camel_case.symbols = static_fields
+dotnet_naming_rule.static_fields_should_be_upper_camel_case.style = upper_camel_case
+dotnet_naming_rule.static_fields_should_be_upper_camel_case.priority = 100
+
+dotnet_naming_symbols.static_fields.applicable_kinds = field
+dotnet_naming_symbols.static_fields.applicable_accessibilities = public, internal, protected, protected_internal, private_protected
+dotnet_naming_symbols.static_fields.required_modifiers = static
+
+# Static fields (private) - lowerCamelCase (Priority: 100)
+dotnet_naming_rule.static_private_fields_should_be_lower_camel_case.severity = warning
+dotnet_naming_rule.static_private_fields_should_be_lower_camel_case.symbols = static_private_fields
+dotnet_naming_rule.static_private_fields_should_be_lower_camel_case.style = lower_camel_case
+dotnet_naming_rule.static_private_fields_should_be_lower_camel_case.priority = 100
+
+dotnet_naming_symbols.static_private_fields.applicable_kinds = field
+dotnet_naming_symbols.static_private_fields.applicable_accessibilities = private
+dotnet_naming_symbols.static_private_fields.required_modifiers = static
+
+# Interfaces - IUpperCamelCase (Priority: 50)
+dotnet_naming_rule.interfaces_should_be_prefixed_with_i.severity = warning
+dotnet_naming_rule.interfaces_should_be_prefixed_with_i.symbols = interfaces
+dotnet_naming_rule.interfaces_should_be_prefixed_with_i.style = i_upper_camel_case
+dotnet_naming_rule.interfaces_should_be_prefixed_with_i.priority = 50
+
+dotnet_naming_symbols.interfaces.applicable_kinds = interface
+dotnet_naming_symbols.interfaces.applicable_accessibilities = public, internal, protected, protected_internal, private_protected, private
+
+dotnet_naming_style.i_upper_camel_case.capitalization = pascal_case
+dotnet_naming_style.i_upper_camel_case.required_prefix = I
+
+# Type parameters - TUpperCamelCase (Priority: 50)
+dotnet_naming_rule.type_parameters_should_be_prefixed_with_t.severity = warning
+dotnet_naming_rule.type_parameters_should_be_prefixed_with_t.symbols = type_parameters
+dotnet_naming_rule.type_parameters_should_be_prefixed_with_t.style = t_upper_camel_case
+dotnet_naming_rule.type_parameters_should_be_prefixed_with_t.priority = 50
+
+dotnet_naming_symbols.type_parameters.applicable_kinds = type_parameter
+dotnet_naming_symbols.type_parameters.applicable_accessibilities = *
+
+dotnet_naming_style.t_upper_camel_case.capitalization = pascal_case
+dotnet_naming_style.t_upper_camel_case.required_prefix = T
+
+# Types and namespaces - UpperCamelCase (Priority: 0)
+dotnet_naming_rule.types_should_be_upper_camel_case.severity = warning
+dotnet_naming_rule.types_should_be_upper_camel_case.symbols = types
+dotnet_naming_rule.types_should_be_upper_camel_case.style = upper_camel_case
+dotnet_naming_rule.types_should_be_upper_camel_case.priority = 0
+
+dotnet_naming_symbols.types.applicable_kinds = namespace, class, struct, enum, delegate
+dotnet_naming_symbols.types.applicable_accessibilities = *
+
+dotnet_naming_style.upper_camel_case.capitalization = pascal_case
+
+# Methods - UpperCamelCase (Priority: 0)
+dotnet_naming_rule.methods_should_be_upper_camel_case.severity = warning
+dotnet_naming_rule.methods_should_be_upper_camel_case.symbols = methods
+dotnet_naming_rule.methods_should_be_upper_camel_case.style = upper_camel_case
+dotnet_naming_rule.methods_should_be_upper_camel_case.priority = 0
+
+dotnet_naming_symbols.methods.applicable_kinds = method
+dotnet_naming_symbols.methods.applicable_accessibilities = *
+
+# Properties - UpperCamelCase (Priority: 0)
+dotnet_naming_rule.properties_should_be_upper_camel_case.severity = warning
+dotnet_naming_rule.properties_should_be_upper_camel_case.symbols = properties
+dotnet_naming_rule.properties_should_be_upper_camel_case.style = upper_camel_case
+dotnet_naming_rule.properties_should_be_upper_camel_case.priority = 0
+
+dotnet_naming_symbols.properties.applicable_kinds = property
+dotnet_naming_symbols.properties.applicable_accessibilities = *
+
+# Events - UpperCamelCase (Priority: 0)
+dotnet_naming_rule.events_should_be_upper_camel_case.severity = warning
+dotnet_naming_rule.events_should_be_upper_camel_case.symbols = events
+dotnet_naming_rule.events_should_be_upper_camel_case.style = upper_camel_case
+dotnet_naming_rule.events_should_be_upper_camel_case.priority = 0
+
+dotnet_naming_symbols.events.applicable_kinds = event
+dotnet_naming_symbols.events.applicable_accessibilities = *
+
+# Local functions - UpperCamelCase (Priority: 0)
+dotnet_naming_rule.local_functions_should_be_upper_camel_case.severity = warning
+dotnet_naming_rule.local_functions_should_be_upper_camel_case.symbols = local_functions
+dotnet_naming_rule.local_functions_should_be_upper_camel_case.style = upper_camel_case
+dotnet_naming_rule.local_functions_should_be_upper_camel_case.priority = 0
+
+dotnet_naming_symbols.local_functions.applicable_kinds = local_function
+dotnet_naming_symbols.local_functions.applicable_accessibilities = *
+
+# Instance fields (not private) - UpperCamelCase (Priority: 0)
+dotnet_naming_rule.public_fields_should_be_upper_camel_case.severity = warning
+dotnet_naming_rule.public_fields_should_be_upper_camel_case.symbols = public_fields
+dotnet_naming_rule.public_fields_should_be_upper_camel_case.style = upper_camel_case
+dotnet_naming_rule.public_fields_should_be_upper_camel_case.priority = 0
+
+dotnet_naming_symbols.public_fields.applicable_kinds = field
+dotnet_naming_symbols.public_fields.applicable_accessibilities = public, internal, protected, protected_internal, private_protected
+
+# Instance fields (private) - lowerCamelCase (Priority: 0)
+dotnet_naming_rule.private_fields_should_be_lower_camel_case.severity = warning
+dotnet_naming_rule.private_fields_should_be_lower_camel_case.symbols = private_fields
+dotnet_naming_rule.private_fields_should_be_lower_camel_case.style = lower_camel_case
+dotnet_naming_rule.private_fields_should_be_lower_camel_case.priority = 0
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.lower_camel_case.capitalization = camel_case
+
+# Local variables - lowerCamelCase (Priority: 0)
+dotnet_naming_rule.local_variables_should_be_lower_camel_case.severity = warning
+dotnet_naming_rule.local_variables_should_be_lower_camel_case.symbols = local_variables
+dotnet_naming_rule.local_variables_should_be_lower_camel_case.style = lower_camel_case
+dotnet_naming_rule.local_variables_should_be_lower_camel_case.priority = 0
+
+dotnet_naming_symbols.local_variables.applicable_kinds = local
+dotnet_naming_symbols.local_variables.applicable_accessibilities = local
+
+# Parameters - lowerCamelCase (Priority: 0)
+dotnet_naming_rule.parameters_should_be_lower_camel_case.severity = warning
+dotnet_naming_rule.parameters_should_be_lower_camel_case.symbols = parameters
+dotnet_naming_rule.parameters_should_be_lower_camel_case.style = lower_camel_case
+dotnet_naming_rule.parameters_should_be_lower_camel_case.priority = 0
+
+dotnet_naming_symbols.parameters.applicable_kinds = parameter
+dotnet_naming_symbols.parameters.applicable_accessibilities = *
+
+# JSON, XML, and other config files
+[*.{json,xml,yml,yaml}]
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+
+# Solution files
+[*.sln]
+indent_style = tab
+
+# Project files
+[*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
+indent_size = 2

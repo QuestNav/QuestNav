@@ -138,9 +138,25 @@ jobs:
 
   # ----------------------- DOCS ----------------------- #
   build-docs:
-    if: needs.detect-changes.outputs.docs-changed == 'true'
+    if: |
+      needs.detect-changes.outputs.docs-changed == 'true' &&
+      github.event_name == 'pull_request'
     needs: [detect-changes]
     uses: ./.github/workflows/reusable-docs-docs.yml
+
+  publish-docs:
+    if: |
+      needs.detect-changes.outputs.docs-changed == 'true' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
+    needs: [build-proto-java, build-proto-csharp, build-web-ui, detect-changes]
+    uses: ./.github/workflows/reusable-publish-docs.yml
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    with:
+      version: 'Development'
 
   # ----------------------- SUMMARY ----------------------- #
   ci-summary:

@@ -146,6 +146,10 @@ namespace QuestNav.Core
         [SerializeField]
         private PassthroughCameraAccess cameraAccess;
 
+        [Tooltip("QuestNav build version.")]
+        [SerializeField]
+        private TMP_Text versionText;
+
         /// <summary>
         /// Current battery percentage of the device
         /// </summary>
@@ -226,6 +230,8 @@ namespace QuestNav.Core
             QueuedLogger.Initialize();
             // Disable stack traces for Log-level logging
             Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+
+            versionText.text = Application.version;
 
             configManager = new ConfigManager();
 

@@ -5,6 +5,19 @@
         <button @click="toggleFullscreen" class="secondary">
           {{ isFullscreen ? '⬜ Exit Fullscreen' : '⛶ Fullscreen' }}
         </button>
+        <div class="control-container">
+          <label for="stream-mode">Mode:</label>
+          <select id="stream-mode" v-model="selectedStreamProfile">
+            <option v-for="option in streamOptions" :key="option.text" :value="option">
+              {{ option.text }}
+            </option>
+          </select>
+        </div>
+        <div class="control-container">
+          <label for="compression">Compression: {{ compressionLevel }}%</label>
+          <input type="range" id="compression" min="1" max="100" v-model="compressionLevel" />
+        </div>
+        <button @click="applyStreamSettings">Apply Stream Settings</button>
       </div>
       <div class="controls-right">
         <span :class="['stream-status', streamEnabled ? 'active' : 'inactive']">
@@ -21,7 +34,7 @@
     </div>
 
     <div v-else class="camera-container" ref="cameraContainer">
-      <img :src="'./video'" alt="Camera Stream" class="camera-stream" />
+      <img :src="streamUrl" alt="Camera Stream" class="camera-stream" />
     </div>
   </div>
 </template>
@@ -37,6 +50,98 @@ const isFullscreen = ref(false)
 const streamEnabled = computed(() => {
   return configStore.config?.enablePassthroughStream ?? false
 })
+
+const streamOptions = [
+  { text: '320x240 MJPEG 1 fps', resolution: '320x240', fps: 1 },
+  { text: '320x240 MJPEG 5 fps', resolution: '320x240', fps: 5 },
+  { text: '320x240 MJPEG 15 fps', resolution: '320x240', fps: 15 },
+  { text: '320x240 MJPEG 24 fps', resolution: '320x240', fps: 24 },
+  { text: '320x240 MJPEG 30 fps', resolution: '320x240', fps: 30 },
+  { text: '320x240 MJPEG 48 fps', resolution: '320x240', fps: 48 },
+  { text: '320x240 MJPEG 60 fps', resolution: '320x240', fps: 60 },
+  { text: '640x360 MJPEG 1 fps', resolution: '640x360', fps: 1 },
+  { text: '640x360 MJPEG 5 fps', resolution: '640x360', fps: 5 },
+  { text: '640x360 MJPEG 15 fps', resolution: '640x360', fps: 15 },
+  { text: '640x360 MJPEG 24 fps', resolution: '640x360', fps: 24 },
+  { text: '640x360 MJPEG 30 fps', resolution: '640x360', fps: 30 },
+  { text: '640x360 MJPEG 48 fps', resolution: '640x360', fps: 48 },
+  { text: '640x360 MJPEG 60 fps', resolution: '640x360', fps: 60 },
+  { text: '640x480 MJPEG 1 fps', resolution: '640x480', fps: 1 },
+  { text: '640x480 MJPEG 5 fps', resolution: '640x480', fps: 5 },
+  { text: '640x480 MJPEG 15 fps', resolution: '640x480', fps: 15 },
+  { text: '640x480 MJPEG 24 fps', resolution: '640x480', fps: 24 },
+  { text: '640x480 MJPEG 30 fps', resolution: '640x480', fps: 30 },
+  { text: '640x480 MJPEG 48 fps', resolution: '640x480', fps: 48 },
+  { text: '640x480 MJPEG 60 fps', resolution: '640x480', fps: 60 },
+  { text: '720x480 MJPEG 1 fps', resolution: '720x480', fps: 1 },
+  { text: '720x480 MJPEG 5 fps', resolution: '720x480', fps: 5 },
+  { text: '720x480 MJPEG 15 fps', resolution: '720x480', fps: 15 },
+  { text: '720x480 MJPEG 24 fps', resolution: '720x480', fps: 24 },
+  { text: '720x480 MJPEG 30 fps', resolution: '720x480', fps: 30 },
+  { text: '720x480 MJPEG 48 fps', resolution: '720x480', fps: 48 },
+  { text: '720x480 MJPEG 60 fps', resolution: '720x480', fps: 60 },
+  { text: '720x576 MJPEG 1 fps', resolution: '720x576', fps: 1 },
+  { text: '720x576 MJPEG 5 fps', resolution: '720x576', fps: 5 },
+  { text: '720x576 MJPEG 15 fps', resolution: '720x576', fps: 15 },
+  { text: '720x576 MJPEG 24 fps', resolution: '720x576', fps: 24 },
+  { text: '720x576 MJPEG 30 fps', resolution: '720x576', fps: 30 },
+  { text: '720x576 MJPEG 48 fps', resolution: '720x576', fps: 48 },
+  { text: '720x576 MJPEG 60 fps', resolution: '720x576', fps: 60 },
+  { text: '800x600 MJPEG 1 fps', resolution: '800x600', fps: 1 },
+  { text: '800x600 MJPEG 5 fps', resolution: '800x600', fps: 5 },
+  { text: '800x600 MJPEG 15 fps', resolution: '800x600', fps: 15 },
+  { text: '800x600 MJPEG 24 fps', resolution: '800x600', fps: 24 },
+  { text: '800x600 MJPEG 30 fps', resolution: '800x600', fps: 30 },
+  { text: '800x600 MJPEG 48 fps', resolution: '800x600', fps: 48 },
+  { text: '800x600 MJPEG 60 fps', resolution: '800x600', fps: 60 },
+  { text: '1024x576 MJPEG 1 fps', resolution: '1024x576', fps: 1 },
+  { text: '1024x576 MJPEG 5 fps', resolution: '1024x576', fps: 5 },
+  { text: '1024x576 MJPEG 15 fps', resolution: '1024x576', fps: 15 },
+  { text: '1024x576 MJPEG 24 fps', resolution: '1024x576', fps: 24 },
+  { text: '1024x576 MJPEG 30 fps', resolution: '1024x576', fps: 30 },
+  { text: '1024x576 MJPEG 48 fps', resolution: '1024x576', fps: 48 },
+  { text: '1024x576 MJPEG 60 fps', resolution: '1024x576', fps: 60 },
+  { text: '1280x720 MJPEG 1 fps', resolution: '1280x720', fps: 1 },
+  { text: '1280x720 MJPEG 5 fps', resolution: '1280x720', fps: 5 },
+  { text: '1280x720 MJPEG 15 fps', resolution: '1280x720', fps: 15 },
+  { text: '1280x720 MJPEG 24 fps', resolution: '1280x720', fps: 24 },
+  { text: '1280x720 MJPEG 30 fps', resolution: '1280x720', fps: 30 },
+  { text: '1280x720 MJPEG 48 fps', resolution: '1280x720', fps: 48 },
+  { text: '1280x720 MJPEG 60 fps', resolution: '1280x720', fps: 60 },
+  { text: '1280x960 MJPEG 1 fps', resolution: '1280x960', fps: 1 },
+  { text: '1280x960 MJPEG 5 fps', resolution: '1280x960', fps: 5 },
+  { text: '1280x960 MJPEG 15 fps', resolution: '1280x960', fps: 15 },
+  { text: '1280x960 MJPEG 24 fps', resolution: '1280x960', fps: 24 },
+  { text: '1280x960 MJPEG 30 fps', resolution: '1280x960', fps: 30 },
+  { text: '1280x960 MJPEG 48 fps', resolution: '1280x960', fps: 48 },
+  { text: '1280x960 MJPEG 60 fps', resolution: '1280x960', fps: 60 },
+  { text: '1280x1080 MJPEG 1 fps', resolution: '1280x1080', fps: 1 },
+  { text: '1280x1080 MJPEG 5 fps', resolution: '1280x1080', fps: 5 },
+  { text: '1280x1080 MJPEG 15 fps', resolution: '1280x1080', fps: 15 },
+  { text: '1280x1080 MJPEG 24 fps', resolution: '1280x1080', fps: 24 },
+  { text: '1280x1080 MJPEG 30 fps', resolution: '1280x1080', fps: 30 },
+  { text: '1280x1080 MJPEG 48 fps', resolution: '1280x1080', fps: 48 },
+  { text: '1280x1080 MJPEG 60 fps', resolution: '1280x1080', fps: 60 },
+  { text: '1280x1280 MJPEG 1 fps', resolution: '1280x1280', fps: 1 },
+  { text: '1280x1280 MJPEG 5 fps', resolution: '1280x1280', fps: 5 },
+  { text: '1280x1280 MJPEG 15 fps', resolution: '1280x1280', fps: 15 },
+  { text: '1280x1280 MJPEG 24 fps', resolution: '1280x1280', fps: 24 },
+  { text: '1280x1280 MJPEG 30 fps', resolution: '1280x1280', fps: 30 },
+  { text: '1280x1280 MJPEG 48 fps', resolution: '1280x1280', fps: 48 },
+  { text: '1280x1280 MJPEG 60 fps', resolution: '1280x1280', fps: 60 },
+]
+
+const selectedStreamProfile = ref(streamOptions[3])
+const compressionLevel = ref(75)
+const streamUrl = ref('./video')
+
+function applyStreamSettings() {
+  const params = new URLSearchParams()
+  params.append('resolution', selectedStreamProfile.value.resolution)
+  params.append('fps', selectedStreamProfile.value.fps.toString())
+  params.append('compression', compressionLevel.value.toString())
+  streamUrl.value = `./video?${params.toString()}`
+}
 
 function toggleFullscreen() {
   if (!cameraContainer.value) return
@@ -89,6 +194,12 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.control-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .stream-status {

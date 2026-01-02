@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Threading;
 using Meta.XR;
 using QuestNav.Config;
-using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Utils;
 using QuestNav.WebServer;
@@ -42,6 +42,11 @@ namespace QuestNav.Camera
         private readonly IConfigManager configManager;
 
         /// <summary>
+        /// Main thread synchronization context for marshalling Unity API calls.
+        /// </summary>
+        private readonly SynchronizationContext mainThreadContext;
+
+        /// <summary>
         /// Whether the frame source has been initialized.
         /// </summary>
         private bool isInitialized;
@@ -50,6 +55,11 @@ namespace QuestNav.Camera
         /// Cached base URL for stream endpoints.
         /// </summary>
         private string baseUrl;
+
+        /// <summary>
+        /// JPEG compression quality (1-100). Higher values mean better quality and larger files.
+        /// </summary>
+        private int compressionQuality = 75;
 
         /// <summary>
         /// Maximum desired framerate for capture/stream pacing
@@ -92,6 +102,102 @@ namespace QuestNav.Camera
         private Coroutine frameCaptureCoroutine;
 
         /// <summary>
+        /// Changes the video mode and compression quality based on requested parameters. The best matching mode that
+        /// meets or exceeds the requested parameters will be selected.
+        /// </summary>
+        /// <param name="width">Requested width, or null if not specified</param>
+        /// <param name="height">Requested height, or null if not specified</param>
+        /// <param name="fps">Requested FPS, or null if not specified</param>
+        /// <param name="compression">Requested compression quality (1-100), or null if not specified</param>
+        public void SetModeAndCompression(int? width, int? height, int? fps, int? compression)
+        {
+            // Apply compression if specified
+            if (compression.HasValue && compressionQuality != compression.Value)
+            {
+                compressionQuality = Math.Clamp(compression.Value, 1, 100);
+                QueuedLogger.Log(
+                    $"[PassthroughFrameSource] Switching compression quality: {compressionQuality}"
+                );
+            }
+
+            if (cameraSource?.Modes == null || cameraSource.Modes.Length == 0)
+            {
+                QueuedLogger.LogWarning("[PassthroughFrameSource] No video modes available");
+                return;
+            }
+
+            // If no mode parameters specified, keep current mode
+            if (!width.HasValue && !height.HasValue && !fps.HasValue)
+            {
+                return;
+            }
+
+            // Find the best matching mode
+            VideoMode? bestMatch = FindBestMatchingModeOrBetter(width, height, fps);
+
+            if (bestMatch.HasValue && !cameraSource.Mode.Equals(bestMatch.Value))
+            {
+                QueuedLogger.Log($"[PassthroughFrameSource] Switching to mode: {bestMatch.Value}");
+                cameraSource.Mode = bestMatch.Value;
+            }
+        }
+
+        /// <summary>
+        /// Finds the best matching video mode that meets or exceeds requested parameters.
+        /// Prefers modes that exactly match or minimally exceed the requested values.
+        /// </summary>
+        /// <param name="width">Minimum requested width, or null</param>
+        /// <param name="height">Minimum requested height, or null</param>
+        /// <param name="fps">Minimum requested FPS, or null</param>
+        /// <returns>Best matching mode that meets or exceeds requirements, or null if no suitable mode found</returns>
+        private VideoMode? FindBestMatchingModeOrBetter(int? width, int? height, int? fps)
+        {
+            VideoMode? exactMatch = null;
+            VideoMode? bestMatch = null;
+            int bestExcess = int.MaxValue; // Track how much we exceed the request
+
+            foreach (var mode in cameraSource.Modes)
+            {
+                bool widthTooSmall = width.HasValue && mode.Width < width.Value;
+                bool heightTooSmall = height.HasValue && mode.Height < height.Value;
+                bool fpsTooSmall = fps.HasValue && mode.Fps < fps.Value;
+                if (widthTooSmall || heightTooSmall || fpsTooSmall)
+                {
+                    // Skip modes that don't meet minimum requirements
+                    continue;
+                }
+
+                // Check for exact match
+                bool widthExact = !width.HasValue || mode.Width == width.Value;
+                bool heightExact = !height.HasValue || mode.Height == height.Value;
+                bool fpsExact = !fps.HasValue || mode.Fps == fps.Value;
+
+                if (widthExact && heightExact && fpsExact)
+                {
+                    exactMatch = mode;
+                    break;
+                }
+
+                // Calculate how much this mode exceeds the request
+                // Lower excess is better (closer to what was requested)
+                int widthExcess = width.HasValue ? mode.Width - width.Value : 0;
+                int heightExcess = height.HasValue ? mode.Height - height.Value : 0;
+                int fpsExcess = fps.HasValue ? mode.Fps - fps.Value : 0;
+
+                // Total excess score (pixel count difference + weighted (100X) FPS difference)
+                int totalExcess = (widthExcess * heightExcess) + (fpsExcess * 100);
+
+                if (totalExcess < bestExcess)
+                {
+                    bestExcess = totalExcess;
+                    bestMatch = mode;
+                }
+            }
+
+            return exactMatch ?? bestMatch;
+        }
+
+        /// <summary>
         /// Creates a new PassthroughFrameSource.
         /// </summary>
         /// <param name="coroutineHost">MonoBehaviour for coroutine execution</param>
@@ -110,6 +216,9 @@ namespace QuestNav.Camera
             this.cameraSource = cameraSource;
             this.configManager = configManager;
 
+            // Capture main thread context for marshalling Unity API calls
+            mainThreadContext = SynchronizationContext.Current;
+
             // Attach to ConfigManager callbacks
             configManager.OnEnablePassthroughStreamChanged += OnEnablePassthroughStreamChanged;
         }
@@ -120,10 +229,14 @@ namespace QuestNav.Camera
         /// <param name="mode">The new video mode.</param>
         private void OnSelectedModeChanged(VideoMode mode)
         {
-            cameraAccess.enabled = false;
-            cameraAccess.RequestedResolution = new Vector2Int(mode.Width, mode.Height);
-            cameraAccess.enabled = true;
-            QueuedLogger.Log($"Changed mode: {mode}");
+            // Callbacks likely run on background thread - marshal to main thread
+            InvokeOnMainThread(() =>
+            {
+                cameraAccess.enabled = false;
+                cameraAccess.RequestedResolution = new Vector2Int(mode.Width, mode.Height);
+                cameraAccess.enabled = true;
+                QueuedLogger.Log($"Changed mode: {mode}");
+            });
         }
 
         /// <summary>
@@ -241,7 +354,10 @@ namespace QuestNav.Camera
                         yield break;
                     }
 
-                    CurrentFrame = new EncodedFrame(Time.frameCount, texture2D.EncodeToJPG());
+                    CurrentFrame = new EncodedFrame(
+                        Time.frameCount,
+                        texture2D.EncodeToJPG(compressionQuality)
+                    );
                 }
                 catch (NullReferenceException ex)
                 {
@@ -253,6 +369,22 @@ namespace QuestNav.Camera
                 }
 
                 yield return new WaitForSeconds(FrameDelaySeconds);
+            }
+        }
+
+        /// <summary>
+        /// Invokes an action on the main thread using the captured SynchronizationContext.
+        /// Falls back to direct invocation if no context was captured.
+        /// </summary>
+        private void InvokeOnMainThread(Action action)
+        {
+            if (mainThreadContext == null)
+            {
+                action();
+            }
+            else
+            {
+                mainThreadContext.Post(_ => action(), null);
             }
         }
     }

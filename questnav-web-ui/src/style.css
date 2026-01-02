@@ -200,18 +200,18 @@ input[type="checkbox"] {
   appearance: none;
   border: 2px solid var(--border-color);
   border-radius: 4px;
-  background-color: var(--input-bg);
+  background-color: var(--primary-color);
   transition: all 0.2s ease;
   position: relative;
   flex-shrink: 0;
 }
 
-input[type="checkbox"]:hover {
-  border-color: var(--primary-color);
-}
-
 input[type="checkbox"]:checked {
   background-color: var(--primary-color);
+  border-color: var(--border-color);
+}
+
+input[type="checkbox"]:hover {
   border-color: var(--primary-color);
 }
 

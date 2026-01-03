@@ -4,7 +4,7 @@ namespace QuestNav.Core
 {
     /// <summary>
     /// Contains all constants used by the QuestNav application.
-    /// Organized by functional category for easier maintenance.
+    /// These are constants meant NOT to change by the user or during runtime.
     /// </summary>
     public static class QuestNavConstants
     {
@@ -16,7 +16,7 @@ namespace QuestNav.Core
             /// <summary>
             /// Default NetworkTables publisher/subscriber options
             /// </summary>
-            public static PubSubOptions NT_PUBLISHER_SETTINGS = PubSubOptions.AllDefault;
+            public static PubSubOptions NtPublisherSettings = PubSubOptions.AllDefault;
 
             /// <summary>
             /// NetworkTables server port
@@ -27,6 +27,21 @@ namespace QuestNav.Core
             /// Default team number when none is provided
             /// </summary>
             public const int DEFAULT_TEAM_NUMBER = 9999;
+
+            /// <summary>
+            /// Team number to be set when IP override is being used
+            /// </summary>
+            public const int TEAM_NUMBER_DISABLED = -1;
+
+            /// <summary>
+            /// Minimum team number allowed to be set
+            /// </summary>
+            public const int MIN_TEAM_NUMBER = 1;
+
+            /// <summary>
+            /// Maximum team number allowed to be set
+            /// </summary>
+            public const int MAX_TEAM_NUMBER = 25599;
         }
 
         /// <summary>
@@ -76,41 +91,6 @@ namespace QuestNav.Core
         public static class Commands
         {
             /// <summary>
-            /// Command code for no request/response
-            /// </summary>
-            public const int IDLE = 0;
-
-            /// <summary>
-            /// Command code for heading reset request
-            /// </summary>
-            public const int HEADING_RESET = 1;
-
-            /// <summary>
-            /// Command code for pose reset request
-            /// </summary>
-            public const int POSE_RESET = 2;
-
-            /// <summary>
-            /// Command code for ping request
-            /// </summary>
-            public const int PING = 3;
-
-            /// <summary>
-            /// Response code for ping
-            /// </summary>
-            public const int PING_RESPONSE = 97;
-
-            /// <summary>
-            /// Response code for successful pose reset
-            /// </summary>
-            public const int POSE_RESET_SUCCESS = 98;
-
-            /// <summary>
-            /// Response code for successful heading reset
-            /// </summary>
-            public const int HEADING_RESET_SUCCESS = 99;
-
-            /// <summary>
             /// Time to live for pose reset command (ms). Commands older than this will be ignored.
             /// </summary>
             public const int POSE_RESET_TTL_MS = 50;
@@ -141,21 +121,6 @@ namespace QuestNav.Core
             /// FRC field width in meters
             /// </summary>
             public const float FIELD_WIDTH = 8.02f;
-
-            /// <summary>
-            /// Maximum number of attempts to read pose data
-            /// </summary>
-            public const int MAX_POSE_READ_RETRIES = 3;
-
-            /// <summary>
-            /// Delay between retry attempts (ms)
-            /// </summary>
-            public const float POSE_RETRY_DELAY_MS = 50f;
-
-            /// <summary>
-            /// Position error threshold for warning (meters)
-            /// </summary>
-            public const float POSITION_ERROR_THRESHOLD = 0.01f; // 1cm
         }
 
         /// <summary>
@@ -166,7 +131,7 @@ namespace QuestNav.Core
             /// <summary>
             /// NetworkTables logging levels constants
             /// </summary>
-            public static class NTLogLevel
+            public static class NtLogLevel
             {
                 /// <summary>Critical level logging</summary>
                 internal const int CRITICAL = 50;
@@ -197,14 +162,24 @@ namespace QuestNav.Core
             }
 
             /// <summary>
-            /// The lowest level to log. Usually this is INFO, or DEBUG1
+            /// The lowest level to log when using DEBUG logging. Usually this is INFO, or DEBUG1
             /// </summary>
-            public const int NT_LOG_LEVEL_MIN = NTLogLevel.DEBUG1;
+            public const int NT_LOG_LEVEL_MIN_DEBUG = NtLogLevel.DEBUG1;
 
             /// <summary>
-            /// The lowest level to log. Almost ALWAYS this is CRITICAL.
+            /// The lowest level to log when using STANDARD logging. Usually this is WARNING
             /// </summary>
-            public const int NT_LOG_LEVEL_MAX = NTLogLevel.CRITICAL;
+            public const int NT_LOG_LEVEL_MIN_STANDARD = NtLogLevel.WARNING;
+
+            /// <summary>
+            /// The highest level to log. Almost ALWAYS this is CRITICAL.
+            /// </summary>
+            public const int NT_LOG_LEVEL_MAX = NtLogLevel.CRITICAL;
+
+            /// <summary>
+            /// Maximum number of logs to keep in memory
+            /// </summary>
+            public const int MAX_LOGS = 500;
         }
 
         /// <summary>
@@ -221,6 +196,22 @@ namespace QuestNav.Core
             /// The rate to run the "MainUpdate" loop at
             /// </summary>
             public const int MAIN_UPDATE_HZ = 120;
+        }
+
+        /// <summary>
+        /// Constants for the web server configuration
+        /// </summary>
+        public static class WebServer
+        {
+            /// <summary>
+            /// The port the web server listens on
+            /// </summary>
+            public const int SERVER_PORT = 5801;
+
+            /// <summary>
+            /// Whether to enable CORS headers for development mode
+            /// </summary>
+            public const bool ENABLE_CORS_DEV_MODE = true;
         }
 
         /// <summary>

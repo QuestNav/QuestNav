@@ -98,8 +98,10 @@ namespace QuestNav.Commands
                         {
                             // Get the age of the command, in milliseconds
                             var ageMs =
-                                (networkTableConnection.Now - receivedTimestampedCommand.LastChange)
-                                / 1000;
+                                (
+                                    networkTableConnection.NtNow
+                                    - receivedTimestampedCommand.LastChange
+                                ) / 1000;
 
                             // Check if the command is fresh
                             if (ageMs < POSE_RESET_TTL_MS)
@@ -128,7 +130,7 @@ namespace QuestNav.Commands
                     default:
                         QueuedLogger.Log(
                             $"Execute called with unknown command. ID: {receivedCommand.CommandId} Type: {receivedCommand.Type}",
-                            QueuedLogger.LogLevel.Warning
+                            QueuedLogger.LogLevel.WARNING
                         );
                         break;
                 }

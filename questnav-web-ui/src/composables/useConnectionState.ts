@@ -30,7 +30,7 @@ export function useConnectionState() {
 
   async function checkConnection(isManualRetry: boolean = false): Promise<boolean> {
     try {
-      await configApi.getSchema()
+      await configApi.getConfig()
       // Success - reset failure counter and delay
       consecutiveFailures.value = 0
       reconnectDelay.value = MIN_DELAY

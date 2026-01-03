@@ -49,9 +49,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useConfigStore } from '../stores/config'
 import type { StreamModeModel } from '../types'
+import { videoApi } from '../api/video'
 
 const configStore = useConfigStore()
 const cameraContainer = ref<HTMLElement | null>(null)
@@ -61,85 +62,7 @@ const streamEnabled = computed(() => {
   return configStore.config?.enablePassthroughStream ?? false
 })
 
-const streamOptions = [
-  { text: '320x240 MJPEG 1 fps', value: { width: 320, height: 240, framerate: 1 } },
-  { text: '320x240 MJPEG 5 fps', value: { width: 320, height: 240, framerate: 5 } },
-  { text: '320x240 MJPEG 15 fps', value: { width: 320, height: 240, framerate: 15 } },
-  { text: '320x240 MJPEG 24 fps', value: { width: 320, height: 240, framerate: 24 } },
-  { text: '320x240 MJPEG 30 fps', value: { width: 320, height: 240, framerate: 30 } },
-  { text: '320x240 MJPEG 48 fps', value: { width: 320, height: 240, framerate: 48 } },
-  { text: '320x240 MJPEG 60 fps', value: { width: 320, height: 240, framerate: 60 } },
-  { text: '640x360 MJPEG 1 fps', value: { width: 640, height: 360, framerate: 1 } },
-  { text: '640x360 MJPEG 5 fps', value: { width: 640, height: 360, framerate: 5 } },
-  { text: '640x360 MJPEG 15 fps', value: { width: 640, height: 360, framerate: 15 } },
-  { text: '640x360 MJPEG 24 fps', value: { width: 640, height: 360, framerate: 24 } },
-  { text: '640x360 MJPEG 30 fps', value: { width: 640, height: 360, framerate: 30 } },
-  { text: '640x360 MJPEG 48 fps', value: { width: 640, height: 360, framerate: 48 } },
-  { text: '640x360 MJPEG 60 fps', value: { width: 640, height: 360, framerate: 60 } },
-  { text: '640x480 MJPEG 1 fps', value: { width: 640, height: 480, framerate: 1 } },
-  { text: '640x480 MJPEG 5 fps', value: { width: 640, height: 480, framerate: 5 } },
-  { text: '640x480 MJPEG 15 fps', value: { width: 640, height: 480, framerate: 15 } },
-  { text: '640x480 MJPEG 24 fps', value: { width: 640, height: 480, framerate: 24 } },
-  { text: '640x480 MJPEG 30 fps', value: { width: 640, height: 480, framerate: 30 } },
-  { text: '640x480 MJPEG 48 fps', value: { width: 640, height: 480, framerate: 48 } },
-  { text: '640x480 MJPEG 60 fps', value: { width: 640, height: 480, framerate: 60 } },
-  { text: '720x480 MJPEG 1 fps', value: { width: 720, height: 480, framerate: 1 } },
-  { text: '720x480 MJPEG 5 fps', value: { width: 720, height: 480, framerate: 5 } },
-  { text: '720x480 MJPEG 15 fps', value: { width: 720, height: 480, framerate: 15 } },
-  { text: '720x480 MJPEG 24 fps', value: { width: 720, height: 480, framerate: 24 } },
-  { text: '720x480 MJPEG 30 fps', value: { width: 720, height: 480, framerate: 30 } },
-  { text: '720x480 MJPEG 48 fps', value: { width: 720, height: 480, framerate: 48 } },
-  { text: '720x480 MJPEG 60 fps', value: { width: 720, height: 480, framerate: 60 } },
-  { text: '720x576 MJPEG 1 fps', value: { width: 720, height: 576, framerate: 1 } },
-  { text: '720x576 MJPEG 5 fps', value: { width: 720, height: 576, framerate: 5 } },
-  { text: '720x576 MJPEG 15 fps', value: { width: 720, height: 576, framerate: 15 } },
-  { text: '720x576 MJPEG 24 fps', value: { width: 720, height: 576, framerate: 24 } },
-  { text: '720x576 MJPEG 30 fps', value: { width: 720, height: 576, framerate: 30 } },
-  { text: '720x576 MJPEG 48 fps', value: { width: 720, height: 576, framerate: 48 } },
-  { text: '720x576 MJPEG 60 fps', value: { width: 720, height: 576, framerate: 60 } },
-  { text: '800x600 MJPEG 1 fps', value: { width: 800, height: 600, framerate: 1 } },
-  { text: '800x600 MJPEG 5 fps', value: { width: 800, height: 600, framerate: 5 } },
-  { text: '800x600 MJPEG 15 fps', value: { width: 800, height: 600, framerate: 15 } },
-  { text: '800x600 MJPEG 24 fps', value: { width: 800, height: 600, framerate: 24 } },
-  { text: '800x600 MJPEG 30 fps', value: { width: 800, height: 600, framerate: 30 } },
-  { text: '800x600 MJPEG 48 fps', value: { width: 800, height: 600, framerate: 48 } },
-  { text: '800x600 MJPEG 60 fps', value: { width: 800, height: 600, framerate: 60 } },
-  { text: '1024x576 MJPEG 1 fps', value: { width: 1024, height: 576, framerate: 1 } },
-  { text: '1024x576 MJPEG 5 fps', value: { width: 1024, height: 576, framerate: 5 } },
-  { text: '1024x576 MJPEG 15 fps', value: { width: 1024, height: 576, framerate: 15 } },
-  { text: '1024x576 MJPEG 24 fps', value: { width: 1024, height: 576, framerate: 24 } },
-  { text: '1024x576 MJPEG 30 fps', value: { width: 1024, height: 576, framerate: 30 } },
-  { text: '1024x576 MJPEG 48 fps', value: { width: 1024, height: 576, framerate: 48 } },
-  { text: '1024x576 MJPEG 60 fps', value: { width: 1024, height: 576, framerate: 60 } },
-  { text: '1280x720 MJPEG 1 fps', value: { width: 1280, height: 720, framerate: 1 } },
-  { text: '1280x720 MJPEG 5 fps', value: { width: 1280, height: 720, framerate: 5 } },
-  { text: '1280x720 MJPEG 15 fps', value: { width: 1280, height: 720, framerate: 15 } },
-  { text: '1280x720 MJPEG 24 fps', value: { width: 1280, height: 720, framerate: 24 } },
-  { text: '1280x720 MJPEG 30 fps', value: { width: 1280, height: 720, framerate: 30 } },
-  { text: '1280x720 MJPEG 48 fps', value: { width: 1280, height: 720, framerate: 48 } },
-  { text: '1280x720 MJPEG 60 fps', value: { width: 1280, height: 720, framerate: 60 } },
-  { text: '1280x960 MJPEG 1 fps', value: { width: 1280, height: 960, framerate: 1 } },
-  { text: '1280x960 MJPEG 5 fps', value: { width: 1280, height: 960, framerate: 5 } },
-  { text: '1280x960 MJPEG 15 fps', value: { width: 1280, height: 960, framerate: 15 } },
-  { text: '1280x960 MJPEG 24 fps', value: { width: 1280, height: 960, framerate: 24 } },
-  { text: '1280x960 MJPEG 30 fps', value: { width: 1280, height: 960, framerate: 30 } },
-  { text: '1280x960 MJPEG 48 fps', value: { width: 1280, height: 960, framerate: 48 } },
-  { text: '1280x960 MJPEG 60 fps', value: { width: 1280, height: 960, framerate: 60 } },
-  { text: '1280x1080 MJPEG 1 fps', value: { width: 1280, height: 1080, framerate: 1 } },
-  { text: '1280x1080 MJPEG 5 fps', value: { width: 1280, height: 1080, framerate: 5 } },
-  { text: '1280x1080 MJPEG 15 fps', value: { width: 1280, height: 1080, framerate: 15 } },
-  { text: '1280x1080 MJPEG 24 fps', value: { width: 1280, height: 1080, framerate: 24 } },
-  { text: '1280x1080 MJPEG 30 fps', value: { width: 1280, height: 1080, framerate: 30 } },
-  { text: '1280x1080 MJPEG 48 fps', value: { width: 1280, height: 1080, framerate: 48 } },
-  { text: '1280x1080 MJPEG 60 fps', value: { width: 1280, height: 1080, framerate: 60 } },
-  { text: '1280x1280 MJPEG 1 fps', value: { width: 1280, height: 1280, framerate: 1 } },
-  { text: '1280x1280 MJPEG 5 fps', value: { width: 1280, height: 1280, framerate: 5 } },
-  { text: '1280x1280 MJPEG 15 fps', value: { width: 1280, height: 1280, framerate: 15 } },
-  { text: '1280x1280 MJPEG 24 fps', value: { width: 1280, height: 1280, framerate: 24 } },
-  { text: '1280x1280 MJPEG 30 fps', value: { width: 1280, height: 1280, framerate: 30 } },
-  { text: '1280x1280 MJPEG 48 fps', value: { width: 1280, height: 1280, framerate: 48 } },
-  { text: '1280x1280 MJPEG 60 fps', value: { width: 1280, height: 1280, framerate: 60 } },
-]
+const streamOptions = ref<{ text: string; value: StreamModeModel }[]>([])
 
 const selectedStreamMode = ref<StreamModeModel>({ width: 320, height: 240, framerate: 24 })
 const selectedStreamQuality = ref(75)
@@ -153,6 +76,40 @@ const activeStreamSettings = computed(() => {
   if (!mode) return ''
   return `${mode.width}x${mode.height}@${mode.framerate}fps Quality: ${quality}`
 })
+
+async function loadStreamModes() {
+  if (!streamEnabled.value) {
+    streamOptions.value = []
+    return
+  }
+
+  try {
+    const modes = await videoApi.getVideoModes()
+    streamOptions.value = modes.map(mode => ({
+      text: `${mode.width}x${mode.height} MJPEG ${mode.framerate} fps`,
+      value: mode,
+    }))
+
+    // Set the initial selected mode from the config
+    if (configStore.config?.streamMode) {
+      const matchingOption = streamOptions.value.find(
+        opt =>
+          opt.value.width === configStore.config!.streamMode.width &&
+          opt.value.height === configStore.config!.streamMode.height &&
+          opt.value.framerate === configStore.config!.streamMode.framerate
+      )
+      if (matchingOption) {
+        selectedStreamMode.value = matchingOption.value
+      } else {
+        // If the configured mode is not in the list, use it directly
+        selectedStreamMode.value = configStore.config.streamMode
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load stream modes:', error)
+    streamOptions.value = [] // Clear options on error
+  }
+}
 
 function applySettings() {
   configStore.updateStreamMode(selectedStreamMode.value)
@@ -176,20 +133,15 @@ function handleFullscreenChange() {
   isFullscreen.value = !!document.fullscreenElement
 }
 
-onMounted(() => {
-  if (configStore.config?.streamMode) {
-    const matchingOption = streamOptions.find(
-      opt =>
-        opt.value.width === configStore.config!.streamMode.width &&
-        opt.value.height === configStore.config!.streamMode.height &&
-        opt.value.framerate === configStore.config!.streamMode.framerate
-    )
-    if (matchingOption) {
-      selectedStreamMode.value = matchingOption.value
-    } else {
-      selectedStreamMode.value = configStore.config.streamMode
-    }
+watch(streamEnabled, (newValue, oldValue) => {
+  if (newValue && !oldValue) {
+    loadStreamModes()
   }
+})
+
+onMounted(() => {
+  loadStreamModes() // Load modes if stream is already enabled on mount
+
   if (configStore.config?.streamQuality) {
     selectedStreamQuality.value = configStore.config.streamQuality
   }

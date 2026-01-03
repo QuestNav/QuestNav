@@ -57,6 +57,12 @@ namespace QuestNav.WebServer
             EncodedFrame CurrentFrame { get; }
 
             /// <summary>
+            /// Gets the available video modes.
+            /// </summary>
+            /// <returns>Array of available video modes, or null if not initialized</returns>
+            Network.VideoMode[] GetAvailableModes();
+
+            /// <summary>
             /// Called when stream starts with requested video parameters from query string.
             /// </summary>
             /// <param name="width">Requested width, or null if not specified</param>
@@ -108,6 +114,11 @@ namespace QuestNav.WebServer
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Gets the frame source for accessing video properties.
+        /// </summary>
+        public IFrameSource FrameSource => frameSource;
 
         /// <summary>
         /// Maximum framerate from the frame source, defaults to 15 fps.

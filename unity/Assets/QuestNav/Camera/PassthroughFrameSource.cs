@@ -195,6 +195,15 @@ namespace QuestNav.Camera
         }
 
         /// <summary>
+        /// Gets the available video modes.
+        /// </summary>
+        /// <returns>Array of available video modes, or null if not initialized</returns>
+        public VideoMode[] GetAvailableModes()
+        {
+            return cameraSource?.Modes;
+        }
+
+        /// <summary>
         /// Finds the best matching video mode that meets or exceeds requested parameters.
         /// Prefers modes that exactly match or minimally exceed the requested values.
         /// </summary>

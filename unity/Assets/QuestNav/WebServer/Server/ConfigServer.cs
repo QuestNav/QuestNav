@@ -313,6 +313,10 @@ namespace QuestNav.WebServer.Server
                 {
                     await HandleResetPose(context);
                 }
+                else if (path == "/api/video-modes" && context.Request.HttpVerb == HttpVerbs.Get)
+                {
+                    await HandleGetVideoModes(context);
+                }
                 else
                 {
                     context.Response.StatusCode = 404;
@@ -596,6 +600,46 @@ namespace QuestNav.WebServer.Server
                 context,
                 new SimpleResponse { success = true, message = "Pose reset initiated" }
             );
+        }
+
+        private async Task HandleGetVideoModes(IHttpContext context)
+        {
+            if (streamProvider?.FrameSource is not Camera.PassthroughFrameSource passthroughSource)
+            {
+                context.Response.StatusCode = 503;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = false, message = "Passthrough stream not available" }
+                );
+                return;
+            }
+
+            var availableModes = passthroughSource.GetAvailableModes();
+            
+            if (availableModes == null || availableModes.Length == 0)
+            {
+                context.Response.StatusCode = 503;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = false, message = "Stream not initialized. Enable passthrough stream first." }
+                );
+                return;
+            }
+
+            // Convert VideoMode[] to StreamModeModel[]
+            var modeModels = new StreamModeModel[availableModes.Length];
+            for (int i = 0; i < availableModes.Length; i++)
+            {
+                modeModels[i] = new StreamModeModel
+                {
+                    width = availableModes[i].Width,
+                    height = availableModes[i].Height,
+                    framerate = availableModes[i].Fps
+                };
+            }
+
+            // Return just the array with 200 OK
+            await SendJsonResponse(context, modeModels);
         }
     }
 }

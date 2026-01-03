@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using QuestNav.Core;
 using QuestNav.Utils;
 using SQLite;
@@ -214,7 +213,13 @@ namespace QuestNav.Config
             await SetTeamNumberAsync(networkDefaults.TeamNumber);
             await SetEnableAutoStartOnBootAsync(systemDefaults.EnableAutoStartOnBoot);
             await SetEnablePassthroughStreamAsync(cameraDefaults.EnablePassthroughStream);
-            await SetStreamModeAsync(new StreamMode(cameraDefaults.StreamWidth, cameraDefaults.StreamHeight, cameraDefaults.StreamFramerate));
+            await SetStreamModeAsync(
+                new StreamMode(
+                    cameraDefaults.StreamWidth,
+                    cameraDefaults.StreamHeight,
+                    cameraDefaults.StreamFramerate
+                )
+            );
             await SetStreamQualityAsync(cameraDefaults.StreamQuality);
             await SetEnableDebugLoggingAsync(loggingDefaults.EnableDebugLogging);
 

@@ -351,7 +351,7 @@ namespace QuestNav.WebServer.Server
                 {
                     width = streamMode.Width,
                     height = streamMode.Height,
-                    framerate = streamMode.Framerate
+                    framerate = streamMode.Framerate,
                 },
                 streamQuality = await configManager.GetStreamQualityAsync(),
                 enableDebugLogging = await configManager.GetEnableDebugLoggingAsync(),
@@ -609,19 +609,27 @@ namespace QuestNav.WebServer.Server
                 context.Response.StatusCode = 503;
                 await SendJsonResponse(
                     context,
-                    new SimpleResponse { success = false, message = "Passthrough stream not available" }
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = "Passthrough stream not available",
+                    }
                 );
                 return;
             }
 
             var availableModes = passthroughSource.GetAvailableModes();
-            
+
             if (availableModes == null || availableModes.Length == 0)
             {
                 context.Response.StatusCode = 503;
                 await SendJsonResponse(
                     context,
-                    new SimpleResponse { success = false, message = "Stream not initialized. Enable passthrough stream first." }
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = "Stream not initialized. Enable passthrough stream first.",
+                    }
                 );
                 return;
             }
@@ -634,7 +642,7 @@ namespace QuestNav.WebServer.Server
                 {
                     width = availableModes[i].Width,
                     height = availableModes[i].Height,
-                    framerate = availableModes[i].Fps
+                    framerate = availableModes[i].Fps,
                 };
             }
 

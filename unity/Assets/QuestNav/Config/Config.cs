@@ -4,6 +4,48 @@ using UnityEngine.Scripting;
 
 namespace QuestNav.Config
 {
+    /// <summary>
+    /// Represents a video stream mode configuration with resolution and framerate.
+    /// </summary>
+    public struct StreamMode
+    {
+        /// <summary>
+        /// The image width in pixels.
+        /// </summary>
+        public int Width { get; set; }
+
+        /// <summary>
+        /// The image height in pixels.
+        /// </summary>
+        public int Height { get; set; }
+
+        /// <summary>
+        /// The stream's frames per second.
+        /// </summary>
+        public int Framerate { get; set; }
+
+        /// <summary>
+        /// Create a new stream mode.
+        /// </summary>
+        /// <param name="width">The image width in pixels.</param>
+        /// <param name="height">The image height in pixels.</param>
+        /// <param name="framerate">The stream's frames per second.</param>
+        public StreamMode(int width, int height, int framerate)
+        {
+            Width = width;
+            Height = height;
+            Framerate = framerate;
+        }
+
+        /// <summary>
+        /// Provide string description of stream mode.
+        /// </summary>
+        public override string ToString()
+        {
+            return $"{Width}x{Height} {Framerate} fps";
+        }
+    }
+
     public class Config
     {
         public class Network
@@ -55,6 +97,26 @@ namespace QuestNav.Config
             /// Whether the passthrough camera should be streamed over NT and WebUI
             /// </summary>
             public bool EnablePassthroughStream { get; set; } = false;
+
+            /// <summary>
+            /// The width of the stream in pixels
+            /// </summary>
+            public int StreamWidth { get; set; } = 320;
+
+            /// <summary>
+            /// The height of the stream in pixels
+            /// </summary>
+            public int StreamHeight { get; set; } = 240;
+
+            /// <summary>
+            /// The framerate of the stream in frames per second
+            /// </summary>
+            public int StreamFramerate { get; set; } = 24;
+
+            /// <summary>
+            /// JPEG compression quality (1-100). Higher values mean better quality and larger files.
+            /// </summary>
+            public int StreamQuality { get; set; } = 75;
         }
 
         public class Logging

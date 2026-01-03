@@ -335,6 +335,7 @@ namespace QuestNav.WebServer.Server
 
         private async Task HandleGetConfig(IHttpContext context)
         {
+            var streamMode = await configManager.GetStreamModeAsync();
             var response = new ConfigResponse
             {
                 success = true,
@@ -342,6 +343,13 @@ namespace QuestNav.WebServer.Server
                 debugIpOverride = await configManager.GetDebugIpOverrideAsync(),
                 enableAutoStartOnBoot = await configManager.GetEnableAutoStartOnBootAsync(),
                 enablePassthroughStream = await configManager.GetEnablePassthroughStreamAsync(),
+                streamMode = new StreamModeModel
+                {
+                    width = streamMode.Width,
+                    height = streamMode.Height,
+                    framerate = streamMode.Framerate
+                },
+                streamQuality = await configManager.GetStreamQualityAsync(),
                 enableDebugLogging = await configManager.GetEnableDebugLoggingAsync(),
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             };
@@ -384,6 +392,20 @@ namespace QuestNav.WebServer.Server
                     await configManager.SetEnablePassthroughStreamAsync(
                         request.EnablePassthroughStream.Value
                     );
+                }
+                if (request.StreamMode != null)
+                {
+                    await configManager.SetStreamModeAsync(
+                        new Config.StreamMode(
+                            request.StreamMode.width,
+                            request.StreamMode.height,
+                            request.StreamMode.framerate
+                        )
+                    );
+                }
+                if (request.StreamQuality.HasValue)
+                {
+                    await configManager.SetStreamQualityAsync(request.StreamQuality.Value);
                 }
                 if (request.EnableDebugLogging.HasValue)
                 {

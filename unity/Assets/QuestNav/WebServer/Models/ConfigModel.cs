@@ -4,6 +4,17 @@ using System.Collections.Generic;
 namespace QuestNav.WebServer
 {
     /// <summary>
+    /// Stream mode configuration for web API
+    /// </summary>
+    [Serializable]
+    public class StreamModeModel
+    {
+        public int width;
+        public int height;
+        public int framerate;
+    }
+
+    /// <summary>
     /// Current configuration values response
     /// </summary>
     [Serializable]
@@ -14,6 +25,8 @@ namespace QuestNav.WebServer
         public string debugIpOverride;
         public bool enableAutoStartOnBoot;
         public bool enablePassthroughStream;
+        public StreamModeModel streamMode;
+        public int streamQuality;
         public bool enableDebugLogging;
         public long timestamp;
     }
@@ -28,6 +41,8 @@ namespace QuestNav.WebServer
         public string debugIpOverride;
         public bool? EnableAutoStartOnBoot;
         public bool? EnablePassthroughStream;
+        public StreamModeModel StreamMode;
+        public int? StreamQuality;
         public bool? EnableDebugLogging;
     }
 

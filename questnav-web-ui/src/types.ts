@@ -1,5 +1,11 @@
 // Type definitions for configuration system
 
+export interface StreamModeModel {
+  width: number
+  height: number
+  framerate: number
+}
+
 export interface ConfigResponse {
   success: boolean
   teamNumber: number
@@ -7,6 +13,8 @@ export interface ConfigResponse {
   enableAutoStartOnBoot: boolean
   enablePassthroughStream: boolean
   enableDebugLogging: boolean
+  streamMode: StreamModeModel
+  streamQuality: number
   timestamp: number
 }
 
@@ -16,6 +24,8 @@ export interface ConfigUpdateRequest {
   enableAutoStartOnBoot?: boolean
   enablePassthroughStream?: boolean
   enableDebugLogging?: boolean
+  streamMode?: StreamModeModel
+  streamQuality?: number
 }
 
 export interface SimpleResponse {

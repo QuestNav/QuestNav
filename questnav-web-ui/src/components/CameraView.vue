@@ -1,29 +1,38 @@
 <template>
   <div class="camera-view">
     <div class="camera-controls">
-      <div class="controls-left">
-        <button @click="toggleFullscreen" class="secondary">
-          {{ isFullscreen ? '⬜ Exit Fullscreen' : '⛶ Fullscreen' }}
-        </button>
-        <div class="control-container">
-          <label for="stream-mode">Mode:</label>
-          <select id="stream-mode" v-model="selectedStreamProfile">
-            <option v-for="option in streamOptions" :key="option.text" :value="option">
-              {{ option.text }}
-            </option>
-          </select>
+      <div class="controls-row">
+        <div class="controls-left">
+          <button @click="toggleFullscreen" class="secondary">
+            {{ isFullscreen ? '⬜ Exit Fullscreen' : '⛶ Fullscreen' }}
+          </button>
         </div>
-        <div class="control-container">
-          <label for="compression">Compression: {{ compressionLevel }}%</label>
-          <input type="range" id="compression" min="1" max="100" v-model="compressionLevel" />
+        <div class="controls-right">
+          <span :class="['stream-status', streamEnabled ? 'active' : 'inactive']">
+            <span class="status-dot"></span>
+            {{ streamEnabled ? 'Stream Active' : 'Stream Disabled' }}
+          </span>
         </div>
-        <button @click="applyStreamSettings">Apply Stream Settings</button>
       </div>
-      <div class="controls-right">
-        <span :class="['stream-status', streamEnabled ? 'active' : 'inactive']">
-          <span class="status-dot"></span>
-          {{ streamEnabled ? 'Stream Active' : 'Stream Disabled' }}
-        </span>
+      <div class="controls-row">
+        <div class="controls-left">
+          <div class="control-container">
+            <label for="stream-mode">Mode:</label>
+            <select id="stream-mode" v-model="selectedStreamMode">
+              <option v-for="option in streamOptions" :key="option.text" :value="option.value">
+                {{ option.text }}
+              </option>
+            </select>
+          </div>
+          <div class="control-container">
+            <label for="compression">Quality: {{ selectedStreamQuality }}</label>
+            <input type="range" id="compression" min="1" max="100" v-model="selectedStreamQuality" />
+          </div>
+          <button @click="applySettings">Apply</button>
+        </div>
+        <div class="controls-right">
+          <span v-if="streamEnabled" class="active-stream-settings">{{ activeStreamSettings }}</span>
+        </div>
       </div>
     </div>
 
@@ -42,6 +51,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useConfigStore } from '../stores/config'
+import type { StreamModeModel } from '../types'
 
 const configStore = useConfigStore()
 const cameraContainer = ref<HTMLElement | null>(null)
@@ -52,95 +62,102 @@ const streamEnabled = computed(() => {
 })
 
 const streamOptions = [
-  { text: '320x240 MJPEG 1 fps', resolution: '320x240', fps: 1 },
-  { text: '320x240 MJPEG 5 fps', resolution: '320x240', fps: 5 },
-  { text: '320x240 MJPEG 15 fps', resolution: '320x240', fps: 15 },
-  { text: '320x240 MJPEG 24 fps', resolution: '320x240', fps: 24 },
-  { text: '320x240 MJPEG 30 fps', resolution: '320x240', fps: 30 },
-  { text: '320x240 MJPEG 48 fps', resolution: '320x240', fps: 48 },
-  { text: '320x240 MJPEG 60 fps', resolution: '320x240', fps: 60 },
-  { text: '640x360 MJPEG 1 fps', resolution: '640x360', fps: 1 },
-  { text: '640x360 MJPEG 5 fps', resolution: '640x360', fps: 5 },
-  { text: '640x360 MJPEG 15 fps', resolution: '640x360', fps: 15 },
-  { text: '640x360 MJPEG 24 fps', resolution: '640x360', fps: 24 },
-  { text: '640x360 MJPEG 30 fps', resolution: '640x360', fps: 30 },
-  { text: '640x360 MJPEG 48 fps', resolution: '640x360', fps: 48 },
-  { text: '640x360 MJPEG 60 fps', resolution: '640x360', fps: 60 },
-  { text: '640x480 MJPEG 1 fps', resolution: '640x480', fps: 1 },
-  { text: '640x480 MJPEG 5 fps', resolution: '640x480', fps: 5 },
-  { text: '640x480 MJPEG 15 fps', resolution: '640x480', fps: 15 },
-  { text: '640x480 MJPEG 24 fps', resolution: '640x480', fps: 24 },
-  { text: '640x480 MJPEG 30 fps', resolution: '640x480', fps: 30 },
-  { text: '640x480 MJPEG 48 fps', resolution: '640x480', fps: 48 },
-  { text: '640x480 MJPEG 60 fps', resolution: '640x480', fps: 60 },
-  { text: '720x480 MJPEG 1 fps', resolution: '720x480', fps: 1 },
-  { text: '720x480 MJPEG 5 fps', resolution: '720x480', fps: 5 },
-  { text: '720x480 MJPEG 15 fps', resolution: '720x480', fps: 15 },
-  { text: '720x480 MJPEG 24 fps', resolution: '720x480', fps: 24 },
-  { text: '720x480 MJPEG 30 fps', resolution: '720x480', fps: 30 },
-  { text: '720x480 MJPEG 48 fps', resolution: '720x480', fps: 48 },
-  { text: '720x480 MJPEG 60 fps', resolution: '720x480', fps: 60 },
-  { text: '720x576 MJPEG 1 fps', resolution: '720x576', fps: 1 },
-  { text: '720x576 MJPEG 5 fps', resolution: '720x576', fps: 5 },
-  { text: '720x576 MJPEG 15 fps', resolution: '720x576', fps: 15 },
-  { text: '720x576 MJPEG 24 fps', resolution: '720x576', fps: 24 },
-  { text: '720x576 MJPEG 30 fps', resolution: '720x576', fps: 30 },
-  { text: '720x576 MJPEG 48 fps', resolution: '720x576', fps: 48 },
-  { text: '720x576 MJPEG 60 fps', resolution: '720x576', fps: 60 },
-  { text: '800x600 MJPEG 1 fps', resolution: '800x600', fps: 1 },
-  { text: '800x600 MJPEG 5 fps', resolution: '800x600', fps: 5 },
-  { text: '800x600 MJPEG 15 fps', resolution: '800x600', fps: 15 },
-  { text: '800x600 MJPEG 24 fps', resolution: '800x600', fps: 24 },
-  { text: '800x600 MJPEG 30 fps', resolution: '800x600', fps: 30 },
-  { text: '800x600 MJPEG 48 fps', resolution: '800x600', fps: 48 },
-  { text: '800x600 MJPEG 60 fps', resolution: '800x600', fps: 60 },
-  { text: '1024x576 MJPEG 1 fps', resolution: '1024x576', fps: 1 },
-  { text: '1024x576 MJPEG 5 fps', resolution: '1024x576', fps: 5 },
-  { text: '1024x576 MJPEG 15 fps', resolution: '1024x576', fps: 15 },
-  { text: '1024x576 MJPEG 24 fps', resolution: '1024x576', fps: 24 },
-  { text: '1024x576 MJPEG 30 fps', resolution: '1024x576', fps: 30 },
-  { text: '1024x576 MJPEG 48 fps', resolution: '1024x576', fps: 48 },
-  { text: '1024x576 MJPEG 60 fps', resolution: '1024x576', fps: 60 },
-  { text: '1280x720 MJPEG 1 fps', resolution: '1280x720', fps: 1 },
-  { text: '1280x720 MJPEG 5 fps', resolution: '1280x720', fps: 5 },
-  { text: '1280x720 MJPEG 15 fps', resolution: '1280x720', fps: 15 },
-  { text: '1280x720 MJPEG 24 fps', resolution: '1280x720', fps: 24 },
-  { text: '1280x720 MJPEG 30 fps', resolution: '1280x720', fps: 30 },
-  { text: '1280x720 MJPEG 48 fps', resolution: '1280x720', fps: 48 },
-  { text: '1280x720 MJPEG 60 fps', resolution: '1280x720', fps: 60 },
-  { text: '1280x960 MJPEG 1 fps', resolution: '1280x960', fps: 1 },
-  { text: '1280x960 MJPEG 5 fps', resolution: '1280x960', fps: 5 },
-  { text: '1280x960 MJPEG 15 fps', resolution: '1280x960', fps: 15 },
-  { text: '1280x960 MJPEG 24 fps', resolution: '1280x960', fps: 24 },
-  { text: '1280x960 MJPEG 30 fps', resolution: '1280x960', fps: 30 },
-  { text: '1280x960 MJPEG 48 fps', resolution: '1280x960', fps: 48 },
-  { text: '1280x960 MJPEG 60 fps', resolution: '1280x960', fps: 60 },
-  { text: '1280x1080 MJPEG 1 fps', resolution: '1280x1080', fps: 1 },
-  { text: '1280x1080 MJPEG 5 fps', resolution: '1280x1080', fps: 5 },
-  { text: '1280x1080 MJPEG 15 fps', resolution: '1280x1080', fps: 15 },
-  { text: '1280x1080 MJPEG 24 fps', resolution: '1280x1080', fps: 24 },
-  { text: '1280x1080 MJPEG 30 fps', resolution: '1280x1080', fps: 30 },
-  { text: '1280x1080 MJPEG 48 fps', resolution: '1280x1080', fps: 48 },
-  { text: '1280x1080 MJPEG 60 fps', resolution: '1280x1080', fps: 60 },
-  { text: '1280x1280 MJPEG 1 fps', resolution: '1280x1280', fps: 1 },
-  { text: '1280x1280 MJPEG 5 fps', resolution: '1280x1280', fps: 5 },
-  { text: '1280x1280 MJPEG 15 fps', resolution: '1280x1280', fps: 15 },
-  { text: '1280x1280 MJPEG 24 fps', resolution: '1280x1280', fps: 24 },
-  { text: '1280x1280 MJPEG 30 fps', resolution: '1280x1280', fps: 30 },
-  { text: '1280x1280 MJPEG 48 fps', resolution: '1280x1280', fps: 48 },
-  { text: '1280x1280 MJPEG 60 fps', resolution: '1280x1280', fps: 60 },
+  { text: '320x240 MJPEG 1 fps', value: { width: 320, height: 240, framerate: 1 } },
+  { text: '320x240 MJPEG 5 fps', value: { width: 320, height: 240, framerate: 5 } },
+  { text: '320x240 MJPEG 15 fps', value: { width: 320, height: 240, framerate: 15 } },
+  { text: '320x240 MJPEG 24 fps', value: { width: 320, height: 240, framerate: 24 } },
+  { text: '320x240 MJPEG 30 fps', value: { width: 320, height: 240, framerate: 30 } },
+  { text: '320x240 MJPEG 48 fps', value: { width: 320, height: 240, framerate: 48 } },
+  { text: '320x240 MJPEG 60 fps', value: { width: 320, height: 240, framerate: 60 } },
+  { text: '640x360 MJPEG 1 fps', value: { width: 640, height: 360, framerate: 1 } },
+  { text: '640x360 MJPEG 5 fps', value: { width: 640, height: 360, framerate: 5 } },
+  { text: '640x360 MJPEG 15 fps', value: { width: 640, height: 360, framerate: 15 } },
+  { text: '640x360 MJPEG 24 fps', value: { width: 640, height: 360, framerate: 24 } },
+  { text: '640x360 MJPEG 30 fps', value: { width: 640, height: 360, framerate: 30 } },
+  { text: '640x360 MJPEG 48 fps', value: { width: 640, height: 360, framerate: 48 } },
+  { text: '640x360 MJPEG 60 fps', value: { width: 640, height: 360, framerate: 60 } },
+  { text: '640x480 MJPEG 1 fps', value: { width: 640, height: 480, framerate: 1 } },
+  { text: '640x480 MJPEG 5 fps', value: { width: 640, height: 480, framerate: 5 } },
+  { text: '640x480 MJPEG 15 fps', value: { width: 640, height: 480, framerate: 15 } },
+  { text: '640x480 MJPEG 24 fps', value: { width: 640, height: 480, framerate: 24 } },
+  { text: '640x480 MJPEG 30 fps', value: { width: 640, height: 480, framerate: 30 } },
+  { text: '640x480 MJPEG 48 fps', value: { width: 640, height: 480, framerate: 48 } },
+  { text: '640x480 MJPEG 60 fps', value: { width: 640, height: 480, framerate: 60 } },
+  { text: '720x480 MJPEG 1 fps', value: { width: 720, height: 480, framerate: 1 } },
+  { text: '720x480 MJPEG 5 fps', value: { width: 720, height: 480, framerate: 5 } },
+  { text: '720x480 MJPEG 15 fps', value: { width: 720, height: 480, framerate: 15 } },
+  { text: '720x480 MJPEG 24 fps', value: { width: 720, height: 480, framerate: 24 } },
+  { text: '720x480 MJPEG 30 fps', value: { width: 720, height: 480, framerate: 30 } },
+  { text: '720x480 MJPEG 48 fps', value: { width: 720, height: 480, framerate: 48 } },
+  { text: '720x480 MJPEG 60 fps', value: { width: 720, height: 480, framerate: 60 } },
+  { text: '720x576 MJPEG 1 fps', value: { width: 720, height: 576, framerate: 1 } },
+  { text: '720x576 MJPEG 5 fps', value: { width: 720, height: 576, framerate: 5 } },
+  { text: '720x576 MJPEG 15 fps', value: { width: 720, height: 576, framerate: 15 } },
+  { text: '720x576 MJPEG 24 fps', value: { width: 720, height: 576, framerate: 24 } },
+  { text: '720x576 MJPEG 30 fps', value: { width: 720, height: 576, framerate: 30 } },
+  { text: '720x576 MJPEG 48 fps', value: { width: 720, height: 576, framerate: 48 } },
+  { text: '720x576 MJPEG 60 fps', value: { width: 720, height: 576, framerate: 60 } },
+  { text: '800x600 MJPEG 1 fps', value: { width: 800, height: 600, framerate: 1 } },
+  { text: '800x600 MJPEG 5 fps', value: { width: 800, height: 600, framerate: 5 } },
+  { text: '800x600 MJPEG 15 fps', value: { width: 800, height: 600, framerate: 15 } },
+  { text: '800x600 MJPEG 24 fps', value: { width: 800, height: 600, framerate: 24 } },
+  { text: '800x600 MJPEG 30 fps', value: { width: 800, height: 600, framerate: 30 } },
+  { text: '800x600 MJPEG 48 fps', value: { width: 800, height: 600, framerate: 48 } },
+  { text: '800x600 MJPEG 60 fps', value: { width: 800, height: 600, framerate: 60 } },
+  { text: '1024x576 MJPEG 1 fps', value: { width: 1024, height: 576, framerate: 1 } },
+  { text: '1024x576 MJPEG 5 fps', value: { width: 1024, height: 576, framerate: 5 } },
+  { text: '1024x576 MJPEG 15 fps', value: { width: 1024, height: 576, framerate: 15 } },
+  { text: '1024x576 MJPEG 24 fps', value: { width: 1024, height: 576, framerate: 24 } },
+  { text: '1024x576 MJPEG 30 fps', value: { width: 1024, height: 576, framerate: 30 } },
+  { text: '1024x576 MJPEG 48 fps', value: { width: 1024, height: 576, framerate: 48 } },
+  { text: '1024x576 MJPEG 60 fps', value: { width: 1024, height: 576, framerate: 60 } },
+  { text: '1280x720 MJPEG 1 fps', value: { width: 1280, height: 720, framerate: 1 } },
+  { text: '1280x720 MJPEG 5 fps', value: { width: 1280, height: 720, framerate: 5 } },
+  { text: '1280x720 MJPEG 15 fps', value: { width: 1280, height: 720, framerate: 15 } },
+  { text: '1280x720 MJPEG 24 fps', value: { width: 1280, height: 720, framerate: 24 } },
+  { text: '1280x720 MJPEG 30 fps', value: { width: 1280, height: 720, framerate: 30 } },
+  { text: '1280x720 MJPEG 48 fps', value: { width: 1280, height: 720, framerate: 48 } },
+  { text: '1280x720 MJPEG 60 fps', value: { width: 1280, height: 720, framerate: 60 } },
+  { text: '1280x960 MJPEG 1 fps', value: { width: 1280, height: 960, framerate: 1 } },
+  { text: '1280x960 MJPEG 5 fps', value: { width: 1280, height: 960, framerate: 5 } },
+  { text: '1280x960 MJPEG 15 fps', value: { width: 1280, height: 960, framerate: 15 } },
+  { text: '1280x960 MJPEG 24 fps', value: { width: 1280, height: 960, framerate: 24 } },
+  { text: '1280x960 MJPEG 30 fps', value: { width: 1280, height: 960, framerate: 30 } },
+  { text: '1280x960 MJPEG 48 fps', value: { width: 1280, height: 960, framerate: 48 } },
+  { text: '1280x960 MJPEG 60 fps', value: { width: 1280, height: 960, framerate: 60 } },
+  { text: '1280x1080 MJPEG 1 fps', value: { width: 1280, height: 1080, framerate: 1 } },
+  { text: '1280x1080 MJPEG 5 fps', value: { width: 1280, height: 1080, framerate: 5 } },
+  { text: '1280x1080 MJPEG 15 fps', value: { width: 1280, height: 1080, framerate: 15 } },
+  { text: '1280x1080 MJPEG 24 fps', value: { width: 1280, height: 1080, framerate: 24 } },
+  { text: '1280x1080 MJPEG 30 fps', value: { width: 1280, height: 1080, framerate: 30 } },
+  { text: '1280x1080 MJPEG 48 fps', value: { width: 1280, height: 1080, framerate: 48 } },
+  { text: '1280x1080 MJPEG 60 fps', value: { width: 1280, height: 1080, framerate: 60 } },
+  { text: '1280x1280 MJPEG 1 fps', value: { width: 1280, height: 1280, framerate: 1 } },
+  { text: '1280x1280 MJPEG 5 fps', value: { width: 1280, height: 1280, framerate: 5 } },
+  { text: '1280x1280 MJPEG 15 fps', value: { width: 1280, height: 1280, framerate: 15 } },
+  { text: '1280x1280 MJPEG 24 fps', value: { width: 1280, height: 1280, framerate: 24 } },
+  { text: '1280x1280 MJPEG 30 fps', value: { width: 1280, height: 1280, framerate: 30 } },
+  { text: '1280x1280 MJPEG 48 fps', value: { width: 1280, height: 1280, framerate: 48 } },
+  { text: '1280x1280 MJPEG 60 fps', value: { width: 1280, height: 1280, framerate: 60 } },
 ]
 
-const selectedStreamProfile = ref(streamOptions[3])
-const compressionLevel = ref(75)
-const streamUrl = ref('./video')
+const selectedStreamMode = ref<StreamModeModel>({ width: 320, height: 240, framerate: 24 })
+const selectedStreamQuality = ref(75)
+const cacheBuster = ref(Date.now())
 
-function applyStreamSettings() {
-  const params = new URLSearchParams()
-  params.append('resolution', selectedStreamProfile.value.resolution)
-  params.append('fps', selectedStreamProfile.value.fps.toString())
-  params.append('compression', compressionLevel.value.toString())
-  streamUrl.value = `./video?${params.toString()}`
+const streamUrl = computed(() => `./video?t=${cacheBuster.value}`)
+
+const activeStreamSettings = computed(() => {
+  const mode = configStore.config?.streamMode
+  const quality = configStore.config?.streamQuality
+  if (!mode) return ''
+  return `${mode.width}x${mode.height}@${mode.framerate}fps Quality: ${quality}`
+})
+
+function applySettings() {
+  configStore.updateStreamMode(selectedStreamMode.value)
+  configStore.updateStreamQuality(selectedStreamQuality.value)
+  cacheBuster.value = Date.now()
 }
 
 function toggleFullscreen() {
@@ -160,6 +177,22 @@ function handleFullscreenChange() {
 }
 
 onMounted(() => {
+  if (configStore.config?.streamMode) {
+    const matchingOption = streamOptions.find(
+      opt =>
+        opt.value.width === configStore.config!.streamMode.width &&
+        opt.value.height === configStore.config!.streamMode.height &&
+        opt.value.framerate === configStore.config!.streamMode.framerate
+    )
+    if (matchingOption) {
+      selectedStreamMode.value = matchingOption.value
+    } else {
+      selectedStreamMode.value = configStore.config.streamMode
+    }
+  }
+  if (configStore.config?.streamQuality) {
+    selectedStreamQuality.value = configStore.config.streamQuality
+  }
   document.addEventListener('fullscreenchange', handleFullscreenChange)
 })
 
@@ -177,15 +210,20 @@ onUnmounted(() => {
 
 .camera-controls {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   gap: 1rem;
   margin-bottom: 1.5rem;
-  flex-wrap: wrap;
   padding: 1rem;
   background: var(--card-bg);
   border-radius: 8px;
   border: 1px solid var(--border-color);
+}
+
+.controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .controls-left,
@@ -194,6 +232,15 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.active-stream-settings {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
 }
 
 .control-container {

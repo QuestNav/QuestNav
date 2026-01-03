@@ -114,12 +114,14 @@
                 description="Start QuestNav when headset boots"
                 control-class="checkbox-control"
               >
-                <input
-                  type="checkbox"
-                  :checked="configStore.config.enableAutoStartOnBoot"
-                  @change="handleAutoStartChange"
-                />
-                <span class="checkbox-label">{{ configStore.config.enableAutoStartOnBoot ? 'Enabled' : 'Disabled' }}</span>
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    :checked="configStore.config.enableAutoStartOnBoot"
+                    @change="handleAutoStartChange"
+                  />
+                  {{ configStore.config.enableAutoStartOnBoot ? 'Enabled' : 'Disabled' }}
+                </label>
               </ConfigField>
 
               <!-- Debug Logging -->
@@ -128,12 +130,14 @@
                 description="Enable verbose debug logging"
                 control-class="checkbox-control"
               >
-                <input
-                  type="checkbox"
-                  :checked="configStore.config.enableDebugLogging"
-                  @change="handleDebugLoggingChange"
-                />
-                <span class="checkbox-label">{{ configStore.config.enableDebugLogging ? 'Enabled' : 'Disabled' }}</span>
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    :checked="configStore.config.enableDebugLogging"
+                    @change="handleDebugLoggingChange"
+                  />
+                  {{ configStore.config.enableDebugLogging ? 'Enabled' : 'Disabled' }}
+                </label>
               </ConfigField>
 
               <!-- Passthrough Stream -->
@@ -142,12 +146,14 @@
                 description="Stream headset camera over network"
                 control-class="checkbox-control"
               >
-                <input
-                  type="checkbox"
-                  :checked="configStore.config.enablePassthroughStream"
-                  @change="handlePassthroughStreamChange"
-                />
-                <span class="checkbox-label">{{ configStore.config.enablePassthroughStream ? 'Enabled' : 'Disabled' }}</span>
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    :checked="configStore.config.enablePassthroughStream"
+                    @change="handlePassthroughStreamChange"
+                  />
+                  {{ configStore.config.enablePassthroughStream ? 'Enabled' : 'Disabled' }}
+                </label>
               </ConfigField>
 
               <!-- Reset to Defaults -->
@@ -410,6 +416,10 @@ async function handleUploadDatabase(event: Event) {
 
 .checkbox-label {
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
 }
 
 .reset-button {

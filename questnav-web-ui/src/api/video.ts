@@ -1,6 +1,6 @@
-import type { StreamModeModel } from '../types'
+import type { VideoModeModel } from '../types'
 
-async function getVideoModes(): Promise<StreamModeModel[]> {
+async function getVideoModes(): Promise<VideoModeModel[]> {
   const response = await fetch('/api/video-modes')
   if (!response.ok) {
     throw new Error('Failed to fetch video modes')

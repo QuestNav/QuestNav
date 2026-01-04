@@ -12,6 +12,18 @@ namespace QuestNav.WebServer
         public int width;
         public int height;
         public int framerate;
+        public int quality;
+    }
+
+    /// <summary>
+    /// Available video mode option for the current stream source
+    /// </summary>
+    [Serializable]
+    public class VideoModeModel
+    {
+        public int width;
+        public int height;
+        public int framerate;
     }
 
     /// <summary>
@@ -26,7 +38,6 @@ namespace QuestNav.WebServer
         public bool enableAutoStartOnBoot;
         public bool enablePassthroughStream;
         public StreamModeModel streamMode;
-        public int streamQuality;
         public bool enableDebugLogging;
         public long timestamp;
     }
@@ -42,7 +53,6 @@ namespace QuestNav.WebServer
         public bool? EnableAutoStartOnBoot;
         public bool? EnablePassthroughStream;
         public StreamModeModel StreamMode;
-        public int? StreamQuality;
         public bool? EnableDebugLogging;
     }
 

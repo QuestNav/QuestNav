@@ -19,7 +19,7 @@
           <div class="control-container">
             <label for="stream-mode">Mode:</label>
             <select id="stream-mode" v-model="selectedStreamMode">
-              <option v-for="option in streamOptions" :key="option.text" :value="option.value">
+              <option v-for="option in streamModeOptions" :key="option.text" :value="option.value">
                 {{ option.text }}
               </option>
             </select>
@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useConfigStore } from '../stores/config'
-import type { StreamModeModel } from '../types'
+import type { VideoModeModel } from '../types'
 import { videoApi } from '../api/video'
 
 const configStore = useConfigStore()
@@ -62,9 +62,9 @@ const streamEnabled = computed(() => {
   return configStore.config?.enablePassthroughStream ?? false
 })
 
-const streamOptions = ref<{ text: string; value: StreamModeModel }[]>([])
+const streamModeOptions = ref<{ text: string; value: VideoModeModel }[]>([])
 
-const selectedStreamMode = ref<StreamModeModel>({ width: 320, height: 240, framerate: 24 })
+const selectedStreamMode = ref<VideoModeModel>({ width: 320, height: 240, framerate: 24 })
 const selectedStreamQuality = ref(75)
 const cacheBuster = ref(Date.now())
 
@@ -72,27 +72,26 @@ const streamUrl = computed(() => `./video?t=${cacheBuster.value}`)
 
 const activeStreamSettings = computed(() => {
   const mode = configStore.config?.streamMode
-  const quality = configStore.config?.streamQuality
   if (!mode) return ''
-  return `${mode.width}x${mode.height}@${mode.framerate}fps Quality: ${quality}`
+  return `${mode.width}x${mode.height}@${mode.framerate}fps Quality: ${mode.quality}`
 })
 
-async function loadStreamModes() {
+async function loadVideoModes() {
   if (!streamEnabled.value) {
-    streamOptions.value = []
+    streamModeOptions.value = []
     return
   }
 
   try {
     const modes = await videoApi.getVideoModes()
-    streamOptions.value = modes.map(mode => ({
+    streamModeOptions.value = modes.map(mode => ({
       text: `${mode.width}x${mode.height} MJPEG ${mode.framerate} fps`,
       value: mode,
     }))
 
     // Set the initial selected mode from the config
     if (configStore.config?.streamMode) {
-      const matchingOption = streamOptions.value.find(
+      const matchingOption = streamModeOptions.value.find(
         opt =>
           opt.value.width === configStore.config!.streamMode.width &&
           opt.value.height === configStore.config!.streamMode.height &&
@@ -107,13 +106,12 @@ async function loadStreamModes() {
     }
   } catch (error) {
     console.error('Failed to load stream modes:', error)
-    streamOptions.value = [] // Clear options on error
+    streamModeOptions.value = [] // Clear options on error
   }
 }
 
 function applySettings() {
-  configStore.updateStreamMode(selectedStreamMode.value)
-  configStore.updateStreamQuality(selectedStreamQuality.value)
+  configStore.updateStreamMode({ ...selectedStreamMode.value, quality: selectedStreamQuality.value })
   cacheBuster.value = Date.now()
 }
 
@@ -135,15 +133,15 @@ function handleFullscreenChange() {
 
 watch(streamEnabled, (newValue, oldValue) => {
   if (newValue && !oldValue) {
-    loadStreamModes()
+    loadVideoModes()
   }
 })
 
 onMounted(() => {
-  loadStreamModes() // Load modes if stream is already enabled on mount
+  loadVideoModes() // Load modes if stream is already enabled on mount
 
-  if (configStore.config?.streamQuality) {
-    selectedStreamQuality.value = configStore.config.streamQuality
+  if (configStore.config?.streamMode.quality) {
+    selectedStreamQuality.value = configStore.config.streamMode.quality
   }
   document.addEventListener('fullscreenchange', handleFullscreenChange)
 })

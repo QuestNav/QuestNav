@@ -112,7 +112,7 @@ namespace QuestNav.Camera
         /// <param name="compression">Requested compression quality (1-100), or null if not specified</param>
         public void SetModeAndCompression(int? width, int? height, int? fps, int? compression)
         {
-            // Save the config, which will trigger the change event handles to actually apply the changes to the stream
+            // Save the config, which will trigger the change event handler to apply the changes to the stream
             _ = PersistModeAndCompression(width, height, fps, compression);
         }
 
@@ -170,16 +170,15 @@ namespace QuestNav.Camera
             int? compression
         )
         {
-            // Persist compression quality if it was specified
-            if (compression.HasValue)
-            {
-                var clampedQuality = Math.Clamp(compression.Value, 1, 100);
-                await configManager.SetStreamQualityAsync(clampedQuality);
-            }
-
             // Persist mode if any mode parameters were specified
-            if (width.HasValue || height.HasValue || fps.HasValue)
+            if (width.HasValue || height.HasValue || fps.HasValue || compression.HasValue)
             {
+                // Use the compression quality if it was specified, otherwise use the current quality
+                var quality = compression.HasValue
+                    ? Math.Clamp(compression.Value, 1, 100)
+                    : compressionQuality;
+
+                // Find the best matching mode, or better
                 var bestMatch = FindBestMatchingModeOrBetter(width, height, fps);
                 if (bestMatch.HasValue)
                 {
@@ -187,7 +186,21 @@ namespace QuestNav.Camera
                         new StreamMode(
                             bestMatch.Value.Width,
                             bestMatch.Value.Height,
-                            bestMatch.Value.Fps
+                            bestMatch.Value.Fps,
+                            quality
+                        )
+                    );
+                }
+                else
+                {
+                    // There was no suitable mode found, keep the current mode
+                    var currentMode = cameraSource.Mode;
+                    await configManager.SetStreamModeAsync(
+                        new StreamMode(
+                            currentMode.Width,
+                            currentMode.Height,
+                            currentMode.Fps,
+                            quality
                         )
                     );
                 }
@@ -197,10 +210,10 @@ namespace QuestNav.Camera
         /// <summary>
         /// Gets the available video modes.
         /// </summary>
-        /// <returns>Array of available video modes, or null if not initialized</returns>
+        /// <returns>Array of available video modes.</returns>
         public VideoMode[] GetAvailableModes()
         {
-            return cameraSource?.Modes;
+            return cameraSource?.Modes ?? Array.Empty<VideoMode>();
         }
 
         /// <summary>
@@ -283,7 +296,6 @@ namespace QuestNav.Camera
             // Attach to ConfigManager callbacks
             configManager.OnEnablePassthroughStreamChanged += OnEnablePassthroughStreamChanged;
             configManager.OnStreamModeChanged += OnStreamModeChanged;
-            configManager.OnStreamQualityChanged += OnStreamQualityChanged;
         }
 
         /// <summary>
@@ -321,27 +333,7 @@ namespace QuestNav.Camera
                     streamMode.Width,
                     streamMode.Height,
                     streamMode.Framerate,
-                    null
-                );
-            });
-        }
-
-        /// <summary>
-        /// Handles stream quality configuration changes.
-        /// </summary>
-        /// <param name="quality">The new compression quality (1-100).</param>
-        private void OnStreamQualityChanged(int quality)
-        {
-            if (!isInitialized)
-            {
-                return;
-            }
-
-            InvokeOnMainThread(() =>
-            {
-                compressionQuality = Math.Clamp(quality, 1, 100);
-                QueuedLogger.Log(
-                    $"[PassthroughFrameSource] Stream quality changed to {compressionQuality}"
+                    streamMode.Quality
                 );
             });
         }
@@ -409,9 +401,9 @@ namespace QuestNav.Camera
                     cameraSource.Modes = modes;
                     cameraSource.SelectedModeChanged += OnSelectedModeChanged;
 
-                    // Load stream mode and quality from config
+                    // Load video mode and quality from config
                     var streamMode = await configManager.GetStreamModeAsync();
-                    compressionQuality = await configManager.GetStreamQualityAsync();
+                    compressionQuality = streamMode.Quality;
 
                     // Find best matching mode for the configured stream mode
                     var bestMatch = FindBestMatchingModeOrBetter(

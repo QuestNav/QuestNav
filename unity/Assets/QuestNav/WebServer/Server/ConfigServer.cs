@@ -352,8 +352,8 @@ namespace QuestNav.WebServer.Server
                     width = streamMode.Width,
                     height = streamMode.Height,
                     framerate = streamMode.Framerate,
+                    quality = streamMode.Quality,
                 },
-                streamQuality = await configManager.GetStreamQualityAsync(),
                 enableDebugLogging = await configManager.GetEnableDebugLoggingAsync(),
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             };
@@ -403,13 +403,10 @@ namespace QuestNav.WebServer.Server
                         new Config.StreamMode(
                             request.StreamMode.width,
                             request.StreamMode.height,
-                            request.StreamMode.framerate
+                            request.StreamMode.framerate,
+                            request.StreamMode.quality
                         )
                     );
-                }
-                if (request.StreamQuality.HasValue)
-                {
-                    await configManager.SetStreamQualityAsync(request.StreamQuality.Value);
                 }
                 if (request.EnableDebugLogging.HasValue)
                 {
@@ -604,7 +601,8 @@ namespace QuestNav.WebServer.Server
 
         private async Task HandleGetVideoModes(IHttpContext context)
         {
-            if (streamProvider?.FrameSource is not Camera.PassthroughFrameSource passthroughSource)
+            var passthroughSource = streamProvider?.FrameSource;
+            if (passthroughSource == null)
             {
                 context.Response.StatusCode = 503;
                 await SendJsonResponse(
@@ -634,11 +632,11 @@ namespace QuestNav.WebServer.Server
                 return;
             }
 
-            // Convert VideoMode[] to StreamModeModel[]
-            var modeModels = new StreamModeModel[availableModes.Length];
+            // Convert VideoMode[] to VideoModeModel[]
+            var modeModels = new VideoModeModel[availableModes.Length];
             for (int i = 0; i < availableModes.Length; i++)
             {
-                modeModels[i] = new StreamModeModel
+                modeModels[i] = new VideoModeModel
                 {
                     width = availableModes[i].Width,
                     height = availableModes[i].Height,

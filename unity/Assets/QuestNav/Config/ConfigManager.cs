@@ -50,11 +50,6 @@ namespace QuestNav.Config
         public event Action<StreamMode> OnStreamModeChanged;
 
         /// <summary>
-        /// Raised when stream quality changes.
-        /// </summary>
-        public event Action<int> OnStreamQualityChanged;
-
-        /// <summary>
         /// Raised when debug logging setting changes.
         /// </summary>
         public event Action<bool> OnEnableDebugLoggingChanged;
@@ -100,14 +95,6 @@ namespace QuestNav.Config
         public Task<StreamMode> GetStreamModeAsync();
 
         /// <summary>
-        /// Gets the stream quality configuration.
-        /// </summary>
-        /// <returns>
-        /// The JPEG compression quality (1-100).
-        /// </returns>
-        public Task<int> GetStreamQualityAsync();
-
-        /// <summary>
         /// Gets whether debug logging is enabled.
         /// </summary>
         /// <returns>
@@ -141,11 +128,6 @@ namespace QuestNav.Config
         /// Sets the stream mode configuration.
         /// </summary>
         public Task SetStreamModeAsync(StreamMode mode);
-
-        /// <summary>
-        /// Sets the stream quality configuration.
-        /// </summary>
-        public Task SetStreamQualityAsync(int quality);
 
         /// <summary>
         /// Sets whether debug logging is enabled.
@@ -198,7 +180,6 @@ namespace QuestNav.Config
             OnEnableAutoStartOnBootChanged?.Invoke(await GetEnableAutoStartOnBootAsync());
             OnEnablePassthroughStreamChanged?.Invoke(await GetEnablePassthroughStreamAsync());
             OnStreamModeChanged?.Invoke(await GetStreamModeAsync());
-            OnStreamQualityChanged?.Invoke(await GetStreamQualityAsync());
             OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
         }
 
@@ -217,10 +198,10 @@ namespace QuestNav.Config
                 new StreamMode(
                     cameraDefaults.StreamWidth,
                     cameraDefaults.StreamHeight,
-                    cameraDefaults.StreamFramerate
+                    cameraDefaults.StreamFramerate,
+                    cameraDefaults.StreamQuality
                 )
             );
-            await SetStreamQualityAsync(cameraDefaults.StreamQuality);
             await SetEnableDebugLoggingAsync(loggingDefaults.EnableDebugLogging);
 
             QueuedLogger.Log("Database reset to defaults");
@@ -303,16 +284,14 @@ namespace QuestNav.Config
         {
             var config = await GetCameraConfigAsync();
 
-            return new StreamMode(config.StreamWidth, config.StreamHeight, config.StreamFramerate);
+            return new StreamMode(
+                config.StreamWidth,
+                config.StreamHeight,
+                config.StreamFramerate,
+                config.StreamQuality
+            );
         }
 
-        /// <inheritdoc/>
-        public async Task<int> GetStreamQualityAsync()
-        {
-            var config = await GetCameraConfigAsync();
-
-            return config.StreamQuality;
-        }
         #endregion
 
         #region Logging
@@ -410,6 +389,7 @@ namespace QuestNav.Config
             config.StreamWidth = mode.Width;
             config.StreamHeight = mode.Height;
             config.StreamFramerate = mode.Framerate;
+            config.StreamQuality = mode.Quality;
             await SaveCameraConfigAsync(config);
 
             // Notify subscribed methods on the main thread
@@ -417,17 +397,6 @@ namespace QuestNav.Config
             QueuedLogger.Log($"Updated Key 'streamMode' to {mode}");
         }
 
-        /// <inheritdoc/>
-        public async Task SetStreamQualityAsync(int quality)
-        {
-            var config = await GetCameraConfigAsync();
-            config.StreamQuality = quality;
-            await SaveCameraConfigAsync(config);
-
-            // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnStreamQualityChanged?.Invoke(quality));
-            QueuedLogger.Log($"Updated Key 'streamQuality' to {quality}");
-        }
         #endregion
 
         #region Logging

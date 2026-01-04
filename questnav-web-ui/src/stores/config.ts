@@ -115,19 +115,6 @@ export const useConfigStore = defineStore('config', () => {
     }
   }
 
-  async function updateStreamQuality(value: number) {
-    try {
-      const response = await configApi.updateConfig({ streamQuality: value })
-      if (response.success && config.value) {
-        config.value.streamQuality = value
-      }
-      return response.success
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to update'
-      return false
-    }
-  }
-
   async function resetToDefaults() {
     try {
       const response = await configApi.resetConfig()
@@ -156,7 +143,6 @@ export const useConfigStore = defineStore('config', () => {
     updateEnablePassthroughStream,
     updateEnableDebugLogging,
     updateStreamMode,
-    updateStreamQuality,
     resetToDefaults
   }
 })

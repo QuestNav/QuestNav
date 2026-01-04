@@ -4,6 +4,13 @@ export interface StreamModeModel {
   width: number
   height: number
   framerate: number
+  quality: number
+}
+
+export interface VideoModeModel {
+  width: number
+  height: number
+  framerate: number
 }
 
 export interface ConfigResponse {
@@ -14,7 +21,6 @@ export interface ConfigResponse {
   enablePassthroughStream: boolean
   enableDebugLogging: boolean
   streamMode: StreamModeModel
-  streamQuality: number
   timestamp: number
 }
 
@@ -25,7 +31,6 @@ export interface ConfigUpdateRequest {
   enablePassthroughStream?: boolean
   enableDebugLogging?: boolean
   streamMode?: StreamModeModel
-  streamQuality?: number
 }
 
 export interface SimpleResponse {

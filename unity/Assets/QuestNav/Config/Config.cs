@@ -1,6 +1,5 @@
 using QuestNav.Core;
 using SQLite;
-using UnityEngine.Scripting;
 
 namespace QuestNav.Config
 {
@@ -25,16 +24,22 @@ namespace QuestNav.Config
         public int Framerate { get; set; }
 
         /// <summary>
+        /// JPEG compression quality (1-100). Higher values mean better quality and larger files.
+        /// </summary>
+        public int Quality { get; set; }
+
+        /// <summary>
         /// Create a new stream mode.
         /// </summary>
         /// <param name="width">The image width in pixels.</param>
         /// <param name="height">The image height in pixels.</param>
         /// <param name="framerate">The stream's frames per second.</param>
-        public StreamMode(int width, int height, int framerate)
+        public StreamMode(int width, int height, int framerate, int quality)
         {
             Width = width;
             Height = height;
             Framerate = framerate;
+            Quality = quality;
         }
 
         /// <summary>
@@ -42,7 +47,7 @@ namespace QuestNav.Config
         /// </summary>
         public override string ToString()
         {
-            return $"{Width}x{Height} {Framerate} fps";
+            return $"{Width}x{Height}@{Framerate}fps Quality: {Quality}";
         }
     }
 

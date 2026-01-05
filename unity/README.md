@@ -702,7 +702,7 @@ adb shell am force-stop gg.questnav.QuestNav
 ## Additional Resources
 
 - **[QuestNav Documentation](https://questnav.gg/)** - Complete user guide
-- **[Discord Community](https://discord.gg/hD3FtR7YAZ)** - Support and discussion
+- **[Discord Community](https://discord.gg/Zfan2qgkRZ)** - Support and discussion
 - [Meta XR SDK Documentation](https://developer.oculus.com/documentation/unity/)
 - [Unity 6 Release Notes](https://unity.com/releases/editor/whats-new)
 - [FRC NetworkTables Specification](https://docs.wpilib.org/en/stable/docs/software/networktables/)

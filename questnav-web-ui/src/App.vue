@@ -93,7 +93,7 @@
             <span class="separator">•</span>
             <a href="https://github.com/QuestNav/QuestNav" target="_blank" rel="noopener noreferrer">GitHub</a>
             <span class="separator">•</span>
-            <a href="https://discord.gg/hD3FtR7YAZ" target="_blank" rel="noopener noreferrer">Discord</a>
+            <a href="https://discord.gg/Zfan2qgkRZ" target="_blank" rel="noopener noreferrer">Discord</a>
           </div>
         </div>
       </footer>

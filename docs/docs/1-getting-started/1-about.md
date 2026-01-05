@@ -70,7 +70,7 @@ QuestNav exists because of many sidebar discussions, technical deep-dives, and w
 ## Support
 
 :::info
-For questions, troubleshooting help, or to share your experiences with QuestNav, join the community discussion on our [Discord](https://discord.gg/hD3FtR7YAZ).
+For questions, troubleshooting help, or to share your experiences with QuestNav, join the community discussion on our [Discord](https://discord.gg/Zfan2qgkRZ).
 :::
 
 

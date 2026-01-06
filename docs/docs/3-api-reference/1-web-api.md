@@ -298,6 +298,25 @@ Host: <device-ip>:5801
 { "success": false, "message": "Unexpected error" }
 ```
 
+## GET /api/video-modes
+- Description: Gets the available passthrough stream capture video modes
+- Request: none (no body)
+- Response: 200 OK → VideoModeModel[]
+```json
+[
+  {"width": 100, "height": 100, "framerate": 24},
+  {"width": 200, "height": 200, "framerate": 24},
+]
+```
+- Errors:
+  - 503 Service Unavailable → `SimpleResponse`
+```json
+{ "success": false, "message": "Passthrough stream not available" }
+```
+```json
+{ "success": false, "message": "Stream not initialized. Enable passthrough stream first." }
+```
+
 ## GET /video
 - Description: MJPEG video stream endpoint (multipart/x-mixed-replace) for passthrough camera or other frame sources.
 - Request: none

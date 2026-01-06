@@ -69,7 +69,7 @@ namespace QuestNav.WebServer
             /// <param name="height">Requested height, or null if not specified</param>
             /// <param name="fps">Requested FPS, or null if not specified</param>
             /// <param name="compression">Requested compression quality (1-100), or null if not specified</param>
-            void SetModeAndCompression(int? width, int? height, int? fps, int? compression);
+            Task SetModeAndCompression(int? width, int? height, int? fps, int? compression);
         }
 
         #region Fields
@@ -199,7 +199,7 @@ namespace QuestNav.WebServer
             }
 
             // Notify frame source of stream start with requested parameters
-            frameSource.SetModeAndCompression(width, height, fps, compression);
+            await frameSource.SetModeAndCompression(width, height, fps, compression);
 
             Interlocked.Increment(ref connectedClients);
             context.Response.StatusCode = 200;

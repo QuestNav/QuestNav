@@ -6,6 +6,7 @@ using QuestNav.Core;
 using QuestNav.Utils;
 using SQLite;
 using UnityEngine;
+using static QuestNav.Config.Config;
 
 namespace QuestNav.Config
 {

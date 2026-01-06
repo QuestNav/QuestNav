@@ -9,6 +9,7 @@ using EmbedIO.Actions;
 using Newtonsoft.Json;
 using QuestNav.Config;
 using UnityEngine;
+using static QuestNav.Config.Config;
 
 namespace QuestNav.WebServer.Server
 {
@@ -400,7 +401,7 @@ namespace QuestNav.WebServer.Server
                 if (request.StreamMode != null)
                 {
                     await configManager.SetStreamModeAsync(
-                        new Config.StreamMode(
+                        new StreamMode(
                             request.StreamMode.width,
                             request.StreamMode.height,
                             request.StreamMode.framerate,

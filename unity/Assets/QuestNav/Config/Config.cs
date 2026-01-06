@@ -3,54 +3,6 @@ using SQLite;
 
 namespace QuestNav.Config
 {
-    /// <summary>
-    /// Represents a video stream mode configuration with resolution and framerate.
-    /// </summary>
-    public struct StreamMode
-    {
-        /// <summary>
-        /// The image width in pixels.
-        /// </summary>
-        public int Width { get; set; }
-
-        /// <summary>
-        /// The image height in pixels.
-        /// </summary>
-        public int Height { get; set; }
-
-        /// <summary>
-        /// The stream's frames per second.
-        /// </summary>
-        public int Framerate { get; set; }
-
-        /// <summary>
-        /// JPEG compression quality (1-100). Higher values mean better quality and larger files.
-        /// </summary>
-        public int Quality { get; set; }
-
-        /// <summary>
-        /// Create a new stream mode.
-        /// </summary>
-        /// <param name="width">The image width in pixels.</param>
-        /// <param name="height">The image height in pixels.</param>
-        /// <param name="framerate">The stream's frames per second.</param>
-        public StreamMode(int width, int height, int framerate, int quality)
-        {
-            Width = width;
-            Height = height;
-            Framerate = framerate;
-            Quality = quality;
-        }
-
-        /// <summary>
-        /// Provide string description of stream mode.
-        /// </summary>
-        public override string ToString()
-        {
-            return $"{Width}x{Height}@{Framerate}fps Quality: {Quality}";
-        }
-    }
-
     public class Config
     {
         public class Network
@@ -136,6 +88,55 @@ namespace QuestNav.Config
             /// Whether debug logging for NetworkTables should be logged to the Unity and WebUI consoles.
             /// </summary>
             public bool EnableDebugLogging { get; set; } = false;
+        }
+
+        /// <summary>
+        /// Represents a video stream mode configuration with resolution and framerate.
+        /// </summary>
+        public readonly struct StreamMode
+        {
+            /// <summary>
+            /// The image width in pixels.
+            /// </summary>
+            public int Width { get; }
+
+            /// <summary>
+            /// The image height in pixels.
+            /// </summary>
+            public int Height { get; }
+
+            /// <summary>
+            /// The stream's frames per second.
+            /// </summary>
+            public int Framerate { get; }
+
+            /// <summary>
+            /// JPEG compression quality (1-100). Higher values mean better quality and larger files.
+            /// </summary>
+            public int Quality { get; }
+
+            /// <summary>
+            /// Create a new stream mode.
+            /// </summary>
+            /// <param name="width">The image width in pixels.</param>
+            /// <param name="height">The image height in pixels.</param>
+            /// <param name="framerate">The stream's frames per second.</param>
+            /// <param name="quality">JPEG compression quality (1-100).</param>
+            public StreamMode(int width, int height, int framerate, int quality)
+            {
+                Width = width;
+                Height = height;
+                Framerate = framerate;
+                Quality = quality;
+            }
+
+            /// <summary>
+            /// Provide string description of stream mode.
+            /// </summary>
+            public override string ToString()
+            {
+                return $"{Width}x{Height}@{Framerate}fps Quality: {Quality}";
+            }
         }
     }
 }

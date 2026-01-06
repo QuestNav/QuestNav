@@ -60,6 +60,13 @@ namespace QuestNav.Core
         private Toggle autoStartToggle;
 
         /// <summary>
+        /// QuestNav build version text
+        /// </summary>
+        [Tooltip("QuestNav build version.")]
+        [SerializeField]
+        private TMP_Text versionText;
+
+        /// <summary>
         /// IP address text
         /// </summary>
         [SerializeField]
@@ -145,10 +152,6 @@ namespace QuestNav.Core
         [Header("Passthrough Camera")]
         [SerializeField]
         private PassthroughCameraAccess cameraAccess;
-
-        [Tooltip("QuestNav build version.")]
-        [SerializeField]
-        private TMP_Text versionText;
 
         /// <summary>
         /// Current battery percentage of the device

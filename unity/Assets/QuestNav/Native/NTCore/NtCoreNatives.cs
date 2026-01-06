@@ -409,5 +409,14 @@ namespace QuestNav.Native.NTCore
 
         [DllImport("ntcore")]
         public static extern long NT_Now();
+
+        [DllImport("ntcore")]
+        public static extern void NT_AddSchema(
+            uint inst,
+            WpiString* name,
+            WpiString* type,
+            byte* schema,
+            UIntPtr schemaSize
+        );
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using Google.Protobuf;
+using Google.Protobuf.Reflection;
 using QuestNav.Utils;
 
 namespace QuestNav.Native.NTCore
@@ -256,17 +257,22 @@ namespace QuestNav.Native.NTCore
         /// </summary>
         /// <typeparam name="T">The protobuf message type</typeparam>
         /// <param name="name">The topic name</param>
-        /// <param name="classString">The protobuf class identifier</param>
+        /// <param name="messageDescriptor">The protobuf message descriptor for the message type</param>
         /// <param name="options">Publisher options</param>
         /// <returns>A protobuf publisher for the specified type</returns>
         public ProtobufPublisher<T> GetProtobufPublisher<T>(
             string name,
-            string classString,
+            MessageDescriptor messageDescriptor,
             PubSubOptions options
         )
             where T : IMessage<T>
         {
-            var rawPublisher = GetRawPublisher(name, "proto:" + classString, options);
+            AddProtobufSchema(messageDescriptor);
+            var rawPublisher = GetRawPublisher(
+                name,
+                "proto:" + messageDescriptor.FullName,
+                options
+            );
             return new ProtobufPublisher<T>(rawPublisher);
         }
 
@@ -287,6 +293,49 @@ namespace QuestNav.Native.NTCore
         {
             var rawSubscriber = GetRawSubscriber(name, "proto:" + classString, options);
             return new ProtobufSubscriber<T>(rawSubscriber);
+        }
+
+        /// <summary>
+        /// Registers a data schema.  Data schemas provide information for how a certain data type string can be
+        /// decoded.  This is used to enable rich client features like automatic decoding and display of protobuf
+        /// messages in tools that support NetworkTables schemas, like AdvantageScope and OutlineViewer. This will
+        /// publish the whole file descriptor for the protobuf message. The schema is published with the name that
+        /// of the protobuf file, and the type is "proto:FileDescriptorProto".
+        /// </summary>
+        /// <param name="descriptor">Protobuf MessageDescriptor whose schema to publish</param>
+        private void AddProtobufSchema(MessageDescriptor descriptor)
+        {
+            // Get the file descriptor for the message type
+            var file = descriptor.File;
+            if (file.Name.Equals("commands.proto"))
+            {
+                // The robot is publishing a conflicting and smaller schema for commands.proto, causing the robot to crash. Don't publish it until we have a solution.
+                // See https://www.chiefdelphi.com/t/publishing-protobuf-schema-for-nt4/509849
+                return;
+            }
+            // Get the schema as a byte array, this is what will be published
+            var schema = file.ToProto().ToByteArray();
+            // Set the name and type
+            byte[] nameUtf8 = Encoding.UTF8.GetBytes("proto:" + file.Name);
+            byte[] typeUtf8 = Encoding.UTF8.GetBytes("proto:FileDescriptorProto");
+
+            fixed (
+                byte* namePtr = nameUtf8,
+                    typePtr = typeUtf8,
+                    schemaPtr = schema
+            )
+            {
+                WpiString nameStr = new WpiString { str = namePtr, len = (UIntPtr)nameUtf8.Length };
+                WpiString typeStr = new WpiString { str = typePtr, len = (UIntPtr)typeUtf8.Length };
+
+                NtCoreNatives.NT_AddSchema(
+                    handle,
+                    &nameStr,
+                    &typeStr,
+                    schemaPtr,
+                    (UIntPtr)schema.Length
+                );
+            }
         }
 
         /// <summary>

@@ -208,14 +208,14 @@ namespace QuestNav.Network
             // High-frequency pose data (120Hz) - robot needs this for real-time tracking
             frameDataPublisher = ntInstance.GetProtobufPublisher<ProtobufQuestNavFrameData>(
                 QuestNavConstants.Topics.FRAME_DATA,
-                "questnav.protos.data.ProtobufQuestNavFrameData",
+                ProtobufQuestNavFrameData.Descriptor,
                 QuestNavConstants.Network.NtPublisherSettings
             );
 
             // Low-frequency device status (3Hz) - robot uses this for diagnostics
             deviceDataPublisher = ntInstance.GetProtobufPublisher<ProtobufQuestNavDeviceData>(
                 QuestNavConstants.Topics.DEVICE_DATA,
-                "questnav.protos.data.ProtobufQuestNavDeviceData",
+                ProtobufQuestNavDeviceData.Descriptor,
                 QuestNavConstants.Network.NtPublisherSettings
             );
 
@@ -223,7 +223,7 @@ namespace QuestNav.Network
             commandResponsePublisher =
                 ntInstance.GetProtobufPublisher<ProtobufQuestNavCommandResponse>(
                     QuestNavConstants.Topics.COMMAND_RESPONSE,
-                    "questnav.protos.commands.ProtobufQuestNavCommandResponse",
+                    ProtobufQuestNavCommandResponse.Descriptor,
                     QuestNavConstants.Network.NtPublisherSettings
                 );
 

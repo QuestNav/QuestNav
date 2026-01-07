@@ -9,6 +9,7 @@ using QuestNav.Utils;
 using QuestNav.WebServer;
 using UnityEngine;
 using static QuestNav.Config.Config;
+using static QuestNav.Core.QuestNavConstants;
 
 namespace QuestNav.Camera
 {
@@ -52,6 +53,11 @@ namespace QuestNav.Camera
         /// Whether the frame source has been initialized.
         /// </summary>
         private bool isInitialized;
+
+        /// <summary>
+        /// Whether high quality streaming is enabled.
+        /// </summary>
+        private bool isHighQualityStreamEnabled;
 
         /// <summary>
         /// Cached base URL for stream endpoints.
@@ -121,10 +127,13 @@ namespace QuestNav.Camera
                     ? Math.Clamp(compression.Value, 1, 100)
                     : compressionQuality;
 
-                // Find the best matching mode, or better
-                var bestMatch = FindBestMatchingModeOrBetter(width, height, fps);
+                // Find the best matching mode
+                var bestMatch = FindBestMatchingMode(width, height, fps);
                 if (bestMatch.HasValue)
                 {
+                    QueuedLogger.Log(
+                        $"Setting mode config to {bestMatch.Value} with quality {quality}"
+                    );
                     await configManager.SetStreamModeAsync(
                         new StreamMode(
                             bestMatch.Value.Width,
@@ -176,8 +185,7 @@ namespace QuestNav.Camera
             if (width.HasValue || height.HasValue || fps.HasValue)
             {
                 // Find the best matching mode
-                VideoMode? bestMatch = FindBestMatchingModeOrBetter(width, height, fps);
-
+                VideoMode? bestMatch = FindBestMatchingMode(width, height, fps);
                 if (bestMatch.HasValue && !cameraSource.Mode.Equals(bestMatch.Value))
                 {
                     QueuedLogger.Log($"Switching to mode: {bestMatch.Value}");
@@ -196,57 +204,71 @@ namespace QuestNav.Camera
         }
 
         /// <summary>
-        /// Finds the best matching video mode that meets or exceeds requested parameters.
-        /// Prefers modes that exactly match or minimally exceed the requested values.
+        /// Finds the best matching video mode that is closest to the requested parameters, without exceeding them.
         /// </summary>
-        /// <param name="width">Minimum requested width, or null</param>
-        /// <param name="height">Minimum requested height, or null</param>
-        /// <param name="fps">Minimum requested FPS, or null</param>
-        /// <returns>Best matching mode that meets or exceeds requirements, or null if no suitable mode found</returns>
-        private VideoMode? FindBestMatchingModeOrBetter(int? width, int? height, int? fps)
+        /// <param name="reqWidth">Requested width, or null to use the current width</param>
+        /// <param name="reqheight">Requested height, or null to use the current height</param>
+        /// <param name="reqFps">Requested FPS, or null to use the current FPS</param>
+        /// <returns>Best matching mode, or null if no suitable mode found</returns>
+        private VideoMode? FindBestMatchingMode(int? reqWidth, int? reqheight, int? reqFps)
         {
+            // If no parameters are specified, there's nothing to match against.
+            if (!reqWidth.HasValue && !reqheight.HasValue && !reqFps.HasValue)
+            {
+                return null;
+            }
+
+            // If any parameter is not specified, use the current mode's value for matching.
+            var currentMode = cameraSource.Mode;
+            var width = reqWidth ?? currentMode.Width;
+            var height = reqheight ?? currentMode.Height;
+            var fps = reqFps ?? currentMode.Fps;
+
             VideoMode? exactMatch = null;
             VideoMode? bestMatch = null;
-            int bestExcess = int.MaxValue; // Track how much we exceed the request
+            long bestScore = long.MaxValue;
 
             foreach (var mode in cameraSource.Modes)
             {
-                bool widthTooSmall = width.HasValue && mode.Width < width.Value;
-                bool heightTooSmall = height.HasValue && mode.Height < height.Value;
-                bool fpsTooSmall = fps.HasValue && mode.Fps < fps.Value;
-                if (widthTooSmall || heightTooSmall || fpsTooSmall)
+                // Restrict pixel count and fps unless high quality is enabled
+                if (
+                    !isHighQualityStreamEnabled
+                    && (
+                        (mode.Width * mode.Height) > VideoStream.MAX_LOW_QUAL_STREAM_PIXEL_COUNT
+                        || mode.Fps > VideoStream.MAX_LOW_QUAL_FRAMERATE
+                    )
+                )
                 {
-                    // Skip modes that don't meet minimum requirements
+                    continue;
+                }
+
+                // If a parameter is exceeded, skip this mode.
+                if (mode.Width > width || mode.Height > height || mode.Fps > fps)
+                {
                     continue;
                 }
 
                 // Check for exact match
-                bool widthExact = !width.HasValue || mode.Width == width.Value;
-                bool heightExact = !height.HasValue || mode.Height == height.Value;
-                bool fpsExact = !fps.HasValue || mode.Fps == fps.Value;
-
-                if (widthExact && heightExact && fpsExact)
+                if (mode.Width == width && mode.Height == height && mode.Fps == fps)
                 {
                     exactMatch = mode;
                     break;
                 }
 
-                // Calculate how much this mode exceeds the request
-                // Lower excess is better (closer to what was requested)
-                int widthExcess = width.HasValue ? mode.Width - width.Value : 0;
-                int heightExcess = height.HasValue ? mode.Height - height.Value : 0;
-                int fpsExcess = fps.HasValue ? mode.Fps - fps.Value : 0;
+                // Calculate how close this mode is to the requested parameters
+                // Lower is better (closer to what was requested)
+                int pixelCountDiff = (width * height) - (mode.Width * mode.Height);
+                int fpsDiff = fps - mode.Fps;
 
-                // Total excess score (pixel count difference + weighted (100X) FPS difference)
-                int totalExcess = (widthExcess * heightExcess) + (fpsExcess * 100);
-
-                if (totalExcess < bestExcess)
+                // Total score (pixel count difference + weighted (100X) FPS difference)
+                int totalDiff = pixelCountDiff + (fpsDiff * 100);
+                if (totalDiff < bestScore)
                 {
-                    bestExcess = totalExcess;
+                    bestScore = totalDiff;
                     bestMatch = mode;
                 }
             }
-
+            QueuedLogger.Log($"Best match result: Exact={exactMatch}, Best={bestMatch}");
             return exactMatch ?? bestMatch;
         }
 
@@ -275,6 +297,7 @@ namespace QuestNav.Camera
             // Attach to ConfigManager callbacks
             configManager.OnEnablePassthroughStreamChanged += OnEnablePassthroughStreamChanged;
             configManager.OnStreamModeChanged += OnStreamModeChanged;
+            configManager.OnEnableHighQualityStreamChanged += OnEnableHighQualityStreamChanged;
         }
 
         /// <summary>
@@ -315,7 +338,61 @@ namespace QuestNav.Camera
                     streamMode.Framerate,
                     streamMode.Quality
                 );
+
+                // Check if the applied mode matches the requested mode. This handles case where the config value is
+                // not valid. For example, high quality streaming could be disabled and the mode exceeded the allowed
+                // resolution or the stored value could be invalid after a system or app update.
+                var currentMode = cameraSource.Mode;
+                if (
+                    streamMode.Width != currentMode.Width
+                    || streamMode.Height != currentMode.Height
+                    || streamMode.Framerate != currentMode.Fps
+                )
+                {
+                    // The applied mode is different, the config value was not valid. Persist the actual applied mode.
+                    var appliedStreamMode = new StreamMode(
+                        currentMode.Width,
+                        currentMode.Height,
+                        currentMode.Fps,
+                        compressionQuality
+                    );
+                    configManager.SetStreamModeAsync(appliedStreamMode);
+                }
             });
+        }
+
+        /// <summary>
+        /// Handles high quality stream enable/disable config changes.
+        /// </summary>
+        /// <param name="enabled">Whether high quality streaming should be enabled.</param>
+        private async void OnEnableHighQualityStreamChanged(bool enabled)
+        {
+            QueuedLogger.Log($"High quality stream enabled changed to: {enabled}");
+
+            // Stream quality might need to be downgraded if high quality was just disabled
+            bool checkForDowngrade = isHighQualityStreamEnabled && !enabled;
+            isHighQualityStreamEnabled = enabled;
+
+            // If high quality is disabled, check if we need to downgrade the resolution
+            if (checkForDowngrade)
+            {
+                var currentMode = cameraSource.Mode;
+                if (
+                    currentMode.Width * currentMode.Height
+                        > VideoStream.MAX_LOW_QUAL_STREAM_PIXEL_COUNT
+                    || currentMode.Fps > VideoStream.MAX_LOW_QUAL_FRAMERATE
+                )
+                {
+                    QueuedLogger.Log("High quality stream disabled, downgrading stream mode");
+                    // Downgrade to best matching low quality mode
+                    await SetModeAndCompression(
+                        currentMode.Width,
+                        currentMode.Height,
+                        currentMode.Fps,
+                        compressionQuality
+                    );
+                }
+            }
         }
 
         /// <summary>
@@ -386,7 +463,7 @@ namespace QuestNav.Camera
                     compressionQuality = streamMode.Quality;
 
                     // Find best matching mode for the configured stream mode
-                    var bestMatch = FindBestMatchingModeOrBetter(
+                    var bestMatch = FindBestMatchingMode(
                         streamMode.Width,
                         streamMode.Height,
                         streamMode.Framerate

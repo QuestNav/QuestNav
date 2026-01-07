@@ -23,6 +23,11 @@ Passthrough video requires the "Allow headset camera access" permission in order
 Passthrough video is _DISABLED_ by default. It can be enabled and configured from the Settings tab of the web interface (eg: `http://10.TE.AM.201:5801`).
 
 - **Passthrough Camera Stream**: Disabled by default.
+- **High Quality Passthrough Stream**: Disabled by default. Allows resolutions above 640x480 and framerates faster than 30 fps to be selected in the configuration UI and with dashboards.
+
+:::warning
+High quality streaming can put heavy load on the headset CPU. This increased load may lead "dropped frames" for tracking data sent to your robot. High CPU also increases battery drain. High quality video can use excessive bandwidth (up to 100 Mbits/second), which can far exceed the available bandwidth during an FRC match.
+:::
 
 ### Streaming To Dashboard
 Once enabled, Passthrough video can be viewed in your Dashboard (e.g. Elastic)

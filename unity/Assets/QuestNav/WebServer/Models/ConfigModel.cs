@@ -37,6 +37,7 @@ namespace QuestNav.WebServer
         public string debugIpOverride;
         public bool enableAutoStartOnBoot;
         public bool enablePassthroughStream;
+        public bool enableHighQualityStream;
         public StreamModeModel streamMode;
         public bool enableDebugLogging;
         public long timestamp;
@@ -52,6 +53,7 @@ namespace QuestNav.WebServer
         public string debugIpOverride;
         public bool? EnableAutoStartOnBoot;
         public bool? EnablePassthroughStream;
+        public bool? EnableHighQualityStream;
         public StreamModeModel StreamMode;
         public bool? EnableDebugLogging;
     }

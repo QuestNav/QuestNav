@@ -17,11 +17,17 @@
       <div class="controls-row">
         <div class="controls-left">
           <div class="control-container">
-            <label for="stream-mode">Mode:</label>
-            <select id="stream-mode" v-model="selectedStreamMode">
-              <option v-for="option in streamModeOptions" :key="option.text" :value="option.value">
+            <label for="stream-resolution">Resolution:</label>
+            <select id="stream-resolution" v-model="selectedResolution">
+              <option v-for="option in resolutionOptions" :key="option.text" :value="option.value">
                 {{ option.text }}
               </option>
+            </select>
+          </div>
+          <div class="control-container">
+            <label for="stream-framerate">FPS:</label>
+            <select id="stream-framerate" v-model="selectedFramerate">
+              <option v-for="rate in framerateOptions" :key="rate" :value="rate">{{ rate }}</option>
             </select>
           </div>
           <div class="control-container">
@@ -51,24 +57,37 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useConfigStore } from '../stores/config'
-import type { VideoModeModel } from '../types'
 import { videoApi } from '../api/video'
 
 const configStore = useConfigStore()
 const cameraContainer = ref<HTMLElement | null>(null)
 const isFullscreen = ref(false)
 
-const streamEnabled = computed(() => {
-  return configStore.config?.enablePassthroughStream ?? false
+const streamEnabled = computed(() => configStore.config?.enablePassthroughStream ?? false)
+const highQualityStreamEnabled = computed(() => configStore.config?.enableHighQualityStream ?? false)
+
+const allResolutionOptions = ref<{ text: string; value: { width: number; height: number } }[]>([])
+const resolutionOptions = computed(() => {
+  if (highQualityStreamEnabled.value) {
+    return allResolutionOptions.value
+  }
+  return allResolutionOptions.value.filter(opt => opt.value.width * opt.value.height <= 307200) // 640 * 480
 })
 
-const streamModeOptions = ref<{ text: string; value: VideoModeModel }[]>([])
+const allFramerateOptions = ref<number[]>([])
+const framerateOptions = computed(() => {
+  if (highQualityStreamEnabled.value) {
+    return allFramerateOptions.value
+  }
+  return allFramerateOptions.value.filter(rate => rate <= 30)
+})
 
-const selectedStreamMode = ref<VideoModeModel>({ width: 320, height: 240, framerate: 24 })
+const selectedResolution = ref({ width: 320, height: 240 })
+const selectedFramerate = ref(24)
 const selectedStreamQuality = ref(75)
 const cacheBuster = ref(Date.now())
 
-const streamUrl = computed(() => `./video?t=${cacheBuster.value}`)
+const streamUrl = computed(() => `${videoApi.baseUrl}/video?t=${cacheBuster.value}`)
 
 const activeStreamSettings = computed(() => {
   const mode = configStore.config?.streamMode
@@ -76,42 +95,93 @@ const activeStreamSettings = computed(() => {
   return `${mode.width}x${mode.height}@${mode.framerate}fps Quality: ${mode.quality}`
 })
 
+function syncResolutionSelection() {
+  // Try to re-sync with the configured resolution
+  if (configStore.config?.streamMode) {
+    const { width, height } = configStore.config.streamMode
+    const matchingOption = resolutionOptions.value.find(
+      opt => opt.value.width === width && opt.value.height === height
+    )
+
+    if (matchingOption) {
+      // If the configured resolution is valid for the current settings, apply it
+      selectedResolution.value = matchingOption.value
+      return
+    }
+  }
+
+  // If the configured resolution is not available or doesn't exist,
+  // check if the current selection is still valid in the filtered list.
+  const currentSelectionValid = resolutionOptions.value.some(
+    opt =>
+      opt.value.width === selectedResolution.value.width && opt.value.height === selectedResolution.value.height
+  )
+
+  // If the current selection is no longer valid (e.g., high quality was turned off)
+  // and there are options available, default to the first one.
+  if (!currentSelectionValid && resolutionOptions.value.length > 0) {
+    selectedResolution.value = resolutionOptions.value[0].value
+  }
+}
+
+function syncFramerateSelection() {
+  // Try to re-sync with the configured framerate
+  if (configStore.config?.streamMode) {
+    const { framerate } = configStore.config.streamMode
+    const matchingOption = framerateOptions.value.find(rate => rate === framerate)
+
+    if (matchingOption) {
+      // If the configured framerate is valid for the current settings, apply it
+      selectedFramerate.value = matchingOption
+      return
+    }
+  }
+
+  // If the configured framerate is not available or doesn't exist,
+  // check if the current selection is still valid in the filtered list.
+  const currentSelectionValid = framerateOptions.value.includes(selectedFramerate.value)
+
+  // If the current selection is no longer valid (e.g., high quality was turned off)
+  // and there are options available, default to the first one.
+  if (!currentSelectionValid && framerateOptions.value.length > 0) {
+    selectedFramerate.value = framerateOptions.value[0]
+  }
+}
+
 async function loadVideoModes() {
   if (!streamEnabled.value) {
-    streamModeOptions.value = []
+    allResolutionOptions.value = []
     return
   }
 
   try {
     const modes = await videoApi.getVideoModes()
-    streamModeOptions.value = modes.map(mode => ({
-      text: `${mode.width}x${mode.height} MJPEG ${mode.framerate} fps`,
-      value: mode,
-    }))
+    const uniqueResolutions = [...new Map(modes.map(m => [`${m.width}x${m.height}`, m])).values()]
+    const uniqueFramerates = [...new Set(modes.map(m => m.framerate))].sort((a, b) => a - b)
 
-    // Set the initial selected mode from the config
-    if (configStore.config?.streamMode) {
-      const matchingOption = streamModeOptions.value.find(
-        opt =>
-          opt.value.width === configStore.config!.streamMode.width &&
-          opt.value.height === configStore.config!.streamMode.height &&
-          opt.value.framerate === configStore.config!.streamMode.framerate
-      )
-      if (matchingOption) {
-        selectedStreamMode.value = matchingOption.value
-      } else {
-        // If the configured mode is not in the list, use it directly
-        selectedStreamMode.value = configStore.config.streamMode
-      }
-    }
+    allResolutionOptions.value = uniqueResolutions.map(mode => ({
+      text: `${mode.width}x${mode.height}`,
+      value: { width: mode.width, height: mode.height },
+    }))
+    allFramerateOptions.value = uniqueFramerates
+
+    syncResolutionSelection()
+    syncFramerateSelection()
   } catch (error) {
     console.error('Failed to load stream modes:', error)
-    streamModeOptions.value = [] // Clear options on error
+    // Clear options on error
+    allResolutionOptions.value = []
+    allFramerateOptions.value = []
   }
 }
 
 function applySettings() {
-  configStore.updateStreamMode({ ...selectedStreamMode.value, quality: selectedStreamQuality.value })
+  configStore.updateStreamMode({
+    width: selectedResolution.value.width,
+    height: selectedResolution.value.height,
+    framerate: selectedFramerate.value,
+    quality: selectedStreamQuality.value,
+  })
   cacheBuster.value = Date.now()
 }
 
@@ -135,6 +205,12 @@ watch(streamEnabled, (newValue, oldValue) => {
   if (newValue && !oldValue) {
     loadVideoModes()
   }
+})
+
+watch(highQualityStreamEnabled, () => {
+  // When the high quality setting changes, the available options change, so we must re-sync.
+  syncResolutionSelection()
+  syncFramerateSelection()
 })
 
 onMounted(() => {

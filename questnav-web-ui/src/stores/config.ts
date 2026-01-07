@@ -102,6 +102,19 @@ export const useConfigStore = defineStore('config', () => {
     }
   }
 
+  async function updateEnableHighQualityStream(value: boolean) {
+    try {
+      const response = await configApi.updateConfig({ enableHighQualityStream: value })
+      if (response.success) {
+        await loadConfig(false)
+      }
+      return response.success
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update'
+      return false
+    }
+  }
+
   async function updateStreamMode(value: StreamModeModel) {
     try {
       const response = await configApi.updateConfig({ streamMode: value })
@@ -141,6 +154,7 @@ export const useConfigStore = defineStore('config', () => {
     updateDebugIpOverride,
     updateEnableAutoStartOnBoot,
     updateEnablePassthroughStream,
+    updateEnableHighQualityStream,
     updateEnableDebugLogging,
     updateStreamMode,
     resetToDefaults

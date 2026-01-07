@@ -1,13 +1,10 @@
+import { QuestNavApi } from './questnav'
 import type { VideoModeModel } from '../types'
 
-async function getVideoModes(): Promise<VideoModeModel[]> {
-  const response = await fetch('/api/video-modes')
-  if (!response.ok) {
-    throw new Error('Failed to fetch video modes')
+class VideoApi extends QuestNavApi {
+  async getVideoModes(): Promise<VideoModeModel[]> {
+    return this.request<VideoModeModel[]>('/api/video-modes')
   }
-  return response.json()
 }
 
-export const videoApi = {
-  getVideoModes,
-}
+export const videoApi = new VideoApi()

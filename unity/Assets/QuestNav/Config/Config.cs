@@ -56,6 +56,11 @@ namespace QuestNav.Config
             public bool EnablePassthroughStream { get; set; } = false;
 
             /// <summary>
+            /// Whether to allow high-resolution stream modes (greater than 640x480).
+            /// </summary>
+            public bool EnableHighQualityStream { get; set; } = false;
+
+            /// <summary>
             /// The width of the stream in pixels
             /// </summary>
             public int StreamWidth { get; set; } = 320;

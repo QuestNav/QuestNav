@@ -348,6 +348,7 @@ namespace QuestNav.WebServer.Server
                 debugIpOverride = await configManager.GetDebugIpOverrideAsync(),
                 enableAutoStartOnBoot = await configManager.GetEnableAutoStartOnBootAsync(),
                 enablePassthroughStream = await configManager.GetEnablePassthroughStreamAsync(),
+                enableHighQualityStream = await configManager.GetEnableHighQualityStreamAsync(),
                 streamMode = new StreamModeModel
                 {
                     width = streamMode.Width,
@@ -396,6 +397,12 @@ namespace QuestNav.WebServer.Server
                 {
                     await configManager.SetEnablePassthroughStreamAsync(
                         request.EnablePassthroughStream.Value
+                    );
+                }
+                if (request.EnableHighQualityStream.HasValue)
+                {
+                    await configManager.SetEnableHighQualityStreamAsync(
+                        request.EnableHighQualityStream.Value
                     );
                 }
                 if (request.StreamMode != null)

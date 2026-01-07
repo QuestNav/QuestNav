@@ -19,6 +19,7 @@ export interface ConfigResponse {
   debugIpOverride: string
   enableAutoStartOnBoot: boolean
   enablePassthroughStream: boolean
+  enableHighQualityStream: boolean
   enableDebugLogging: boolean
   streamMode: StreamModeModel
   timestamp: number
@@ -29,6 +30,7 @@ export interface ConfigUpdateRequest {
   debugIpOverride?: string
   enableAutoStartOnBoot?: boolean
   enablePassthroughStream?: boolean
+  enableHighQualityStream?: boolean
   enableDebugLogging?: boolean
   streamMode?: StreamModeModel
 }

@@ -156,6 +156,28 @@
                 </label>
               </ConfigField>
 
+              <!-- High Quality Passthrough Stream -->
+              <ConfigField
+                title="High Quality Passthrough Stream"
+                control-class="checkbox-control"
+              >
+                <template #description>
+                  Enable high quality streaming for the passthrough camera.
+                  <div class="warning-text">
+                    <strong>Warning:</strong> High quality streaming can put heavy load on the headset CPU, leading to
+                    degraded tracking frequency, rapid battery drain, and network instability.
+                  </div>
+                </template>
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    :checked="configStore.config.enableHighQualityStream"
+                    @change="handleHighQualityStreamChange"
+                  />
+                  {{ configStore.config.enableHighQualityStream ? 'Enabled' : 'Disabled' }}
+                </label>
+              </ConfigField>
+
               <!-- Reset to Defaults -->
               <ConfigField
                 title="Reset Configuration"
@@ -283,6 +305,11 @@ async function handlePassthroughStreamChange(event: Event) {
   await configStore.updateEnablePassthroughStream(target.checked)
 }
 
+async function handleHighQualityStreamChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  await configStore.updateEnableHighQualityStream(target.checked)
+}
+
 async function handleReset() {
   if (confirm('Reset all settings to defaults?')) {
     await configStore.resetToDefaults()
@@ -402,6 +429,11 @@ async function handleUploadDatabase(event: Event) {
 .override-badge {
   background: var(--text-secondary);
   color: white;
+}
+
+.warning-text {
+  color: var(--warning-color);
+  margin-top: 0.5rem;
 }
 
 .submit-button {

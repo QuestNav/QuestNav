@@ -14,7 +14,7 @@ namespace QuestNav.Native.NTCore
         public static PubSubOptions AllDefault { get; } =
             new PubSubOptions()
             {
-                Periodic = 0.005,
+                Periodic = 0.02,
                 SendAll = true,
                 KeepDuplicates = true,
                 PollStorage = 0,

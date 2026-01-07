@@ -333,7 +333,10 @@ namespace QuestNav.Core
                 rotation,
                 currentlyTracking
             );
-
+            
+            // Update position reset FIFO Queue
+            commandProcessor.PoseResetCommand.UpdatePoseHistory(networkTableConnection.NtNow);
+            
             // Check for and execute any pending commands from the robot
             // Commands include pose resets, calibration requests, etc.
             commandProcessor.ProcessCommands();
@@ -356,7 +359,7 @@ namespace QuestNav.Core
         private void SlowUpdate()
         {
             // Poll for connection status, logging, ip address changes, etc.
-            networkTableConnection.Periodic();
+            networkTableConnection.SlowPeriodic();
 
             // Update UI elements like connection status, IP address display, team number validation
             // UI updates don't need to be real-time, 3Hz provides smooth visual feedback

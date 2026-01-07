@@ -103,7 +103,7 @@ namespace QuestNav.Network
         /// <summary>
         /// Performs periodic updates including connection polling and logging.
         /// </summary>
-        void Periodic();
+        void SlowPeriodic();
 
         /// <summary>
         /// Populates subscribed events with initial values
@@ -252,7 +252,7 @@ namespace QuestNav.Network
                 {
                     SendAll = true,
                     KeepDuplicates = true,
-                    Periodic = 0.005,
+                    Periodic = 0.02,
                     PollStorage = 20,
                 }
             );
@@ -316,6 +316,7 @@ namespace QuestNav.Network
 
             // Standard mode: Use team number to resolve robot address
             QueuedLogger.Log($"Setting Team number to {teamNumber}");
+            ntInstance.SetAddresses(new (string addr, int port)[] { });
             ntInstance.SetTeamNumber(teamNumber, QuestNavConstants.Network.NT_SERVER_PORT);
             teamNumberSet = true;
             ipAddressSet = false;
@@ -390,6 +391,7 @@ namespace QuestNav.Network
 
             // Publish data
             frameDataPublisher.Set(frameData);
+            ntInstance.Flush();
         }
 
         /// <summary>
@@ -409,6 +411,7 @@ namespace QuestNav.Network
 
             // Publish data
             deviceDataPublisher.Set(deviceData);
+            // Don't flush here, it will be flushed anyways next frame when we call PublishFrameData
         }
 
         /// <summary>
@@ -502,7 +505,7 @@ namespace QuestNav.Network
         /// <summary>
         /// Performs periodic updates including connection polling and logging.
         /// </summary>
-        public void Periodic()
+        public void SlowPeriodic()
         {
             PollForNewIpAddress();
             PollForConnectionStatus();

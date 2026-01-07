@@ -316,6 +316,20 @@ namespace QuestNav.Native.NTCore
         }
 
         /// <summary>
+        /// Forces an immediate flush of all local entry changes to network.
+        /// Normally this is done on a regularly scheduled interval (set
+        /// by update rates on individual publishers).
+        ///
+        /// Note: flushes are rate limited to avoid excessive network traffic.  If
+        /// the time between calls is too short, the flush will occur after the minimum
+        /// time elapses---5ms---rather than immediately.
+        /// </summary>
+        public void Flush()
+        {
+            NtCoreNatives.NT_Flush(handle);
+        }
+
+        /// <summary>
         /// Maps an NtType to its NetworkTables type string representation (e.g., "boolean", "string[]").
         /// </summary>
         /// <param name="type">The NetworkTables type.</param>

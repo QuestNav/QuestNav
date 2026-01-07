@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
+using LibJpegTurboUnity;
 using Meta.XR;
 using QuestNav.Config;
 using QuestNav.Core;
+using QuestNav.Native.AprilTag;
 using QuestNav.Network;
 using QuestNav.Utils;
 using QuestNav.WebServer;
@@ -190,7 +192,7 @@ namespace QuestNav.Camera
                     cameraSource.SelectedModeChanged += OnSelectedModeChanged;
                     // Arbitrarily pick the first, I guess?
                     // TODO: This should be stored in playerPrefs so that it doesn't reset
-                    cameraSource.Mode = cameraSource.Modes[3];
+                    cameraSource.Mode = cameraSource.Modes[74];
 
                     // Start initialization coroutine
                     frameCaptureCoroutine = coroutineHost.StartCoroutine(FrameCaptureCoroutine());
@@ -220,30 +222,35 @@ namespace QuestNav.Camera
                 }
             }
         }
-
+        
         /// <summary>
         /// Captures frames from the passthrough camera at the requested frame rate and encodes them as JPEG.
         /// </summary>
         public IEnumerator FrameCaptureCoroutine()
         {
-            QueuedLogger.Log("Initialized");
+            // START DEBUG:
+            Debug.Log("Starting AprilTag");
+            Debug.Log("Creating detector");
+            AprilTagDetector aprilTagDetector = new AprilTagDetector(threadCount:5, quadDecimate:2);
+
+            Debug.Log("Creating family");
+            AprilTagFamily family = new Tag36h11();
+
+            Debug.Log("Adding family to detector");
+            aprilTagDetector.AddFamily(family);
+
+            Debug.Log("Initializing LJPGT");
+            var compressor = new LJTCompressor();
+            Debug.Log("Initialized");
 
             while (true)
             {
+                Texture texture;
+                
                 try
                 {
-                    var texture = cameraAccess.GetTexture();
-                    if (texture is not Texture2D texture2D)
-                    {
-                        QueuedLogger.LogError(
-                            $"GetTexture returned an incompatible object ({texture.GetType().Name})"
-                        );
-                        yield break;
-                    }
-
-                    CurrentFrame = new EncodedFrame(Time.frameCount, texture2D.EncodeToJPG());
-                }
-                catch (NullReferenceException ex)
+                    texture = cameraAccess.GetTexture();
+                } catch (NullReferenceException ex)
                 {
                     // This probably means the app hasn't been given permission to access the headset camera.
                     QueuedLogger.LogError(
@@ -251,8 +258,38 @@ namespace QuestNav.Camera
                     );
                     yield break;
                 }
+                
+                
+                // var texture = cameraAccess.GetTexture();
+                    // if (texture is not Texture2D texture2D)
+                    // {
+                    //     QueuedLogger.LogError(
+                    //         $"GetTexture returned an incompatible object ({texture.GetType().Name})"
+                    //     );
+                    //     yield break;
+                    // }
+                    // // rawJpeg = compressor.EncodeJPG(texture2D, 30);
+                    // CurrentFrame = new EncodedFrame(Time.frameCount, rawJpeg);
 
-                yield return new WaitForSeconds(FrameDelaySeconds);
+                    var colors = cameraAccess.GetColors();
+                    var resolution = cameraAccess.CurrentResolution;
+                    using var nativeImg = ImageU8.FromPassthroughCamera(
+                        colors,
+                        resolution.x,
+                        resolution.y,
+                        flipVertically: true
+                    );
+
+                    // Debug.Log("Passing frame into detector");
+                    var results = aprilTagDetector.Detect(nativeImg);
+                    // Debug.Log("Printing results");
+                    foreach (var result in results)
+                    {
+                        Debug.Log(result);
+                    }
+                    results.Dispose();
+                    
+                    yield return new WaitForSeconds(FrameDelaySeconds);
             }
         }
     }

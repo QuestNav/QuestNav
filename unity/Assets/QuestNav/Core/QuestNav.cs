@@ -60,6 +60,13 @@ namespace QuestNav.Core
         private Toggle autoStartToggle;
 
         /// <summary>
+        /// QuestNav build version text
+        /// </summary>
+        [Tooltip("QuestNav build version.")]
+        [SerializeField]
+        private TMP_Text versionText;
+
+        /// <summary>
         /// IP address text
         /// </summary>
         [SerializeField]
@@ -226,6 +233,8 @@ namespace QuestNav.Core
             QueuedLogger.Initialize();
             // Disable stack traces for Log-level logging
             Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+
+            versionText.text = Application.version;
 
             configManager = new ConfigManager();
 

@@ -573,8 +573,18 @@ namespace QuestNav.WebServer.Server
             // Create an anonymous object to represent the model we expect to receive
             var request = new
             {
-                position = new { x = 0f, y = 0f, z = 0f},
-                eulerAngles = new { pitch = 0f, roll = 0f, yaw = 0f }
+                position = new
+                {
+                    x = 0f,
+                    y = 0f,
+                    z = 0f,
+                },
+                eulerAngles = new
+                {
+                    pitch = 0f,
+                    roll = 0f,
+                    yaw = 0f,
+                },
             };
             request = JsonConvert.DeserializeAnonymousType(body, request);
             var position = request.position is not null
@@ -582,9 +592,10 @@ namespace QuestNav.WebServer.Server
                 : Vector3.zero;
             var rotation = request.eulerAngles is not null
                 ? Quaternion.Euler(
-                    request.eulerAngles.roll, 
+                    request.eulerAngles.roll,
                     request.eulerAngles.yaw,
-                    request.eulerAngles.pitch)
+                    request.eulerAngles.pitch
+                )
                 : Quaternion.identity;
             webServerManager.RequestPoseReset(position, rotation);
             await SendJsonResponse(

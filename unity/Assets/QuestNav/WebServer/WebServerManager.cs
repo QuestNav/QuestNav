@@ -209,7 +209,7 @@ namespace QuestNav.WebServer
         #endregion
 
         #region Main Thread Callbacks
-        
+
         /// <summary>
         /// Requests a pose reset to be executed on the main thread.
         /// Called from ConfigServer on background HTTP thread.
@@ -244,7 +244,7 @@ namespace QuestNav.WebServer
                         X = rotation.x,
                         Y = rotation.y,
                         Z = rotation.z,
-                        W = rotation.w
+                        W = rotation.w,
                     },
                 },
             };

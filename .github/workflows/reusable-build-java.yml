@@ -54,8 +54,8 @@ jobs:
       - name: Build Library
         run: |
           ./gradlew build \
-            -PquestnavVersion="${{ steps.version-info.outputs.version }}" \
-            -PreleaseType="${{ steps.version-info.outputs.version-type }}"
+            -Pversion="${{ steps.version-info.outputs.version }}" \
+            -PversionType="${{ steps.version-info.outputs.version-type }}"
 
       - name: Upload JAR Artifact
         id: upload-jar

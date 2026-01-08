@@ -26,8 +26,9 @@ ext {
             (mavenRepository == null && (versionType in ['dev', 'snapshot', 'pr'] || version.contains('-SNAPSHOT')))
 }
 
-// Set the base name for all archives globally
-archivesBaseName = artifactId
+// Set the project version and base name for all archives globally
+version = ext.version
+archivesBaseName = ext.artifactId
 
 // Java configuration
 java {
@@ -215,7 +216,6 @@ task buildInfo {
 
     doLast {
         println "QuestNavLib Build Information:"
-        println "  Base Version: ${baseVersion}"
         println "  Release Type: ${versionType}"
         println "  Full Version: ${version}"
         println "  FRC Year: ${frcYear}"
@@ -242,6 +242,16 @@ wrapper {
 clean {
     delete "$buildDir/generated"
     delete "$buildDir/outputs"
+}
+
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': version,
+                'Build-Timestamp': new Date().format("yyyy-MM-dd HH:mm:ss")
+                )
+    }
 }
 
 spotless {

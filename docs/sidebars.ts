@@ -50,6 +50,11 @@ const sidebars: SidebarsConfig = {
           label: 'Overview',
         },
         {
+          type: 'doc',
+          id: 'api-reference/web-api',
+          label: 'Web API',
+        },
+        {
           type: 'link',
           label: 'Protocol Buffers →',
           href: 'https://questnav.gg/static/api/proto/',

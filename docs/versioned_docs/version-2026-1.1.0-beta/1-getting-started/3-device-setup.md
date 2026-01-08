@@ -34,10 +34,6 @@ Before you can install custom applications on your Quest, you need to set up a d
 Developer mode is required to install and use custom applications like QuestNav. Without it, you won't be able to complete the installation process.
 :::
 
-:::tip
-The following steps can be automated by visiting the [QuestNav Setup Page](https://setup.questnav.gg/) and following the steps provided.
-:::
-
 ## Optimizing for QuestNav
 
 Once developer mode is enabled, you'll need to adjust several system settings:
@@ -66,7 +62,7 @@ Alternatively, you can use ADB with this command:
 adb shell svc bluetooth disable
 ```
 
-:::info
+:::note
 Disabling Bluetooth will break the companion app functionality, but this is necessary for competition reliability.
 :::
 

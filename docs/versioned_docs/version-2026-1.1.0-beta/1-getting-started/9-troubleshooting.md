@@ -3,7 +3,7 @@ title: Troubleshooting
 ---
 # Troubleshooting
 
-This guide covers common issues you might encounter when setting up and using QuestNav, along with their solutions. If you experience problems not covered here, please reach out on the [QuestNav Discord server](https://discord.gg/Zfan2qgkRZ) or [Chief Delphi thread](https://www.chiefdelphi.com/t/questnav-the-best-robot-pose-tracking-system-in-frc/476083).
+This guide covers common issues you might encounter when setting up and using QuestNav, along with their solutions. If you experience problems not covered here, please reach out on the [QuestNav Discord server](https://discord.gg/hD3FtR7YAZ) or [Chief Delphi thread](https://www.chiefdelphi.com/t/questnav-the-best-robot-pose-tracking-system-in-frc/476083).
 
 ## Connection Issues
 
@@ -225,7 +225,7 @@ If you've tried the solutions above and are still experiencing issues:
 
 1. Take a video of the problem if possible
 2. Gather log files from both QuestNav and robot
-3. Post details on the [QuestNav Discord](https://discord.gg/Zfan2qgkRZ) or [Chief Delphi thread](https://www.chiefdelphi.com/t/questnav-the-best-robot-pose-tracking-system-in-frc/476083)
+3. Post details on the [QuestNav Discord](https://discord.gg/hD3FtR7YAZ) or [Chief Delphi thread](https://www.chiefdelphi.com/t/questnav-the-best-robot-pose-tracking-system-in-frc/476083)
 4. Include your Quest model, robot controller, and QuestNav version
 
 :::tip

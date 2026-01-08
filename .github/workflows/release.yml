@@ -7,6 +7,11 @@ on:
         required: false
         type: string
         default: '2025-1.0.0-beta'
+      force-release:
+        description: 'Force publishing of all jobs'
+        required: true
+        type: boolean
+        default: false
 concurrency:
   group: publish-release
   cancel-in-progress: false
@@ -66,9 +71,10 @@ jobs:
 
   build-web-ui:
     if: |
-      needs.determine-publishable-changes.outputs.web-ui-changed == 'true' ||
+      (needs.determine-publishable-changes.outputs.web-ui-changed == 'true' ||
       needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
-      needs.determine-publishable-changes.outputs.java-changed == 'true'
+      needs.determine-publishable-changes.outputs.java-changed == 'true') ||
+      inputs.force-release
     needs: [determine-publishable-changes]
     uses: ./.github/workflows/reusable-build-web-ui.yml
     with:
@@ -76,9 +82,10 @@ jobs:
 
   build-apk:
     if: |
-      needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
+      (needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
       needs.determine-publishable-changes.outputs.java-changed == 'true' ||
-      needs.determine-publishable-changes.outputs.web-ui-changed
+      needs.determine-publishable-changes.outputs.web-ui-changed == 'true') ||
+      inputs.force-release
     needs: [build-proto-csharp, build-web-ui, determine-publishable-changes]
     uses: ./.github/workflows/reusable-build-csharp.yml
     with:
@@ -90,7 +97,8 @@ jobs:
 
   publish-docs:
     if: |
-      needs.determine-publishable-changes.outputs.docs-changed == 'true'
+      (needs.determine-publishable-changes.outputs.docs-changed == 'true') ||
+      inputs.force-release
     needs: [build-proto-java, build-proto-csharp, build-web-ui, determine-publishable-changes]
     uses: ./.github/workflows/reusable-publish-docs.yml
     permissions:
@@ -102,9 +110,10 @@ jobs:
   
   publish-java:
     if: |
-      needs.determine-publishable-changes.outputs.java-changed == 'true' ||
+      (needs.determine-publishable-changes.outputs.java-changed == 'true' ||
       needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
-      needs.determine-publishable-changes.outputs.web-ui-changed
+      needs.determine-publishable-changes.outputs.web-ui-changed == 'true') ||
+      inputs.force-release
     needs: [build-proto-java, determine-publishable-changes]
     uses: ./.github/workflows/reusable-publish-java.yml
     with:
@@ -115,9 +124,10 @@ jobs:
 
   github-release:
     if: |
-      needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
+      (needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
       needs.determine-publishable-changes.outputs.java-changed == 'true' ||
-      needs.determine-publishable-changes.outputs.web-ui-changed
+      needs.determine-publishable-changes.outputs.web-ui-changed == 'true') ||
+      inputs.force-release
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -205,7 +205,7 @@ import CalibrationForm from './CalibrationForm.vue'
 
 const configStore = useConfigStore()
 const activeTab = ref<string>('Status')
-const tabs = ['Status', 'Logs', 'Calibratino', 'Camera', 'Settings']
+const tabs = ['Status', 'Logs', 'Calibration', 'Camera', 'Settings']
 let pollInterval: number | null = null
 
 const pendingTeamNumber = ref<number | null>(null)

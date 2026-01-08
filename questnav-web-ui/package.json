@@ -10,6 +10,7 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@math.gl/core": "^4.1.0",
     "@mytskine/curve-fitting": "^1.2.0",
     "pinia": "^2.1.7",
     "vue": "^3.4.0"

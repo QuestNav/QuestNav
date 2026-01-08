@@ -104,9 +104,10 @@ class ConfigApi {
   async restartApp(): Promise<SimpleResponse> {
     return this.request('/api/restart', { method: 'POST' })
   }
-  
-  async resetPose(): Promise<SimpleResponse> {
-    return this.request('/api/reset-pose', { method: 'POST' })
+
+  async resetPose(position?: {x: number, y: number, z: number}, eulerAngles?: {pitch: number, roll: number, yaw: number}): Promise<SimpleResponse> {
+    const body = {position, eulerAngles}
+    return this.request('/api/reset-pose', { method: 'POST', body: JSON.stringify(body) })
   }
 }
 

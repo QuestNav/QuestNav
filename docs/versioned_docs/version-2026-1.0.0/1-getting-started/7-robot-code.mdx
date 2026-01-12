@@ -75,7 +75,7 @@ PoseFrame[] poseFrames = questNav.getAllUnreadPoseFrames();
 
 if (poseFrames.length > 0) {
     // Get the most recent Quest pose
-    Pose3d questPose = poseFrames[poseFrames.length - 1].questPose();
+    Pose3d questPose = poseFrames[poseFrames.length - 1].questPose3d();
 
     // Transform by the mount pose to get your robot pose
     Pose3d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());

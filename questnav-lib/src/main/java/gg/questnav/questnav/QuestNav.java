@@ -597,14 +597,10 @@ public class QuestNav {
   /**
    * Retrieves the QuestNav-lib version number.
    *
-   * @return The version number as a String, or "0-0.0.0" if unable to retrieve.
+   * @return The version number as a String.
    */
   public String getLibVersion() {
-    var version = QuestNav.class.getPackage().getImplementationVersion();
-    if (version == null) {
-      return "0-0.0.0";
-    }
-    return version;
+    return BuildConfig.APP_VERSION;
   }
 
   /**

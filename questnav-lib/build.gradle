@@ -3,6 +3,7 @@ plugins {
     id 'maven-publish'
     id 'edu.wpi.first.GradleRIO' version '2025.3.2'
     id 'com.diffplug.spotless' version '6.20.0'
+    id 'com.github.gmazzo.buildconfig' version '6.0.7'
 }
 
 // Version and build configuration
@@ -244,6 +245,17 @@ clean {
     delete "$buildDir/outputs"
 }
 
+// Generates build config class for version info on robot.
+// WPILib uses a shadow JAR, so it doesn't include library manifests on the robot.
+buildConfig {
+    packageName("gg.questnav.questnav")
+
+    buildConfigField(String, 'APP_NAME', project.name)
+    buildConfigField(String, "APP_VERSION", provider { version })
+    buildConfigField(String, "BUILD_TIMESTAMP", provider { new Date().format("yyyy-MM-dd HH:mm:ss") })
+}
+
+// Add manifest to JAR (does not get deployed to the robot.)
 jar {
     manifest {
         attributes(

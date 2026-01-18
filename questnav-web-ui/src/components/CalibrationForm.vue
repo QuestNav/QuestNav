@@ -3,7 +3,6 @@
     <h3>🧭 Calibration</h3>
 
     <div class="controls">
-      <p>{{ step }}</p>
       <!-- Idle state -->
       <template v-if="step === 'Initial'">
         <button class="primary" @click="goToStep('CalibrateRotation')">Calibrate</button>
@@ -12,6 +11,7 @@
       <!-- CalibrateRotation state -->
       <template v-else-if="step === 'CalibrateRotation'">
         <p class="acquiring">
+          Move the robot at least 3m (10ft) straight forward.<br/>
           For best results:
           <ul>
             <li>Ensure the robot is on a level surface</li>
@@ -19,28 +19,33 @@
             <li>Ensure the robot remains pointing forward</li>
           </ul>
         </p>
-        <p class="summary">Distance traveled: {{ distanceTraveled.toFixed(2) }} m</p>
-        <p class="summary">Starting Position: <{{ startPosition?.position.x.toFixed(3) }},
-          {{ startPosition?.position.y.toFixed(3) }}, startPosition?.position.z.toFixed(3)}}></p>
-        <p class="summary">Current Position: <{{ status?.position.x.toFixed(3) }}, {{ status?.position.y.toFixed(3) }},
-          {{ status?.position.z.toFixed(3) }}></p>
-        <button class="secondary" @click="resetRotation">Reset</button>
-        <button v-if="distanceTraveled < MIN_DISTANCE_FOR_CALIBRATION" class="primary"
-                @click="goToStep('CalibrateTranslation')">Skip
-        </button>
-        <button v-else class="primary" @click="goToStep('CalibrateTranslation')">Next</button>
+        <p class="summary data">Distance traveled:<br/> {{ distanceTraveled.toFixed(2) }} m</p>
+        <p class="summary data">Starting Position:<br/> <{{ startPosition?.position.x.toFixed(1) }},
+          {{ startPosition?.position.y.toFixed(1) }}, {{ startPosition?.position.z.toFixed(1)}}></p>
+        <p class="summary data">Current Position:<br/> <{{ status?.position.x.toFixed(1) }}, {{ status?.position.y.toFixed(1) }},
+          {{ status?.position.z.toFixed(1) }}></p>
+        <p class="br"/>
+        <button class="secondary" @click="resetRotation">Reset Pose</button>
+        <button class="primary" :disabled="distanceTraveled < MIN_DISTANCE_FOR_CALIBRATION" @click="goToStep('CalibrateTranslation')">Next</button>
       </template>
 
       <!-- CalibrateTranslation state -->
       <template v-else>
-        <div class="acquiring">Acquiring Data</div>
-        <button class="secondary" @click="resetTranslation">Reset</button>
+        <p class="acquiring">
+          Slowly rotate the robot in-place
+        </p>
+        <p class="summary data" v-if="samples?.length">
+          <span>Samples:<br/> {{ samples.length }}</span>
+        </p>
+        <p class="br"/>
+        <button class="secondary" @click="resetTranslation">Clear Samples</button>
         <button class="primary" @click="goToStep('Initial')"
                 :disabled="samples?.length < MIN_SAMPLES_TO_COMPUTE">Finish
         </button>
-        <div class="summary" v-if="samples?.length">
-          <span>Samples: {{ samples.length }}</span>
-        </div>
+        <button class="secondary" @click="copySamplesToClipboard" :disabled="copying">
+          {{ copying ? 'Copying…' : 'Copy CSV' }}
+        </button>
+        <p class="br"/>
 
         <div v-if="samples?.length >= MIN_SAMPLES_TO_DRAW" class="canvas-wrapper">
           <canvas ref="canvasRef" :width="canvasSize" :height="canvasSize"></canvas>
@@ -50,18 +55,15 @@
                 offset.x.toFixed(3)
               }}, {{ offset.y.toFixed(3) }}</span>
           </div>
-          <button class="secondary" @click="copySamplesToClipboard" :disabled="copying">
-            {{ copying ? 'Copying…' : 'Copy' }}
-          </button>
         </div>
       </template>
     </div>
 
-    <div class="summary">
+    <div class="code">
       <pre>
-        {{ rotationCode }}
-        {{ translationCode }}
-        public static final Pose3d questNavToRobot = new Transform3d(questToRobotTranslation, questToRobotRotation);
+{{ rotationCode }}
+{{ translationCode }}
+public static final Pose3d questNavToRobot = new Transform3d(questToRobotTranslation, questToRobotRotation);
       </pre>
     </div>
   </div>
@@ -82,7 +84,7 @@ const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvasSize = 320
 const MIN_SAMPLES_TO_DRAW = 4
 const MIN_SAMPLES_TO_COMPUTE = 10
-const MIN_DISTANCE_FOR_CALIBRATION = 2.0
+const MIN_DISTANCE_FOR_CALIBRATION = 3.0
 
 let pollId: number | null = null
 let rotationEuler: Euler | null = null
@@ -109,17 +111,24 @@ const currentEulerAngles = computed<Euler>(() => new Euler().fromRotationMatrix(
 type Step = 'Initial' | 'CalibrateRotation' | 'CalibrateTranslation'
 const step = ref<Step>('Initial')
 
+async function resetPose(position?: {x: number, y: number, z: number}, eulerAngles?: {pitch: number, roll: number, yaw: number}) {
+  await configApi.resetPose(position, eulerAngles)
+  // Wait until the next SlowUpdate to ensure the pose is reset
+  const timeoutMs = 1000 / 3
+  await new Promise(resolve => setTimeout(resolve, timeoutMs))
+  await loadStatus()
+}
+
 // Initial state
 async function enterInitial() {
-  // no-op
+  await resetRotation()
 }
 
 async function exitInitial() {
   // no-op
 }
 
-// Rotation (yaw) Calibration
-// Rotation calibration state data
+// Rotation calibration state data and logic
 const startPosition = ref<Sample | null>(null)
 const distanceTraveled = computed(() => {
   if (!startPosition.value || !status.value) return 0
@@ -129,8 +138,10 @@ const distanceTraveled = computed(() => {
 })
 
 async function resetRotation() {
-  await configApi.resetPose()
-  await loadStatus()
+  await resetPose()
+  // BUG: The tick after a pose reset may adjust the position up/down slightly if the pitch/roll don't match.
+  // Reset the pose a second time to ensure the pose matches.
+  await resetPose()
   startPosition.value = status.value ? {
     position: new Vector3(status.value.position.x, status.value.position.y, status.value.position.z),
     rotation: currentRotation.value,
@@ -160,18 +171,16 @@ async function exitRotation() {
   const yawDegrees = toDegrees(yaw)
   rotationEuler = new Euler(0, 0, yaw)
   rotationCode.value =
-      `
-        // The complete Euler angles roll & pitch of the headset relative to the ground plane are included below.
-        // For headsets mounted upright and relatively level only yaw typically matters.
-        //   pitch = ${initialEulers.pitch.toFixed(3)}
-        //   roll = ${initialEulers.roll.toFixed(3)}
-        //   yaw = ${yawDegrees.toFixed(3)}
-        // Represents the yaw offset of the headset relative to the robot's forward direction
-        ${rotationDecl} = new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(${yawDegrees.toFixed(3)})");
-        `
+      `// The complete Euler angles roll & pitch of the headset relative to the ground plane are included below.
+// For headsets mounted upright and relatively level only yaw typically matters.
+//   pitch = ${initialEulers.pitch.toFixed(3)}
+//   roll = ${initialEulers.roll.toFixed(3)}
+//   yaw = ${yawDegrees.toFixed(3)}
+// Represents the yaw offset of the headset relative to the robot's forward direction
+${rotationDecl} = new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(${yawDegrees.toFixed(3)})");
+`
 }
 
-// Translation Calibration
 // Translation Calibration data and logic
 let translationPollId: null | number = null
 const samples = ref<Sample[]>([])
@@ -336,9 +345,9 @@ async function resetTranslation() {
 
   // Reset the pose to 0,0,0 with the yaw calculated above before calculating the XY offset
   try {
-    await configApi.resetPose(
+    await resetPose(
         {x: 0, y: 0, z: 0},
-        rotationEuler ? {pitch: rotationEuler.y, roll: rotationEuler.x, yaw: rotationEuler.z} : undefined)
+        rotationEuler ? {pitch: 0, roll: 0, yaw: rotationEuler.z} : undefined)
   } catch (e: any) {
     error.value = e?.message ?? 'Failed to reset pose'
   }
@@ -390,8 +399,8 @@ function set_translation_offset() {
 
   const z_offset = status.value?.position.z ?? 0
   translationCode.value = `
-  // z value is the headset's estimated distance to the floor
-  ${translationDecl} = new Translation3d(${center.x.toFixed(3)}, ${center.y.toFixed(3)}, ${z_offset.toFixed(3)});`
+// z value is the headset's estimated distance to the floor
+${translationDecl} = new Translation3d(${center.x.toFixed(3)}, ${center.y.toFixed(3)}, ${z_offset.toFixed(3)});`
 }
 
 async function exitTranslation() {
@@ -475,6 +484,7 @@ onUnmounted(() => {
 
 .controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
 }
@@ -491,7 +501,7 @@ onUnmounted(() => {
 .secondary {
   background: transparent;
   color: #cbd5e1;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border-color);
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
@@ -504,6 +514,26 @@ onUnmounted(() => {
 
 .summary {
   color: #9aa3b2;
+}
+
+.data {
+  width: 10em;
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.controls > .br {
+  flex-basis: 100%;
+}
+
+.code {
+  color: white;
+  background: black;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  white-space: pre;
 }
 
 .canvas-wrapper {

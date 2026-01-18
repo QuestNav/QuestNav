@@ -600,7 +600,35 @@ namespace QuestNav.WebServer.Server
 
         private async Task HandleResetPose(IHttpContext context)
         {
-            webServerManager.RequestPoseReset();
+            string body = await context.GetRequestBodyAsStringAsync();
+            // Create an anonymous object to represent the model we expect to receive
+            var request = new
+            {
+                position = new
+                {
+                    x = 0f,
+                    y = 0f,
+                    z = 0f,
+                },
+                eulerAngles = new
+                {
+                    pitch = 0f,
+                    roll = 0f,
+                    yaw = 0f,
+                },
+            };
+            request = JsonConvert.DeserializeAnonymousType(body, request);
+            var position = request.position is not null
+                ? new Vector3(request.position.x, request.position.y, request.position.z)
+                : Vector3.zero;
+            var rotation = request.eulerAngles is not null
+                ? Quaternion.Euler(
+                    request.eulerAngles.roll,
+                    request.eulerAngles.yaw,
+                    request.eulerAngles.pitch
+                )
+                : Quaternion.identity;
+            webServerManager.RequestPoseReset(position, rotation);
             await SendJsonResponse(
                 context,
                 new SimpleResponse { success = true, message = "Pose reset initiated" }

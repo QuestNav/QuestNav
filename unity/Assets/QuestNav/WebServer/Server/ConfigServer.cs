@@ -9,6 +9,7 @@ using EmbedIO.Actions;
 using Newtonsoft.Json;
 using QuestNav.Config;
 using UnityEngine;
+using static QuestNav.Config.Config;
 
 namespace QuestNav.WebServer.Server
 {
@@ -313,6 +314,10 @@ namespace QuestNav.WebServer.Server
                 {
                     await HandleResetPose(context);
                 }
+                else if (path == "/api/video-modes" && context.Request.HttpVerb == HttpVerbs.Get)
+                {
+                    await HandleGetVideoModes(context);
+                }
                 else
                 {
                     context.Response.StatusCode = 404;
@@ -335,6 +340,7 @@ namespace QuestNav.WebServer.Server
 
         private async Task HandleGetConfig(IHttpContext context)
         {
+            var streamMode = await configManager.GetStreamModeAsync();
             var response = new ConfigResponse
             {
                 success = true,
@@ -342,6 +348,14 @@ namespace QuestNav.WebServer.Server
                 debugIpOverride = await configManager.GetDebugIpOverrideAsync(),
                 enableAutoStartOnBoot = await configManager.GetEnableAutoStartOnBootAsync(),
                 enablePassthroughStream = await configManager.GetEnablePassthroughStreamAsync(),
+                enableHighQualityStream = await configManager.GetEnableHighQualityStreamAsync(),
+                streamMode = new StreamModeModel
+                {
+                    width = streamMode.Width,
+                    height = streamMode.Height,
+                    framerate = streamMode.Framerate,
+                    quality = streamMode.Quality,
+                },
                 enableDebugLogging = await configManager.GetEnableDebugLoggingAsync(),
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             };
@@ -383,6 +397,23 @@ namespace QuestNav.WebServer.Server
                 {
                     await configManager.SetEnablePassthroughStreamAsync(
                         request.EnablePassthroughStream.Value
+                    );
+                }
+                if (request.EnableHighQualityStream.HasValue)
+                {
+                    await configManager.SetEnableHighQualityStreamAsync(
+                        request.EnableHighQualityStream.Value
+                    );
+                }
+                if (request.StreamMode != null)
+                {
+                    await configManager.SetStreamModeAsync(
+                        new StreamMode(
+                            request.StreamMode.width,
+                            request.StreamMode.height,
+                            request.StreamMode.framerate,
+                            request.StreamMode.quality
+                        )
                     );
                 }
                 if (request.EnableDebugLogging.HasValue)
@@ -602,6 +633,55 @@ namespace QuestNav.WebServer.Server
                 context,
                 new SimpleResponse { success = true, message = "Pose reset initiated" }
             );
+        }
+
+        private async Task HandleGetVideoModes(IHttpContext context)
+        {
+            var passthroughSource = streamProvider?.FrameSource;
+            if (passthroughSource == null)
+            {
+                context.Response.StatusCode = 503;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = "Passthrough stream not available",
+                    }
+                );
+                return;
+            }
+
+            var availableModes = passthroughSource.GetAvailableModes();
+
+            if (availableModes == null || availableModes.Length == 0)
+            {
+                context.Response.StatusCode = 503;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = "Stream not initialized. Enable passthrough stream first.",
+                    }
+                );
+                return;
+            }
+
+            // Convert VideoMode[] to VideoModeModel[]
+            var modeModels = new VideoModeModel[availableModes.Length];
+            for (int i = 0; i < availableModes.Length; i++)
+            {
+                modeModels[i] = new VideoModeModel
+                {
+                    width = availableModes[i].Width,
+                    height = availableModes[i].Height,
+                    framerate = availableModes[i].Fps,
+                };
+            }
+
+            // Return just the array with 200 OK
+            await SendJsonResponse(context, modeModels);
         }
     }
 }

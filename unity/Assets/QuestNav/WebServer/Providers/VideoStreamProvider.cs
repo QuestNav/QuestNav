@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Buffers.Text;
-using System.Collections;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EmbedIO;
-using Meta.XR;
 using UnityEngine;
 
 namespace QuestNav.WebServer
@@ -57,6 +55,21 @@ namespace QuestNav.WebServer
             /// The current frame
             /// </summary>
             EncodedFrame CurrentFrame { get; }
+
+            /// <summary>
+            /// Gets the available video modes.
+            /// </summary>
+            /// <returns>Array of available video modes, or null if not initialized</returns>
+            Network.VideoMode[] GetAvailableModes();
+
+            /// <summary>
+            /// Called when stream starts with requested video parameters from query string.
+            /// </summary>
+            /// <param name="width">Requested width, or null if not specified</param>
+            /// <param name="height">Requested height, or null if not specified</param>
+            /// <param name="fps">Requested FPS, or null if not specified</param>
+            /// <param name="compression">Requested compression quality (1-100), or null if not specified</param>
+            Task SetModeAndCompression(int? width, int? height, int? fps, int? compression);
         }
 
         #region Fields
@@ -103,6 +116,11 @@ namespace QuestNav.WebServer
         #region Properties
 
         /// <summary>
+        /// Gets the frame source for accessing video properties.
+        /// </summary>
+        public IFrameSource FrameSource => frameSource;
+
+        /// <summary>
         /// Maximum framerate from the frame source, defaults to 15 fps.
         /// </summary>
         private int MaxFrameRate => frameSource?.MaxFrameRate ?? 15;
@@ -144,6 +162,44 @@ namespace QuestNav.WebServer
                 );
                 return;
             }
+
+            // Parse compression quality from query string
+            int? compression = null;
+            if (int.TryParse(context.Request.QueryString["compression"], out int parsed))
+            {
+                compression = Math.Clamp(parsed, 1, 100);
+            }
+
+            // Parse resolution and FPS from query string
+            int? width = null;
+            int? height = null;
+
+            // Parse resolution in format "320x240"
+            if (context.Request.QueryString["resolution"] != null)
+            {
+                string resolutionStr = context.Request.QueryString["resolution"];
+                string[] parts = resolutionStr.Split('x', 'X');
+                if (parts.Length == 2)
+                {
+                    if (int.TryParse(parts[0], out int parsedWidth))
+                    {
+                        width = parsedWidth;
+                    }
+                    if (int.TryParse(parts[1], out int parsedHeight))
+                    {
+                        height = parsedHeight;
+                    }
+                }
+            }
+
+            int? fps = null;
+            if (int.TryParse(context.Request.QueryString["fps"], out int parsedFps))
+            {
+                fps = parsedFps;
+            }
+
+            // Notify frame source of stream start with requested parameters
+            await frameSource.SetModeAndCompression(width, height, fps, compression);
 
             Interlocked.Increment(ref connectedClients);
             context.Response.StatusCode = 200;

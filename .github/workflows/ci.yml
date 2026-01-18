@@ -155,8 +155,6 @@ jobs:
       contents: write
       pages: write
       id-token: write
-    with:
-      version: 'Development'
 
   # ----------------------- SUMMARY ----------------------- #
   ci-summary:

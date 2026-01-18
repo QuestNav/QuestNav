@@ -254,5 +254,32 @@ namespace QuestNav.Core
             /// </summary>
             public const float ANGLE_THRESHOLD = 0.1f;
         }
+
+        /// <summary>
+        /// Constants for video streaming
+        /// </summary>
+        public static class VideoStream
+        {
+            /// <summary>
+            /// Default max stream width when high-quality streams are disabled
+            /// </summary>
+            public const int DEFAULT_LOW_QUAL_STREAM_WIDTH = 640;
+
+            /// <summary>
+            /// Default max stream height when high-quality streams are disabled
+            /// </summary>
+            public const int DEFAULT_LOW_QUAL_STREAM_HEIGHT = 480;
+
+            /// <summary>
+            /// The maximum stream pixelcount (width * height) allowed when high-quality streams are disabled
+            /// </summary>
+            public const int MAX_LOW_QUAL_STREAM_PIXEL_COUNT =
+                DEFAULT_LOW_QUAL_STREAM_HEIGHT * DEFAULT_LOW_QUAL_STREAM_WIDTH;
+
+            /// <summary>
+            /// The maximum framerate allowed when high-quality streams are disabled
+            /// </summary>
+            public const int MAX_LOW_QUAL_FRAMERATE = 30;
+        }
     }
 }

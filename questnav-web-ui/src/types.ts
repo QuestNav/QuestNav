@@ -1,12 +1,27 @@
 // Type definitions for configuration system
 
+export interface StreamModeModel {
+  width: number
+  height: number
+  framerate: number
+  quality: number
+}
+
+export interface VideoModeModel {
+  width: number
+  height: number
+  framerate: number
+}
+
 export interface ConfigResponse {
   success: boolean
   teamNumber: number
   debugIpOverride: string
   enableAutoStartOnBoot: boolean
   enablePassthroughStream: boolean
+  enableHighQualityStream: boolean
   enableDebugLogging: boolean
+  streamMode: StreamModeModel
   timestamp: number
 }
 
@@ -15,7 +30,9 @@ export interface ConfigUpdateRequest {
   debugIpOverride?: string
   enableAutoStartOnBoot?: boolean
   enablePassthroughStream?: boolean
+  enableHighQualityStream?: boolean
   enableDebugLogging?: boolean
+  streamMode?: StreamModeModel
 }
 
 export interface SimpleResponse {

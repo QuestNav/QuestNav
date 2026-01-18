@@ -2,11 +2,11 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using QuestNav.Core;
 using QuestNav.Utils;
 using SQLite;
 using UnityEngine;
+using static QuestNav.Config.Config;
 
 namespace QuestNav.Config
 {
@@ -46,6 +46,16 @@ namespace QuestNav.Config
         public event Action<bool> OnEnablePassthroughStreamChanged;
 
         /// <summary>
+        /// Raised when stream mode changes.
+        /// </summary>
+        public event Action<StreamMode> OnStreamModeChanged;
+
+        /// <summary>
+        /// Raised when the high quality stream setting changes.
+        /// </summary>
+        public event Action<bool> OnEnableHighQualityStreamChanged;
+
+        /// <summary>
         /// Raised when debug logging setting changes.
         /// </summary>
         public event Action<bool> OnEnableDebugLoggingChanged;
@@ -83,6 +93,22 @@ namespace QuestNav.Config
         public Task<bool> GetEnablePassthroughStreamAsync();
 
         /// <summary>
+        /// Gets the stream mode configuration.
+        /// </summary>
+        /// <returns>
+        /// The stream mode with width, height, and framerate.
+        /// </returns>
+        public Task<StreamMode> GetStreamModeAsync();
+
+        /// <summary>
+        /// Gets whether high quality streaming is enabled.
+        /// </summary>
+        /// <returns>
+        /// True if high quality streaming is enabled.
+        /// </returns>
+        public Task<bool> GetEnableHighQualityStreamAsync();
+
+        /// <summary>
         /// Gets whether debug logging is enabled.
         /// </summary>
         /// <returns>
@@ -111,6 +137,16 @@ namespace QuestNav.Config
         /// Sets whether to stream passthrough camera over NT and WebUI
         /// </summary>
         public Task SetEnablePassthroughStreamAsync(bool autoStart);
+
+        /// <summary>
+        /// Sets the stream mode configuration.
+        /// </summary>
+        public Task SetStreamModeAsync(StreamMode mode);
+
+        /// <summary>
+        /// Sets whether to allow high quality stream modes.
+        /// </summary>
+        public Task SetEnableHighQualityStreamAsync(bool enabled);
 
         /// <summary>
         /// Sets whether debug logging is enabled.
@@ -162,6 +198,8 @@ namespace QuestNav.Config
             OnDebugIpOverrideChanged?.Invoke(await GetDebugIpOverrideAsync());
             OnEnableAutoStartOnBootChanged?.Invoke(await GetEnableAutoStartOnBootAsync());
             OnEnablePassthroughStreamChanged?.Invoke(await GetEnablePassthroughStreamAsync());
+            OnStreamModeChanged?.Invoke(await GetStreamModeAsync());
+            OnEnableHighQualityStreamChanged?.Invoke(await GetEnableHighQualityStreamAsync());
             OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
         }
 
@@ -176,6 +214,15 @@ namespace QuestNav.Config
             await SetTeamNumberAsync(networkDefaults.TeamNumber);
             await SetEnableAutoStartOnBootAsync(systemDefaults.EnableAutoStartOnBoot);
             await SetEnablePassthroughStreamAsync(cameraDefaults.EnablePassthroughStream);
+            await SetEnableHighQualityStreamAsync(cameraDefaults.EnableHighQualityStream);
+            await SetStreamModeAsync(
+                new StreamMode(
+                    cameraDefaults.StreamWidth,
+                    cameraDefaults.StreamHeight,
+                    cameraDefaults.StreamFramerate,
+                    cameraDefaults.StreamQuality
+                )
+            );
             await SetEnableDebugLoggingAsync(loggingDefaults.EnableDebugLogging);
 
             QueuedLogger.Log("Database reset to defaults");
@@ -204,6 +251,15 @@ namespace QuestNav.Config
 
         /// <inheritdoc/>
         public event Action<bool> OnEnablePassthroughStreamChanged;
+
+        /// <inheritdoc/>
+        public event Action<StreamMode> OnStreamModeChanged;
+
+        /// <inheritdoc/>
+        public event Action<bool> OnEnableHighQualityStreamChanged;
+
+        /// <inheritdoc/>
+        public event Action<int> OnStreamQualityChanged;
 
         /// <inheritdoc/>
         public event Action<bool> OnEnableDebugLoggingChanged;
@@ -246,6 +302,28 @@ namespace QuestNav.Config
 
             return config.EnablePassthroughStream;
         }
+
+        /// <inheritdoc/>
+        public async Task<bool> GetEnableHighQualityStreamAsync()
+        {
+            var config = await GetCameraConfigAsync();
+
+            return config.EnableHighQualityStream;
+        }
+
+        /// <inheritdoc/>
+        public async Task<StreamMode> GetStreamModeAsync()
+        {
+            var config = await GetCameraConfigAsync();
+
+            return new StreamMode(
+                config.StreamWidth,
+                config.StreamHeight,
+                config.StreamFramerate,
+                config.StreamQuality
+            );
+        }
+
         #endregion
 
         #region Logging
@@ -335,6 +413,34 @@ namespace QuestNav.Config
             invokeOnMainThread(() => OnEnablePassthroughStreamChanged?.Invoke(enabled));
             QueuedLogger.Log($"Updated Key 'enablePassthroughStream' to {enabled}");
         }
+
+        /// <inheritdoc/>
+        public async Task SetEnableHighQualityStreamAsync(bool enabled)
+        {
+            var config = await GetCameraConfigAsync();
+            config.EnableHighQualityStream = enabled;
+            await SaveCameraConfigAsync(config);
+
+            // Notify subscribed methods on the main thread
+            invokeOnMainThread(() => OnEnableHighQualityStreamChanged?.Invoke(enabled));
+            QueuedLogger.Log($"Updated Key 'enableHighQualityStream' to {enabled}");
+        }
+
+        /// <inheritdoc/>
+        public async Task SetStreamModeAsync(StreamMode mode)
+        {
+            var config = await GetCameraConfigAsync();
+            config.StreamWidth = mode.Width;
+            config.StreamHeight = mode.Height;
+            config.StreamFramerate = mode.Framerate;
+            config.StreamQuality = mode.Quality;
+            await SaveCameraConfigAsync(config);
+
+            // Notify subscribed methods on the main thread
+            invokeOnMainThread(() => OnStreamModeChanged?.Invoke(mode));
+            QueuedLogger.Log($"Updated Key 'streamMode' to {mode}");
+        }
+
         #endregion
 
         #region Logging

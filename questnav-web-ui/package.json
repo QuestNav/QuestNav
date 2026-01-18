@@ -14,7 +14,7 @@
     "@mytskine/curve-fitting": "^1.2.0",
     "esbuild": "^0.21.5",
     "pinia": "^2.3.1",
-    "vue": "^3.5.25"
+    "vue": "^3.5.26"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.4",

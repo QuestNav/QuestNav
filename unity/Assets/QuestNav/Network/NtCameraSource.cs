@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
-using QuestNav.Network;
 
 namespace QuestNav.Network
 {

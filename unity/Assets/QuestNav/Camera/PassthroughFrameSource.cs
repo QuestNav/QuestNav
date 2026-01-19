@@ -3,7 +3,6 @@ using System.Collections;
 using LibJpegTurboUnity;
 using Meta.XR;
 using QuestNav.Config;
-using QuestNav.Core;
 using QuestNav.Native.AprilTag;
 using QuestNav.Native.PoseLib;
 using QuestNav.Network;
@@ -315,7 +314,12 @@ namespace QuestNav.Camera
 
                     if (poseResult != null)
                     {
-                        Debug.Log(poseResult.CameraPose);
+                        Debug.Log($"Camera Pose: {poseResult.CameraPose}");
+
+                        var (frcPos, frcRot) = Conversions.CvToFrc(poseResult.CameraPose);
+                        Debug.Log(
+                            $"FRC Pose: Pos({frcPos.x:F3}, {frcPos.y:F3}, {frcPos.z:F3}) Rot({frcRot.eulerAngles.x:F3}, {frcRot.eulerAngles.y:F3}, {frcRot.eulerAngles.z})"
+                        );
                     }
                     else
                     {

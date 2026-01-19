@@ -24,17 +24,17 @@ namespace QuestNav.Native.PoseLib
 
             foreach (var detection in detections)
             {
-                corners2d.Add(detection.CornerBottomLeft0.x);
-                corners2d.Add(detection.CornerBottomLeft0.y);
-
                 corners2d.Add(detection.CornerBottomRight1.x);
                 corners2d.Add(detection.CornerBottomRight1.y);
 
-                corners2d.Add(detection.CornerUpperRight2.x);
-                corners2d.Add(detection.CornerUpperRight2.y);
+                corners2d.Add(detection.CornerBottomLeft0.x);
+                corners2d.Add(detection.CornerBottomLeft0.y);
 
                 corners2d.Add(detection.CornerUpperLeft3.x);
                 corners2d.Add(detection.CornerUpperLeft3.y);
+
+                corners2d.Add(detection.CornerUpperRight2.x);
+                corners2d.Add(detection.CornerUpperRight2.y);
 
                 var corner3dTranslations = fieldLayout.GetTagCorners(detection.Id);
                 foreach (var corner3d in corner3dTranslations)

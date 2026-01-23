@@ -205,5 +205,48 @@ namespace QuestNav.Utils
 
             return (position, rotation);
         }
+
+        /// <summary>
+        /// Converts a Computer Vision (CV) pose (World-to-Camera) to an FRC field pose (Camera-in-World).
+        /// </summary>
+        /// <param name="tvec">The translation vector from CV (t in P_cv = R * P_world + t).</param>
+        /// <param name="rvec">The rotation quaternion from CV (R in P_cv = R * P_world + t).</param>
+        /// <returns>The position and rotation of the camera in FRC field coordinates.</returns>
+        public static (Vector3 position, Quaternion rotation) CvToFrc(Vector3 tvec, Quaternion rvec)
+        {
+            // 1. Invert the World-to-Camera transform to get Camera-in-World
+            Vector3 cameraPosition = -(Quaternion.Inverse(rvec) * tvec);
+
+            // 2. Adjust Orientation
+            // We want the rotation of the Camera Body axes (FRC: X-Fwd, Y-Left, Z-Up)
+            // relative to the World axes.
+            //
+            // R_body_to_cv rotates FRC Body frame to CV frame.
+            // [0  0  1]
+            // [-1 0  0]
+            // [0 -1  0]
+            // This quaternion corresponds to: 0.5, -0.5, 0.5, 0.5
+            Quaternion cvToBody = new Quaternion(0.5f, -0.5f, 0.5f, 0.5f);
+            Quaternion cameraRotation = Quaternion.Inverse(rvec) * cvToBody;
+
+            return (cameraPosition, cameraRotation);
+        }
+
+        /// <summary>
+        /// Converts a Computer Vision (CV) pose (World-to-Camera) to an FRC field pose (Camera-in-World).
+        /// </summary>
+        /// <param name="rawPose">The pose directly from the definition libraries.</param>
+        /// <returns>The position and rotation of the camera in FRC field coordinates.</returns>
+        public static (Vector3 position, Quaternion rotation) CvToFrc(
+            QuestNav.Geometry.Pose3d rawPose
+        )
+        {
+            var tvec = new Vector3((float)rawPose.X, (float)rawPose.Y, (float)rawPose.Z);
+
+            var q = rawPose.Rotation.Quaternion;
+            var rvec = new Quaternion((float)q.X, (float)q.Y, (float)q.Z, (float)q.W);
+
+            return CvToFrc(tvec, rvec);
+        }
     }
 }

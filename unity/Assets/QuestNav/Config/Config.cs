@@ -54,31 +54,56 @@ namespace QuestNav.Config
             /// Whether the passthrough camera should be streamed over NT and WebUI
             /// </summary>
             public bool EnablePassthroughStream { get; set; } = false;
-
-            /// <summary>
-            /// Whether to allow high-resolution stream modes (greater than 640x480).
-            /// </summary>
-            public bool EnableHighQualityStream { get; set; } = false;
-
+            
             /// <summary>
             /// The width of the stream in pixels
             /// </summary>
-            public int StreamWidth { get; set; } = 320;
+            public int PassthroughStreamWidth { get; set; } = 320;
 
             /// <summary>
             /// The height of the stream in pixels
             /// </summary>
-            public int StreamHeight { get; set; } = 240;
+            public int PassthroughStreamHeight { get; set; } = 240;
 
             /// <summary>
             /// The framerate of the stream in frames per second
             /// </summary>
-            public int StreamFramerate { get; set; } = 24;
+            public int PassthroughStreamFramerate { get; set; } = 24;
 
             /// <summary>
             /// JPEG compression quality (1-100). Higher values mean better quality and larger files.
             /// </summary>
-            public int StreamQuality { get; set; } = 75;
+            public int PassthroughStreamQuality { get; set; } = 75;
+            
+            /// <summary>
+            /// Whether the AprilTag camera should be streamed over NT and WebUI
+            /// </summary>
+            public bool EnableAprilTagStream { get; set; } = false;
+            
+            /// <summary>
+            /// The width of the stream in pixels
+            /// </summary>
+            public int AprilTagStreamWidth { get; set; } = 320;
+
+            /// <summary>
+            /// The height of the stream in pixels
+            /// </summary>
+            public int AprilTagStreamHeight { get; set; } = 240;
+
+            /// <summary>
+            /// The framerate of the stream in frames per second
+            /// </summary>
+            public int AprilTagStreamFramerate { get; set; } = 24;
+
+            /// <summary>
+            /// JPEG compression quality (1-100). Higher values mean better quality and larger files.
+            /// </summary>
+            public int AprilTagStreamQuality { get; set; } = 75;
+            
+            /// <summary>
+            /// Whether to allow high-resolution stream modes (greater than 640x480).
+            /// </summary>
+            public bool EnableHighQualityStreams { get; set; } = false;
         }
 
         public class Logging

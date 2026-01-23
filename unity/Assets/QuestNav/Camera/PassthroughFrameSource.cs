@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections;
+using LibJpegTurboUnity;
 using System.Threading;
 using System.Threading.Tasks;
 using Meta.XR;
@@ -28,7 +29,7 @@ namespace QuestNav.Camera
         /// MonoBehaviour host for running coroutines.
         /// </summary>
         private readonly MonoBehaviour coroutineHost;
-
+        
         /// <summary>
         /// Meta SDK passthrough camera accessor.
         /// </summary>
@@ -134,7 +135,7 @@ namespace QuestNav.Camera
                     QueuedLogger.Log(
                         $"Setting mode config to {bestMatch.Value} with quality {quality}"
                     );
-                    await configManager.SetStreamModeAsync(
+                    await configManager.SetPassthroughStreamModeAsync(
                         new StreamMode(
                             bestMatch.Value.Width,
                             bestMatch.Value.Height,
@@ -147,7 +148,7 @@ namespace QuestNav.Camera
                 {
                     // There was no suitable mode found, keep the current mode
                     var currentMode = cameraSource.Mode;
-                    await configManager.SetStreamModeAsync(
+                    await configManager.SetPassthroughStreamModeAsync(
                         new StreamMode(
                             currentMode.Width,
                             currentMode.Height,
@@ -296,8 +297,8 @@ namespace QuestNav.Camera
 
             // Attach to ConfigManager callbacks
             configManager.OnEnablePassthroughStreamChanged += OnEnablePassthroughStreamChanged;
-            configManager.OnStreamModeChanged += OnStreamModeChanged;
-            configManager.OnEnableHighQualityStreamChanged += OnEnableHighQualityStreamChanged;
+            configManager.OnPassthroughStreamModeChanged += OnPassthroughStreamModeChanged;
+            configManager.OnEnableHighQualityStreamsChanged += OnEnableHighQualityPassthroughStreamChanged;
         }
 
         /// <summary>
@@ -320,7 +321,7 @@ namespace QuestNav.Camera
         /// Handles stream mode configuration changes.
         /// </summary>
         /// <param name="streamMode">The new stream mode configuration.</param>
-        private void OnStreamModeChanged(StreamMode streamMode)
+        private void OnPassthroughStreamModeChanged(StreamMode streamMode)
         {
             if (!isInitialized)
             {
@@ -356,7 +357,7 @@ namespace QuestNav.Camera
                         currentMode.Fps,
                         compressionQuality
                     );
-                    configManager.SetStreamModeAsync(appliedStreamMode);
+                    configManager.SetPassthroughStreamModeAsync(appliedStreamMode);
                 }
             });
         }
@@ -365,10 +366,8 @@ namespace QuestNav.Camera
         /// Handles high quality stream enable/disable config changes.
         /// </summary>
         /// <param name="enabled">Whether high quality streaming should be enabled.</param>
-        private async void OnEnableHighQualityStreamChanged(bool enabled)
+        private async void OnEnableHighQualityPassthroughStreamChanged(bool enabled)
         {
-            QueuedLogger.Log($"High quality stream enabled changed to: {enabled}");
-
             // Stream quality might need to be downgraded if high quality was just disabled
             bool checkForDowngrade = isHighQualityStreamEnabled && !enabled;
             isHighQualityStreamEnabled = enabled;
@@ -459,7 +458,7 @@ namespace QuestNav.Camera
                     cameraSource.SelectedModeChanged += OnSelectedModeChanged;
 
                     // Load video mode and quality from config
-                    var streamMode = await configManager.GetStreamModeAsync();
+                    var streamMode = await configManager.GetPassthroughStreamModeAsync();
                     compressionQuality = streamMode.Quality;
 
                     // Find best matching mode for the configured stream mode
@@ -519,25 +518,16 @@ namespace QuestNav.Camera
         /// </summary>
         public IEnumerator FrameCaptureCoroutine()
         {
-            QueuedLogger.Log("Initialized");
+            QueuedLogger.Log("Initializing LJPGT");
+            var compressor = new LJTCompressor();
 
             while (true)
             {
+                Texture texture;
+                
                 try
                 {
-                    var texture = cameraAccess.GetTexture();
-                    if (texture is not Texture2D texture2D)
-                    {
-                        QueuedLogger.LogError(
-                            $"GetTexture returned an incompatible object ({texture.GetType().Name})"
-                        );
-                        yield break;
-                    }
-
-                    CurrentFrame = new EncodedFrame(
-                        Time.frameCount,
-                        texture2D.EncodeToJPG(compressionQuality)
-                    );
+                    texture = cameraAccess.GetTexture();
                 }
                 catch (NullReferenceException ex)
                 {
@@ -547,6 +537,16 @@ namespace QuestNav.Camera
                     );
                     yield break;
                 }
+                
+                if (texture is not Texture2D texture2D)
+                {
+                    QueuedLogger.LogError(
+                        $"GetTexture returned an incompatible object ({texture.GetType().Name})"
+                    );
+                    yield break;
+                }
+                byte[] rawJpeg = compressor.EncodeJPG(texture2D, compressionQuality);
+                CurrentFrame = new EncodedFrame(Time.frameCount, rawJpeg);
 
                 yield return new WaitForSeconds(FrameDelaySeconds);
             }

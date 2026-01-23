@@ -289,7 +289,7 @@ namespace QuestNav.WebServer
         {
             QueuedLogger.Log("Starting configuration server...");
 
-            string staticPath = GetStaticFilesPath();
+            string staticPath = FileManager.GetStaticFilesPath("ui");
             if (string.IsNullOrEmpty(staticPath))
             {
                 QueuedLogger.LogError("Failed to get static files path");
@@ -326,15 +326,6 @@ namespace QuestNav.WebServer
             ShowConnectionInfo();
             QueuedLogger.Log("Server started successfully");
         }
-
-        private string GetStaticFilesPath()
-        {
-#if UNITY_ANDROID && !UNITY_EDITOR
-            return Path.Combine(Application.persistentDataPath, "ui");
-#else
-            return Path.Combine(Application.streamingAssetsPath, "ui");
-#endif
-        }
         #endregion
 
         #region Static File Management
@@ -353,41 +344,13 @@ namespace QuestNav.WebServer
             string assetsDir = Path.Combine(targetPath, "assets");
             Directory.CreateDirectory(assetsDir);
 
-            await ExtractAndroidFileAsync("ui/index.html", Path.Combine(targetPath, "index.html"));
-            await ExtractAndroidFileAsync(
-                "ui/assets/main.css",
-                Path.Combine(assetsDir, "main.css")
-            );
-            await ExtractAndroidFileAsync("ui/assets/main.js", Path.Combine(assetsDir, "main.js"));
-            await ExtractAndroidFileAsync("ui/logo.svg", Path.Combine(targetPath, "logo.svg"));
-            await ExtractAndroidFileAsync(
-                "ui/logo-dark.svg",
-                Path.Combine(targetPath, "logo-dark.svg")
-            );
+            await FileManager.ExtractAndroidFileAsync("index.html", "ui", targetPath);
+            await FileManager.ExtractAndroidFileAsync("main.css", "ui/assets", assetsDir);
+            await FileManager.ExtractAndroidFileAsync("main.js", "ui/assets", assetsDir);
+            await FileManager.ExtractAndroidFileAsync("logo.svg", "ui", targetPath);
+            await FileManager.ExtractAndroidFileAsync("logo-dark.svg", "ui", targetPath);
 
             QueuedLogger.Log("UI extraction complete");
-        }
-
-        private async Task ExtractAndroidFileAsync(string sourceRelative, string targetAbsolute)
-        {
-            string sourcePath = Path.Combine(Application.streamingAssetsPath, sourceRelative);
-
-            using (var www = UnityEngine.Networking.UnityWebRequest.Get(sourcePath))
-            {
-                var operation = www.SendWebRequest();
-                while (!operation.isDone)
-                    await Task.Yield();
-
-                if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
-                {
-                    File.WriteAllBytes(targetAbsolute, www.downloadHandler.data);
-                    QueuedLogger.Log($"Extracted: {sourceRelative}");
-                }
-                else
-                {
-                    QueuedLogger.LogWarning($"Failed to extract {sourceRelative}: {www.error}");
-                }
-            }
         }
 #endif
 

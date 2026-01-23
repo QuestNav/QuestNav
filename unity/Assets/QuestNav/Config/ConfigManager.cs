@@ -25,6 +25,7 @@ namespace QuestNav.Config
         /// </summary>
         public Task CloseAsync();
 
+        #region Events
         /// <summary>
         /// Raised when team number changes.
         /// </summary>
@@ -48,18 +49,30 @@ namespace QuestNav.Config
         /// <summary>
         /// Raised when stream mode changes.
         /// </summary>
-        public event Action<StreamMode> OnStreamModeChanged;
+        public event Action<StreamMode> OnPassthroughStreamModeChanged;
+        
+        /// <summary>
+        /// Raised when AprilTag stream enable/disable changes. NOT THE SETTINGS OF THE DETECTOR ITSELF! 
+        /// </summary>
+        public event Action<bool> OnEnableAprilTagStreamChanged;
+
+        /// <summary>
+        /// Raised when stream mode changes for the AprilTag stream. NOT THE SETTINGS OF THE DETECTOR ITSELF!
+        /// </summary>
+        public event Action<StreamMode> OnAprilTagStreamModeChanged;
 
         /// <summary>
         /// Raised when the high quality stream setting changes.
         /// </summary>
-        public event Action<bool> OnEnableHighQualityStreamChanged;
+        public event Action<bool> OnEnableHighQualityStreamsChanged;
 
         /// <summary>
         /// Raised when debug logging setting changes.
         /// </summary>
         public event Action<bool> OnEnableDebugLoggingChanged;
+        #endregion
 
+        #region Getters
         /// <summary>
         /// Gets the configured team number.
         /// </summary>
@@ -98,16 +111,32 @@ namespace QuestNav.Config
         /// <returns>
         /// The stream mode with width, height, and framerate.
         /// </returns>
-        public Task<StreamMode> GetStreamModeAsync();
+        public Task<StreamMode> GetPassthroughStreamModeAsync();
 
         /// <summary>
-        /// Gets whether high quality streaming is enabled.
+        /// Gets whether streaming the apriltag camera feed over NT and webui (NOT IF THE DETECTOR IS ENABLED)
+        /// </summary>
+        /// <returns>
+        /// True if streaming is enabled.
+        /// </returns>
+        public Task<bool> GetEnableAprilTagStreamAsync();
+
+        /// <summary>
+        /// Gets the stream mode configuration. NOT THE APRILTAG DETECTOR OPTIONS
+        /// </summary>
+        /// <returns>
+        /// The stream mode with width, height, and framerate.
+        /// </returns>
+        public Task<StreamMode> GetAprilTagStreamModeAsync();
+        
+        /// <summary>
+        /// Gets whether high quality streaming is enabled for both the AprilTag and Passthrough streams.
         /// </summary>
         /// <returns>
         /// True if high quality streaming is enabled.
         /// </returns>
-        public Task<bool> GetEnableHighQualityStreamAsync();
-
+        public Task<bool> GetEnableHighQualityStreamsAsync();
+        
         /// <summary>
         /// Gets whether debug logging is enabled.
         /// </summary>
@@ -115,7 +144,9 @@ namespace QuestNav.Config
         /// True if debug logging is enabled.
         /// </returns>
         public Task<bool> GetEnableDebugLoggingAsync();
+        #endregion
 
+        #region Setters
         /// <summary>
         /// Sets the team number and clears IP override
         /// .</summary>
@@ -136,22 +167,33 @@ namespace QuestNav.Config
         /// <summary>
         /// Sets whether to stream passthrough camera over NT and WebUI
         /// </summary>
-        public Task SetEnablePassthroughStreamAsync(bool autoStart);
+        public Task SetEnablePassthroughStreamAsync(bool enable);
 
         /// <summary>
         /// Sets the stream mode configuration.
         /// </summary>
-        public Task SetStreamModeAsync(StreamMode mode);
+        public Task SetPassthroughStreamModeAsync(StreamMode mode);
 
+        /// <summary>
+        /// Sets whether to stream AprilTag camera over NT and WebUI. NOT THE STATUS OF THE APRILTAG DETECTOR.
+        /// </summary>
+        public Task SetEnableAprilTagStreamAsync(bool enable);
+        
+        /// <summary>
+        /// Sets the stream mode configuration for the AprilTag stream. NOT THE APRILTAG DETECTOR SETTINGS.
+        /// </summary>
+        public Task SetAprilTagStreamModeAsync(StreamMode mode);
+        
         /// <summary>
         /// Sets whether to allow high quality stream modes.
         /// </summary>
-        public Task SetEnableHighQualityStreamAsync(bool enabled);
+        public Task SetEnableHighQualityStreamsAsync(bool enabled);
 
         /// <summary>
         /// Sets whether debug logging is enabled.
         /// </summary>
         public Task SetEnableDebugLoggingAsync(bool enableDebugLogging);
+        #endregion
 
         /// <summary>
         /// Resets all settings to defaults.
@@ -198,8 +240,8 @@ namespace QuestNav.Config
             OnDebugIpOverrideChanged?.Invoke(await GetDebugIpOverrideAsync());
             OnEnableAutoStartOnBootChanged?.Invoke(await GetEnableAutoStartOnBootAsync());
             OnEnablePassthroughStreamChanged?.Invoke(await GetEnablePassthroughStreamAsync());
-            OnStreamModeChanged?.Invoke(await GetStreamModeAsync());
-            OnEnableHighQualityStreamChanged?.Invoke(await GetEnableHighQualityStreamAsync());
+            OnPassthroughStreamModeChanged?.Invoke(await GetPassthroughStreamModeAsync());
+            OnEnableHighQualityStreamsChanged?.Invoke(await GetEnableHighQualityStreamsAsync());
             OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
         }
 
@@ -214,13 +256,13 @@ namespace QuestNav.Config
             await SetTeamNumberAsync(networkDefaults.TeamNumber);
             await SetEnableAutoStartOnBootAsync(systemDefaults.EnableAutoStartOnBoot);
             await SetEnablePassthroughStreamAsync(cameraDefaults.EnablePassthroughStream);
-            await SetEnableHighQualityStreamAsync(cameraDefaults.EnableHighQualityStream);
-            await SetStreamModeAsync(
+            await SetEnableHighQualityStreamsAsync(cameraDefaults.EnableHighQualityStreams);
+            await SetPassthroughStreamModeAsync(
                 new StreamMode(
-                    cameraDefaults.StreamWidth,
-                    cameraDefaults.StreamHeight,
-                    cameraDefaults.StreamFramerate,
-                    cameraDefaults.StreamQuality
+                    cameraDefaults.PassthroughStreamWidth,
+                    cameraDefaults.PassthroughStreamHeight,
+                    cameraDefaults.PassthroughStreamFramerate,
+                    cameraDefaults.PassthroughStreamQuality
                 )
             );
             await SetEnableDebugLoggingAsync(loggingDefaults.EnableDebugLogging);
@@ -253,13 +295,16 @@ namespace QuestNav.Config
         public event Action<bool> OnEnablePassthroughStreamChanged;
 
         /// <inheritdoc/>
-        public event Action<StreamMode> OnStreamModeChanged;
+        public event Action<StreamMode> OnPassthroughStreamModeChanged;
 
         /// <inheritdoc/>
-        public event Action<bool> OnEnableHighQualityStreamChanged;
+        public event Action<bool> OnEnableAprilTagStreamChanged;
 
         /// <inheritdoc/>
-        public event Action<int> OnStreamQualityChanged;
+        public event Action<StreamMode> OnAprilTagStreamModeChanged;
+
+        /// <inheritdoc/>
+        public event Action<bool> OnEnableHighQualityStreamsChanged;
 
         /// <inheritdoc/>
         public event Action<bool> OnEnableDebugLoggingChanged;
@@ -304,26 +349,47 @@ namespace QuestNav.Config
         }
 
         /// <inheritdoc/>
-        public async Task<bool> GetEnableHighQualityStreamAsync()
-        {
-            var config = await GetCameraConfigAsync();
-
-            return config.EnableHighQualityStream;
-        }
-
-        /// <inheritdoc/>
-        public async Task<StreamMode> GetStreamModeAsync()
+        public async Task<StreamMode> GetPassthroughStreamModeAsync()
         {
             var config = await GetCameraConfigAsync();
 
             return new StreamMode(
-                config.StreamWidth,
-                config.StreamHeight,
-                config.StreamFramerate,
-                config.StreamQuality
+                config.PassthroughStreamWidth,
+                config.PassthroughStreamHeight,
+                config.PassthroughStreamFramerate,
+                config.PassthroughStreamQuality
             );
         }
 
+        /// <inheritdoc/>
+        public async Task<bool> GetEnableAprilTagStreamAsync()
+        {
+            var config = await GetCameraConfigAsync();
+
+            return config.EnableAprilTagStream;
+        }
+
+        /// <inheritdoc/>
+        public async Task<StreamMode> GetAprilTagStreamModeAsync()
+        {
+            var config = await GetCameraConfigAsync();
+
+            return new StreamMode(
+                config.AprilTagStreamWidth,
+                config.AprilTagStreamHeight,
+                config.AprilTagStreamFramerate,
+                config.AprilTagStreamQuality
+                );
+        }
+        
+        /// <inheritdoc/>
+        public async Task<bool> GetEnableHighQualityStreamsAsync()
+        {
+            var config = await GetCameraConfigAsync();
+
+            return config.EnableHighQualityStreams;
+        }
+        
         #endregion
 
         #region Logging
@@ -403,44 +469,70 @@ namespace QuestNav.Config
 
         #region Camera
         /// <inheritdoc/>
-        public async Task SetEnablePassthroughStreamAsync(bool enabled)
+        public async Task SetEnablePassthroughStreamAsync(bool enable)
         {
             var config = await GetCameraConfigAsync();
-            config.EnablePassthroughStream = enabled;
+            config.EnablePassthroughStream = enable;
             await SaveCameraConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnablePassthroughStreamChanged?.Invoke(enabled));
-            QueuedLogger.Log($"Updated Key 'enablePassthroughStream' to {enabled}");
+            invokeOnMainThread(() => OnEnablePassthroughStreamChanged?.Invoke(enable));
+            QueuedLogger.Log($"Updated Key 'enablePassthroughStream' to {enable}");
         }
 
         /// <inheritdoc/>
-        public async Task SetEnableHighQualityStreamAsync(bool enabled)
+        public async Task SetPassthroughStreamModeAsync(StreamMode mode)
         {
             var config = await GetCameraConfigAsync();
-            config.EnableHighQualityStream = enabled;
+            config.PassthroughStreamWidth = mode.Width;
+            config.PassthroughStreamHeight = mode.Height;
+            config.PassthroughStreamFramerate = mode.Framerate;
+            config.PassthroughStreamQuality = mode.Quality;
             await SaveCameraConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnableHighQualityStreamChanged?.Invoke(enabled));
-            QueuedLogger.Log($"Updated Key 'enableHighQualityStream' to {enabled}");
+            invokeOnMainThread(() => OnPassthroughStreamModeChanged?.Invoke(mode));
+            QueuedLogger.Log($"Updated Key 'passthroughStreamMode' to {mode}");
         }
 
         /// <inheritdoc/>
-        public async Task SetStreamModeAsync(StreamMode mode)
+        public async Task SetEnableAprilTagStreamAsync(bool enable)
         {
             var config = await GetCameraConfigAsync();
-            config.StreamWidth = mode.Width;
-            config.StreamHeight = mode.Height;
-            config.StreamFramerate = mode.Framerate;
-            config.StreamQuality = mode.Quality;
+            config.EnableAprilTagStream = enable;
             await SaveCameraConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnStreamModeChanged?.Invoke(mode));
-            QueuedLogger.Log($"Updated Key 'streamMode' to {mode}");
+            invokeOnMainThread(() => OnEnableAprilTagStreamChanged?.Invoke(enable));
+            QueuedLogger.Log($"Updated Key 'enableAprilTagStream' to {enable}");
         }
+        
+        /// <inheritdoc/>
+        public async Task SetAprilTagStreamModeAsync(StreamMode mode)
+        {
+            var config = await GetCameraConfigAsync();
+            config.AprilTagStreamWidth = mode.Width;
+            config.AprilTagStreamHeight = mode.Height;
+            config.AprilTagStreamFramerate = mode.Framerate;
+            config.AprilTagStreamQuality = mode.Quality;
+            await SaveCameraConfigAsync(config);
 
+            // Notify subscribed methods on the main thread
+            invokeOnMainThread(() => OnAprilTagStreamModeChanged?.Invoke(mode));
+            QueuedLogger.Log($"Updated Key 'aprilTagStreamMode' to {mode}");
+        }
+        
+        /// <inheritdoc/>
+        public async Task SetEnableHighQualityStreamsAsync(bool enabled)
+        {
+            var config = await GetCameraConfigAsync();
+            config.EnableHighQualityStreams = enabled;
+            await SaveCameraConfigAsync(config);
+
+            // Notify subscribed methods on the main thread
+            invokeOnMainThread(() => OnEnableHighQualityStreamsChanged?.Invoke(enabled));
+            QueuedLogger.Log($"Updated Key 'enableHighQualityStreams' to {enabled}");
+        }
         #endregion
 
         #region Logging

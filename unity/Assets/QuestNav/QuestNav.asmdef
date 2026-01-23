@@ -5,7 +5,9 @@
         "Unity.TextMeshPro",
         "Unity.InputSystem",
         "Oculus.VR",
-        "meta.xr.mrutilitykit"
+        "meta.xr.mrutilitykit",
+        "Unity.Burst",
+        "Unity.Collections"
     ],
     "includePlatforms": [
         "Android",

@@ -39,12 +39,17 @@
           <div v-show="activeTab === 'Logs'" class="tab-panel">
             <LogsView />
           </div>
-          
+
+          <!-- Calibration Tab -->
+          <div v-show="activeTab === 'Calibration'" class="tab-panel">
+            <CalibrationForm />
+          </div>
+
           <!-- Camera Tab -->
           <div v-show="activeTab === 'Camera'" class="tab-panel">
             <CameraView />
           </div>
-          
+
           <!-- Settings Tab -->
           <div v-show="activeTab === 'Settings'" class="tab-panel">
             <div class="settings-grid">
@@ -73,7 +78,7 @@
                   min="1"
                   max="25599"
                 />
-                <button 
+                <button
                   v-if="hasTeamNumberChanged"
                   @click="submitTeamNumber"
                   class="submit-button"
@@ -99,7 +104,7 @@
                   @keyup.enter="submitDebugIP"
                   placeholder="e.g., 10.0.0.2"
                 />
-                <button 
+                <button
                   v-if="hasDebugIPChanged"
                   @click="submitDebugIP"
                   class="submit-button"
@@ -224,10 +229,11 @@ import StatusView from './StatusView.vue'
 import LogsView from './LogsView.vue'
 import CameraView from './CameraView.vue'
 import ConfigField from './ConfigField.vue'
+import CalibrationForm from './CalibrationForm.vue'
 
 const configStore = useConfigStore()
 const activeTab = ref<string>('Status')
-const tabs = ['Status', 'Logs', 'Camera', 'Settings']
+const tabs = ['Status', 'Logs', 'Calibration', 'Camera', 'Settings']
 let pollInterval: number | null = null
 
 const pendingTeamNumber = ref<number | null>(null)
@@ -247,7 +253,7 @@ const hasDebugIPChanged = computed(() => {
 
 onMounted(async () => {
   await loadData()
-  
+
   pollInterval = setInterval(async () => {
     await configStore.loadConfig(false)
     if (configStore.config) {
@@ -328,7 +334,7 @@ async function handleUploadDatabase(event: Event) {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (!file) return
-  
+
   if (!confirm('Upload this database? The app will need to restart to apply changes.')) {
     target.value = ''
     return

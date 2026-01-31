@@ -70,6 +70,17 @@ namespace QuestNav.WebServer
             /// <param name="fps">Requested FPS, or null if not specified</param>
             /// <param name="compression">Requested compression quality (1-100), or null if not specified</param>
             Task SetModeAndCompression(int? width, int? height, int? fps, int? compression);
+
+            /// <summary>
+            /// Gets whether the frame source is currently available for streaming.
+            /// </summary>
+            bool IsAvailable { get; }
+
+            /// <summary>
+            /// Function that returns whether the frame source should currently be paused.
+            /// Evaluated by the frame source to stay synchronized with provider state.
+            /// </summary>
+            Func<bool> ShouldBePaused { get; set; }
         }
 
         #region Fields
@@ -139,6 +150,10 @@ namespace QuestNav.WebServer
         public VideoStreamProvider(IFrameSource frameSource)
         {
             this.frameSource = frameSource;
+
+            // Frame source will poll this function to determine if it should be paused
+            frameSource.ShouldBePaused = () => connectedClients == 0;
+
             Debug.Log("[VideoStreamProvider] Created");
         }
 
@@ -201,48 +216,64 @@ namespace QuestNav.WebServer
             // Notify frame source of stream start with requested parameters
             await frameSource.SetModeAndCompression(width, height, fps, compression);
 
-            Interlocked.Increment(ref connectedClients);
-            context.Response.StatusCode = 200;
-            context.Response.ContentType = "multipart/x-mixed-replace; boundary=--" + Boundary;
-            context.Response.SendChunked = true;
-
-            Debug.Log("[VideoStreamProvider] Starting mjpeg stream");
-            using Stream responseStream = context.OpenResponseStream(preferCompression: false);
-
-            // Create a buffer that we'll use to build the data structure for each frame
-            MemoryStream memStream = new(InitialBufferSize);
-            int lastFrame = 0;
-            while (!context.CancellationToken.IsCancellationRequested)
+            try
             {
-                var frame = frameSource.CurrentFrame;
-                if (lastFrame < frame.frameNumber)
+                int currentCount = Interlocked.Increment(ref connectedClients);
+
+                context.Response.StatusCode = 200;
+                context.Response.ContentType = "multipart/x-mixed-replace; boundary=--" + Boundary;
+                context.Response.SendChunked = true;
+
+                Debug.Log(
+                    $"[VideoStreamProvider] Client connected (total clients: {currentCount})"
+                );
+
+                using (Stream responseStream = context.OpenResponseStream(preferCompression: false))
+                using (MemoryStream memStream = new MemoryStream(InitialBufferSize))
                 {
-                    try
-                    {
-                        Stream frameStream = memStream;
-                        // Reset the content of memStream
-                        memStream.SetLength(0);
-                        WriteFrame(frameStream, frame.frameData);
+                    int lastFrame = 0;
 
-                        // Copy the buffer into the response stream
-                        memStream.Position = 0;
-                        memStream.CopyTo(responseStream);
-                        responseStream.Flush();
-
-                        // Don't re-send the same frame
-                        lastFrame = frame.frameNumber;
-                    }
-                    catch
+                    while (
+                        !context.CancellationToken.IsCancellationRequested
+                        && frameSource.IsAvailable
+                    )
                     {
-                        break;
+                        var frame = frameSource.CurrentFrame;
+                        if (lastFrame < frame.frameNumber)
+                        {
+                            try
+                            {
+                                // Reset the content of memStream
+                                memStream.SetLength(0);
+                                WriteFrame(memStream, frame.frameData);
+
+                                // Copy the buffer into the response stream
+                                memStream.Position = 0;
+                                memStream.CopyTo(responseStream);
+                                responseStream.Flush();
+
+                                // Don't re-send the same frame
+                                lastFrame = frame.frameNumber;
+                            }
+                            catch (IOException)
+                            {
+                                // Failed to write back to the client client, it probably disconnected - exit gracefully
+                                break;
+                            }
+                        }
+
+                        await Task.Delay(FrameDelay, context.CancellationToken);
                     }
                 }
-
-                Interlocked.Decrement(ref connectedClients);
-                await Task.Delay(FrameDelay);
             }
+            finally
+            {
+                int remainingCount = Interlocked.Decrement(ref connectedClients);
 
-            Debug.Log("[VideoStreamProvider] Done streaming");
+                Debug.Log(
+                    $"[VideoStreamProvider] Client disconnected (remaining clients: {remainingCount})"
+                );
+            }
         }
 
         /// <summary>

@@ -136,6 +136,7 @@ namespace QuestNav.WebServer.Server
                 .WithModule(new ActionModule("/api", HttpVerbs.Any, HandleApiRequest))
                 .WithModule(new ActionModule("/video", HttpVerbs.Get, HandleVideoStream))
                 .WithStaticFolder("/", staticPath, true);
+            server.Listener.IgnoreWriteExceptions = false;
 
             server.StateChanged += (s, e) =>
             {

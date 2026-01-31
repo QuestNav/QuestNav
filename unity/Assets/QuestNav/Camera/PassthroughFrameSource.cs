@@ -65,14 +65,30 @@ namespace QuestNav.Camera
         private string baseUrl;
 
         /// <summary>
+        /// Whether frame capture is currently paused due to no active connections.
+        /// </summary>
+        private bool isPaused;
+
+        /// <summary>
         /// JPEG compression quality (1-100). Higher values mean better quality and larger files.
         /// </summary>
         private int compressionQuality = 75;
 
         /// <summary>
+        /// Function that returns whether frame capture should be paused.
+        /// Set by VideoStreamProvider to control capture based on its state.
+        /// </summary>
+        public Func<bool> ShouldBePaused { get; set; } = () => true;
+
+        /// <summary>
         /// Maximum desired framerate for capture/stream pacing
         /// </summary>
         public int MaxFrameRate => cameraSource.Mode.Fps;
+
+        /// <summary>
+        /// Gets whether the frame source is currently available for streaming.
+        /// </summary>
+        public bool IsAvailable => isInitialized;
 
         /// <summary>
         /// The current frame
@@ -523,6 +539,28 @@ namespace QuestNav.Camera
 
             while (true)
             {
+                // Check if the desired pause state has changed and sync it
+                bool shouldBePaused = ShouldBePaused();
+
+                if (shouldBePaused && !isPaused)
+                {
+                    isPaused = true;
+                    CurrentFrame = default;
+                    QueuedLogger.Log("Paused capture");
+                }
+                else if (!shouldBePaused && isPaused)
+                {
+                    isPaused = false;
+                    QueuedLogger.Log("Resumed capture");
+                }
+
+                // If paused, yield until unpaused
+                if (isPaused)
+                {
+                    yield return new WaitWhile(ShouldBePaused);
+                    continue;
+                }
+
                 try
                 {
                     var texture = cameraAccess.GetTexture();

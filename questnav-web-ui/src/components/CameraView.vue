@@ -204,6 +204,7 @@ function handleFullscreenChange() {
 watch(streamEnabled, (newValue, oldValue) => {
   if (newValue && !oldValue) {
     loadVideoModes()
+    cacheBuster.value = Date.now()
   }
 })
 

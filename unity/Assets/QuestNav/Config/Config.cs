@@ -54,31 +54,82 @@ namespace QuestNav.Config
             /// Whether the passthrough camera should be streamed over NT and WebUI
             /// </summary>
             public bool EnablePassthroughStream { get; set; } = false;
-
-            /// <summary>
-            /// Whether to allow high-resolution stream modes (greater than 640x480).
-            /// </summary>
-            public bool EnableHighQualityStream { get; set; } = false;
-
+            
             /// <summary>
             /// The width of the stream in pixels
             /// </summary>
-            public int StreamWidth { get; set; } = 320;
+            public int PassthroughStreamWidth { get; set; } = 320;
 
             /// <summary>
             /// The height of the stream in pixels
             /// </summary>
-            public int StreamHeight { get; set; } = 240;
+            public int PassthroughStreamHeight { get; set; } = 240;
 
             /// <summary>
             /// The framerate of the stream in frames per second
             /// </summary>
-            public int StreamFramerate { get; set; } = 24;
+            public int PassthroughStreamFramerate { get; set; } = 24;
 
             /// <summary>
             /// JPEG compression quality (1-100). Higher values mean better quality and larger files.
             /// </summary>
-            public int StreamQuality { get; set; } = 75;
+            public int PassthroughStreamQuality { get; set; } = 75;
+            
+            /// <summary>
+            /// Whether to allow high-resolution stream modes (greater than 640x480).
+            /// </summary>
+            public bool EnableHighQualityStreams { get; set; } = false;
+        }
+
+        public class AprilTag
+        {
+            /// <summary>
+            /// The ID to be used as the primary key of this column in the database
+            /// </summary>
+            [PrimaryKey]
+            public int ID { get; set; }
+
+            /// <summary>
+            /// Whether the AprilTag detector is enabled.
+            /// </summary>
+            public bool EnableAprilTagDetector { get; set; } = true;
+
+            /// <summary>
+            /// The mode to detect using.
+            /// <ul>TRADITIONAL = 0</ul>
+            /// <ul>ANCHOR_ENHANCED = 1</ul>
+            /// </summary>
+            public int AprilTagDetectorMode { get; set; } = (int) Config.AprilTagDetectorMode.DetectionMode.TRADITIONAL;
+
+            /// <summary>
+            /// The width of the detection region in pixels.
+            /// </summary>
+            public int AprilTagDetectorWidth { get; set; } = 640;
+
+            /// <summary>
+            /// The height of the detection region in pixels.
+            /// </summary>
+            public int AprilTagDetectorHeight { get; set; } = 480;
+
+            /// <summary>
+            /// The detection framerate in frames per second.
+            /// </summary>
+            public int AprilTagDetectorFramerate { get; set; } = 30;
+
+            /// <summary>
+            /// Array of AprilTag family IDs to detect. Empty array detects all families.
+            /// </summary>
+            public int[] AprilTagDetectorAllowedIds { get; set; } = {};
+
+            /// <summary>
+            /// Maximum detection distance in meters.
+            /// </summary>
+            public double AprilTagDetectorMaxDistance { get; set; } = 4.0;
+
+            /// <summary>
+            /// Minimum number of tags required to report a valid pose.
+            /// </summary>
+            public int AprilTagDetectorMinimumNumberOfTags { get; set; } = 2;
         }
 
         public class Logging
@@ -141,6 +192,74 @@ namespace QuestNav.Config
             public override string ToString()
             {
                 return $"{Width}x{Height}@{Framerate}fps Quality: {Quality}";
+            }
+        }
+
+        public readonly struct AprilTagDetectorMode
+        {
+            public DetectionMode Mode { get; }
+            
+            public enum DetectionMode
+            {
+                /// <summary>
+                /// Uses traditional PnP solving for tag detection.
+                /// </summary>
+                TRADITIONAL = 0,
+                /// <summary>
+                /// Uses PnP solving combined with Meta Quest spatial anchors for enhanced performance.
+                /// </summary>
+                ANCHOR_ENHANCED = 1,
+            }
+
+            /// <summary>
+            /// The width of the detection region in pixels.
+            /// </summary>
+            public int Width { get; }
+
+            /// <summary>
+            /// The height of the detection region in pixels.
+            /// </summary>
+            public int Height { get; }
+
+            /// <summary>
+            /// The detection framerate in frames per second.
+            /// </summary>
+            public int Framerate { get; }
+
+            /// <summary>
+            /// Array of AprilTag family IDs to detect. Empty array detects all families.
+            /// </summary>
+            public int[] AllowedIds { get; }
+
+            /// <summary>
+            /// Maximum detection distance in meters.
+            /// </summary>
+            public double MaxDistance { get; }
+
+            /// <summary>
+            /// Minimum number of tags required to report a valid pose.
+            /// </summary>
+            public int MinimumNumberOfTags { get; }
+
+            /// <summary>
+            /// Creates a new AprilTag detector mode configuration.
+            /// </summary>
+            /// <param name="mode">The detection mode to use</param>
+            /// <param name="width">The width of the detection region in pixels.</param>
+            /// <param name="height">The height of the detection region in pixels.</param>
+            /// <param name="framerate">The detection framerate in frames per second.</param>
+            /// <param name="allowedIds">Array of AprilTag family IDs to detect.</param>
+            /// <param name="maxDistance">Maximum detection distance in meters.</param>
+            /// <param name="minimumNumberOfTags">Minimum number of tags required to report a valid pose.</param>
+            public AprilTagDetectorMode(DetectionMode mode, int width, int height, int framerate, int[] allowedIds, double maxDistance, int minimumNumberOfTags)
+            {
+                Mode = mode;
+                Width = width;
+                Height = height;
+                Framerate = framerate;
+                AllowedIds = allowedIds;
+                MaxDistance = maxDistance;
+                MinimumNumberOfTags = minimumNumberOfTags;
             }
         }
     }

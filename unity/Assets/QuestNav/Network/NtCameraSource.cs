@@ -128,6 +128,85 @@ namespace QuestNav.Network
         /// <summary>
         /// Available video modes.
         /// </summary>
+        /// <list>
+        ///   <item>0: MJPEG, 320x240 @ 1fps</item>
+        ///   <item>1: MJPEG, 320x240 @ 5fps</item>
+        ///   <item>2: MJPEG, 320x240 @ 15fps</item>
+        ///   <item>3: MJPEG, 320x240 @ 24fps</item>
+        ///   <item>4: MJPEG, 320x240 @ 30fps</item>
+        ///   <item>5: MJPEG, 320x240 @ 48fps</item>
+        ///   <item>6: MJPEG, 320x240 @ 60fps</item>
+        ///   <item>7: MJPEG, 640x360 @ 1fps</item>
+        ///   <item>8: MJPEG, 640x360 @ 5fps</item>
+        ///   <item>9: MJPEG, 640x360 @ 15fps</item>
+        ///   <item>10: MJPEG, 640x360 @ 24fps</item>
+        ///   <item>11: MJPEG, 640x360 @ 30fps</item>
+        ///   <item>12: MJPEG, 640x360 @ 48fps</item>
+        ///   <item>13: MJPEG, 640x360 @ 60fps</item>
+        ///   <item>14: MJPEG, 640x480 @ 1fps</item>
+        ///   <item>15: MJPEG, 640x480 @ 5fps</item>
+        ///   <item>16: MJPEG, 640x480 @ 15fps</item>
+        ///   <item>17: MJPEG, 640x480 @ 24fps</item>
+        ///   <item>18: MJPEG, 640x480 @ 30fps</item>
+        ///   <item>19: MJPEG, 640x480 @ 48fps</item>
+        ///   <item>20: MJPEG, 640x480 @ 60fps</item>
+        ///   <item>21: MJPEG, 720x480 @ 1fps</item>
+        ///   <item>22: MJPEG, 720x480 @ 5fps</item>
+        ///   <item>23: MJPEG, 720x480 @ 15fps</item>
+        ///   <item>24: MJPEG, 720x480 @ 24fps</item>
+        ///   <item>25: MJPEG, 720x480 @ 30fps</item>
+        ///   <item>26: MJPEG, 720x480 @ 48fps</item>
+        ///   <item>27: MJPEG, 720x480 @ 60fps</item>
+        ///   <item>28: MJPEG, 720x576 @ 1fps</item>
+        ///   <item>29: MJPEG, 720x576 @ 5fps</item>
+        ///   <item>30: MJPEG, 720x576 @ 15fps</item>
+        ///   <item>31: MJPEG, 720x576 @ 24fps</item>
+        ///   <item>32: MJPEG, 720x576 @ 30fps</item>
+        ///   <item>33: MJPEG, 720x576 @ 48fps</item>
+        ///   <item>34: MJPEG, 720x576 @ 60fps</item>
+        ///   <item>35: MJPEG, 800x600 @ 1fps</item>
+        ///   <item>36: MJPEG, 800x600 @ 5fps</item>
+        ///   <item>37: MJPEG, 800x600 @ 15fps</item>
+        ///   <item>38: MJPEG, 800x600 @ 24fps</item>
+        ///   <item>39: MJPEG, 800x600 @ 30fps</item>
+        ///   <item>40: MJPEG, 800x600 @ 48fps</item>
+        ///   <item>41: MJPEG, 800x600 @ 60fps</item>
+        ///   <item>42: MJPEG, 1024x576 @ 1fps</item>
+        ///   <item>43: MJPEG, 1024x576 @ 5fps</item>
+        ///   <item>44: MJPEG, 1024x576 @ 15fps</item>
+        ///   <item>45: MJPEG, 1024x576 @ 24fps</item>
+        ///   <item>46: MJPEG, 1024x576 @ 30fps</item>
+        ///   <item>47: MJPEG, 1024x576 @ 48fps</item>
+        ///   <item>48: MJPEG, 1024x576 @ 60fps</item>
+        ///   <item>49: MJPEG, 1280x720 @ 1fps</item>
+        ///   <item>50: MJPEG, 1280x720 @ 5fps</item>
+        ///   <item>51: MJPEG, 1280x720 @ 15fps</item>
+        ///   <item>52: MJPEG, 1280x720 @ 24fps</item>
+        ///   <item>53: MJPEG, 1280x720 @ 30fps</item>
+        ///   <item>54: MJPEG, 1280x720 @ 48fps</item>
+        ///   <item>55: MJPEG, 1280x720 @ 60fps</item>
+        ///   <item>56: MJPEG, 1280x960 @ 1fps</item>
+        ///   <item>57: MJPEG, 1280x960 @ 5fps</item>
+        ///   <item>58: MJPEG, 1280x960 @ 15fps</item>
+        ///   <item>59: MJPEG, 1280x960 @ 24fps</item>
+        ///   <item>60: MJPEG, 1280x960 @ 30fps</item>
+        ///   <item>61: MJPEG, 1280x960 @ 48fps</item>
+        ///   <item>62: MJPEG, 1280x960 @ 60fps</item>
+        ///   <item>63: MJPEG, 1280x1080 @ 1fps</item>
+        ///   <item>64: MJPEG, 1280x1080 @ 5fps</item>
+        ///   <item>65: MJPEG, 1280x1080 @ 15fps</item>
+        ///   <item>66: MJPEG, 1280x1080 @ 24fps</item>
+        ///   <item>67: MJPEG, 1280x1080 @ 30fps</item>
+        ///   <item>68: MJPEG, 1280x1080 @ 48fps</item>
+        ///   <item>69: MJPEG, 1280x1080 @ 60fps</item>
+        ///   <item>70: MJPEG, 1280x1280 @ 1fps</item>
+        ///   <item>71: MJPEG, 1280x1280 @ 5fps</item>
+        ///   <item>72: MJPEG, 1280x1280 @ 15fps</item>
+        ///   <item>73: MJPEG, 1280x1280 @ 24fps</item>
+        ///   <item>74: MJPEG, 1280x1280 @ 30fps</item>
+        ///   <item>75: MJPEG, 1280x1280 @ 48fps</item>
+        ///   <item>76: MJPEG, 1280x1280 @ 60fps</item>
+        /// </list>
         VideoMode[] Modes { get; set; }
 
         /// <summary>

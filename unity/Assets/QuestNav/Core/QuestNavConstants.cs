@@ -256,12 +256,6 @@ namespace QuestNav.Core
             public const float ANGLE_THRESHOLD = 0.1f;
         }
 
-        public static class AprilTag
-        {
-            public const int DETECTION_RESOLUTION_X = 1280;
-            public const int DETECTION_RESOLUTION_Y = 1280;
-        }
-
         /// <summary>
         /// Constants for video streaming
         /// </summary>

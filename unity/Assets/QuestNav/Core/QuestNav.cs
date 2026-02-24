@@ -221,6 +221,8 @@ namespace QuestNav.Core
         /// </summary>
         private PassthroughFrameSource passthroughFrameSource;
 
+        private AprilTagManager aprilTagManager;
+
         #endregion
 
         #endregion
@@ -256,13 +258,15 @@ namespace QuestNav.Core
                 teamUpdateButton,
                 autoStartToggle
             );
-
-            // TODO: find a home for this
-            var layoutTest = new AprilTagFieldLayout(0.1651); // TODO: no magic numbers
-            await layoutTest.LoadJsonFromFileAsync("2026-rebuilt-welded.json");
-
-            // TODO: Layout test and others should be seperated out into its own passthrough file
-            // Initialize passthrough capture and start capture coroutine
+            
+            var aprilTagFieldLayout = new AprilTagFieldLayout(0.1651); // TODO: no magic numbers
+            await aprilTagFieldLayout.LoadJsonFromFileAsync("2026-rebuilt-welded.json");
+            aprilTagManager = new AprilTagManager(
+                configManager,
+                cameraAccess,
+                aprilTagFieldLayout,
+                this);
+            
             passthroughFrameSource = new PassthroughFrameSource(
                 this,
                 cameraAccess,

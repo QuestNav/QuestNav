@@ -1,11 +1,11 @@
-using System;
-using System.Net;
-using System.Net.Sockets;
 using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Protos.Generated;
 using QuestNav.Utils;
+using System;
+using System.Net;
+using System.Net.Sockets;
 using UnityEngine;
 
 namespace QuestNav.Network
@@ -560,6 +560,13 @@ namespace QuestNav.Network
         /// </summary>
         private void PollInternalNtLog()
         {
+            if (ntInstanceLogger == null)
+            {
+                QueuedLogger.LogWarning(
+                        "NT Instance logger not initialized"
+                    );
+                return;
+            }
             var messages = ntInstanceLogger.PollForMessages();
             if (messages == null)
                 return;

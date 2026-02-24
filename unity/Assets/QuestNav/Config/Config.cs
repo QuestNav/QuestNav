@@ -28,6 +28,25 @@ namespace QuestNav.Config
             public string DebugIpOverride { get; set; } = "";
         }
 
+        /// <summary>
+        /// Join table that stores allowed AprilTag family IDs for the single AprilTag config row.
+        /// </summary>
+        public class AprilTagAllowedId
+        {
+            [PrimaryKey, AutoIncrement]
+            public int ID { get; set; }
+
+            /// <summary>
+            /// Reference to the parent AprilTag config (we use ID=1 for the single config row)
+            /// </summary>
+            public int AprilTagConfigId { get; set; }
+
+            /// <summary>
+            /// The allowed AprilTag family ID
+            /// </summary>
+            public int AllowedId { get; set; }
+        }
+
         public class System
         {
             /// <summary>
@@ -54,7 +73,7 @@ namespace QuestNav.Config
             /// Whether the passthrough camera should be streamed over NT and WebUI
             /// </summary>
             public bool EnablePassthroughStream { get; set; } = false;
-            
+
             /// <summary>
             /// The width of the stream in pixels
             /// </summary>
@@ -74,13 +93,20 @@ namespace QuestNav.Config
             /// JPEG compression quality (1-100). Higher values mean better quality and larger files.
             /// </summary>
             public int PassthroughStreamQuality { get; set; } = 75;
-            
+
             /// <summary>
             /// Whether to allow high-resolution stream modes (greater than 640x480).
             /// </summary>
             public bool EnableHighQualityStreams { get; set; } = false;
         }
 
+        /// <summary>
+        /// ApriTag detection configuration.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: allowed IDs are stored in a separate table `AprilTagAllowedId`.
+        /// See ConfigManager to read/write.
+        /// </remarks>
         public class AprilTag
         {
             /// <summary>
@@ -90,44 +116,50 @@ namespace QuestNav.Config
             public int ID { get; set; }
 
             /// <summary>
-            /// Whether the AprilTag detector is enabled.
+            /// Whether the AprilTag detector is enabled. Default is true.
             /// </summary>
             public bool EnableAprilTagDetector { get; set; } = true;
 
             /// <summary>
             /// The mode to detect using.
-            /// <ul>TRADITIONAL = 0</ul>
-            /// <ul>ANCHOR_ENHANCED = 1</ul>
             /// </summary>
-            public int AprilTagDetectorMode { get; set; } = (int) Config.AprilTagDetectorMode.DetectionMode.TRADITIONAL;
+            /// <remarks>
+            /// <list type="table">
+            /// <item>
+            /// <term><c>TRADITIONAL</c></term>
+            /// <description>Uses traditional PnP solving for tag detection.</description>
+            /// </item>
+            /// <item>
+            /// <term><c>ANCHOR_ENHANCED</c></term>
+            /// <description>Uses PnP solving combined with Meta Quest spatial anchors for enhanced performance.</description>
+            /// </item>
+            /// </list>
+            /// Default is <c>TRADITIONAL</c>.
+            /// </remarks>
+            public int AprilTagDetectorMode { get; set; } = (int)Config.AprilTagDetectorMode.DetectionMode.TRADITIONAL;
 
             /// <summary>
-            /// The width of the detection region in pixels.
+            /// The width of the detection region in pixels. Default is 640.
             /// </summary>
             public int AprilTagDetectorWidth { get; set; } = 640;
 
             /// <summary>
-            /// The height of the detection region in pixels.
+            /// The height of the detection region in pixels. Default is 480.
             /// </summary>
             public int AprilTagDetectorHeight { get; set; } = 480;
 
             /// <summary>
-            /// The detection framerate in frames per second.
+            /// The detection framerate in frames per second. Default is 30.
             /// </summary>
             public int AprilTagDetectorFramerate { get; set; } = 30;
 
             /// <summary>
-            /// Array of AprilTag family IDs to detect. Empty array detects all families.
-            /// </summary>
-            public int[] AprilTagDetectorAllowedIds { get; set; } = {};
-
-            /// <summary>
-            /// Maximum detection distance in meters.
+            /// Maximum detection distance in meters. Default is 4.0 meters.
             /// </summary>
             public double AprilTagDetectorMaxDistance { get; set; } = 4.0;
 
             /// <summary>
-            /// Minimum number of tags required to report a valid pose.
+            /// Minimum number of tags required to report a valid pose. Default is 2.
             /// </summary>
             public int AprilTagDetectorMinimumNumberOfTags { get; set; } = 2;
         }
@@ -198,7 +230,7 @@ namespace QuestNav.Config
         public readonly struct AprilTagDetectorMode
         {
             public DetectionMode Mode { get; }
-            
+
             public enum DetectionMode
             {
                 /// <summary>

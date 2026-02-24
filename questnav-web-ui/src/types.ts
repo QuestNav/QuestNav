@@ -13,6 +13,16 @@ export interface VideoModeModel {
   framerate: number
 }
 
+export interface AprilTagDetectorMode {
+  mode: number
+  width: number
+  height: number
+  framerate: number
+  allowedIds: number[]
+  maxDistance: number
+  minimumNumberOfTags: number
+}
+
 export interface ConfigResponse {
   success: boolean
   teamNumber: number
@@ -22,6 +32,8 @@ export interface ConfigResponse {
   enableHighQualityStream: boolean
   enableDebugLogging: boolean
   streamMode: StreamModeModel
+  enableAprilTagDetector: boolean
+  aprilTagDetectorMode: AprilTagDetectorMode
   timestamp: number
 }
 
@@ -33,6 +45,8 @@ export interface ConfigUpdateRequest {
   enableHighQualityStream?: boolean
   enableDebugLogging?: boolean
   streamMode?: StreamModeModel
+  enableAprilTagDetector?: boolean
+  aprilTagDetectorMode?: AprilTagDetectorMode
 }
 
 export interface SimpleResponse {

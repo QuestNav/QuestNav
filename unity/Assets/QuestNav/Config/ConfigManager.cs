@@ -1,10 +1,12 @@
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using QuestNav.Core;
 using QuestNav.Utils;
 using SQLite;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using static QuestNav.Config.Config;
 
@@ -127,7 +129,7 @@ namespace QuestNav.Config
         /// The stream mode with width, height, and framerate.
         /// </returns>
         public Task<StreamMode> GetPassthroughStreamModeAsync();
-        
+
         /// <summary>
         /// Gets whether high quality streaming is enabled for both the AprilTag and Passthrough streams.
         /// </summary>
@@ -154,7 +156,7 @@ namespace QuestNav.Config
         /// </returns>
         public Task<AprilTagDetectorMode> GetAprilTagDetectorModeAsync();
         #endregion
-        
+
         #region Logging
         /// <summary>
         /// Gets whether debug logging is enabled.
@@ -198,7 +200,7 @@ namespace QuestNav.Config
         /// Sets the stream mode configuration.
         /// </summary>
         public Task SetPassthroughStreamModeAsync(StreamMode mode);
-        
+
         /// <summary>
         /// Sets whether to allow high quality stream modes.
         /// </summary>
@@ -261,6 +263,7 @@ namespace QuestNav.Config
             await connection.CreateTableAsync<Config.System>();
             await connection.CreateTableAsync<Config.Camera>();
             await connection.CreateTableAsync<Config.AprilTag>();
+            await connection.CreateTableAsync<Config.AprilTagAllowedId>();
             await connection.CreateTableAsync<Config.Logging>();
 
             QueuedLogger.Log($"Database initialized at: {dbPath}");
@@ -269,14 +272,14 @@ namespace QuestNav.Config
             OnTeamNumberChanged?.Invoke(await GetTeamNumberAsync());
             OnDebugIpOverrideChanged?.Invoke(await GetDebugIpOverrideAsync());
             OnEnableAutoStartOnBootChanged?.Invoke(await GetEnableAutoStartOnBootAsync());
-            
+
             OnEnablePassthroughStreamChanged?.Invoke(await GetEnablePassthroughStreamAsync());
             OnPassthroughStreamModeChanged?.Invoke(await GetPassthroughStreamModeAsync());
             OnEnableHighQualityStreamsChanged?.Invoke(await GetEnableHighQualityStreamsAsync());
-            
+
             OnEnableAprilTagDetectorChanged?.Invoke(await GetEnableAprilTagDetectorAsync());
             OnAprilTagDetectorModeChanged?.Invoke(await GetAprilTagDetectorModeAsync());
-            
+
             OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
         }
 
@@ -291,7 +294,7 @@ namespace QuestNav.Config
 
             await SetTeamNumberAsync(networkDefaults.TeamNumber);
             await SetEnableAutoStartOnBootAsync(systemDefaults.EnableAutoStartOnBoot);
-            
+
             await SetEnablePassthroughStreamAsync(cameraDefaults.EnablePassthroughStream);
             await SetEnableHighQualityStreamsAsync(cameraDefaults.EnableHighQualityStreams);
             await SetPassthroughStreamModeAsync(
@@ -310,12 +313,12 @@ namespace QuestNav.Config
                     aprilTagDefaults.AprilTagDetectorWidth,
                     aprilTagDefaults.AprilTagDetectorHeight,
                     aprilTagDefaults.AprilTagDetectorFramerate,
-                    aprilTagDefaults.AprilTagDetectorAllowedIds,
+                    Array.Empty<int>(),
                     aprilTagDefaults.AprilTagDetectorMaxDistance,
                     aprilTagDefaults.AprilTagDetectorMinimumNumberOfTags
                 )
             );
-            
+
             await SetEnableDebugLoggingAsync(loggingDefaults.EnableDebugLogging);
 
             QueuedLogger.Log("Database reset to defaults");
@@ -421,7 +424,7 @@ namespace QuestNav.Config
                 config.PassthroughStreamQuality
             );
         }
-        
+
         /// <inheritdoc/>
         public async Task<bool> GetEnableHighQualityStreamsAsync()
         {
@@ -429,7 +432,7 @@ namespace QuestNav.Config
 
             return config.EnableHighQualityStreams;
         }
-        
+
         #endregion
 
         #region AprilTag
@@ -445,19 +448,20 @@ namespace QuestNav.Config
         public async Task<AprilTagDetectorMode> GetAprilTagDetectorModeAsync()
         {
             var config = await GetAprilTagConfigAsync();
+            var allowedIds = await GetAprilTagAllowedIdsAsync();
 
             return new AprilTagDetectorMode(
                 (AprilTagDetectorMode.DetectionMode)config.AprilTagDetectorMode,
                 config.AprilTagDetectorWidth,
                 config.AprilTagDetectorHeight,
                 config.AprilTagDetectorFramerate,
-                config.AprilTagDetectorAllowedIds,
+                allowedIds,
                 config.AprilTagDetectorMaxDistance,
                 config.AprilTagDetectorMinimumNumberOfTags
             );
         }
         #endregion
-        
+
         #region Logging
         /// <inheritdoc/>
         public async Task<bool> GetEnableDebugLoggingAsync()
@@ -560,7 +564,7 @@ namespace QuestNav.Config
             invokeOnMainThread(() => OnPassthroughStreamModeChanged?.Invoke(mode));
             QueuedLogger.Log($"Updated Key 'passthroughStreamMode' to {mode}");
         }
-        
+
         /// <inheritdoc/>
         public async Task SetEnableHighQualityStreamsAsync(bool enabled)
         {
@@ -581,7 +585,7 @@ namespace QuestNav.Config
             var config = await GetAprilTagConfigAsync();
             config.EnableAprilTagDetector = enable;
             await SaveAprilTagConfigAsync(config);
-            
+
             // Notify subscribed methods on the main thread
             invokeOnMainThread(() => OnEnableAprilTagDetectorChanged?.Invoke(enable));
             QueuedLogger.Log($"Updated Key 'enableAprilTagDetector' to {enable}");
@@ -591,14 +595,14 @@ namespace QuestNav.Config
         public async Task SetAprilTagDetectorModeAsnyc(AprilTagDetectorMode mode)
         {
             var config = await GetAprilTagConfigAsync();
-            config.AprilTagDetectorMode = (int) mode.Mode;
+            config.AprilTagDetectorMode = (int)mode.Mode;
             config.AprilTagDetectorWidth = mode.Width;
             config.AprilTagDetectorHeight = mode.Height;
             config.AprilTagDetectorFramerate = mode.Framerate;
-            config.AprilTagDetectorAllowedIds = mode.AllowedIds;
             config.AprilTagDetectorMaxDistance = mode.MaxDistance;
             config.AprilTagDetectorMinimumNumberOfTags = mode.MinimumNumberOfTags;
             await SaveAprilTagConfigAsync(config);
+            await SaveAprilTagAllowedIdsAsync(mode.AllowedIds ?? Array.Empty<int>());
 
             // Notify subscribed methods on the main thread
             invokeOnMainThread(() => OnAprilTagDetectorModeChanged?.Invoke(mode));
@@ -679,7 +683,7 @@ namespace QuestNav.Config
             }
             return config;
         }
-        
+
         /// <summary>
         /// Gets AprilTag config from DB, creating defaults if not found.
         /// </summary>
@@ -697,6 +701,22 @@ namespace QuestNav.Config
                 await SaveAprilTagConfigAsync(config);
             }
             return config;
+        }
+
+        /// <summary>
+        /// Gets AprilTag allowed IDs from DB, creating defaults if not found.
+        /// </summary>
+        /// <returns>
+        /// The AprilTag allowed IDs configuration.
+        /// </returns>
+        private async Task<int[]> GetAprilTagAllowedIdsAsync()
+        {
+            /// The default is an emptry array so no records are created for the default
+            var rows = await connection.Table<Config.AprilTagAllowedId>()
+                                       .Where(r => r.AprilTagConfigId == 1)
+                                       .ToListAsync();
+
+            return rows.Select(r => r.AllowedId).ToArray();
         }
 
         /// <summary>
@@ -749,7 +769,7 @@ namespace QuestNav.Config
             config.ID = 1;
             await connection.InsertOrReplaceAsync(config);
         }
-        
+
         /// <summary>
         /// Persists AprilTag config to the database.
         /// </summary>
@@ -758,6 +778,27 @@ namespace QuestNav.Config
         {
             config.ID = 1;
             await connection.InsertOrReplaceAsync(config);
+        }
+
+        /// <summary>
+        /// Persists AprilTag allowed IDs to the database.
+        /// </summary>
+        /// <param name="ids">The AprilTag allowed IDs configuration to save.</param>
+        private async Task SaveAprilTagAllowedIdsAsync(IEnumerable<int> ids)
+        {
+            // single config row uses AprilTagConfigId = 1
+            await connection.ExecuteAsync("DELETE FROM AprilTagAllowedId WHERE AprilTagConfigId = ?", 1);
+
+            // bulk insert (one row per allowed id)
+            foreach (var id in ids ?? Array.Empty<int>())
+            {
+                var entry = new Config.AprilTagAllowedId
+                {
+                    AprilTagConfigId = 1,
+                    AllowedId = id
+                };
+                await connection.InsertAsync(entry);
+            }
         }
 
         /// <summary>

@@ -341,6 +341,7 @@ namespace QuestNav.WebServer.Server
         private async Task HandleGetConfig(IHttpContext context)
         {
             var streamMode = await configManager.GetPassthroughStreamModeAsync();
+            var aprilTagDetectorMode = await configManager.GetAprilTagDetectorModeAsync();
             var response = new ConfigResponse
             {
                 success = true,
@@ -355,6 +356,17 @@ namespace QuestNav.WebServer.Server
                     height = streamMode.Height,
                     framerate = streamMode.Framerate,
                     quality = streamMode.Quality,
+                },
+                enableAprilTagDetector = await configManager.GetEnableAprilTagDetectorAsync(),
+                aprilTagDetectorMode = new AprilTagDetectorModeModel
+                {
+                    mode = (int)aprilTagDetectorMode.Mode,
+                    width = aprilTagDetectorMode.Width,
+                    height = aprilTagDetectorMode.Height,
+                    framerate = aprilTagDetectorMode.Framerate,
+                    allowedIds = aprilTagDetectorMode.AllowedIds,
+                    maxDistance = aprilTagDetectorMode.MaxDistance,
+                    minimumNumberOfTags = aprilTagDetectorMode.MinimumNumberOfTags,
                 },
                 enableDebugLogging = await configManager.GetEnableDebugLoggingAsync(),
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
@@ -413,6 +425,26 @@ namespace QuestNav.WebServer.Server
                             request.StreamMode.height,
                             request.StreamMode.framerate,
                             request.StreamMode.quality
+                        )
+                    );
+                }
+                if (request.EnableAprilTagDetector.HasValue)
+                {
+                    await configManager.SetEnableAprilTagDetectorAsync(
+                        request.EnableAprilTagDetector.Value
+                    );
+                }
+                if (request.AprilTagDetectorMode != null)
+                {
+                    await configManager.SetAprilTagDetectorModeAsnyc(
+                        new AprilTagDetectorMode(
+                            (AprilTagDetectorMode.DetectionMode)request.AprilTagDetectorMode.mode,
+                            request.AprilTagDetectorMode.width,
+                            request.AprilTagDetectorMode.height,
+                            request.AprilTagDetectorMode.framerate,
+                            request.AprilTagDetectorMode.allowedIds,
+                            request.AprilTagDetectorMode.maxDistance,
+                            request.AprilTagDetectorMode.minimumNumberOfTags
                         )
                     );
                 }

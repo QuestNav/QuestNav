@@ -68,12 +68,23 @@ defineProps<{
   gap: 0.5rem;
 }
 
-.input-control :deep(input) {
+.input-control :deep(input:not([type="range"])) {
   flex: 1;
-  padding: 0.75rem;
-  border: 1px solid var(--border-color);
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--border-color);
   border-radius: 6px;
   font-size: 1rem;
+}
+
+[data-theme="dark"] .input-control :deep(input:not([type="range"])) {
+  border-color: #4a5568;
+  background: #2d3748;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .input-control :deep(input:not([type="range"])):focus {
+  border-color: var(--primary-color);
+  background: #374151;
 }
 
 .checkbox-control {

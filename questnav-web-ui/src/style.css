@@ -174,10 +174,10 @@ textarea {
   width: 100%;
   padding: 0.5rem 0.75rem;
   background-color: var(--input-bg);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-primary);
-  transition: border-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 input[type="text"]:focus,
@@ -186,6 +186,33 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(51, 161, 253, 0.1);
+}
+
+/* Dark mode form control improvements */
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  border-color: #4a5568;
+  background: #2d3748;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] input[type="text"]:focus,
+[data-theme="dark"] input[type="number"]:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+  border-color: var(--primary-color);
+  background: #374151;
+}
+
+.checkbox-label {
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
 }
 
 input[type="checkbox"] {
@@ -200,7 +227,7 @@ input[type="checkbox"] {
   appearance: none;
   border: 2px solid var(--border-color);
   border-radius: 4px;
-  background-color: var(--primary-color);
+  background-color: var(--bg-color);
   transition: all 0.2s ease;
   position: relative;
   flex-shrink: 0;
@@ -208,11 +235,16 @@ input[type="checkbox"] {
 
 input[type="checkbox"]:checked {
   background-color: var(--primary-color);
-  border-color: var(--border-color);
+  border-color: var(--primary-color);
 }
 
 input[type="checkbox"]:hover {
   border-color: var(--primary-color);
+}
+
+input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(51, 161, 253, 0.1);
 }
 
 input[type="checkbox"]:checked::after {
@@ -227,33 +259,72 @@ input[type="checkbox"]:checked::after {
   transform: translate(-50%, -60%) rotate(45deg);
 }
 
+[data-theme="dark"] input[type="checkbox"] {
+  border-color: #4a5568;
+  background-color: #2d3748;
+}
+
+[data-theme="dark"] input[type="checkbox"]:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
 input[type="range"] {
   width: 100%;
-  height: 6px;
-  background: var(--bg-tertiary);
-  border-radius: 3px;
+  height: 8px;
+  background: var(--input-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
   outline: none;
   -webkit-appearance: none;
+  transition: all 0.2s ease;
+}
+
+input[type="range"]:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(51, 161, 253, 0.1);
+}
+
+/* Dark mode range improvements */
+[data-theme="dark"] input[type="range"] {
+  border-color: #4a5568;
+  background: #2d3748;
+}
+
+[data-theme="dark"] input[type="range"]:focus {
+  border-color: var(--primary-color);
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   background: var(--primary-color);
   border-radius: 50%;
   cursor: pointer;
+  border: 2px solid var(--bg-color);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   background: var(--primary-color);
   border-radius: 50%;
   cursor: pointer;
-  border: none;
+  border: 2px solid var(--bg-color);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   appearance: none;
+}
+
+/* Dark mode slider thumb improvements */
+[data-theme="dark"] input[type="range"]::-webkit-slider-thumb {
+  border-color: #2d3748;
+}
+
+[data-theme="dark"] input[type="range"]::-moz-range-thumb {
+  border-color: #2d3748;
 }
 
 input[type="color"] {
@@ -379,4 +450,17 @@ button.danger:hover {
 .justify-between { justify-content: space-between; }
 .gap-1 { gap: 0.5rem; }
 .gap-2 { gap: 1rem; }
+
+/* Layout Components */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
 

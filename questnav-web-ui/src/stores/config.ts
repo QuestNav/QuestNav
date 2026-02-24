@@ -2,7 +2,7 @@
 
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { ConfigResponse, StreamModeModel } from '../types'
+import type { ConfigResponse, StreamModeModel, AprilTagDetectorMode } from '../types'
 import { configApi } from '../api/config'
 
 export const useConfigStore = defineStore('config', () => {
@@ -128,6 +128,32 @@ export const useConfigStore = defineStore('config', () => {
     }
   }
 
+  async function updateEnableAprilTagDetector(value: boolean) {
+    try {
+      const response = await configApi.updateConfig({ enableAprilTagDetector: value })
+      if (response.success) {
+        await loadConfig(false)
+      }
+      return response.success
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update'
+      return false
+    }
+  }
+
+  async function updateAprilTagDetectorMode(value: AprilTagDetectorMode) {
+    try {
+      const response = await configApi.updateConfig({ aprilTagDetectorMode: value })
+      if (response.success && config.value) {
+        config.value.aprilTagDetectorMode = value
+      }
+      return response.success
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update'
+      return false
+    }
+  }
+
   async function resetToDefaults() {
     try {
       const response = await configApi.resetConfig()
@@ -157,6 +183,8 @@ export const useConfigStore = defineStore('config', () => {
     updateEnableHighQualityStream,
     updateEnableDebugLogging,
     updateStreamMode,
+    updateEnableAprilTagDetector,
+    updateAprilTagDetectorMode,
     resetToDefaults
   }
 })

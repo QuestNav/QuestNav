@@ -63,6 +63,19 @@ export const useConfigStore = defineStore('config', () => {
     }
   }
 
+  async function updateAllowedPoseResetTimeoutMs(value: number) {
+    try {
+      const response = await configApi.updateConfig({ allowedPoseResetTimeoutMs: value })
+      if (response.success) {
+        await loadConfig(false)
+      }
+      return response.success
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update'
+      return false
+    }
+  }
+
   async function updateEnableAutoStartOnBoot(value: boolean) {
     try {
       const response = await configApi.updateConfig({ enableAutoStartOnBoot: value })
@@ -152,6 +165,7 @@ export const useConfigStore = defineStore('config', () => {
     loadConfig,
     updateTeamNumber,
     updateDebugIpOverride,
+    updateAllowedPoseResetTimeoutMs,
     updateEnableAutoStartOnBoot,
     updateEnablePassthroughStream,
     updateEnableHighQualityStream,
@@ -160,4 +174,3 @@ export const useConfigStore = defineStore('config', () => {
     resetToDefaults
   }
 })
-

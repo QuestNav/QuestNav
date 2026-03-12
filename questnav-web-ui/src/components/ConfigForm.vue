@@ -108,6 +108,28 @@
                 </button>
               </ConfigField>
 
+
+              <!-- Pose Reset Timeout -->
+              <ConfigField
+                title="Pose Reset Timeout"
+                description="How stale a pose reset request can be (milliseconds)"
+                control-class="input-control"
+              >
+                <input
+                  type="number"
+                  :value="pendingPoseResetTimeout ?? configStore.config.allowedPoseResetTimeoutMs"
+                  @input="handlePoseResetTimeoutInput"
+                  @keyup.enter="submitPoseResetTimeout"
+                  min="1"
+                />
+                <button
+                  v-if="hasPoseResetTimeoutChanged"
+                  @click="submitPoseResetTimeout"
+                  class="submit-button"
+                >
+                  Apply
+                </button>
+              </ConfigField>
               <!-- Auto Start on Boot -->
               <ConfigField
                 title="Auto Start on Boot"
@@ -232,6 +254,7 @@ let pollInterval: number | null = null
 
 const pendingTeamNumber = ref<number | null>(null)
 const pendingDebugIP = ref<string | null>(null)
+const pendingPoseResetTimeout = ref<number | null>(null)
 
 const isDebugIPActive = computed(() => {
   return configStore.config?.debugIpOverride && configStore.config.debugIpOverride.length > 0
@@ -245,6 +268,10 @@ const hasDebugIPChanged = computed(() => {
   return pendingDebugIP.value !== null && pendingDebugIP.value !== configStore.config?.debugIpOverride
 })
 
+const hasPoseResetTimeoutChanged = computed(() => {
+  return pendingPoseResetTimeout.value !== null && pendingPoseResetTimeout.value !== configStore.config?.allowedPoseResetTimeoutMs
+})
+
 onMounted(async () => {
   await loadData()
   
@@ -253,6 +280,7 @@ onMounted(async () => {
     if (configStore.config) {
       if (pendingTeamNumber.value === configStore.config.teamNumber) pendingTeamNumber.value = null
       if (pendingDebugIP.value === configStore.config.debugIpOverride) pendingDebugIP.value = null
+      if (pendingPoseResetTimeout.value === configStore.config.allowedPoseResetTimeoutMs) pendingPoseResetTimeout.value = null
     }
   }, 3000) as unknown as number
 })
@@ -287,6 +315,19 @@ async function submitDebugIP() {
   if (pendingDebugIP.value !== null) {
     await configStore.updateDebugIpOverride(pendingDebugIP.value)
     pendingDebugIP.value = null
+  }
+}
+
+function handlePoseResetTimeoutInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  const value = parseInt(target.value)
+  if (!isNaN(value)) pendingPoseResetTimeout.value = value
+}
+
+async function submitPoseResetTimeout() {
+  if (pendingPoseResetTimeout.value !== null) {
+    await configStore.updateAllowedPoseResetTimeoutMs(pendingPoseResetTimeout.value)
+    pendingPoseResetTimeout.value = null
   }
 }
 
@@ -488,4 +529,3 @@ async function handleUploadDatabase(event: Event) {
   }
 }
 </style>
-

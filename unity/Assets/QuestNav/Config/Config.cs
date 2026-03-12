@@ -26,6 +26,11 @@ namespace QuestNav.Config
             /// Cannot be combined with <see cref="TeamNumber"/> at the same time.
             /// </summary>
             public string DebugIpOverride { get; set; } = "";
+
+            /// <summary>
+            /// How stale a request to reset the Quest's pose can be in milliseconds
+            /// </summary>
+            public int AllowedPoseResetTimeoutMs { get; set; } = QuestNavConstants.Commands.POSE_RESET_TTL_MS;
         }
 
         public class System

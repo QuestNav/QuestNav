@@ -347,6 +347,7 @@ namespace QuestNav.WebServer.Server
                 success = true,
                 teamNumber = await configManager.GetTeamNumberAsync(),
                 debugIpOverride = await configManager.GetDebugIpOverrideAsync(),
+                allowedPoseResetTimeoutMs = await configManager.GetAllowedPoseResetTimeoutMsAsync(),
                 enableAutoStartOnBoot = await configManager.GetEnableAutoStartOnBootAsync(),
                 enablePassthroughStream = await configManager.GetEnablePassthroughStreamAsync(),
                 enableHighQualityStream = await configManager.GetEnableHighQualityStreamAsync(),
@@ -387,6 +388,12 @@ namespace QuestNav.WebServer.Server
                 if (request.debugIpOverride != null)
                 {
                     await configManager.SetDebugIpOverrideAsync(request.debugIpOverride);
+                }
+                if (request.AllowedPoseResetTimeoutMs.HasValue)
+                {
+                    await configManager.SetAllowedPoseResetTimeoutMsAsync(
+                        request.AllowedPoseResetTimeoutMs.Value
+                    );
                 }
                 if (request.EnableAutoStartOnBoot.HasValue)
                 {

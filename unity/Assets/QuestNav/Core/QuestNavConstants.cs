@@ -91,17 +91,6 @@ namespace QuestNav.Core
         }
 
         /// <summary>
-        /// Constants related to command processing.
-        /// </summary>
-        public static class Commands
-        {
-            /// <summary>
-            /// Time to live for pose reset command (ms). Commands older than this will be ignored.
-            /// </summary>
-            public const int POSE_RESET_TTL_MS = 50;
-        }
-
-        /// <summary>
         /// Constants related to the display and update frequency.
         /// </summary>
         public static class Display

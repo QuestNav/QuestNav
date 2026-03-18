@@ -5,12 +5,15 @@ using QuestNav.Commands;
 using QuestNav.Config;
 using QuestNav.Network;
 using QuestNav.QuestNav.AprilTag;
+using QuestNav.QuestNav.Estimation;
+using QuestNav.QuestNav.Geometry;
 using QuestNav.UI;
 using QuestNav.Utils;
 using QuestNav.WebServer;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Quaternion = UnityEngine.Quaternion;
 
 namespace QuestNav.Core
 {
@@ -31,16 +34,6 @@ namespace QuestNav.Core
         /// Current timestamp from Unity's Time.time
         /// </summary>
         private double timeStamp;
-
-        /// <summary>
-        /// Current position of the VR headset
-        /// </summary>
-        private Vector3 position;
-
-        /// <summary>
-        /// Current rotation of the VR headset as a Quaternion
-        /// </summary>
-        private Quaternion rotation;
 
         /// <summary>
         /// Reference to the OVR Camera Rig for tracking
@@ -155,6 +148,11 @@ namespace QuestNav.Core
         private PassthroughCameraAccess cameraAccess;
 
         /// <summary>
+        /// The current pose of the HMD
+        /// </summary>
+        private Pose3d pose;
+        
+        /// <summary>
         /// Current battery percentage of the device
         /// </summary>
         private int batteryPercent;
@@ -221,6 +219,8 @@ namespace QuestNav.Core
         /// </summary>
         private PassthroughFrameSource passthroughFrameSource;
 
+        private IVioAprilTagPoseEstimator vioAprilTagPoseEstimator;
+        
         private AprilTagManager aprilTagManager;
 
         #endregion
@@ -258,11 +258,14 @@ namespace QuestNav.Core
                 teamUpdateButton,
                 autoStartToggle
             );
+
+            vioAprilTagPoseEstimator = new VioAprilTagPoseEstimator();
             
             var aprilTagFieldLayout = new AprilTagFieldLayout(0.1651); // TODO: no magic numbers
             await aprilTagFieldLayout.LoadJsonFromFileAsync("2026-rebuilt-welded.json");
             aprilTagManager = new AprilTagManager(
                 configManager,
+                vioAprilTagPoseEstimator,
                 cameraAccess,
                 aprilTagFieldLayout,
                 this);
@@ -278,6 +281,7 @@ namespace QuestNav.Core
             webServerManager = new WebServerManager(
                 configManager,
                 networkTableConnection,
+                vioAprilTagPoseEstimator,
                 vrCamera,
                 vrCameraRoot,
                 passthroughFrameSource,
@@ -286,6 +290,7 @@ namespace QuestNav.Core
 
             commandProcessor = new CommandProcessor(
                 networkTableConnection,
+                vioAprilTagPoseEstimator,
                 vrCamera,
                 vrCameraRoot,
                 resetTransform
@@ -339,8 +344,7 @@ namespace QuestNav.Core
             networkTableConnection.PublishFrameData(
                 frameCount,
                 timeStamp,
-                position,
-                rotation,
+                vioAprilTagPoseEstimator.EstimatedPose,
                 currentlyTracking
             );
 
@@ -370,7 +374,8 @@ namespace QuestNav.Core
 
             // Update UI elements like connection status, IP address display, team number validation
             // UI updates don't need to be real-time, 3Hz provides smooth visual feedback
-            uiManager.UpdatePositionText(position, rotation);
+            //TODO: this should take pose3d
+            uiManager.UpdatePositionText(cameraRig.centerEyeAnchor.position, cameraRig.centerEyeAnchor.rotation);
 
             // Monitor device health: tracking status, battery level, tracking loss events
             // This data helps diagnose issues but doesn't need high-frequency updates
@@ -378,7 +383,9 @@ namespace QuestNav.Core
             networkTableConnection.PublishDeviceData(trackingLostEvents, batteryPercent);
 
             // Update web server with current pose data (it handles everything else internally)
-            var frcPose = Conversions.UnityToFrc3d(position, rotation);
+            //TODO: this should pull from the kalman pose estimator
+            //TODO: this should take pose3d
+            var frcPose = Conversions.UnityToFrc3d(cameraRig.centerEyeAnchor.position, cameraRig.centerEyeAnchor.rotation);
             var (frcPosition, frcRotation) = Conversions.ProtobufPose3dToUnity(frcPose);
             webServerManager?.Periodic(
                 frcPosition,
@@ -560,14 +567,10 @@ namespace QuestNav.Core
 
             // Time since Unity startup in seconds - provides temporal correlation for robot code
             timeStamp = Time.time;
-
-            // Get the center eye position - this is the averaged position between left and right eyes
-            // This represents the "head" position that the robot should track
-            position = cameraRig.centerEyeAnchor.position;
-
-            // Get the headset orientation as a quaternion
-            // This includes pitch (looking up/down), yaw (turning left/right), and roll (tilting head)
-            rotation = cameraRig.centerEyeAnchor.rotation;
+            
+            // Add latest VIO data to kalman filter
+            pose = new Pose3d(Conversions.UnityToFrc3d(cameraRig.centerEyeAnchor.position, cameraRig.centerEyeAnchor.rotation));
+            vioAprilTagPoseEstimator.AddVioObservation(pose, timeStamp);
         }
 
         /// <summary>

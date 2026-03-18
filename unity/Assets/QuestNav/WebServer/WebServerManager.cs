@@ -10,6 +10,7 @@ using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
+using QuestNav.QuestNav.Estimation;
 using QuestNav.Utils;
 using QuestNav.WebServer.Server;
 using UnityEngine;
@@ -67,6 +68,7 @@ namespace QuestNav.WebServer
         private readonly Transform resetTransform;
         private readonly Transform vrCameraRoot;
         private readonly INetworkTableConnection networkTableConnection;
+        private readonly IVioAprilTagPoseEstimator vioAprilTagPoseEstimator;
         private readonly Transform vrCamera;
         private readonly IConfigManager configManager;
         private readonly LogCollector logCollector;
@@ -81,6 +83,7 @@ namespace QuestNav.WebServer
         public WebServerManager(
             IConfigManager configManager,
             INetworkTableConnection networkTableConnection,
+            IVioAprilTagPoseEstimator vioAprilTagPoseEstimator,
             Transform vrCamera,
             Transform vrCameraRoot,
             VideoStreamProvider.IFrameSource frameSource,
@@ -89,6 +92,7 @@ namespace QuestNav.WebServer
         {
             this.configManager = configManager;
             this.networkTableConnection = networkTableConnection;
+            this.vioAprilTagPoseEstimator = vioAprilTagPoseEstimator;
             this.vrCamera = vrCamera;
             this.vrCameraRoot = vrCameraRoot;
             this.resetTransform = resetTransform;
@@ -264,7 +268,8 @@ namespace QuestNav.WebServer
                 webContext, // Web context is no-op (no NetworkTables responses)
                 vrCamera,
                 vrCameraRoot,
-                resetTransform
+                resetTransform,
+                vioAprilTagPoseEstimator
             );
 
             // Execute the pose reset using the existing command implementation

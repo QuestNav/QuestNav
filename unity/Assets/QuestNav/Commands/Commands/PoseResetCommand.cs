@@ -1,13 +1,16 @@
 using QuestNav.Core;
 using QuestNav.Protos.Generated;
+using QuestNav.QuestNav.Estimation;
 using QuestNav.Utils;
+using QuestNav.QuestNav.Geometry;
 using UnityEngine;
 using Wpi.Proto;
+using Quaternion = UnityEngine.Quaternion;
 
 namespace QuestNav.Commands.Commands
 {
     /// <summary>
-    /// Resets the VR camera pose to a specified position
+    /// Resets the VR camera pose and the Kalman filter to a specified position.
     /// </summary>
     public class PoseResetCommand : ICommand
     {
@@ -15,36 +18,35 @@ namespace QuestNav.Commands.Commands
         private readonly Transform vrCamera;
         private readonly Transform vrCameraRoot;
         private readonly Transform resetTransform;
+        private readonly IVioAprilTagPoseEstimator poseEstimator;
 
         /// <summary>
-        /// Initializes a new instance of the PoseResetCommand
+        /// Initializes a new instance of the PoseResetCommand.
         /// </summary>
-        /// <param name="commandContext">The command context to use for sending responses</param>
-        /// <param name="vrCamera">Reference to the VR camera transform</param>
-        /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
-        /// <param name="resetTransform">Reference to the reset position transform</param>
         public PoseResetCommand(
             ICommandContext commandContext,
             Transform vrCamera,
             Transform vrCameraRoot,
-            Transform resetTransform
+            Transform resetTransform,
+            IVioAprilTagPoseEstimator poseEstimator
         )
         {
             this.commandContext = commandContext;
             this.vrCamera = vrCamera;
             this.vrCameraRoot = vrCameraRoot;
             this.resetTransform = resetTransform;
+            this.poseEstimator = poseEstimator;
         }
 
         /// <summary>
-        /// The formatted name for PoseResetCommand
+        /// The formatted name for PoseResetCommand.
         /// </summary>
         public string CommandNiceName => "PoseReset";
 
         /// <summary>
-        /// Executes the pose reset command by applying the target pose to the VR camera system
+        /// Executes the pose reset by applying the target pose to the VR camera system
+        /// and resetting the Kalman filter to match.
         /// </summary>
-        /// <param name="receivedCommand">The command containing pose reset payload with target position</param>
         public void Execute(ProtobufQuestNavCommand receivedCommand)
         {
             QueuedLogger.Log("Received pose reset request, initiating reset...");
@@ -87,30 +89,7 @@ namespace QuestNav.Commands.Commands
             // Apply pose reset if data is valid
             if (validPose)
             {
-                /*
-                 * POSE RESET ALGORITHM EXPLANATION:
-                 *
-                 * The challenge: We need to move the VR camera to a specific field position, but the user
-                 * might be standing anywhere in their physical play space. We can't move the user physically,
-                 * so we move the virtual world around them.
-                 *
-                 * VR Hierarchy:
-                 * - vrCameraRoot: The "world origin" that we can move/rotate
-                 * - vrCamera: The actual headset position (controlled by VR tracking, we can't move this directly)
-                 *
-                 * Algorithm Steps:
-                 * 1. Convert target field coordinates to Unity world coordinates
-                 * 2. Calculate rotation difference between current camera and target
-                 * 3. Apply rotation to root
-                 * 4. Recalculate position after rotation
-                 * 5. Apply the new position to vrCameraRoot
-                 *
-                 * This ensures the user's physical position in their room doesn't change, but their
-                 * virtual position on the field matches what the robot expects.
-                 */
-
-                // Step 1: Convert FRC field coordinates (meters, standard orientation) to Unity coordinates
-                // This accounts for coordinate system differences (FRC: X forward, Y left vs Unity: Z forward, X right)
+                // Step 1: Convert FRC field coordinates to Unity coordinates
                 var (targetCameraPosition, targetCameraRotation) = Conversions.FrcToUnity3d(
                     resetPose
                 );
@@ -129,20 +108,25 @@ namespace QuestNav.Commands.Commands
                 // Step 5: Apply the new position to vrCameraRoot
                 vrCameraRoot.position = newRootPosition;
 
+                // Step 6: Reset the Kalman filter so it agrees with the new VIO reference frame.
+                // After moving vrCameraRoot, the next VIO reading will be relative to this new
+                // origin. The filter must be told so it doesn't interpret the jump as displacement.
+                var resetPose3d = new Pose3d(
+                    targetCameraPosition.x, targetCameraPosition.y, targetCameraPosition.z,
+                    new Rotation3d(new QuestNav.Geometry.Quaternion(poseQW, poseQx, poseQy, poseQz))
+                );
+                poseEstimator.ResetPosition(resetPose3d, Time.timeAsDouble);
+
                 QueuedLogger.Log(
-                    $"Pose reset applied: X={poseX}, Y={poseY}, Z={poseZ} Rotation X={targetCameraRotation.eulerAngles.x}, "
-                        + $"Y={targetCameraRotation.eulerAngles.y}, Z={targetCameraRotation.eulerAngles.z}"
+                    $"Pose reset applied: X={poseX}, Y={poseY}, Z={poseZ} Rotation W={poseQW}, X={poseQx}, "
+                        + $"Y={poseQy}, Z={poseQz}"
                 );
 
-                // Send success response via command context
-                // (NetworkTables context sends to robot, Web context is no-op)
                 commandContext.SendSuccessResponse(receivedCommand.CommandId);
                 QueuedLogger.Log("Pose reset completed successfully");
             }
             else
             {
-                // Send error response via command context
-                // (NetworkTables context sends to robot, Web context is no-op)
                 commandContext.SendErrorResponse(
                     receivedCommand.CommandId,
                     "Failed to get valid pose data (invalid)"

@@ -1,9 +1,12 @@
 using System;
 using System.Collections;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 using Meta.XR;
 using QuestNav.Config;
 using QuestNav.Native.AprilTag;
 using QuestNav.Native.PoseLib;
+using QuestNav.QuestNav.Estimation;
 using QuestNav.Utils;
 using Unity.Collections;
 using UnityEngine;
@@ -13,6 +16,7 @@ namespace QuestNav.QuestNav.AprilTag
     public class AprilTagManager
     {
         private readonly AprilTagFieldLayout aprilTagFieldLayout;
+        private readonly IVioAprilTagPoseEstimator vioAprilTagPoseEstimator;
         private readonly PassthroughCameraAccess cameraAccess;
         private readonly IConfigManager configManager;
         private AprilTagDetector aprilTagDetector;
@@ -23,18 +27,26 @@ namespace QuestNav.QuestNav.AprilTag
         private int[] allowedIds;
         private double maxDistance;
         private int minimumNumberOfTags;
+        private readonly Matrix<double> aprilTagStdBase;
         
         //TODO: use interface here when passing into QuestNav.cs
-        public AprilTagManager(IConfigManager configManager, PassthroughCameraAccess cameraAccess, AprilTagFieldLayout aprilTagFieldLayout, MonoBehaviour coroutineHost)
+        public AprilTagManager(IConfigManager configManager, IVioAprilTagPoseEstimator vioAprilTagPoseEstimator, PassthroughCameraAccess cameraAccess, AprilTagFieldLayout aprilTagFieldLayout, MonoBehaviour coroutineHost)
         {
             this.cameraAccess = cameraAccess;
+            this.vioAprilTagPoseEstimator = vioAprilTagPoseEstimator;
             this.configManager = configManager;
             this.aprilTagFieldLayout = aprilTagFieldLayout;
             this.coroutineHost = coroutineHost;
             poseLibSolver = new PoseLibSolver(aprilTagFieldLayout, cameraAccess.Intrinsics);
+            aprilTagStdBase = DenseMatrix.OfArray(new[,]
+            {
+                { VioAprilTagPoseEstimatorConstants.defaultAprilTagStdDevs[0] },
+                { VioAprilTagPoseEstimatorConstants.defaultAprilTagStdDevs[1] },
+                { VioAprilTagPoseEstimatorConstants.defaultAprilTagStdDevs[2] },
+            });
             
             configManager.OnEnableAprilTagDetectorChanged += OnEnableAprilTagDetectorChanged;
-            configManager.OnAprilTagDetectorModeChanged += Configure;
+            configManager.OnAprilTagDetectorModeChanged += OnAprilTagDetectorModeChanged;
         }
 
         private void OnEnableAprilTagDetectorChanged(bool enable)
@@ -55,7 +67,7 @@ namespace QuestNav.QuestNav.AprilTag
             }
         }
 
-        private void Configure(Config.Config.AprilTagDetectorMode configuration)
+        private void OnAprilTagDetectorModeChanged(Config.Config.AprilTagDetectorMode configuration)
         {
             if (configuration.Mode == Config.Config.AprilTagDetectorMode.DetectionMode.ANCHOR_ENHANCED)
             {
@@ -76,6 +88,7 @@ namespace QuestNav.QuestNav.AprilTag
         private IEnumerator FrameCaptureCoroutine()
         {
             NativeArray<Color32> colors;
+            
             // Capture image every x frames
             try
             {
@@ -95,16 +108,36 @@ namespace QuestNav.QuestNav.AprilTag
             // Detect tags
             var results = aprilTagDetector.Detect(converted);
             
-            //TODO: filter tags based on requirements (distance, id, etc)
             
-            // Pass into solver
-            var poseLibResult = poseLibSolver.PoseLibSolve(results);
-            
-            //TODO: fuse pose using kalman filter
-            
-            //DEBUG:
-            QueuedLogger.Log($"Received new PoseLib estimate: {poseLibResult.CameraPose}");
-            
+            if (results.NumberOfDetections >= 2)
+            {
+                // Pass into solver
+                var poseLibResult = poseLibSolver.PoseLibSolve(results);
+
+                
+                //TODO: filter tags based on requirements (distance, id, etc) Dynamic STD filtering is a MUST
+                // Calculate dynamic standard deviations
+                // Calculate standard deviation based on tag distance and count
+                // Uncertainty increases with distance squared and decreases with more tags
+                /* Code from my java repo:
+                double stdDevFactor = Math.Pow(observation.averageTagDistance(), 2.0) / results.NumberOfDetections;
+                double linearStdDev = MULTI_TAG_LINEAR_STD_DEV_BASE * stdDevFactor;
+                double angularStdDev = MULTI_TAG_ANGULAR_STD_DEV_BASE * stdDevFactor;
+
+                // Apply camera-specific adjustment factor if available
+                if (cameraIndex < CAMERA_STD_DEV_FACTORS.length)
+                {
+                    linearStdDev *= CAMERA_STD_DEV_FACTORS[cameraIndex];
+                    angularStdDev *= CAMERA_STD_DEV_FACTORS[cameraIndex];
+                }
+                */
+
+                vioAprilTagPoseEstimator.AddAprilTagObservation(poseLibResult.CameraPose.Translation,
+                    cameraAccess.Timestamp.Second, aprilTagStdBase);
+                
+                //DEBUG:
+                QueuedLogger.Log($"Received new PoseLib estimate: {poseLibResult.CameraPose}");
+            }
             yield return new WaitForSeconds(frameDelaySeconds);
         }
     }

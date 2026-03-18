@@ -45,10 +45,10 @@ namespace QuestNav.UI
 
             // 2. Calculate the target rotation
             Vector3 lookDirection = transform.position - head.position;
-            Quaternion idealRotation = Quaternion.LookRotation(lookDirection);
+            Quaternion idealRotation = Quaternion.LookRotation(lookDirection, transform.parent.up);
 
             // Determine if the UI needs to move based on position thresholds
-            Vector3 delta = transform.position - idealPosition;
+            Vector3 delta = head.InverseTransformDirection(transform.position - idealPosition);
             bool needsPositionUpdate =
                 Mathf.Abs(delta.x) > POSITION_THRESHOLD_X
                 || Mathf.Abs(delta.y) > POSITION_THRESHOLD_Y;

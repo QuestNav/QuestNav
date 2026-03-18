@@ -47,6 +47,8 @@ namespace QuestNav.QuestNav.AprilTag
             
             configManager.OnEnableAprilTagDetectorChanged += OnEnableAprilTagDetectorChanged;
             configManager.OnAprilTagDetectorModeChanged += OnAprilTagDetectorModeChanged;
+            
+            QueuedLogger.Log("Initialized AprilTagManager");
         }
 
         private void OnEnableAprilTagDetectorChanged(bool enable)
@@ -56,14 +58,16 @@ namespace QuestNav.QuestNav.AprilTag
                 cameraAccess.enabled = true;
                 aprilTagDetector = new AprilTagDetector();
                 aprilTagDetector.AddFamily(aprilTagFamily);
-                coroutineHost.StartCoroutine(FrameCaptureCoroutine());
+                coroutineHost.StartCoroutine(AprilTagFrameCaptureCoroutine());
+                QueuedLogger.Log("AprilTagDetector Enabled");
             }
             else
             {
-                coroutineHost.StopCoroutine(FrameCaptureCoroutine());
+                coroutineHost.StopCoroutine(AprilTagFrameCaptureCoroutine());
                 cameraAccess.enabled = false;
                 aprilTagDetector.Dispose();
                 aprilTagFamily.Dispose();
+                QueuedLogger.Log("AprilTagDetector Disabled");
             }
         }
 
@@ -85,7 +89,7 @@ namespace QuestNav.QuestNav.AprilTag
             minimumNumberOfTags = configuration.MinimumNumberOfTags;
         }
 
-        private IEnumerator FrameCaptureCoroutine()
+        private IEnumerator AprilTagFrameCaptureCoroutine()
         {
             NativeArray<Color32> colors;
             
@@ -108,9 +112,10 @@ namespace QuestNav.QuestNav.AprilTag
             // Detect tags
             var results = aprilTagDetector.Detect(converted);
             
-            
+            QueuedLogger.Log("Running AprilTag Detection Loop");
             if (results.NumberOfDetections >= 2)
             {
+                QueuedLogger.Log("2+ Tags Detected");
                 // Pass into solver
                 var poseLibResult = poseLibSolver.PoseLibSolve(results);
 

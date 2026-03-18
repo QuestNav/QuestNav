@@ -540,6 +540,8 @@ namespace QuestNav.Camera
             while (true)
             {
                 // Check if the desired pause state has changed and sync it
+                //TODO: Sync this with AprilTag support to ensure it doesnt get accidentally paused
+                /*
                 bool shouldBePaused = ShouldBePaused();
 
                 if (shouldBePaused && !isPaused)
@@ -560,6 +562,7 @@ namespace QuestNav.Camera
                     yield return new WaitWhile(ShouldBePaused);
                     continue;
                 }
+                */
 
                 Texture texture;
                 

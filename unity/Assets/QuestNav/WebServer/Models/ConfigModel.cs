@@ -27,6 +27,21 @@ namespace QuestNav.WebServer
     }
 
     /// <summary>
+    /// AprilTag detector configuration for web API
+    /// </summary>
+    [Serializable]
+    public class AprilTagDetectorModeModel
+    {
+        public int mode;
+        public int width;
+        public int height;
+        public int framerate;
+        public int[] allowedIds;
+        public double maxDistance;
+        public int minimumNumberOfTags;
+    }
+
+    /// <summary>
     /// Current configuration values response
     /// </summary>
     [Serializable]
@@ -39,6 +54,8 @@ namespace QuestNav.WebServer
         public bool enablePassthroughStream;
         public bool enableHighQualityStream;
         public StreamModeModel streamMode;
+        public bool enableAprilTagDetector;
+        public AprilTagDetectorModeModel aprilTagDetectorMode;
         public bool enableDebugLogging;
         public long timestamp;
     }
@@ -55,6 +72,8 @@ namespace QuestNav.WebServer
         public bool? EnablePassthroughStream;
         public bool? EnableHighQualityStream;
         public StreamModeModel StreamMode;
+        public bool? EnableAprilTagDetector;
+        public AprilTagDetectorModeModel AprilTagDetectorMode;
         public bool? EnableDebugLogging;
     }
 

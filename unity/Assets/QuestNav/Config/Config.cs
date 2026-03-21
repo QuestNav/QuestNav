@@ -142,12 +142,12 @@ namespace QuestNav.Config
             /// <summary>
             /// The width of the detection region in pixels. Default is 640.
             /// </summary>
-            public int AprilTagDetectorWidth { get; set; } = 640;
+            public int AprilTagDetectorWidth { get; set; } = 1280;
 
             /// <summary>
             /// The height of the detection region in pixels. Default is 480.
             /// </summary>
-            public int AprilTagDetectorHeight { get; set; } = 480;
+            public int AprilTagDetectorHeight { get; set; } = 1280;
 
             /// <summary>
             /// The detection framerate in frames per second. Default is 30.

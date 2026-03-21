@@ -55,6 +55,7 @@ namespace QuestNav.QuestNav.Estimation
         private bool initialized;
         
         /// <summary>Creates a new estimator with optional noise tuning parameters.</summary>
+        /// TODO: ADD OPTIONAL SUPPORT FOR YAW AND 6DOF APRILTAG
         public VioAprilTagPoseEstimator(
             Matrix<double> vioStdDevs = null,
             double bufferDurationSeconds = VioAprilTagPoseEstimatorConstants.BUFFER_DURATION_SECONDS)

@@ -19,7 +19,11 @@ namespace QuestNav.QuestNav.Estimation
         void AddVioObservation(Pose3d vioPose, double timestamp);
 
         /// <summary>Applies a latency-compensated AprilTag position correction.</summary>
-        void AddAprilTagObservation(Translation3d measuredPosition, double timestampSeconds, Matrix<double> stdDevs);
+        void AddAprilTagObservation(
+            Translation3d measuredPosition,
+            double timestampSeconds,
+            Matrix<double> stdDevs
+        );
     }
 
     /// <summary>
@@ -34,7 +38,11 @@ namespace QuestNav.QuestNav.Estimation
             public Translation3d Position;
             public Matrix<double> EstimatedState;
 
-            public VIOSnapshot(double timestamp, Translation3d position, Matrix<double> estimatedState)
+            public VIOSnapshot(
+                double timestamp,
+                Translation3d position,
+                Matrix<double> estimatedState
+            )
             {
                 Timestamp = timestamp;
                 Position = position;
@@ -53,19 +61,24 @@ namespace QuestNav.QuestNav.Estimation
         private Translation3d previousVioPosition;
         private Rotation3d latestRotation;
         private bool initialized;
-        
+
         /// <summary>Creates a new estimator with optional noise tuning parameters.</summary>
         /// TODO: ADD OPTIONAL SUPPORT FOR YAW AND 6DOF APRILTAG
         public VioAprilTagPoseEstimator(
             Matrix<double> vioStdDevs = null,
-            double bufferDurationSeconds = VioAprilTagPoseEstimatorConstants.BUFFER_DURATION_SECONDS)
+            double bufferDurationSeconds = VioAprilTagPoseEstimatorConstants.BUFFER_DURATION_SECONDS
+        )
         {
-            Matrix<double> qStdDev = vioStdDevs ?? DenseMatrix.OfArray(new[,]
-            {
-                { VioAprilTagPoseEstimatorConstants.defaultVioStdDevs[0] },
-                { VioAprilTagPoseEstimatorConstants.defaultVioStdDevs[1] },
-                { VioAprilTagPoseEstimatorConstants.defaultVioStdDevs[2] },
-            });
+            Matrix<double> qStdDev =
+                vioStdDevs
+                ?? DenseMatrix.OfArray(
+                    new[,]
+                    {
+                        { VioAprilTagPoseEstimatorConstants.defaultVioStdDevs[0] },
+                        { VioAprilTagPoseEstimatorConstants.defaultVioStdDevs[1] },
+                        { VioAprilTagPoseEstimatorConstants.defaultVioStdDevs[2] },
+                    }
+                );
 
             bufferDuration = bufferDurationSeconds;
 
@@ -83,7 +96,8 @@ namespace QuestNav.QuestNav.Estimation
         {
             get
             {
-                if (filter == null) return Pose3d.Zero;
+                if (filter == null)
+                    return Pose3d.Zero;
                 var s = filter.State;
                 return new Pose3d(s[0, 0], s[1, 0], s[2, 0], latestRotation);
             }
@@ -92,7 +106,14 @@ namespace QuestNav.QuestNav.Estimation
         /// <summary>Converts a Translation3d to a 3x1 column matrix for the Kalman filter.</summary>
         private static Matrix<double> ToColumnVector(Translation3d t)
         {
-            return DenseMatrix.OfArray(new[,] { { t.X }, { t.Y }, { t.Z } });
+            return DenseMatrix.OfArray(
+                new[,]
+                {
+                    { t.X },
+                    { t.Y },
+                    { t.Z },
+                }
+            );
         }
 
         /// <summary>Builds a diagonal R matrix from a 3x1 standard deviation column vector.</summary>
@@ -136,13 +157,20 @@ namespace QuestNav.QuestNav.Estimation
             filter = new DiscreteKalmanFilter(corrected, filter.Cov.Clone());
 
             PruneBuffer(timestamp);
-            snapshotBuffer.AddLast(new VIOSnapshot(timestamp, vioPose.Translation, corrected.Clone()));
+            snapshotBuffer.AddLast(
+                new VIOSnapshot(timestamp, vioPose.Translation, corrected.Clone())
+            );
         }
 
         /// <inheritdoc/>
-        public void AddAprilTagObservation(Translation3d measuredPosition, double timestampSeconds, Matrix<double> stdDevs)
+        public void AddAprilTagObservation(
+            Translation3d measuredPosition,
+            double timestampSeconds,
+            Matrix<double> stdDevs
+        )
         {
-            if (!initialized) return;
+            if (!initialized)
+                return;
 
             var z = ToColumnVector(measuredPosition);
             var R = StdDevsToR(stdDevs);
@@ -175,7 +203,8 @@ namespace QuestNav.QuestNav.Estimation
 
             while (replayNode != null)
             {
-                Translation3d displacement = replayNode.Value.Position - prevReplayNode.Value.Position;
+                Translation3d displacement =
+                    replayNode.Value.Position - prevReplayNode.Value.Position;
 
                 filter.Predict(f, q);
 
@@ -186,7 +215,8 @@ namespace QuestNav.QuestNav.Estimation
                 replayNode.Value = new VIOSnapshot(
                     replayNode.Value.Timestamp,
                     replayNode.Value.Position,
-                    corrected.Clone());
+                    corrected.Clone()
+                );
 
                 prevReplayNode = replayNode;
                 replayNode = replayNode.Next;
@@ -199,7 +229,8 @@ namespace QuestNav.QuestNav.Estimation
             double cutoff = currentTimestamp - bufferDuration;
             while (snapshotBuffer.First != null && snapshotBuffer.First.Value.Timestamp < cutoff)
             {
-                if (snapshotBuffer.Count <= 1) break;
+                if (snapshotBuffer.Count <= 1)
+                    break;
                 snapshotBuffer.RemoveFirst();
             }
         }

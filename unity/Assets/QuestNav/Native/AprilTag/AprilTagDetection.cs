@@ -78,7 +78,7 @@ namespace QuestNav.Native.AprilTag
 
         //NOTE: In the standard AprilTag U of M library they should wrap counter-clockwise around the tag. In our case they don't, and it
         // works, so I'm not touching it. :)
-        
+
         /// <summary>
         /// Gets the bottom right corner of the tag in image pixel coordinates.
         /// Corners wrap clockwise around the tag.

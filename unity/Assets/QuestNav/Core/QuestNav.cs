@@ -151,7 +151,7 @@ namespace QuestNav.Core
         /// The current pose of the HMD
         /// </summary>
         private Pose3d pose;
-        
+
         /// <summary>
         /// Current battery percentage of the device
         /// </summary>
@@ -220,7 +220,7 @@ namespace QuestNav.Core
         private PassthroughFrameSource passthroughFrameSource;
 
         private IVioAprilTagPoseEstimator vioAprilTagPoseEstimator;
-        
+
         private AprilTagManager aprilTagManager;
 
         #endregion
@@ -260,7 +260,7 @@ namespace QuestNav.Core
             );
 
             vioAprilTagPoseEstimator = new VioAprilTagPoseEstimator();
-            
+
             var aprilTagFieldLayout = new AprilTagFieldLayout(0.1651); // TODO: no magic numbers
             await aprilTagFieldLayout.LoadJsonFromFileAsync("2026-rebuilt-welded.json");
             aprilTagManager = new AprilTagManager(
@@ -268,8 +268,9 @@ namespace QuestNav.Core
                 vioAprilTagPoseEstimator,
                 cameraAccess,
                 aprilTagFieldLayout,
-                this);
-            
+                this
+            );
+
             passthroughFrameSource = new PassthroughFrameSource(
                 this,
                 cameraAccess,
@@ -375,7 +376,10 @@ namespace QuestNav.Core
             // Update UI elements like connection status, IP address display, team number validation
             // UI updates don't need to be real-time, 3Hz provides smooth visual feedback
             //TODO: this should take pose3d
-            uiManager.UpdatePositionText(cameraRig.centerEyeAnchor.position, cameraRig.centerEyeAnchor.rotation);
+            uiManager.UpdatePositionText(
+                cameraRig.centerEyeAnchor.position,
+                cameraRig.centerEyeAnchor.rotation
+            );
 
             // Monitor device health: tracking status, battery level, tracking loss events
             // This data helps diagnose issues but doesn't need high-frequency updates
@@ -385,7 +389,10 @@ namespace QuestNav.Core
             // Update web server with current pose data (it handles everything else internally)
             //TODO: this should pull from the kalman pose estimator
             //TODO: this should take pose3d
-            var frcPose = Conversions.UnityToFrc3d(cameraRig.centerEyeAnchor.position, cameraRig.centerEyeAnchor.rotation);
+            var frcPose = Conversions.UnityToFrc3d(
+                cameraRig.centerEyeAnchor.position,
+                cameraRig.centerEyeAnchor.rotation
+            );
             var (frcPosition, frcRotation) = Conversions.ProtobufPose3dToUnity(frcPose);
             webServerManager?.Periodic(
                 frcPosition,
@@ -567,9 +574,14 @@ namespace QuestNav.Core
 
             // Time since Unity startup in seconds - provides temporal correlation for robot code
             timeStamp = Time.time;
-            
+
             // Add latest VIO data to kalman filter
-            pose = new Pose3d(Conversions.UnityToFrc3d(cameraRig.centerEyeAnchor.position, cameraRig.centerEyeAnchor.rotation));
+            pose = new Pose3d(
+                Conversions.UnityToFrc3d(
+                    cameraRig.centerEyeAnchor.position,
+                    cameraRig.centerEyeAnchor.rotation
+                )
+            );
             vioAprilTagPoseEstimator.AddVioObservation(pose, timeStamp);
         }
 

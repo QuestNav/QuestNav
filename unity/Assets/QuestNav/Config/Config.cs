@@ -136,7 +136,8 @@ namespace QuestNav.Config
             /// </list>
             /// Default is <c>TRADITIONAL</c>.
             /// </remarks>
-            public int AprilTagDetectorMode { get; set; } = (int)Config.AprilTagDetectorMode.DetectionMode.TRADITIONAL;
+            public int AprilTagDetectorMode { get; set; } =
+                (int)Config.AprilTagDetectorMode.DetectionMode.TRADITIONAL;
 
             /// <summary>
             /// The width of the detection region in pixels. Default is 640.
@@ -237,6 +238,7 @@ namespace QuestNav.Config
                 /// Uses traditional PnP solving for tag detection.
                 /// </summary>
                 TRADITIONAL = 0,
+
                 /// <summary>
                 /// Uses PnP solving combined with Meta Quest spatial anchors for enhanced performance.
                 /// </summary>
@@ -283,7 +285,15 @@ namespace QuestNav.Config
             /// <param name="allowedIds">Array of AprilTag family IDs to detect.</param>
             /// <param name="maxDistance">Maximum detection distance in meters.</param>
             /// <param name="minimumNumberOfTags">Minimum number of tags required to report a valid pose.</param>
-            public AprilTagDetectorMode(DetectionMode mode, int width, int height, int framerate, int[] allowedIds, double maxDistance, int minimumNumberOfTags)
+            public AprilTagDetectorMode(
+                DetectionMode mode,
+                int width,
+                int height,
+                int framerate,
+                int[] allowedIds,
+                double maxDistance,
+                int minimumNumberOfTags
+            )
             {
                 Mode = mode;
                 Width = width;

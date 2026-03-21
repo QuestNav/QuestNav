@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
-using LibJpegTurboUnity;
 using System.Threading;
 using System.Threading.Tasks;
+using LibJpegTurboUnity;
 using Meta.XR;
 using QuestNav.Config;
 using QuestNav.Network;
@@ -29,7 +29,7 @@ namespace QuestNav.Camera
         /// MonoBehaviour host for running coroutines.
         /// </summary>
         private readonly MonoBehaviour coroutineHost;
-        
+
         /// <summary>
         /// Meta SDK passthrough camera accessor.
         /// </summary>
@@ -314,7 +314,8 @@ namespace QuestNav.Camera
             // Attach to ConfigManager callbacks
             configManager.OnEnablePassthroughStreamChanged += OnEnablePassthroughStreamChanged;
             configManager.OnPassthroughStreamModeChanged += OnPassthroughStreamModeChanged;
-            configManager.OnEnableHighQualityStreamsChanged += OnEnableHighQualityPassthroughStreamChanged;
+            configManager.OnEnableHighQualityStreamsChanged +=
+                OnEnableHighQualityPassthroughStreamChanged;
         }
 
         /// <summary>
@@ -565,7 +566,7 @@ namespace QuestNav.Camera
                 */
 
                 Texture texture;
-                
+
                 try
                 {
                     texture = cameraAccess.GetTexture();
@@ -578,7 +579,7 @@ namespace QuestNav.Camera
                     );
                     yield break;
                 }
-                
+
                 if (texture is not Texture2D texture2D)
                 {
                     QueuedLogger.LogError(

@@ -1,12 +1,12 @@
-using QuestNav.Core;
-using QuestNav.Utils;
-using SQLite;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using QuestNav.Core;
+using QuestNav.Utils;
+using SQLite;
 using UnityEngine;
 using static QuestNav.Config.Config;
 
@@ -712,9 +712,10 @@ namespace QuestNav.Config
         private async Task<int[]> GetAprilTagAllowedIdsAsync()
         {
             /// The default is an emptry array so no records are created for the default
-            var rows = await connection.Table<Config.AprilTagAllowedId>()
-                                       .Where(r => r.AprilTagConfigId == 1)
-                                       .ToListAsync();
+            var rows = await connection
+                .Table<Config.AprilTagAllowedId>()
+                .Where(r => r.AprilTagConfigId == 1)
+                .ToListAsync();
 
             return rows.Select(r => r.AllowedId).ToArray();
         }
@@ -787,16 +788,15 @@ namespace QuestNav.Config
         private async Task SaveAprilTagAllowedIdsAsync(IEnumerable<int> ids)
         {
             // single config row uses AprilTagConfigId = 1
-            await connection.ExecuteAsync("DELETE FROM AprilTagAllowedId WHERE AprilTagConfigId = ?", 1);
+            await connection.ExecuteAsync(
+                "DELETE FROM AprilTagAllowedId WHERE AprilTagConfigId = ?",
+                1
+            );
 
             // bulk insert (one row per allowed id)
             foreach (var id in ids ?? Array.Empty<int>())
             {
-                var entry = new Config.AprilTagAllowedId
-                {
-                    AprilTagConfigId = 1,
-                    AllowedId = id
-                };
+                var entry = new Config.AprilTagAllowedId { AprilTagConfigId = 1, AllowedId = id };
                 await connection.InsertAsync(entry);
             }
         }

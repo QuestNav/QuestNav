@@ -1,12 +1,12 @@
+using System;
+using System.Net;
+using System.Net.Sockets;
 using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Protos.Generated;
-using QuestNav.Utils;
-using System;
-using System.Net;
-using System.Net.Sockets;
 using QuestNav.QuestNav.Geometry;
+using QuestNav.Utils;
 using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
 
@@ -60,12 +60,7 @@ namespace QuestNav.Network
         /// <param name="timeStamp">Current timestamp</param>
         /// <param name="pose">Current field-relative position of the Quest headset</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
-        void PublishFrameData(
-            int frameCount,
-            double timeStamp,
-            Pose3d pose,
-            bool isTracking
-        );
+        void PublishFrameData(int frameCount, double timeStamp, Pose3d pose, bool isTracking);
 
         /// <summary>
         /// Publishes device data to NetworkTables.
@@ -374,12 +369,7 @@ namespace QuestNav.Network
         /// <param name="timeStamp">Unity time stamp</param>
         /// <param name="pose">Current VR headset position</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
-        public void PublishFrameData(
-            int frameCount,
-            double timeStamp,
-            Pose3d pose,
-            bool isTracking
-        )
+        public void PublishFrameData(int frameCount, double timeStamp, Pose3d pose, bool isTracking)
         {
             frameData.FrameCount = frameCount;
             frameData.Timestamp = timeStamp;
@@ -560,9 +550,7 @@ namespace QuestNav.Network
         {
             if (ntInstanceLogger == null)
             {
-                QueuedLogger.LogWarning(
-                        "NT Instance logger not initialized"
-                    );
+                QueuedLogger.LogWarning("NT Instance logger not initialized");
                 return;
             }
             var messages = ntInstanceLogger.PollForMessages();

@@ -21,7 +21,7 @@ namespace QuestNav.QuestNav.AprilTag
         /// Main thread synchronization context for marshalling Unity API calls.
         /// </summary>
         private readonly SynchronizationContext mainThreadContext;
-        
+
         private readonly AprilTagFieldLayout aprilTagFieldLayout;
         private readonly IVioAprilTagPoseEstimator vioAprilTagPoseEstimator;
         private readonly PassthroughCameraAccess cameraAccess;
@@ -37,23 +37,31 @@ namespace QuestNav.QuestNav.AprilTag
         private int minimumNumberOfTags;
         private readonly Matrix<double> aprilTagStdBase;
 
-        public AprilTagManager(IConfigManager configManager, IVioAprilTagPoseEstimator vioAprilTagPoseEstimator, PassthroughCameraAccess cameraAccess, AprilTagFieldLayout aprilTagFieldLayout, MonoBehaviour coroutineHost)
+        public AprilTagManager(
+            IConfigManager configManager,
+            IVioAprilTagPoseEstimator vioAprilTagPoseEstimator,
+            PassthroughCameraAccess cameraAccess,
+            AprilTagFieldLayout aprilTagFieldLayout,
+            MonoBehaviour coroutineHost
+        )
         {
             // Capture main thread context for marshalling Unity API calls
             mainThreadContext = SynchronizationContext.Current;
-            
+
             this.cameraAccess = cameraAccess;
             this.vioAprilTagPoseEstimator = vioAprilTagPoseEstimator;
             this.configManager = configManager;
             this.aprilTagFieldLayout = aprilTagFieldLayout;
             this.coroutineHost = coroutineHost;
             poseLibSolver = new PoseLibSolver(aprilTagFieldLayout, cameraAccess.Intrinsics);
-            aprilTagStdBase = DenseMatrix.OfArray(new[,]
-            {
-                { VioAprilTagPoseEstimatorConstants.defaultAprilTagStdDevs[0] },
-                { VioAprilTagPoseEstimatorConstants.defaultAprilTagStdDevs[1] },
-                { VioAprilTagPoseEstimatorConstants.defaultAprilTagStdDevs[2] },
-            });
+            aprilTagStdBase = DenseMatrix.OfArray(
+                new[,]
+                {
+                    { VioAprilTagPoseEstimatorConstants.defaultAprilTagStdDevs[0] },
+                    { VioAprilTagPoseEstimatorConstants.defaultAprilTagStdDevs[1] },
+                    { VioAprilTagPoseEstimatorConstants.defaultAprilTagStdDevs[2] },
+                }
+            );
 
             configManager.OnEnableAprilTagDetectorChanged += OnEnableAprilTagDetectorChanged;
             configManager.OnAprilTagDetectorModeChanged += OnAprilTagDetectorModeChanged;
@@ -87,11 +95,16 @@ namespace QuestNav.QuestNav.AprilTag
 
         private void OnAprilTagDetectorModeChanged(Config.Config.AprilTagDetectorMode configuration)
         {
-            if (configuration.Mode == Config.Config.AprilTagDetectorMode.DetectionMode.ANCHOR_ENHANCED)
+            if (
+                configuration.Mode
+                == Config.Config.AprilTagDetectorMode.DetectionMode.ANCHOR_ENHANCED
+            )
             {
-                throw new NotImplementedException("ANCHOR_ENHANCED has not been implemented yet! Please check for a later release.");
+                throw new NotImplementedException(
+                    "ANCHOR_ENHANCED has not been implemented yet! Please check for a later release."
+                );
             }
-            
+
             InvokeOnMainThread(() =>
             {
                 cameraAccess.enabled = false;
@@ -126,10 +139,13 @@ namespace QuestNav.QuestNav.AprilTag
                     yield break;
                 }
 
-                var converted = ImageU8.FromPassthroughCamera(colors, cameraAccess.RequestedResolution.x, cameraAccess.RequestedResolution.y);
+                var converted = ImageU8.FromPassthroughCamera(
+                    colors,
+                    cameraAccess.RequestedResolution.x,
+                    cameraAccess.RequestedResolution.y
+                );
                 var results = aprilTagDetector.Detect(converted);
-                
-                
+
                 if (results.NumberOfDetections >= 2)
                 {
                     QueuedLogger.Log("2+ Tags Detected");
@@ -152,19 +168,24 @@ namespace QuestNav.QuestNav.AprilTag
                         angularStdDev *= CAMERA_STD_DEV_FACTORS[cameraIndex];
                     }
                     */
-                    
+
                     var (frcPos, frcRot) = Conversions.CvToFrc(poseLibResult.CameraPose);
-                    
-                    vioAprilTagPoseEstimator.AddAprilTagObservation(new Translation3d(frcPos.x, frcPos.y, frcPos.z),
-                        cameraAccess.Timestamp.Second, aprilTagStdBase);
-                    
-                    QueuedLogger.Log($"Received new PoseLib estimate: Pos({frcPos.x:F3}, {frcPos.y:F3}, {frcPos.z:F3}) Rot({frcRot.eulerAngles.x:F3}, {frcRot.eulerAngles.y:F3}, {frcRot.eulerAngles.z})");
+
+                    vioAprilTagPoseEstimator.AddAprilTagObservation(
+                        new Translation3d(frcPos.x, frcPos.y, frcPos.z),
+                        cameraAccess.Timestamp.Second,
+                        aprilTagStdBase
+                    );
+
+                    QueuedLogger.Log(
+                        $"Received new PoseLib estimate: Pos({frcPos.x:F3}, {frcPos.y:F3}, {frcPos.z:F3}) Rot({frcRot.eulerAngles.x:F3}, {frcRot.eulerAngles.y:F3}, {frcRot.eulerAngles.z})"
+                    );
                 }
 
                 yield return new WaitForSeconds(frameDelaySeconds);
             }
         }
-        
+
         /// <summary>
         /// Invokes an action on the main thread using the captured SynchronizationContext.
         /// Falls back to direct invocation if no context was captured.

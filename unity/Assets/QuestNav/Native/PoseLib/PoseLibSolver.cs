@@ -17,11 +17,14 @@ namespace QuestNav.Native.PoseLib
         private readonly int resolutionX;
         private readonly int resolutionY;
         private readonly AprilTagFieldLayout fieldLayout;
-        
-        public PoseLibSolver(AprilTagFieldLayout fieldLayout, PassthroughCameraAccess.CameraIntrinsics intrinsics)
+
+        public PoseLibSolver(
+            AprilTagFieldLayout fieldLayout,
+            PassthroughCameraAccess.CameraIntrinsics intrinsics
+        )
         {
             this.fieldLayout = fieldLayout;
-            
+
             intrinsicsArray = new double[]
             {
                 intrinsics.FocalLength.x,
@@ -33,10 +36,8 @@ namespace QuestNav.Native.PoseLib
             resolutionX = intrinsics.SensorResolution.x;
             resolutionY = intrinsics.SensorResolution.y;
         }
-        
-        public PoseLibResult PoseLibSolve(
-            AprilTagDetectionResults detections
-        )
+
+        public PoseLibResult PoseLibSolve(AprilTagDetectionResults detections)
         {
             var corners2d = new List<double>();
             var corners3d = new List<double>();
@@ -45,13 +46,13 @@ namespace QuestNav.Native.PoseLib
             {
                 corners2d.Add(detection.CornerBottomRight0.x);
                 corners2d.Add(detection.CornerBottomRight0.y);
-                
+
                 corners2d.Add(detection.CornerBottomLeft1.x);
                 corners2d.Add(detection.CornerBottomLeft1.y);
 
                 corners2d.Add(detection.CornerUpperLeft2.x);
                 corners2d.Add(detection.CornerUpperLeft2.y);
-                
+
                 corners2d.Add(detection.CornerUpperRight3.x);
                 corners2d.Add(detection.CornerUpperRight3.y);
 
@@ -63,12 +64,11 @@ namespace QuestNav.Native.PoseLib
                     corners3d.Add(corner3d.Z);
                 }
             }
-             
 
             int status = PoseLibNatives.poselib_estimate_absolute_pose_simple(
                 corners2d.ToArray(),
                 corners3d.ToArray(),
-                (ulong) (detections.NumberOfDetections * 4),
+                (ulong)(detections.NumberOfDetections * 4),
                 (int)PoseLibNatives.PoseLibCameraModelIdNative.POSELIB_CAMERA_PINHOLE,
                 resolutionX,
                 resolutionY,

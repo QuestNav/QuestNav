@@ -1,8 +1,8 @@
 using QuestNav.Core;
 using QuestNav.Protos.Generated;
 using QuestNav.QuestNav.Estimation;
-using QuestNav.Utils;
 using QuestNav.QuestNav.Geometry;
+using QuestNav.Utils;
 using UnityEngine;
 using Wpi.Proto;
 using Quaternion = UnityEngine.Quaternion;
@@ -112,7 +112,9 @@ namespace QuestNav.Commands.Commands
                 // After moving vrCameraRoot, the next VIO reading will be relative to this new
                 // origin. The filter must be told so it doesn't interpret the jump as displacement.
                 var resetPose3d = new Pose3d(
-                    targetCameraPosition.x, targetCameraPosition.y, targetCameraPosition.z,
+                    targetCameraPosition.x,
+                    targetCameraPosition.y,
+                    targetCameraPosition.z,
                     new Rotation3d(new QuestNav.Geometry.Quaternion(poseQW, poseQx, poseQy, poseQz))
                 );
                 poseEstimator.ResetPosition(resetPose3d, Time.timeAsDouble);

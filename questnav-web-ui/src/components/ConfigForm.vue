@@ -117,7 +117,7 @@
                 <template #description>
                   How stale a pose reset request can be (milliseconds).
                   <div class="warning-text">
-                    <strong>Warning:</strong> Values above the default (50ms) can cause unexpected
+                    <strong>Warning:</strong> Values above the default (120ms) can cause unexpected
                     behavior. Missed resets are usually caused by loop overruns in user code —
                     fix those before changing this value.
                   </div>

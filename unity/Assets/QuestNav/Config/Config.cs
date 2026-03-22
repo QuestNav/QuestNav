@@ -30,7 +30,7 @@ namespace QuestNav.Config
             /// <summary>
             /// How stale a request to reset the Quest's pose can be in milliseconds
             /// </summary>
-            public int AllowedPoseResetTimeoutMs { get; set; } = 50;
+            public int AllowedPoseResetTimeoutMs { get; set; } = 120;
         }
 
         public class System

@@ -282,9 +282,6 @@ namespace QuestNav.Config
         public event Action<bool> OnEnableHighQualityStreamChanged;
 
         /// <inheritdoc/>
-        public event Action<int> OnStreamQualityChanged;
-
-        /// <inheritdoc/>
         public event Action<bool> OnEnableDebugLoggingChanged;
         #endregion
 

@@ -130,7 +130,6 @@ Notice how when transforming back to the Quest pose from the robot pose, we **do
 The most common use case is to utilize the pose data from QuestNav with a SwerveDrivePoseEstimator for vision
 correction. Most swerve libraries have a method to accomplish this.
 
-
 :::danger
 The last published value to NetworkTables will persist even if QuestNav disconnects. It is **imperative** you ensure
 the Quest is connected and is tracking before using its pose data!
@@ -188,3 +187,137 @@ import TabItem from '@theme/TabItem';
 :::note
 The above example should be called in a **periodic loop** to ensure vision measurements are always being added!
 :::
+
+
+## Advanced Usage
+
+### Event Callbacks
+
+QuestNav provides an event-driven callback system for reacting to state changes in the Quest headset. Callbacks are
+evaluated every `commandPeriodic()` call, so make sure that is being called periodically as described in the
+[Prerequisites](#prerequisites) section.
+
+All callbacks are registered on your `QuestNav` instance — typically in your subsystem's constructor.
+
+#### Connection Callbacks
+
+Fire once when the Quest transitions between connected and disconnected states.
+
+```java title="e.g. QuestNavSubsystem.java"
+QuestNav questNav = new QuestNav();
+
+// Constructor
+public QuestNavSubsystem() {
+    questNav.onConnected(() -> System.out.println("Quest connected!"));
+    questNav.onDisconnected(() -> DriverStation.reportWarning("Quest disconnected!", false));
+}
+```
+
+#### Tracking Callbacks
+
+Fire once when the Quest transitions between actively tracking and not tracking. When tracking is lost, pose
+data becomes unreliable and should not be used for robot control.
+
+```java title="e.g. QuestNavSubsystem.java"
+QuestNav questNav = new QuestNav();
+
+// Constructor
+public QuestNavSubsystem() {
+    questNav.onTrackingAcquired(() -> System.out.println("Quest tracking acquired!"));
+    questNav.onTrackingLost(() -> DriverStation.reportWarning("Quest tracking lost!", false));
+}
+```
+
+:::tip
+Use `onTrackingLost` to switch your robot to a fallback localization strategy (wheel odometry, PhotonVision, etc.)
+until tracking is restored.
+:::
+
+#### Low Battery Callback
+
+Fires once when the Quest's battery level drops at or below a specified threshold. The callback will not fire again
+until the battery rises back above the threshold and drops below it again.
+
+```java title="e.g. QuestNavSubsystem.java"
+QuestNav questNav = new QuestNav();
+
+// Constructor
+public QuestNavSubsystem() {
+    // Warn when battery reaches 20% or below
+    questNav.onLowBattery(20, level ->
+        DriverStation.reportWarning("Quest battery low: " + level + "%", false)
+    );
+}
+```
+
+#### Command Callbacks
+
+Fire for each response to a command sent via `setPose()`. Failures are also automatically logged to the
+DriverStation regardless of whether a callback is registered.
+
+```java title="e.g. QuestNavSubsystem.java"
+QuestNav questNav = new QuestNav();
+
+// Constructor
+public QuestNavSubsystem() {
+    questNav.onCommandSuccess(response ->
+        System.out.println("Pose reset succeeded for command ID: " + response.getCommandId())
+    );
+    questNav.onCommandFailure(response ->
+        DriverStation.reportError("Pose reset failed: " + response.getErrorMessage(), false)
+    );
+}
+```
+
+#### All Callbacks Together
+
+Here is an example registering all available callbacks in a single subsystem:
+
+```java title="e.g. QuestNavSubsystem.java"
+public class QuestNavSubsystem extends SubsystemBase {
+    private final QuestNav questNav = new QuestNav();
+
+    public QuestNavSubsystem() {
+        questNav.onConnected(() ->
+            System.out.println("Quest connected!")
+        );
+        questNav.onDisconnected(() ->
+            DriverStation.reportWarning("Quest disconnected!", false)
+        );
+        questNav.onTrackingAcquired(() ->
+            System.out.println("Quest tracking acquired!")
+        );
+        questNav.onTrackingLost(() ->
+            DriverStation.reportWarning("Quest tracking lost!", false)
+        );
+        questNav.onLowBattery(20, level ->
+            DriverStation.reportWarning("Quest battery low: " + level + "%", false)
+        );
+        questNav.onCommandSuccess(response ->
+            System.out.println("Command succeeded: " + response.getCommandId())
+        );
+        questNav.onCommandFailure(response ->
+            DriverStation.reportError("Command failed: " + response.getErrorMessage(), false)
+        );
+    }
+
+    @Override
+    public void periodic() {
+        questNav.commandPeriodic();
+    }
+}
+```
+
+#### Callback Reference
+
+| Method | Trigger | Notes |
+|--------|---------|-------|
+| `onConnected(Runnable)` | Quest transitions disconnected → connected | Fires once per transition |
+| `onDisconnected(Runnable)` | Quest transitions connected → disconnected | Fires once per transition |
+| `onTrackingAcquired(Runnable)` | Quest transitions not-tracking → tracking | Fires once per transition |
+| `onTrackingLost(Runnable)` | Quest transitions tracking → not-tracking | Fires once per transition |
+| `onLowBattery(int, IntConsumer)` | Battery drops at or below threshold % | Resets when battery rises above threshold |
+| `onCommandSuccess(Consumer)` | A command response arrives with `success == true` | Fires per response |
+| `onCommandFailure(Consumer)` | A command response arrives with `success == false` | Also logged to DriverStation automatically |
+
+---

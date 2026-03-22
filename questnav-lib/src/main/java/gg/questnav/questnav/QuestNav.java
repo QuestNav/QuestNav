@@ -201,7 +201,7 @@ public class QuestNav {
 
   /** The last time QuestNavLib and QuestNav were checked for a match */
   private double lastVersionCheckTime = 0.0;
-  
+
   // Callback state tracking
 
   /** Cached connection state from the previous commandPeriodic() call */
@@ -212,7 +212,7 @@ public class QuestNav {
 
   /** Whether the low-battery callback has already fired for the current threshold crossing */
   private boolean lowBatteryFired = false;
-  
+
   // Callbacks
 
   /** Fired once when the Quest transitions from disconnected → connected */
@@ -257,7 +257,7 @@ public class QuestNav {
    * </ul>
    */
   public QuestNav() {}
-  
+
   // Callback registration
 
   /**
@@ -334,7 +334,7 @@ public class QuestNav {
   public void onCommandFailure(Consumer<Commands.ProtobufQuestNavCommandResponse> callback) {
     this.onFailureCallback = callback;
   }
-  
+
   // Internal helpers
 
   /**
@@ -413,7 +413,7 @@ public class QuestNav {
               });
     }
   }
-  
+
   // Public API
 
   /**

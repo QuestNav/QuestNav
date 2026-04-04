@@ -541,7 +541,7 @@ namespace QuestNav.Camera
             while (true)
             {
                 // Check if the desired pause state has changed and sync it
-                
+
                 bool shouldBePaused = ShouldBePaused();
 
                 if (shouldBePaused && !isPaused)
@@ -562,7 +562,6 @@ namespace QuestNav.Camera
                     yield return new WaitWhile(ShouldBePaused);
                     continue;
                 }
-                
 
                 Texture texture;
 

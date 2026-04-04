@@ -1,88 +1,104 @@
 <template>
-  <div class="settings-grid">
-    <!-- AprilTag Detector Enable/Disable -->
-    <ConfigField title="AprilTag Detector" description="Enable AprilTag detection for pose estimation"
-      control-class="checkbox-control">
-      <label class="checkbox-label">
-        <input type="checkbox" :checked="configStore.config?.enableAprilTagDetector ?? false"
-          @change="handleDetectorEnabledChange" />
-        {{ configStore.config?.enableAprilTagDetector ? 'Enabled' : 'Disabled' }}
-      </label>
-    </ConfigField>
-
-    <!-- Detection Mode -->
-    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Detection Mode" control-class="input-control">
-      <template #description>
-        <div><strong>Traditional</strong> - PnP solving</div>
-        <div><strong>Anchor Enhanced</strong> - PnP solving + spatial anchors for enhanced performance</div>
-      </template>
-      <template #badge>
-        <span v-if="isModeFieldDirty" class="dirty-badge">●</span>
-      </template>
-      <select :value="pendingMode.mode" @change="handleModeChange">
-        <option value="0">Traditional</option>
-        <option value="1">Anchor Enhanced</option>
-      </select>
-    </ConfigField>
-
-    <!-- Detection Resolution -->
-    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Detection Resolution"
-      description="Camera resolution for AprilTag detection (Width x Height @ Framerate)" control-class="input-control">
-      <template #badge>
-        <span v-if="isResolutionFieldDirty" class="dirty-badge">●</span>
-      </template>
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <input type="text" :value="pendingMode.width" @input="handleWidthChange" style="width: 75px;"
-          placeholder="Width" />
-        <span>×</span>
-        <input type="text" :value="pendingMode.height" @input="handleHeightChange" style="width: 75px;"
-          placeholder="Height" />
-        <span>@</span>
-        <input type="text" :value="pendingMode.framerate" @input="handleFramerateChange" style="width: 75px;"
-          placeholder="FPS" />
-        <span>fps</span>
-      </div>
-    </ConfigField>
-
-    <!-- Detection Range -->
-    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Detection Range"
-      description="Maximum distance for tag detection" control-class="input-control">
-      <template #badge>
-        <span v-if="isMaxDistanceFieldDirty" class="dirty-badge">●</span>
-      </template>
-      <input type="range" :value="pendingMode.maxDistance" @input="handleMaxDistanceChange" min="0.5" max="10"
-        step="0.1" style="flex: 2;" />
-      <span class="range-value">{{ pendingMode.maxDistance }}m</span>
-    </ConfigField>
-
-    <!-- Minimum Tags -->
-    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Minimum Tags Required"
-      description="Minimum number of tags needed for pose estimation" control-class="input-control">
-      <template #badge>
-        <span v-if="isMinTagsFieldDirty" class="dirty-badge">●</span>
-      </template>
-      <input type="text" :value="pendingMode.minimumNumberOfTags" @input="handleMinimumTagsChange" />
-    </ConfigField>
-
-    <!-- Allowed Tag IDs -->
-    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Allowed Tag IDs"
-      description="Comma-separated list of allowed AprilTag IDs (leave empty for all)" control-class="input-control">
-      <template #badge>
-        <span v-if="isAllowedIdsFieldDirty" class="dirty-badge">●</span>
-      </template>
-      <input type="text" :value="allowedIdsText" @input="handleAllowedIdsChange" placeholder="e.g., 1,2,3,4" />
-    </ConfigField>
+  <!-- TODO: Remove this alpha warning banner when config support is implemented -->
+  <div class="alpha-warning-banner">
+    <span class="alpha-warning-icon">⚠️</span>
+    <span>Config persistence is not yet supported in this alpha release. Settings cannot be saved.</span>
   </div>
 
-  <!-- Apply Button Section -->
-  <div v-if="configStore.config?.enableAprilTagDetector">
-    <div class="apply-buttons">
-      <button @click="submitModeSettings" :disabled="!hasModeChanged" class="submit-button primary">
-        Apply
-      </button>
-      <button @click="cancelChanges" :disabled="!hasModeChanged" class="cancel-button">
-        Cancel
-      </button>
+  <!-- TODO: Remove `alpha-disabled` class and wrapper div when config support is implemented -->
+  <div class="alpha-disabled">
+    <div class="settings-grid">
+      <!-- AprilTag Detector Enable/Disable -->
+      <ConfigField title="AprilTag Detector" description="Enable AprilTag detection for pose estimation"
+                   control-class="checkbox-control">
+        <label class="checkbox-label">
+          <!-- TODO: Restore @change="handleDetectorEnabledChange" when config support is implemented -->
+          <input type="checkbox" :checked="configStore.config?.enableAprilTagDetector ?? false"
+                 disabled />
+          {{ configStore.config?.enableAprilTagDetector ? 'Enabled' : 'Disabled' }}
+        </label>
+      </ConfigField>
+
+      <!-- Detection Mode -->
+      <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Detection Mode" control-class="input-control">
+        <template #description>
+          <div><strong>Traditional</strong> - PnP solving</div>
+          <div><strong>Anchor Enhanced</strong> - PnP solving + spatial anchors for enhanced performance</div>
+        </template>
+        <template #badge>
+          <span v-if="isModeFieldDirty" class="dirty-badge">●</span>
+        </template>
+        <!-- TODO: Restore @change="handleModeChange" when config support is implemented -->
+        <select :value="pendingMode.mode" disabled>
+          <option value="0">Traditional</option>
+          <option value="1">Anchor Enhanced</option>
+        </select>
+      </ConfigField>
+
+      <!-- Detection Resolution -->
+      <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Detection Resolution"
+                   description="Camera resolution for AprilTag detection (Width x Height @ Framerate)" control-class="input-control">
+        <template #badge>
+          <span v-if="isResolutionFieldDirty" class="dirty-badge">●</span>
+        </template>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <!-- TODO: Restore @input handlers on all three inputs when config support is implemented -->
+          <input type="text" :value="pendingMode.width" disabled style="width: 75px;"
+                 placeholder="Width" />
+          <span>×</span>
+          <input type="text" :value="pendingMode.height" disabled style="width: 75px;"
+                 placeholder="Height" />
+          <span>@</span>
+          <input type="text" :value="pendingMode.framerate" disabled style="width: 75px;"
+                 placeholder="FPS" />
+          <span>fps</span>
+        </div>
+      </ConfigField>
+
+      <!-- Detection Range -->
+      <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Detection Range"
+                   description="Maximum distance for tag detection" control-class="input-control">
+        <template #badge>
+          <span v-if="isMaxDistanceFieldDirty" class="dirty-badge">●</span>
+        </template>
+        <!-- TODO: Restore @input="handleMaxDistanceChange" when config support is implemented -->
+        <input type="range" :value="pendingMode.maxDistance" disabled min="0.5" max="10"
+               step="0.1" style="flex: 2;" />
+        <span class="range-value">{{ pendingMode.maxDistance }}m</span>
+      </ConfigField>
+
+      <!-- Minimum Tags -->
+      <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Minimum Tags Required"
+                   description="Minimum number of tags needed for pose estimation" control-class="input-control">
+        <template #badge>
+          <span v-if="isMinTagsFieldDirty" class="dirty-badge">●</span>
+        </template>
+        <!-- TODO: Restore @input="handleMinimumTagsChange" when config support is implemented -->
+        <input type="text" :value="pendingMode.minimumNumberOfTags" disabled />
+      </ConfigField>
+
+      <!-- Allowed Tag IDs -->
+      <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Allowed Tag IDs"
+                   description="Comma-separated list of allowed AprilTag IDs (leave empty for all)" control-class="input-control">
+        <template #badge>
+          <span v-if="isAllowedIdsFieldDirty" class="dirty-badge">●</span>
+        </template>
+        <!-- TODO: Restore @input="handleAllowedIdsChange" when config support is implemented -->
+        <input type="text" :value="allowedIdsText" disabled placeholder="e.g., 1,2,3,4" />
+      </ConfigField>
+    </div>
+
+    <!-- Apply Button Section -->
+    <!-- TODO: Remove always-disabled override on buttons when config support is implemented -->
+    <div v-if="configStore.config?.enableAprilTagDetector">
+      <div class="apply-buttons">
+        <button @click="submitModeSettings" disabled class="submit-button primary">
+          Apply
+        </button>
+        <button @click="cancelChanges" disabled class="cancel-button">
+          Cancel
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -140,8 +156,8 @@ const allowedIdsText = computed({
   get: () => pendingMode.value.allowedIds.join(','),
   set: (value: string) => {
     const ids = value.split(',')
-      .map(id => parseInt(id.trim()))
-      .filter(id => !isNaN(id) && id >= 0)
+        .map(id => parseInt(id.trim()))
+        .filter(id => !isNaN(id) && id >= 0)
     pendingMode.value.allowedIds = ids
     // Don't auto-mark as modified here - let the change handler do it
   }
@@ -159,8 +175,8 @@ const isModeFieldDirty = computed(() => {
 
 const isResolutionFieldDirty = computed(() => {
   return userModifiedFields.value.has('width') ||
-    userModifiedFields.value.has('height') ||
-    userModifiedFields.value.has('framerate')
+      userModifiedFields.value.has('height') ||
+      userModifiedFields.value.has('framerate')
 })
 
 const isMaxDistanceFieldDirty = computed(() => {
@@ -253,6 +269,32 @@ function cancelChanges() {
 </script>
 
 <style scoped>
+/* TODO: Remove .alpha-warning-banner and .alpha-disabled styles when config support is implemented */
+.alpha-warning-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  border-radius: 6px;
+  padding: 0.65rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.alpha-warning-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.alpha-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
+}
+
 .dirty-badge {
   color: #ff9500;
   font-size: 14px;

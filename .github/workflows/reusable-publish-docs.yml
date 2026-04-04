@@ -1,6 +1,12 @@
 name: Publish Docs
 
 on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
+        type: string
   workflow_call:
     inputs:
       version:

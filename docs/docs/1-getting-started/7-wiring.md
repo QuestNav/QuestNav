@@ -37,13 +37,16 @@ The Quest headset should be powered using a **USB battery bank** mounted on the 
 ### Recommended Setup
 
 1. Mount a USB battery bank securely on the robot
-2. Connect a USB cable from the battery bank to your adapter's power input
+2. Connect a **USB-C to USB-A** cable from the battery bank to your adapter's power input
 3. The battery bank should supply enough power to sustain the Quest headset indefinitely
 4. Charge state can be monitored externally using the power meter on the battery bank
 
 :::warning
-Some adapters may boot loop when exposed to USB Power Delivery (PD) voltages higher than 5V. If you experience this, use a USB-A to USB-C cable (which forces 5V output) or a battery bank that does not support PD negotiation.
+Some adapters may boot loop when exposed to USB Power Delivery (PD) voltages above 5-V. To avoid this, use a **USB-A to USB-C cable**, which always forces a fixed 5-V output and prevents PD negotiation.
+
+Avoid using USB-C to USB-C cables, as they support PD negotiation and bidirectional power transfer. In some cases, this can cause the battery to draw power from the device or trigger higher voltages that lead to instability.
 :::
+
 
 ### Power Requirements
 

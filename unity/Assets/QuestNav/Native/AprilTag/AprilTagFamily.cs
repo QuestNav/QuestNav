@@ -7,7 +7,7 @@ namespace QuestNav.Native.AprilTag
     /// Base class for AprilTag family wrappers.
     /// Tag families define the specific tag encoding schemes (e.g., tag36h11, tag25h9).
     /// </summary>
-    public unsafe abstract class AprilTagFamily : IDisposable
+    public abstract unsafe class AprilTagFamily : IDisposable
     {
         /// <summary>
         /// The native family pointer

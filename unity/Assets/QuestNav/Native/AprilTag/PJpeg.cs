@@ -33,7 +33,7 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         /// <param name="rawJpeg">The byte[] containing the JPEG encoded data</param>
         /// <returns>A new Pjpeg object, or null if creation failed</returns>
-        public unsafe static PJpeg FromRawJpeg(byte[] rawJpeg)
+        public static unsafe PJpeg FromRawJpeg(byte[] rawJpeg)
         {
             if (rawJpeg == null || rawJpeg.Length == 0)
             {

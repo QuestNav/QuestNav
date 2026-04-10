@@ -140,6 +140,7 @@ namespace QuestNav.QuestNav.AprilTag
         {
             while (true)
             {
+                float captureTimestamp = Time.time;
                 NativeArray<Color32> colors;
 
                 try
@@ -184,17 +185,24 @@ namespace QuestNav.QuestNav.AprilTag
                     }
                     */
 
-                    var (frcPos, frcRot) = Conversions.CvToFrc(poseLibResult.CameraPose);
+                    if (poseLibResult != null)
+                    {
+                        var (frcPos, frcRot) = Conversions.CvToFrc(poseLibResult.CameraPose);
+                        var measuredRotation = new Rotation3d(
+                            new Geometry.Quaternion(frcRot.w, frcRot.x, frcRot.y, frcRot.z)
+                        );
 
-                    vioAprilTagPoseEstimator.AddAprilTagObservation(
-                        new Translation3d(frcPos.x, frcPos.y, frcPos.z),
-                        cameraAccess.Timestamp.Second,
-                        aprilTagStdBase
-                    );
+                        vioAprilTagPoseEstimator.AddAprilTagObservation(
+                            new Translation3d(frcPos.x, frcPos.y, frcPos.z),
+                            measuredRotation,
+                            captureTimestamp,
+                            aprilTagStdBase
+                        );
 
-                    QueuedLogger.Log(
-                        $"Received new PoseLib estimate: Pos({frcPos.x:F3}, {frcPos.y:F3}, {frcPos.z:F3}) Rot({frcRot.eulerAngles.x:F3}, {frcRot.eulerAngles.y:F3}, {frcRot.eulerAngles.z})"
-                    );
+                        QueuedLogger.Log(
+                            $"Received new PoseLib estimate: Pos({frcPos.x:F3}, {frcPos.y:F3}, {frcPos.z:F3}) Rot({frcRot.eulerAngles.x:F3}, {frcRot.eulerAngles.y:F3}, {frcRot.eulerAngles.z})"
+                        );
+                    }
                 }
 
                 yield return new WaitForSeconds(frameDelaySeconds);

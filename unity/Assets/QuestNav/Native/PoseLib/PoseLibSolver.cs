@@ -81,7 +81,7 @@ namespace QuestNav.Native.PoseLib
 
             if (status == 0)
             {
-                return new PoseLibResult(resultPose, resultInliers);
+                return new PoseLibResult(resultPose, resultInliers, detections.NumberOfDetections * 4);
             }
 
             QueuedLogger.LogError($"PoseLib solve failed! Error code: {status}");

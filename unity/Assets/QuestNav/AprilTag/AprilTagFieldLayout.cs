@@ -80,9 +80,9 @@ namespace QuestNav.QuestNav.AprilTag
                 var cornerTransforms = new Transform3d[]
                 {
                     new Transform3d(new Translation3d(0, -halfSize, -halfSize), new Rotation3d()), // p[0]: Bottom-right
-                    new Transform3d(new Translation3d(0, halfSize, -halfSize), new Rotation3d()),  // p[1]: Bottom-left
-                    new Transform3d(new Translation3d(0, halfSize, halfSize), new Rotation3d()),   // p[2]: Upper-left
-                    new Transform3d(new Translation3d(0, -halfSize, halfSize), new Rotation3d()),  // p[3]: Upper-right
+                    new Transform3d(new Translation3d(0, halfSize, -halfSize), new Rotation3d()), // p[1]: Bottom-left
+                    new Transform3d(new Translation3d(0, halfSize, halfSize), new Rotation3d()), // p[2]: Upper-left
+                    new Transform3d(new Translation3d(0, -halfSize, halfSize), new Rotation3d()), // p[3]: Upper-right
                 };
 
                 var fieldTransforms = new[]

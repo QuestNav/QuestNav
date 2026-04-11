@@ -88,9 +88,9 @@ PoseLib uses RANSAC internally, meaning it can tolerate some bad correspondences
 
 PoseLib returns a **world-to-camera** transform following the COLMAP convention:
 
-$$
-P_{camera} = R \cdot P_{world} + t
-$$
+```
+P_camera = R * P_world + t
+```
 
 The "world" here is whatever coordinate system the 3D points are in — which is **FRC field coordinates**. The camera frame uses CV conventions (X-right, Y-down, Z-forward).
 
@@ -102,9 +102,9 @@ The "world" here is whatever coordinate system the 3D points are in — which is
 
 The camera's position in the field is computed by inverting the world-to-camera transform:
 
-$$
-C_{field} = -R^{-1} \cdot t
-$$
+```
+C_field = -(R_inv * t)
+```
 
 This gives the camera position in FRC field coordinates (meters).
 
@@ -112,11 +112,11 @@ This gives the camera position in FRC field coordinates (meters).
 
 The rotation is converted from CV camera axes to FRC body axes (X-forward, Y-left, Z-up) by composing the inverse rotation with a fixed body rotation:
 
-$$
-q_{FRC} = R^{-1} \cdot q_{cv \rightarrow body}
-$$
+```
+q_FRC = R_inv * q_cv_to_body
+```
 
-where $q_{cv \rightarrow body} = (w=0.5,\ x=-0.5,\ y=0.5,\ z=0.5)$.
+where `q_cv_to_body = (w=0.5, x=-0.5, y=0.5, z=0.5)`.
 
 See the [Coordinate Systems](./coordinate-systems) page for the full derivation.
 

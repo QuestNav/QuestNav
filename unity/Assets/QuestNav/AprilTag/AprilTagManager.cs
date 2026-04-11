@@ -167,9 +167,10 @@ namespace QuestNav.QuestNav.AprilTag
                         );
 
                         int tagCount = results.NumberOfDetections;
-                        double inlierRatio = (poseLibResult.TotalPoints > 0)
-                            ? poseLibResult.AcceptedPoints / poseLibResult.TotalPoints
-                            : 0.0;
+                        double inlierRatio =
+                            (poseLibResult.TotalPoints > 0)
+                                ? poseLibResult.AcceptedPoints / poseLibResult.TotalPoints
+                                : 0.0;
 
                         // Approximate average tag distance as the norm of the camera
                         // position in FRC space (distance from camera to field origin is
@@ -179,8 +180,11 @@ namespace QuestNav.QuestNav.AprilTag
                         );
 
                         // Dynamic std devs: uncertainty scales with distance^2 and decreases with tag count
-                        double stdDevFactor = (avgTagDistance * avgTagDistance) / Math.Max(1, tagCount);
-                        double linearStdDev = VioAprilTagPoseEstimatorConstants.MULTI_TAG_LINEAR_STD_DEV_BASE * stdDevFactor;
+                        double stdDevFactor =
+                            (avgTagDistance * avgTagDistance) / Math.Max(1, tagCount);
+                        double linearStdDev =
+                            VioAprilTagPoseEstimatorConstants.MULTI_TAG_LINEAR_STD_DEV_BASE
+                            * stdDevFactor;
                         var dynamicStdDevs = DenseMatrix.OfArray(
                             new[,]
                             {
@@ -201,8 +205,8 @@ namespace QuestNav.QuestNav.AprilTag
 
                         QueuedLogger.Log(
                             $"PoseLib estimate: Pos({frcPos.x:F3}, {frcPos.y:F3}, {frcPos.z:F3}) "
-                            + $"tags={tagCount} inliers={poseLibResult.AcceptedPoints}/{poseLibResult.TotalPoints} "
-                            + $"ratio={inlierRatio:F2} dist={avgTagDistance:F2}m stdDev={linearStdDev:F4}"
+                                + $"tags={tagCount} inliers={poseLibResult.AcceptedPoints}/{poseLibResult.TotalPoints} "
+                                + $"ratio={inlierRatio:F2} dist={avgTagDistance:F2}m stdDev={linearStdDev:F4}"
                         );
                     }
                 }

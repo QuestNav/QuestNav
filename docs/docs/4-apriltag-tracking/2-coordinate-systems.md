@@ -66,23 +66,25 @@ The CV-to-FRC conversion is more complex because PoseLib returns a **world-to-ca
 
 1. **Invert the transform** to get the camera position in world (FRC) coordinates:
 
-$$
-C_{world} = -R^{-1} \cdot t
-$$
+```
+C_world = -(R_inv * t)
+```
 
-where $R$ and $t$ are the rotation and translation from PoseLib's output.
+where `R` and `t` are the rotation and translation from PoseLib's output.
 
 2. **Apply a body rotation** to convert the camera's orientation from CV axes to FRC body axes (X-forward, Y-left, Z-up):
 
-$$
-q_{body} = R^{-1} \cdot q_{cv \rightarrow body}
-$$
+```
+q_body = R_inv * q_cv_to_body
+```
 
-where $q_{cv \rightarrow body} = (w=0.5,\ x=-0.5,\ y=0.5,\ z=0.5)$ corresponds to the rotation matrix:
+where `q_cv_to_body = (w=0.5, x=-0.5, y=0.5, z=0.5)` corresponds to the rotation matrix:
 
-$$
-R_{cv \rightarrow body} = \begin{bmatrix} 0 & 0 & 1 \\ -1 & 0 & 0 \\ 0 & -1 & 0 \end{bmatrix}
-$$
+```
+R_cv_to_body = | 0  0  1 |
+               |-1  0  0 |
+               | 0 -1  0 |
+```
 
 ## Quaternion Mappings
 
@@ -114,9 +116,11 @@ When converting VIO data from Unity to FRC coordinates, `UnityToFrc3d` applies t
 
 This is corrected by the **yaw offset** — a scalar rotation computed during Phase 1 of AprilTag alignment. After Phase 1, all VIO displacements are rotated by this offset before being applied to the Kalman filter state:
 
-$$
-d_{corrected} = R_{yaw}(yawOffset) \cdot d_{raw}
-$$
+```
+d_corrected = Rz(yawOffset) * d_raw
+```
+
+where `Rz` is the 3×3 rotation matrix about the Z-axis (yaw).
 
 Without this correction, the headset's movement appears rotated (often by 90 degrees) on the field visualization.
 

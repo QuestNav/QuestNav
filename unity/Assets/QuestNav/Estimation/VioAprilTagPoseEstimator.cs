@@ -128,9 +128,7 @@ namespace QuestNav.QuestNav.Estimation
                 if (filter == null)
                     return Pose3d.Zero;
                 var s = filter.State;
-                var correctedRotation = latestRotation.RotateBy(
-                    new Rotation3d(0, 0, yawOffset)
-                );
+                var correctedRotation = latestRotation.RotateBy(new Rotation3d(0, 0, yawOffset));
                 return new Pose3d(s[0, 0], s[1, 0], s[2, 0], correctedRotation);
             }
         }
@@ -229,13 +227,16 @@ namespace QuestNav.QuestNav.Estimation
             // --- Phase 1: Initial alignment ---
             if (!hasInitialAlignment)
             {
-                if (tagCount < VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_TAGS
-                    || inlierRatio < VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_INLIER_RATIO)
+                if (
+                    tagCount < VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_TAGS
+                    || inlierRatio
+                        < VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_INLIER_RATIO
+                )
                 {
                     QueuedLogger.Log(
                         $"AprilTag rejected (Phase 1): tags={tagCount}, inlierRatio={inlierRatio:F2} "
-                        + $"(need >={VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_TAGS} tags, "
-                        + $">={VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_INLIER_RATIO:F2} inlier ratio)"
+                            + $"(need >={VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_TAGS} tags, "
+                            + $">={VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_INLIER_RATIO:F2} inlier ratio)"
                     );
                     return;
                 }
@@ -250,14 +251,19 @@ namespace QuestNav.QuestNav.Estimation
 
                 snapshotBuffer.Clear();
                 snapshotBuffer.AddLast(
-                    new VIOSnapshot(timestampSeconds, previousVioPosition, latestRotation, x0.Clone())
+                    new VIOSnapshot(
+                        timestampSeconds,
+                        previousVioPosition,
+                        latestRotation,
+                        x0.Clone()
+                    )
                 );
 
                 ApplyYawCorrection(measuredRotation, timestampSeconds);
                 hasInitialAlignment = true;
                 QueuedLogger.Log(
                     $"AprilTag initial alignment accepted: tags={tagCount}, inlierRatio={inlierRatio:F2}, "
-                    + $"pos=({measuredPosition.X:F3}, {measuredPosition.Y:F3}, {measuredPosition.Z:F3})"
+                        + $"pos=({measuredPosition.X:F3}, {measuredPosition.Y:F3}, {measuredPosition.Z:F3})"
                 );
                 return;
             }
@@ -275,18 +281,20 @@ namespace QuestNav.QuestNav.Estimation
             {
                 QueuedLogger.Log(
                     $"AprilTag rejected (Phase 2): position jump {distance:F2}m > "
-                    + $"{VioAprilTagPoseEstimatorConstants.CORRECTION_MAX_POSITION_JUMP:F1}m limit"
+                        + $"{VioAprilTagPoseEstimatorConstants.CORRECTION_MAX_POSITION_JUMP:F1}m limit"
                 );
                 return;
             }
 
-            if (tagCount < VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_TAGS
-                || inlierRatio < VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_INLIER_RATIO)
+            if (
+                tagCount < VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_TAGS
+                || inlierRatio < VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_INLIER_RATIO
+            )
             {
                 QueuedLogger.Log(
                     $"AprilTag rejected (Phase 2): tags={tagCount}, inlierRatio={inlierRatio:F2} "
-                    + $"(need >={VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_TAGS} tags, "
-                    + $">={VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_INLIER_RATIO:F2} inlier ratio)"
+                        + $"(need >={VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_TAGS} tags, "
+                        + $">={VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_INLIER_RATIO:F2} inlier ratio)"
                 );
                 return;
             }
@@ -306,7 +314,12 @@ namespace QuestNav.QuestNav.Estimation
 
             snapshotBuffer.Clear();
             snapshotBuffer.AddLast(
-                new VIOSnapshot(timestamp, newVioPose.Translation, newVioPose.Rotation, filter.State.Clone())
+                new VIOSnapshot(
+                    timestamp,
+                    newVioPose.Translation,
+                    newVioPose.Rotation,
+                    filter.State.Clone()
+                )
             );
 
             QueuedLogger.LogWarning("VIO recenter detected — estimator VIO baseline reset");
@@ -355,7 +368,9 @@ namespace QuestNav.QuestNav.Estimation
                 {
                     Translation3d rawDisplacement =
                         replayNode.Value.Position - prevReplayNode.Value.Position;
-                    Translation3d displacement = rawDisplacement.RotateBy(new Rotation3d(0, 0, yawOffset));
+                    Translation3d displacement = rawDisplacement.RotateBy(
+                        new Rotation3d(0, 0, yawOffset)
+                    );
 
                     filter.Predict(f, q);
 
@@ -395,9 +410,8 @@ namespace QuestNav.QuestNav.Estimation
             }
 
             double measuredYaw = measuredRotation.Z;
-            Rotation3d vioRotationAtCapture = (bestNode != null)
-                ? bestNode.Value.Rotation
-                : latestRotation;
+            Rotation3d vioRotationAtCapture =
+                (bestNode != null) ? bestNode.Value.Rotation : latestRotation;
             double vioYaw = vioRotationAtCapture.Z;
             yawOffset = NormalizeAngle(measuredYaw - vioYaw);
         }

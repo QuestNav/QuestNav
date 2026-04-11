@@ -31,35 +31,34 @@ Called by `AddVioObservation(pose, timestamp)` every time the VIO system provide
 
 2. **Compute raw displacement**:
 
-$$
-d_{raw} = p_{vio}^{current} - p_{vio}^{previous}
-$$
+```
+d_raw = p_vio_current - p_vio_previous
+```
 
 Both positions are in the FRC-mapped-from-Unity frame (axes are FRC-labeled but orientation depends on headset startup).
 
 3. **Rotate displacement by yaw offset** to align with the true FRC frame:
 
-$$
-d_{corrected} = \begin{bmatrix} \cos(\psi) & -\sin(\psi) & 0 \\ \sin(\psi) & \cos(\psi) & 0 \\ 0 & 0 & 1 \end{bmatrix} d_{raw}
-$$
+```
+        | cos(ψ)  -sin(ψ)  0 |
+d_corrected =  | sin(ψ)   cos(ψ)  0 | * d_raw
+        | 0        0       1 |
+```
 
-where $\psi$ is the `yawOffset` computed during Phase 1 alignment.
+where `ψ` is the `yawOffset` computed during Phase 1 alignment.
 
 4. **Kalman predict**:
 
-$$
-\hat{x}_{k|k-1} = F \hat{x}_{k-1|k-1}
-$$
-
-$$
-P_{k|k-1} = F P_{k-1|k-1} F^T + Q
-$$
+```
+x̂(k|k-1) = F * x̂(k-1|k-1)
+P(k|k-1) = F * P(k-1|k-1) * Fᵀ + Q
+```
 
 5. **Apply displacement** (dead-reckoning correction):
 
-$$
-\hat{x}_{k|k-1} \leftarrow \hat{x}_{k|k-1} + d_{corrected}
-$$
+```
+x̂(k|k-1) = x̂(k|k-1) + d_corrected
+```
 
 6. **Reconstruct filter** with the corrected state (the MathNet Kalman filter does not expose state mutation, so a new instance is created).
 
@@ -86,23 +85,23 @@ Before any accepted AprilTag observation, the Kalman filter runs on pure VIO in 
 **On accept:**
 1. **Hard-reset the KF state** to the measured AprilTag position:
 
-$$
-\hat{x} \leftarrow z_{measured}
-$$
+```
+x̂ = z_measured
+```
 
-This bypass is necessary because the initial covariance $P_0 = 0.001 \times I$ represents extreme confidence in the VIO starting position. A standard Kalman update would compute a near-zero gain:
+This bypass is necessary because the initial covariance `P₀ = 0.001 × I` represents extreme confidence in the VIO starting position. A standard Kalman update would compute a near-zero gain:
 
-$$
-K = P H^T (H P H^T + R)^{-1} \approx \frac{0.001}{0.001 + R} \approx 0.004
-$$
+```
+K = P * Hᵀ * (H * P * Hᵀ + R)⁻¹ ≈ 0.001 / (0.001 + R) ≈ 0.004
+```
 
 This would cause the filter to almost entirely ignore the first AprilTag measurement, keeping the headset stuck near its VIO origin.
 
 2. **Set covariance** to the observation's measurement noise:
 
-$$
-P \leftarrow \text{diag}(\sigma_{x}^{2},\ \sigma_{y}^{2},\ \sigma_{z}^{2})
-$$
+```
+P = diag(σ_x², σ_y², σ_z²)
+```
 
 3. **Clear and re-seed** the snapshot buffer with the current VIO baseline and new KF state.
 
@@ -129,19 +128,13 @@ After initial alignment, VIO is the primary pose source. AprilTag corrections ar
 
 When a Phase 2 observation is accepted:
 
-$$
-K = P_{k|k-1} H^T (H P_{k|k-1} H^T + R)^{-1}
-$$
+```
+K = P(k|k-1) * Hᵀ * (H * P(k|k-1) * Hᵀ + R)⁻¹
+x̂(k|k) = x̂(k|k-1) + K * (z - H * x̂(k|k-1))
+P(k|k) = (I - K*H) * P(k|k-1)
+```
 
-$$
-\hat{x}_{k|k} = \hat{x}_{k|k-1} + K(z - H \hat{x}_{k|k-1})
-$$
-
-$$
-P_{k|k} = (I - KH) P_{k|k-1}
-$$
-
-where $z$ is the AprilTag-measured position and $R$ is the dynamic measurement noise.
+where `z` is the AprilTag-measured position and `R` is the dynamic measurement noise.
 
 ### Latency Compensation (Replay Buffer)
 
@@ -189,25 +182,25 @@ When the first accepted AprilTag observation arrives (Phase 1):
 
 1. Extract the **measured yaw** from the AprilTag rotation:
 
-$$
-\psi_{measured} = \text{Rotation3d.Z}(q_{aprilTag})
-$$
+```
+ψ_measured = Rotation3d.Z(q_aprilTag)
+```
 
 The `.Z` component of a `Rotation3d` corresponds to rotation around the FRC Z-axis (up), which is yaw.
 
 2. Look up the **VIO yaw at capture time** from the snapshot buffer (or fall back to the latest VIO rotation if no match):
 
-$$
-\psi_{vio} = \text{Rotation3d.Z}(q_{vioAtCapture})
-$$
+```
+ψ_vio = Rotation3d.Z(q_vioAtCapture)
+```
 
 3. Compute the offset:
 
-$$
-yawOffset = \text{normalize}(\psi_{measured} - \psi_{vio})
-$$
+```
+yawOffset = normalize(ψ_measured - ψ_vio)
+```
 
-where `normalize` wraps the result to $[-\pi, \pi]$.
+where `normalize` wraps the result to `[-π, π]`.
 
 ### Applying the Yaw Offset
 
@@ -217,11 +210,11 @@ The yaw offset is applied in two places:
 
 2. **Output rotation** in `EstimatedPose`:
 
-$$
-q_{output} = q_{latestVio} \circ R_z(yawOffset)
-$$
+```
+q_output = q_latestVio ∘ Rz(yawOffset)
+```
 
-where $R_z$ is a rotation around the Z-axis and $\circ$ denotes quaternion composition.
+where `Rz` is a rotation around the Z-axis and `∘` denotes quaternion composition.
 
 ### Why Yaw Is Locked After Phase 1
 
@@ -237,26 +230,26 @@ The Kalman filter's R matrix is computed dynamically for each AprilTag observati
 
 ### Formula
 
-$$
-\sigma_{linear} = \sigma_{base} \times \frac{d_{avg}^{2}}{n_{tags}}
-$$
+```
+σ_linear = σ_base × (d_avg² / n_tags)
+```
 
 where:
-- $\sigma_{base}$ = 0.05 m (compile-time constant `MULTI_TAG_LINEAR_STD_DEV_BASE`)
-- $d_{avg}$ = average distance to tags (approximated as `‖position‖`)
-- $n_{tags}$ = number of detected tags
+- `σ_base` = 0.05 m (compile-time constant `MULTI_TAG_LINEAR_STD_DEV_BASE`)
+- `d_avg` = average distance to tags (approximated as `‖position‖`)
+- `n_tags` = number of detected tags
 
 The R matrix is then:
 
-$$
-R = \text{diag}(\sigma_{linear}^{2},\ \sigma_{linear}^{2},\ (2\sigma_{linear})^{2})
-$$
+```
+R = diag(σ_linear², σ_linear², (2 × σ_linear)²)
+```
 
 The Z-axis noise is doubled because vertical position is less precisely determined by the PnP solution (tags are typically at similar heights, providing weak vertical constraints).
 
 ### Effect on Filter Behavior
 
-| Scenario | σ_linear | Kalman Gain | Behavior |
+| Scenario | σ\_linear | Kalman Gain | Behavior |
 |----------|----------|-------------|----------|
 | 3 tags at 2m | 0.067m | High | Strong correction |
 | 5 tags at 3m | 0.090m | Moderate | Moderate correction |
@@ -282,9 +275,9 @@ The `EstimatedPose` property returns a `Pose3d` combining:
 - **Position**: KF-filtered `[x, y, z]` in FRC field coordinates
 - **Rotation**: Latest VIO rotation with yaw offset applied
 
-$$
-\text{EstimatedPose} = \text{Pose3d}\big(\hat{x}[0],\ \hat{x}[1],\ \hat{x}[2],\ q_{vio} \circ R_z(yawOffset)\big)
-$$
+```
+EstimatedPose = Pose3d(x̂[0], x̂[1], x̂[2], q_vio ∘ Rz(yawOffset))
+```
 
 This is published to NetworkTables at 120 Hz for consumption by the robot's drive code.
 

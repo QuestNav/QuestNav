@@ -25,7 +25,11 @@ namespace QuestNav.QuestNav.Native.PoseLib
         /// <param name="cameraPose">The native CameraPose to convert</param>
         /// <param name="numInliersOut">The inlier count to convert</param>
         /// <param name="totalPoints">Total number of point correspondences</param>
-        public PoseLibResult(PoseLibNatives.PoseLibCameraPoseNative cameraPose, ulong numInliersOut, int totalPoints)
+        public PoseLibResult(
+            PoseLibNatives.PoseLibCameraPoseNative cameraPose,
+            ulong numInliersOut,
+            int totalPoints
+        )
         {
             var q = new Quaternion(
                 cameraPose.Q[0],

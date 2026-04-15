@@ -376,10 +376,8 @@ namespace QuestNav.Core
 
             // Update UI elements like connection status, IP address display, team number validation
             // UI updates don't need to be real-time, 3Hz provides smooth visual feedback
-            //TODO: this should take pose3d
             uiManager.UpdatePositionText(
-                cameraRig.centerEyeAnchor.position,
-                cameraRig.centerEyeAnchor.rotation
+                vioAprilTagPoseEstimator.EstimatedPose
             );
 
             // Monitor device health: tracking status, battery level, tracking loss events

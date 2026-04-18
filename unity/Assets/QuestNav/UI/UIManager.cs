@@ -2,11 +2,11 @@ using System;
 using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Network;
+using QuestNav.QuestNav.Geometry;
 using QuestNav.Utils;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using QuestNav.QuestNav.Geometry;
 
 namespace QuestNav.UI
 {

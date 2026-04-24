@@ -711,7 +711,7 @@ namespace QuestNav.Config
         /// </returns>
         private async Task<int[]> GetAprilTagAllowedIdsAsync()
         {
-            /// The default is an emptry array so no records are created for the default
+            // The default is an empty array so no records are created for the default
             var rows = await connection
                 .Table<Config.AprilTagAllowedId>()
                 .Where(r => r.AprilTagConfigId == 1)

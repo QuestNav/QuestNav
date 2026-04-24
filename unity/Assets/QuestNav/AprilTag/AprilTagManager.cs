@@ -35,7 +35,6 @@ namespace QuestNav.QuestNav.AprilTag
         private int[] allowedIds;
         private double maxDistance;
         private int minimumNumberOfTags;
-        private readonly Matrix<double> aprilTagStdBase;
 
         public AprilTagManager(
             IConfigManager configManager,
@@ -54,14 +53,6 @@ namespace QuestNav.QuestNav.AprilTag
             this.aprilTagFieldLayout = aprilTagFieldLayout;
             this.coroutineHost = coroutineHost;
             poseLibSolver = new PoseLibSolver(aprilTagFieldLayout, cameraAccess.Intrinsics);
-            aprilTagStdBase = DenseMatrix.OfArray(
-                new[,]
-                {
-                    { VioAprilTagPoseEstimatorConstants.defaultAprilTagStdDevs[0] },
-                    { VioAprilTagPoseEstimatorConstants.defaultAprilTagStdDevs[1] },
-                    { VioAprilTagPoseEstimatorConstants.defaultAprilTagStdDevs[2] },
-                }
-            );
 
             configManager.OnEnableAprilTagDetectorChanged += OnEnableAprilTagDetectorChanged;
             configManager.OnAprilTagDetectorModeChanged += OnAprilTagDetectorModeChanged;
@@ -140,6 +131,7 @@ namespace QuestNav.QuestNav.AprilTag
         {
             while (true)
             {
+                float captureTimestamp = Time.time;
                 NativeArray<Color32> colors;
 
                 try
@@ -167,34 +159,56 @@ namespace QuestNav.QuestNav.AprilTag
 
                     var poseLibResult = poseLibSolver.PoseLibSolve(results);
 
-                    //TODO: filter tags based on requirements (distance, id, etc) Dynamic STD filtering is a MUST
-                    // Calculate dynamic standard deviations
-                    // Calculate standard deviation based on tag distance and count
-                    // Uncertainty increases with distance squared and decreases with more tags
-                    /* Code from my java repo:
-                    double stdDevFactor = Math.Pow(observation.averageTagDistance(), 2.0) / results.NumberOfDetections;
-                    double linearStdDev = MULTI_TAG_LINEAR_STD_DEV_BASE * stdDevFactor;
-                    double angularStdDev = MULTI_TAG_ANGULAR_STD_DEV_BASE * stdDevFactor;
-
-                    // Apply camera-specific adjustment factor if available
-                    if (cameraIndex < CAMERA_STD_DEV_FACTORS.length)
+                    if (poseLibResult != null)
                     {
-                        linearStdDev *= CAMERA_STD_DEV_FACTORS[cameraIndex];
-                        angularStdDev *= CAMERA_STD_DEV_FACTORS[cameraIndex];
+                        var (frcPos, frcRot) = Conversions.CvToFrc(poseLibResult.CameraPose);
+                        var measuredRotation = new Rotation3d(
+                            new Geometry.Quaternion(frcRot.w, frcRot.x, frcRot.y, frcRot.z)
+                        );
+
+                        int tagCount = results.NumberOfDetections;
+                        double inlierRatio =
+                            (poseLibResult.TotalPoints > 0)
+                                ? poseLibResult.AcceptedPoints / poseLibResult.TotalPoints
+                                : 0.0;
+
+                        // Approximate average tag distance as the norm of the camera
+                        // position in FRC space (distance from camera to field origin is
+                        // a reasonable proxy for average tag range).
+                        double avgTagDistance = Math.Sqrt(
+                            frcPos.x * frcPos.x + frcPos.y * frcPos.y + frcPos.z * frcPos.z
+                        );
+
+                        // Dynamic std devs: uncertainty scales with distance^2 and decreases with tag count
+                        double stdDevFactor =
+                            (avgTagDistance * avgTagDistance) / Math.Max(1, tagCount);
+                        double linearStdDev =
+                            VioAprilTagPoseEstimatorConstants.MULTI_TAG_LINEAR_STD_DEV_BASE
+                            * stdDevFactor;
+                        var dynamicStdDevs = DenseMatrix.OfArray(
+                            new[,]
+                            {
+                                { linearStdDev },
+                                { linearStdDev },
+                                { linearStdDev * 2.0 },
+                            }
+                        );
+
+                        vioAprilTagPoseEstimator.AddAprilTagObservation(
+                            new Translation3d(frcPos.x, frcPos.y, frcPos.z),
+                            measuredRotation,
+                            captureTimestamp,
+                            dynamicStdDevs,
+                            tagCount,
+                            inlierRatio
+                        );
+
+                        QueuedLogger.Log(
+                            $"PoseLib estimate: Pos({frcPos.x:F3}, {frcPos.y:F3}, {frcPos.z:F3}) "
+                                + $"tags={tagCount} inliers={poseLibResult.AcceptedPoints}/{poseLibResult.TotalPoints} "
+                                + $"ratio={inlierRatio:F2} dist={avgTagDistance:F2}m stdDev={linearStdDev:F4}"
+                        );
                     }
-                    */
-
-                    var (frcPos, frcRot) = Conversions.CvToFrc(poseLibResult.CameraPose);
-
-                    vioAprilTagPoseEstimator.AddAprilTagObservation(
-                        new Translation3d(frcPos.x, frcPos.y, frcPos.z),
-                        cameraAccess.Timestamp.Second,
-                        aprilTagStdBase
-                    );
-
-                    QueuedLogger.Log(
-                        $"Received new PoseLib estimate: Pos({frcPos.x:F3}, {frcPos.y:F3}, {frcPos.z:F3}) Rot({frcRot.eulerAngles.x:F3}, {frcRot.eulerAngles.y:F3}, {frcRot.eulerAngles.z})"
-                    );
                 }
 
                 yield return new WaitForSeconds(frameDelaySeconds);

@@ -174,7 +174,7 @@ namespace QuestNav.QuestNav.Geometry
         /// <summary>
         /// Constructs a Rotation3d from a quaternion.
         /// </summary>
-        /// <param name="q">The quaternion. Will be automatically normalized.</param>
+        /// <param name="quaternion">The quaternion. Will be automatically normalized.</param>
         [JsonConstructor]
         public Rotation3d(Quaternion quaternion)
         {

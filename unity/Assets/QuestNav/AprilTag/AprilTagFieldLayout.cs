@@ -41,6 +41,8 @@ namespace QuestNav.QuestNav.AprilTag
 #if UNITY_ANDROID && !UNITY_EDITOR
             // Extract the JSON from the APK
             await FileManager.ExtractAndroidFileAsync(fileName, "apriltag/fieldlayouts", filesPath);
+#else
+            await Task.CompletedTask;
 #endif
             string filePath = $"{filesPath}/{fileName}";
             using var file = File.OpenText(filePath);
@@ -71,23 +73,23 @@ namespace QuestNav.QuestNav.AprilTag
                 var tagPose = tag.Pose;
                 double halfSize = TagSize / 2.0;
 
+                // Corners ordered to match the passthrough camera's clockwise detection order.
+                // The Meta Quest passthrough camera produces a mirrored image, so the
+                // AprilTag detector returns corners in CW order (BR, BL, UL, UR) rather
+                // than the standard CCW convention.
                 var cornerTransforms = new Transform3d[]
                 {
-                    new Transform3d(new Translation3d(0, -halfSize, -halfSize), new Rotation3d()), // Corner1: Bottom-right
-                    new Transform3d(new Translation3d(0, halfSize, -halfSize), new Rotation3d()), // Corner0: Bottom-left
-                    new Transform3d(new Translation3d(0, halfSize, halfSize), new Rotation3d()), // Corner3: Upper-left
-                    new Transform3d(new Translation3d(0, -halfSize, halfSize), new Rotation3d()), // Corner2: Upper-right
+                    new Transform3d(new Translation3d(0, -halfSize, -halfSize), new Rotation3d()), // p[0]: Bottom-right
+                    new Transform3d(new Translation3d(0, halfSize, -halfSize), new Rotation3d()), // p[1]: Bottom-left
+                    new Transform3d(new Translation3d(0, halfSize, halfSize), new Rotation3d()), // p[2]: Upper-left
+                    new Transform3d(new Translation3d(0, -halfSize, halfSize), new Rotation3d()), // p[3]: Upper-right
                 };
 
                 var fieldTransforms = new[]
                 {
-                    // Index 0: br (bottom-right from viewer)
                     tagPose.Plus(cornerTransforms[0]).Translation,
-                    // Index 1: bl (bottom-left from viewer)
                     tagPose.Plus(cornerTransforms[1]).Translation,
-                    // Index 2: ul (upper-left from viewer)
                     tagPose.Plus(cornerTransforms[2]).Translation,
-                    // Index 3: ur (upper-right from viewer)
                     tagPose.Plus(cornerTransforms[3]).Translation,
                 };
 

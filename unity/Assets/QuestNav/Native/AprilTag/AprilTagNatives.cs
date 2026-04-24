@@ -124,10 +124,10 @@ namespace QuestNav.Native.AprilTag
     ///     // saves expensive decoding processing.
     ///     float max_line_fit_mse;
     ///
-    ///     // When we build our model of black & white pixels, we add an
+    ///     // When we build our model of black and white pixels, we add an
     ///     // extra check that the white model must be (overall) brighter
     ///     // than the black model.  How much brighter? (in pixel values,
-    ///     // [0,255]). .
+    ///     // [0,255]).
     ///     int min_white_black_diff;
     ///
     ///     // should the thresholded image be deglitched? Only useful for

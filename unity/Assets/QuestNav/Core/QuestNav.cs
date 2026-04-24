@@ -260,6 +260,7 @@ namespace QuestNav.Core
             );
 
             vioAprilTagPoseEstimator = new VioAprilTagPoseEstimator();
+            OVRManager.display.RecenteredPose += OnVioRecenter;
 
             var aprilTagFieldLayout = new AprilTagFieldLayout(0.1651); // TODO: no magic numbers
             await aprilTagFieldLayout.LoadJsonFromFileAsync("2026-rebuilt-welded.json");
@@ -375,11 +376,7 @@ namespace QuestNav.Core
 
             // Update UI elements like connection status, IP address display, team number validation
             // UI updates don't need to be real-time, 3Hz provides smooth visual feedback
-            //TODO: this should take pose3d
-            uiManager.UpdatePositionText(
-                cameraRig.centerEyeAnchor.position,
-                cameraRig.centerEyeAnchor.rotation
-            );
+            uiManager.UpdatePositionText(vioAprilTagPoseEstimator.EstimatedPose);
 
             // Monitor device health: tracking status, battery level, tracking loss events
             // This data helps diagnose issues but doesn't need high-frequency updates
@@ -415,6 +412,7 @@ namespace QuestNav.Core
         /// </summary>
         private void OnDestroy()
         {
+            OVRManager.display.RecenteredPose -= OnVioRecenter;
             configManager.CloseAsync();
             webServerManager?.Shutdown();
         }
@@ -583,6 +581,21 @@ namespace QuestNav.Core
                 )
             );
             vioAprilTagPoseEstimator.AddVioObservation(pose, timeStamp);
+        }
+
+        /// <summary>
+        /// Handles the OVR tracking recenter event (Quest logo long-press).
+        /// Resets the VIO baseline in the estimator without disturbing the KF state.
+        /// </summary>
+        private void OnVioRecenter()
+        {
+            var newPose = new Pose3d(
+                Conversions.UnityToFrc3d(
+                    cameraRig.centerEyeAnchor.position,
+                    cameraRig.centerEyeAnchor.rotation
+                )
+            );
+            vioAprilTagPoseEstimator.HandleRecenter(newPose, Time.time);
         }
 
         /// <summary>

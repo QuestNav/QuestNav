@@ -10,16 +10,26 @@ namespace QuestNav.QuestNav.Native.PoseLib
         public Pose3d CameraPose { get; }
 
         /// <summary>
-        /// How many points of the points inputted were fit to the model
+        /// How many points of the points inputted were fit to the model (inliers)
         /// </summary>
         public double AcceptedPoints { get; }
+
+        /// <summary>
+        /// Total number of 2D-3D point correspondences fed to the solver
+        /// </summary>
+        public int TotalPoints { get; }
 
         /// <summary>
         /// Creates a new CPnPResult from the native struct returned by the estimator
         /// </summary>
         /// <param name="cameraPose">The native CameraPose to convert</param>
         /// <param name="numInliersOut">The inlier count to convert</param>
-        public PoseLibResult(PoseLibNatives.PoseLibCameraPoseNative cameraPose, ulong numInliersOut)
+        /// <param name="totalPoints">Total number of point correspondences</param>
+        public PoseLibResult(
+            PoseLibNatives.PoseLibCameraPoseNative cameraPose,
+            ulong numInliersOut,
+            int totalPoints
+        )
         {
             var q = new Quaternion(
                 cameraPose.Q[0],
@@ -32,6 +42,7 @@ namespace QuestNav.QuestNav.Native.PoseLib
             CameraPose = new Pose3d(t, new Rotation3d(q));
 
             AcceptedPoints = numInliersOut;
+            TotalPoints = totalPoints;
         }
     }
 }

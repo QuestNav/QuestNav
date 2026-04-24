@@ -2,6 +2,7 @@ using System;
 using QuestNav.Config;
 using QuestNav.Core;
 using QuestNav.Network;
+using QuestNav.QuestNav.Geometry;
 using QuestNav.Utils;
 using TMPro;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace QuestNav.UI
         /// <summary>
         /// Updates the position and rotation text in the UI.
         /// </summary>
-        void UpdatePositionText(Vector3 position, Quaternion rotation);
+        void UpdatePositionText(Pose3d pose);
     }
 
     /// <summary>
@@ -298,9 +299,8 @@ namespace QuestNav.UI
         /// <summary>
         /// Updates the position and rotation text displays with current values.
         /// </summary>
-        /// <param name="position">Current position vector</param>
-        /// <param name="rotation">Current rotation quaternion</param>
-        public void UpdatePositionText(Vector3 position, Quaternion rotation)
+        /// <param name="pose">Current position estimate</param>
+        public void UpdatePositionText(Pose3d pose)
         {
             TextMeshProUGUI xText = posXText as TextMeshProUGUI;
             TextMeshProUGUI yText = posYText as TextMeshProUGUI;
@@ -318,21 +318,13 @@ namespace QuestNav.UI
             )
                 return;
 
-            var frcPosition = Conversions.UnityToFrc3d(position, rotation);
-            xText.text = $"{frcPosition.Translation.X:0.00} M";
-            yText.text = $"{frcPosition.Translation.Y:0.00} M";
-            zText.text = $"{frcPosition.Translation.Z:0.00} M";
+            xText.text = $"{pose.X:0.00} M";
+            yText.text = $"{pose.Y:0.00} M";
+            zText.text = $"{pose.Z:0.00} M";
 
-            Quaternion unityQuat = new Quaternion(
-                (float)frcPosition.Rotation.Q.X,
-                (float)frcPosition.Rotation.Q.Y,
-                (float)frcPosition.Rotation.Q.Z,
-                (float)frcPosition.Rotation.Q.W
-            );
-            Vector3 euler = unityQuat.eulerAngles;
-            xRotText.text = $"{euler.x:0.00}°";
-            yRotText.text = $"{euler.y:0.00}°";
-            zRotText.text = $"{euler.z:0.00}°";
+            xRotText.text = $"{(pose.Rotation.X * (180 / 3.14159)):0.00}°";
+            yRotText.text = $"{(pose.Rotation.Y * (180 / 3.14159)):0.00}°";
+            zRotText.text = $"{(pose.Rotation.Z * (180 / 3.14159)):0.00}°";
         }
         #endregion
     }

@@ -44,6 +44,7 @@ namespace QuestNav.Commands
         /// Initializes a new command processor with required dependencies
         /// </summary>
         /// <param name="networkTableConnection">Network connection for command communication</param>
+        /// <param name="vioAprilTagPoseEstimator">Pose estimator for Kalman filter resets</param>
         /// <param name="vrCamera">Reference to the VR camera transform</param>
         /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
         /// <param name="resetTransform">Reference to the reset position transform</param>

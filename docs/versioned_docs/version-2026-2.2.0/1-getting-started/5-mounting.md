@@ -123,10 +123,5 @@ After mounting, verify that the Quest has adequate visibility:
 To access pass-through view, launch the QuestNav app. This allows you to see what the cameras see, helping verify proper positioning.
 :::
 
-## Video Guide
-:::tip Video Guide
-A video walkthrough for mounting is coming soon.
-:::
-
 ## Next Steps
 Once your Quest is securely mounted, proceed to the [Wiring](./wiring) section to learn how to connect your headset to the robot's network.

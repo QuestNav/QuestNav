@@ -160,7 +160,7 @@ if (poseFrames.length > 0) {
     Pose3d questPose = poseFrames[poseFrames.length - 1].questPose3d();
 
     // Transform by the mount pose to get your robot pose
-    Pose3d robotPose = questPose.plus(ROBOT_TO_QUEST.inverse());
+    Pose3d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
 }
 ```
 
@@ -234,7 +234,7 @@ Transform3d ROBOT_TO_QUEST = new Transform3d(0.3, 0.0, 0.5, new Rotation3d());
 Pose3d robotPose = new Pose3d( /* Some pose data */ );
 
 // Transform by the offset to get the Quest pose
-Pose3d questPose = robotPose.plus(ROBOT_TO_QUEST);
+Pose3d questPose = robotPose.transformBy(ROBOT_TO_QUEST);
 
 // Send the reset operation
 questNav.setPose(questPose);
@@ -293,7 +293,7 @@ the Quest is connected and is tracking before using its pose data!
                     double timestamp = questFrame.dataTimestamp();
 
                     // Transform by the mount pose to get your robot pose
-                    Pose3d robotPose = questPose.plus(QuestNavConstants.ROBOT_TO_QUEST.inverse());
+                    Pose3d robotPose = questPose.transformBy(QuestNavConstants.ROBOT_TO_QUEST.inverse());
 
                     // You can put some sort of filtering here if you would like!
 
@@ -527,3 +527,7 @@ For a full working subsystem that combines everything covered above, see the [Qu
 - AdvantageScope-friendly telemetry topics (`QuestNav/RobotPoses`, `RobotPosesAccepted`, `RobotPosesRejected`, `LatestRobotPose`)
 
 The project runs in the WPILib simulator without any hardware, making it a useful starting point or comparison reference when adapting QuestNav to your own robot.
+
+:::tip Have an example to share?
+If your team has a QuestNav subsystem, integration pattern, or reference project that would help other teams (swerve, AdvantageKit, CTRE, custom drivetrains, etc.), open a pull request against [QuestNav/QuestNav](https://github.com/QuestNav/QuestNav) adding a link to it on this page.
+:::

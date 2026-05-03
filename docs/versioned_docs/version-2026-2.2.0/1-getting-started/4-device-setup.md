@@ -37,7 +37,7 @@ For the official walkthrough (with screenshots and a video), see [Enable develop
 
 After enabling Developer Mode, connect the Quest to your computer with a USB-C data cable. When prompted inside the headset, select **Always allow from this computer** to authorize USB debugging. This lets the QuestNav Setup Page (and ADB / Meta Quest Developer Hub if used) communicate with the headset.
 
-<img src="/img/headset-setup/always_allow.jpg" alt="Always allow from this computer prompt on the Quest" width="800"/>
+<img src="/img/headset-setup/always_allow.webp" alt="Always allow from this computer prompt on the Quest" width="800"/>
 
 ## Run the QuestNav Setup Page
 

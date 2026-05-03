@@ -14,18 +14,23 @@ This guide covers common issues you might encounter when setting up and using Qu
 - Network Tables not receiving pose data
 
 **Solutions:**
-1. **Check Ethernet Adapter Compatibility**
+1. **Confirm Wi-Fi is disabled on the headset**
+    - With Wi-Fi enabled, the Quest may route NetworkTables traffic over the Wi-Fi interface instead of the Ethernet adapter. The behaviour is inconsistent and can change between sessions, so the only reliable fix is to disable Wi-Fi entirely.
+    - Check via `Settings → Wi-Fi` on the headset, or run `adb shell svc wifi disable`
+    - The [QuestNav Setup Page](https://setup.questnav.gg/) disables Wi-Fi automatically; if you set up the headset by hand, verify this is off
+
+2. **Check Ethernet Adapter Compatibility**
     - Verify your adapter is on the [supported list](./adapters)
     - Look for LED activity on the adapter — no lights usually indicates a power or connection issue
 
-2. **Verify Physical Connections**
+3. **Verify Physical Connections**
     - Ensure the USB-C to Ethernet adapter is being powered
     - Verify the adapter is fully seated in the Quest's USB-C port
     - Ensure the Ethernet cable is securely connected at both ends
     - Try a different Ethernet cable
     - Test the adapter with a computer to confirm functionality
 
-3. **Check Network Configuration**
+4. **Check Network Configuration**
     - Verify the team number on the headset matches your team's number — the Quest connects to `10.TE.AM.2`
     - Confirm the roboRIO has booted and NetworkTables is running on it
     - Try resetting the robot's network switch
@@ -82,9 +87,9 @@ See the [Testing & Simulation](./simulation) page for more details on running Qu
     - Add service loops at connection points so vibration doesn't tug on connectors
 
 4. **Power Issues**
-    - Check that the adapter is receiving consistent power
-    - If using passthrough power, verify voltage stability
-    - Temporarily run on the Quest's internal battery to isolate power-related drops
+    - Watch the battery percent on the headset over a few minutes. If it isn't steadily climbing (or staying at 100% while the adapter is plugged in), the Quest isn't getting consistent power.
+    - Force a fixed 5V supply by using a USB-A to USB-C cable from the power source to the adapter. This skips PD negotiation entirely and rules out PD-related instability.
+    - If using a non-PD source, confirm it can supply 5V at 4A (matching the Quest's input spec on the [Wiring](./wiring#power-requirements) page).
 
 
 ## Tracking Problems
@@ -381,7 +386,7 @@ Useful for triggering app restarts, pulling logs, or kicking a stuck headset fro
 Make sure you're resetting the pose to the correct field coordinates. The reset position should match your **headset's** actual position on the field, including orientation. **NOT THE ROBOT POSE.** If you know the robot's pose, you must apply the `ROBOT_TO_QUEST` transform before calling `setPose()`:
 
 ```java
-Pose3d questPose = robotPose.plus(ROBOT_TO_QUEST);
+Pose3d questPose = robotPose.transformBy(ROBOT_TO_QUEST);
 questNav.setPose(questPose);
 ```
 

@@ -119,7 +119,7 @@ public class QuestNavSubsystem extends SubsystemBase {
         for (PoseFrame frame : questNav.getAllUnreadPoseFrames()) {
             if (frame.isTracking()) {
                 Pose3d robotPose = frame.questPose3d()
-                    .plus(ROBOT_TO_QUEST.inverse());
+                    .transformBy(ROBOT_TO_QUEST.inverse());
                 // Feed to your pose estimator:
                 // driveSubsystem.addVisionMeasurement(
                 //     robotPose.toPose2d(), frame.dataTimestamp(), stdDevs);

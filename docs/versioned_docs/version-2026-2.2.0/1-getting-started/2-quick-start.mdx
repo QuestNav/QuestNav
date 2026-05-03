@@ -20,7 +20,7 @@ export const VendorDepCodeBlock = () => {
 This page walks through the entire QuestNav setup from unboxing to a working robot integration. Each step links to a detailed page if you need more information.
 
 :::tip Recommended: Use the QuestNav Setup Page
-The [QuestNav Setup Page](https://setup.questnav.gg/) automates headset configuration and app installation over USB. This is more reliable and consistent than configuring everything manually. **We strongly recommend using the setup page for steps 3-5 below.**
+The [QuestNav Setup Page](https://setup.questnav.gg/) automates headset configuration and app installation over USB. This is more reliable and consistent than configuring everything manually. **We strongly recommend using the setup page for step 3 below.**
 :::
 
 ## What You'll Need
@@ -32,8 +32,8 @@ Before starting, gather the following:
 | Meta Quest 3S or Quest 3 headset | Quest 3S recommended for FRC |
 | USB-C to Ethernet adapter (with power passthrough) | See [Choosing an Ethernet Adapter](./adapters) for tested models |
 | Short CAT5e or CAT6 Ethernet cable | Under 1 meter / 3 feet preferred |
-| USB battery bank | For powering the headset during matches |
-| USB-C cable for power | Connects battery bank to adapter's power input |
+| USB battery bank **or** regulated 5V converter (e.g. Redux Robotics [Zinc-V](https://shop.reduxrobotics.com/products/zinc-v)) | Powers the headset through the adapter — battery bank is preferred for simplicity, Zinc-V if you want to run off the robot's 12V system |
+| USB-A to USB-C cable | Connects the power source to the adapter's power input (forces a fixed 5V output) |
 | 3D printed headset mount | STL files available on the [Mounting](./mounting) page |
 
 ## Setup Steps
@@ -53,26 +53,20 @@ You must enable Developer Mode on your Quest before installing QuestNav. This re
 5. Tap **Headset Settings > Developer Mode**
 6. Toggle Developer Mode **On**
 
-See [Device Setup](./device-setup) for alternative methods and additional detail.
+See [Headset Setup](./device-setup) for the full procedure.
 
-### 3. Configure the headset
+### 3. Configure the headset and install QuestNav
 
-Visit [setup.questnav.gg](https://setup.questnav.gg/) and connect your Quest via USB. The setup page will automatically apply all required settings (disable Wi-Fi, disable Bluetooth, disable Guardian, set power options, etc.).
+Visit [setup.questnav.gg](https://setup.questnav.gg/) and connect your Quest via USB. The setup page automatically applies all required settings (Wi-Fi, Bluetooth, Guardian, power options, etc.) and installs both the QuestNav app and the [QuestNav KeepAwake](https://github.com/QuestNav/QuestNavKeepAwake) companion app, which prevents the headset from sleeping during operation.
 
-If you prefer to configure manually, follow the [Device Setup](./device-setup) guide.
-
-### 4. Install QuestNav
-
-The [QuestNav Setup Page](https://setup.questnav.gg/) can install the QuestNav app. If you need to install manually, download the latest APK from the [GitHub releases page](https://github.com/QuestNav/QuestNav/releases) and install via ADB, Meta Quest Developer Hub, or SideQuest. See [App Setup](./app-setup) for details.
-
-### 5. Set your team number
+### 4. Set your team number
 
 1. Launch QuestNav on the headset (Apps > Unknown Sources > QuestNav)
 2. Enter your FRC team number and click **Set**
 
 Your team number determines the IP address QuestNav connects to (`10.TE.AM.2`). If this is wrong, the Quest will not find your robot.
 
-### 6. Mount the headset
+### 5. Mount the headset
 
 Securely mount the Quest on your robot using a 3D printed mount. Keep it:
 - At least 30 cm (12 inches) above the floor
@@ -81,15 +75,17 @@ Securely mount the Quest on your robot using a 3D printed mount. Keep it:
 
 See [Mounting](./mounting) for 3D print files and detailed guidance.
 
-### 7. Wire Ethernet and power
+### 6. Wire Ethernet and power
 
 1. Connect the USB-C to Ethernet adapter to the Quest
 2. Run a short Ethernet cable from the adapter to your robot's network switch
-3. Connect a USB battery bank to the adapter's power input to keep the headset charged
+3. Power the adapter using one of:
+    - **USB battery bank** (preferred — simple and isolated from the robot's electrical system), connected with a USB-A to USB-C cable
+    - **Regulated 5V converter** such as the Redux Robotics [Zinc-V](https://shop.reduxrobotics.com/products/zinc-v), wired from a fused 12V rail on the PDH/PDP if you'd rather power the headset directly off the robot
 
-See [Wiring](./wiring) for cable selection, power details, and best practices.
+See [Wiring](./wiring) for cable selection, power details, and the trade-offs between the two power options.
 
-### 8. Add the vendor library
+### 7. Add the vendor library
 
 In VS Code, press `Ctrl+Shift+P` (`Cmd+Shift+P` on macOS), select **WPILib: Manage Vendor Libraries > Install new libraries (online)**, and paste:
 
@@ -97,7 +93,7 @@ In VS Code, press `Ctrl+Shift+P` (`Cmd+Shift+P` on macOS), select **WPILib: Mana
 
 See [Robot Code Setup](./robot-code) for command-line and manual installation methods.
 
-### 9. Add minimal robot code
+### 8. Add minimal robot code
 
 Create a subsystem that calls `commandPeriodic()` and feeds pose data to your drive pose estimator:
 
@@ -135,7 +131,11 @@ public class QuestNavSubsystem extends SubsystemBase {
 
 See [Robot Code Setup](./robot-code) for the full integration guide.
 
-### 10. Deploy and verify
+:::tip Want a fully wired-up example?
+The [QuestNav Robot Sim Example](https://github.com/juchong/QuestNav-Robot-Sim-Example) is a complete WPILib project that drops all of the above into a working subsystem with pose-estimator fusion, callbacks, and AdvantageScope telemetry. It runs in the desktop simulator without hardware.
+:::
+
+### 9. Deploy and verify
 
 1. Deploy your robot code
 2. Open [AdvantageScope](https://docs.wpilib.org/en/stable/docs/software/dashboards/advantagescope.html) or the WPILib simulation GUI

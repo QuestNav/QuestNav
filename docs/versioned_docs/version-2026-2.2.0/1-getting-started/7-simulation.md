@@ -2,6 +2,21 @@
 title: Testing & Simulation 
 ---
 
+## Reference Example Project
+
+The [QuestNav Robot Sim Example](https://github.com/juchong/QuestNav-Robot-Sim-Example) is a complete WPILib project that runs in the desktop simulator out of the box. It demonstrates the full integration pattern covered throughout these docs:
+
+- `ROBOT_TO_QUEST` mounting transform
+- Pose fusion with `DifferentialDrivePoseEstimator` via `addVisionMeasurement`
+- All lifecycle callbacks (connection, tracking, low-battery, command responses)
+- Field-bounds rejection of bad pose readings
+- Pose seeding on `autonomousInit`
+- AdvantageScope-friendly NetworkTables telemetry
+
+:::tip
+Clone the example and run `./gradlew simulateJava` for a known-good baseline before integrating QuestNav into your own robot project. It's also a useful comparison point when troubleshooting your own integration.
+:::
+
 ## Connecting to PC
 
 Once your team number has been configured QuestNav will attempt to connect to a Network Tables server at 10.TE.AM.2. 
@@ -13,7 +28,7 @@ QuestNav can also be configured to use a specific IP address:
 <img src="/img/web-interface/DebugIP.webp" width="800"/>
 
 :::warning
-This setting should NEVER be used during a competition. To reset, follow steps 1-2 above, then clear the contents of `Debug IP Override`.
+Revert this setting before connecting the headset to a real robot and RoboRIO. With `Debug IP Override` set, the Quest will keep trying to reach your dev machine instead of the roboRIO at `10.TE.AM.2`. To clear it, follow steps 1-2 above and empty the `Debug IP Override` field.
 :::
 
 :::info
@@ -63,8 +78,3 @@ You can check which `java.exe` is in use via Task Manager while the simulation i
 The NetworkTables server binds to ports **1735** (NT3) and **5810** (NT4). If a previous simulation instance
 didn't shut down cleanly, these ports may still be in use. Open Task Manager, look for stale `java.exe`
 processes, and end them before restarting the simulation.
-
-## [Python QuestNav Viewer](https://github.com/juchong/python-questnav-viewer)
-
-A python desktop application for receiving and visualizing Quest headset tracking data.
-This project also acts as sample code for interfacing with QuestNav using python.

@@ -1,146 +1,61 @@
 ---
-title: Device Setup 
+title: Headset Setup
 ---
-# Device Setup
+# Headset Setup
 
-Setting up your Quest headset correctly is crucial for optimal QuestNav performance. This guide will walk you through the initial configuration to prepare your Quest for robot navigation.
+This page covers everything you need to prepare a Quest headset for QuestNav: enabling Developer Mode, applying the required system settings, and installing the QuestNav app.
 
-:::tip Recommended: Use the QuestNav Setup Page
-The [QuestNav Setup Page](https://setup.questnav.gg/) automates headset configuration by applying all required settings over USB. This is more reliable and consistent than configuring everything manually. **We strongly recommend using the setup page instead of following the manual steps below.**
+## Prerequisites
 
-The setup page requires Developer Mode to be enabled on your headset (see below) and a USB connection to a computer.
-:::
+The QuestNav Setup Page handles almost everything for you, but you still need to:
 
-## Initial Setup
-
-1. **Power on the Quest headset** and put it on.
-2. **Complete the initial Oculus setup process** if this is a new headset:
-    - Create or log into a Meta account if prompted
-    - Set up your guardian boundaries in a clear area
-    - Complete any system tutorials that are required
-
-:::tip
-If this is your first time using a Quest headset, take a few minutes to familiarize yourself with the basic controls and interface before proceeding with the QuestNav setup.
-:::
-
-## Developer Account Setup
-
-Before you can install custom applications on your Quest, you need to enable Developer Mode. This requires a smartphone with the **Meta Horizon mobile app** installed and paired with your headset.
-
-### Prerequisites
-
-- A [Meta Developer Account](https://developers.meta.com/sign-up/) (free to create). You must be a verified Meta developer (verify your account at [developers.meta.com/manage/verify](https://developers.meta.com/manage/verify/)).
-- The **Meta Horizon** mobile app installed on an iOS or Android phone, paired with your Quest headset.
-- A USB-C data cable capable of transferring data (the cable that comes with the Quest is charging-only and will not work).
+1. **Complete the initial Quest setup** (Meta account, guardian boundaries, system tutorials) if this is a brand-new headset
+2. **Enable Developer Mode** on the headset — see below
 
 ### Enable Developer Mode
 
+Developer Mode is required by both the QuestNav Setup Page and the manual procedure. You only need to do this once per headset.
+
+#### Requirements
+
+- A [Meta Developer Account](https://developers.meta.com/sign-up/) (free, must be verified at [developers.meta.com/manage/verify](https://developers.meta.com/manage/verify/))
+- The **Meta Horizon** mobile app installed on a phone paired with your Quest
+- A USB-C data cable (the cable that ships with the Quest works)
+
+#### Steps
+
 1. Open the **Meta Horizon** app on your phone
 2. Tap the **headset icon** in the toolbar
-3. Tap your paired headset at the top of the screen (it shows the model and status)
-4. Tap **Headset Settings**
-5. Tap **Developer Mode**
-6. Toggle Developer Mode **On**
-7. Restart your Quest headset for the change to take effect
+3. Tap your paired headset at the top of the screen
+4. Tap **Headset Settings → Developer Mode**
+5. Toggle Developer Mode **On**
+6. Restart your Quest headset for the change to take effect
 
-For the full official walkthrough, see [Enable developer mode on headset](https://developers.meta.com/horizon/documentation/android-apps/enable-developer-mode).
+For the official walkthrough (with screenshots and a video), see [Enable developer mode on your headset](https://developers.meta.com/horizon/documentation/android-apps/enable-developer-mode/#enable-developer-mode-on-your-headset) on the Meta developer docs.
 
-### USB Debugging
+#### Authorize USB Debugging
 
-After enabling Developer Mode, connect the Quest to your computer with a USB-C data cable. When prompted inside the headset, select **Always allow from this computer** to authorize USB debugging. This allows ADB, Meta Quest Developer Hub, and the QuestNav Setup Page to communicate with the headset.
+After enabling Developer Mode, connect the Quest to your computer with a USB-C data cable. When prompted inside the headset, select **Always allow from this computer** to authorize USB debugging. This lets the QuestNav Setup Page (and ADB / Meta Quest Developer Hub if used) communicate with the headset.
 
-### Alternative: SideQuest-Led Setup
+<img src="/img/headset-setup/always_allow.webp" alt="Always allow from this computer prompt on the Quest" width="800"/>
 
-If you prefer a guided setup:
-1. Download the SideQuest advanced installer from [sidequestvr.com](https://sidequestvr.com/setup-howto)
-2. Connect your Quest to your PC using a USB cable
-3. Follow the on-screen prompts to enable developer mode
+## Run the QuestNav Setup Page
 
-:::info
-Developer mode is required to install and use custom applications like QuestNav. Without it, you won't be able to complete the installation process.
-:::
+With Developer Mode enabled and USB debugging authorized, the QuestNav Setup Page handles the rest:
 
-## Optimizing for QuestNav
+1. Keep the Quest connected to your computer over USB
+2. Open [setup.questnav.gg](https://setup.questnav.gg/) in a browser
+3. Follow the on-screen prompts
 
-:::info
-All of the settings below are automatically applied by the [QuestNav Setup Page](https://setup.questnav.gg/). The manual steps are provided here for reference only.
-:::
+The page applies every required system setting (Wi-Fi, Bluetooth, Guardian, power, screen timeout) and installs two apps for you:
 
-Once developer mode is enabled, you'll need to adjust several system settings:
-
-### Disable Wi-Fi
-QuestNav uses a direct Ethernet connection to your robot, so Wi-Fi should be disabled:
-1. Navigate to **Settings** → **Wi-Fi**
-2. Toggle the switch to **Off**
-
-Alternatively, you can use ADB to disable Wi-Fi with this command:
-```
-adb shell svc wifi disable
-```
-
-:::warning
-If Wi-Fi remains enabled, the headset will constantly disconnect from the robot network as it tries to look for internet connectivity, causing reliability issues.
-:::
-
-### Disable Bluetooth
-Bluetooth connections can cause interference:
-1. Go to **Settings** → **Bluetooth**
-2. Toggle the switch to **Off**
-
-Alternatively, you can use ADB with this command:
-```
-adb shell svc bluetooth disable
-```
-
-:::info
-Disabling Bluetooth will break the companion app functionality, but this is necessary for competition reliability.
-:::
-
-### Disable Guardian System
-The Guardian system is designed for VR safety but can interfere with QuestNav:
-1. Navigate to **Settings** → **Advanced** → **Experimental Settings** → **Enable Custom Settings**
-2. Turn OFF **Physical Space Features**, **MTP Notification**, and **Link Auto Connect**
-    - These settings might also be located in **Settings** → **Developer** → **Experimental Settings** on older OS builds
-
-### Maximize Screen Timeout
-To prevent the headset from sleeping during operation:
-1. Go to **Settings** → **General** → **Power** → **Display off**
-2. Set to the maximum value (usually 4 hours)
-
-### Power Settings
-For optimal operation on your robot:
-1. **Disable Travel Mode** in power settings
-2. **Disable Battery Saver Mode** in power settings
-3. Turn brightness as low as possible
-
-:::tip
-These power settings are the opposite of what was previously recommended. Testing has shown that disabling these features provides better performance for robot navigation.
-:::
-
-## Verification
-To verify your settings have been properly applied:
-1. Wi-Fi icon should show as disconnected
-2. Bluetooth icon should not appear
-3. No guardian boundaries should appear when moving the headset
-4. Screen timeout should be set to the maximum value
-
-:::tip
-Create a pre-competition checklist with these verification steps to ensure your Quest is properly configured before each match.
-:::
-
-## Troubleshooting
-- If the quest goes into sleep mode, check for system updates that may have changed settings
-- If developer mode isn't working, verify your Meta account has developer status enabled
-- If ADB connection fails, try restarting the headset or switching USB ports on your laptop
-
-:::warning
-Meta occasionally releases Quest updates that may reset some of these settings. Always verify your configuration before competitions.
-:::
-
-## Video Guide
-:::tip Video Guide
-A video walkthrough for device setup is coming soon.
-:::
+- **QuestNav** itself
+- **[QuestNav KeepAwake](https://github.com/QuestNav/QuestNavKeepAwake)** — a companion app that prevents the Quest from sleeping during operation. The Quest's built-in sleep timers can't be disabled through normal Android settings on Quest 3 and 3S, so KeepAwake holds a wake lock and continuously signals the headset that it's being worn. It auto-starts on boot and runs in the background.
 
 ## Next Steps
-Now that your Quest is configured, proceed to the [App Setup](./app-setup) section to install the QuestNav application.
+
+With your Quest configured and QuestNav installed, proceed to [Mounting](./mounting) to learn how to attach the headset to your robot.
+
+:::note Need to set up a headset by hand?
+The manual procedure (configuring system settings yourself and installing the APK via ADB, MQDH, or SideQuest) lives in [Development → Manual Headset Setup](../development/manual-setup). It is preserved for reference and edge cases — for normal team setup, use the QuestNav Setup Page above.
+:::

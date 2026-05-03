@@ -1,32 +1,33 @@
 ---
 title: Choosing an Ethernet Adapter
 ---
-# QuestNav Recommended USB to Ethernet Adapters
+# Choosing an Ethernet Adapter
 
-First, you'll need a USB to Ethernet adapter. The Quest 3/3s has a USB-C port that can be used for this purpose, with a dongle. It is imperative you choose from this list if possible as Android fails to enumerate some USB to Ethernet adapters as it was never designed for this purpose.
+The Quest 3 / 3S has only a USB-C port, so a USB-C to Ethernet adapter is required to connect to the robot's wired network.
 
 :::danger
-Not all USB-C to Ethernet adapters work with the Quest! Some adapters will not be recognized by the Android operating system, making them useless for QuestNav.
+Not every USB-C to Ethernet adapter works with the Quest. The Quest's Android build only includes drivers for specific Ethernet chipsets. Community testing has shown that adapters using **Realtek RTL8153** or **ASIX AX88179** chips have the highest success rate. Adapters built around other chipsets, or knock-offs that misreport which chipset they use, often won't enumerate and are useless for QuestNav.
 :::
 
 :::info
-Adapters not listed on this page may also work. If you have an adapter not on either list, test it yourself using the steps in the [Testing Your Adapter](#testing-your-adapter) section below and consider contributing your results.
+Adapters not on the lists below may also work, but Quest compatibility isn't guaranteed by chipset alone. The Quest 3 / 3S use a customized Android build, so an adapter that works on a Linux PC or other Android device may still fail to enumerate on a Quest. The only reliable confirmation is another team testing the same model on a Quest 3 / 3S. If you've tested an unlisted adapter on a Quest, please contribute your results via [Contributing](#contributing) at the bottom of this page.
 :::
 
 ## Recommended Adapters
-The list below includes pictures, links, and other information for USB to Ethernet adapters known to work with Quest headsets, our most recommended choices are nearest to the top. We highly suggest that you use an adapter with power pass through to keep your headset charged during the match.
 
-| Name                                                                                  | Type                      | Status                              | Link                                                                                                    | Picture                                                                             |
-|---------------------------------------------------------------------------------------|---------------------------|-------------------------------------|---------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
-| Cable Matters 5-Port USB-C Hub On-The-Go                                              | USB-C to Ethernet + Power | Tested, Working, Highly Recommended | [Amazon](https://a.co/d/72hhWqz)                                                                        | <img src="/img/adapter-pictures/cable-matters-5-in-1.webp" width="500"/>            |
-| onn. 8-in-1 USB-C Adapter, USB 3.0 and 4K HDMI Compatible                             | USB-C to Ethernet + Power | Tested, Working, Recommended        | [Walmart](https://www.walmart.com/ip/onn-8-in-1-USB-C-Adapter-USB-3-0-and-4K-HDMI-Compatible/590617670) | <img src="/img/adapter-pictures/onn-8-in-1.webp" width="500"/>                      |
-| Belkin Connect USB-C to Ethernet + Charge Adapter 100W                                | USB-C to Ethernet + Power | Tested, Working                     | [Amazon](https://a.co/d/grTsVxG)                                                                        | <img src="/img/adapter-pictures/belkin-connect-passthrough.webp" width="500"/>      |
-| StarTech.com USB-C to Gigabit Ethernet Adapter - White - Thunderbolt 3 / 4 Compatible | USB-C to Ethernet         | Tested, Working                     | [Amazon](https://a.co/d/aBIJCgZ)                                                                        | <img src="/img/adapter-pictures/star-tech-usb-c-to-ethernet-tb4.webp" width="500"/> |
-| Cable Matters USB-C to Gigabit Ethernet Network Adapter                               | USB-C to Ethernet         | Tested, Working                     | [Amazon](https://a.co/d/hBC5Hfr)                                                                        | <img src="/img/adapter-pictures/cable-matters-usb-c-to-ethernet.webp" width="500"/> |
-| Belkin USB-C to Gigabit Ethernet Network Adapter                                      | USB-C to Ethernet         | Tested, Working                     | [Amazon](https://a.co/d/11adViN)                                                                        | <img src="/img/adapter-pictures/belkin-usb-c-to-ethernet.webp" width="500"/>        |
+The list below is ordered by preference. We highly recommend an adapter with **power passthrough** so the headset stays charged during matches, although a non-passthrough adapter paired with a [Zinc-V regulated 5V converter](./wiring#alternative-robot-powered-via-a-regulated-5v-converter) is also a perfectly valid setup.
+
+| Name                                                                                     | Type                      | Status                              | Link                                                                                                    | Picture                                                                             |
+|------------------------------------------------------------------------------------------|---------------------------|-------------------------------------|---------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| Cable Matters 5-Port USB-C Hub On-The-Go                                                 | USB-C to Ethernet + Power | Tested, Working, Highly Recommended | [Amazon](https://a.co/d/72hhWqz)                                                                        | <img src="/img/adapter-pictures/cable-matters-5-in-1.webp" width="500"/>            |
+| onn. 8-in-1 USB-C Adapter, USB 3.0 and 4K HDMI Compatible                                | USB-C to Ethernet + Power | Tested, Working, Recommended        | [Walmart](https://www.walmart.com/ip/onn-8-in-1-USB-C-Adapter-USB-3-0-and-4K-HDMI-Compatible/590617670) | <img src="/img/adapter-pictures/onn-8-in-1.webp" width="500"/>                      |
+| Belkin Connect USB-C to Ethernet + Charge Adapter 100W                                   | USB-C to Ethernet + Power | Tested, Working                     | [Amazon](https://a.co/d/grTsVxG)                                                                        | <img src="/img/adapter-pictures/belkin-connect-passthrough.webp" width="500"/>      |
+| StarTech.com USB-C to Gigabit Ethernet Adapter - White - Thunderbolt 3 / 4 Compatible    | USB-C to Ethernet         | Tested, Working                     | [Amazon](https://a.co/d/aBIJCgZ)                                                                        | <img src="/img/adapter-pictures/star-tech-usb-c-to-ethernet-tb4.webp" width="500"/> |
+| Cable Matters USB-C to Gigabit Ethernet Network Adapter                                  | USB-C to Ethernet         | Tested, Working                     | [Amazon](https://a.co/d/hBC5Hfr)                                                                        | <img src="/img/adapter-pictures/cable-matters-usb-c-to-ethernet.webp" width="500"/> |
+| Belkin USB-C to Gigabit Ethernet Network Adapter                                         | USB-C to Ethernet         | Tested, Working                     | [Amazon](https://a.co/d/11adViN)                                                                        | <img src="/img/adapter-pictures/belkin-usb-c-to-ethernet.webp" width="500"/>        |
 
 :::tip
-The Cable Matters 5-Port USB-C Hub is our top recommendation as it provides both Ethernet connectivity and power passthrough in a reliable form factor that has been well-tested with QuestNav.
+The Cable Matters 5-Port USB-C Hub is our top recommendation: Ethernet, power passthrough, and well-tested under FRC competition conditions.
 :::
 
 ## Known Non-Working Adapters
@@ -38,7 +39,7 @@ The Cable Matters 5-Port USB-C Hub is our top recommendation as it provides both
 | StarTech.com USB-C to Ethernet Adapter, USB 3.0 to Gigabit Ethernet Network Adapter | USB-C to Ethernet | Does Not Work. Will Not Enumerate | [Amazon](https://a.co/d/icEjAsG) | <img src="/img/adapter-pictures/star-tech-usb-c-to-ethernet.webp" width="500"/>  |
 
 :::danger
-The adapters listed above have been tested and confirmed NOT to work with Quest headsets. Do not purchase these for use with QuestNav, even if they seem similar to working models.
+The adapters listed above have been tested and confirmed NOT to work with Quest headsets. Do not purchase these for QuestNav, even if they appear similar to working models.
 :::
 
 ## Alternative Solutions
@@ -46,27 +47,31 @@ The adapters listed above have been tested and confirmed NOT to work with Quest 
 **USB Splitters with Ethernet Adapters**
 
 :::note
-Some teams have had success using USB splitters like [this one](https://a.co/d/42pHOMf) with a USB-C to Ethernet dongle. However, vibration appears to make this adapter less reliable over time. Your mileage may vary.
+Some teams have had success using USB splitters like [this one](https://a.co/d/42pHOMf) with a USB-C to Ethernet dongle. However, vibration appears to make this approach less reliable over time. Your mileage may vary.
 :::
 
 ## Testing Your Adapter
 
 After purchasing an adapter, we recommend testing it thoroughly before competition:
 
-1. Connect the adapter to your Quest headset
-2. Connect Ethernet to your robot or development computer
-3. Check if the Quest shows a valid IP address
-4. Verify data transmission through Network Tables
-5. Stress test by subjecting the system to vibration similar to competition conditions
+1. Connect the adapter to the Quest headset
+2. Connect an Ethernet cable from the adapter to your robot or development computer's network
+3. Confirm the Quest receives a valid IP address: open `http://<Quest IP>:5801/api/status` from another device on the same network. If it returns valid JSON, the adapter is enumerating correctly.
+4. **Stress test under realistic conditions**: mount the headset on a running robot and drive for at least 5 minutes (turns, accelerations, impacts). Watch `/api/status` over time and confirm `networkConnected` stays `true` — flips indicate the adapter is dropping.
 
 :::tip
-Always bring a backup adapter to competitions. Hardware failures often happen at the worst possible times!
+Always bring a backup adapter to competitions. Hardware failures often happen at the worst possible times.
 :::
 
 ## Next Steps
-Once you've selected an appropriate adapter, proceed to the [Device Setup](./device-setup) section to configure your Quest headset for QuestNav.
 
----
+Once you've selected an adapter, proceed to [Headset Setup](./device-setup) to configure your Quest for QuestNav.
 
-### Have an adapter you tested?
-Click the "Edit this page" button to add yours!
+## Contributing
+
+Tested an adapter that's not on either list? Contribute it:
+
+- Click the **Edit this page** button at the bottom of this page to edit it via GitHub, or
+- Open a pull request against [QuestNav/QuestNav](https://github.com/QuestNav/QuestNav) directly.
+
+Include the model name, your test results, a purchase link, and ideally a picture.

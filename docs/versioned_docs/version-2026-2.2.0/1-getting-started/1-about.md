@@ -7,7 +7,7 @@ title: About QuestNav
 QuestNav enables streaming Meta Quest headset pose information to an FRC robot using the Network Tables 4 (NT4) protocol. This pose data provides robot control systems with accurate mapping and navigation capabilities in competition fields, practice spaces, or any location.
 
 :::info
-QuestNav produces a more stable and reliable tracking pose than any other FRC vision solution (LimeLight, Photon Vision, etc.), making it an ideal choice for teams seeking precise robot localization.
+QuestNav produces a more stable and reliable tracking pose than any other FRC vision solution ([Limelight](https://limelightvision.io/), [PhotonVision](https://photonvision.org/), etc.), making it an ideal choice for teams seeking precise robot localization.
 :::
 
 ## Key Benefits
@@ -27,9 +27,9 @@ The Quest 3S headset is recommended for FRC applications due to its lower cost a
 
 ## How It Works
 
-QuestNav uses the Quest headset's Visual-Inertial Odometry (VIO) system - the same technology that powers VR gaming - to track position in 3D space with remarkable accuracy. The system:
+QuestNav uses the Quest headset's Visual-Inertial Odometry (VIO) system, the same technology that powers VR gaming, to track position in 3D space with remarkable accuracy. The system:
 
-1. Captures visual data through the headset's cameras
+1. Captures visual data through the headset's SLAM cameras
 2. Combines this with inertial data from the built-in IMU
 3. Processes this information to determine position and orientation in real-time
 4. Transmits this data to the robot via a wired Ethernet connection

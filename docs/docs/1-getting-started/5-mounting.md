@@ -31,11 +31,20 @@ The specific mount design you need depends on your Quest model. QuestNav is opti
 
 ### 3D Printed Mount Options
 
-STLs and STEP files for both Quest 3 and Quest 3S headsets are available at the links below: 
+STLs and STEP files are available for both Quest 3 and Quest 3S headsets.
 
-[Quest 3S Headset Mount for Robots and Autonomous Vehicles](https://www.printables.com/model/1100711-quest-3s-headset-mount-for-robots-and-autonomous-v)
+#### Quest 3
 
-[Quest 3 Headset Mount for Robots and Autonomous Vehicles](https://www.printables.com/model/1324702-quest-3-headset-mount-for-robots-and-autonomous-ve)
+<img src="/img/mounting/quest3-mount.webp" alt="Quest 3 secured in a 3D-printed robot mount" width="640"/>
+
+- [Quest 3 Headset Mount for Robots and Autonomous Vehicles](https://www.printables.com/model/1324702-quest-3-headset-mount-for-robots-and-autonomous-ve)
+
+#### Quest 3S
+
+<img src="/img/mounting/quest3s-mount.webp" alt="Quest 3S secured in a 3D-printed robot mount" width="640"/>
+
+- [Quest 3S Headset Mount for Robots and Autonomous Vehicles](https://www.printables.com/model/1100711-quest-3s-headset-mount-for-robots-and-autonomous-v)
+- [Spectrum 3847 Quest 3S Robot Mount](https://www.printables.com/model/1115821-spectrum-3847-quest-3s-robot-mount)
 
 :::tip
 If you don't have access to a 3D printer, check with other local FRC teams, your school's engineering department, or local makerspaces that might offer 3D printing services.
@@ -48,8 +57,8 @@ If you don't have access to a 3D printer, check with other local FRC teams, your
 - **Layer Height**: 0.2mm or finer for smoother surfaces
 - **Supports**: Required for overhangs (on build plate only)
 
-:::warning
-Avoid using ABS for printing mounts, as it will shrink and may crack under the vibration and impacts experienced during competitions.
+:::note
+ABS shrinks measurably as it cools (typically 0.5–1%). If you choose to print mounts in ABS, scale the model up in your slicer to compensate, or the finished part may end up undersized for the headset.
 :::
 
 ## Mounting Position

@@ -611,18 +611,112 @@ namespace QuestNav.Camera
                     yield break;
                 }
 
-                if (texture is not Texture2D texture2D)
+                Texture2D texture2D = ResolveTexture2D(texture);
+                if (texture2D == null)
                 {
-                    QueuedLogger.LogError(
-                        $"GetTexture returned an incompatible object ({texture.GetType().Name})"
-                    );
-                    yield break;
+                    // GetTexture returned something we can't encode (or the SDK isn't ready
+                    // yet and produced no usable texture). Skip this frame instead of
+                    // permanently breaking the coroutine - the Meta SDK warms up over a
+                    // few frames after a camera bounce and the next iteration usually
+                    // succeeds. Logged once per "bad type" via the helper to avoid log spam.
+                    yield return new WaitForSeconds(FrameDelaySeconds);
+                    continue;
                 }
+
                 byte[] rawJpeg = compressor.EncodeJPG(texture2D, compressionQuality);
                 CurrentFrame = new EncodedFrame(Time.frameCount, rawJpeg);
 
                 yield return new WaitForSeconds(FrameDelaySeconds);
             }
+        }
+
+        /// <summary>
+        /// Cached Texture2D used as a readback target when <c>cameraAccess.GetTexture()</c>
+        /// returns a RenderTexture. Re-allocated only when the source RT dimensions change.
+        /// </summary>
+        private Texture2D rgbaReadbackCache;
+
+        /// <summary>
+        /// Tracks the last "unexpected texture type" name we logged so we only log once per
+        /// distinct type. Without this the coroutine would spam the log at frame rate when
+        /// the SDK steady-states on something we can't handle.
+        /// </summary>
+        private string lastWarnedTextureType;
+
+        /// <summary>
+        /// Resolves whatever <see cref="PassthroughCameraAccess.GetTexture"/> returned into a
+        /// Texture2D suitable for libjpeg-turbo encoding.
+        ///
+        /// The Meta SDK normally returns a Texture2D for the passthrough RGB camera, but on
+        /// the first frame or two after a camera bounce (especially via the
+        /// CameraResourceManager arbiter) it can transiently return a RenderTexture while
+        /// the underlying Android Camera2 pipeline initializes. Returning RenderTexture is
+        /// also the documented path for some YUV420 -> RGBA conversion modes added in v83.
+        ///
+        /// Returns null when the SDK gave us nothing usable; the coroutine treats that as
+        /// "skip this frame, try again next iteration".
+        /// </summary>
+        private Texture2D ResolveTexture2D(Texture source)
+        {
+            if (source == null)
+            {
+                return null;
+            }
+            if (source is Texture2D direct)
+            {
+                return direct;
+            }
+            if (source is RenderTexture rt)
+            {
+                try
+                {
+                    if (
+                        rgbaReadbackCache == null
+                        || rgbaReadbackCache.width != rt.width
+                        || rgbaReadbackCache.height != rt.height
+                    )
+                    {
+                        if (rgbaReadbackCache != null)
+                        {
+                            UnityEngine.Object.Destroy(rgbaReadbackCache);
+                        }
+                        rgbaReadbackCache = new Texture2D(
+                            rt.width,
+                            rt.height,
+                            TextureFormat.RGBA32,
+                            mipChain: false
+                        );
+                    }
+                    var prev = RenderTexture.active;
+                    RenderTexture.active = rt;
+                    rgbaReadbackCache.ReadPixels(
+                        new Rect(0, 0, rt.width, rt.height),
+                        0,
+                        0,
+                        recalculateMipMaps: false
+                    );
+                    rgbaReadbackCache.Apply(updateMipmaps: false, makeNoLongerReadable: false);
+                    RenderTexture.active = prev;
+                    return rgbaReadbackCache;
+                }
+                catch (Exception ex)
+                {
+                    QueuedLogger.LogError(
+                        $"Failed to readback RenderTexture into Texture2D for JPEG encoding: {ex.Message}"
+                    );
+                    return null;
+                }
+            }
+            // Anything else (a Cubemap, RenderTextureArray, etc.) - log once per type and bail.
+            string typeName = source.GetType().Name;
+            if (lastWarnedTextureType != typeName)
+            {
+                QueuedLogger.LogError(
+                    $"GetTexture returned an unsupported texture type ({typeName}); frames will be skipped until the SDK returns a Texture2D or RenderTexture."
+                );
+                lastWarnedTextureType = typeName;
+            }
+            return null;
         }
 
         /// <summary>

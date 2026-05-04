@@ -278,8 +278,13 @@ namespace QuestNav.Config
             OnPassthroughStreamModeChanged?.Invoke(await GetPassthroughStreamModeAsync());
             OnEnableHighQualityStreamsChanged?.Invoke(await GetEnableHighQualityStreamsAsync());
 
-            OnEnableAprilTagDetectorChanged?.Invoke(await GetEnableAprilTagDetectorAsync());
+            // Mode MUST fire before Enable. AprilTagManager caches the requested
+            // resolution from the Mode event and uses it when Enable triggers the
+            // camera reservation. If Enable fires first, the camera is reserved at
+            // (0,0) and the first AprilTag frame fed to libapriltag is malformed,
+            // which causes a native SIGSEGV in gradient_clusters.
             OnAprilTagDetectorModeChanged?.Invoke(await GetAprilTagDetectorModeAsync());
+            OnEnableAprilTagDetectorChanged?.Invoke(await GetEnableAprilTagDetectorAsync());
 
             OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
         }

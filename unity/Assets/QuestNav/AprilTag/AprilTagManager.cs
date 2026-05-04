@@ -105,6 +105,23 @@ namespace QuestNav.QuestNav.AprilTag
                     return;
                 }
 
+                // Refuse to reserve the camera at an invalid resolution. ConfigManager
+                // is supposed to fire OnAprilTagDetectorModeChanged before
+                // OnEnableAprilTagDetectorChanged at startup so currentResolution is
+                // already valid; this guard catches the case where someone toggles
+                // Enable directly via the API without a prior Mode write. A camera
+                // reservation at (0, 0) puts the underlying Android camera into a bad
+                // state and crashes libapriltag on the first frame.
+                if (currentResolution.x <= 0 || currentResolution.y <= 0)
+                {
+                    QueuedLogger.LogError(
+                        "AprilTag detector enable requested but no valid resolution has been "
+                            + $"configured (currentResolution={currentResolution.x}x{currentResolution.y}). "
+                            + "Skipping enable; set the detection resolution first."
+                    );
+                    return;
+                }
+
                 try
                 {
                     // Allocate a fresh family each time. The detector takes ownership and
@@ -286,10 +303,30 @@ namespace QuestNav.QuestNav.AprilTag
                     yield break;
                 }
 
+                // Discard frames whose pixel count does not match the requested resolution.
+                // Right after a resolution change, the Meta SDK can briefly return a buffer
+                // sized for the previous resolution while RequestedResolution already reports
+                // the new one. Feeding such a buffer to ImageU8 causes the Burst grayscale
+                // job to read out of bounds and produce garbage that segfaults libapriltag
+                // (gradient_clusters / apriltag_quad_thresh).
+                int requestedWidth = cameraAccess.RequestedResolution.x;
+                int requestedHeight = cameraAccess.RequestedResolution.y;
+                int expectedPixelCount = requestedWidth * requestedHeight;
+                if (!colors.IsCreated || colors.Length == 0 || colors.Length != expectedPixelCount)
+                {
+                    QueuedLogger.Log(
+                        $"AprilTag frame skipped: expected {expectedPixelCount} pixels "
+                            + $"({requestedWidth}x{requestedHeight}), got {colors.Length}. "
+                            + "Camera resolution likely mid-bounce; this should clear within a frame or two."
+                    );
+                    yield return new WaitForSeconds(frameDelaySeconds);
+                    continue;
+                }
+
                 var converted = ImageU8.FromPassthroughCamera(
                     colors,
-                    cameraAccess.RequestedResolution.x,
-                    cameraAccess.RequestedResolution.y
+                    requestedWidth,
+                    requestedHeight
                 );
 
                 // ImageU8 returns null when the colors NativeArray is uninitialized or

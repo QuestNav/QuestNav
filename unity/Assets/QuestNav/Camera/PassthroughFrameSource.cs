@@ -31,9 +31,22 @@ namespace QuestNav.Camera
         private readonly MonoBehaviour coroutineHost;
 
         /// <summary>
-        /// Meta SDK passthrough camera accessor.
+        /// Meta SDK passthrough camera accessor. Used for frame reads (GetTexture);
+        /// the camera's enable state and resolution are owned by <see cref="cameraArbiter"/>.
         /// </summary>
         private readonly PassthroughCameraAccess cameraAccess;
+
+        /// <summary>
+        /// Single owner of camera enable/resolution. PFS reserves at low priority;
+        /// the AprilTag detector reserves at high priority and wins ties.
+        /// </summary>
+        private readonly CameraResourceManager cameraArbiter;
+
+        /// <summary>
+        /// Stable identifier used by this PFS instance with the arbiter. Multiple PFS
+        /// instances (not currently expected) would each need a distinct id.
+        /// </summary>
+        private const string CameraArbiterRequesterId = "PassthroughFrameSource";
 
         /// <summary>
         /// NetworkTables camera source for publishing stream info.
@@ -294,17 +307,20 @@ namespace QuestNav.Camera
         /// </summary>
         /// <param name="coroutineHost">MonoBehaviour for coroutine execution</param>
         /// <param name="cameraAccess">Provides access to the PassthroughCamera through Meta's SDK</param>
+        /// <param name="cameraArbiter">Single owner of camera enable/resolution. PFS reserves at low priority.</param>
         /// <param name="cameraSource">The network table source that will expose this camera stream</param>
         /// <param name="configManager">The config manager to update/querry config values</param>
         public PassthroughFrameSource(
             MonoBehaviour coroutineHost,
             PassthroughCameraAccess cameraAccess,
+            CameraResourceManager cameraArbiter,
             INtCameraSource cameraSource,
             IConfigManager configManager
         )
         {
             this.coroutineHost = coroutineHost;
             this.cameraAccess = cameraAccess;
+            this.cameraArbiter = cameraArbiter;
             this.cameraSource = cameraSource;
             this.configManager = configManager;
 
@@ -319,19 +335,28 @@ namespace QuestNav.Camera
         }
 
         /// <summary>
-        /// Handles video mode changes by updating the camera resolution.
+        /// Handles video mode changes by requesting the new resolution from the
+        /// camera arbiter. The arbiter may decline (return a different resolution)
+        /// if a higher-priority requester (AprilTag detector) has the camera locked.
         /// </summary>
         /// <param name="mode">The new video mode.</param>
         private void OnSelectedModeChanged(VideoMode mode)
         {
             QueuedLogger.Log($"Changed mode: {mode}");
-            // Callbacks likely run on background thread - marshal to main thread
-            InvokeOnMainThread(() =>
+            var requested = new Vector2Int(mode.Width, mode.Height);
+            var applied = cameraArbiter.Reserve(
+                CameraArbiterRequesterId,
+                requested,
+                CameraRequestPriority.Low
+            );
+            if (applied != requested)
             {
-                cameraAccess.enabled = false;
-                cameraAccess.RequestedResolution = new Vector2Int(mode.Width, mode.Height);
-                cameraAccess.enabled = true;
-            });
+                QueuedLogger.Log(
+                    $"PassthroughFrameSource requested {requested.x}x{requested.y} "
+                        + $"but camera arbiter applied {applied.x}x{applied.y} "
+                        + "(higher-priority requester active)"
+                );
+            }
         }
 
         /// <summary>
@@ -417,9 +442,9 @@ namespace QuestNav.Camera
         /// <param name="enabled">Whether streaming should be enabled.</param>
         private async void OnEnablePassthroughStreamChanged(bool enabled)
         {
-            if (cameraAccess is null || !cameraAccess.enabled)
+            if (cameraAccess is null)
             {
-                QueuedLogger.Log("Disabled - cameraAccess is unset or disabled");
+                QueuedLogger.Log("Disabled - cameraAccess is unset");
                 return;
             }
 
@@ -513,7 +538,7 @@ namespace QuestNav.Camera
                 {
                     QueuedLogger.Log("Disabling Passthrough");
 
-                    // Remove callback from cameraSource
+                    // Remove callback from cameraSource so a stale mode change can't re-reserve
                     cameraSource.SelectedModeChanged -= OnSelectedModeChanged;
 
                     // Stop Coroutine
@@ -522,6 +547,11 @@ namespace QuestNav.Camera
                         coroutineHost.StopCoroutine(frameCaptureCoroutine);
                         frameCaptureCoroutine = null;
                     }
+
+                    // Release our camera reservation. If the AprilTag detector is also
+                    // active and holding a high-priority reservation, the camera stays on
+                    // at the AprilTag-pinned resolution; otherwise it shuts down.
+                    cameraArbiter.Release(CameraArbiterRequesterId);
 
                     isInitialized = false;
                     cameraSource.IsConnected = false;

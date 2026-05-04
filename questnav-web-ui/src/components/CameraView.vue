@@ -18,7 +18,7 @@
         <div class="controls-left">
           <div class="control-container">
             <label for="stream-resolution">Resolution:</label>
-            <select id="stream-resolution" v-model="selectedResolution">
+            <select id="stream-resolution" v-model="selectedResolution" :disabled="lockedByAprilTag">
               <option v-for="option in resolutionOptions" :key="option.text" :value="option.value">
                 {{ option.text }}
               </option>
@@ -26,7 +26,7 @@
           </div>
           <div class="control-container">
             <label for="stream-framerate">FPS:</label>
-            <select id="stream-framerate" v-model="selectedFramerate">
+            <select id="stream-framerate" v-model="selectedFramerate" :disabled="lockedByAprilTag">
               <option v-for="rate in framerateOptions" :key="rate" :value="rate">{{ rate }}</option>
             </select>
           </div>
@@ -34,11 +34,20 @@
             <label for="compression">Quality: {{ selectedStreamQuality }}</label>
             <input type="range" id="compression" min="1" max="100" v-model="selectedStreamQuality" />
           </div>
-          <button @click="applySettings">Apply</button>
+          <button @click="applySettings" :disabled="lockedByAprilTag">Apply</button>
         </div>
         <div class="controls-right">
           <span v-if="streamEnabled" class="active-stream-settings">{{ activeStreamSettings }}</span>
         </div>
+      </div>
+
+      <div v-if="lockedByAprilTag" class="apriltag-lock-banner">
+        <span class="lock-icon">🔒</span>
+        <span>
+          Resolution locked by AprilTag detector<span v-if="effectiveResolutionLabel">
+            ({{ effectiveResolutionLabel }})</span>. Disable the AprilTag detector to change camera
+          settings independently.
+        </span>
       </div>
     </div>
 
@@ -58,6 +67,8 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useConfigStore } from '../stores/config'
 import { videoApi } from '../api/video'
+import { configApi } from '../api/config'
+import type { HeadsetStatus } from '../types'
 
 const configStore = useConfigStore()
 const cameraContainer = ref<HTMLElement | null>(null)
@@ -65,6 +76,17 @@ const isFullscreen = ref(false)
 
 const streamEnabled = computed(() => configStore.config?.enablePassthroughStream ?? false)
 const highQualityStreamEnabled = computed(() => configStore.config?.enableHighQualityStream ?? false)
+
+// Camera arbitration state polled from /api/status. When the AprilTag detector is
+// enabled it pins the camera resolution; the passthrough stream still serves frames
+// at whatever the arbiter applied, but the resolution / framerate dropdowns are locked
+// to communicate that the user's request would be overridden.
+const cameraStatus = ref<HeadsetStatus | null>(null)
+const lockedByAprilTag = computed(() => cameraStatus.value?.passthroughResolutionLockedByAprilTag ?? false)
+const effectiveResolutionLabel = computed(() => {
+  const r = cameraStatus.value?.effectivePassthroughResolution
+  return r ? `${r.width}x${r.height}` : ''
+})
 
 const allResolutionOptions = ref<{ text: string; value: { width: number; height: number } }[]>([])
 const resolutionOptions = computed(() => {
@@ -214,6 +236,16 @@ watch(highQualityStreamEnabled, () => {
   syncFramerateSelection()
 })
 
+let statusPollInterval: number | null = null
+
+async function pollCameraStatus() {
+  try {
+    cameraStatus.value = await configApi.getHeadsetStatus()
+  } catch {
+    // Silently ignore; the global disconnect overlay handles connection loss.
+  }
+}
+
 onMounted(() => {
   loadVideoModes() // Load modes if stream is already enabled on mount
 
@@ -221,10 +253,16 @@ onMounted(() => {
     selectedStreamQuality.value = configStore.config.streamMode.quality
   }
   document.addEventListener('fullscreenchange', handleFullscreenChange)
+
+  pollCameraStatus()
+  statusPollInterval = setInterval(pollCameraStatus, 2000) as unknown as number
 })
 
 onUnmounted(() => {
   document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  if (statusPollInterval !== null) {
+    clearInterval(statusPollInterval)
+  }
 })
 </script>
 
@@ -268,6 +306,24 @@ onUnmounted(() => {
   padding: 0.5rem 1rem;
   border-radius: 6px;
   border: 1px solid var(--border-color);
+}
+
+.apriltag-lock-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(51, 161, 253, 0.12);
+  border: 1px solid var(--primary-color);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.apriltag-lock-banner .lock-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
 }
 
 .control-container {

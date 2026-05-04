@@ -72,30 +72,36 @@ export interface HeadsetStatus {
   position: { x: number, y: number, z: number }
   rotation: { x: number, y: number, z: number, w: number }
   eulerAngles: { pitch: number, yaw: number, roll: number }
-  
+
   // Tracking
   isTracking: boolean
   trackingLostEvents: number
-  
+
   // Battery
   batteryPercent: number
   batteryLevel: number
   batteryStatus: string
   batteryCharging: boolean
-  
+
   // Network
   networkConnected: boolean
   ipAddress: string
   teamNumber: number
   robotIpAddress: string
-  
+
   // Performance
   fps: number
   frameCount: number
-  
+
   // Web Interface
   connectedClients: number
-  
+
+  // Camera arbitration: AprilTag detector wins over the passthrough stream when
+  // both are enabled. The passthrough video keeps showing whatever frames the
+  // camera is producing, but the resolution dropdown is locked.
+  passthroughResolutionLockedByAprilTag: boolean
+  effectivePassthroughResolution: { width: number, height: number } | null
+
   timestamp: number
 }
 

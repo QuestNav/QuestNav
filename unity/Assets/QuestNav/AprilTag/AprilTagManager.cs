@@ -4,6 +4,7 @@ using System.Threading;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using Meta.XR;
+using QuestNav.Camera;
 using QuestNav.Config;
 using QuestNav.Native.AprilTag;
 using QuestNav.Native.PoseLib;
@@ -18,6 +19,11 @@ namespace QuestNav.QuestNav.AprilTag
     public class AprilTagManager
     {
         /// <summary>
+        /// Stable identifier used by AprilTagManager with the camera arbiter.
+        /// </summary>
+        private const string CameraArbiterRequesterId = "AprilTagManager";
+
+        /// <summary>
         /// Main thread synchronization context for marshalling Unity API calls.
         /// </summary>
         private readonly SynchronizationContext mainThreadContext;
@@ -25,6 +31,7 @@ namespace QuestNav.QuestNav.AprilTag
         private readonly AprilTagFieldLayout aprilTagFieldLayout;
         private readonly IVioAprilTagPoseEstimator vioAprilTagPoseEstimator;
         private readonly PassthroughCameraAccess cameraAccess;
+        private readonly CameraResourceManager cameraArbiter;
         private readonly IConfigManager configManager;
         private AprilTagDetector aprilTagDetector;
         private readonly AprilTagFamily aprilTagFamily = new Tag36h11();
@@ -36,10 +43,17 @@ namespace QuestNav.QuestNav.AprilTag
         private double maxDistance;
         private int minimumNumberOfTags;
 
+        /// <summary>
+        /// Most recently requested camera resolution. Used to skip arbiter re-reservations
+        /// when only the framerate changed (the camera does not need to be bounced).
+        /// </summary>
+        private Vector2Int currentResolution;
+
         public AprilTagManager(
             IConfigManager configManager,
             IVioAprilTagPoseEstimator vioAprilTagPoseEstimator,
             PassthroughCameraAccess cameraAccess,
+            CameraResourceManager cameraArbiter,
             AprilTagFieldLayout aprilTagFieldLayout,
             MonoBehaviour coroutineHost
         )
@@ -48,6 +62,7 @@ namespace QuestNav.QuestNav.AprilTag
             mainThreadContext = SynchronizationContext.Current;
 
             this.cameraAccess = cameraAccess;
+            this.cameraArbiter = cameraArbiter;
             this.vioAprilTagPoseEstimator = vioAprilTagPoseEstimator;
             this.configManager = configManager;
             this.aprilTagFieldLayout = aprilTagFieldLayout;
@@ -64,7 +79,13 @@ namespace QuestNav.QuestNav.AprilTag
         {
             if (enable)
             {
-                cameraAccess.enabled = true;
+                // Reserve the camera at high priority. The arbiter will downgrade the
+                // passthrough stream's reservation if it conflicts.
+                cameraArbiter.Reserve(
+                    CameraArbiterRequesterId,
+                    currentResolution,
+                    CameraRequestPriority.High
+                );
                 aprilTagDetector = new AprilTagDetector();
                 aprilTagDetector.AddFamily(aprilTagFamily);
                 captureCoroutine = coroutineHost.StartCoroutine(AprilTagFrameCaptureCoroutine());
@@ -77,7 +98,7 @@ namespace QuestNav.QuestNav.AprilTag
                     coroutineHost.StopCoroutine(captureCoroutine);
                     captureCoroutine = null;
                 }
-                cameraAccess.enabled = false;
+                cameraArbiter.Release(CameraArbiterRequesterId);
                 aprilTagDetector.Dispose();
                 aprilTagFamily.Dispose();
                 QueuedLogger.Log("AprilTagDetector Disabled");
@@ -96,15 +117,24 @@ namespace QuestNav.QuestNav.AprilTag
                 );
             }
 
-            InvokeOnMainThread(() =>
+            // Cache the requested resolution so OnEnableAprilTagDetectorChanged(true)
+            // can re-reserve at the right size, and so we can detect FPS-only changes
+            // below to skip an unnecessary camera bounce.
+            var requested = new Vector2Int(configuration.Width, configuration.Height);
+            bool resolutionChanged = requested != currentResolution;
+            currentResolution = requested;
+
+            // Only ask the arbiter to re-apply when we are currently the active high-priority
+            // requester AND the resolution actually changed. A pure FPS change does not need
+            // to bounce the camera (the framerate is enforced by the coroutine's WaitForSeconds).
+            if (resolutionChanged && captureCoroutine != null)
             {
-                cameraAccess.enabled = false;
-                cameraAccess.RequestedResolution = new Vector2Int(
-                    configuration.Width,
-                    configuration.Height
+                cameraArbiter.Reserve(
+                    CameraArbiterRequesterId,
+                    requested,
+                    CameraRequestPriority.High
                 );
-                cameraAccess.enabled = true;
-            });
+            }
 
             frameDelaySeconds = 1.0f / Math.Max(1, configuration.Framerate);
             allowedIds = configuration.AllowedIds;

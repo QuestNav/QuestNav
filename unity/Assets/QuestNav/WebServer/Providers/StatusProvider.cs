@@ -81,6 +81,18 @@ namespace QuestNav.WebServer
         /// Number of connected web clients
         /// </summary>
         private int connectedClients;
+
+        /// <summary>
+        /// Whether the camera arbiter currently has a high-priority reservation.
+        /// True when the AprilTag detector is enabled and pinning the camera resolution.
+        /// </summary>
+        private bool passthroughResolutionLockedByAprilTag;
+
+        /// <summary>
+        /// The resolution actually being applied to the camera, or null if disabled.
+        /// May differ from the passthrough stream's requested resolution when locked.
+        /// </summary>
+        private Vector2Int? effectivePassthroughResolution;
         #endregion
 
         #region Public Update Methods
@@ -145,6 +157,22 @@ namespace QuestNav.WebServer
                 connectedClients = clients;
             }
         }
+
+        /// <summary>
+        /// Updates the camera arbitration state for the web UI. Called from
+        /// <see cref="WebServerManager"/> in response to
+        /// <see cref="QuestNav.Camera.CameraResourceManager.OnResolutionChanged"/>.
+        /// </summary>
+        /// <param name="lockedByAprilTag">True when AprilTag detector holds the camera lock.</param>
+        /// <param name="effectiveResolution">Actual camera resolution, or null when disabled.</param>
+        public void UpdateCameraStatus(bool lockedByAprilTag, Vector2Int? effectiveResolution)
+        {
+            lock (statusLock)
+            {
+                passthroughResolutionLockedByAprilTag = lockedByAprilTag;
+                this.effectivePassthroughResolution = effectiveResolution;
+            }
+        }
         #endregion
 
         #region Public Query Methods
@@ -207,6 +235,17 @@ namespace QuestNav.WebServer
 
                     // Web Interface
                     connectedClients = connectedClients,
+
+                    // Camera arbitration (AprilTag wins over passthrough stream)
+                    passthroughResolutionLockedByAprilTag = passthroughResolutionLockedByAprilTag,
+                    effectivePassthroughResolution = effectivePassthroughResolution.HasValue
+                        ? (object)
+                            new
+                            {
+                                width = effectivePassthroughResolution.Value.x,
+                                height = effectivePassthroughResolution.Value.y,
+                            }
+                        : null,
 
                     // Timestamp
                     timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds(),

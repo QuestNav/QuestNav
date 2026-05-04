@@ -183,7 +183,7 @@ namespace QuestNav.Config
 
             /// <summary>
             /// Phase-2 correction confidence preset (0=Permissive, 1=Balanced, 2=Strict).
-            /// Maps to <see cref="QuestNav.QuestNav.Estimation.ConfidencePreset"/>; tighter
+            /// Maps to <c>QuestNav.QuestNav.Estimation.ConfidencePreset</c>; tighter
             /// presets reject more pose updates but are more conservative against bad
             /// observations. Defaults to Balanced (the prior hardcoded values).
             /// </summary>

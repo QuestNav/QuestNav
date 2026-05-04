@@ -161,7 +161,7 @@ namespace QuestNav.WebServer
         /// <summary>
         /// Updates the camera arbitration state for the web UI. Called from
         /// <see cref="WebServerManager"/> in response to
-        /// <see cref="QuestNav.Camera.CameraResourceManager.OnResolutionChanged"/>.
+        /// <c>QuestNav.Camera.CameraResourceManager.OnResolutionChanged</c>.
         /// </summary>
         /// <param name="lockedByAprilTag">True when AprilTag detector holds the camera lock.</param>
         /// <param name="effectiveResolution">Actual camera resolution, or null when disabled.</param>

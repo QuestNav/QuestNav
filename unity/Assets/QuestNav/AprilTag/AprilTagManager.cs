@@ -55,7 +55,7 @@ namespace QuestNav.QuestNav.AprilTag
 
         /// <summary>
         /// Set of tag IDs to drop from each frame's detections (blacklist). Empty = detect every tag.
-        /// Rebuilt from <see cref="Config.AprilTagDetectorMode.IgnoredIds"/> on every config change.
+        /// Rebuilt from <c>Config.AprilTagDetectorMode.IgnoredIds</c> on every config change.
         /// </summary>
         private HashSet<int> ignoredIdSet = new HashSet<int>();
         private double maxDistance;

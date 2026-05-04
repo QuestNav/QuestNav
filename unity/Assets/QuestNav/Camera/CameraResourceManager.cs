@@ -18,7 +18,7 @@ namespace QuestNav.Camera
     }
 
     /// <summary>
-    /// Single owner of <see cref="PassthroughCameraAccess.enabled"/> and
+    /// Single owner of <c>PassthroughCameraAccess.enabled</c> and
     /// <see cref="PassthroughCameraAccess.RequestedResolution"/>. Multiple subsystems
     /// (AprilTag detector, passthrough MJPEG stream) request a desired resolution
     /// through this arbiter; the arbiter applies the highest-priority winner and

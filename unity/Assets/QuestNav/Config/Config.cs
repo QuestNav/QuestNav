@@ -170,7 +170,7 @@ namespace QuestNav.Config
             /// <summary>
             /// Filename of the AprilTag field-layout JSON to load at startup. The file is
             /// resolved against the bundled <c>StreamingAssets/apriltag/fieldlayouts</c>
-            /// directory and (in commit 6) the user-uploaded
+            /// directory and the user-uploaded
             /// <c>persistentDataPath/apriltag/fieldlayouts-custom</c> directory.
             ///
             /// Changes to this value take effect on app restart only; AprilTagFieldLayout
@@ -180,6 +180,21 @@ namespace QuestNav.Config
             /// </summary>
             public string AprilTagFieldLayoutFile { get; set; } =
                 QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE;
+
+            /// <summary>
+            /// Phase-2 correction confidence preset (0=Permissive, 1=Balanced, 2=Strict).
+            /// Maps to <see cref="QuestNav.QuestNav.Estimation.ConfidencePreset"/>; tighter
+            /// presets reject more pose updates but are more conservative against bad
+            /// observations. Defaults to Balanced (the prior hardcoded values).
+            /// </summary>
+            public int AprilTagConfidencePreset { get; set; } = 1;
+
+            /// <summary>
+            /// Multiplier on the dynamic AprilTag measurement noise std-dev. 0.5x = the KF
+            /// trusts AprilTag observations more than the default; 2.0x = the KF trusts
+            /// AprilTag less. Slider range in the web UI is [0.5, 2.0]; the default is 1.0.
+            /// </summary>
+            public double AprilTagNoiseScale { get; set; } = 1.0;
         }
 
         public class Logging

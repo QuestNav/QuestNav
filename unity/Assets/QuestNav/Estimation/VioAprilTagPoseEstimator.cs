@@ -41,6 +41,14 @@ namespace QuestNav.QuestNav.Estimation
         /// the VIO baseline without disturbing the KF state or field alignment.
         /// </summary>
         void HandleRecenter(Pose3d newVioPose, double timestamp);
+
+        /// <summary>
+        /// Updates the Phase-2 correction confidence preset. Tighter presets reject more
+        /// observations but produce a more conservative pose; looser presets are useful
+        /// when the default tuning never converges (e.g. only a single tag is visible).
+        /// Phase-1 alignment thresholds are not affected.
+        /// </summary>
+        void SetConfidencePreset(ConfidencePreset preset);
     }
 
     /// <summary>
@@ -89,6 +97,13 @@ namespace QuestNav.QuestNav.Estimation
         private double yawOffset;
         private bool initialized;
         private bool hasInitialAlignment;
+
+        // Runtime-tunable Phase-2 correction thresholds. Initialized from the BALANCED
+        // preset; SetConfidencePreset(...) overrides them at runtime in response to a
+        /// web-UI change.
+        private int correctionMinTags = VioAprilTagPoseEstimatorConstants.PRESET_BALANCED_MIN_TAGS;
+        private double correctionMinInlierRatio =
+            VioAprilTagPoseEstimatorConstants.PRESET_BALANCED_MIN_INLIER_RATIO;
 
         /// <summary>Creates a new estimator with optional noise tuning parameters.</summary>
         public VioAprilTagPoseEstimator(
@@ -286,21 +301,47 @@ namespace QuestNav.QuestNav.Estimation
                 return;
             }
 
-            if (
-                tagCount < VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_TAGS
-                || inlierRatio < VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_INLIER_RATIO
-            )
+            if (tagCount < correctionMinTags || inlierRatio < correctionMinInlierRatio)
             {
                 QueuedLogger.Log(
                     $"AprilTag rejected (Phase 2): tags={tagCount}, inlierRatio={inlierRatio:F2} "
-                        + $"(need >={VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_TAGS} tags, "
-                        + $">={VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_INLIER_RATIO:F2} inlier ratio)"
+                        + $"(need >={correctionMinTags} tags, "
+                        + $">={correctionMinInlierRatio:F2} inlier ratio)"
                 );
                 return;
             }
 
             // High-confidence correction — update position only, yaw is locked from Phase 1
             ApplyKfUpdate(measuredPosition, stdDevs, timestampSeconds);
+        }
+
+        /// <inheritdoc/>
+        public void SetConfidencePreset(ConfidencePreset preset)
+        {
+            switch (preset)
+            {
+                case ConfidencePreset.Permissive:
+                    correctionMinTags =
+                        VioAprilTagPoseEstimatorConstants.PRESET_PERMISSIVE_MIN_TAGS;
+                    correctionMinInlierRatio =
+                        VioAprilTagPoseEstimatorConstants.PRESET_PERMISSIVE_MIN_INLIER_RATIO;
+                    break;
+                case ConfidencePreset.Strict:
+                    correctionMinTags = VioAprilTagPoseEstimatorConstants.PRESET_STRICT_MIN_TAGS;
+                    correctionMinInlierRatio =
+                        VioAprilTagPoseEstimatorConstants.PRESET_STRICT_MIN_INLIER_RATIO;
+                    break;
+                case ConfidencePreset.Balanced:
+                default:
+                    correctionMinTags = VioAprilTagPoseEstimatorConstants.PRESET_BALANCED_MIN_TAGS;
+                    correctionMinInlierRatio =
+                        VioAprilTagPoseEstimatorConstants.PRESET_BALANCED_MIN_INLIER_RATIO;
+                    break;
+            }
+            QueuedLogger.Log(
+                $"AprilTag confidence preset set to {preset}: "
+                    + $"tags>={correctionMinTags}, inlierRatio>={correctionMinInlierRatio:F2}"
+            );
         }
 
         /// <inheritdoc/>

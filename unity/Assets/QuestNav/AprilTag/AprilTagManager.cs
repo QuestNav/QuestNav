@@ -62,6 +62,14 @@ namespace QuestNav.QuestNav.AprilTag
         private int minimumNumberOfTags;
 
         /// <summary>
+        /// Multiplier applied to <see cref="VioAprilTagPoseEstimatorConstants.MULTI_TAG_LINEAR_STD_DEV_BASE"/>
+        /// when computing the dynamic AprilTag measurement std-dev. The user controls this
+        /// from the AprilTag tab "Trust" slider (0.5x = high trust, 1.0x = default, 2.0x = low trust).
+        /// Updated via <see cref="OnAprilTagNoiseScaleChanged"/>.
+        /// </summary>
+        private double noiseScale = 1.0;
+
+        /// <summary>
         /// Most recently requested camera resolution. Used to skip arbiter re-reservations
         /// when only the framerate changed (the camera does not need to be bounced).
         /// </summary>
@@ -89,6 +97,8 @@ namespace QuestNav.QuestNav.AprilTag
 
             configManager.OnEnableAprilTagDetectorChanged += OnEnableAprilTagDetectorChanged;
             configManager.OnAprilTagDetectorModeChanged += OnAprilTagDetectorModeChanged;
+            configManager.OnAprilTagConfidencePresetChanged += OnAprilTagConfidencePresetChanged;
+            configManager.OnAprilTagNoiseScaleChanged += OnAprilTagNoiseScaleChanged;
 
             // Refresh PoseLib's cached intrinsics whenever the camera arbiter changes
             // the effective resolution. Meta SDK exposes per-resolution intrinsics
@@ -98,6 +108,36 @@ namespace QuestNav.QuestNav.AprilTag
             cameraArbiter.OnResolutionChanged += OnCameraArbiterResolutionChanged;
 
             QueuedLogger.Log("Initialized AprilTagManager");
+        }
+
+        /// <summary>
+        /// Called when the user changes the Phase-2 confidence preset from the web UI.
+        /// Forwards to the estimator, which mutates its private CORRECTION_MIN_TAGS and
+        /// CORRECTION_MIN_INLIER_RATIO instance fields. The next AprilTag observation
+        /// uses the new thresholds.
+        /// </summary>
+        private void OnAprilTagConfidencePresetChanged(int presetInt)
+        {
+            // Convert via cast (validated 0..2 by ConfigManager). Default to Balanced
+            // for any future enum addition we don't recognize.
+            ConfidencePreset preset = ConfidencePreset.Balanced;
+            if (Enum.IsDefined(typeof(ConfidencePreset), presetInt))
+            {
+                preset = (ConfidencePreset)presetInt;
+            }
+            vioAprilTagPoseEstimator?.SetConfidencePreset(preset);
+        }
+
+        /// <summary>
+        /// Called when the user changes the AprilTag Trust slider. Cached locally and
+        /// applied multiplicatively to MULTI_TAG_LINEAR_STD_DEV_BASE in
+        /// <see cref="AprilTagFrameCaptureCoroutine"/>; takes effect on the next
+        /// observation.
+        /// </summary>
+        private void OnAprilTagNoiseScaleChanged(double scale)
+        {
+            // ConfigManager has already clamped to [0.5, 2.0]; keep the field in sync.
+            noiseScale = scale;
         }
 
         /// <summary>
@@ -462,11 +502,15 @@ namespace QuestNav.QuestNav.AprilTag
                             continue;
                         }
 
-                        // Dynamic std devs: uncertainty scales with distance^2 and decreases with tag count
+                        // Dynamic std devs: uncertainty scales with distance^2 and decreases with tag count.
+                        // The user-tunable noiseScale multiplier (0.5x = high trust, 2.0x = low trust)
+                        // applies on top of the base; smaller std-dev = the KF trusts the AprilTag
+                        // measurement more relative to VIO.
                         double stdDevFactor =
                             (avgTagDistance * avgTagDistance) / Math.Max(1, tagCount);
                         double linearStdDev =
                             VioAprilTagPoseEstimatorConstants.MULTI_TAG_LINEAR_STD_DEV_BASE
+                            * noiseScale
                             * stdDevFactor;
                         var dynamicStdDevs = DenseMatrix.OfArray(
                             new[,]

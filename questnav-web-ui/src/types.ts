@@ -27,6 +27,11 @@ export interface AprilTagDetectorMode {
   // persists it but the running app keeps using the previously-loaded layout. The UI
   // surfaces the restart-required state with an inline banner + restart button.
   fieldLayoutFile: string
+  // Tier 3 advanced. Both nullable in the wire schema; sending null/undefined leaves
+  // the existing value alone. The Vue side always sends concrete values from the
+  // Advanced disclosure controls.
+  confidencePreset?: number  // 0 = Permissive, 1 = Balanced, 2 = Strict
+  noiseScale?: number        // [0.5, 2.0]; 0.5 = high trust in AprilTag, 2.0 = low trust
 }
 
 export interface AprilTagFieldLayoutEntry {

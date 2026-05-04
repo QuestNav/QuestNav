@@ -1,8 +1,27 @@
 namespace QuestNav.QuestNav.Estimation
 {
     /// <summary>
-    /// Holds the constants for VIO and AprilTag fusion
-    /// TODO: MAKE THIS CONFIGURABLE VIA WEB DASHBOARD
+    /// Phase-2 correction confidence presets. Wider gap = more conservative pose updates;
+    /// the dropdown in the AprilTag tab picks one. Mirrored on the web side as
+    /// <c>questnav-web-ui/src/types.ts:ConfidencePreset</c>; keep the int values aligned.
+    /// </summary>
+    public enum ConfidencePreset
+    {
+        /// <summary>Permissive (2 tags, ratio >= 0.75). Use only when default tuning is too strict.</summary>
+        Permissive = 0,
+
+        /// <summary>Balanced (3 tags, ratio >= 0.80). Default; matches the prior hardcoded values.</summary>
+        Balanced = 1,
+
+        /// <summary>Strict (4 tags, ratio >= 0.90). Use in noisy / high-glare environments.</summary>
+        Strict = 2,
+    }
+
+    /// <summary>
+    /// Holds the constants for VIO and AprilTag fusion. The CORRECTION_MIN_TAGS and
+    /// CORRECTION_MIN_INLIER_RATIO values shown here are the BALANCED defaults; the
+    /// effective values can be overridden at runtime via
+    /// <see cref="VioAprilTagPoseEstimator.SetConfidencePreset"/> from the web UI.
     /// </summary>
     public static class VioAprilTagPoseEstimatorConstants
     {
@@ -15,7 +34,7 @@ namespace QuestNav.QuestNav.Estimation
         /// <summary>How far back in time AprilTag corrections can be applied.</summary>
         public const double BUFFER_DURATION_SECONDS = 0.5;
 
-        // --- Phase 1: Initial alignment gating ---
+        // --- Phase 1: Initial alignment gating (NOT user-configurable) ---
 
         /// <summary>Minimum number of detected tags to accept the first alignment observation.</summary>
         public const int INITIAL_ALIGNMENT_MIN_TAGS = 2;
@@ -23,12 +42,12 @@ namespace QuestNav.QuestNav.Estimation
         /// <summary>Minimum inlier ratio (acceptedPoints / totalPoints) for the first alignment.</summary>
         public const double INITIAL_ALIGNMENT_MIN_INLIER_RATIO = 0.6;
 
-        // --- Phase 2: Ongoing correction gating ---
+        // --- Phase 2: Ongoing correction gating (defaults; overridden by ConfidencePreset) ---
 
-        /// <summary>Minimum number of detected tags for a Phase 2 correction to be accepted.</summary>
+        /// <summary>Default minimum number of detected tags for a Phase 2 correction (Balanced preset).</summary>
         public const int CORRECTION_MIN_TAGS = 3;
 
-        /// <summary>Minimum inlier ratio for a Phase 2 correction to be accepted.</summary>
+        /// <summary>Default minimum inlier ratio for a Phase 2 correction (Balanced preset).</summary>
         public const double CORRECTION_MIN_INLIER_RATIO = 0.8;
 
         /// <summary>
@@ -37,9 +56,28 @@ namespace QuestNav.QuestNav.Estimation
         /// </summary>
         public const double CORRECTION_MAX_POSITION_JUMP = 2.0;
 
+        // --- Confidence presets ---
+
+        /// <summary>Permissive preset: (min tags, min inlier ratio).</summary>
+        public const int PRESET_PERMISSIVE_MIN_TAGS = 2;
+        public const double PRESET_PERMISSIVE_MIN_INLIER_RATIO = 0.75;
+
+        /// <summary>Balanced preset: (min tags, min inlier ratio). Same as the legacy hardcoded values.</summary>
+        public const int PRESET_BALANCED_MIN_TAGS = 3;
+        public const double PRESET_BALANCED_MIN_INLIER_RATIO = 0.8;
+
+        /// <summary>Strict preset: (min tags, min inlier ratio).</summary>
+        public const int PRESET_STRICT_MIN_TAGS = 4;
+        public const double PRESET_STRICT_MIN_INLIER_RATIO = 0.9;
+
         // --- Dynamic standard deviation scaling ---
 
-        /// <summary>Base linear std dev for dynamic scaling: linearStdDev = base * (avgDist^2 / tagCount).</summary>
+        /// <summary>
+        /// Base linear std dev for dynamic scaling:
+        /// <c>linearStdDev = base * noiseScale * (avgDist^2 / tagCount)</c>.
+        /// <c>noiseScale</c> is the user-tunable "AprilTag Trust" multiplier (0.5x = high
+        /// trust, 1.0x = default, 2.0x = low trust).
+        /// </summary>
         public const double MULTI_TAG_LINEAR_STD_DEV_BASE = 0.05;
     }
 }

@@ -82,6 +82,16 @@ namespace QuestNav.Config
         /// Raised when AprilTag detector mode changes.
         /// </summary>
         public event Action<AprilTagDetectorMode> OnAprilTagDetectorModeChanged;
+
+        /// <summary>
+        /// Raised when the Phase-2 confidence preset changes.
+        /// </summary>
+        public event Action<int> OnAprilTagConfidencePresetChanged;
+
+        /// <summary>
+        /// Raised when the AprilTag noise-scale multiplier changes.
+        /// </summary>
+        public event Action<double> OnAprilTagNoiseScaleChanged;
         #endregion
 
         #region Logging
@@ -170,6 +180,16 @@ namespace QuestNav.Config
         /// effect on the next app restart.
         /// </summary>
         public Task<string> GetAprilTagFieldLayoutFileAsync();
+
+        /// <summary>
+        /// Gets the AprilTag Phase-2 confidence preset (0 / 1 / 2).
+        /// </summary>
+        public Task<int> GetAprilTagConfidencePresetAsync();
+
+        /// <summary>
+        /// Gets the AprilTag dynamic-std-dev noise-scale multiplier.
+        /// </summary>
+        public Task<double> GetAprilTagNoiseScaleAsync();
         #endregion
 
         #region Logging
@@ -239,6 +259,17 @@ namespace QuestNav.Config
         /// hot-swapping the layout would invalidate the Kalman estimator's field alignment.
         /// </summary>
         public Task SetAprilTagFieldLayoutFileAsync(string fileName);
+
+        /// <summary>
+        /// Sets the AprilTag Phase-2 confidence preset. Fires
+        /// <see cref="OnAprilTagConfidencePresetChanged"/> on the main thread.
+        /// </summary>
+        public Task SetAprilTagConfidencePresetAsync(int preset);
+
+        /// <summary>
+        /// Sets the AprilTag noise-scale multiplier. Clamped to [0.5, 2.0].
+        /// </summary>
+        public Task SetAprilTagNoiseScaleAsync(double scale);
         #endregion
         #region Logging
         /// <summary>
@@ -320,6 +351,11 @@ namespace QuestNav.Config
             // (0,0) and the first AprilTag frame fed to libapriltag is malformed,
             // which causes a native SIGSEGV in gradient_clusters.
             OnAprilTagDetectorModeChanged?.Invoke(await GetAprilTagDetectorModeAsync());
+            // Phase-2 confidence preset and noise scale must also fire BEFORE Enable so
+            // the estimator and the dynamic-std-dev calc are configured with the user's
+            // chosen values from the very first observation.
+            OnAprilTagConfidencePresetChanged?.Invoke(await GetAprilTagConfidencePresetAsync());
+            OnAprilTagNoiseScaleChanged?.Invoke(await GetAprilTagNoiseScaleAsync());
             OnEnableAprilTagDetectorChanged?.Invoke(await GetEnableAprilTagDetectorAsync());
 
             OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
@@ -396,6 +432,9 @@ namespace QuestNav.Config
                     aprilTagDefaults.AprilTagDetectorMinimumNumberOfTags
                 )
             );
+            await SetAprilTagFieldLayoutFileAsync(aprilTagDefaults.AprilTagFieldLayoutFile);
+            await SetAprilTagConfidencePresetAsync(aprilTagDefaults.AprilTagConfidencePreset);
+            await SetAprilTagNoiseScaleAsync(aprilTagDefaults.AprilTagNoiseScale);
 
             await SetEnableDebugLoggingAsync(loggingDefaults.EnableDebugLogging);
 
@@ -444,6 +483,12 @@ namespace QuestNav.Config
 
         /// <inheritdoc/>
         public event Action<AprilTagDetectorMode> OnAprilTagDetectorModeChanged;
+
+        /// <inheritdoc/>
+        public event Action<int> OnAprilTagConfidencePresetChanged;
+
+        /// <inheritdoc/>
+        public event Action<double> OnAprilTagNoiseScaleChanged;
         #endregion
 
         #region Logging
@@ -548,6 +593,33 @@ namespace QuestNav.Config
             return string.IsNullOrEmpty(config.AprilTagFieldLayoutFile)
                 ? QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE
                 : config.AprilTagFieldLayoutFile;
+        }
+
+        /// <inheritdoc/>
+        public async Task<int> GetAprilTagConfidencePresetAsync()
+        {
+            var config = await GetAprilTagConfigAsync();
+            // Clamp to the supported [0, 2] range to defend against a corrupt row.
+            int v = config.AprilTagConfidencePreset;
+            if (v < 0)
+                v = 0;
+            if (v > 2)
+                v = 2;
+            return v;
+        }
+
+        /// <inheritdoc/>
+        public async Task<double> GetAprilTagNoiseScaleAsync()
+        {
+            var config = await GetAprilTagConfigAsync();
+            // Clamp to the slider range so a corrupt row can't push the std-dev outside
+            // sensible bounds and tank the Kalman filter.
+            double v = config.AprilTagNoiseScale;
+            if (v < 0.5)
+                v = 0.5;
+            if (v > 2.0)
+                v = 2.0;
+            return v;
         }
         #endregion
 
@@ -696,6 +768,58 @@ namespace QuestNav.Config
             // Notify subscribed methods on the main thread
             invokeOnMainThread(() => OnAprilTagDetectorModeChanged?.Invoke(mode));
             QueuedLogger.Log($"Updated Key 'aprilTagDetectorMode' to {mode}");
+        }
+
+        /// <inheritdoc/>
+        public async Task SetAprilTagConfidencePresetAsync(int preset)
+        {
+            // Clamp to [0, 2] - the only supported values map to ConfidencePreset enum.
+            int sanitized = preset;
+            if (sanitized < 0)
+                sanitized = 0;
+            if (sanitized > 2)
+                sanitized = 2;
+
+            var config = await GetAprilTagConfigAsync();
+            if (config.AprilTagConfidencePreset == sanitized)
+            {
+                return;
+            }
+            config.AprilTagConfidencePreset = sanitized;
+            await SaveAprilTagConfigAsync(config);
+
+            invokeOnMainThread(() => OnAprilTagConfidencePresetChanged?.Invoke(sanitized));
+            QueuedLogger.Log($"Updated Key 'aprilTagConfidencePreset' to {sanitized}");
+        }
+
+        /// <inheritdoc/>
+        public async Task SetAprilTagNoiseScaleAsync(double scale)
+        {
+            // Match the slider's clamped range. Refuse non-finite values defensively.
+            if (double.IsNaN(scale) || double.IsInfinity(scale))
+            {
+                QueuedLogger.LogError(
+                    $"Refusing non-finite AprilTag noise scale {scale}; ignoring."
+                );
+                return;
+            }
+            double sanitized = scale;
+            if (sanitized < 0.5)
+                sanitized = 0.5;
+            if (sanitized > 2.0)
+                sanitized = 2.0;
+
+            var config = await GetAprilTagConfigAsync();
+            // Use a tight epsilon so we don't write the row for a sub-microscopic delta.
+            if (Math.Abs(config.AprilTagNoiseScale - sanitized) < 1e-9)
+            {
+                return;
+            }
+            config.AprilTagNoiseScale = sanitized;
+            await SaveAprilTagConfigAsync(config);
+
+            invokeOnMainThread(() => OnAprilTagNoiseScaleChanged?.Invoke(sanitized));
+            QueuedLogger.Log($"Updated Key 'aprilTagNoiseScale' to {sanitized:F2}");
         }
 
         /// <inheritdoc/>

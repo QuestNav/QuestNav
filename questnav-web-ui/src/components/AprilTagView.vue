@@ -113,6 +113,62 @@
     </ConfigField>
   </div>
 
+  <!-- Advanced disclosure (Tier 3). Hidden by default; the user opts in. Houses the
+       confidence preset (3-button group with a UI warning when Permissive is selected)
+       and the AprilTag Trust slider (0.5x = high trust, 2.0x = low trust). Both fields
+       take effect immediately (no restart required) but are still part of the same
+       pendingMode object so they get applied via the same Apply button. -->
+  <details v-if="configStore.config?.enableAprilTagDetector" class="advanced-disclosure">
+    <summary>Advanced</summary>
+
+    <div class="settings-grid">
+      <ConfigField title="Confidence Preset" control-class="input-control">
+        <template #description>
+          <div><strong>Permissive</strong>: 2 tags, 75% inlier ratio. Use only when default tuning is too strict.</div>
+          <div><strong>Balanced</strong>: 3 tags, 80% inlier ratio. Default for most teams.</div>
+          <div><strong>Strict</strong>: 4 tags, 90% inlier ratio. Use in noisy / high-glare environments.</div>
+        </template>
+        <template #badge>
+          <span v-if="isConfidencePresetDirty" class="dirty-badge">●</span>
+        </template>
+        <div class="preset-buttons">
+          <button v-for="preset in CONFIDENCE_PRESETS" :key="preset.value"
+                  @click="handleConfidencePresetChange(preset.value)" type="button"
+                  :class="['preset-button', { active: pendingMode.confidencePreset === preset.value }]">
+            {{ preset.label }}
+          </button>
+        </div>
+      </ConfigField>
+
+      <div v-if="pendingMode.confidencePreset === 0" class="permissive-warning">
+        <span class="warning-icon">⚠️</span>
+        <span>
+          Permissive mode accepts borderline AprilTag observations. Use only when the
+          default tuning never converges (e.g. only one tag is visible on average).
+          Increases the chance of bad pose corrections.
+        </span>
+      </div>
+
+      <ConfigField title="AprilTag Trust" control-class="input-control">
+        <template #description>
+          How much the Kalman filter trusts AprilTag observations relative to VIO.
+          <strong>High Trust</strong> snaps the pose to AprilTag faster; <strong>Low Trust</strong>
+          smooths the pose by sticking closer to VIO.
+        </template>
+        <template #badge>
+          <span v-if="isNoiseScaleDirty" class="dirty-badge">●</span>
+        </template>
+        <div class="trust-slider-wrap">
+          <span class="trust-end">High Trust</span>
+          <input type="range" min="0.5" max="2.0" step="0.1"
+                 :value="pendingMode.noiseScale" @input="handleNoiseScaleChange" class="trust-slider" />
+          <span class="trust-end">Low Trust</span>
+          <span class="trust-value">{{ trustLabel }}</span>
+        </div>
+      </ConfigField>
+    </div>
+  </details>
+
   <!-- Apply Button Section -->
   <div v-if="configStore.config?.enableAprilTagDetector">
     <div class="apply-buttons">
@@ -158,6 +214,15 @@ import FieldLayoutManager from './FieldLayoutManager.vue'
 // validation rejects values outside this set so keep these in sync.
 const MIN_TAGS_OPTIONS = [1, 2, 3, 4]
 
+// Mirrors QuestNav.QuestNav.Estimation.ConfidencePreset on the server. Order matches
+// the enum (0 = Permissive, 1 = Balanced, 2 = Strict) and the labels are what the
+// preset button group renders.
+const CONFIDENCE_PRESETS = [
+  { value: 0, label: 'Permissive' },
+  { value: 1, label: 'Balanced' },
+  { value: 2, label: 'Strict' }
+]
+
 // Use mock store if available (for testing), otherwise use real store
 const injectedStore = inject('configStore', null)
 const configStore = injectedStore || (window as any).__MOCK_CONFIG_STORE__ || useConfigStore()
@@ -171,7 +236,9 @@ const pendingMode = ref<AprilTagDetectorMode>({
   ignoredIds: [],
   maxDistance: 4.0,
   minimumNumberOfTags: 2,
-  fieldLayoutFile: '2026-rebuilt-welded.json'
+  fieldLayoutFile: '2026-rebuilt-welded.json',
+  confidencePreset: 1,
+  noiseScale: 1.0
 })
 
 // FRC tag36h11 IDs in current use never exceed ~40; clamp to 50 for headroom.
@@ -199,6 +266,12 @@ watch(() => configStore.config?.aprilTagDetectorMode, (newMode) => {
       if (!userModifiedFields.value.has('minimumNumberOfTags')) updated.minimumNumberOfTags = newMode.minimumNumberOfTags
       if (!userModifiedFields.value.has('ignoredIds')) updated.ignoredIds = [...newMode.ignoredIds]
       if (!userModifiedFields.value.has('fieldLayoutFile')) updated.fieldLayoutFile = newMode.fieldLayoutFile
+      if (!userModifiedFields.value.has('confidencePreset') && newMode.confidencePreset !== undefined) {
+        updated.confidencePreset = newMode.confidencePreset
+      }
+      if (!userModifiedFields.value.has('noiseScale') && newMode.noiseScale !== undefined) {
+        updated.noiseScale = newMode.noiseScale
+      }
 
       pendingMode.value = updated
     }
@@ -278,6 +351,17 @@ const isMinTagsFieldDirty = computed(() => {
 
 const isIgnoredIdsFieldDirty = computed(() => {
   return userModifiedFields.value.has('ignoredIds')
+})
+
+const isConfidencePresetDirty = computed(() => userModifiedFields.value.has('confidencePreset'))
+const isNoiseScaleDirty = computed(() => userModifiedFields.value.has('noiseScale'))
+
+// Friendly label for the AprilTag Trust slider value.
+const trustLabel = computed(() => {
+  const v = pendingMode.value.noiseScale ?? 1.0
+  if (v <= 0.75) return `${v.toFixed(1)}x  (high trust)`
+  if (v >= 1.25) return `${v.toFixed(1)}x  (low trust)`
+  return `${v.toFixed(1)}x  (default)`
 })
 
 // Event handlers
@@ -430,6 +514,20 @@ function clearIgnoredIds() {
   userModifiedFields.value.add('ignoredIds')
 }
 
+function handleConfidencePresetChange(value: number) {
+  pendingMode.value.confidencePreset = value
+  userModifiedFields.value.add('confidencePreset')
+}
+
+function handleNoiseScaleChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  const value = parseFloat(target.value)
+  if (!isNaN(value)) {
+    pendingMode.value.noiseScale = value
+    userModifiedFields.value.add('noiseScale')
+  }
+}
+
 async function submitModeSettings() {
   await configStore.updateAprilTagDetectorMode(pendingMode.value)
   userModifiedFields.value.clear()
@@ -561,5 +659,102 @@ function cancelChanges() {
 
 .restart-button:hover {
   opacity: 0.85;
+}
+
+.advanced-disclosure {
+  margin-top: 1.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem 1rem 0.75rem;
+  background: var(--bg-tertiary);
+}
+
+.advanced-disclosure summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.4rem 0;
+  user-select: none;
+}
+
+.advanced-disclosure[open] summary {
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.6rem;
+}
+
+.preset-buttons {
+  display: inline-flex;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.preset-button {
+  padding: 0.4rem 0.95rem;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: none;
+  border-right: 1px solid var(--border-color);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: background 0.15s ease;
+}
+
+.preset-button:last-child {
+  border-right: none;
+}
+
+.preset-button:hover {
+  background: var(--bg-secondary);
+}
+
+.preset-button.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+.permissive-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: rgba(255, 193, 7, 0.12);
+  border: 1px solid var(--warning-color, #ffc107);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.permissive-warning .warning-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.trust-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.trust-end {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.trust-slider {
+  flex: 1;
+}
+
+.trust-value {
+  min-width: 110px;
+  text-align: right;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.85rem;
 }
 </style>

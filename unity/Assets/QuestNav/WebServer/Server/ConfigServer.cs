@@ -441,6 +441,8 @@ namespace QuestNav.WebServer.Server
                     maxDistance = aprilTagDetectorMode.MaxDistance,
                     minimumNumberOfTags = aprilTagDetectorMode.MinimumNumberOfTags,
                     fieldLayoutFile = await configManager.GetAprilTagFieldLayoutFileAsync(),
+                    confidencePreset = await configManager.GetAprilTagConfidencePresetAsync(),
+                    noiseScale = await configManager.GetAprilTagNoiseScaleAsync(),
                 },
                 enableDebugLogging = await configManager.GetEnableDebugLoggingAsync(),
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
@@ -592,6 +594,51 @@ namespace QuestNav.WebServer.Server
                         }
 
                         await configManager.SetAprilTagFieldLayoutFileAsync(atm.fieldLayoutFile);
+                    }
+
+                    // Tier 3: confidence preset and noise scale. Both take effect
+                    // immediately (no restart required). Both are nullable on the wire;
+                    // a missing field is treated as "leave existing value alone" so a
+                    // pre-Tier-3 client doesn't accidentally clobber them.
+                    if (atm.confidencePreset.HasValue)
+                    {
+                        int p = atm.confidencePreset.Value;
+                        if (p < 0 || p > 2)
+                        {
+                            context.Response.StatusCode = 400;
+                            await SendJsonResponse(
+                                context,
+                                new SimpleResponse
+                                {
+                                    success = false,
+                                    message =
+                                        $"confidencePreset={p} is out of range. "
+                                        + "Allowed: 0 (Permissive), 1 (Balanced), 2 (Strict).",
+                                }
+                            );
+                            return;
+                        }
+                        await configManager.SetAprilTagConfidencePresetAsync(p);
+                    }
+
+                    if (atm.noiseScale.HasValue)
+                    {
+                        double n = atm.noiseScale.Value;
+                        if (double.IsNaN(n) || double.IsInfinity(n) || n < 0.5 || n > 2.0)
+                        {
+                            context.Response.StatusCode = 400;
+                            await SendJsonResponse(
+                                context,
+                                new SimpleResponse
+                                {
+                                    success = false,
+                                    message =
+                                        $"noiseScale={n} is out of range. Allowed: [0.5, 2.0].",
+                                }
+                            );
+                            return;
+                        }
+                        await configManager.SetAprilTagNoiseScaleAsync(n);
                     }
                 }
                 if (request.EnableAprilTagDetector.HasValue)

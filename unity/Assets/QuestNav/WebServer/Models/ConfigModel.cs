@@ -45,11 +45,27 @@ namespace QuestNav.WebServer
 
         /// <summary>
         /// Filename of the field-layout JSON to use on the next app restart. Resolved
-        /// against the bundled directory (and, in commit 6, the user-uploaded directory).
+        /// against the bundled directory and the user-uploaded directory.
         /// Restart-on-change; the running app keeps using the previously-loaded layout
         /// until restart.
         /// </summary>
         public string fieldLayoutFile;
+
+        /// <summary>
+        /// Phase-2 confidence preset: 0=Permissive, 1=Balanced, 2=Strict. Tighter presets
+        /// reject more pose updates but produce a more conservative pose. Takes effect
+        /// immediately (no restart required). Nullable: a missing field means "leave the
+        /// existing value alone" so a third-party client that doesn't know about this
+        /// field can still POST AprilTagDetectorMode without clobbering it.
+        /// </summary>
+        public int? confidencePreset;
+
+        /// <summary>
+        /// AprilTag measurement noise multiplier (UI slider range [0.5, 2.0]). 0.5x = high
+        /// trust, 1.0x = default, 2.0x = low trust. Takes effect on the next observation.
+        /// Nullable: a missing field means "leave alone".
+        /// </summary>
+        public double? noiseScale;
     }
 
     /// <summary>

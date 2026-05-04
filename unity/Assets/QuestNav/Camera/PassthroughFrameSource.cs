@@ -596,6 +596,20 @@ namespace QuestNav.Camera
                     continue;
                 }
 
+                // Skip iterations where the SDK has not delivered a new frame this
+                // Unity Update. GetTexture() would still return the previous frame's
+                // texture, but encoding it again is wasted work AND every extra
+                // GetTexture / ReadPixels keeps the render thread busier, which feeds
+                // the Meta SDK's
+                // "MRUK Shared: PCA: previous command buffer is still executing"
+                // warning. Effective FPS is implicitly capped at the camera's actual
+                // delivery rate.
+                if (!cameraAccess.IsUpdatedThisFrame)
+                {
+                    yield return null;
+                    continue;
+                }
+
                 Texture texture;
 
                 try

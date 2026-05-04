@@ -367,6 +367,20 @@ namespace QuestNav.QuestNav.AprilTag
                     continue;
                 }
 
+                // Skip iterations where the SDK has not yet delivered a new frame this
+                // Unity Update. Calling GetColors() anyway would re-trigger an
+                // AsyncGPUReadback against the same texture and pile work onto the
+                // render thread, which causes the Meta SDK's
+                // "MRUK Shared: PCA: previous command buffer is still executing"
+                // warning. Detection rate is therefore implicitly capped at the
+                // camera's actual delivery rate (~60 Hz on Quest 3), which is what
+                // we want.
+                if (!cameraAccess.IsUpdatedThisFrame)
+                {
+                    yield return null;
+                    continue;
+                }
+
                 float captureTimestamp = Time.time;
                 NativeArray<Color32> colors;
 

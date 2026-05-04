@@ -10,43 +10,41 @@
       </label>
     </ConfigField>
 
-    <!-- Field Layout (restart-on-change). The dropdown writes the new selection to
-         config immediately, but the running app keeps using the previously-loaded
-         layout until it restarts. The banner below the grid prompts the user when a
-         restart is pending. The "Manage Custom Layouts" button opens a modal where
-         the user can paste / edit / rename / delete their own JSONs. -->
+    <!-- Field Layout (restart-on-change). The dropdown saves the selection on Apply,
+         but the running app keeps using the previously-loaded layout until it restarts.
+         The banner below the grid prompts the user when a restart is pending. The
+         "Manage Custom..." button opens a modal where the user can paste / edit /
+         rename / delete their own JSONs. -->
     <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Field Layout"
-                 description="AprilTag layout for the field. Changes take effect after restart."
+                 description="AprilTag positions on the field. Restart QuestNav after changing."
                  control-class="input-control">
       <template #badge>
         <span v-if="fieldLayoutDirty" class="dirty-badge">●</span>
       </template>
-      <div style="display: flex; gap: 0.5rem; align-items: center; width: 100%;">
+      <div class="field-layout-control">
         <select :value="pendingFieldLayoutFile" @change="handleFieldLayoutChange"
-                :disabled="fieldLayoutOptions.length === 0" style="flex: 1;">
+                :disabled="fieldLayoutOptions.length === 0">
           <option v-if="fieldLayoutOptions.length === 0" :value="pendingFieldLayoutFile">Loading...</option>
           <option v-for="opt in fieldLayoutOptions" :key="opt.fileName" :value="opt.fileName">
             {{ opt.displayName }} ({{ opt.tagCount }} tags{{ opt.source === 'custom' ? ', custom' : '' }})
           </option>
         </select>
-        <button @click="showFieldLayoutManager = true" type="button" class="cancel-button">
-          Manage Custom...
+        <button @click="showFieldLayoutManager = true" type="button" class="cancel-button manage-custom-button">
+          Manage Custom Layouts...
         </button>
       </div>
     </ConfigField>
 
-    <!-- Camera Resolution
-         This dropdown actually configures the underlying Meta SDK PassthroughCameraAccess.
-         Quest 3 / Quest 3S support 1280x960 and 1280x1280 only; the list is sourced from
-         the SDK at runtime. Higher pixel count = larger detection range but more CPU and
-         battery. Note: when the AprilTag detector is enabled, this resolution also drives
-         the passthrough video stream (see camera arbiter / "Locked by AprilTag" badge in
-         the Camera tab).
-         Note: ANCHOR_ENHANCED detection mode is not implemented yet (it throws on the
-         backend). The mode dropdown is intentionally hidden; the only supported value
-         (TRADITIONAL = 0) is sent automatically by submitModeSettings(). -->
+    <!-- Camera Resolution.
+         Quest 3 / Quest 3S support 1280x960 and 1280x1280 only; the list is sourced
+         from the Meta SDK at runtime (with a fallback). When the detector is enabled
+         this resolution also overrides the passthrough stream's resolution (see the
+         "Locked by AprilTag" badge on the Camera tab).
+         Note: ANCHOR_ENHANCED detection mode is not implemented yet. The mode dropdown
+         is intentionally hidden; the only supported value (TRADITIONAL = 0) is sent
+         automatically by submitModeSettings(). -->
     <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Camera Resolution"
-                 description="Headset camera resolution. Higher resolutions detect tags from further away but cost more CPU and battery. While AprilTag is enabled, this resolution overrides the passthrough stream's resolution."
+                 description="Headset camera resolution. Higher = more detection range, more CPU and battery."
                  control-class="input-control">
       <template #badge>
         <span v-if="isResolutionFieldDirty" class="dirty-badge">●</span>
@@ -59,12 +57,11 @@
       </select>
     </ConfigField>
 
-    <!-- Detection Framerate. The Meta SDK does not let us set a camera framerate;
-         frames arrive continuously at ~60 Hz. This dropdown controls how often the
-         AprilTag detection coroutine pulls a frame and runs the detector, which lets
-         a team trade off CPU/battery for correction frequency. -->
+    <!-- Detection Framerate. The camera always streams at ~60 Hz; this dropdown
+         controls how many of those frames the AprilTag detector consumes. Lower =
+         less CPU/battery, fewer pose corrections per second. -->
     <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Detection Framerate"
-                 description="How often to run AprilTag detection on captured frames. The camera always runs at 60 Hz; this only affects how many frames per second the detector processes. Lower = less CPU and battery, fewer pose corrections."
+                 description="How many frames per second the AprilTag detector processes. Lower = less CPU and battery."
                  control-class="input-control">
       <template #badge>
         <span v-if="isFramerateFieldDirty" class="dirty-badge">●</span>
@@ -75,9 +72,12 @@
       </select>
     </ConfigField>
 
-    <!-- Detection Range -->
-    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Detection Range"
-                 description="Maximum distance for tag detection" control-class="input-control">
+    <!-- Max Tag Distance. Reject pose updates whose mean camera-to-tag distance
+         exceeds this. The detector still runs at full range; only the pose update
+         is gated. (See AprilTagManager: "AprilTag observation rejected: avgTagDistance=...") -->
+    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Max Tag Distance"
+                 description="Reject pose updates when the average camera-to-tag distance exceeds this. The detector still runs at full range."
+                 control-class="input-control">
       <template #badge>
         <span v-if="isMaxDistanceFieldDirty" class="dirty-badge">●</span>
       </template>
@@ -86,9 +86,11 @@
       <span class="range-value">{{ pendingMode.maxDistance }}m</span>
     </ConfigField>
 
-    <!-- Minimum Tags -->
+    <!-- Minimum Tags. Floor for the initial Phase-1 alignment AND a floor for
+         Phase-2 corrections (the Confidence Preset can raise it but cannot lower
+         it below this value). See VioAprilTagPoseEstimator.SetMinimumTags. -->
     <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Minimum Tags Required"
-                 description="Minimum number of tags needed before a pose update is published. Higher values reject noisier observations but reduce update rate."
+                 description="Minimum tags needed for a pose lock. The Confidence Preset (Advanced) may require more for ongoing corrections."
                  control-class="input-control">
       <template #badge>
         <span v-if="isMinTagsFieldDirty" class="dirty-badge">●</span>
@@ -98,9 +100,12 @@
       </select>
     </ConfigField>
 
-    <!-- Ignored Tag IDs (blacklist) -->
+    <!-- Ignored Tag IDs (blacklist). Detections matching these IDs are dropped
+         before reaching PoseLib. Useful when a stale or off-field tag keeps
+         producing reflections in your test space. -->
     <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Ignored Tag IDs"
-                 description="Comma-separated list of AprilTag IDs to ignore (leave empty to detect all)" control-class="input-control">
+                 description="Comma-separated tag IDs to drop from every frame. Leave empty to use all tags in the field layout."
+                 control-class="input-control">
       <template #badge>
         <span v-if="isIgnoredIdsFieldDirty" class="dirty-badge">●</span>
       </template>
@@ -113,68 +118,64 @@
     </ConfigField>
   </div>
 
-  <!-- Advanced disclosure (Tier 3). Hidden by default; the user opts in. Houses the
-       confidence preset (3-button group with a UI warning when Permissive is selected)
-       and the AprilTag Trust slider (0.5x = high trust, 2.0x = low trust). Both fields
-       take effect immediately (no restart required) but are still part of the same
-       pendingMode object so they get applied via the same Apply button. -->
+  <!-- Advanced disclosure (Tier 3). Hidden by default. Houses the Phase-2 correction
+       Confidence Preset and the AprilTag Trust slider. Both apply immediately on
+       Apply (no restart). The Permissive / Debug warning banners live INSIDE the
+       Confidence Preset card so they're visually attached to their trigger and don't
+       break the grid layout. -->
   <details v-if="configStore.config?.enableAprilTagDetector" class="advanced-disclosure">
     <summary>Advanced</summary>
 
     <div class="settings-grid">
-      <ConfigField title="Confidence Preset" control-class="input-control">
-        <template #description>
-          <div><strong>Permissive</strong>: 2 tags, 75% inlier ratio. Use only when default tuning is too strict.</div>
-          <div><strong>Balanced</strong>: 3 tags, 80% inlier ratio. Default for most teams.</div>
-          <div><strong>Strict</strong>: 4 tags, 90% inlier ratio. Use in noisy / high-glare environments.</div>
-          <div><strong>Debug</strong>: 1 tag, 60% inlier ratio. Benchtop only — see warning below.</div>
-          <div class="preset-apply-hint">Selection is staged until you click <strong>Apply</strong>.</div>
-        </template>
+      <ConfigField title="Confidence Preset"
+                   description="Gating for ongoing pose corrections after the initial lock. Tighter presets reject more observations but produce a more conservative pose."
+                   control-class="confidence-preset-control">
         <template #badge>
           <span v-if="isConfidencePresetDirty" class="dirty-badge">●</span>
         </template>
+
+        <!-- Stack the (optional) warning banner above the dropdown. The wrapper is a
+             flex column so the dropdown still ends up at the bottom of the card; the
+             banner only appears when Permissive (0) or Debug (3) is selected. -->
+        <div v-if="pendingMode.confidencePreset === 0" class="permissive-warning">
+          <span class="warning-icon">⚠️</span>
+          <span>
+            <strong>Permissive</strong> (2 tags, 75% inlier) accepts borderline observations.
+            Use only when the default tuning never converges.
+          </span>
+        </div>
+
+        <div v-if="pendingMode.confidencePreset === 3" class="debug-warning">
+          <span class="warning-icon">⚠️</span>
+          <span>
+            <strong>Debug</strong> (1 tag, 60% inlier) applies corrections from a single
+            tag. Single-tag pose is geometrically ambiguous (left/right, depth) and may
+            snap the robot to incorrect positions. <strong>Benchtop testing only — do NOT
+            enable on a competition robot.</strong>
+          </span>
+        </div>
+
         <select :value="pendingMode.confidencePreset" @change="handleConfidencePresetChange">
           <option v-for="preset in CONFIDENCE_PRESETS" :key="preset.value" :value="preset.value">
-            {{ preset.label }}
+            {{ preset.label }} ({{ preset.summary }})
           </option>
         </select>
       </ConfigField>
 
-      <div v-if="pendingMode.confidencePreset === 0" class="permissive-warning">
-        <span class="warning-icon">⚠️</span>
-        <span>
-          Permissive mode accepts borderline AprilTag observations. Use only when the
-          default tuning never converges (e.g. only one tag is visible on average).
-          Increases the chance of bad pose corrections.
-        </span>
-      </div>
-
-      <div v-if="pendingMode.confidencePreset === 3" class="debug-warning">
-        <span class="warning-icon">⚠️</span>
-        <span>
-          <strong>Debug mode</strong> applies pose corrections from a single AprilTag.
-          Single-tag pose estimates are geometrically ambiguous (left/right reflection,
-          depth uncertainty), so corrections may snap the robot to incorrect positions.
-          Intended for benchtop testing in confined spaces only — <strong>do NOT enable
-          on a robot during competition</strong>.
-        </span>
-      </div>
-
-      <ConfigField title="AprilTag Trust" control-class="input-control">
-        <template #description>
-          How much the Kalman filter trusts AprilTag observations relative to VIO.
-          <strong>High Trust</strong> snaps the pose to AprilTag faster; <strong>Low Trust</strong>
-          smooths the pose by sticking closer to VIO.
-        </template>
+      <ConfigField title="AprilTag Trust"
+                   description="How much the Kalman filter trusts AprilTag observations vs. VIO. High Trust snaps to the tag; Low Trust smooths via VIO."
+                   control-class="trust-control">
         <template #badge>
           <span v-if="isNoiseScaleDirty" class="dirty-badge">●</span>
         </template>
         <div class="trust-slider-wrap">
-          <span class="trust-end">High Trust</span>
           <input type="range" min="0.5" max="2.0" step="0.1"
                  :value="pendingMode.noiseScale" @input="handleNoiseScaleChange" class="trust-slider" />
-          <span class="trust-end">Low Trust</span>
-          <span class="trust-value">{{ trustLabel }}</span>
+          <div class="trust-labels">
+            <span class="trust-end">High Trust</span>
+            <span class="trust-value">{{ trustLabel }}</span>
+            <span class="trust-end">Low Trust</span>
+          </div>
         </div>
       </ConfigField>
     </div>
@@ -225,15 +226,17 @@ import FieldLayoutManager from './FieldLayoutManager.vue'
 // validation rejects values outside this set so keep these in sync.
 const MIN_TAGS_OPTIONS = [1, 2, 3, 4]
 
-// Mirrors QuestNav.QuestNav.Estimation.ConfidencePreset on the server. Order matches
-// the enum (0 = Permissive, 1 = Balanced, 2 = Strict, 3 = Debug) and the labels are
-// what the preset button group renders. "Debug" is intended for benchtop testing
-// only; the renderer attaches a separate warning banner when it is selected.
+// Mirrors QuestNav.QuestNav.Estimation.ConfidencePreset on the server. Order and
+// values match the enum (0 = Permissive, 1 = Balanced, 2 = Strict, 3 = Debug).
+// `summary` is the "(N tags, R% inlier)" suffix shown next to the preset name in
+// the dropdown so the user can see the gating thresholds without leaving the card.
+// Keep these in sync with VioAprilTagPoseEstimatorConstants.PRESET_*_MIN_TAGS and
+// PRESET_*_MIN_INLIER_RATIO on the server.
 const CONFIDENCE_PRESETS = [
-  { value: 0, label: 'Permissive' },
-  { value: 1, label: 'Balanced' },
-  { value: 2, label: 'Strict' },
-  { value: 3, label: 'Debug' }
+  { value: 0, label: 'Permissive', summary: '2 tags, 75% inlier' },
+  { value: 1, label: 'Balanced', summary: '3 tags, 80% inlier' },
+  { value: 2, label: 'Strict', summary: '4 tags, 90% inlier' },
+  { value: 3, label: 'Debug', summary: '1 tag, 60% inlier' }
 ]
 
 // Use mock store if available (for testing), otherwise use real store
@@ -699,10 +702,32 @@ function cancelChanges() {
   padding-bottom: 0.6rem;
 }
 
-.preset-apply-hint {
-  margin-top: 0.4rem;
-  font-style: italic;
-  color: var(--text-secondary);
+/* Confidence Preset card uses a flex-column control area so the warning banner
+   (when shown) stacks above the dropdown instead of sitting beside it. */
+:deep(.confidence-preset-control) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+/* Field Layout card stacks the layout dropdown over the "Manage Custom..." button
+   vertically. Side-by-side both truncated at typical card widths because the
+   dropdown text (e.g. "2026 rebuilt welded (22 tags)") and the button label can't
+   share the ~250 px card width without one being cut off. */
+.field-layout-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.field-layout-control select {
+  width: 100%;
+}
+
+.manage-custom-button {
+  align-self: flex-end;
 }
 
 .permissive-warning {
@@ -715,7 +740,6 @@ function cancelChanges() {
   border-radius: 6px;
   padding: 0.6rem 0.9rem;
   font-size: 0.85rem;
-  margin-bottom: 0.5rem;
 }
 
 .permissive-warning .warning-icon {
@@ -733,7 +757,6 @@ function cancelChanges() {
   border-radius: 6px;
   padding: 0.6rem 0.9rem;
   font-size: 0.85rem;
-  margin-bottom: 0.5rem;
 }
 
 .debug-warning .warning-icon {
@@ -741,11 +764,32 @@ function cancelChanges() {
   flex-shrink: 0;
 }
 
+/* AprilTag Trust card: slider takes the full card width; the High/Low labels and
+   the numeric value sit on a single row directly underneath. The previous layout
+   (slider in a flex row with labels on either side and the value to the right)
+   left the slider with only ~80 px of horizontal space at typical card widths. */
+:deep(.trust-control) {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .trust-slider-wrap {
   display: flex;
-  align-items: center;
-  gap: 0.65rem;
+  flex-direction: column;
+  gap: 0.4rem;
   width: 100%;
+}
+
+.trust-slider {
+  width: 100%;
+}
+
+.trust-labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .trust-end {
@@ -755,15 +799,10 @@ function cancelChanges() {
   white-space: nowrap;
 }
 
-.trust-slider {
-  flex: 1;
-}
-
 .trust-value {
-  min-width: 110px;
-  text-align: right;
   font-weight: 500;
   color: var(--text-primary);
   font-size: 0.85rem;
+  white-space: nowrap;
 }
 </style>

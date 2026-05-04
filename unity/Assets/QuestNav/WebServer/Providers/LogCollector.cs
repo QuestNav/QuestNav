@@ -100,6 +100,17 @@ namespace QuestNav.WebServer
         /// <param name="type">Type of log message</param>
         private void HandleLog(string message, string stackTrace, LogType type)
         {
+            // Drop SDK-internal noise that we cannot suppress at the source. These
+            // messages are emitted by Meta's MRUtilityKit native plugin and provide
+            // no actionable signal to a QuestNav user; including them in the web
+            // /api/logs view fills the buffer with duplicates that crowd out our own
+            // log lines. Match is intentionally narrow (case-sensitive, prefix-based)
+            // to avoid hiding legitimate warnings from the same library.
+            if (IsIgnoredSdkLog(message))
+            {
+                return;
+            }
+
             var entry = new LogEntry
             {
                 Message = CleanFilePaths(message),
@@ -118,6 +129,36 @@ namespace QuestNav.WebServer
                     logQueue.Dequeue();
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns true for known-noisy SDK log messages we explicitly want to drop
+        /// from the web log buffer. Add entries here only after confirming the
+        /// message provides no actionable signal and that we cannot suppress it at
+        /// the source.
+        ///
+        /// Current entries:
+        /// <list type="bullet">
+        /// <item>
+        ///   <description>
+        ///     <c>MRUK Shared: PCA: previous command buffer is still executing</c> -
+        ///     emitted by the Meta MRUtilityKit Passthrough Camera Access plugin
+        ///     when the render thread hasn't finished the previous camera-texture
+        ///     update before the next Unity Update tick. Benign; the SDK skips that
+        ///     update and tries again next frame. We already gate our coroutines on
+        ///     <c>cameraAccess.IsUpdatedThisFrame</c> to minimize how often this
+        ///     fires, but heavy GPU frames can still trigger it.
+        ///   </description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        private static bool IsIgnoredSdkLog(string message)
+        {
+            if (string.IsNullOrEmpty(message))
+                return false;
+            if (message.Contains("MRUK Shared: PCA: previous command buffer is still executing"))
+                return true;
+            return false;
         }
 
         /// <summary>

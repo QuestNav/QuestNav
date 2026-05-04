@@ -30,6 +30,15 @@ defineProps<{
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
+
+  /* Stretch the card to the tallest row height (default grid behavior) and
+     space children so the header sits at the top and the control sticks to
+     the bottom. Without this, cards with short descriptions leave the input
+     hanging at the top of an over-tall card and the row looks ragged. */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100%;
 }
 
 .config-field.field-warning {

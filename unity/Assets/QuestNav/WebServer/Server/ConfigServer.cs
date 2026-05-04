@@ -1406,9 +1406,7 @@ namespace QuestNav.WebServer.Server
         private async Task HandlePatchAprilTagFieldLayout(IHttpContext context, string fileName)
         {
             string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
-            QueuedLogger.Log(
-                $"PATCH /api/apriltag-field-layouts/{fileName} from {clientIp}"
-            );
+            QueuedLogger.Log($"PATCH /api/apriltag-field-layouts/{fileName} from {clientIp}");
 
             if (string.IsNullOrEmpty(fileName) || IsBundledLayoutName(fileName))
             {
@@ -1553,9 +1551,7 @@ namespace QuestNav.WebServer.Server
         private async Task HandleDeleteAprilTagFieldLayout(IHttpContext context, string fileName)
         {
             string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
-            QueuedLogger.Log(
-                $"DELETE /api/apriltag-field-layouts/{fileName} from {clientIp}"
-            );
+            QueuedLogger.Log($"DELETE /api/apriltag-field-layouts/{fileName} from {clientIp}");
 
             if (string.IsNullOrEmpty(fileName) || IsBundledLayoutName(fileName))
             {

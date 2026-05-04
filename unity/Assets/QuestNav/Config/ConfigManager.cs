@@ -822,9 +822,7 @@ namespace QuestNav.Config
             // Use a tight epsilon so we don't write the row for a sub-microscopic delta.
             if (Math.Abs(config.AprilTagNoiseScale - sanitized) < 1e-9)
             {
-                QueuedLogger.Log(
-                    $"Key 'aprilTagNoiseScale' already {sanitized:F2}; no-op write"
-                );
+                QueuedLogger.Log($"Key 'aprilTagNoiseScale' already {sanitized:F2}; no-op write");
                 return;
             }
             config.AprilTagNoiseScale = sanitized;

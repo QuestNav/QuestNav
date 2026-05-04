@@ -34,12 +34,24 @@ namespace QuestNav.QuestNav.AprilTag
         private readonly PassthroughCameraAccess cameraAccess;
         private readonly CameraResourceManager cameraArbiter;
         private readonly IConfigManager configManager;
+
+        // Detector and family are re-allocated on each enable. They are nullable because
+        // the disable path tears them down completely. Both AprilTagDetector.Dispose and
+        // Tag36h11.Dispose are idempotent guards so a second dispose is safe but wasteful.
         private AprilTagDetector aprilTagDetector;
-        private readonly AprilTagFamily aprilTagFamily = new Tag36h11();
+        private AprilTagFamily aprilTagFamily;
+
         private readonly PoseLibSolver poseLibSolver;
         private readonly MonoBehaviour coroutineHost;
         private Coroutine captureCoroutine;
         private float frameDelaySeconds;
+
+        /// <summary>
+        /// Single source of truth for the detector lifecycle. The capture coroutine checks
+        /// this on every iteration; setting it to false causes the next iteration to break
+        /// cleanly without touching the (about-to-be-disposed) detector or family.
+        /// </summary>
+        private bool detectorActive;
 
         /// <summary>
         /// Set of tag IDs to drop from each frame's detections (blacklist). Empty = detect every tag.
@@ -85,28 +97,94 @@ namespace QuestNav.QuestNav.AprilTag
         {
             if (enable)
             {
+                if (detectorActive)
+                {
+                    QueuedLogger.LogWarning(
+                        "AprilTag detector enable requested but already active; ignoring."
+                    );
+                    return;
+                }
+
+                try
+                {
+                    // Allocate a fresh family each time. The detector takes ownership and
+                    // disposes it as part of AprilTagDetector.Dispose(); we intentionally
+                    // do NOT also call aprilTagFamily.Dispose() in the disable path to
+                    // avoid double-dispose.
+                    aprilTagFamily = new Tag36h11();
+                    aprilTagDetector = new AprilTagDetector();
+                    aprilTagDetector.AddFamily(aprilTagFamily);
+                }
+                catch (Exception ex)
+                {
+                    QueuedLogger.LogError(
+                        $"Failed to allocate AprilTag detector/family: {ex.Message}"
+                    );
+                    aprilTagDetector?.Dispose();
+                    aprilTagDetector = null;
+                    aprilTagFamily = null;
+                    return;
+                }
+
                 // Reserve the camera at high priority. The arbiter will downgrade the
-                // passthrough stream's reservation if it conflicts.
+                // passthrough stream's reservation if it conflicts. Reserve is async
+                // (posts to main thread); the coroutine waits for cameraAccess.enabled
+                // before calling GetColors so the early frames before the arbiter has
+                // applied the reservation are skipped instead of crashing.
                 cameraArbiter.Reserve(
                     CameraArbiterRequesterId,
                     currentResolution,
                     CameraRequestPriority.High
                 );
-                aprilTagDetector = new AprilTagDetector();
-                aprilTagDetector.AddFamily(aprilTagFamily);
+
+                detectorActive = true;
                 captureCoroutine = coroutineHost.StartCoroutine(AprilTagFrameCaptureCoroutine());
                 QueuedLogger.Log("AprilTagDetector Enabled");
             }
             else
             {
+                if (!detectorActive)
+                {
+                    QueuedLogger.LogWarning(
+                        "AprilTag detector disable requested but already inactive; ignoring."
+                    );
+                    return;
+                }
+
+                // Flip the active flag FIRST so the coroutine breaks cleanly on its
+                // next iteration without touching the detector or family.
+                detectorActive = false;
+
                 if (captureCoroutine != null)
                 {
                     coroutineHost.StopCoroutine(captureCoroutine);
                     captureCoroutine = null;
                 }
-                cameraArbiter.Release(CameraArbiterRequesterId);
-                aprilTagDetector.Dispose();
-                aprilTagFamily.Dispose();
+
+                try
+                {
+                    cameraArbiter.Release(CameraArbiterRequesterId);
+                }
+                catch (Exception ex)
+                {
+                    QueuedLogger.LogError(
+                        $"AprilTag detector disable: cameraArbiter.Release failed: {ex.Message}"
+                    );
+                }
+
+                try
+                {
+                    // AprilTagDetector.Dispose disposes its registered family for us.
+                    aprilTagDetector?.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    QueuedLogger.LogError(
+                        $"AprilTag detector disable: detector dispose failed: {ex.Message}"
+                    );
+                }
+                aprilTagDetector = null;
+                aprilTagFamily = null;
                 QueuedLogger.Log("AprilTagDetector Disabled");
             }
         }
@@ -133,7 +211,7 @@ namespace QuestNav.QuestNav.AprilTag
             // Only ask the arbiter to re-apply when we are currently the active high-priority
             // requester AND the resolution actually changed. A pure FPS change does not need
             // to bounce the camera (the framerate is enforced by the coroutine's WaitForSeconds).
-            if (resolutionChanged && captureCoroutine != null)
+            if (resolutionChanged && detectorActive)
             {
                 cameraArbiter.Reserve(
                     CameraArbiterRequesterId,
@@ -174,6 +252,25 @@ namespace QuestNav.QuestNav.AprilTag
         {
             while (true)
             {
+                // Bail out cleanly if the detector was disabled between iterations. Checked
+                // BEFORE any cameraAccess / detector access so a torn-down detector cannot
+                // be touched on a coroutine that is mid-iteration when disable runs.
+                if (!detectorActive || aprilTagDetector == null)
+                {
+                    yield break;
+                }
+
+                // The camera arbiter applies cameraAccess.enabled = true on a Post()-queued
+                // main-thread callback, but StartCoroutine runs the first MoveNext()
+                // synchronously. If the very first iteration runs before the arbiter has
+                // dispatched, the camera is still off; skip the iteration instead of feeding
+                // an uninitialized GetColors() result into the native detector.
+                if (!cameraAccess.enabled)
+                {
+                    yield return new WaitForSeconds(frameDelaySeconds);
+                    continue;
+                }
+
                 float captureTimestamp = Time.time;
                 NativeArray<Color32> colors;
 
@@ -194,7 +291,32 @@ namespace QuestNav.QuestNav.AprilTag
                     cameraAccess.RequestedResolution.x,
                     cameraAccess.RequestedResolution.y
                 );
-                var results = aprilTagDetector.Detect(converted);
+
+                // ImageU8 returns null when the colors NativeArray is uninitialized or
+                // empty (e.g. the camera was just enabled and hasn't produced a frame yet).
+                // Skip this iteration cleanly instead of throwing inside Detect.
+                if (converted == null)
+                {
+                    yield return new WaitForSeconds(frameDelaySeconds);
+                    continue;
+                }
+
+                AprilTagDetectionResults results = null;
+                bool detectFailed = false;
+                try
+                {
+                    results = aprilTagDetector.Detect(converted);
+                }
+                catch (Exception ex)
+                {
+                    QueuedLogger.LogError($"AprilTagDetector.Detect threw: {ex.Message}");
+                    detectFailed = true;
+                }
+                if (detectFailed || results == null)
+                {
+                    yield return new WaitForSeconds(frameDelaySeconds);
+                    continue;
+                }
 
                 // Apply the ignored-IDs blacklist before counting / solving. Empty set
                 // keeps every detection. Building the kept list in-line avoids allocating

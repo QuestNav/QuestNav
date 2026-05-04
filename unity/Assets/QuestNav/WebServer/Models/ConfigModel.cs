@@ -30,6 +30,7 @@ namespace QuestNav.WebServer
     /// AprilTag detector configuration for web API.
     /// <c>ignoredIds</c> is a blacklist: detections with one of these IDs are dropped
     /// before the PoseLib solver runs. Empty array means detect every tag.
+    /// <c>fieldLayoutFile</c> takes effect on the next app restart only.
     /// </summary>
     [Serializable]
     public class AprilTagDetectorModeModel
@@ -41,6 +42,33 @@ namespace QuestNav.WebServer
         public int[] ignoredIds;
         public double maxDistance;
         public int minimumNumberOfTags;
+
+        /// <summary>
+        /// Filename of the field-layout JSON to use on the next app restart. Resolved
+        /// against the bundled directory (and, in commit 6, the user-uploaded directory).
+        /// Restart-on-change; the running app keeps using the previously-loaded layout
+        /// until restart.
+        /// </summary>
+        public string fieldLayoutFile;
+    }
+
+    /// <summary>
+    /// One entry in the response from <c>GET /api/apriltag-field-layouts</c>.
+    /// </summary>
+    [Serializable]
+    public class AprilTagFieldLayoutEntry
+    {
+        /// <summary>The literal filename (e.g. "2026-rebuilt-welded.json").</summary>
+        public string fileName;
+
+        /// <summary>Human-friendly name derived from the filename for display in the UI.</summary>
+        public string displayName;
+
+        /// <summary>"bundled" or "custom" (commit 6 adds custom uploads).</summary>
+        public string source;
+
+        /// <summary>Number of tag entries in the layout JSON.</summary>
+        public int tagCount;
     }
 
     /// <summary>

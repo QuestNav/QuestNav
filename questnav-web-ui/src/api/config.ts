@@ -1,7 +1,7 @@
 // API client for configuration endpoints
 
 import { QuestNavApi } from './questnav'
-import type { ConfigResponse, ConfigUpdateRequest, SimpleResponse, ServerInfo, HeadsetStatus } from '../types'
+import type { ConfigResponse, ConfigUpdateRequest, SimpleResponse, ServerInfo, HeadsetStatus, AprilTagFieldLayoutEntry } from '../types'
 
 class ConfigApi extends QuestNavApi {
 
@@ -70,6 +70,10 @@ class ConfigApi extends QuestNavApi {
   
   async resetPose(): Promise<SimpleResponse> {
     return this.request('/api/reset-pose', { method: 'POST' })
+  }
+
+  async getAprilTagFieldLayouts(): Promise<AprilTagFieldLayoutEntry[]> {
+    return this.request<AprilTagFieldLayoutEntry[]>('/api/apriltag-field-layouts')
   }
 }
 

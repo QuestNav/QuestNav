@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -8,6 +9,8 @@ using EmbedIO;
 using EmbedIO.Actions;
 using Newtonsoft.Json;
 using QuestNav.Config;
+using QuestNav.Core;
+using QuestNav.Utils;
 using UnityEngine;
 using static QuestNav.Config.Config;
 
@@ -319,6 +322,13 @@ namespace QuestNav.WebServer.Server
                 {
                     await HandleGetVideoModes(context);
                 }
+                else if (
+                    path == "/api/apriltag-field-layouts"
+                    && context.Request.HttpVerb == HttpVerbs.Get
+                )
+                {
+                    await HandleGetAprilTagFieldLayouts(context);
+                }
                 else
                 {
                     context.Response.StatusCode = 404;
@@ -368,6 +378,7 @@ namespace QuestNav.WebServer.Server
                     ignoredIds = aprilTagDetectorMode.IgnoredIds,
                     maxDistance = aprilTagDetectorMode.MaxDistance,
                     minimumNumberOfTags = aprilTagDetectorMode.MinimumNumberOfTags,
+                    fieldLayoutFile = await configManager.GetAprilTagFieldLayoutFileAsync(),
                 },
                 enableDebugLogging = await configManager.GetEnableDebugLoggingAsync(),
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
@@ -447,6 +458,33 @@ namespace QuestNav.WebServer.Server
                             request.AprilTagDetectorMode.minimumNumberOfTags
                         )
                     );
+
+                    // Field layout is restart-on-change. Validation lives in
+                    // SetAprilTagFieldLayoutFileAsync against the bundled list (and the
+                    // custom dir in commit 6); a value that doesn't exist is rejected
+                    // with a 400 and the rest of the AprilTagDetectorMode update sticks.
+                    if (!string.IsNullOrEmpty(request.AprilTagDetectorMode.fieldLayoutFile))
+                    {
+                        if (!IsValidFieldLayoutChoice(request.AprilTagDetectorMode.fieldLayoutFile))
+                        {
+                            context.Response.StatusCode = 400;
+                            await SendJsonResponse(
+                                context,
+                                new SimpleResponse
+                                {
+                                    success = false,
+                                    message =
+                                        $"Unknown field layout '{request.AprilTagDetectorMode.fieldLayoutFile}'. "
+                                        + "Use GET /api/apriltag-field-layouts to list valid options.",
+                                }
+                            );
+                            return;
+                        }
+
+                        await configManager.SetAprilTagFieldLayoutFileAsync(
+                            request.AprilTagDetectorMode.fieldLayoutFile
+                        );
+                    }
                 }
                 if (request.EnableAprilTagDetector.HasValue)
                 {
@@ -692,6 +730,118 @@ namespace QuestNav.WebServer.Server
 
             // Return just the array with 200 OK
             await SendJsonResponse(context, modeModels);
+        }
+
+        /// <summary>
+        /// Returns true if the file name matches a bundled or (in commit 6) custom field
+        /// layout. Used to validate POST /api/config writes to fieldLayoutFile.
+        /// </summary>
+        private bool IsValidFieldLayoutChoice(string fileName)
+        {
+            foreach (var bundled in QuestNavConstants.AprilTag.BUNDLED_FIELD_LAYOUTS)
+            {
+                if (string.Equals(bundled, fileName, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+            // commit 6 will also accept files in
+            // Application.persistentDataPath/apriltag/fieldlayouts-custom
+            return false;
+        }
+
+        /// <summary>
+        /// Handles GET /api/apriltag-field-layouts. Enumerates the bundled list (in commit
+        /// 6 also the custom-uploaded list) and returns metadata for each so the web UI
+        /// can populate the field-layout dropdown without having to enumerate the APK
+        /// itself (Android forbids listing StreamingAssets at runtime).
+        /// </summary>
+        private async Task HandleGetAprilTagFieldLayouts(IHttpContext context)
+        {
+            var entries = new List<AprilTagFieldLayoutEntry>();
+            string bundledDir = FileManager.GetStaticFilesPath("apriltag/fieldlayouts");
+            foreach (var fileName in QuestNavConstants.AprilTag.BUNDLED_FIELD_LAYOUTS)
+            {
+                int tagCount = 0;
+                try
+                {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                    // Bundled JSONs live inside the APK; extract them on demand so we can
+                    // count tags. Subsequent loads are no-ops because the file already
+                    // exists in persistent storage.
+                    await FileManager.ExtractAndroidFileAsync(
+                        fileName,
+                        "apriltag/fieldlayouts",
+                        bundledDir
+                    );
+#else
+                    await Task.CompletedTask;
+#endif
+                    string filePath = Path.Combine(bundledDir, fileName);
+                    if (File.Exists(filePath))
+                    {
+                        tagCount = CountTagsInLayoutFile(filePath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    QueuedLogger.LogWarning(
+                        $"Could not introspect bundled field layout '{fileName}': {ex.Message}"
+                    );
+                }
+
+                entries.Add(
+                    new AprilTagFieldLayoutEntry
+                    {
+                        fileName = fileName,
+                        displayName = MakeFieldLayoutDisplayName(fileName),
+                        source = "bundled",
+                        tagCount = tagCount,
+                    }
+                );
+            }
+
+            // Custom layouts are added in commit 6.
+
+            await SendJsonResponse(context, entries);
+        }
+
+        /// <summary>
+        /// Cheap tag-count introspection: just looks for the number of <c>"ID"</c> keys
+        /// in the JSON. Avoids deserializing the entire layout (which costs ~50 ms per
+        /// file with Newtonsoft.Json on the Quest) just to render a dropdown.
+        /// </summary>
+        private static int CountTagsInLayoutFile(string filePath)
+        {
+            try
+            {
+                string contents = File.ReadAllText(filePath);
+                int count = 0;
+                int idx = 0;
+                while ((idx = contents.IndexOf("\"ID\"", idx, StringComparison.Ordinal)) >= 0)
+                {
+                    count++;
+                    idx += 4;
+                }
+                return count;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Strips the <c>.json</c> extension and replaces hyphens with spaces; the result
+        /// is a friendlier dropdown label without forcing every layout file to be renamed
+        /// (e.g. "2026-rebuilt-welded.json" -> "2026 rebuilt welded").
+        /// </summary>
+        private static string MakeFieldLayoutDisplayName(string fileName)
+        {
+            string stem = fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
+                ? fileName.Substring(0, fileName.Length - 5)
+                : fileName;
+            return stem.Replace('-', ' ').Replace('_', ' ');
         }
     }
 }

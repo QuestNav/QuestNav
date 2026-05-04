@@ -18,7 +18,15 @@ namespace QuestNav.Config
     public interface IConfigManager
     {
         /// <summary>
+        /// Opens the configuration database (creates tables if needed) without firing
+        /// any initial events. Idempotent. Use this when a caller needs to read a
+        /// boot-only setting before constructing the subsystems that subscribe to events.
+        /// </summary>
+        public Task OpenAsync();
+
+        /// <summary>
         /// Initializes the configuration database and fires initial values.
+        /// Calls <see cref="OpenAsync"/> internally.
         /// </summary>
         public Task InitializeAsync();
 
@@ -155,6 +163,13 @@ namespace QuestNav.Config
         /// The detector mode with detection mode, resolution, framerate, and filter settings.
         /// </returns>
         public Task<AprilTagDetectorMode> GetAprilTagDetectorModeAsync();
+
+        /// <summary>
+        /// Gets the AprilTag field-layout file currently selected. Read once at startup;
+        /// changing this value via <see cref="SetAprilTagFieldLayoutFileAsync"/> takes
+        /// effect on the next app restart.
+        /// </summary>
+        public Task<string> GetAprilTagFieldLayoutFileAsync();
         #endregion
 
         #region Logging
@@ -217,6 +232,13 @@ namespace QuestNav.Config
         /// Sets the AprilTag detector mode configuration.
         /// </summary>
         public Task SetAprilTagDetectorModeAsnyc(AprilTagDetectorMode mode);
+
+        /// <summary>
+        /// Sets the AprilTag field-layout file. Persisted immediately; the new layout is
+        /// picked up on the next app restart. There is no event for this change because
+        /// hot-swapping the layout would invalidate the Kalman estimator's field alignment.
+        /// </summary>
+        public Task SetAprilTagFieldLayoutFileAsync(string fileName);
         #endregion
         #region Logging
         /// <summary>
@@ -245,8 +267,16 @@ namespace QuestNav.Config
         private SynchronizationContext mainThreadContext;
 
         #region Lifecycle Methods
-        /// <inheritdoc/>
-        public async Task InitializeAsync()
+        /// <summary>
+        /// Opens the SQLite connection and creates / migrates tables, but does NOT fire
+        /// any initial events. Idempotent. Used by <see cref="QuestNav"/> startup so that
+        /// "boot-only" config values (currently the AprilTag field-layout file) can be
+        /// read before the rest of the subsystems are constructed and subscribed.
+        ///
+        /// You almost certainly want <see cref="InitializeAsync"/> instead, which calls
+        /// this and then fires initial events to all subscribers.
+        /// </summary>
+        public async Task OpenAsync()
         {
             // Capture the main thread context for event callbacks
             mainThreadContext = SynchronizationContext.Current;
@@ -268,6 +298,12 @@ namespace QuestNav.Config
             await connection.CreateTableAsync<Config.Logging>();
 
             QueuedLogger.Log($"Database initialized at: {dbPath}");
+        }
+
+        /// <inheritdoc/>
+        public async Task InitializeAsync()
+        {
+            await OpenAsync();
 
             // Fire initial values to all current subscribers
             OnTeamNumberChanged?.Invoke(await GetTeamNumberAsync());
@@ -502,6 +538,17 @@ namespace QuestNav.Config
                 config.AprilTagDetectorMinimumNumberOfTags
             );
         }
+
+        /// <inheritdoc/>
+        public async Task<string> GetAprilTagFieldLayoutFileAsync()
+        {
+            var config = await GetAprilTagConfigAsync();
+            // Defensive: defaults are normally enforced by the SQLite POCO default value
+            // but a corrupt or pre-migration row could yield empty/null.
+            return string.IsNullOrEmpty(config.AprilTagFieldLayoutFile)
+                ? QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE
+                : config.AprilTagFieldLayoutFile;
+        }
         #endregion
 
         #region Logging
@@ -649,6 +696,34 @@ namespace QuestNav.Config
             // Notify subscribed methods on the main thread
             invokeOnMainThread(() => OnAprilTagDetectorModeChanged?.Invoke(mode));
             QueuedLogger.Log($"Updated Key 'aprilTagDetectorMode' to {mode}");
+        }
+
+        /// <inheritdoc/>
+        public async Task SetAprilTagFieldLayoutFileAsync(string fileName)
+        {
+            // Empty / null collapses to the default. The setter does NOT validate that the
+            // file exists - validation is the caller's job (the web POST handler in
+            // ConfigServer rejects unknown bundled names; commit 6 will add custom-file
+            // existence checking). Persisting an unknown name will just cause the next
+            // app start to fall back to the default layout (with a warning log).
+            string sanitized = string.IsNullOrEmpty(fileName)
+                ? QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE
+                : fileName;
+
+            var config = await GetAprilTagConfigAsync();
+            if (config.AprilTagFieldLayoutFile == sanitized)
+            {
+                return; // no-op
+            }
+            config.AprilTagFieldLayoutFile = sanitized;
+            await SaveAprilTagConfigAsync(config);
+
+            // No event on purpose. Hot-swapping the field layout would invalidate
+            // VioAprilTagPoseEstimator.hasInitialAlignment and the yaw offset; the change
+            // is intentionally restart-on-apply and the web UI surfaces that to the user.
+            QueuedLogger.Log(
+                $"Updated Key 'aprilTagFieldLayoutFile' to '{sanitized}' (effective on next restart)"
+            );
         }
         #endregion
 

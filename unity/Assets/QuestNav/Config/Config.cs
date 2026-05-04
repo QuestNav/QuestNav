@@ -166,6 +166,20 @@ namespace QuestNav.Config
             /// Minimum number of tags required to report a valid pose. Default is 2.
             /// </summary>
             public int AprilTagDetectorMinimumNumberOfTags { get; set; } = 2;
+
+            /// <summary>
+            /// Filename of the AprilTag field-layout JSON to load at startup. The file is
+            /// resolved against the bundled <c>StreamingAssets/apriltag/fieldlayouts</c>
+            /// directory and (in commit 6) the user-uploaded
+            /// <c>persistentDataPath/apriltag/fieldlayouts-custom</c> directory.
+            ///
+            /// Changes to this value take effect on app restart only; AprilTagFieldLayout
+            /// caches the loaded data and the Kalman estimator is aligned to it. A live
+            /// swap would invalidate <c>VioAprilTagPoseEstimator.hasInitialAlignment</c>
+            /// and is intentionally avoided.
+            /// </summary>
+            public string AprilTagFieldLayoutFile { get; set; } =
+                QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE;
         }
 
         public class Logging

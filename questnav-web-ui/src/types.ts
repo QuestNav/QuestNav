@@ -23,6 +23,17 @@ export interface AprilTagDetectorMode {
   ignoredIds: number[]
   maxDistance: number
   minimumNumberOfTags: number
+  // Field-layout JSON file used at app startup. Restart-on-change: writing this value
+  // persists it but the running app keeps using the previously-loaded layout. The UI
+  // surfaces the restart-required state with an inline banner + restart button.
+  fieldLayoutFile: string
+}
+
+export interface AprilTagFieldLayoutEntry {
+  fileName: string
+  displayName: string
+  source: 'bundled' | 'custom'
+  tagCount: number
 }
 
 export interface ConfigResponse {

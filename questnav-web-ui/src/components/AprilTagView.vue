@@ -10,6 +10,24 @@
       </label>
     </ConfigField>
 
+    <!-- Field Layout (restart-on-change). The dropdown writes the new selection to
+         config immediately, but the running app keeps using the previously-loaded
+         layout until it restarts. The banner below the grid prompts the user when a
+         restart is pending. -->
+    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Field Layout"
+                 description="AprilTag layout for the field. Changes take effect after restart."
+                 control-class="input-control">
+      <template #badge>
+        <span v-if="fieldLayoutDirty" class="dirty-badge">●</span>
+      </template>
+      <select :value="pendingFieldLayoutFile" @change="handleFieldLayoutChange" :disabled="fieldLayoutOptions.length === 0">
+        <option v-if="fieldLayoutOptions.length === 0" :value="pendingFieldLayoutFile">Loading...</option>
+        <option v-for="opt in fieldLayoutOptions" :key="opt.fileName" :value="opt.fileName">
+          {{ opt.displayName }} ({{ opt.tagCount }} tags{{ opt.source === 'custom' ? ', custom' : '' }})
+        </option>
+      </select>
+    </ConfigField>
+
     <!-- Detection Resolution
          Note: ANCHOR_ENHANCED detection mode is not implemented yet (it throws on the
          backend). The mode dropdown is intentionally hidden; the only supported value
@@ -78,12 +96,25 @@
       </button>
     </div>
   </div>
+
+  <!-- Restart-required banner. Field layout is read once at startup; if the user has
+       saved a new selection that does not match the active layout, prompt them to
+       restart. The button calls POST /api/restart (existing endpoint). -->
+  <div v-if="restartRequired" class="restart-banner">
+    <span class="restart-icon">⟳</span>
+    <span class="restart-text">
+      Field layout change saved. Restart QuestNav to apply
+      <strong>{{ savedFieldLayoutFile }}</strong>.
+    </span>
+    <button @click="handleRestart" class="restart-button">Restart App</button>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, inject } from 'vue'
+import { ref, computed, watch, inject, onMounted } from 'vue'
 import { useConfigStore } from '../stores/config'
-import type { AprilTagDetectorMode } from '../types'
+import { configApi } from '../api/config'
+import type { AprilTagDetectorMode, AprilTagFieldLayoutEntry } from '../types'
 import ConfigField from './ConfigField.vue'
 
 // Use mock store if available (for testing), otherwise use real store
@@ -98,7 +129,8 @@ const pendingMode = ref<AprilTagDetectorMode>({
   framerate: 30,
   ignoredIds: [],
   maxDistance: 4.0,
-  minimumNumberOfTags: 2
+  minimumNumberOfTags: 2,
+  fieldLayoutFile: '2026-rebuilt-welded.json'
 })
 
 // FRC tag36h11 IDs in current use never exceed ~40; clamp to 50 for headroom.
@@ -125,11 +157,40 @@ watch(() => configStore.config?.aprilTagDetectorMode, (newMode) => {
       if (!userModifiedFields.value.has('maxDistance')) updated.maxDistance = newMode.maxDistance
       if (!userModifiedFields.value.has('minimumNumberOfTags')) updated.minimumNumberOfTags = newMode.minimumNumberOfTags
       if (!userModifiedFields.value.has('ignoredIds')) updated.ignoredIds = [...newMode.ignoredIds]
+      if (!userModifiedFields.value.has('fieldLayoutFile')) updated.fieldLayoutFile = newMode.fieldLayoutFile
 
       pendingMode.value = updated
     }
   }
 }, { immediate: true })
+
+// Field layout dropdown state. Loaded from /api/apriltag-field-layouts on mount.
+const fieldLayoutOptions = ref<AprilTagFieldLayoutEntry[]>([])
+
+// pendingFieldLayoutFile is what the user has chosen in the dropdown (may not yet be saved
+// to the backend). pendingMode.fieldLayoutFile is what's currently in pendingMode.
+// They diverge between change and Apply when other dirty fields are also pending.
+const pendingFieldLayoutFile = computed({
+  get: () => pendingMode.value.fieldLayoutFile,
+  set: (value: string) => {
+    pendingMode.value.fieldLayoutFile = value
+  }
+})
+
+const fieldLayoutDirty = computed(() => userModifiedFields.value.has('fieldLayoutFile'))
+
+// savedFieldLayoutFile reflects the field-layout file currently persisted in the backend.
+// restartRequired is true when the saved value differs from what's in pendingMode at
+// Apply time. We surface a banner + Restart App button so the user can apply the change.
+const savedFieldLayoutFile = computed(() => configStore.config?.aprilTagDetectorMode?.fieldLayoutFile ?? '')
+// Active layout: lock in the value at first load; the running app cannot change layouts
+// without a restart so this is the right comparison target for the restart banner.
+const activeFieldLayoutFile = ref<string | null>(null)
+const restartRequired = computed(() => {
+  if (activeFieldLayoutFile.value === null) return false
+  if (!savedFieldLayoutFile.value) return false
+  return savedFieldLayoutFile.value !== activeFieldLayoutFile.value
+})
 
 // Computed for ignored IDs text representation. Clamps every entry to [0, FRC_MAX_TAG_ID]
 // and de-duplicates so the user can paste freely without breaking the backend filter.
@@ -226,6 +287,50 @@ function handleIgnoredIdsChange(event: Event) {
   ignoredIdsText.value = target.value
   userModifiedFields.value.add('ignoredIds')
 }
+
+function handleFieldLayoutChange(event: Event) {
+  const target = event.target as HTMLSelectElement
+  pendingMode.value.fieldLayoutFile = target.value
+  userModifiedFields.value.add('fieldLayoutFile')
+}
+
+async function loadFieldLayouts() {
+  try {
+    fieldLayoutOptions.value = await configApi.getAprilTagFieldLayouts()
+  } catch (err) {
+    console.error('Failed to load AprilTag field layouts:', err)
+    fieldLayoutOptions.value = []
+  }
+}
+
+async function handleRestart() {
+  if (!confirm('Restart QuestNav now to apply the new field layout?')) {
+    return
+  }
+  try {
+    await configApi.restartApp()
+  } catch (err) {
+    alert('Failed to restart: ' + (err instanceof Error ? err.message : String(err)))
+  }
+}
+
+onMounted(async () => {
+  await loadFieldLayouts()
+  // Snapshot the saved field-layout value at first mount; this is treated as the
+  // "currently active" layout for the running app session. Subsequent changes that
+  // diverge from this snapshot trigger the restart-required banner.
+  if (configStore.config?.aprilTagDetectorMode?.fieldLayoutFile) {
+    activeFieldLayoutFile.value = configStore.config.aprilTagDetectorMode.fieldLayoutFile
+  } else {
+    // Wait for config to load, then snapshot.
+    const stop = watch(() => configStore.config?.aprilTagDetectorMode?.fieldLayoutFile, (v) => {
+      if (v) {
+        activeFieldLayoutFile.value = v
+        stop()
+      }
+    })
+  }
+})
 
 function clearIgnoredIds() {
   pendingMode.value.ignoredIds = []
@@ -325,5 +430,43 @@ function cancelChanges() {
   font-weight: 500;
   color: var(--text-primary);
   font-size: 0.9rem;
+}
+
+.restart-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 193, 7, 0.12);
+  border: 1px solid var(--warning-color, #ffc107);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.restart-banner .restart-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.restart-banner .restart-text {
+  flex: 1;
+}
+
+.restart-button {
+  padding: 0.4rem 0.9rem;
+  border-radius: 4px;
+  font-weight: 600;
+  background: var(--warning-color, #ffc107);
+  color: #000;
+  border: 1px solid var(--warning-color, #ffc107);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.restart-button:hover {
+  opacity: 0.85;
 }
 </style>

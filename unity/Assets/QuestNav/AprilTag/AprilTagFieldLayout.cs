@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -32,30 +33,72 @@ namespace QuestNav.QuestNav.AprilTag
         }
 
         /// <summary>
-        /// Loads field JSON layout from the given filename. MUST be called prior to getting data from this class
+        /// Loads a field-layout JSON file. Returns true on success, false on any failure
+        /// (missing file, IO error, deserialization failure, empty <c>tags</c> array).
+        /// On failure, the existing <see cref="Tags"/> / <see cref="Field"/> values are
+        /// preserved so the caller can fall back to a different layout.
         /// </summary>
-        /// <param name="fileName">The filename to load</param>
-        public async Task LoadJsonFromFileAsync(string fileName)
+        /// <param name="fileName">The filename to load (must include extension).</param>
+        public async Task<bool> LoadJsonFromFileAsync(string fileName)
         {
             string filesPath = FileManager.GetStaticFilesPath("apriltag/fieldlayouts");
 #if UNITY_ANDROID && !UNITY_EDITOR
             // Extract the JSON from the APK
-            await FileManager.ExtractAndroidFileAsync(fileName, "apriltag/fieldlayouts", filesPath);
+            try
+            {
+                await FileManager.ExtractAndroidFileAsync(
+                    fileName,
+                    "apriltag/fieldlayouts",
+                    filesPath
+                );
+            }
+            catch (Exception ex)
+            {
+                QueuedLogger.LogError(
+                    $"Failed to extract bundled field layout '{fileName}' from APK: {ex.Message}"
+                );
+                return false;
+            }
 #else
             await Task.CompletedTask;
 #endif
             string filePath = $"{filesPath}/{fileName}";
-            using var file = File.OpenText(filePath);
-            var jsonSerializer = new JsonSerializer();
-            var root = (AprilTagFieldLayout)
-                jsonSerializer.Deserialize(file, typeof(AprilTagFieldLayout));
+            try
+            {
+                if (!File.Exists(filePath))
+                {
+                    QueuedLogger.LogError($"Field layout file does not exist: {filePath}");
+                    return false;
+                }
 
-            if (root == null)
-                return;
-            Tags = root.Tags;
-            Field = root.Field;
+                using var file = File.OpenText(filePath);
+                var jsonSerializer = new JsonSerializer();
+                var root = (AprilTagFieldLayout)
+                    jsonSerializer.Deserialize(file, typeof(AprilTagFieldLayout));
 
-            QueuedLogger.Log($"Loaded new AprilTagFieldLayout '{filePath}' with {Tags.Count} tags");
+                if (root == null || root.Tags == null || root.Tags.Count == 0)
+                {
+                    QueuedLogger.LogError(
+                        $"Field layout file '{filePath}' deserialized to an empty / invalid layout."
+                    );
+                    return false;
+                }
+
+                Tags = root.Tags;
+                Field = root.Field;
+
+                QueuedLogger.Log(
+                    $"Loaded new AprilTagFieldLayout '{filePath}' with {Tags.Count} tags"
+                );
+                return true;
+            }
+            catch (Exception ex)
+            {
+                QueuedLogger.LogError(
+                    $"Failed to load field layout '{filePath}': {ex.GetType().Name}: {ex.Message}"
+                );
+                return false;
+            }
         }
 
         /// <summary>

@@ -343,6 +343,43 @@ namespace QuestNav.WebServer.Server
                     await HandleGetAprilTagFieldLayouts(context);
                 }
                 else if (
+                    path == "/api/apriltag-field-layouts"
+                    && context.Request.HttpVerb == HttpVerbs.Post
+                )
+                {
+                    await HandlePostAprilTagFieldLayout(context);
+                }
+                else if (
+                    path.StartsWith("/api/apriltag-field-layouts/")
+                    && context.Request.HttpVerb == HttpVerbs.Get
+                )
+                {
+                    await HandleGetAprilTagFieldLayoutContent(
+                        context,
+                        path.Substring("/api/apriltag-field-layouts/".Length)
+                    );
+                }
+                else if (
+                    path.StartsWith("/api/apriltag-field-layouts/")
+                    && context.Request.HttpVerb == HttpVerbs.Patch
+                )
+                {
+                    await HandlePatchAprilTagFieldLayout(
+                        context,
+                        path.Substring("/api/apriltag-field-layouts/".Length)
+                    );
+                }
+                else if (
+                    path.StartsWith("/api/apriltag-field-layouts/")
+                    && context.Request.HttpVerb == HttpVerbs.Delete
+                )
+                {
+                    await HandleDeleteAprilTagFieldLayout(
+                        context,
+                        path.Substring("/api/apriltag-field-layouts/".Length)
+                    );
+                }
+                else if (
                     path == "/api/apriltag-video-modes"
                     && context.Request.HttpVerb == HttpVerbs.Get
                 )
@@ -799,8 +836,9 @@ namespace QuestNav.WebServer.Server
         }
 
         /// <summary>
-        /// Returns true if the file name matches a bundled or (in commit 6) custom field
-        /// layout. Used to validate POST /api/config writes to fieldLayoutFile.
+        /// Returns true if the file name matches a bundled layout or an existing custom
+        /// layout file in <see cref="FileManager.GetCustomFieldLayoutDir"/>. Used to
+        /// validate POST /api/config writes to <c>fieldLayoutFile</c>.
         /// </summary>
         private bool IsValidFieldLayoutChoice(string fileName)
         {
@@ -811,9 +849,8 @@ namespace QuestNav.WebServer.Server
                     return true;
                 }
             }
-            // commit 6 will also accept files in
-            // Application.persistentDataPath/apriltag/fieldlayouts-custom
-            return false;
+            string customPath = Path.Combine(FileManager.GetCustomFieldLayoutDir(), fileName);
+            return File.Exists(customPath);
         }
 
         /// <summary>
@@ -867,9 +904,638 @@ namespace QuestNav.WebServer.Server
                 );
             }
 
-            // Custom layouts are added in commit 6.
+            // Custom (user-uploaded) layouts.
+            string customDir = FileManager.GetCustomFieldLayoutDir();
+            try
+            {
+                if (Directory.Exists(customDir))
+                {
+                    foreach (var path in Directory.GetFiles(customDir, "*.json"))
+                    {
+                        string fileName = Path.GetFileName(path);
+                        // Defensive: never advertise a custom file that shadows a bundled
+                        // name (POST rejects this so it shouldn't exist, but if it does
+                        // we don't want two entries with identical fileName).
+                        if (IsBundledLayoutName(fileName))
+                        {
+                            continue;
+                        }
+                        int tagCount = 0;
+                        try
+                        {
+                            tagCount = CountTagsInLayoutFile(path);
+                        }
+                        catch (Exception ex)
+                        {
+                            QueuedLogger.LogWarning(
+                                $"Could not introspect custom field layout '{fileName}': {ex.Message}"
+                            );
+                        }
+                        entries.Add(
+                            new AprilTagFieldLayoutEntry
+                            {
+                                fileName = fileName,
+                                displayName = MakeFieldLayoutDisplayName(fileName),
+                                source = "custom",
+                                tagCount = tagCount,
+                            }
+                        );
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                QueuedLogger.LogError(
+                    $"Failed to enumerate custom field layouts in '{customDir}': {ex.Message}"
+                );
+            }
 
             await SendJsonResponse(context, entries);
+        }
+
+        /// <summary>
+        /// Helper used by both the listing endpoint and the POST handler to check whether
+        /// a name collides with a bundled layout (which is read-only and cannot be
+        /// shadowed by a custom upload).
+        /// </summary>
+        private static bool IsBundledLayoutName(string fileName)
+        {
+            foreach (var bundled in QuestNavConstants.AprilTag.BUNDLED_FIELD_LAYOUTS)
+            {
+                if (string.Equals(bundled, fileName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Sanitize and validate a user-supplied layout name. Returns the canonical
+        /// "&lt;name&gt;.json" form on success or null on failure (caller returns 400 with
+        /// the message). Forbids path traversal and collisions with bundled names.
+        /// </summary>
+        private static bool TrySanitizeFieldLayoutName(
+            string name,
+            out string canonical,
+            out string error
+        )
+        {
+            canonical = null;
+            error = null;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                error = "Layout name is required.";
+                return false;
+            }
+
+            // Strip any caller-supplied .json suffix so the regex below sees only the stem.
+            string stem = name;
+            if (stem.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            {
+                stem = stem.Substring(0, stem.Length - 5);
+            }
+
+            // Reject anything that isn't [A-Za-z0-9._-]{1,64}. This covers path-traversal
+            // attempts (../, /, \\), Windows reserved characters, leading dots, etc.
+            if (!System.Text.RegularExpressions.Regex.IsMatch(stem, @"^[A-Za-z0-9._-]{1,64}$"))
+            {
+                error =
+                    "Invalid layout name. Use only letters, numbers, '.', '_', and '-' (max 64 chars).";
+                return false;
+            }
+
+            canonical = stem + ".json";
+            if (IsBundledLayoutName(canonical))
+            {
+                error =
+                    $"'{canonical}' is a bundled layout name. Custom layouts cannot shadow "
+                    + "bundled layouts; choose a different name.";
+                canonical = null;
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Validates that a JSON string is a parseable AprilTagFieldLayout with at least
+        /// one tag, finite translations, and no duplicate IDs. Returns the deserialized
+        /// layout (and tagCount) on success.
+        /// </summary>
+        private static bool TryValidateFieldLayoutJson(
+            string json,
+            out int tagCount,
+            out string error
+        )
+        {
+            tagCount = 0;
+            error = null;
+            QuestNav.QuestNav.AprilTag.AprilTagFieldLayout parsed = null;
+            try
+            {
+                parsed =
+                    JsonConvert.DeserializeObject<QuestNav.QuestNav.AprilTag.AprilTagFieldLayout>(
+                        json
+                    );
+            }
+            catch (Exception ex)
+            {
+                error = $"Failed to parse JSON: {ex.Message}";
+                return false;
+            }
+            if (parsed == null || parsed.Tags == null || parsed.Tags.Count == 0)
+            {
+                error = "Layout must contain at least one tag in the 'tags' array.";
+                return false;
+            }
+            var seenIds = new HashSet<int>();
+            foreach (var tag in parsed.Tags)
+            {
+                if (tag == null || tag.Pose == null)
+                {
+                    error = "Every tag entry must have a 'pose' object.";
+                    return false;
+                }
+                var t = tag.Pose.Translation;
+                if (
+                    t == null
+                    || double.IsNaN(t.X)
+                    || double.IsNaN(t.Y)
+                    || double.IsNaN(t.Z)
+                    || double.IsInfinity(t.X)
+                    || double.IsInfinity(t.Y)
+                    || double.IsInfinity(t.Z)
+                )
+                {
+                    error = $"Tag {tag.ID}: translation has non-finite values.";
+                    return false;
+                }
+                if (!seenIds.Add(tag.ID))
+                {
+                    error = $"Duplicate tag ID {tag.ID} in layout.";
+                    return false;
+                }
+            }
+            tagCount = parsed.Tags.Count;
+            return true;
+        }
+
+        /// <summary>
+        /// GET /api/apriltag-field-layouts/{name} - returns the raw JSON content of a
+        /// custom layout so the web UI can populate the edit textarea. Refuses bundled
+        /// layouts (they are read-only - if the user wants to modify a bundled layout
+        /// they must rebuild the app).
+        /// </summary>
+        private async Task HandleGetAprilTagFieldLayoutContent(
+            IHttpContext context,
+            string fileName
+        )
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                context.Response.StatusCode = 400;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = false, message = "Layout name is required." }
+                );
+                return;
+            }
+            if (IsBundledLayoutName(fileName))
+            {
+                context.Response.StatusCode = 403;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message =
+                            "Bundled layouts are read-only. Edit the source JSON in StreamingAssets and rebuild the app.",
+                    }
+                );
+                return;
+            }
+            string path = Path.Combine(FileManager.GetCustomFieldLayoutDir(), fileName);
+            if (!File.Exists(path))
+            {
+                context.Response.StatusCode = 404;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = $"Custom layout '{fileName}' does not exist.",
+                    }
+                );
+                return;
+            }
+            try
+            {
+                string content = await File.ReadAllTextAsync(path);
+                context.Response.ContentType = "application/json";
+                await context.SendStringAsync(content, "application/json", Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 500;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = false, message = ex.Message }
+                );
+            }
+        }
+
+        /// <summary>
+        /// POST /api/apriltag-field-layouts. Body shape:
+        /// <code>{ "name": "team-1234-practice", "content": "..." }</code>
+        /// where <c>content</c> is the raw layout JSON string.
+        ///
+        /// Creates the layout if it doesn't exist; replaces it if it does (the UI's
+        /// "Edit" flow re-POSTs the same name with new content). Writes atomically via
+        /// a *.tmp file + rename so a failed write cannot corrupt an existing layout.
+        /// </summary>
+        private async Task HandlePostAprilTagFieldLayout(IHttpContext context)
+        {
+            // 10 MB body cap. Field layouts are ~30 KB; this is generous abuse-protection.
+            const long MAX_BODY_BYTES = 10L * 1024L * 1024L;
+            if (
+                context.Request.ContentLength64 > 0
+                && context.Request.ContentLength64 > MAX_BODY_BYTES
+            )
+            {
+                context.Response.StatusCode = 413;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = "Layout body too large (max 10 MB).",
+                    }
+                );
+                return;
+            }
+
+            string body;
+            try
+            {
+                using var reader = new StreamReader(
+                    context.Request.InputStream,
+                    Encoding.UTF8,
+                    detectEncodingFromByteOrderMarks: false,
+                    bufferSize: 1024,
+                    leaveOpen: false
+                );
+                var sb = new StringBuilder();
+                char[] buf = new char[8192];
+                long total = 0;
+                int read;
+                while ((read = await reader.ReadAsync(buf, 0, buf.Length)) > 0)
+                {
+                    total += read;
+                    if (total > MAX_BODY_BYTES)
+                    {
+                        context.Response.StatusCode = 413;
+                        await SendJsonResponse(
+                            context,
+                            new SimpleResponse
+                            {
+                                success = false,
+                                message = "Layout body too large (max 10 MB).",
+                            }
+                        );
+                        return;
+                    }
+                    sb.Append(buf, 0, read);
+                }
+                body = sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 400;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = $"Could not read request body: {ex.Message}",
+                    }
+                );
+                return;
+            }
+
+            FieldLayoutUploadRequest req;
+            try
+            {
+                req = JsonConvert.DeserializeObject<FieldLayoutUploadRequest>(body);
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 400;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = $"Invalid request envelope: {ex.Message}",
+                    }
+                );
+                return;
+            }
+            if (req == null || string.IsNullOrEmpty(req.content))
+            {
+                context.Response.StatusCode = 400;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = "Request must contain a 'name' and a non-empty 'content' string.",
+                    }
+                );
+                return;
+            }
+
+            if (!TrySanitizeFieldLayoutName(req.name, out string canonical, out string sanError))
+            {
+                context.Response.StatusCode = 400;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = false, message = sanError }
+                );
+                return;
+            }
+
+            if (!TryValidateFieldLayoutJson(req.content, out int tagCount, out string valError))
+            {
+                context.Response.StatusCode = 400;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = false, message = valError }
+                );
+                return;
+            }
+
+            string customDir = FileManager.GetCustomFieldLayoutDir();
+            string finalPath = Path.Combine(customDir, canonical);
+            string tmpPath = finalPath + ".tmp";
+
+            try
+            {
+                await File.WriteAllTextAsync(tmpPath, req.content);
+                if (File.Exists(finalPath))
+                {
+                    File.Delete(finalPath);
+                }
+                File.Move(tmpPath, finalPath);
+            }
+            catch (Exception ex)
+            {
+                if (File.Exists(tmpPath))
+                {
+                    try
+                    {
+                        File.Delete(tmpPath);
+                    }
+                    catch
+                    {
+                        /* swallow */
+                    }
+                }
+                context.Response.StatusCode = 500;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = $"Failed to write file: {ex.Message}",
+                    }
+                );
+                return;
+            }
+
+            await SendJsonResponse(
+                context,
+                new
+                {
+                    success = true,
+                    fileName = canonical,
+                    tagCount = tagCount,
+                }
+            );
+        }
+
+        /// <summary>
+        /// PATCH /api/apriltag-field-layouts/{name}. Body: <c>{ "newName": "..." }</c>.
+        /// Renames the file (sanitizing newName the same way as POST). If the renamed
+        /// layout was the currently-selected fieldLayoutFile in config, updates the
+        /// config to point at the new name atomically.
+        /// </summary>
+        private async Task HandlePatchAprilTagFieldLayout(IHttpContext context, string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName) || IsBundledLayoutName(fileName))
+            {
+                context.Response.StatusCode = 403;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = "Only custom layouts can be renamed.",
+                    }
+                );
+                return;
+            }
+
+            string body = await context.GetRequestBodyAsStringAsync();
+            FieldLayoutRenameRequest req = null;
+            try
+            {
+                req = JsonConvert.DeserializeObject<FieldLayoutRenameRequest>(body);
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 400;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = $"Invalid request: {ex.Message}",
+                    }
+                );
+                return;
+            }
+            if (req == null || string.IsNullOrWhiteSpace(req.newName))
+            {
+                context.Response.StatusCode = 400;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = "Request must contain 'newName'.",
+                    }
+                );
+                return;
+            }
+
+            if (
+                !TrySanitizeFieldLayoutName(
+                    req.newName,
+                    out string newCanonical,
+                    out string sanError
+                )
+            )
+            {
+                context.Response.StatusCode = 400;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse { success = false, message = sanError }
+                );
+                return;
+            }
+
+            string customDir = FileManager.GetCustomFieldLayoutDir();
+            string oldPath = Path.Combine(customDir, fileName);
+            string newPath = Path.Combine(customDir, newCanonical);
+
+            if (!File.Exists(oldPath))
+            {
+                context.Response.StatusCode = 404;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = $"Custom layout '{fileName}' does not exist.",
+                    }
+                );
+                return;
+            }
+            if (File.Exists(newPath))
+            {
+                context.Response.StatusCode = 409;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = $"A layout named '{newCanonical}' already exists.",
+                    }
+                );
+                return;
+            }
+
+            try
+            {
+                File.Move(oldPath, newPath);
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 500;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = $"Failed to rename file: {ex.Message}",
+                    }
+                );
+                return;
+            }
+
+            // If the currently-selected layout was just renamed, update the config so the
+            // next restart loads the right one (and the dropdown shows the new name without
+            // a stale "missing" reference).
+            string currentSelection = await configManager.GetAprilTagFieldLayoutFileAsync();
+            bool reselected = false;
+            if (string.Equals(currentSelection, fileName, StringComparison.Ordinal))
+            {
+                await configManager.SetAprilTagFieldLayoutFileAsync(newCanonical);
+                reselected = true;
+            }
+
+            await SendJsonResponse(
+                context,
+                new
+                {
+                    success = true,
+                    oldFileName = fileName,
+                    newFileName = newCanonical,
+                    reselectedConfigPointer = reselected,
+                }
+            );
+        }
+
+        /// <summary>
+        /// DELETE /api/apriltag-field-layouts/{name}. Refuses to delete bundled layouts.
+        /// If the deleted layout was the currently-selected fieldLayoutFile, falls back
+        /// to QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE.
+        /// </summary>
+        private async Task HandleDeleteAprilTagFieldLayout(IHttpContext context, string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName) || IsBundledLayoutName(fileName))
+            {
+                context.Response.StatusCode = 403;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = "Only custom layouts can be deleted.",
+                    }
+                );
+                return;
+            }
+            string customDir = FileManager.GetCustomFieldLayoutDir();
+            string path = Path.Combine(customDir, fileName);
+            if (!File.Exists(path))
+            {
+                context.Response.StatusCode = 404;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = $"Custom layout '{fileName}' does not exist.",
+                    }
+                );
+                return;
+            }
+            try
+            {
+                File.Delete(path);
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 500;
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = false,
+                        message = $"Failed to delete file: {ex.Message}",
+                    }
+                );
+                return;
+            }
+
+            string currentSelection = await configManager.GetAprilTagFieldLayoutFileAsync();
+            string fellBackTo = null;
+            if (string.Equals(currentSelection, fileName, StringComparison.Ordinal))
+            {
+                fellBackTo = QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE;
+                await configManager.SetAprilTagFieldLayoutFileAsync(fellBackTo);
+            }
+
+            await SendJsonResponse(
+                context,
+                new
+                {
+                    success = true,
+                    deletedFileName = fileName,
+                    fellBackTo = fellBackTo,
+                }
+            );
         }
 
         /// <summary>
@@ -914,14 +1580,19 @@ namespace QuestNav.WebServer.Server
         /// Editor-mode fallback resolution list. The Meta SDK
         /// <c>GetSupportedResolutions</c> call returns nothing meaningful in playmode
         /// (no real Quest camera); without this fallback the AprilTag tab would show
-        /// an empty resolution dropdown in dev. Same fallback shared with the camera
-        /// arbiter so both subsystems agree on the editor behavior.
+        /// an empty resolution dropdown in dev.
+        ///
+        /// Per Meta's PCA documentation, Quest 3 / Quest 3S only support these two
+        /// resolutions: 1280x960 (legacy 4:3, the original passthrough mode) and
+        /// 1280x1280 (added in Horizon OS v83, expanded vertical FOV). Aspirational
+        /// resolutions (320x240, 640x480, etc.) are NOT what the SDK returns at
+        /// runtime; including them in the editor fallback would let dev users select
+        /// modes that fail on device.
         /// </summary>
         private static readonly Vector2Int[] EditorFallbackResolutions =
         {
             new Vector2Int(1280, 1280),
-            new Vector2Int(640, 640),
-            new Vector2Int(320, 240),
+            new Vector2Int(1280, 960),
         };
 
         /// <summary>

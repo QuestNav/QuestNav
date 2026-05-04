@@ -75,6 +75,45 @@ class ConfigApi extends QuestNavApi {
   async getAprilTagFieldLayouts(): Promise<AprilTagFieldLayoutEntry[]> {
     return this.request<AprilTagFieldLayoutEntry[]>('/api/apriltag-field-layouts')
   }
+
+  /**
+   * Returns the raw JSON content of a custom (user-uploaded) layout. Bundled layouts
+   * are read-only and the server returns 403 for them; the UI should never call this
+   * for a bundled entry.
+   */
+  async getAprilTagFieldLayoutContent(fileName: string): Promise<string> {
+    const url = `${this.baseUrl}/api/apriltag-field-layouts/${encodeURIComponent(fileName)}`
+    const res = await fetch(url)
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ message: res.statusText }))
+      throw new Error(err.message || `HTTP ${res.status}`)
+    }
+    return await res.text()
+  }
+
+  /**
+   * Creates or replaces a custom layout. The same endpoint is used for both create
+   * and edit flows; sending an existing name with new content overwrites in place.
+   */
+  async saveCustomAprilTagFieldLayout(name: string, content: string): Promise<{ success: boolean, fileName: string, tagCount: number }> {
+    return this.request('/api/apriltag-field-layouts', {
+      method: 'POST',
+      body: JSON.stringify({ name, content })
+    })
+  }
+
+  async renameCustomAprilTagFieldLayout(oldName: string, newName: string): Promise<{ success: boolean, oldFileName: string, newFileName: string }> {
+    return this.request(`/api/apriltag-field-layouts/${encodeURIComponent(oldName)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ newName })
+    })
+  }
+
+  async deleteCustomAprilTagFieldLayout(fileName: string): Promise<{ success: boolean, deletedFileName: string, fellBackTo: string | null }> {
+    return this.request(`/api/apriltag-field-layouts/${encodeURIComponent(fileName)}`, {
+      method: 'DELETE'
+    })
+  }
 }
 
 export const configApi = new ConfigApi()

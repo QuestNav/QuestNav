@@ -64,11 +64,39 @@ namespace QuestNav.WebServer
         /// <summary>Human-friendly name derived from the filename for display in the UI.</summary>
         public string displayName;
 
-        /// <summary>"bundled" or "custom" (commit 6 adds custom uploads).</summary>
+        /// <summary>"bundled" or "custom" (user-uploaded via the manage modal).</summary>
         public string source;
 
         /// <summary>Number of tag entries in the layout JSON.</summary>
         public int tagCount;
+    }
+
+    /// <summary>
+    /// Request body for <c>POST /api/apriltag-field-layouts</c>. Used for both
+    /// "create new" and "edit existing" flows; sending the same name with new content
+    /// overwrites in place.
+    /// </summary>
+    [Serializable]
+    public class FieldLayoutUploadRequest
+    {
+        /// <summary>
+        /// Friendly name (extension optional; the server appends ".json" if missing).
+        /// Sanitized server-side to <c>[A-Za-z0-9._-]{1,64}</c>.
+        /// </summary>
+        public string name;
+
+        /// <summary>Raw JSON content of the layout (the same shape as the bundled JSONs).</summary>
+        public string content;
+    }
+
+    /// <summary>
+    /// Request body for <c>PATCH /api/apriltag-field-layouts/{name}</c>.
+    /// </summary>
+    [Serializable]
+    public class FieldLayoutRenameRequest
+    {
+        /// <summary>The new name (extension optional; sanitized server-side).</summary>
+        public string newName;
     }
 
     /// <summary>

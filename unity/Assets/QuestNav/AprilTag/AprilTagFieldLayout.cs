@@ -37,19 +37,35 @@ namespace QuestNav.QuestNav.AprilTag
         /// (missing file, IO error, deserialization failure, empty <c>tags</c> array).
         /// On failure, the existing <see cref="Tags"/> / <see cref="Field"/> values are
         /// preserved so the caller can fall back to a different layout.
+        ///
+        /// Lookup order: the user-uploaded "custom" directory
+        /// (<see cref="FileManager.GetCustomFieldLayoutDir"/>) is checked first. If the
+        /// file is not there, falls through to the bundled
+        /// <c>StreamingAssets/apriltag/fieldlayouts/</c> directory (extracted from the
+        /// APK on Android). Bundled-name shadowing is rejected at upload time, so this
+        /// order does not let a custom file silently override a bundled one.
         /// </summary>
         /// <param name="fileName">The filename to load (must include extension).</param>
         public async Task<bool> LoadJsonFromFileAsync(string fileName)
         {
-            string filesPath = FileManager.GetStaticFilesPath("apriltag/fieldlayouts");
+            // 1) Custom-uploaded JSONs live in persistentDataPath; check there first.
+            string customPath = Path.Combine(FileManager.GetCustomFieldLayoutDir(), fileName);
+            if (File.Exists(customPath))
+            {
+                return TryLoadFrom(customPath);
+            }
+
+            // 2) Fall through to bundled. On Android this requires extracting the
+            // JSON out of the APK first; on Editor / Standalone the StreamingAssets
+            // path is directly readable.
+            string bundledDir = FileManager.GetStaticFilesPath("apriltag/fieldlayouts");
 #if UNITY_ANDROID && !UNITY_EDITOR
-            // Extract the JSON from the APK
             try
             {
                 await FileManager.ExtractAndroidFileAsync(
                     fileName,
                     "apriltag/fieldlayouts",
-                    filesPath
+                    bundledDir
                 );
             }
             catch (Exception ex)
@@ -62,7 +78,17 @@ namespace QuestNav.QuestNav.AprilTag
 #else
             await Task.CompletedTask;
 #endif
-            string filePath = $"{filesPath}/{fileName}";
+            string bundledPath = Path.Combine(bundledDir, fileName);
+            return TryLoadFrom(bundledPath);
+        }
+
+        /// <summary>
+        /// Synchronous loader used by both the custom and bundled code paths above.
+        /// Captures the parse failure modes so the caller (which is async) can return
+        /// a simple bool.
+        /// </summary>
+        private bool TryLoadFrom(string filePath)
+        {
             try
             {
                 if (!File.Exists(filePath))

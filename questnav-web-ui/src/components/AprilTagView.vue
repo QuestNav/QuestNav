@@ -13,27 +13,40 @@
     <!-- Field Layout (restart-on-change). The dropdown writes the new selection to
          config immediately, but the running app keeps using the previously-loaded
          layout until it restarts. The banner below the grid prompts the user when a
-         restart is pending. -->
+         restart is pending. The "Manage Custom Layouts" button opens a modal where
+         the user can paste / edit / rename / delete their own JSONs. -->
     <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Field Layout"
                  description="AprilTag layout for the field. Changes take effect after restart."
                  control-class="input-control">
       <template #badge>
         <span v-if="fieldLayoutDirty" class="dirty-badge">●</span>
       </template>
-      <select :value="pendingFieldLayoutFile" @change="handleFieldLayoutChange" :disabled="fieldLayoutOptions.length === 0">
-        <option v-if="fieldLayoutOptions.length === 0" :value="pendingFieldLayoutFile">Loading...</option>
-        <option v-for="opt in fieldLayoutOptions" :key="opt.fileName" :value="opt.fileName">
-          {{ opt.displayName }} ({{ opt.tagCount }} tags{{ opt.source === 'custom' ? ', custom' : '' }})
-        </option>
-      </select>
+      <div style="display: flex; gap: 0.5rem; align-items: center; width: 100%;">
+        <select :value="pendingFieldLayoutFile" @change="handleFieldLayoutChange"
+                :disabled="fieldLayoutOptions.length === 0" style="flex: 1;">
+          <option v-if="fieldLayoutOptions.length === 0" :value="pendingFieldLayoutFile">Loading...</option>
+          <option v-for="opt in fieldLayoutOptions" :key="opt.fileName" :value="opt.fileName">
+            {{ opt.displayName }} ({{ opt.tagCount }} tags{{ opt.source === 'custom' ? ', custom' : '' }})
+          </option>
+        </select>
+        <button @click="showFieldLayoutManager = true" type="button" class="cancel-button">
+          Manage Custom...
+        </button>
+      </div>
     </ConfigField>
 
-    <!-- Detection Resolution
+    <!-- Camera Resolution
+         This dropdown actually configures the underlying Meta SDK PassthroughCameraAccess.
+         Quest 3 / Quest 3S support 1280x960 and 1280x1280 only; the list is sourced from
+         the SDK at runtime. Higher pixel count = larger detection range but more CPU and
+         battery. Note: when the AprilTag detector is enabled, this resolution also drives
+         the passthrough video stream (see camera arbiter / "Locked by AprilTag" badge in
+         the Camera tab).
          Note: ANCHOR_ENHANCED detection mode is not implemented yet (it throws on the
          backend). The mode dropdown is intentionally hidden; the only supported value
          (TRADITIONAL = 0) is sent automatically by submitModeSettings(). -->
-    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Detection Resolution"
-                 description="Camera resolution for AprilTag detection. Higher resolutions detect tags from further away but cost more CPU and battery."
+    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Camera Resolution"
+                 description="Headset camera resolution. Higher resolutions detect tags from further away but cost more CPU and battery. While AprilTag is enabled, this resolution overrides the passthrough stream's resolution."
                  control-class="input-control">
       <template #badge>
         <span v-if="isResolutionFieldDirty" class="dirty-badge">●</span>
@@ -46,11 +59,12 @@
       </select>
     </ConfigField>
 
-    <!-- Detection Framerate. FPS options are gated on the chosen resolution because the
-         camera supports different framerates per resolution; selecting a new resolution
-         resyncs the FPS selection to the closest valid value. -->
+    <!-- Detection Framerate. The Meta SDK does not let us set a camera framerate;
+         frames arrive continuously at ~60 Hz. This dropdown controls how often the
+         AprilTag detection coroutine pulls a frame and runs the detector, which lets
+         a team trade off CPU/battery for correction frequency. -->
     <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Detection Framerate"
-                 description="How often to run AprilTag detection. Lower FPS reduces CPU load."
+                 description="How often to run AprilTag detection on captured frames. The camera always runs at 60 Hz; this only affects how many frames per second the detector processes. Lower = less CPU and battery, fewer pose corrections."
                  control-class="input-control">
       <template #badge>
         <span v-if="isFramerateFieldDirty" class="dirty-badge">●</span>
@@ -122,6 +136,13 @@
     </span>
     <button @click="handleRestart" class="restart-button">Restart App</button>
   </div>
+
+  <!-- Custom field layout manager modal. Opens via the "Manage Custom..." button next
+       to the field-layout dropdown. Refreshes the dropdown on save / rename / delete
+       via the @changed event. -->
+  <FieldLayoutManager v-if="showFieldLayoutManager"
+                      @close="showFieldLayoutManager = false"
+                      @changed="loadFieldLayouts" />
 </template>
 
 <script setup lang="ts">
@@ -131,6 +152,7 @@ import { configApi } from '../api/config'
 import { videoApi } from '../api/video'
 import type { AprilTagDetectorMode, AprilTagFieldLayoutEntry, VideoModeModel } from '../types'
 import ConfigField from './ConfigField.vue'
+import FieldLayoutManager from './FieldLayoutManager.vue'
 
 // Mirrors QuestNavConstants.AprilTag.MINIMUM_TAGS_OPTIONS on the server. Server-side
 // validation rejects values outside this set so keep these in sync.
@@ -185,6 +207,11 @@ watch(() => configStore.config?.aprilTagDetectorMode, (newMode) => {
 
 // Field layout dropdown state. Loaded from /api/apriltag-field-layouts on mount.
 const fieldLayoutOptions = ref<AprilTagFieldLayoutEntry[]>([])
+
+// Toggles the "Custom Field Layouts" manager modal. The modal handles its own
+// loading state and emits 'changed' after save/rename/delete so we can refresh
+// the dropdown immediately.
+const showFieldLayoutManager = ref(false)
 
 // pendingFieldLayoutFile is what the user has chosen in the dropdown (may not yet be saved
 // to the backend). pendingMode.fieldLayoutFile is what's currently in pendingMode.

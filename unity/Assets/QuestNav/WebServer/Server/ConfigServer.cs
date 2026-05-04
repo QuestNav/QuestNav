@@ -14,6 +14,11 @@ using QuestNav.Core;
 using QuestNav.Utils;
 using UnityEngine;
 using static QuestNav.Config.Config;
+// The detection-pipeline namespaces are doubly-prefixed (QuestNav.QuestNav.*); using
+// aliases here avoids ambiguity with the project root namespace QuestNav when this file
+// is itself inside QuestNav.WebServer.Server. Otherwise a bare QuestNav.QuestNav.AprilTag
+// resolves to QuestNav.WebServer.Server.QuestNav.QuestNav.AprilTag and fails to find it.
+using AprilTagFieldLayoutDomain = QuestNav.QuestNav.AprilTag.AprilTagFieldLayout;
 
 namespace QuestNav.WebServer.Server
 {
@@ -1030,13 +1035,10 @@ namespace QuestNav.WebServer.Server
         {
             tagCount = 0;
             error = null;
-            QuestNav.QuestNav.AprilTag.AprilTagFieldLayout parsed = null;
+            AprilTagFieldLayoutDomain parsed = null;
             try
             {
-                parsed =
-                    JsonConvert.DeserializeObject<QuestNav.QuestNav.AprilTag.AprilTagFieldLayout>(
-                        json
-                    );
+                parsed = JsonConvert.DeserializeObject<AprilTagFieldLayoutDomain>(json);
             }
             catch (Exception ex)
             {

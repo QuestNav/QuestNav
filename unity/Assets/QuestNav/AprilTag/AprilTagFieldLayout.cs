@@ -59,6 +59,25 @@ namespace QuestNav.QuestNav.AprilTag
         }
 
         /// <summary>
+        /// Gets the field-relative pose of a tag by ID, or null if the ID is not in the
+        /// loaded layout. Used by the AprilTag detection pipeline to compute the true
+        /// camera-to-tag distance for max-distance gating and dynamic std dev scaling.
+        /// </summary>
+        /// <param name="id">The ID of the tag's pose to get.</param>
+        /// <returns>The tag's field-relative pose, or null if not found.</returns>
+        public Pose3d GetTagPose(int id)
+        {
+            if (Tags == null)
+                return null;
+            foreach (var tag in Tags)
+            {
+                if (tag.ID == id)
+                    return tag.Pose;
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Gets all four corners of the AprilTag in field relative space given the ID and loaded layout
         /// </summary>
         /// <param name="id">The ID of the tag's pose to get</param>

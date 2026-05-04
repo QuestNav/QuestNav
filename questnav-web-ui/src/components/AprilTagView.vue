@@ -52,13 +52,18 @@
       <input type="text" :value="pendingMode.minimumNumberOfTags" @input="handleMinimumTagsChange" />
     </ConfigField>
 
-    <!-- Allowed Tag IDs (will be renamed to Ignored Tag IDs in commit 3 alongside the backend rename) -->
-    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Allowed Tag IDs"
-                 description="Comma-separated list of allowed AprilTag IDs (leave empty for all)" control-class="input-control">
+    <!-- Ignored Tag IDs (blacklist) -->
+    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Ignored Tag IDs"
+                 description="Comma-separated list of AprilTag IDs to ignore (leave empty to detect all)" control-class="input-control">
       <template #badge>
-        <span v-if="isAllowedIdsFieldDirty" class="dirty-badge">●</span>
+        <span v-if="isIgnoredIdsFieldDirty" class="dirty-badge">●</span>
       </template>
-      <input type="text" :value="allowedIdsText" @input="handleAllowedIdsChange" placeholder="e.g., 1,2,3,4" />
+      <div style="display: flex; gap: 0.5rem; align-items: center; width: 100%;">
+        <input type="text" :value="ignoredIdsText" @input="handleIgnoredIdsChange" placeholder="e.g., 16,17" style="flex: 1;" />
+        <button @click="clearIgnoredIds" :disabled="pendingMode.ignoredIds.length === 0" class="cancel-button" type="button">
+          Clear
+        </button>
+      </div>
     </ConfigField>
   </div>
 
@@ -91,10 +96,13 @@ const pendingMode = ref<AprilTagDetectorMode>({
   width: 640,
   height: 480,
   framerate: 30,
-  allowedIds: [],
+  ignoredIds: [],
   maxDistance: 4.0,
   minimumNumberOfTags: 2
 })
+
+// FRC tag36h11 IDs in current use never exceed ~40; clamp to 50 for headroom.
+const FRC_MAX_TAG_ID = 50
 
 // Track which specific fields the user has actually modified
 const userModifiedFields = ref<Set<string>>(new Set())
@@ -116,21 +124,24 @@ watch(() => configStore.config?.aprilTagDetectorMode, (newMode) => {
       if (!userModifiedFields.value.has('framerate')) updated.framerate = newMode.framerate
       if (!userModifiedFields.value.has('maxDistance')) updated.maxDistance = newMode.maxDistance
       if (!userModifiedFields.value.has('minimumNumberOfTags')) updated.minimumNumberOfTags = newMode.minimumNumberOfTags
-      if (!userModifiedFields.value.has('allowedIds')) updated.allowedIds = [...newMode.allowedIds]
+      if (!userModifiedFields.value.has('ignoredIds')) updated.ignoredIds = [...newMode.ignoredIds]
 
       pendingMode.value = updated
     }
   }
 }, { immediate: true })
 
-// Computed for allowed IDs text representation
-const allowedIdsText = computed({
-  get: () => pendingMode.value.allowedIds.join(','),
+// Computed for ignored IDs text representation. Clamps every entry to [0, FRC_MAX_TAG_ID]
+// and de-duplicates so the user can paste freely without breaking the backend filter.
+const ignoredIdsText = computed({
+  get: () => pendingMode.value.ignoredIds.join(','),
   set: (value: string) => {
-    const ids = value.split(',')
+    const ids = Array.from(new Set(
+      value.split(',')
         .map(id => parseInt(id.trim()))
-        .filter(id => !isNaN(id) && id >= 0)
-    pendingMode.value.allowedIds = ids
+        .filter(id => !isNaN(id) && id >= 0 && id <= FRC_MAX_TAG_ID)
+    ))
+    pendingMode.value.ignoredIds = ids
     // Don't auto-mark as modified here - let the change handler do it
   }
 })
@@ -155,8 +166,8 @@ const isMinTagsFieldDirty = computed(() => {
   return userModifiedFields.value.has('minimumNumberOfTags')
 })
 
-const isAllowedIdsFieldDirty = computed(() => {
-  return userModifiedFields.value.has('allowedIds')
+const isIgnoredIdsFieldDirty = computed(() => {
+  return userModifiedFields.value.has('ignoredIds')
 })
 
 // Event handlers
@@ -210,10 +221,15 @@ function handleMinimumTagsChange(event: Event) {
   }
 }
 
-function handleAllowedIdsChange(event: Event) {
+function handleIgnoredIdsChange(event: Event) {
   const target = event.target as HTMLInputElement
-  allowedIdsText.value = target.value
-  userModifiedFields.value.add('allowedIds')
+  ignoredIdsText.value = target.value
+  userModifiedFields.value.add('ignoredIds')
+}
+
+function clearIgnoredIds() {
+  pendingMode.value.ignoredIds = []
+  userModifiedFields.value.add('ignoredIds')
 }
 
 async function submitModeSettings() {

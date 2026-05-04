@@ -365,7 +365,7 @@ namespace QuestNav.WebServer.Server
                     width = aprilTagDetectorMode.Width,
                     height = aprilTagDetectorMode.Height,
                     framerate = aprilTagDetectorMode.Framerate,
-                    allowedIds = aprilTagDetectorMode.AllowedIds,
+                    ignoredIds = aprilTagDetectorMode.IgnoredIds,
                     maxDistance = aprilTagDetectorMode.MaxDistance,
                     minimumNumberOfTags = aprilTagDetectorMode.MinimumNumberOfTags,
                 },
@@ -429,12 +429,11 @@ namespace QuestNav.WebServer.Server
                         )
                     );
                 }
-                if (request.EnableAprilTagDetector.HasValue)
-                {
-                    await configManager.SetEnableAprilTagDetectorAsync(
-                        request.EnableAprilTagDetector.Value
-                    );
-                }
+                // Apply mode BEFORE enable when both are present in the same request.
+                // OnAprilTagDetectorModeChanged caches the resolution that
+                // OnEnableAprilTagDetectorChanged uses to reserve the camera; with the
+                // wrong order, enabling would reserve at a stale resolution and the next
+                // mode change would re-bounce the camera unnecessarily.
                 if (request.AprilTagDetectorMode != null)
                 {
                     await configManager.SetAprilTagDetectorModeAsnyc(
@@ -443,10 +442,16 @@ namespace QuestNav.WebServer.Server
                             request.AprilTagDetectorMode.width,
                             request.AprilTagDetectorMode.height,
                             request.AprilTagDetectorMode.framerate,
-                            request.AprilTagDetectorMode.allowedIds,
+                            request.AprilTagDetectorMode.ignoredIds,
                             request.AprilTagDetectorMode.maxDistance,
                             request.AprilTagDetectorMode.minimumNumberOfTags
                         )
+                    );
+                }
+                if (request.EnableAprilTagDetector.HasValue)
+                {
+                    await configManager.SetEnableAprilTagDetectorAsync(
+                        request.EnableAprilTagDetector.Value
                     );
                 }
                 if (request.EnableDebugLogging.HasValue)

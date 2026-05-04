@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -39,7 +40,12 @@ namespace QuestNav.QuestNav.AprilTag
         private readonly MonoBehaviour coroutineHost;
         private Coroutine captureCoroutine;
         private float frameDelaySeconds;
-        private int[] allowedIds;
+
+        /// <summary>
+        /// Set of tag IDs to drop from each frame's detections (blacklist). Empty = detect every tag.
+        /// Rebuilt from <see cref="Config.AprilTagDetectorMode.IgnoredIds"/> on every config change.
+        /// </summary>
+        private HashSet<int> ignoredIdSet = new HashSet<int>();
         private double maxDistance;
         private int minimumNumberOfTags;
 
@@ -137,9 +143,16 @@ namespace QuestNav.QuestNav.AprilTag
             }
 
             frameDelaySeconds = 1.0f / Math.Max(1, configuration.Framerate);
-            allowedIds = configuration.AllowedIds;
+            // Rebuild the ignore set on each config change. The capture coroutine reads
+            // ignoredIdSet on every frame; replacing the reference atomically is safe
+            // because both reads and writes happen on the Unity main thread (the coroutine
+            // and this event handler are both main-thread).
+            ignoredIdSet =
+                configuration.IgnoredIds == null
+                    ? new HashSet<int>()
+                    : new HashSet<int>(configuration.IgnoredIds);
             maxDistance = configuration.MaxDistance;
-            minimumNumberOfTags = configuration.MinimumNumberOfTags;
+            minimumNumberOfTags = Math.Max(1, configuration.MinimumNumberOfTags);
         }
 
         //TODO: Fix crash when enabling/disabling detector
@@ -183,11 +196,25 @@ namespace QuestNav.QuestNav.AprilTag
                 );
                 var results = aprilTagDetector.Detect(converted);
 
-                if (results.NumberOfDetections >= 2)
+                // Apply the ignored-IDs blacklist before counting / solving. Empty set
+                // keeps every detection. Building the kept list in-line avoids allocating
+                // an AprilTagDetectionResults clone.
+                var kept = new List<AprilTagDetection>(results.NumberOfDetections);
+                foreach (var detection in results)
                 {
-                    QueuedLogger.Log("2+ Tags Detected");
+                    if (!ignoredIdSet.Contains(detection.Id))
+                    {
+                        kept.Add(detection);
+                    }
+                }
 
-                    var poseLibResult = poseLibSolver.PoseLibSolve(results);
+                if (kept.Count >= minimumNumberOfTags)
+                {
+                    QueuedLogger.Log(
+                        $"{kept.Count} usable tag(s) detected (ignore-set hides {results.NumberOfDetections - kept.Count})"
+                    );
+
+                    var poseLibResult = poseLibSolver.PoseLibSolve(kept);
 
                     if (poseLibResult != null)
                     {
@@ -196,18 +223,51 @@ namespace QuestNav.QuestNav.AprilTag
                             new Geometry.Quaternion(frcRot.w, frcRot.x, frcRot.y, frcRot.z)
                         );
 
-                        int tagCount = results.NumberOfDetections;
+                        int tagCount = kept.Count;
                         double inlierRatio =
                             (poseLibResult.TotalPoints > 0)
                                 ? poseLibResult.AcceptedPoints / poseLibResult.TotalPoints
                                 : 0.0;
 
-                        // Approximate average tag distance as the norm of the camera
-                        // position in FRC space (distance from camera to field origin is
-                        // a reasonable proxy for average tag range).
-                        double avgTagDistance = Math.Sqrt(
-                            frcPos.x * frcPos.x + frcPos.y * frcPos.y + frcPos.z * frcPos.z
-                        );
+                        // FIX: previously avgTagDistance was ||camera_position||, i.e. the
+                        // camera's distance from the FIELD ORIGIN (blue alliance corner).
+                        // That value silently inflates the dynamic std dev whenever the camera
+                        // is far from the origin and made the user-facing maxDistance gate
+                        // behave incorrectly (a robot in the red corner with a tag 1 m away
+                        // would compute distance ~16 m). The pipeline appeared to work today
+                        // because (a) maxDistance was unenforced and (b) the dynamic std dev
+                        // only affects correction trust, not pass/fail. Switching to the true
+                        // mean camera-to-tag distance changes the std dev curve - if pose
+                        // behavior regresses after this change, suspect this block first.
+                        double avgTagDistance = 0.0;
+                        int distanceSamples = 0;
+                        foreach (var det in kept)
+                        {
+                            var tagPose = aprilTagFieldLayout.GetTagPose(det.Id);
+                            if (tagPose == null)
+                            {
+                                continue; // skip detections whose ID isn't in the layout
+                            }
+                            double dx = tagPose.X - frcPos.x;
+                            double dy = tagPose.Y - frcPos.y;
+                            double dz = tagPose.Z - frcPos.z;
+                            avgTagDistance += Math.Sqrt(dx * dx + dy * dy + dz * dz);
+                            distanceSamples++;
+                        }
+                        if (distanceSamples > 0)
+                        {
+                            avgTagDistance /= distanceSamples;
+                        }
+
+                        if (avgTagDistance > maxDistance)
+                        {
+                            QueuedLogger.Log(
+                                $"AprilTag observation rejected: avgTagDistance={avgTagDistance:F2}m "
+                                    + $"> maxDistance={maxDistance:F2}m"
+                            );
+                            yield return new WaitForSeconds(frameDelaySeconds);
+                            continue;
+                        }
 
                         // Dynamic std devs: uncertainty scales with distance^2 and decreases with tag count
                         double stdDevFactor =

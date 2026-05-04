@@ -29,9 +29,10 @@ namespace QuestNav.Config
         }
 
         /// <summary>
-        /// Join table that stores allowed AprilTag family IDs for the single AprilTag config row.
+        /// Join table that stores ignored AprilTag IDs (blacklist) for the single AprilTag config row.
+        /// Empty = detect every tag the camera sees.
         /// </summary>
-        public class AprilTagAllowedId
+        public class AprilTagIgnoredId
         {
             [PrimaryKey, AutoIncrement]
             public int ID { get; set; }
@@ -42,9 +43,11 @@ namespace QuestNav.Config
             public int AprilTagConfigId { get; set; }
 
             /// <summary>
-            /// The allowed AprilTag family ID
+            /// The AprilTag ID to ignore. Detections with this ID are dropped before the
+            /// PoseLib solver runs. tag36h11 supports 587 unique IDs but FRC only uses
+            /// the first ~40, so the UI clamps user input to [0, 50] for headroom.
             /// </summary>
-            public int AllowedId { get; set; }
+            public int IgnoredId { get; set; }
         }
 
         public class System
@@ -104,8 +107,8 @@ namespace QuestNav.Config
         /// ApriTag detection configuration.
         /// </summary>
         /// <remarks>
-        /// NOTE: allowed IDs are stored in a separate table `AprilTagAllowedId`.
-        /// See ConfigManager to read/write.
+        /// NOTE: ignored IDs (blacklist) are stored in a separate table <c>AprilTagIgnoredId</c>.
+        /// See <see cref="ConfigManager"/> to read/write.
         /// </remarks>
         public class AprilTag
         {
@@ -261,9 +264,10 @@ namespace QuestNav.Config
             public int Framerate { get; }
 
             /// <summary>
-            /// Array of AprilTag family IDs to detect. Empty array detects all families.
+            /// Array of AprilTag IDs to ignore (blacklist). Empty array detects every tag.
+            /// FRC uses the first ~40 IDs of tag36h11; the UI clamps entries to [0, 50].
             /// </summary>
-            public int[] AllowedIds { get; }
+            public int[] IgnoredIds { get; }
 
             /// <summary>
             /// Maximum detection distance in meters.
@@ -282,7 +286,7 @@ namespace QuestNav.Config
             /// <param name="width">The width of the detection region in pixels.</param>
             /// <param name="height">The height of the detection region in pixels.</param>
             /// <param name="framerate">The detection framerate in frames per second.</param>
-            /// <param name="allowedIds">Array of AprilTag family IDs to detect.</param>
+            /// <param name="ignoredIds">Array of AprilTag IDs to ignore. Empty array detects every tag.</param>
             /// <param name="maxDistance">Maximum detection distance in meters.</param>
             /// <param name="minimumNumberOfTags">Minimum number of tags required to report a valid pose.</param>
             public AprilTagDetectorMode(
@@ -290,7 +294,7 @@ namespace QuestNav.Config
                 int width,
                 int height,
                 int framerate,
-                int[] allowedIds,
+                int[] ignoredIds,
                 double maxDistance,
                 int minimumNumberOfTags
             )
@@ -299,7 +303,7 @@ namespace QuestNav.Config
                 Width = width;
                 Height = height;
                 Framerate = framerate;
-                AllowedIds = allowedIds;
+                IgnoredIds = ignoredIds;
                 MaxDistance = maxDistance;
                 MinimumNumberOfTags = minimumNumberOfTags;
             }

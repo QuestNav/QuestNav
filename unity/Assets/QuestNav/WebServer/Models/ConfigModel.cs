@@ -27,7 +27,9 @@ namespace QuestNav.WebServer
     }
 
     /// <summary>
-    /// AprilTag detector configuration for web API
+    /// AprilTag detector configuration for web API.
+    /// <c>ignoredIds</c> is a blacklist: detections with one of these IDs are dropped
+    /// before the PoseLib solver runs. Empty array means detect every tag.
     /// </summary>
     [Serializable]
     public class AprilTagDetectorModeModel
@@ -36,7 +38,7 @@ namespace QuestNav.WebServer
         public int width;
         public int height;
         public int framerate;
-        public int[] allowedIds;
+        public int[] ignoredIds;
         public double maxDistance;
         public int minimumNumberOfTags;
     }

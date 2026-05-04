@@ -263,7 +263,8 @@ namespace QuestNav.Config
             await connection.CreateTableAsync<Config.System>();
             await connection.CreateTableAsync<Config.Camera>();
             await connection.CreateTableAsync<Config.AprilTag>();
-            await connection.CreateTableAsync<Config.AprilTagAllowedId>();
+            await MigrateAprilTagAllowedIdToIgnoredIdAsync();
+            await connection.CreateTableAsync<Config.AprilTagIgnoredId>();
             await connection.CreateTableAsync<Config.Logging>();
 
             QueuedLogger.Log($"Database initialized at: {dbPath}");
@@ -281,6 +282,42 @@ namespace QuestNav.Config
             OnAprilTagDetectorModeChanged?.Invoke(await GetAprilTagDetectorModeAsync());
 
             OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
+        }
+
+        /// <summary>
+        /// One-shot migration that renames the legacy <c>AprilTagAllowedId</c> table to
+        /// <c>AprilTagIgnoredId</c>. The semantics flipped from a whitelist to a blacklist;
+        /// silently reinterpreting the old rows would do the opposite of what the user
+        /// originally intended, so any pre-existing rows are dropped (with a warning) rather
+        /// than carried over. The previous UI was disabled, so no real-world data exists.
+        /// </summary>
+        private async Task MigrateAprilTagAllowedIdToIgnoredIdAsync()
+        {
+            try
+            {
+                int existing = await connection.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM AprilTagAllowedId"
+                );
+                if (existing > 0)
+                {
+                    QueuedLogger.LogWarning(
+                        $"Found {existing} legacy AprilTagAllowedId rows. The whitelist/blacklist "
+                            + "semantics have flipped; dropping legacy rows. Re-enter any IDs you "
+                            + "want ignored via the new Ignored Tag IDs field."
+                    );
+                }
+                // The table existed (the COUNT succeeded). Drop it; the fresh
+                // AprilTagIgnoredId table is created by the caller right after.
+                await connection.ExecuteAsync("DROP TABLE AprilTagAllowedId");
+                QueuedLogger.Log(
+                    "Migrated AprilTagAllowedId table out of the database (replaced by AprilTagIgnoredId)."
+                );
+            }
+            catch (SQLite.SQLiteException)
+            {
+                // Fresh database; the legacy table never existed. Normal path on first launch
+                // or on a database created after this migration was introduced.
+            }
         }
 
         /// <inheritdoc/>
@@ -448,14 +485,14 @@ namespace QuestNav.Config
         public async Task<AprilTagDetectorMode> GetAprilTagDetectorModeAsync()
         {
             var config = await GetAprilTagConfigAsync();
-            var allowedIds = await GetAprilTagAllowedIdsAsync();
+            var ignoredIds = await GetAprilTagIgnoredIdsAsync();
 
             return new AprilTagDetectorMode(
                 (AprilTagDetectorMode.DetectionMode)config.AprilTagDetectorMode,
                 config.AprilTagDetectorWidth,
                 config.AprilTagDetectorHeight,
                 config.AprilTagDetectorFramerate,
-                allowedIds,
+                ignoredIds,
                 config.AprilTagDetectorMaxDistance,
                 config.AprilTagDetectorMinimumNumberOfTags
             );
@@ -602,7 +639,7 @@ namespace QuestNav.Config
             config.AprilTagDetectorMaxDistance = mode.MaxDistance;
             config.AprilTagDetectorMinimumNumberOfTags = mode.MinimumNumberOfTags;
             await SaveAprilTagConfigAsync(config);
-            await SaveAprilTagAllowedIdsAsync(mode.AllowedIds ?? Array.Empty<int>());
+            await SaveAprilTagIgnoredIdsAsync(mode.IgnoredIds ?? Array.Empty<int>());
 
             // Notify subscribed methods on the main thread
             invokeOnMainThread(() => OnAprilTagDetectorModeChanged?.Invoke(mode));
@@ -704,20 +741,20 @@ namespace QuestNav.Config
         }
 
         /// <summary>
-        /// Gets AprilTag allowed IDs from DB, creating defaults if not found.
+        /// Gets AprilTag ignored IDs (blacklist) from the DB. Empty list means detect every tag.
         /// </summary>
         /// <returns>
-        /// The AprilTag allowed IDs configuration.
+        /// The AprilTag ignored IDs configuration.
         /// </returns>
-        private async Task<int[]> GetAprilTagAllowedIdsAsync()
+        private async Task<int[]> GetAprilTagIgnoredIdsAsync()
         {
             // The default is an empty array so no records are created for the default
             var rows = await connection
-                .Table<Config.AprilTagAllowedId>()
+                .Table<Config.AprilTagIgnoredId>()
                 .Where(r => r.AprilTagConfigId == 1)
                 .ToListAsync();
 
-            return rows.Select(r => r.AllowedId).ToArray();
+            return rows.Select(r => r.IgnoredId).ToArray();
         }
 
         /// <summary>
@@ -782,21 +819,21 @@ namespace QuestNav.Config
         }
 
         /// <summary>
-        /// Persists AprilTag allowed IDs to the database.
+        /// Persists AprilTag ignored IDs (blacklist) to the database.
         /// </summary>
-        /// <param name="ids">The AprilTag allowed IDs configuration to save.</param>
-        private async Task SaveAprilTagAllowedIdsAsync(IEnumerable<int> ids)
+        /// <param name="ids">The AprilTag ignored IDs configuration to save.</param>
+        private async Task SaveAprilTagIgnoredIdsAsync(IEnumerable<int> ids)
         {
             // single config row uses AprilTagConfigId = 1
             await connection.ExecuteAsync(
-                "DELETE FROM AprilTagAllowedId WHERE AprilTagConfigId = ?",
+                "DELETE FROM AprilTagIgnoredId WHERE AprilTagConfigId = ?",
                 1
             );
 
-            // bulk insert (one row per allowed id)
+            // bulk insert (one row per ignored id)
             foreach (var id in ids ?? Array.Empty<int>())
             {
-                var entry = new Config.AprilTagAllowedId { AprilTagConfigId = 1, AllowedId = id };
+                var entry = new Config.AprilTagIgnoredId { AprilTagConfigId = 1, IgnoredId = id };
                 await connection.InsertAsync(entry);
             }
         }

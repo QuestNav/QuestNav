@@ -18,7 +18,9 @@ export interface AprilTagDetectorMode {
   width: number
   height: number
   framerate: number
-  allowedIds: number[]
+  // Blacklist: detections with one of these IDs are dropped before the PoseLib solver runs.
+  // Empty array means detect every tag. UI clamps entries to [0, 50] (FRC tag range).
+  ignoredIds: number[]
   maxDistance: number
   minimumNumberOfTags: number
 }

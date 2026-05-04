@@ -22,10 +22,11 @@ namespace QuestNav.Camera
     {
         /// <summary>
         /// Available FPS options for video streaming. Sourced from
-        /// <see cref="QuestNavConstants.VideoStream.SUPPORTED_FPS"/> so the Camera tab
-        /// dropdown and the AprilTag tab dropdown stay in lock-step.
+        /// <c>QuestNavConstants.VideoStream.SUPPORTED_FPS</c> (imported via the
+        /// file-level <c>using static</c> directive) so the Camera tab dropdown and
+        /// the AprilTag tab dropdown stay in lock-step.
         /// </summary>
-        private static readonly int[] FpsOptions = QuestNavConstants.VideoStream.SUPPORTED_FPS;
+        private static readonly int[] FpsOptions = VideoStream.SUPPORTED_FPS;
 
         /// <summary>
         /// MonoBehaviour host for running coroutines.

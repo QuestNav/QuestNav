@@ -323,6 +323,7 @@ namespace QuestNav.Core
                 vrCameraRoot,
                 passthroughFrameSource,
                 cameraArbiter,
+                cameraAccess,
                 resetTransform
             );
 

@@ -283,6 +283,14 @@ namespace QuestNav.Core
             /// <see cref="BUNDLED_FIELD_LAYOUTS"/>.
             /// </summary>
             public const string DEFAULT_FIELD_LAYOUT_FILE = "2026-rebuilt-welded.json";
+
+            /// <summary>
+            /// Allowed values for the "Minimum Tags Required" dropdown. The estimator
+            /// already rejects pose updates with fewer than this many kept tags; the
+            /// list is constrained to plausible single-frame tag counts on the Quest
+            /// passthrough camera (the camera FOV makes 5+ tags vanishingly rare).
+            /// </summary>
+            public static readonly int[] MINIMUM_TAGS_OPTIONS = { 1, 2, 3, 4 };
         }
 
         /// <summary>
@@ -310,6 +318,15 @@ namespace QuestNav.Core
             /// The maximum framerate allowed when high-quality streams are disabled
             /// </summary>
             public const int MAX_LOW_QUAL_FRAMERATE = 30;
+
+            /// <summary>
+            /// Framerate options exposed to the UI dropdown. Used by both
+            /// <c>PassthroughFrameSource</c> and the AprilTag detector since they share the
+            /// same Meta SDK camera; FPS is enforced via coroutine timing, not at the SDK
+            /// level, so any value is technically callable but these are the values we
+            /// actively support.
+            /// </summary>
+            public static readonly int[] SUPPORTED_FPS = { 1, 5, 15, 24, 30, 48, 60 };
         }
     }
 }

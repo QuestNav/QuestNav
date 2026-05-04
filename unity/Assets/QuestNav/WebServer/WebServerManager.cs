@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Meta.XR;
 using QuestNav.Camera;
 using QuestNav.Commands;
 using QuestNav.Commands.Commands;
@@ -75,6 +76,13 @@ namespace QuestNav.WebServer
         private readonly LogCollector logCollector;
         private readonly CameraResourceManager cameraArbiter;
 
+        /// <summary>
+        /// Meta SDK camera reference. Forwarded to <see cref="ConfigServer"/> so the
+        /// AprilTag video-modes endpoint can enumerate supported resolutions even when
+        /// the passthrough stream is not currently running.
+        /// </summary>
+        private readonly PassthroughCameraAccess cameraAccess;
+
         private bool isInitialized;
 
         // Cached values updated via config events
@@ -90,6 +98,7 @@ namespace QuestNav.WebServer
             Transform vrCameraRoot,
             VideoStreamProvider.IFrameSource frameSource,
             CameraResourceManager cameraArbiter,
+            PassthroughCameraAccess cameraAccess,
             Transform resetTransform
         )
         {
@@ -100,6 +109,7 @@ namespace QuestNav.WebServer
             this.vrCameraRoot = vrCameraRoot;
             this.resetTransform = resetTransform;
             this.cameraArbiter = cameraArbiter;
+            this.cameraAccess = cameraAccess;
 
             statusProvider = new StatusProvider();
             logCollector = new LogCollector();
@@ -339,7 +349,8 @@ namespace QuestNav.WebServer
                 this,
                 statusProvider,
                 logCollector,
-                streamProvider
+                streamProvider,
+                cameraAccess
             );
 
             await server.StartAsync();

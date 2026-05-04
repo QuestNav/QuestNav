@@ -13,9 +13,14 @@ namespace QuestNav.Native.PoseLib
 {
     public class PoseLibSolver
     {
-        private readonly double[] intrinsicsArray;
-        private readonly int resolutionX;
-        private readonly int resolutionY;
+        // Cached camera intrinsics. These MUST be refreshed via RefreshIntrinsics()
+        // whenever the camera resolution changes (the Meta SDK exposes intrinsics
+        // per-resolution: focal length, principal point, and sensor resolution all
+        // change when RequestedResolution changes). Solving with stale intrinsics
+        // produces a pose that's silently wrong by 5-50 cm.
+        private double[] intrinsicsArray;
+        private int resolutionX;
+        private int resolutionY;
         private readonly AprilTagFieldLayout fieldLayout;
 
         public PoseLibSolver(
@@ -24,7 +29,16 @@ namespace QuestNav.Native.PoseLib
         )
         {
             this.fieldLayout = fieldLayout;
+            RefreshIntrinsics(intrinsics);
+        }
 
+        /// <summary>
+        /// Updates the cached camera intrinsics. Called from
+        /// <c>AprilTagManager.OnAprilTagDetectorModeChanged</c> after the camera arbiter
+        /// has applied a new resolution. The next solve uses the refreshed values.
+        /// </summary>
+        public void RefreshIntrinsics(PassthroughCameraAccess.CameraIntrinsics intrinsics)
+        {
             intrinsicsArray = new double[]
             {
                 intrinsics.FocalLength.x,
@@ -32,7 +46,6 @@ namespace QuestNav.Native.PoseLib
                 intrinsics.PrincipalPoint.x,
                 intrinsics.PrincipalPoint.y,
             };
-
             resolutionX = intrinsics.SensorResolution.x;
             resolutionY = intrinsics.SensorResolution.y;
         }

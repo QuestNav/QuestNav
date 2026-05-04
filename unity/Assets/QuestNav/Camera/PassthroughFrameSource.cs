@@ -21,9 +21,11 @@ namespace QuestNav.Camera
     public class PassthroughFrameSource : VideoStreamProvider.IFrameSource
     {
         /// <summary>
-        /// Available FPS options for video streaming.
+        /// Available FPS options for video streaming. Sourced from
+        /// <see cref="QuestNavConstants.VideoStream.SUPPORTED_FPS"/> so the Camera tab
+        /// dropdown and the AprilTag tab dropdown stay in lock-step.
         /// </summary>
-        private static readonly int[] FpsOptions = { 1, 5, 15, 24, 30, 48, 60 };
+        private static readonly int[] FpsOptions = QuestNavConstants.VideoStream.SUPPORTED_FPS;
 
         /// <summary>
         /// MonoBehaviour host for running coroutines.

@@ -90,7 +90,41 @@ namespace QuestNav.QuestNav.AprilTag
             configManager.OnEnableAprilTagDetectorChanged += OnEnableAprilTagDetectorChanged;
             configManager.OnAprilTagDetectorModeChanged += OnAprilTagDetectorModeChanged;
 
+            // Refresh PoseLib's cached intrinsics whenever the camera arbiter changes
+            // the effective resolution. Meta SDK exposes per-resolution intrinsics
+            // (focal length, principal point, sensor resolution all change with the
+            // requested resolution), and PoseLib silently produces a wrong pose if
+            // we solve with stale values.
+            cameraArbiter.OnResolutionChanged += OnCameraArbiterResolutionChanged;
+
             QueuedLogger.Log("Initialized AprilTagManager");
+        }
+
+        /// <summary>
+        /// Called when the camera arbiter applies a new effective resolution. Pulls the
+        /// latest intrinsics from the Meta SDK and forwards them to <see cref="PoseLibSolver"/>.
+        /// Wrapped in try/catch because <see cref="PassthroughCameraAccess.Intrinsics"/> can
+        /// throw if accessed while the camera is mid-state-change.
+        /// </summary>
+        private void OnCameraArbiterResolutionChanged(Vector2Int? newResolution)
+        {
+            if (!detectorActive || !newResolution.HasValue || poseLibSolver == null)
+            {
+                return;
+            }
+            try
+            {
+                poseLibSolver.RefreshIntrinsics(cameraAccess.Intrinsics);
+                QueuedLogger.Log(
+                    $"PoseLib intrinsics refreshed for {newResolution.Value.x}x{newResolution.Value.y}"
+                );
+            }
+            catch (Exception ex)
+            {
+                QueuedLogger.LogError(
+                    $"Failed to refresh PoseLib intrinsics after resolution change: {ex.Message}"
+                );
+            }
         }
 
         private void OnEnableAprilTagDetectorChanged(bool enable)

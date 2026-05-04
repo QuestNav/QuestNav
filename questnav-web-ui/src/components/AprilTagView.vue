@@ -31,23 +31,34 @@
     <!-- Detection Resolution
          Note: ANCHOR_ENHANCED detection mode is not implemented yet (it throws on the
          backend). The mode dropdown is intentionally hidden; the only supported value
-         (TRADITIONAL = 0) is sent automatically by handleModeChange()/submitModeSettings(). -->
+         (TRADITIONAL = 0) is sent automatically by submitModeSettings(). -->
     <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Detection Resolution"
-                 description="Camera resolution for AprilTag detection (Width x Height @ Framerate)" control-class="input-control">
+                 description="Camera resolution for AprilTag detection. Higher resolutions detect tags from further away but cost more CPU and battery."
+                 control-class="input-control">
       <template #badge>
         <span v-if="isResolutionFieldDirty" class="dirty-badge">●</span>
       </template>
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <input type="text" :value="pendingMode.width" @input="handleWidthChange" style="width: 75px;"
-               placeholder="Width" />
-        <span>×</span>
-        <input type="text" :value="pendingMode.height" @input="handleHeightChange" style="width: 75px;"
-               placeholder="Height" />
-        <span>@</span>
-        <input type="text" :value="pendingMode.framerate" @input="handleFramerateChange" style="width: 75px;"
-               placeholder="FPS" />
-        <span>fps</span>
-      </div>
+      <select :value="resolutionKey" @change="handleResolutionChange" :disabled="resolutionOptions.length === 0">
+        <option v-if="resolutionOptions.length === 0" :value="resolutionKey">Loading...</option>
+        <option v-for="opt in resolutionOptions" :key="opt.key" :value="opt.key">
+          {{ opt.label }}
+        </option>
+      </select>
+    </ConfigField>
+
+    <!-- Detection Framerate. FPS options are gated on the chosen resolution because the
+         camera supports different framerates per resolution; selecting a new resolution
+         resyncs the FPS selection to the closest valid value. -->
+    <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Detection Framerate"
+                 description="How often to run AprilTag detection. Lower FPS reduces CPU load."
+                 control-class="input-control">
+      <template #badge>
+        <span v-if="isFramerateFieldDirty" class="dirty-badge">●</span>
+      </template>
+      <select :value="pendingMode.framerate" @change="handleFramerateChange" :disabled="framerateOptions.length === 0">
+        <option v-if="framerateOptions.length === 0" :value="pendingMode.framerate">Loading...</option>
+        <option v-for="fps in framerateOptions" :key="fps" :value="fps">{{ fps }} fps</option>
+      </select>
     </ConfigField>
 
     <!-- Detection Range -->
@@ -63,11 +74,14 @@
 
     <!-- Minimum Tags -->
     <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Minimum Tags Required"
-                 description="Minimum number of tags needed for pose estimation" control-class="input-control">
+                 description="Minimum number of tags needed before a pose update is published. Higher values reject noisier observations but reduce update rate."
+                 control-class="input-control">
       <template #badge>
         <span v-if="isMinTagsFieldDirty" class="dirty-badge">●</span>
       </template>
-      <input type="text" :value="pendingMode.minimumNumberOfTags" @input="handleMinimumTagsChange" />
+      <select :value="pendingMode.minimumNumberOfTags" @change="handleMinimumTagsChange">
+        <option v-for="n in MIN_TAGS_OPTIONS" :key="n" :value="n">{{ n }}</option>
+      </select>
     </ConfigField>
 
     <!-- Ignored Tag IDs (blacklist) -->
@@ -114,8 +128,13 @@
 import { ref, computed, watch, inject, onMounted } from 'vue'
 import { useConfigStore } from '../stores/config'
 import { configApi } from '../api/config'
-import type { AprilTagDetectorMode, AprilTagFieldLayoutEntry } from '../types'
+import { videoApi } from '../api/video'
+import type { AprilTagDetectorMode, AprilTagFieldLayoutEntry, VideoModeModel } from '../types'
 import ConfigField from './ConfigField.vue'
+
+// Mirrors QuestNavConstants.AprilTag.MINIMUM_TAGS_OPTIONS on the server. Server-side
+// validation rejects values outside this set so keep these in sync.
+const MIN_TAGS_OPTIONS = [1, 2, 3, 4]
 
 // Use mock store if available (for testing), otherwise use real store
 const injectedStore = inject('configStore', null)
@@ -213,10 +232,13 @@ const hasModeChanged = computed(() => {
 })
 
 // Individual field dirty state indicators (only show dirty if user actually modified them)
+// Resolution badge covers width AND height (both flip together); FPS gets its own badge.
 const isResolutionFieldDirty = computed(() => {
-  return userModifiedFields.value.has('width') ||
-      userModifiedFields.value.has('height') ||
-      userModifiedFields.value.has('framerate')
+  return userModifiedFields.value.has('width') || userModifiedFields.value.has('height')
+})
+
+const isFramerateFieldDirty = computed(() => {
+  return userModifiedFields.value.has('framerate')
 })
 
 const isMaxDistanceFieldDirty = computed(() => {
@@ -237,28 +259,63 @@ async function handleDetectorEnabledChange(event: Event) {
   await configStore.updateEnableAprilTagDetector(target.checked)
 }
 
-function handleWidthChange(event: Event) {
-  const target = event.target as HTMLInputElement
-  const value = parseInt(target.value)
-  if (!isNaN(value) && value >= 160 && value <= 1920) {
-    pendingMode.value.width = value
-    userModifiedFields.value.add('width')
-  }
-}
+// Available video modes for AprilTag detection, loaded once on mount from
+// /api/apriltag-video-modes. This is the resolution x framerate cross-product the
+// underlying camera actually supports (with an editor-mode fallback on the server side).
+const apriltagVideoModes = ref<VideoModeModel[]>([])
 
-function handleHeightChange(event: Event) {
-  const target = event.target as HTMLInputElement
-  const value = parseInt(target.value)
-  if (!isNaN(value) && value >= 120 && value <= 1080) {
-    pendingMode.value.height = value
-    userModifiedFields.value.add('height')
+// Unique resolutions derived from the supported modes, formatted for the dropdown.
+const resolutionOptions = computed(() => {
+  const seen = new Map<string, { key: string; label: string; width: number; height: number }>()
+  for (const m of apriltagVideoModes.value) {
+    const key = `${m.width}x${m.height}`
+    if (!seen.has(key)) {
+      seen.set(key, { key, label: key, width: m.width, height: m.height })
+    }
+  }
+  return Array.from(seen.values())
+})
+
+// FPS options filtered to the current resolution. Different resolutions can support
+// different FPS values; resyncing the framerate selection happens in
+// syncResolutionAndFramerate() whenever the modes list or pending resolution changes.
+const framerateOptions = computed(() => {
+  const fps = new Set<number>()
+  for (const m of apriltagVideoModes.value) {
+    if (m.width === pendingMode.value.width && m.height === pendingMode.value.height) {
+      fps.add(m.framerate)
+    }
+  }
+  return Array.from(fps).sort((a, b) => a - b)
+})
+
+const resolutionKey = computed(() => `${pendingMode.value.width}x${pendingMode.value.height}`)
+
+function handleResolutionChange(event: Event) {
+  const target = event.target as HTMLSelectElement
+  const opt = resolutionOptions.value.find(o => o.key === target.value)
+  if (!opt) return
+  pendingMode.value.width = opt.width
+  pendingMode.value.height = opt.height
+  userModifiedFields.value.add('width')
+  userModifiedFields.value.add('height')
+  // The chosen FPS may not be valid for the new resolution. If so, snap to the closest.
+  const validFps = apriltagVideoModes.value
+    .filter(m => m.width === opt.width && m.height === opt.height)
+    .map(m => m.framerate)
+  if (validFps.length > 0 && !validFps.includes(pendingMode.value.framerate)) {
+    const closest = validFps.reduce((best, fps) =>
+      Math.abs(fps - pendingMode.value.framerate) < Math.abs(best - pendingMode.value.framerate) ? fps : best
+    )
+    pendingMode.value.framerate = closest
+    userModifiedFields.value.add('framerate')
   }
 }
 
 function handleFramerateChange(event: Event) {
-  const target = event.target as HTMLInputElement
+  const target = event.target as HTMLSelectElement
   const value = parseInt(target.value)
-  if (!isNaN(value) && value >= 5 && value <= 60) {
+  if (!isNaN(value)) {
     pendingMode.value.framerate = value
     userModifiedFields.value.add('framerate')
   }
@@ -274,9 +331,9 @@ function handleMaxDistanceChange(event: Event) {
 }
 
 function handleMinimumTagsChange(event: Event) {
-  const target = event.target as HTMLInputElement
+  const target = event.target as HTMLSelectElement
   const value = parseInt(target.value)
-  if (!isNaN(value) && value >= 1 && value <= 8) {
+  if (!isNaN(value) && MIN_TAGS_OPTIONS.includes(value)) {
     pendingMode.value.minimumNumberOfTags = value
     userModifiedFields.value.add('minimumNumberOfTags')
   }
@@ -303,6 +360,15 @@ async function loadFieldLayouts() {
   }
 }
 
+async function loadAprilTagVideoModes() {
+  try {
+    apriltagVideoModes.value = await videoApi.getAprilTagVideoModes()
+  } catch (err) {
+    console.error('Failed to load AprilTag video modes:', err)
+    apriltagVideoModes.value = []
+  }
+}
+
 async function handleRestart() {
   if (!confirm('Restart QuestNav now to apply the new field layout?')) {
     return
@@ -315,7 +381,7 @@ async function handleRestart() {
 }
 
 onMounted(async () => {
-  await loadFieldLayouts()
+  await Promise.all([loadFieldLayouts(), loadAprilTagVideoModes()])
   // Snapshot the saved field-layout value at first mount; this is treated as the
   // "currently active" layout for the running app session. Subsequent changes that
   // diverge from this snapshot trigger the restart-required banner.

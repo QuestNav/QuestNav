@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EmbedIO;
 using EmbedIO.Actions;
+using Meta.XR;
 using Newtonsoft.Json;
 using QuestNav.Config;
 using QuestNav.Core;
@@ -52,6 +53,15 @@ namespace QuestNav.WebServer.Server
         private readonly VideoStreamProvider streamProvider;
 
         /// <summary>
+        /// Meta SDK passthrough camera reference. Used to enumerate supported resolutions
+        /// for the AprilTag video-modes endpoint independently of the passthrough stream
+        /// state (the AprilTag detector and the passthrough stream both use the same
+        /// physical camera but the AprilTag detector should still get a populated
+        /// dropdown even when the passthrough stream is disabled).
+        /// </summary>
+        private readonly PassthroughCameraAccess cameraAccess;
+
+        /// <summary>
         /// Stream provider instance (injected)
         /// </summary>
         private readonly System.Collections.Generic.Dictionary<string, DateTime> activeClients =
@@ -75,6 +85,7 @@ namespace QuestNav.WebServer.Server
         /// <param name="statusProvider">Status provider instance for runtime data.</param>
         /// <param name="logCollector">Log collector instance for log messages.</param>
         /// <param name="streamProvider">Stream provider instance for video streaming.</param>
+        /// <param name="cameraAccess">Meta SDK camera reference used for the AprilTag video-modes endpoint.</param>
         public ConfigServer(
             IConfigManager configManager,
             int port,
@@ -84,7 +95,8 @@ namespace QuestNav.WebServer.Server
             WebServerManager webServerManager,
             StatusProvider statusProvider,
             LogCollector logCollector,
-            VideoStreamProvider streamProvider
+            VideoStreamProvider streamProvider,
+            PassthroughCameraAccess cameraAccess
         )
         {
             this.configManager = configManager;
@@ -96,6 +108,7 @@ namespace QuestNav.WebServer.Server
             this.statusProvider = statusProvider;
             this.logCollector = logCollector;
             this.streamProvider = streamProvider;
+            this.cameraAccess = cameraAccess;
 
             cachedDatabasePath = Path.Combine(Application.persistentDataPath, "config.db");
 
@@ -329,6 +342,13 @@ namespace QuestNav.WebServer.Server
                 {
                     await HandleGetAprilTagFieldLayouts(context);
                 }
+                else if (
+                    path == "/api/apriltag-video-modes"
+                    && context.Request.HttpVerb == HttpVerbs.Get
+                )
+                {
+                    await HandleGetAprilTagVideoModes(context);
+                }
                 else
                 {
                     context.Response.StatusCode = 404;
@@ -447,25 +467,73 @@ namespace QuestNav.WebServer.Server
                 // mode change would re-bounce the camera unnecessarily.
                 if (request.AprilTagDetectorMode != null)
                 {
+                    var atm = request.AprilTagDetectorMode;
+
+                    // Validate resolution / framerate against the camera's supported modes.
+                    // Reject 400 BEFORE persisting anything from this request so the API and
+                    // UI cannot get out of sync. The dropdown in the UI is driven from the
+                    // same source (/api/apriltag-video-modes) so this should only fire for
+                    // direct API callers / scripts.
+                    if (!IsValidAprilTagMode(atm.width, atm.height, atm.framerate))
+                    {
+                        context.Response.StatusCode = 400;
+                        await SendJsonResponse(
+                            context,
+                            new SimpleResponse
+                            {
+                                success = false,
+                                message =
+                                    $"Resolution {atm.width}x{atm.height} @ {atm.framerate}fps is not supported on this camera. "
+                                    + "Use GET /api/apriltag-video-modes to list valid combinations.",
+                            }
+                        );
+                        return;
+                    }
+
+                    // Validate minimumNumberOfTags against the dropdown's allowed range.
+                    bool validMinTags = false;
+                    foreach (var n in QuestNavConstants.AprilTag.MINIMUM_TAGS_OPTIONS)
+                    {
+                        if (n == atm.minimumNumberOfTags)
+                        {
+                            validMinTags = true;
+                            break;
+                        }
+                    }
+                    if (!validMinTags)
+                    {
+                        context.Response.StatusCode = 400;
+                        await SendJsonResponse(
+                            context,
+                            new SimpleResponse
+                            {
+                                success = false,
+                                message =
+                                    $"minimumNumberOfTags={atm.minimumNumberOfTags} is not in the supported set "
+                                    + "[1, 2, 3, 4]. Use one of those values.",
+                            }
+                        );
+                        return;
+                    }
+
                     await configManager.SetAprilTagDetectorModeAsnyc(
                         new AprilTagDetectorMode(
-                            (AprilTagDetectorMode.DetectionMode)request.AprilTagDetectorMode.mode,
-                            request.AprilTagDetectorMode.width,
-                            request.AprilTagDetectorMode.height,
-                            request.AprilTagDetectorMode.framerate,
-                            request.AprilTagDetectorMode.ignoredIds,
-                            request.AprilTagDetectorMode.maxDistance,
-                            request.AprilTagDetectorMode.minimumNumberOfTags
+                            (AprilTagDetectorMode.DetectionMode)atm.mode,
+                            atm.width,
+                            atm.height,
+                            atm.framerate,
+                            atm.ignoredIds,
+                            atm.maxDistance,
+                            atm.minimumNumberOfTags
                         )
                     );
 
-                    // Field layout is restart-on-change. Validation lives in
-                    // SetAprilTagFieldLayoutFileAsync against the bundled list (and the
-                    // custom dir in commit 6); a value that doesn't exist is rejected
-                    // with a 400 and the rest of the AprilTagDetectorMode update sticks.
-                    if (!string.IsNullOrEmpty(request.AprilTagDetectorMode.fieldLayoutFile))
+                    // Field layout is restart-on-change. A value that doesn't exist is
+                    // rejected with a 400 and the rest of the AprilTagDetectorMode update
+                    // sticks (it was already persisted by SetAprilTagDetectorModeAsnyc above).
+                    if (!string.IsNullOrEmpty(atm.fieldLayoutFile))
                     {
-                        if (!IsValidFieldLayoutChoice(request.AprilTagDetectorMode.fieldLayoutFile))
+                        if (!IsValidFieldLayoutChoice(atm.fieldLayoutFile))
                         {
                             context.Response.StatusCode = 400;
                             await SendJsonResponse(
@@ -474,16 +542,14 @@ namespace QuestNav.WebServer.Server
                                 {
                                     success = false,
                                     message =
-                                        $"Unknown field layout '{request.AprilTagDetectorMode.fieldLayoutFile}'. "
+                                        $"Unknown field layout '{atm.fieldLayoutFile}'. "
                                         + "Use GET /api/apriltag-field-layouts to list valid options.",
                                 }
                             );
                             return;
                         }
 
-                        await configManager.SetAprilTagFieldLayoutFileAsync(
-                            request.AprilTagDetectorMode.fieldLayoutFile
-                        );
+                        await configManager.SetAprilTagFieldLayoutFileAsync(atm.fieldLayoutFile);
                     }
                 }
                 if (request.EnableAprilTagDetector.HasValue)
@@ -842,6 +908,98 @@ namespace QuestNav.WebServer.Server
                 ? fileName.Substring(0, fileName.Length - 5)
                 : fileName;
             return stem.Replace('-', ' ').Replace('_', ' ');
+        }
+
+        /// <summary>
+        /// Editor-mode fallback resolution list. The Meta SDK
+        /// <c>GetSupportedResolutions</c> call returns nothing meaningful in playmode
+        /// (no real Quest camera); without this fallback the AprilTag tab would show
+        /// an empty resolution dropdown in dev. Same fallback shared with the camera
+        /// arbiter so both subsystems agree on the editor behavior.
+        /// </summary>
+        private static readonly Vector2Int[] EditorFallbackResolutions =
+        {
+            new Vector2Int(1280, 1280),
+            new Vector2Int(640, 640),
+            new Vector2Int(320, 240),
+        };
+
+        /// <summary>
+        /// Returns the cross-product of supported resolutions and supported framerates.
+        /// Source order: Meta SDK first (real device), then editor fallback if the SDK
+        /// returns an empty list. Wrapped in try/catch (issue 20: Meta SDK can throw
+        /// during state changes).
+        /// </summary>
+        private VideoModeModel[] BuildAprilTagSupportedModes()
+        {
+            Vector2Int[] resolutions;
+            try
+            {
+                resolutions =
+                    cameraAccess != null
+                        ? PassthroughCameraAccess.GetSupportedResolutions(
+                            cameraAccess.CameraPosition
+                        )
+                        : Array.Empty<Vector2Int>();
+            }
+            catch (Exception ex)
+            {
+                QueuedLogger.LogWarning(
+                    $"PassthroughCameraAccess.GetSupportedResolutions threw: {ex.Message}. "
+                        + "Falling back to editor stub list."
+                );
+                resolutions = Array.Empty<Vector2Int>();
+            }
+
+            if (resolutions == null || resolutions.Length == 0)
+            {
+                resolutions = EditorFallbackResolutions;
+            }
+
+            var fpsOptions = QuestNavConstants.VideoStream.SUPPORTED_FPS;
+            var modes = new VideoModeModel[resolutions.Length * fpsOptions.Length];
+            int n = 0;
+            foreach (var res in resolutions)
+            {
+                foreach (var fps in fpsOptions)
+                {
+                    modes[n++] = new VideoModeModel
+                    {
+                        width = res.x,
+                        height = res.y,
+                        framerate = fps,
+                    };
+                }
+            }
+            return modes;
+        }
+
+        /// <summary>
+        /// GET /api/apriltag-video-modes - resolution x framerate cross-product the
+        /// AprilTag detector can use. Note: AprilTag detection does NOT gate on
+        /// EnableHighQualityStreams; the detector benefits from higher resolution and
+        /// the user is expected to balance accuracy against thermal load themselves.
+        /// </summary>
+        private async Task HandleGetAprilTagVideoModes(IHttpContext context)
+        {
+            await SendJsonResponse(context, BuildAprilTagSupportedModes());
+        }
+
+        /// <summary>
+        /// Returns true if (width, height, fps) is one of the modes returned by
+        /// <see cref="BuildAprilTagSupportedModes"/>. Used by HandlePostConfig to reject
+        /// resolution / framerate combinations that the camera cannot actually deliver.
+        /// </summary>
+        private bool IsValidAprilTagMode(int width, int height, int fps)
+        {
+            foreach (var mode in BuildAprilTagSupportedModes())
+            {
+                if (mode.width == width && mode.height == height && mode.framerate == fps)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

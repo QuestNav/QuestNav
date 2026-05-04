@@ -377,31 +377,33 @@ namespace QuestNav.QuestNav.AprilTag
                     yield break;
                 }
 
-                // Discard frames whose pixel count does not match the requested resolution.
-                // Right after a resolution change, the Meta SDK can briefly return a buffer
-                // sized for the previous resolution while RequestedResolution already reports
-                // the new one. Feeding such a buffer to ImageU8 causes the Burst grayscale
-                // job to read out of bounds and produce garbage that segfaults libapriltag
-                // (gradient_clusters / apriltag_quad_thresh).
-                int requestedWidth = cameraAccess.RequestedResolution.x;
-                int requestedHeight = cameraAccess.RequestedResolution.y;
-                int expectedPixelCount = requestedWidth * requestedHeight;
+                // Use CurrentResolution (the camera's actual produced size) rather than
+                // RequestedResolution (the user's hint to the SDK). Per Meta API docs:
+                // "If the requested resolution is not present in GetSupportedResolutions,
+                //  the first smaller resolution will be selected instead." So a request
+                // for 1280x1280 can come back as 1280x960 or even 2560x2560 depending on
+                // the device. The colors NativeArray length always matches CurrentResolution.
+                int currentWidth = cameraAccess.CurrentResolution.x;
+                int currentHeight = cameraAccess.CurrentResolution.y;
+                int expectedPixelCount = currentWidth * currentHeight;
+
+                // Frame-size sanity check. After a resolution change, the SDK can briefly
+                // hand back a buffer sized for the previous resolution while
+                // CurrentResolution has already advanced. Feeding such a buffer to ImageU8
+                // makes the Burst grayscale job read out of bounds and produces garbage
+                // that segfaults libapriltag (gradient_clusters / apriltag_quad_thresh).
                 if (!colors.IsCreated || colors.Length == 0 || colors.Length != expectedPixelCount)
                 {
                     QueuedLogger.Log(
                         $"AprilTag frame skipped: expected {expectedPixelCount} pixels "
-                            + $"({requestedWidth}x{requestedHeight}), got {colors.Length}. "
+                            + $"({currentWidth}x{currentHeight}), got {colors.Length}. "
                             + "Camera resolution likely mid-bounce; this should clear within a frame or two."
                     );
                     yield return new WaitForSeconds(frameDelaySeconds);
                     continue;
                 }
 
-                var converted = ImageU8.FromPassthroughCamera(
-                    colors,
-                    requestedWidth,
-                    requestedHeight
-                );
+                var converted = ImageU8.FromPassthroughCamera(colors, currentWidth, currentHeight);
 
                 // ImageU8 returns null when the colors NativeArray is uninitialized or
                 // empty (e.g. the camera was just enabled and hasn't produced a frame yet).

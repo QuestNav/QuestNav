@@ -3,6 +3,14 @@
     <div class="camera-controls">
       <div class="controls-row">
         <div class="controls-left">
+          <!-- Master enable/disable for the passthrough camera stream. Moved here from
+               the Settings tab because it gates everything else on this page (the
+               resolution / FPS / quality controls) and pairs naturally with the live
+               stream view below. -->
+          <label class="checkbox-label inline-toggle">
+            <input type="checkbox" :checked="streamEnabled" @change="handlePassthroughStreamChange" />
+            {{ streamEnabled ? 'Stream Enabled' : 'Stream Disabled' }}
+          </label>
           <button @click="toggleFullscreen" class="secondary">
             {{ isFullscreen ? '⬜ Exit Fullscreen' : '⛶ Fullscreen' }}
           </button>
@@ -54,7 +62,7 @@
     <div v-if="!streamEnabled" class="stream-disabled-message">
       <div class="disabled-icon">📷</div>
       <h3>Camera Stream Disabled</h3>
-      <p>Enable "Passthrough Camera Stream" in Settings to view the camera feed.</p>
+      <p>Toggle "Stream Enabled" above to view the camera feed.</p>
     </div>
 
     <div v-else class="camera-container" ref="cameraContainer">
@@ -197,6 +205,11 @@ async function loadVideoModes() {
   }
 }
 
+async function handlePassthroughStreamChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  await configStore.updateEnablePassthroughStream(target.checked)
+}
+
 function applySettings() {
   configStore.updateStreamMode({
     width: selectedResolution.value.width,
@@ -297,6 +310,16 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.checkbox-label.inline-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
 }
 
 .active-stream-settings {

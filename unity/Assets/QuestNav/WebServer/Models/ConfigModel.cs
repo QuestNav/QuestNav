@@ -52,8 +52,9 @@ namespace QuestNav.WebServer
         public string fieldLayoutFile;
 
         /// <summary>
-        /// Phase-2 confidence preset: 0=Permissive, 1=Balanced, 2=Strict. Tighter presets
-        /// reject more pose updates but produce a more conservative pose. Takes effect
+        /// Phase-2 confidence preset: 0=Permissive, 1=Balanced, 2=Strict, 3=Debug.
+        /// Tighter presets reject more pose updates but produce a more conservative pose;
+        /// Debug allows single-tag corrections for benchtop testing only. Takes effect
         /// immediately (no restart required). Nullable: a missing field means "leave the
         /// existing value alone" so a third-party client that doesn't know about this
         /// field can still POST AprilTagDetectorMode without clobbering it.

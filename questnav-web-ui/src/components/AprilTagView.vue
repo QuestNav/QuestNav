@@ -127,17 +127,17 @@
           <div><strong>Permissive</strong>: 2 tags, 75% inlier ratio. Use only when default tuning is too strict.</div>
           <div><strong>Balanced</strong>: 3 tags, 80% inlier ratio. Default for most teams.</div>
           <div><strong>Strict</strong>: 4 tags, 90% inlier ratio. Use in noisy / high-glare environments.</div>
+          <div><strong>Debug</strong>: 1 tag, 60% inlier ratio. Benchtop only — see warning below.</div>
+          <div class="preset-apply-hint">Selection is staged until you click <strong>Apply</strong>.</div>
         </template>
         <template #badge>
           <span v-if="isConfidencePresetDirty" class="dirty-badge">●</span>
         </template>
-        <div class="preset-buttons">
-          <button v-for="preset in CONFIDENCE_PRESETS" :key="preset.value"
-                  @click="handleConfidencePresetChange(preset.value)" type="button"
-                  :class="['preset-button', { active: pendingMode.confidencePreset === preset.value }]">
+        <select :value="pendingMode.confidencePreset" @change="handleConfidencePresetChange">
+          <option v-for="preset in CONFIDENCE_PRESETS" :key="preset.value" :value="preset.value">
             {{ preset.label }}
-          </button>
-        </div>
+          </option>
+        </select>
       </ConfigField>
 
       <div v-if="pendingMode.confidencePreset === 0" class="permissive-warning">
@@ -146,6 +146,17 @@
           Permissive mode accepts borderline AprilTag observations. Use only when the
           default tuning never converges (e.g. only one tag is visible on average).
           Increases the chance of bad pose corrections.
+        </span>
+      </div>
+
+      <div v-if="pendingMode.confidencePreset === 3" class="debug-warning">
+        <span class="warning-icon">⚠️</span>
+        <span>
+          <strong>Debug mode</strong> applies pose corrections from a single AprilTag.
+          Single-tag pose estimates are geometrically ambiguous (left/right reflection,
+          depth uncertainty), so corrections may snap the robot to incorrect positions.
+          Intended for benchtop testing in confined spaces only — <strong>do NOT enable
+          on a robot during competition</strong>.
         </span>
       </div>
 
@@ -215,12 +226,14 @@ import FieldLayoutManager from './FieldLayoutManager.vue'
 const MIN_TAGS_OPTIONS = [1, 2, 3, 4]
 
 // Mirrors QuestNav.QuestNav.Estimation.ConfidencePreset on the server. Order matches
-// the enum (0 = Permissive, 1 = Balanced, 2 = Strict) and the labels are what the
-// preset button group renders.
+// the enum (0 = Permissive, 1 = Balanced, 2 = Strict, 3 = Debug) and the labels are
+// what the preset button group renders. "Debug" is intended for benchtop testing
+// only; the renderer attaches a separate warning banner when it is selected.
 const CONFIDENCE_PRESETS = [
   { value: 0, label: 'Permissive' },
   { value: 1, label: 'Balanced' },
-  { value: 2, label: 'Strict' }
+  { value: 2, label: 'Strict' },
+  { value: 3, label: 'Debug' }
 ]
 
 // Use mock store if available (for testing), otherwise use real store
@@ -514,9 +527,13 @@ function clearIgnoredIds() {
   userModifiedFields.value.add('ignoredIds')
 }
 
-function handleConfidencePresetChange(value: number) {
-  pendingMode.value.confidencePreset = value
-  userModifiedFields.value.add('confidencePreset')
+function handleConfidencePresetChange(event: Event) {
+  const target = event.target as HTMLSelectElement
+  const value = parseInt(target.value)
+  if (!isNaN(value)) {
+    pendingMode.value.confidencePreset = value
+    userModifiedFields.value.add('confidencePreset')
+  }
 }
 
 function handleNoiseScaleChange(event: Event) {
@@ -682,36 +699,10 @@ function cancelChanges() {
   padding-bottom: 0.6rem;
 }
 
-.preset-buttons {
-  display: inline-flex;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.preset-button {
-  padding: 0.4rem 0.95rem;
-  background: var(--card-bg);
-  color: var(--text-primary);
-  border: none;
-  border-right: 1px solid var(--border-color);
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 0.9rem;
-  transition: background 0.15s ease;
-}
-
-.preset-button:last-child {
-  border-right: none;
-}
-
-.preset-button:hover {
-  background: var(--bg-secondary);
-}
-
-.preset-button.active {
-  background: var(--primary-color);
-  color: white;
+.preset-apply-hint {
+  margin-top: 0.4rem;
+  font-style: italic;
+  color: var(--text-secondary);
 }
 
 .permissive-warning {
@@ -728,6 +719,24 @@ function cancelChanges() {
 }
 
 .permissive-warning .warning-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.debug-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: rgba(220, 53, 69, 0.12);
+  border: 1px solid var(--error-color, #dc3545);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.debug-warning .warning-icon {
   font-size: 1rem;
   flex-shrink: 0;
 }

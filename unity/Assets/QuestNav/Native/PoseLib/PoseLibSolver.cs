@@ -101,15 +101,10 @@ namespace QuestNav.Native.PoseLib
                 }
             }
 
-            // Scale RANSAC reprojection-error threshold proportionally to the image
-            // width: ~1% of the image width is the rule we use across modes. The
-            // legacy hardcoded value 12 (px) was tuned for ~1280-wide frames; the
-            // Meta SDK is now delivering full-sensor 2560-wide frames (per commit
-            // that switched to colors.Length-derived sizing), so a literal 12 px
-            // becomes a 2x tighter relative tolerance and tanks RANSAC's inlier
-            // ratio. Computed per-call so it adapts if intrinsics are refreshed.
-            double maxReprojErrorPx = Math.Max(8.0, resolutionX * 0.01);
-
+            // 12 px RANSAC reprojection-error threshold was tuned for the Quest 3 / 3S
+            // 1280-wide passthrough frames. (An earlier attempt to scale this with
+            // colors.Length was based on a misread of the Meta SDK's GetColors over-
+            // allocation; see AprilTagManager comment in AprilTagFrameCaptureCoroutine.)
             int status = PoseLibNatives.poselib_estimate_absolute_pose_simple(
                 corners2d.ToArray(),
                 corners3d.ToArray(),
@@ -119,7 +114,7 @@ namespace QuestNav.Native.PoseLib
                 resolutionY,
                 intrinsicsArray,
                 4,
-                maxReprojErrorPx,
+                12,
                 out var resultPose,
                 out ulong resultInliers
             );

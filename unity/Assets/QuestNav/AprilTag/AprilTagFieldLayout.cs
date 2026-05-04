@@ -18,6 +18,16 @@ namespace QuestNav.QuestNav.AprilTag
         public Field2d Field { get; set; }
 
         /// <summary>
+        /// O(1) lookup of tag IDs known to the loaded layout. Rebuilt every successful
+        /// load (<see cref="TryLoadFrom"/>). The detection pipeline calls
+        /// <see cref="ContainsId"/> on every detected tag to drop false-positive IDs
+        /// (e.g. tag36h11 noise that decodes to ID 554 when no such tag is on the field).
+        /// Feeding such IDs into <c>PoseLibSolver</c> would mismatch the 2D/3D corner
+        /// buffer lengths and produce a garbage pose tens of meters from the field.
+        /// </summary>
+        private HashSet<int> knownIds = new HashSet<int>();
+
+        /// <summary>
         /// Represents the physical size of the AprilTags on the field
         /// </summary>
         public double TagSize { get; }
@@ -113,6 +123,13 @@ namespace QuestNav.QuestNav.AprilTag
                 Tags = root.Tags;
                 Field = root.Field;
 
+                var rebuilt = new HashSet<int>();
+                foreach (var tag in Tags)
+                {
+                    rebuilt.Add(tag.ID);
+                }
+                knownIds = rebuilt;
+
                 QueuedLogger.Log(
                     $"Loaded new AprilTagFieldLayout '{filePath}' with {Tags.Count} tags"
                 );
@@ -144,6 +161,17 @@ namespace QuestNav.QuestNav.AprilTag
                     return tag.Pose;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Fast O(1) check for whether an AprilTag ID is present in the loaded layout.
+        /// Returns false before <see cref="LoadJsonFromFileAsync"/> succeeds. The detection
+        /// pipeline uses this to drop false-positive detections (random noise patterns
+        /// that decode to a valid tag36h11 codeword) before passing them to PoseLib.
+        /// </summary>
+        public bool ContainsId(int id)
+        {
+            return knownIds != null && knownIds.Contains(id);
         }
 
         /// <summary>
@@ -183,11 +211,20 @@ namespace QuestNav.QuestNav.AprilTag
 
                 return fieldTransforms;
             }
-            // ID does not exist in our list. Warn user
-            QueuedLogger.LogWarning(
-                $"Attempted to get the pose of non-existent ID in the current field layout! ID: {id}"
-            );
+            // ID does not exist in our list. Defense in depth: callers should now
+            // pre-filter via ContainsId, but we still log once per unknown ID so a
+            // regression in the filter is visible without spamming the log every
+            // frame at the detection rate.
+            if (loggedUnknownIds.Add(id))
+            {
+                QueuedLogger.LogWarning(
+                    $"Attempted to get corners of non-existent ID in the current field layout! ID: {id} "
+                        + "(further occurrences of this ID will be silenced)"
+                );
+            }
             return new Translation3d[] { };
         }
+
+        private readonly HashSet<int> loggedUnknownIds = new HashSet<int>();
     }
 }

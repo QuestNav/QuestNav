@@ -15,6 +15,14 @@ namespace QuestNav.QuestNav.Estimation
 
         /// <summary>Strict (4 tags, ratio >= 0.90). Use in noisy / high-glare environments.</summary>
         Strict = 2,
+
+        /// <summary>
+        /// Debug (1 tag, ratio >= 0.60). For benchtop / confined-space testing where only
+        /// one tag fits in view. Single-tag PnP is geometrically ambiguous (left/right
+        /// reflection, depth uncertainty) so corrections under this preset can introduce
+        /// pose jumps; do NOT use on a robot during competition.
+        /// </summary>
+        Debug = 3,
     }
 
     /// <summary>
@@ -69,6 +77,15 @@ namespace QuestNav.QuestNav.Estimation
         /// <summary>Strict preset: (min tags, min inlier ratio).</summary>
         public const int PRESET_STRICT_MIN_TAGS = 4;
         public const double PRESET_STRICT_MIN_INLIER_RATIO = 0.9;
+
+        /// <summary>
+        /// Debug preset: (min tags, min inlier ratio). For benchtop / confined-space
+        /// testing only. The 0.60 ratio mirrors INITIAL_ALIGNMENT_MIN_INLIER_RATIO so a
+        /// single tag that's good enough to lock in Phase 1 is also good enough to
+        /// correct under this preset.
+        /// </summary>
+        public const int PRESET_DEBUG_MIN_TAGS = 1;
+        public const double PRESET_DEBUG_MIN_INLIER_RATIO = 0.6;
 
         // --- Dynamic standard deviation scaling ---
 

@@ -30,7 +30,7 @@ export interface AprilTagDetectorMode {
   // Tier 3 advanced. Both nullable in the wire schema; sending null/undefined leaves
   // the existing value alone. The Vue side always sends concrete values from the
   // Advanced disclosure controls.
-  confidencePreset?: number  // 0 = Permissive, 1 = Balanced, 2 = Strict
+  confidencePreset?: number  // 0 = Permissive, 1 = Balanced, 2 = Strict, 3 = Debug (single tag, benchtop only)
   noiseScale?: number        // [0.5, 2.0]; 0.5 = high trust in AprilTag, 2.0 = low trust
 }
 

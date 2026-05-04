@@ -355,6 +355,11 @@ namespace QuestNav.QuestNav.Estimation
                     correctionMinInlierRatio =
                         VioAprilTagPoseEstimatorConstants.PRESET_STRICT_MIN_INLIER_RATIO;
                     break;
+                case ConfidencePreset.Debug:
+                    correctionMinTags = VioAprilTagPoseEstimatorConstants.PRESET_DEBUG_MIN_TAGS;
+                    correctionMinInlierRatio =
+                        VioAprilTagPoseEstimatorConstants.PRESET_DEBUG_MIN_INLIER_RATIO;
+                    break;
                 case ConfidencePreset.Balanced:
                 default:
                     correctionMinTags = VioAprilTagPoseEstimatorConstants.PRESET_BALANCED_MIN_TAGS;

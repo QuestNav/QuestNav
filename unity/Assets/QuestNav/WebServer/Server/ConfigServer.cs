@@ -465,6 +465,17 @@ namespace QuestNav.WebServer.Server
                 return;
             }
 
+            // Single line per POST that captures every non-null field the web UI is
+            // asking us to change. This fires BEFORE persistence so callers can see what
+            // arrived even if a downstream Set*Async no-ops on an unchanged value, or if
+            // a later validation block returns 400 mid-handler. The per-key
+            // "Updated Key '...'" logs in ConfigManager still fire as a second line on
+            // actual writes; together they let you trace request -> persistence per
+            // submit.
+            string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
+            string summary = SummarizeConfigUpdateRequest(request);
+            QueuedLogger.Log($"POST /api/config from {clientIp}: {summary}");
+
             try
             {
                 if (request.TeamNumber.HasValue)
@@ -603,7 +614,7 @@ namespace QuestNav.WebServer.Server
                     if (atm.confidencePreset.HasValue)
                     {
                         int p = atm.confidencePreset.Value;
-                        if (p < 0 || p > 2)
+                        if (p < 0 || p > 3)
                         {
                             context.Response.StatusCode = 400;
                             await SendJsonResponse(
@@ -613,7 +624,8 @@ namespace QuestNav.WebServer.Server
                                     success = false,
                                     message =
                                         $"confidencePreset={p} is out of range. "
-                                        + "Allowed: 0 (Permissive), 1 (Balanced), 2 (Strict).",
+                                        + "Allowed: 0 (Permissive), 1 (Balanced), 2 (Strict), "
+                                        + "3 (Debug).",
                                 }
                             );
                             return;
@@ -672,6 +684,8 @@ namespace QuestNav.WebServer.Server
 
         private async Task HandleResetConfig(IHttpContext context)
         {
+            string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
+            QueuedLogger.Log($"POST /api/reset-config from {clientIp}");
             try
             {
                 await configManager.ResetToDefaultsAsync();
@@ -730,6 +744,8 @@ namespace QuestNav.WebServer.Server
 
         private async Task HandleUploadDatabase(IHttpContext context)
         {
+            string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
+            QueuedLogger.Log($"POST /api/upload-database from {clientIp}");
             try
             {
                 using (var memoryStream = new MemoryStream())
@@ -813,6 +829,8 @@ namespace QuestNav.WebServer.Server
 
         private async Task HandleClearLogs(IHttpContext context)
         {
+            string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
+            QueuedLogger.Log($"DELETE /api/logs from {clientIp}");
             logCollector.ClearLogs();
             await SendJsonResponse(
                 context,
@@ -822,6 +840,8 @@ namespace QuestNav.WebServer.Server
 
         private async Task HandleRestart(IHttpContext context)
         {
+            string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
+            QueuedLogger.Log($"POST /api/restart from {clientIp}");
             await SendJsonResponse(
                 context,
                 new SimpleResponse { success = true, message = "Restart initiated" }
@@ -831,6 +851,8 @@ namespace QuestNav.WebServer.Server
 
         private async Task HandleResetPose(IHttpContext context)
         {
+            string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
+            QueuedLogger.Log($"POST /api/reset-pose from {clientIp}");
             webServerManager.RequestPoseReset();
             await SendJsonResponse(
                 context,
@@ -1204,6 +1226,9 @@ namespace QuestNav.WebServer.Server
         /// </summary>
         private async Task HandlePostAprilTagFieldLayout(IHttpContext context)
         {
+            string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
+            QueuedLogger.Log($"POST /api/apriltag-field-layouts from {clientIp}");
+
             // 10 MB body cap. Field layouts are ~30 KB; this is generous abuse-protection.
             const long MAX_BODY_BYTES = 10L * 1024L * 1024L;
             if (
@@ -1380,6 +1405,11 @@ namespace QuestNav.WebServer.Server
         /// </summary>
         private async Task HandlePatchAprilTagFieldLayout(IHttpContext context, string fileName)
         {
+            string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
+            QueuedLogger.Log(
+                $"PATCH /api/apriltag-field-layouts/{fileName} from {clientIp}"
+            );
+
             if (string.IsNullOrEmpty(fileName) || IsBundledLayoutName(fileName))
             {
                 context.Response.StatusCode = 403;
@@ -1522,6 +1552,11 @@ namespace QuestNav.WebServer.Server
         /// </summary>
         private async Task HandleDeleteAprilTagFieldLayout(IHttpContext context, string fileName)
         {
+            string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
+            QueuedLogger.Log(
+                $"DELETE /api/apriltag-field-layouts/{fileName} from {clientIp}"
+            );
+
             if (string.IsNullOrEmpty(fileName) || IsBundledLayoutName(fileName))
             {
                 context.Response.StatusCode = 403;
@@ -1626,29 +1661,97 @@ namespace QuestNav.WebServer.Server
         }
 
         /// <summary>
-        /// Editor-mode fallback resolution list. The Meta SDK
-        /// <c>GetSupportedResolutions</c> call returns nothing meaningful in playmode
-        /// (no real Quest camera); without this fallback the AprilTag tab would show
-        /// an empty resolution dropdown in dev.
+        /// Fallback resolution list used when the Meta SDK
+        /// <c>GetSupportedResolutions</c> call returns nothing meaningful (Editor
+        /// playmode has no real Quest camera; on device the SDK can also throw
+        /// transiently while the camera is mid-state-change). Without this fallback
+        /// the AprilTag tab would show an empty resolution dropdown.
         ///
         /// Per Meta's PCA documentation, Quest 3 / Quest 3S only support these two
         /// resolutions: 1280x960 (legacy 4:3, the original passthrough mode) and
         /// 1280x1280 (added in Horizon OS v83, expanded vertical FOV). Aspirational
         /// resolutions (320x240, 640x480, etc.) are NOT what the SDK returns at
-        /// runtime; including them in the editor fallback would let dev users select
-        /// modes that fail on device.
+        /// runtime; including them in the fallback would let users select modes that
+        /// fail on device.
         /// </summary>
-        private static readonly Vector2Int[] EditorFallbackResolutions =
+        private static readonly Vector2Int[] FallbackResolutions =
         {
             new Vector2Int(1280, 1280),
             new Vector2Int(1280, 960),
         };
 
         /// <summary>
+        /// Tracks whether we have already logged the fallback warning at least once,
+        /// so subsequent transient SDK throws (e.g. while the camera is being
+        /// reconfigured by the arbiter) don't spam the log every time the AprilTag
+        /// tab polls <c>/api/apriltag-video-modes</c>.
+        /// </summary>
+        private bool loggedSupportedResolutionsFallback;
+
+        /// <summary>
+        /// Builds a one-line summary of the non-null fields in a
+        /// <see cref="ConfigUpdateRequest"/>. Used by the POST /api/config entry-point
+        /// log so every web-initiated change is visible regardless of whether the
+        /// underlying setter ends up being a no-op. Nested <see cref="StreamModeModel"/>
+        /// and <see cref="AprilTagDetectorModeModel"/> are expanded inline so the log
+        /// line documents every leaf field that was sent.
+        /// </summary>
+        private static string SummarizeConfigUpdateRequest(ConfigUpdateRequest request)
+        {
+            var parts = new List<string>();
+
+            if (request.TeamNumber.HasValue)
+                parts.Add($"teamNumber={request.TeamNumber.Value}");
+            if (request.debugIpOverride != null)
+                parts.Add($"debugIpOverride='{request.debugIpOverride}'");
+            if (request.EnableAutoStartOnBoot.HasValue)
+                parts.Add($"enableAutoStartOnBoot={request.EnableAutoStartOnBoot.Value}");
+            if (request.EnablePassthroughStream.HasValue)
+                parts.Add($"enablePassthroughStream={request.EnablePassthroughStream.Value}");
+            if (request.EnableHighQualityStream.HasValue)
+                parts.Add($"enableHighQualityStream={request.EnableHighQualityStream.Value}");
+            if (request.StreamMode != null)
+            {
+                var s = request.StreamMode;
+                parts.Add(
+                    $"streamMode={{w={s.width},h={s.height},fps={s.framerate},q={s.quality}}}"
+                );
+            }
+            if (request.EnableAprilTagDetector.HasValue)
+                parts.Add($"enableAprilTagDetector={request.EnableAprilTagDetector.Value}");
+            if (request.AprilTagDetectorMode != null)
+            {
+                var a = request.AprilTagDetectorMode;
+                var atParts = new List<string>
+                {
+                    $"mode={a.mode}",
+                    $"w={a.width}",
+                    $"h={a.height}",
+                    $"fps={a.framerate}",
+                    $"maxDist={a.maxDistance}",
+                    $"minTags={a.minimumNumberOfTags}",
+                    $"ignoredIds=[{string.Join(",", a.ignoredIds ?? Array.Empty<int>())}]",
+                };
+                if (!string.IsNullOrEmpty(a.fieldLayoutFile))
+                    atParts.Add($"fieldLayoutFile='{a.fieldLayoutFile}'");
+                if (a.confidencePreset.HasValue)
+                    atParts.Add($"confidencePreset={a.confidencePreset.Value}");
+                if (a.noiseScale.HasValue)
+                    atParts.Add($"noiseScale={a.noiseScale.Value:F2}");
+                parts.Add($"aprilTagDetectorMode={{{string.Join(",", atParts)}}}");
+            }
+            if (request.EnableDebugLogging.HasValue)
+                parts.Add($"enableDebugLogging={request.EnableDebugLogging.Value}");
+
+            return parts.Count == 0 ? "(empty request)" : string.Join(", ", parts);
+        }
+
+        /// <summary>
         /// Returns the cross-product of supported resolutions and supported framerates.
-        /// Source order: Meta SDK first (real device), then editor fallback if the SDK
-        /// returns an empty list. Wrapped in try/catch (issue 20: Meta SDK can throw
-        /// during state changes).
+        /// Source order: Meta SDK first (real device), then static fallback if the SDK
+        /// returns an empty list. Wrapped in try/catch because the SDK can throw
+        /// during camera state changes; the fallback covers both that case and the
+        /// Editor (no real camera) case.
         /// </summary>
         private VideoModeModel[] BuildAprilTagSupportedModes()
         {
@@ -1664,16 +1767,21 @@ namespace QuestNav.WebServer.Server
             }
             catch (Exception ex)
             {
-                QueuedLogger.LogWarning(
-                    $"PassthroughCameraAccess.GetSupportedResolutions threw: {ex.Message}. "
-                        + "Falling back to editor stub list."
-                );
+                if (!loggedSupportedResolutionsFallback)
+                {
+                    loggedSupportedResolutionsFallback = true;
+                    QueuedLogger.LogWarning(
+                        $"PassthroughCameraAccess.GetSupportedResolutions threw: {ex.Message}. "
+                            + "Falling back to the static Quest 3 / 3S resolution list "
+                            + "(1280x1280, 1280x960). This warning is logged once per session."
+                    );
+                }
                 resolutions = Array.Empty<Vector2Int>();
             }
 
             if (resolutions == null || resolutions.Length == 0)
             {
-                resolutions = EditorFallbackResolutions;
+                resolutions = FallbackResolutions;
             }
 
             var fpsOptions = QuestNavConstants.VideoStream.SUPPORTED_FPS;

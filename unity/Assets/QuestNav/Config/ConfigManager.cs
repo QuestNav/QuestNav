@@ -599,12 +599,17 @@ namespace QuestNav.Config
         public async Task<int> GetAprilTagConfidencePresetAsync()
         {
             var config = await GetAprilTagConfigAsync();
-            // Clamp to the supported [0, 2] range to defend against a corrupt row.
+            // Clamp to the supported [0, 3] range to defend against a corrupt row.
+            // Range is 0=Permissive, 1=Balanced, 2=Strict, 3=Debug. Must stay in sync
+            // with SetAprilTagConfidencePresetAsync's clamp and the POST validator in
+            // ConfigServer; an out-of-range clamp here silently downgrades the user's
+            // selection on the next /api/config poll, which manifests as the AprilTag
+            // tab "snapping back" a few seconds after Apply.
             int v = config.AprilTagConfidencePreset;
             if (v < 0)
                 v = 0;
-            if (v > 2)
-                v = 2;
+            if (v > 3)
+                v = 3;
             return v;
         }
 
@@ -773,16 +778,20 @@ namespace QuestNav.Config
         /// <inheritdoc/>
         public async Task SetAprilTagConfidencePresetAsync(int preset)
         {
-            // Clamp to [0, 2] - the only supported values map to ConfidencePreset enum.
+            // Clamp to [0, 3] - the only supported values map to ConfidencePreset enum
+            // (0 = Permissive, 1 = Balanced, 2 = Strict, 3 = Debug).
             int sanitized = preset;
             if (sanitized < 0)
                 sanitized = 0;
-            if (sanitized > 2)
-                sanitized = 2;
+            if (sanitized > 3)
+                sanitized = 3;
 
             var config = await GetAprilTagConfigAsync();
             if (config.AprilTagConfidencePreset == sanitized)
             {
+                QueuedLogger.Log(
+                    $"Key 'aprilTagConfidencePreset' already {sanitized}; no-op write"
+                );
                 return;
             }
             config.AprilTagConfidencePreset = sanitized;
@@ -813,6 +822,9 @@ namespace QuestNav.Config
             // Use a tight epsilon so we don't write the row for a sub-microscopic delta.
             if (Math.Abs(config.AprilTagNoiseScale - sanitized) < 1e-9)
             {
+                QueuedLogger.Log(
+                    $"Key 'aprilTagNoiseScale' already {sanitized:F2}; no-op write"
+                );
                 return;
             }
             config.AprilTagNoiseScale = sanitized;
@@ -837,7 +849,10 @@ namespace QuestNav.Config
             var config = await GetAprilTagConfigAsync();
             if (config.AprilTagFieldLayoutFile == sanitized)
             {
-                return; // no-op
+                QueuedLogger.Log(
+                    $"Key 'aprilTagFieldLayoutFile' already '{sanitized}'; no-op write"
+                );
+                return;
             }
             config.AprilTagFieldLayoutFile = sanitized;
             await SaveAprilTagConfigAsync(config);

@@ -377,33 +377,38 @@ namespace QuestNav.QuestNav.AprilTag
                     yield break;
                 }
 
-                // Use CurrentResolution (the camera's actual produced size) rather than
-                // RequestedResolution (the user's hint to the SDK). Per Meta API docs:
-                // "If the requested resolution is not present in GetSupportedResolutions,
-                //  the first smaller resolution will be selected instead." So a request
-                // for 1280x1280 can come back as 1280x960 or even 2560x2560 depending on
-                // the device. The colors NativeArray length always matches CurrentResolution.
-                int currentWidth = cameraAccess.CurrentResolution.x;
-                int currentHeight = cameraAccess.CurrentResolution.y;
-                int expectedPixelCount = currentWidth * currentHeight;
-
-                // Frame-size sanity check. After a resolution change, the SDK can briefly
-                // hand back a buffer sized for the previous resolution while
-                // CurrentResolution has already advanced. Feeding such a buffer to ImageU8
-                // makes the Burst grayscale job read out of bounds and produces garbage
-                // that segfaults libapriltag (gradient_clusters / apriltag_quad_thresh).
-                if (!colors.IsCreated || colors.Length == 0 || colors.Length != expectedPixelCount)
+                // Validate that we got a frame at all.
+                if (!colors.IsCreated || colors.Length == 0)
                 {
-                    QueuedLogger.Log(
-                        $"AprilTag frame skipped: expected {expectedPixelCount} pixels "
-                            + $"({currentWidth}x{currentHeight}), got {colors.Length}. "
-                            + "Camera resolution likely mid-bounce; this should clear within a frame or two."
-                    );
                     yield return new WaitForSeconds(frameDelaySeconds);
                     continue;
                 }
 
-                var converted = ImageU8.FromPassthroughCamera(colors, currentWidth, currentHeight);
+                // Per Meta API docs, PassthroughCameraAccess.Intrinsics are "static
+                // intrinsic parameters of the SENSOR" (not the user's RequestedResolution),
+                // and the SDK delivers full-sensor frames. CurrentResolution reflects the
+                // user's request, not the actual buffer size. On Quest 3 a request for
+                // 1280x1280 produces a 2560x2560 buffer (4x more pixels); other modes are
+                // similarly oversampled at the sensor's native size.
+                //
+                // So instead of validating colors.Length against CurrentResolution, we
+                // derive the actual frame width/height from colors.Length using
+                // CurrentResolution's aspect ratio. Intrinsics already match the physical
+                // sensor (so PoseLib gets the right fx/fy/cx/cy unchanged).
+                if (
+                    !TryDeriveActualFrameSize(
+                        colors.Length,
+                        cameraAccess.CurrentResolution,
+                        out int actualW,
+                        out int actualH
+                    )
+                )
+                {
+                    yield return new WaitForSeconds(frameDelaySeconds);
+                    continue;
+                }
+
+                var converted = ImageU8.FromPassthroughCamera(colors, actualW, actualH);
 
                 // ImageU8 returns null when the colors NativeArray is uninitialized or
                 // empty (e.g. the camera was just enabled and hasn't produced a frame yet).
@@ -542,6 +547,91 @@ namespace QuestNav.QuestNav.AprilTag
 
                 yield return new WaitForSeconds(frameDelaySeconds);
             }
+        }
+
+        /// <summary>
+        /// Last (colors.Length, reportedW, reportedH) tuple we derived a size for. Used
+        /// to log only once per distinct combination so we don't spam the log when the
+        /// SDK steady-states at an oversampled buffer.
+        /// </summary>
+        private (int len, int w, int h) lastDerivedFrameSizeKey;
+
+        /// <summary>
+        /// Derives the actual width/height of a Meta SDK passthrough frame from the
+        /// NativeArray length and the camera's reported (requested) resolution.
+        ///
+        /// Required because the SDK delivers full-sensor frames (which can be up to 4x
+        /// the pixel count of <c>CurrentResolution</c>) and only reports the user's
+        /// requested resolution back via <c>CurrentResolution</c>. Computing the actual
+        /// size from <c>colors.Length</c> using the reported aspect ratio gives the
+        /// real buffer dimensions.
+        /// </summary>
+        /// <returns>True on success, false if no coherent (w, h) can be derived.</returns>
+        private bool TryDeriveActualFrameSize(
+            int colorsLength,
+            Vector2Int reportedResolution,
+            out int actualW,
+            out int actualH
+        )
+        {
+            actualW = 0;
+            actualH = 0;
+            if (colorsLength <= 0)
+            {
+                return false;
+            }
+            int reportedW = reportedResolution.x;
+            int reportedH = reportedResolution.y;
+            int reportedPx = reportedW * reportedH;
+
+            // Common cases first: SDK matches its own reporting, OR the buffer is
+            // exactly Nx oversampled in each axis (typical for the Quest 3 PCA where
+            // N=2 maps a 1280x1280 request to a 2560x2560 sensor frame).
+            if (reportedPx > 0 && colorsLength == reportedPx)
+            {
+                actualW = reportedW;
+                actualH = reportedH;
+                return true;
+            }
+            if (reportedW > 0 && reportedH > 0)
+            {
+                double scale = Math.Sqrt((double)colorsLength / reportedPx);
+                int w = (int)Math.Round(reportedW * scale);
+                int h = (int)Math.Round(reportedH * scale);
+                if (w > 0 && h > 0 && w * h == colorsLength)
+                {
+                    var key = (colorsLength, reportedW, reportedH);
+                    if (lastDerivedFrameSizeKey != key)
+                    {
+                        lastDerivedFrameSizeKey = key;
+                        QueuedLogger.Log(
+                            $"PassthroughCamera buffer is {w}x{h} ({colorsLength} px) for a "
+                                + $"requested {reportedW}x{reportedH} mode (sensor native size). "
+                                + "Feeding the larger image to the AprilTag detector at full size."
+                        );
+                    }
+                    actualW = w;
+                    actualH = h;
+                    return true;
+                }
+            }
+
+            // Square fallback when CurrentResolution is unavailable or doesn't divide
+            // evenly. tag36h11 detection on a non-aspect-correct image would still work
+            // (the corners are still valid pixels) but the std-dev calc would be biased.
+            int side = (int)Math.Sqrt(colorsLength);
+            if (side > 0 && side * side == colorsLength)
+            {
+                actualW = side;
+                actualH = side;
+                return true;
+            }
+
+            QueuedLogger.LogWarning(
+                $"PassthroughCamera frame size could not be derived: colors.Length={colorsLength}, "
+                    + $"reported={reportedW}x{reportedH}. Skipping frame."
+            );
+            return false;
         }
 
         /// <summary>

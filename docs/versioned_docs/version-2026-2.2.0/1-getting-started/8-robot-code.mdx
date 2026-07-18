@@ -29,6 +29,10 @@ export const GradlewCodeBlock = () => {
 
 This guide explains how to integrate QuestNav into your robot code to provide accurate position tracking for your FRC robot.
 
+:::tip Want a complete working example?
+The [QuestNav Robot Sim Example](https://github.com/juchong/QuestNav-Robot-Sim-Example) is a runnable WPILib project that wires together everything on this page — mounting transform, pose-estimator fusion, all callbacks, field-bounds filtering, and pose seeding — in a single subsystem. Use it as a reference while reading the sections below.
+:::
+
 ## Verifying Setup
 :::note
 Before proceeding with integration, it is **highly** recommended that you verify that QuestNav is correctly
@@ -270,11 +274,10 @@ the Quest is connected and is tracking before using its pose data!
         SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
         Matrix<N3, N1> QUESTNAV_STD_DEVS =
             VecBuilder.fill(
-                0.02, // Trust down to 2cm in X direction
-                0.02, // Trust down to 2cm in Y direction
-                0.035 // Trust down to 2 degrees rotational
-            );
-        
+                0.02,        // X position trust (20 mm)
+                0.02,        // Y position trust (20 mm)
+                0.0872665);  // Rotation trust (5 degrees)
+
         @Override
         public void periodic() {
             // Get the latest pose data frames from the Quest
@@ -511,3 +514,20 @@ private boolean shouldReject(Pose3d pose) {
 
 Use this in your pose processing loop to skip measurements that are clearly outside the field before feeding
 them to your pose estimator.
+
+## Complete Example
+
+For a full working subsystem that combines everything covered above, see the [QuestNav Robot Sim Example](https://github.com/juchong/QuestNav-Robot-Sim-Example) repository. It demonstrates:
+
+- A `QuestNavSubsystem` that owns the `QuestNav` instance, mounting transform, and standard deviations
+- Pose ingestion with `getAllUnreadPoseFrames()`, transformation, and field-bounds rejection
+- All seven lifecycle callbacks registered in the subsystem constructor
+- Pose seeding on `autonomousInit` (resetting both drivetrain odometry and the Quest origin)
+- `DifferentialDrivePoseEstimator` fusion (the same `addVisionMeasurement` pattern used by `SwerveDrivePoseEstimator` and `MecanumDrivePoseEstimator`)
+- AdvantageScope-friendly telemetry topics (`QuestNav/RobotPoses`, `RobotPosesAccepted`, `RobotPosesRejected`, `LatestRobotPose`)
+
+The project runs in the WPILib simulator without any hardware, making it a useful starting point or comparison reference when adapting QuestNav to your own robot.
+
+:::tip Have an example to share?
+If your team has a QuestNav subsystem, integration pattern, or reference project that would help other teams (swerve, AdvantageKit, CTRE, custom drivetrains, etc.), open a pull request against [QuestNav/QuestNav](https://github.com/QuestNav/QuestNav) adding a link to it on this page.
+:::

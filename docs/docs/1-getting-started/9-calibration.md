@@ -23,7 +23,7 @@ If the Quest prompts you to redraw a boundary or can't establish tracking, move 
 
 ### 2. Launch QuestNav
 
-Open the QuestNav app from your Quest's app library (under **Unknown Sources** if it isn't pinned). If you enabled **Auto Start On Boot** during [App Setup](./app-setup), QuestNav launches automatically when the headset powers on.
+Open the QuestNav app from your Quest's app library (under **Unknown Sources** if it isn't pinned). If you enabled **Auto Start On Boot** during [headset setup](../2-development/3-manual-setup.md), QuestNav launches automatically when the headset powers on.
 
 ### 3. Connect to the Quest's network
 

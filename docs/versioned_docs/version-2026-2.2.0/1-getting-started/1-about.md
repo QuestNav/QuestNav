@@ -36,7 +36,7 @@ QuestNav uses the Quest headset's Visual-Inertial Odometry (VIO) system - the sa
 5. Makes the information available through Network Tables for robot code to use
 
 :::note
-The same technology that prevents motion sickness in VR by precisely tracking head movements is now used to track your robot's position with high precision.
+The same technology that enables VR by precisely tracking head movements is now used to track your robot's position on the competition field!
 :::
 
 ## Software Architecture
@@ -58,14 +58,11 @@ For a more comprehensive demonstration, view the [full video on YouTube](https:/
 
 ## Thanks
 
-QuestNav exists because of many sidebar discussions, technical deep-dives, and what-if conversations with coworkers and members of the FIRST community. Special thanks to the following contributors who made this project possible:
+QuestNav exists because of many sidebar discussions, technical deep-dives, and what-if conversations with coworkers and members of the FIRST community. Special thanks to everyone who has contributed to the project:
 
-- [@juchong](https://github.com/juchong)
-- [@SunnyBat](https://github.com/SunnyBat)
-- [@ThadHouse](https://github.com/ThadHouse)
-- [@SeanErn](https://github.com/SeanErn)
-- [@jasondaming](https://github.com/jasondaming)
-- [@allengregoryiv](https://github.com/allengregoryiv)
+<a href="https://github.com/QuestNav/QuestNav/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=QuestNav/QuestNav" alt="QuestNav contributors" />
+</a>
 
 ## Support
 

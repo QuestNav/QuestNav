@@ -18,7 +18,9 @@ This page tracks planned and completed improvements to QuestNav.
 ## In Progress
 
 - **AprilTag detection and tracking** (#31)
-  - An upcoming release of QuestNav will include AprilTag detection.
+  - An upcoming release of QuestNav will include AprilTag detection.<br /><br />
+
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/EBK9KA7otfA" title="QuestNav AprilTag detection preview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 - **Get each AprilTag position and place a spatial anchor** (#32)
   - Building on detection capabilities

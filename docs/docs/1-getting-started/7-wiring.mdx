@@ -1,9 +1,22 @@
 ---
 title: Wiring 
 ---
+
+import WiringDiagram from '@site/src/components/WiringDiagram';
+
 # Wiring
 
 Proper wiring is essential for reliable communication between your Quest headset and robot. This guide covers Ethernet connections, power options, and best practices for secure wiring.
+
+## Wiring Overview
+
+The diagram below shows a typical QuestNav wiring layout. The Quest headset connects over USB-C to a USB-C to Ethernet adapter. The adapter's Ethernet output joins the robot network — either directly to the radio or through an Ethernet switch — which is also connected to the roboRIO. A USB battery bank powers the adapter (and, through it, the headset).
+
+<WiringDiagram />
+
+:::info
+The Ethernet switch is **optional**. If you have a spare port on your robot radio, you can connect the adapter directly to the radio. A switch is only needed when you have more devices than available radio ports (e.g. a coprocessor, Limelight, or additional cameras).
+:::
 
 ## Ethernet Connection
 
@@ -86,7 +99,7 @@ Service loops are small, intentional slack sections in the cable that prevent te
 - Test connections before each match
 
 :::tip
-Create a simple checklist to verify all connections before matches. A quick visual inspection can catch loose cables before they cause problems.
+Create a simple checklist to verify all connections before matches. A quick visual inspection can catch loose cables before they cause problems. See the [Pre-Match Checklist](./pre-match-checklist) for a ready-made list.
 :::
 
 ## Troubleshooting Common Issues

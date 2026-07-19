@@ -1,0 +1,81 @@
+/**
+ * styles.module.css
+ * Theme-aware styling for the WiringDiagram SVG component.
+ * All colors reference Infima CSS variables so the diagram automatically
+ * adapts to Docusaurus light/dark mode.
+ */
+
+.diagram {
+    width: 100%;
+    max-width: 900px;
+    margin: 1.5rem auto;
+}
+
+.diagram svg {
+    width: 100%;
+    height: auto;
+    font-family: var(--ifm-font-family-base);
+}
+
+/* Component boxes */
+.box {
+    fill: var(--ifm-background-surface-color);
+    stroke: var(--ifm-color-emphasis-500);
+    stroke-width: 2px;
+}
+
+.boxOptional {
+    fill: var(--ifm-background-surface-color);
+    stroke: var(--ifm-color-emphasis-500);
+    stroke-width: 2px;
+    stroke-dasharray: 6 4;
+}
+
+/* Text labels */
+.label {
+    fill: var(--ifm-font-color-base);
+    font-weight: 700;
+    font-size: 15px;
+    text-anchor: middle;
+}
+
+.sublabel {
+    fill: var(--ifm-color-emphasis-600);
+    font-size: 11px;
+    text-anchor: middle;
+}
+
+.lineLabel {
+    fill: var(--ifm-color-emphasis-700);
+    font-size: 12px;
+    text-anchor: middle;
+}
+
+.lineLabelStart {
+    fill: var(--ifm-color-emphasis-700);
+    font-size: 12px;
+    text-anchor: start;
+}
+
+/* Connection lines */
+.dataLine {
+    stroke: var(--ifm-color-primary);
+    stroke-width: 2.5px;
+    fill: none;
+}
+
+.powerLine {
+    stroke: var(--ifm-color-amber-darker);
+    stroke-width: 2.5px;
+    stroke-dasharray: 7 5;
+    fill: none;
+}
+
+/* Arrowhead markers */
+.arrowData {
+    fill: var(--ifm-color-primary);
+}
+
+.arrowPower {
+    fill: var(--ifm-color-amber-darker);
+}

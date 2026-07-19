@@ -209,21 +209,22 @@ namespace QuestNav.WebServer
         #endregion
 
         #region Main Thread Callbacks
+
         /// <summary>
         /// Requests a pose reset to be executed on the main thread.
         /// Called from ConfigServer on background HTTP thread.
         /// </summary>
-        internal void RequestPoseReset()
+        internal void RequestPoseReset(Vector3 position, Quaternion rotation)
         {
             QueuedLogger.Log("Pose reset requested from web interface");
-            mainThreadContext.Post(_ => ExecutePoseResetToOrigin(), null);
+            mainThreadContext.Post(_ => ExecutePoseResetToOrigin(position, rotation), null);
         }
 
         /// <summary>
         /// Executes pose reset to origin (0,0,0) with no rotation.
         /// Uses the existing PoseResetCommand implementation to ensure single source of truth.
         /// </summary>
-        private void ExecutePoseResetToOrigin()
+        private void ExecutePoseResetToOrigin(Vector3 position, Quaternion rotation)
         {
             QueuedLogger.Log("Web interface requested pose reset to origin");
 
@@ -232,18 +233,18 @@ namespace QuestNav.WebServer
             {
                 Translation = new ProtobufTranslation3d
                 {
-                    X = 0,
-                    Y = 0,
-                    Z = 0,
+                    X = position.x,
+                    Y = position.y,
+                    Z = position.z,
                 },
                 Rotation = new ProtobufRotation3d
                 {
                     Q = new ProtobufQuaternion
                     {
-                        X = 0,
-                        Y = 0,
-                        Z = 0,
-                        W = 1,
+                        X = rotation.x,
+                        Y = rotation.y,
+                        Z = rotation.z,
+                        W = rotation.w,
                     },
                 },
             };

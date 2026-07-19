@@ -1,9 +1,22 @@
 ---
 title: Wiring 
 ---
+
+import WiringDiagram from '@site/src/components/WiringDiagram';
+
 # Wiring
 
 Proper wiring is essential for reliable communication between your Quest headset and robot. This guide covers Ethernet connections, power options, and best practices for secure wiring.
+
+## Wiring Overview
+
+The diagram below shows a typical QuestNav wiring layout. The Quest headset connects over USB-C to a USB-C to Ethernet adapter. The adapter's Ethernet output joins the robot network — either directly to the radio or through an Ethernet switch — which is also connected to the roboRIO. A USB battery bank powers the adapter (and, through it, the headset).
+
+<WiringDiagram />
+
+:::info
+The Ethernet switch is **optional**. If you have a spare port on your robot radio, you can connect the adapter directly to the radio. A switch is only needed when you have more devices than available radio ports (e.g. a coprocessor, Limelight, or additional cameras).
+:::
 
 ## Ethernet Connection
 
@@ -39,12 +52,14 @@ There are two recommended ways to power the Quest headset on a robot. A **USB ba
 A USB battery bank mounted on the robot provides clean, stable power that is fully isolated from the rest of the robot's electrical system.
 
 1. Mount a USB battery bank securely on the robot
-2. Connect a USB-A to USB-C cable from the battery bank to your adapter's power input
+2. Connect a **USB-A to USB-C** cable from the battery bank to your adapter's power input
 3. The battery bank should supply enough power to sustain the Quest headset indefinitely
 4. Charge state can be monitored externally using the power meter on the battery bank
 
 :::warning
-Some USB-C to Ethernet adapters may boot loop when exposed to USB Power Delivery (PD) voltages higher than 5V. If you experience this, use a USB-A to USB-C cable (which forces 5V output) or a battery bank that does not support PD negotiation.
+Some USB-C to Ethernet adapters may boot loop when exposed to USB Power Delivery (PD) voltages above 5V. To avoid this, use a **USB-A to USB-C cable**, which always forces a fixed 5V output and prevents PD negotiation.
+
+Avoid using USB-C to USB-C cables, as they support PD negotiation and bidirectional power transfer. In some cases, this can cause the battery to draw power from the device or trigger higher voltages that lead to instability.
 :::
 
 ### Alternative: Robot-Powered via a Regulated 5V Converter

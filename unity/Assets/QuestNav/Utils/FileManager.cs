@@ -63,5 +63,24 @@ namespace QuestNav.Utils
             return Path.Combine(Application.streamingAssetsPath, subPath);
 #endif
         }
+
+        /// <summary>
+        /// Returns the directory where user-uploaded AprilTag field-layout JSONs live.
+        /// Always under <see cref="Application.persistentDataPath"/> (writable on every
+        /// platform, persisted across app updates). Creates the directory on first call.
+        /// </summary>
+        public static string GetCustomFieldLayoutDir()
+        {
+            string path = Path.Combine(
+                Application.persistentDataPath,
+                "apriltag",
+                "fieldlayouts-custom"
+            );
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            return path;
+        }
     }
 }

@@ -18,9 +18,27 @@ export interface AprilTagDetectorMode {
   width: number
   height: number
   framerate: number
-  allowedIds: number[]
+  // Blacklist: detections with one of these IDs are dropped before the PoseLib solver runs.
+  // Empty array means detect every tag. UI clamps entries to [0, 50] (FRC tag range).
+  ignoredIds: number[]
   maxDistance: number
   minimumNumberOfTags: number
+  // Field-layout JSON file used at app startup. Restart-on-change: writing this value
+  // persists it but the running app keeps using the previously-loaded layout. The UI
+  // surfaces the restart-required state with an inline banner + restart button.
+  fieldLayoutFile: string
+  // Tier 3 advanced. Both nullable in the wire schema; sending null/undefined leaves
+  // the existing value alone. The Vue side always sends concrete values from the
+  // Advanced disclosure controls.
+  confidencePreset?: number  // 0 = Permissive, 1 = Balanced, 2 = Strict, 3 = Debug (single tag, benchtop only)
+  noiseScale?: number        // [0.5, 2.0]; 0.5 = high trust in AprilTag, 2.0 = low trust
+}
+
+export interface AprilTagFieldLayoutEntry {
+  fileName: string
+  displayName: string
+  source: 'bundled' | 'custom'
+  tagCount: number
 }
 
 export interface ConfigResponse {
@@ -72,30 +90,36 @@ export interface HeadsetStatus {
   position: { x: number, y: number, z: number }
   rotation: { x: number, y: number, z: number, w: number }
   eulerAngles: { pitch: number, yaw: number, roll: number }
-  
+
   // Tracking
   isTracking: boolean
   trackingLostEvents: number
-  
+
   // Battery
   batteryPercent: number
   batteryLevel: number
   batteryStatus: string
   batteryCharging: boolean
-  
+
   // Network
   networkConnected: boolean
   ipAddress: string
   teamNumber: number
   robotIpAddress: string
-  
+
   // Performance
   fps: number
   frameCount: number
-  
+
   // Web Interface
   connectedClients: number
-  
+
+  // Camera arbitration: AprilTag detector wins over the passthrough stream when
+  // both are enabled. The passthrough video keeps showing whatever frames the
+  // camera is producing, but the resolution dropdown is locked.
+  passthroughResolutionLockedByAprilTag: boolean
+  effectivePassthroughResolution: { width: number, height: number } | null
+
   timestamp: number
 }
 

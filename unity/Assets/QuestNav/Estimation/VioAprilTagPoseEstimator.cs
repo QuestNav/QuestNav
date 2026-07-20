@@ -41,6 +41,21 @@ namespace QuestNav.QuestNav.Estimation
         /// the VIO baseline without disturbing the KF state or field alignment.
         /// </summary>
         void HandleRecenter(Pose3d newVioPose, double timestamp);
+
+        /// <summary>
+        /// Updates the Phase-2 correction confidence preset. Tighter presets reject more
+        /// observations but produce a more conservative pose; looser presets are useful
+        /// when the default tuning never converges (e.g. only a single tag is visible).
+        /// The Phase-1 inlier-ratio threshold is not affected.
+        /// </summary>
+        void SetConfidencePreset(ConfidencePreset preset);
+
+        /// <summary>
+        /// Sets the user-supplied "Minimum Tags Required" floor used by both Phase-1
+        /// alignment and Phase-2 corrections. Phase-2 takes the max of this and the
+        /// preset's tag count; Phase-1 uses this value directly.
+        /// </summary>
+        void SetMinimumTags(int minimumTags);
     }
 
     /// <summary>
@@ -89,6 +104,21 @@ namespace QuestNav.QuestNav.Estimation
         private double yawOffset;
         private bool initialized;
         private bool hasInitialAlignment;
+
+        // Runtime-tunable Phase-2 correction thresholds. Initialized from the BALANCED
+        // preset; SetConfidencePreset(...) overrides them at runtime in response to a
+        // web-UI change.
+        private int correctionMinTags = VioAprilTagPoseEstimatorConstants.PRESET_BALANCED_MIN_TAGS;
+        private double correctionMinInlierRatio =
+            VioAprilTagPoseEstimatorConstants.PRESET_BALANCED_MIN_INLIER_RATIO;
+
+        /// <summary>
+        /// User-supplied "Minimum Tags Required" floor. Phase-1 alignment uses this
+        /// directly; Phase-2 corrections take the max of this and the preset's tag count.
+        /// Initialized from the legacy hardcoded INITIAL_ALIGNMENT_MIN_TAGS so behavior
+        /// matches the prior estimator until the web UI fires its first config event.
+        /// </summary>
+        private int userMinimumTags = VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_TAGS;
 
         /// <summary>Creates a new estimator with optional noise tuning parameters.</summary>
         public VioAprilTagPoseEstimator(
@@ -227,15 +257,20 @@ namespace QuestNav.QuestNav.Estimation
             // --- Phase 1: Initial alignment ---
             if (!hasInitialAlignment)
             {
+                // Phase-1 tag count uses the user's "Minimum Tags Required" setting
+                // (forwarded by AprilTagManager via SetMinimumTags). The inlier-ratio
+                // threshold is intentionally still hardcoded (INITIAL_ALIGNMENT_MIN_INLIER_RATIO)
+                // because a bad first observation mis-aligns the field origin for the
+                // whole session, so a quality safety floor is non-negotiable.
                 if (
-                    tagCount < VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_TAGS
+                    tagCount < userMinimumTags
                     || inlierRatio
                         < VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_INLIER_RATIO
                 )
                 {
                     QueuedLogger.Log(
                         $"AprilTag rejected (Phase 1): tags={tagCount}, inlierRatio={inlierRatio:F2} "
-                            + $"(need >={VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_TAGS} tags, "
+                            + $"(need >={userMinimumTags} tags, "
                             + $">={VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_INLIER_RATIO:F2} inlier ratio)"
                     );
                     return;
@@ -286,21 +321,72 @@ namespace QuestNav.QuestNav.Estimation
                 return;
             }
 
-            if (
-                tagCount < VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_TAGS
-                || inlierRatio < VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_INLIER_RATIO
-            )
+            // Phase-2 takes the max of the user's "Minimum Tags Required" and the
+            // confidence preset's tag count. The user's setting is a HARD FLOOR; the
+            // preset cannot loosen it below what the user explicitly chose.
+            int effectiveMinTags = Math.Max(userMinimumTags, correctionMinTags);
+            if (tagCount < effectiveMinTags || inlierRatio < correctionMinInlierRatio)
             {
                 QueuedLogger.Log(
                     $"AprilTag rejected (Phase 2): tags={tagCount}, inlierRatio={inlierRatio:F2} "
-                        + $"(need >={VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_TAGS} tags, "
-                        + $">={VioAprilTagPoseEstimatorConstants.CORRECTION_MIN_INLIER_RATIO:F2} inlier ratio)"
+                        + $"(need >={effectiveMinTags} tags, "
+                        + $">={correctionMinInlierRatio:F2} inlier ratio)"
                 );
                 return;
             }
 
             // High-confidence correction — update position only, yaw is locked from Phase 1
             ApplyKfUpdate(measuredPosition, stdDevs, timestampSeconds);
+        }
+
+        /// <inheritdoc/>
+        public void SetConfidencePreset(ConfidencePreset preset)
+        {
+            switch (preset)
+            {
+                case ConfidencePreset.Permissive:
+                    correctionMinTags =
+                        VioAprilTagPoseEstimatorConstants.PRESET_PERMISSIVE_MIN_TAGS;
+                    correctionMinInlierRatio =
+                        VioAprilTagPoseEstimatorConstants.PRESET_PERMISSIVE_MIN_INLIER_RATIO;
+                    break;
+                case ConfidencePreset.Strict:
+                    correctionMinTags = VioAprilTagPoseEstimatorConstants.PRESET_STRICT_MIN_TAGS;
+                    correctionMinInlierRatio =
+                        VioAprilTagPoseEstimatorConstants.PRESET_STRICT_MIN_INLIER_RATIO;
+                    break;
+                case ConfidencePreset.Debug:
+                    correctionMinTags = VioAprilTagPoseEstimatorConstants.PRESET_DEBUG_MIN_TAGS;
+                    correctionMinInlierRatio =
+                        VioAprilTagPoseEstimatorConstants.PRESET_DEBUG_MIN_INLIER_RATIO;
+                    break;
+                case ConfidencePreset.Balanced:
+                default:
+                    correctionMinTags = VioAprilTagPoseEstimatorConstants.PRESET_BALANCED_MIN_TAGS;
+                    correctionMinInlierRatio =
+                        VioAprilTagPoseEstimatorConstants.PRESET_BALANCED_MIN_INLIER_RATIO;
+                    break;
+            }
+            QueuedLogger.Log(
+                $"AprilTag confidence preset set to {preset}: "
+                    + $"tags>={correctionMinTags}, inlierRatio>={correctionMinInlierRatio:F2}"
+            );
+        }
+
+        /// <inheritdoc/>
+        public void SetMinimumTags(int minimumTags)
+        {
+            // Refuse zero or negative; the estimator cannot work with no observations.
+            int sanitized = minimumTags < 1 ? 1 : minimumTags;
+            if (userMinimumTags == sanitized)
+            {
+                return;
+            }
+            userMinimumTags = sanitized;
+            QueuedLogger.Log(
+                $"AprilTag minimum tags set to {sanitized} "
+                    + "(applied to Phase 1 alignment and as a Phase 2 floor)"
+            );
         }
 
         /// <inheritdoc/>

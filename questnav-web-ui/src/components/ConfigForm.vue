@@ -145,21 +145,10 @@
                 </label>
               </ConfigField>
 
-              <!-- Passthrough Stream -->
-              <ConfigField
-                title="Passthrough Camera Stream"
-                description="Stream headset camera over network"
-                control-class="checkbox-control"
-              >
-                <label class="checkbox-label">
-                  <input
-                    type="checkbox"
-                    :checked="configStore.config.enablePassthroughStream"
-                    @change="handlePassthroughStreamChange"
-                  />
-                  {{ configStore.config.enablePassthroughStream ? 'Enabled' : 'Disabled' }}
-                </label>
-              </ConfigField>
+              <!-- Passthrough Stream enable/disable lives on the Camera tab now (next to
+                   the resolution / FPS controls it gates). The High Quality toggle stays
+                   here in Settings because it has app-wide implications (CPU, battery,
+                   network) beyond just the visual stream. -->
 
               <!-- High Quality Passthrough Stream -->
               <ConfigField
@@ -304,11 +293,6 @@ async function handleAutoStartChange(event: Event) {
 async function handleDebugLoggingChange(event: Event) {
   const target = event.target as HTMLInputElement
   await configStore.updateEnableDebugLogging(target.checked)
-}
-
-async function handlePassthroughStreamChange(event: Event) {
-  const target = event.target as HTMLInputElement
-  await configStore.updateEnablePassthroughStream(target.checked)
 }
 
 async function handleHighQualityStreamChange(event: Event) {

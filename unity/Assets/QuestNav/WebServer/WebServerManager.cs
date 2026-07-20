@@ -4,6 +4,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Meta.XR;
+using QuestNav.Camera;
 using QuestNav.Commands;
 using QuestNav.Commands.Commands;
 using QuestNav.Config;
@@ -72,6 +74,14 @@ namespace QuestNav.WebServer
         private readonly Transform vrCamera;
         private readonly IConfigManager configManager;
         private readonly LogCollector logCollector;
+        private readonly CameraResourceManager cameraArbiter;
+
+        /// <summary>
+        /// Meta SDK camera reference. Forwarded to <see cref="ConfigServer"/> so the
+        /// AprilTag video-modes endpoint can enumerate supported resolutions even when
+        /// the passthrough stream is not currently running.
+        /// </summary>
+        private readonly PassthroughCameraAccess cameraAccess;
 
         private bool isInitialized;
 
@@ -87,6 +97,8 @@ namespace QuestNav.WebServer
             Transform vrCamera,
             Transform vrCameraRoot,
             VideoStreamProvider.IFrameSource frameSource,
+            CameraResourceManager cameraArbiter,
+            PassthroughCameraAccess cameraAccess,
             Transform resetTransform
         )
         {
@@ -96,6 +108,8 @@ namespace QuestNav.WebServer
             this.vrCamera = vrCamera;
             this.vrCameraRoot = vrCameraRoot;
             this.resetTransform = resetTransform;
+            this.cameraArbiter = cameraArbiter;
+            this.cameraAccess = cameraAccess;
 
             statusProvider = new StatusProvider();
             logCollector = new LogCollector();
@@ -104,6 +118,19 @@ namespace QuestNav.WebServer
             // Subscribe to config change events
             configManager.OnTeamNumberChanged += OnTeamNumberChanged;
             configManager.OnDebugIpOverrideChanged += OnDebugIpOverrideChanged;
+
+            // Forward camera arbitration changes into the status provider so the web UI
+            // can show "Locked by AprilTag" and the actual effective resolution.
+            cameraArbiter.OnResolutionChanged += OnEffectiveCameraResolutionChanged;
+        }
+
+        /// <summary>
+        /// Subscriber for <see cref="CameraResourceManager.OnResolutionChanged"/>. Pushes the
+        /// new effective resolution and lock state into the status provider for the web UI.
+        /// </summary>
+        private void OnEffectiveCameraResolutionChanged(Vector2Int? resolution)
+        {
+            statusProvider?.UpdateCameraStatus(cameraArbiter.IsLockedByHighPriority, resolution);
         }
 
         #region Properties
@@ -173,6 +200,11 @@ namespace QuestNav.WebServer
 
             configManager.OnTeamNumberChanged -= OnTeamNumberChanged;
             configManager.OnDebugIpOverrideChanged -= OnDebugIpOverrideChanged;
+
+            if (cameraArbiter != null)
+            {
+                cameraArbiter.OnResolutionChanged -= OnEffectiveCameraResolutionChanged;
+            }
 
             server?.Stop();
             server = null;
@@ -317,7 +349,8 @@ namespace QuestNav.WebServer
                 this,
                 statusProvider,
                 logCollector,
-                streamProvider
+                streamProvider,
+                cameraAccess
             );
 
             await server.StartAsync();

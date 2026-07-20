@@ -219,6 +219,12 @@ namespace QuestNav.Core
         /// </summary>
         private PassthroughFrameSource passthroughFrameSource;
 
+        /// <summary>
+        /// Single owner of camera enable/resolution. Both <see cref="passthroughFrameSource"/>
+        /// and <see cref="aprilTagManager"/> reserve through this arbiter; AprilTag wins ties.
+        /// </summary>
+        private CameraResourceManager cameraArbiter;
+
         private IVioAprilTagPoseEstimator vioAprilTagPoseEstimator;
 
         private AprilTagManager aprilTagManager;
@@ -262,12 +268,40 @@ namespace QuestNav.Core
             vioAprilTagPoseEstimator = new VioAprilTagPoseEstimator();
             OVRManager.display.RecenteredPose += OnVioRecenter;
 
+            // Construct the camera arbiter before any subsystem that touches the camera.
+            // Both PassthroughFrameSource (Low priority) and AprilTagManager (High priority)
+            // route enable/resolution changes through this single owner.
+            cameraArbiter = new CameraResourceManager(cameraAccess);
+
+            // Open the SQLite connection now (without firing events) so we can read the
+            // user-selected AprilTag field layout file before constructing the
+            // AprilTagFieldLayout / AprilTagManager. Field layout is "boot only" - the
+            // value is read once at startup and changes require a restart to apply.
+            await configManager.OpenAsync();
+
             var aprilTagFieldLayout = new AprilTagFieldLayout(0.1651); // TODO: no magic numbers
-            await aprilTagFieldLayout.LoadJsonFromFileAsync("2026-rebuilt-welded.json");
+            string requestedFieldLayout = await configManager.GetAprilTagFieldLayoutFileAsync();
+            bool layoutLoaded = await aprilTagFieldLayout.LoadJsonFromFileAsync(
+                requestedFieldLayout
+            );
+            if (
+                !layoutLoaded
+                && requestedFieldLayout != QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE
+            )
+            {
+                QueuedLogger.LogWarning(
+                    $"Failed to load AprilTag field layout '{requestedFieldLayout}'. "
+                        + $"Falling back to default '{QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE}'."
+                );
+                await aprilTagFieldLayout.LoadJsonFromFileAsync(
+                    QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE
+                );
+            }
             aprilTagManager = new AprilTagManager(
                 configManager,
                 vioAprilTagPoseEstimator,
                 cameraAccess,
+                cameraArbiter,
                 aprilTagFieldLayout,
                 this
             );
@@ -275,6 +309,7 @@ namespace QuestNav.Core
             passthroughFrameSource = new PassthroughFrameSource(
                 this,
                 cameraAccess,
+                cameraArbiter,
                 networkTableConnection.CreateCameraSource("Passthrough"),
                 configManager
             );
@@ -287,6 +322,8 @@ namespace QuestNav.Core
                 vrCamera,
                 vrCameraRoot,
                 passthroughFrameSource,
+                cameraArbiter,
+                cameraAccess,
                 resetTransform
             );
 

@@ -27,7 +27,10 @@ namespace QuestNav.WebServer
     }
 
     /// <summary>
-    /// AprilTag detector configuration for web API
+    /// AprilTag detector configuration for web API.
+    /// <c>ignoredIds</c> is a blacklist: detections with one of these IDs are dropped
+    /// before the PoseLib solver runs. Empty array means detect every tag.
+    /// <c>fieldLayoutFile</c> takes effect on the next app restart only.
     /// </summary>
     [Serializable]
     public class AprilTagDetectorModeModel
@@ -36,9 +39,81 @@ namespace QuestNav.WebServer
         public int width;
         public int height;
         public int framerate;
-        public int[] allowedIds;
+        public int[] ignoredIds;
         public double maxDistance;
         public int minimumNumberOfTags;
+
+        /// <summary>
+        /// Filename of the field-layout JSON to use on the next app restart. Resolved
+        /// against the bundled directory and the user-uploaded directory.
+        /// Restart-on-change; the running app keeps using the previously-loaded layout
+        /// until restart.
+        /// </summary>
+        public string fieldLayoutFile;
+
+        /// <summary>
+        /// Phase-2 confidence preset: 0=Permissive, 1=Balanced, 2=Strict, 3=Debug.
+        /// Tighter presets reject more pose updates but produce a more conservative pose;
+        /// Debug allows single-tag corrections for benchtop testing only. Takes effect
+        /// immediately (no restart required). Nullable: a missing field means "leave the
+        /// existing value alone" so a third-party client that doesn't know about this
+        /// field can still POST AprilTagDetectorMode without clobbering it.
+        /// </summary>
+        public int? confidencePreset;
+
+        /// <summary>
+        /// AprilTag measurement noise multiplier (UI slider range [0.5, 2.0]). 0.5x = high
+        /// trust, 1.0x = default, 2.0x = low trust. Takes effect on the next observation.
+        /// Nullable: a missing field means "leave alone".
+        /// </summary>
+        public double? noiseScale;
+    }
+
+    /// <summary>
+    /// One entry in the response from <c>GET /api/apriltag-field-layouts</c>.
+    /// </summary>
+    [Serializable]
+    public class AprilTagFieldLayoutEntry
+    {
+        /// <summary>The literal filename (e.g. "2026-rebuilt-welded.json").</summary>
+        public string fileName;
+
+        /// <summary>Human-friendly name derived from the filename for display in the UI.</summary>
+        public string displayName;
+
+        /// <summary>"bundled" or "custom" (user-uploaded via the manage modal).</summary>
+        public string source;
+
+        /// <summary>Number of tag entries in the layout JSON.</summary>
+        public int tagCount;
+    }
+
+    /// <summary>
+    /// Request body for <c>POST /api/apriltag-field-layouts</c>. Used for both
+    /// "create new" and "edit existing" flows; sending the same name with new content
+    /// overwrites in place.
+    /// </summary>
+    [Serializable]
+    public class FieldLayoutUploadRequest
+    {
+        /// <summary>
+        /// Friendly name (extension optional; the server appends ".json" if missing).
+        /// Sanitized server-side to <c>[A-Za-z0-9._-]{1,64}</c>.
+        /// </summary>
+        public string name;
+
+        /// <summary>Raw JSON content of the layout (the same shape as the bundled JSONs).</summary>
+        public string content;
+    }
+
+    /// <summary>
+    /// Request body for <c>PATCH /api/apriltag-field-layouts/{name}</c>.
+    /// </summary>
+    [Serializable]
+    public class FieldLayoutRenameRequest
+    {
+        /// <summary>The new name (extension optional; sanitized server-side).</summary>
+        public string newName;
     }
 
     /// <summary>

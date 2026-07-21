@@ -421,13 +421,9 @@ namespace QuestNav.Core
             networkTableConnection.PublishDeviceData(trackingLostEvents, batteryPercent);
 
             // Update web server with current pose data (it handles everything else internally)
-            //TODO: this should pull from the kalman pose estimator
-            //TODO: this should take pose3d
-            var frcPose = Conversions.UnityToFrc3d(
-                cameraRig.centerEyeAnchor.position,
-                cameraRig.centerEyeAnchor.rotation
+            var (frcPosition, frcRotation) = Conversions.ProtobufPose3dToUnity(
+                vioAprilTagPoseEstimator.EstimatedPose.ToProtobuf()
             );
-            var (frcPosition, frcRotation) = Conversions.ProtobufPose3dToUnity(frcPose);
             webServerManager?.Periodic(
                 frcPosition,
                 frcRotation,

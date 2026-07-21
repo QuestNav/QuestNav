@@ -111,6 +111,7 @@ namespace QuestNav.Commands.Commands
                 // Step 6: Reset the Kalman filter so it agrees with the new VIO reference frame.
                 // After moving vrCameraRoot, the next VIO reading will be relative to this new
                 // origin. The filter must be told so it doesn't interpret the jump as displacement.
+                //TODO: Investigate. Potential bug (new rotation is set to the exact quaternion not whatever "newRotation" is)
                 var resetPose3d = new Pose3d(
                     targetCameraPosition.x,
                     targetCameraPosition.y,

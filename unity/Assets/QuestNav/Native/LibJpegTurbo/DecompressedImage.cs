@@ -2,7 +2,13 @@
 {
     public class DecompressedImage
     {
-        public DecompressedImage(int width, int height, int stride, byte[] data, LJTPixelFormat pixelFormat)
+        public DecompressedImage(
+            int width,
+            int height,
+            int stride,
+            byte[] data,
+            LJTPixelFormat pixelFormat
+        )
         {
             this.Width = width;
             this.Height = height;

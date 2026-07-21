@@ -42,8 +42,16 @@ namespace LibJpegTurboUnity
             Dispose(false);
         }
 
-        public byte[] Compress(IntPtr srcPtr, int stride, int width, int height, LJTPixelFormat ljtPixelFormat,
-            LJTSubsamplingOption subSamp, int quality, LJTFlags ljtFlags)
+        public byte[] Compress(
+            IntPtr srcPtr,
+            int stride,
+            int width,
+            int height,
+            LJTPixelFormat ljtPixelFormat,
+            LJTSubsamplingOption subSamp,
+            int quality,
+            LJTFlags ljtFlags
+        )
         {
             if (isDisposed)
             {
@@ -55,15 +63,27 @@ namespace LibJpegTurboUnity
             ulong jpegSize = 0;
             try
             {
-                if (LJTImport.TjCompress2(compressorHandle, srcPtr, width, stride, height,
-                        (int) ljtPixelFormat,
-                        ref zero, ref jpegSize, (int) subSamp, quality, (int) ljtFlags) == -1)
+                if (
+                    LJTImport.TjCompress2(
+                        compressorHandle,
+                        srcPtr,
+                        width,
+                        stride,
+                        height,
+                        (int)ljtPixelFormat,
+                        ref zero,
+                        ref jpegSize,
+                        (int)subSamp,
+                        quality,
+                        (int)ljtFlags
+                    ) == -1
+                )
                 {
                     LJTUtils.GetErrorAndThrow();
                 }
 
                 var destination = new byte[jpegSize];
-                Marshal.Copy(zero, destination, 0, (int) jpegSize);
+                Marshal.Copy(zero, destination, 0, (int)jpegSize);
                 return destination;
             }
             finally
@@ -72,8 +92,16 @@ namespace LibJpegTurboUnity
             }
         }
 
-        public unsafe byte[] Compress(byte[] srcBuf, int stride, int width, int height, LJTPixelFormat ljtPixelFormat,
-            LJTSubsamplingOption subSamp, int quality, LJTFlags ljtFlags)
+        public unsafe byte[] Compress(
+            byte[] srcBuf,
+            int stride,
+            int width,
+            int height,
+            LJTPixelFormat ljtPixelFormat,
+            LJTSubsamplingOption subSamp,
+            int quality,
+            LJTFlags ljtFlags
+        )
         {
             if (isDisposed)
             {
@@ -87,15 +115,28 @@ namespace LibJpegTurboUnity
             {
                 fixed (byte* srcBuf1 = srcBuf)
                 {
-                    if (LJTImport.TjCompress2(compressorHandle, (IntPtr) srcBuf1, width, stride, height,
-                            (int) ljtPixelFormat, ref zero, ref jpegSize, (int) subSamp, quality, (int) ljtFlags) == -1)
+                    if (
+                        LJTImport.TjCompress2(
+                            compressorHandle,
+                            (IntPtr)srcBuf1,
+                            width,
+                            stride,
+                            height,
+                            (int)ljtPixelFormat,
+                            ref zero,
+                            ref jpegSize,
+                            (int)subSamp,
+                            quality,
+                            (int)ljtFlags
+                        ) == -1
+                    )
                     {
                         LJTUtils.GetErrorAndThrow();
                     }
                 }
 
                 var destination = new byte[jpegSize];
-                Marshal.Copy(zero, destination, 0, (int) jpegSize);
+                Marshal.Copy(zero, destination, 0, (int)jpegSize);
                 return destination;
             }
             finally
@@ -104,8 +145,11 @@ namespace LibJpegTurboUnity
             }
         }
 
-        public byte[] EncodeJPG(Texture2D texture, int Quality,
-            LJTSubsamplingOption ljtSubsampling = LJTSubsamplingOption.Chrominance420)
+        public byte[] EncodeJPG(
+            Texture2D texture,
+            int Quality,
+            LJTSubsamplingOption ljtSubsampling = LJTSubsamplingOption.Chrominance420
+        )
         {
             var ljtPixelFormat = LJTPixelFormat.RGB;
             var stride = texture.width * 3;
@@ -129,12 +173,26 @@ namespace LibJpegTurboUnity
                     break;
             }
 
-            return Compress(texture.GetRawTextureData(), stride, texture.width, texture.height, ljtPixelFormat,
-                ljtSubsampling, Quality, LJTFlags.BottomUp);
+            return Compress(
+                texture.GetRawTextureData(),
+                stride,
+                texture.width,
+                texture.height,
+                ljtPixelFormat,
+                ljtSubsampling,
+                Quality,
+                LJTFlags.BottomUp
+            );
         }
 
-        public byte[] EncodeJPG(byte[] _RawTextureData, int _width, int _height, LJTPixelFormat _format, int Quality,
-            LJTSubsamplingOption ljtSubsampling = LJTSubsamplingOption.Chrominance420)
+        public byte[] EncodeJPG(
+            byte[] _RawTextureData,
+            int _width,
+            int _height,
+            LJTPixelFormat _format,
+            int Quality,
+            LJTSubsamplingOption ljtSubsampling = LJTSubsamplingOption.Chrominance420
+        )
         {
             var stride = _width * 3;
             switch (_format)
@@ -153,15 +211,36 @@ namespace LibJpegTurboUnity
                     break;
             }
 
-            return Compress(_RawTextureData, stride, _width, _height, _format, ljtSubsampling, Quality,
-                LJTFlags.BottomUp);
+            return Compress(
+                _RawTextureData,
+                stride,
+                _width,
+                _height,
+                _format,
+                ljtSubsampling,
+                Quality,
+                LJTFlags.BottomUp
+            );
         }
 
-        public byte[] EncodeJPG(byte[] _RawTextureData, int _width, int _height, int Quality,
-            LJTSubsamplingOption ljtSubsampling = LJTSubsamplingOption.Chrominance420)
+        public byte[] EncodeJPG(
+            byte[] _RawTextureData,
+            int _width,
+            int _height,
+            int Quality,
+            LJTSubsamplingOption ljtSubsampling = LJTSubsamplingOption.Chrominance420
+        )
         {
-            return Compress(_RawTextureData, _width * 3, _width, _height, LJTPixelFormat.RGB, ljtSubsampling, Quality,
-                LJTFlags.BottomUp);
+            return Compress(
+                _RawTextureData,
+                _width * 3,
+                _width,
+                _height,
+                LJTPixelFormat.RGB,
+                ljtSubsampling,
+                Quality,
+                LJTFlags.BottomUp
+            );
         }
 
         protected virtual void Dispose(bool callFromUserCode)
@@ -180,13 +259,20 @@ namespace LibJpegTurboUnity
             compressorHandle = IntPtr.Zero;
         }
 
-        private static void CheckOptionsCompatibilityAndThrow(LJTSubsamplingOption subSamp, LJTPixelFormat srcFormat)
+        private static void CheckOptionsCompatibilityAndThrow(
+            LJTSubsamplingOption subSamp,
+            LJTPixelFormat srcFormat
+        )
         {
             if (srcFormat == LJTPixelFormat.Gray && subSamp != LJTSubsamplingOption.Gray)
             {
-                throw new NotSupportedException(string.Format(
-                    "Subsampling differ from {0} for pixel format {1} is not supported", LJTSubsamplingOption.Gray,
-                    LJTPixelFormat.Gray));
+                throw new NotSupportedException(
+                    string.Format(
+                        "Subsampling differ from {0} for pixel format {1} is not supported",
+                        LJTSubsamplingOption.Gray,
+                        LJTPixelFormat.Gray
+                    )
+                );
             }
         }
     }

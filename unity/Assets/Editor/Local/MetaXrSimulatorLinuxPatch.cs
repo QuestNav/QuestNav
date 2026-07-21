@@ -17,20 +17,20 @@ namespace QuestNav.EditorTools
         private const string RelativePathUnderPackage = "Editor/MetaXRSimulator/Installer.cs";
 
         private const string BuggyBlock =
-            "#elif UNITY_EDITOR_OSX\n" +
-            "            var downloadedInstallerPath =\n" +
-            "                            Path.Combine(XRSimConstants.DownloadFolderPath, $\"meta_xr_simulator.dmg\");\n" +
-            "#endif";
+            "#elif UNITY_EDITOR_OSX\n"
+            + "            var downloadedInstallerPath =\n"
+            + "                            Path.Combine(XRSimConstants.DownloadFolderPath, $\"meta_xr_simulator.dmg\");\n"
+            + "#endif";
 
         private const string PatchedBlock =
-            "#elif UNITY_EDITOR_OSX\n" +
-            "            var downloadedInstallerPath =\n" +
-            "                            Path.Combine(XRSimConstants.DownloadFolderPath, $\"meta_xr_simulator.dmg\");\n" +
-            "#else\n" +
-            "            string downloadedInstallerPath = null;\n" +
-            "            onError?.Invoke(\"Meta XR Simulator is not supported on this platform.\");\n" +
-            "            return false;\n" +
-            "#endif";
+            "#elif UNITY_EDITOR_OSX\n"
+            + "            var downloadedInstallerPath =\n"
+            + "                            Path.Combine(XRSimConstants.DownloadFolderPath, $\"meta_xr_simulator.dmg\");\n"
+            + "#else\n"
+            + "            string downloadedInstallerPath = null;\n"
+            + "            onError?.Invoke(\"Meta XR Simulator is not supported on this platform.\");\n"
+            + "            return false;\n"
+            + "#endif";
 
         static MetaXrSimulatorLinuxPatch()
         {
@@ -40,13 +40,19 @@ namespace QuestNav.EditorTools
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"[MetaXrSimulatorLinuxPatch] Failed to patch Meta XR SDK core for Linux: {ex}");
+                UnityEngine.Debug.LogWarning(
+                    $"[MetaXrSimulatorLinuxPatch] Failed to patch Meta XR SDK core for Linux: {ex}"
+                );
             }
         }
 
         private static void ApplyPatch()
         {
-            var packageCacheDir = Path.Combine(Path.GetDirectoryName(UnityEngine.Application.dataPath), "Library", "PackageCache");
+            var packageCacheDir = Path.Combine(
+                Path.GetDirectoryName(UnityEngine.Application.dataPath),
+                "Library",
+                "PackageCache"
+            );
             if (!Directory.Exists(packageCacheDir))
             {
                 return;
@@ -54,9 +60,17 @@ namespace QuestNav.EditorTools
 
             var patchedAny = false;
 
-            foreach (var packageDir in Directory.GetDirectories(packageCacheDir, "com.meta.xr.sdk.core@*"))
+            foreach (
+                var packageDir in Directory.GetDirectories(
+                    packageCacheDir,
+                    "com.meta.xr.sdk.core@*"
+                )
+            )
             {
-                var installerPath = Path.Combine(packageDir, RelativePathUnderPackage.Replace('/', Path.DirectorySeparatorChar));
+                var installerPath = Path.Combine(
+                    packageDir,
+                    RelativePathUnderPackage.Replace('/', Path.DirectorySeparatorChar)
+                );
                 if (!File.Exists(installerPath))
                 {
                     continue;
@@ -70,7 +84,9 @@ namespace QuestNav.EditorTools
 
                 File.WriteAllText(installerPath, contents.Replace(BuggyBlock, PatchedBlock));
                 patchedAny = true;
-                UnityEngine.Debug.Log($"[MetaXrSimulatorLinuxPatch] Patched {installerPath} for Linux compilation.");
+                UnityEngine.Debug.Log(
+                    $"[MetaXrSimulatorLinuxPatch] Patched {installerPath} for Linux compilation."
+                );
             }
 
             if (patchedAny)

@@ -5,9 +5,7 @@ namespace LibJpegTurboUnity
 {
     internal static class LJTUtils
     {
-        public static void GetErrorAndThrow()
-        {
-        }
+        public static void GetErrorAndThrow() { }
 
         public static string GetPlatformName()
         {
@@ -21,7 +19,11 @@ namespace LibJpegTurboUnity
             var int64 = intPtr.ToInt64();
             foreach (var structure in structArray)
             {
-                Marshal.StructureToPtr(structure ?? throw new InvalidOperationException(), new IntPtr(int64), false);
+                Marshal.StructureToPtr(
+                    structure ?? throw new InvalidOperationException(),
+                    new IntPtr(int64),
+                    false
+                );
                 int64 += num;
             }
 
@@ -30,8 +32,9 @@ namespace LibJpegTurboUnity
 
         public static IntPtr CopyDataToPointer(byte[] data, bool useComAllocation = false)
         {
-            var destination =
-                useComAllocation ? Marshal.AllocCoTaskMem(data.Length) : Marshal.AllocHGlobal(data.Length);
+            var destination = useComAllocation
+                ? Marshal.AllocCoTaskMem(data.Length)
+                : Marshal.AllocHGlobal(data.Length);
             Marshal.Copy(data, 0, destination, data.Length);
             return destination;
         }

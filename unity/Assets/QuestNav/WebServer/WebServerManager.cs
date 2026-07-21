@@ -345,7 +345,6 @@ namespace QuestNav.WebServer
                 QuestNavConstants.WebServer.SERVER_PORT,
                 QuestNavConstants.WebServer.ENABLE_CORS_DEV_MODE,
                 staticPath,
-                new UnityLogger(),
                 this,
                 statusProvider,
                 logCollector,

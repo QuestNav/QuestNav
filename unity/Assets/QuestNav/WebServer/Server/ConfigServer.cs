@@ -47,7 +47,6 @@ namespace QuestNav.WebServer.Server
         private readonly int port;
         private readonly bool enableCorsDevMode;
         private readonly string staticPath;
-        private readonly ILogger logger;
         private readonly WebServerManager webServerManager;
         private readonly StatusProvider statusProvider;
         private readonly LogCollector logCollector;
@@ -85,7 +84,6 @@ namespace QuestNav.WebServer.Server
         /// <param name="port">HTTP server port.</param>
         /// <param name="enableCorsDevMode">Enable CORS for development.</param>
         /// <param name="staticPath">Path to static web UI files.</param>
-        /// <param name="logger">Logger implementation for background thread.</param>
         /// <param name="webServerManager">Web server manager for restart/reset callbacks.</param>
         /// <param name="statusProvider">Status provider instance for runtime data.</param>
         /// <param name="logCollector">Log collector instance for log messages.</param>
@@ -96,7 +94,6 @@ namespace QuestNav.WebServer.Server
             int port,
             bool enableCorsDevMode,
             string staticPath,
-            ILogger logger,
             WebServerManager webServerManager,
             StatusProvider statusProvider,
             LogCollector logCollector,
@@ -108,7 +105,6 @@ namespace QuestNav.WebServer.Server
             this.port = port;
             this.enableCorsDevMode = enableCorsDevMode;
             this.staticPath = staticPath;
-            this.logger = logger;
             this.webServerManager = webServerManager;
             this.statusProvider = statusProvider;
             this.logCollector = logCollector;
@@ -140,14 +136,14 @@ namespace QuestNav.WebServer.Server
         {
             if (IsRunning)
             {
-                logger?.LogWarning("[ConfigServer] Server already running");
+                QueuedLogger.LogWarning("Server already running");
                 return;
             }
 
             cancellationTokenSource = new CancellationTokenSource();
 
-            logger?.Log($"[ConfigServer] Starting server on port {port}");
-            logger?.Log($"[ConfigServer] Static files path: {staticPath}");
+            QueuedLogger.Log($"Starting server on port {port}");
+            QueuedLogger.Log($"Static files path: {staticPath}");
 
             var listeningTcs = new TaskCompletionSource<bool>();
 
@@ -173,7 +169,7 @@ namespace QuestNav.WebServer.Server
             }
             catch
             {
-                logger?.Log("[ConfigServer] Failed to unregister logger!");
+                QueuedLogger.Log("Failed to unregister logger!");
             }
 
             _ = Task.Run(async () =>
@@ -184,14 +180,14 @@ namespace QuestNav.WebServer.Server
                 }
                 catch (Exception ex)
                 {
-                    logger?.LogError($"[ConfigServer] Server error: {ex.Message}");
+                    QueuedLogger.LogError($"Server error: {ex.Message}");
                     listeningTcs.TrySetResult(false);
                 }
             });
 
             await listeningTcs.Task;
 
-            logger?.Log($"[ConfigServer] Server started at {BaseUrl}");
+            QueuedLogger.Log($"Server started at {BaseUrl}");
         }
 
         private async Task HandleVideoStream(IHttpContext context)
@@ -219,11 +215,11 @@ namespace QuestNav.WebServer.Server
         {
             if (!IsRunning)
                 return;
-            logger?.Log("[ConfigServer] Stopping server...");
+            QueuedLogger.Log("Stopping server...");
             cancellationTokenSource?.Cancel();
             server?.Dispose();
             server = null;
-            logger?.Log("[ConfigServer] Server stopped");
+            QueuedLogger.Log("Server stopped");
         }
 
         private void RecordClientActivity(string clientIp)
@@ -402,7 +398,7 @@ namespace QuestNav.WebServer.Server
             }
             catch (Exception ex)
             {
-                logger?.LogError($"[ConfigServer] Request error: {ex.Message}");
+                QueuedLogger.LogError($"Request error: {ex.Message}");
                 context.Response.StatusCode = 500;
                 await SendJsonResponse(
                     context,
@@ -673,7 +669,7 @@ namespace QuestNav.WebServer.Server
             }
             catch (Exception ex)
             {
-                logger?.LogError($"[ConfigServer] Failed to apply config update: {ex.Message}");
+                QueuedLogger.LogError($"Failed to apply config update: {ex.Message}");
                 context.Response.StatusCode = 500;
                 await SendJsonResponse(
                     context,
@@ -700,7 +696,7 @@ namespace QuestNav.WebServer.Server
             }
             catch (Exception ex)
             {
-                logger?.LogError($"[ConfigServer] Failed to reset config: {ex.Message}");
+                QueuedLogger.LogError($"Failed to reset config: {ex.Message}");
                 context.Response.StatusCode = 500;
                 await SendJsonResponse(
                     context,

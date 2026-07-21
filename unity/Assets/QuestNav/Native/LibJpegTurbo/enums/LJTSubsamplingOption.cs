@@ -7,6 +7,6 @@
         Chrominance420,
         Gray,
         Chrominance440,
-        Chrominance411
+        Chrominance411,
     }
 }

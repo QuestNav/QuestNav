@@ -22,31 +22,73 @@ namespace LibJpegTurboUnity
 
         ~LJTDecompressor() => this.Dispose(false);
 
-        public unsafe byte[] Decompress(IntPtr jpegBuf, ulong jpegBufSize, LJTPixelFormat destPixelFormat,
-            LJTFlags flags, out int width, out int height, out int stride)
+        public unsafe byte[] Decompress(
+            IntPtr jpegBuf,
+            ulong jpegBufSize,
+            LJTPixelFormat destPixelFormat,
+            LJTFlags flags,
+            out int width,
+            out int height,
+            out int stride
+        )
         {
             int bufSize;
-            this.GetImageInfo(jpegBuf, jpegBufSize, destPixelFormat, out width, out height, out stride, out bufSize);
+            this.GetImageInfo(
+                jpegBuf,
+                jpegBufSize,
+                destPixelFormat,
+                out width,
+                out height,
+                out stride,
+                out bufSize
+            );
             byte[] numArray;
             fixed (byte* outBuf = numArray = new byte[bufSize])
             {
-                this.Decompress(jpegBuf, jpegBufSize, (IntPtr) (void*) outBuf, bufSize, destPixelFormat, flags,
-                    out width, out height, out stride);
+                this.Decompress(
+                    jpegBuf,
+                    jpegBufSize,
+                    (IntPtr)(void*)outBuf,
+                    bufSize,
+                    destPixelFormat,
+                    flags,
+                    out width,
+                    out height,
+                    out stride
+                );
             }
 
             return numArray;
         }
 
-        public void Decompress(IntPtr jpegBuf, ulong jpegBufSize, IntPtr outBuf, int outBufSize,
-            LJTPixelFormat destPixelFormat, LJTFlags flags, out int width, out int height, out int stride)
+        public void Decompress(
+            IntPtr jpegBuf,
+            ulong jpegBufSize,
+            IntPtr outBuf,
+            int outBufSize,
+            LJTPixelFormat destPixelFormat,
+            LJTFlags flags,
+            out int width,
+            out int height,
+            out int stride
+        )
         {
             if (this.isDisposed)
             {
                 throw new ObjectDisposedException("this");
             }
 
-            if (LJTImport.TjDecompressHeader(this.decompressorHandle, jpegBuf, jpegBufSize, out width, out height,
-                    out int _, out int _) == -1)
+            if (
+                LJTImport.TjDecompressHeader(
+                    this.decompressorHandle,
+                    jpegBuf,
+                    jpegBufSize,
+                    out width,
+                    out height,
+                    out int _,
+                    out int _
+                ) == -1
+            )
             {
                 LJTUtils.GetErrorAndThrow();
             }
@@ -59,8 +101,19 @@ namespace LibJpegTurboUnity
                 throw new ArgumentOutOfRangeException(outBufSize.ToString());
             }
 
-            if (LJTImport.TjDecompress(this.decompressorHandle, jpegBuf, jpegBufSize, outBuf, width, stride, height,
-                    (int) tjPixelFormat, (int) flags) != -1)
+            if (
+                LJTImport.TjDecompress(
+                    this.decompressorHandle,
+                    jpegBuf,
+                    jpegBufSize,
+                    outBuf,
+                    width,
+                    stride,
+                    height,
+                    (int)tjPixelFormat,
+                    (int)flags
+                ) != -1
+            )
             {
                 return;
             }
@@ -68,24 +121,41 @@ namespace LibJpegTurboUnity
             LJTUtils.GetErrorAndThrow();
         }
 
-        public unsafe byte[] Decompress(byte[] jpegBuf, LJTPixelFormat destPixelFormat, LJTFlags flags, out int width,
-            out int height, out int stride)
+        public unsafe byte[] Decompress(
+            byte[] jpegBuf,
+            LJTPixelFormat destPixelFormat,
+            LJTFlags flags,
+            out int width,
+            out int height,
+            out int stride
+        )
         {
             if (this.isDisposed)
             {
                 throw new ObjectDisposedException("this");
             }
 
-            ulong length = (ulong) jpegBuf.Length;
+            ulong length = (ulong)jpegBuf.Length;
             fixed (byte* jpegBuf1 = jpegBuf)
             {
-                return this.Decompress((IntPtr) (void*) jpegBuf1, length, destPixelFormat, flags, out width, out height,
-                    out stride);
+                return this.Decompress(
+                    (IntPtr)(void*)jpegBuf1,
+                    length,
+                    destPixelFormat,
+                    flags,
+                    out width,
+                    out height,
+                    out stride
+                );
             }
         }
 
-        public DecompressedImage Decompress(IntPtr jpegBuf, ulong jpegBufSize, LJTPixelFormat destPixelFormat,
-            LJTFlags flags)
+        public DecompressedImage Decompress(
+            IntPtr jpegBuf,
+            ulong jpegBufSize,
+            LJTPixelFormat destPixelFormat,
+            LJTFlags flags
+        )
         {
             if (this.isDisposed)
             {
@@ -95,22 +165,33 @@ namespace LibJpegTurboUnity
             int width;
             int height;
             int stride;
-            byte[] data = this.Decompress(jpegBuf, jpegBufSize, destPixelFormat, flags, out width, out height,
-                out stride);
+            byte[] data = this.Decompress(
+                jpegBuf,
+                jpegBufSize,
+                destPixelFormat,
+                flags,
+                out width,
+                out height,
+                out stride
+            );
             return new DecompressedImage(width, height, stride, data, destPixelFormat);
         }
 
-        public unsafe DecompressedImage Decompress(byte[] jpegBuf, LJTPixelFormat destPixelFormat, LJTFlags flags)
+        public unsafe DecompressedImage Decompress(
+            byte[] jpegBuf,
+            LJTPixelFormat destPixelFormat,
+            LJTFlags flags
+        )
         {
             if (this.isDisposed)
             {
                 throw new ObjectDisposedException("this");
             }
 
-            ulong length = (ulong) jpegBuf.Length;
+            ulong length = (ulong)jpegBuf.Length;
             fixed (byte* jpegBuf1 = jpegBuf)
             {
-                return this.Decompress((IntPtr) (void*) jpegBuf1, length, destPixelFormat, flags);
+                return this.Decompress((IntPtr)(void*)jpegBuf1, length, destPixelFormat, flags);
             }
         }
 
@@ -149,11 +230,25 @@ namespace LibJpegTurboUnity
             return this.Decompress(jpegBuf, _format, LJTFlags.BottomUp);
         }
 
-        public void GetImageInfo(IntPtr jpegBuf, ulong jpegBufSize, LJTPixelFormat destPixelFormat, out int width,
-            out int height, out int stride, out int bufSize)
+        public void GetImageInfo(
+            IntPtr jpegBuf,
+            ulong jpegBufSize,
+            LJTPixelFormat destPixelFormat,
+            out int width,
+            out int height,
+            out int stride,
+            out int bufSize
+        )
         {
-            LJTImport.TjDecompressHeader(this.decompressorHandle, jpegBuf, jpegBufSize, out width, out height,
-                out int _, out int _);
+            LJTImport.TjDecompressHeader(
+                this.decompressorHandle,
+                jpegBuf,
+                jpegBufSize,
+                out width,
+                out height,
+                out int _,
+                out int _
+            );
             stride = width * LJTImport.PixelSizes[destPixelFormat];
             bufSize = stride * height;
         }
@@ -178,7 +273,7 @@ namespace LibJpegTurboUnity
                 }
 
                 this.Dispose(true);
-                GC.SuppressFinalize((object) this);
+                GC.SuppressFinalize((object)this);
             }
         }
 

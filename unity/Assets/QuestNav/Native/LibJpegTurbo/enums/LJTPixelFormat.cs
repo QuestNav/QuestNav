@@ -13,6 +13,6 @@
         BGRA,
         ABGR,
         ARGB,
-        CMYK
+        CMYK,
     }
 }

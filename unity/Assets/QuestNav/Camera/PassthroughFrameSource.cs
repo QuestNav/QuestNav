@@ -596,8 +596,19 @@ namespace QuestNav.Camera
                     continue;
                 }
 
+                // The camera arbiter applies cameraAccess.enabled = false/true on a
+                // Post()-queued main-thread callback while bouncing the camera to a new
+                // resolution. Skip the iteration instead of calling GetTexture() during
+                // that window (it would still fail safely, just with a noisy SDK log).
+                if (!cameraAccess.enabled)
+                {
+                    yield return new WaitForSeconds(FrameDelaySeconds);
+                    continue;
+                }
+
                 // Skip iterations where the SDK has not delivered a new frame this
                 // Unity Update. GetTexture() would still return the previous frame's
+
                 // texture, but encoding it again is wasted work AND every extra
                 // GetTexture / ReadPixels keeps the render thread busier, which feeds
                 // the Meta SDK's
@@ -609,7 +620,6 @@ namespace QuestNav.Camera
                     yield return null;
                     continue;
                 }
-
                 Texture texture;
 
                 try

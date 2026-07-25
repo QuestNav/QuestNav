@@ -6,6 +6,31 @@ namespace QuestNav.Utils
 {
     public static class FileManager
     {
+        /// <summary>
+        /// Cached <see cref="Application.persistentDataPath"/>, captured on the main thread
+        /// by <see cref="Initialize"/>. The property throws when accessed off the main
+        /// thread, but <see cref="GetStaticFilesPath"/> and <see cref="GetCustomFieldLayoutDir"/>
+        /// are called from ConfigServer's background HTTP request handlers.
+        /// </summary>
+        private static string persistentDataPath;
+
+        /// <summary>
+        /// Cached <see cref="Application.streamingAssetsPath"/>, captured on the main thread
+        /// by <see cref="Initialize"/> for the same reason as <see cref="persistentDataPath"/>.
+        /// </summary>
+        private static string streamingAssetsPath;
+
+        /// <summary>
+        /// Caches the Unity path properties this class needs. Must be called from the main
+        /// thread (e.g. from a MonoBehaviour's Awake) before any background-thread caller
+        /// (such as ConfigServer's HTTP request handlers) uses this class.
+        /// </summary>
+        public static void Initialize()
+        {
+            persistentDataPath = Application.persistentDataPath;
+            streamingAssetsPath = Application.streamingAssetsPath;
+        }
+
 #if UNITY_ANDROID && !UNITY_EDITOR
         /// <summary>
         /// Extracts files from the APK StreamingAssets path to another specified path
@@ -20,10 +45,7 @@ namespace QuestNav.Utils
             string targetDirAbsolute
         )
         {
-            string sourceDirAbsolute = Path.Combine(
-                Application.streamingAssetsPath,
-                sourceDirRelative
-            );
+            string sourceDirAbsolute = Path.Combine(streamingAssetsPath, sourceDirRelative);
 
             string sourceFileAbsolute = Path.Combine(sourceDirAbsolute, fileName);
             string targetFileAbsolute = Path.Combine(targetDirAbsolute, fileName);
@@ -58,9 +80,9 @@ namespace QuestNav.Utils
         public static string GetStaticFilesPath(string subPath)
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
-            return Path.Combine(Application.persistentDataPath, subPath);
+            return Path.Combine(persistentDataPath, subPath);
 #else
-            return Path.Combine(Application.streamingAssetsPath, subPath);
+            return Path.Combine(streamingAssetsPath, subPath);
 #endif
         }
 
@@ -71,11 +93,7 @@ namespace QuestNav.Utils
         /// </summary>
         public static string GetCustomFieldLayoutDir()
         {
-            string path = Path.Combine(
-                Application.persistentDataPath,
-                "apriltag",
-                "fieldlayouts-custom"
-            );
+            string path = Path.Combine(persistentDataPath, "apriltag", "fieldlayouts-custom");
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);

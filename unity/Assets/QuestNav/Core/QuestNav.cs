@@ -239,6 +239,7 @@ namespace QuestNav.Core
         private async void Awake()
         {
             QueuedLogger.Initialize();
+            FileManager.Initialize();
             // Disable stack traces for Log-level logging
             Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
 

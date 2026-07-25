@@ -125,7 +125,7 @@ namespace QuestNav.QuestNav.AprilTag
             {
                 preset = (ConfidencePreset)presetInt;
             }
-            vioAprilTagPoseEstimator?.SetConfidencePreset(preset);
+            vioAprilTagPoseEstimator.SetConfidencePreset(preset);
         }
 
         /// <summary>
@@ -311,7 +311,7 @@ namespace QuestNav.QuestNav.AprilTag
                 );
             }
 
-            frameDelaySeconds = 1.0f / Math.Max(1, configuration.Framerate);
+            frameDelaySeconds = 1.0f / configuration.Framerate;
             // Rebuild the ignore set on each config change. The capture coroutine reads
             // ignoredIdSet on every frame; replacing the reference atomically is safe
             // because both reads and writes happen on the Unity main thread (the coroutine
@@ -321,12 +321,12 @@ namespace QuestNav.QuestNav.AprilTag
                     ? new HashSet<int>()
                     : new HashSet<int>(configuration.IgnoredIds);
             maxDistance = configuration.MaxDistance;
-            minimumNumberOfTags = Math.Max(1, configuration.MinimumNumberOfTags);
+            minimumNumberOfTags = configuration.MinimumNumberOfTags;
 
             // Forward the user's minimum-tags floor to the estimator so its Phase 1
             // alignment gate honors the same value (otherwise the estimator's hardcoded
             // INITIAL_ALIGNMENT_MIN_TAGS = 2 would override a user setting of 1).
-            vioAprilTagPoseEstimator?.SetMinimumTags(minimumNumberOfTags);
+            vioAprilTagPoseEstimator.SetMinimumTags(minimumNumberOfTags);
         }
 
         private IEnumerator AprilTagFrameCaptureCoroutine()
@@ -512,10 +512,6 @@ namespace QuestNav.QuestNav.AprilTag
                         foreach (var det in kept)
                         {
                             var tagPose = aprilTagFieldLayout.GetTagPose(det.Id);
-                            if (tagPose == null)
-                            {
-                                continue; // skip detections whose ID isn't in the layout
-                            }
                             double dx = tagPose.X - frcPos.x;
                             double dy = tagPose.Y - frcPos.y;
                             double dz = tagPose.Z - frcPos.z;

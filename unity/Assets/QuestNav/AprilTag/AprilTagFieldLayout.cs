@@ -43,10 +43,9 @@ namespace QuestNav.QuestNav.AprilTag
         }
 
         /// <summary>
-        /// Loads a field-layout JSON file. Returns true on success, false on any failure
-        /// (missing file, IO error, deserialization failure, empty <c>tags</c> array).
-        /// On failure, the existing <see cref="Tags"/> / <see cref="Field"/> values are
-        /// preserved so the caller can fall back to a different layout.
+        /// Loads a field-layout JSON file. On failure (missing file, IO error,
+        /// deserialization failure, empty <c>tags</c> array), the existing
+        /// <see cref="Tags"/> / <see cref="Field"/> values are left untouched.
         ///
         /// Lookup order: the user-uploaded "custom" directory
         /// (<see cref="FileManager.GetCustomFieldLayoutDir"/>) is checked first. If the
@@ -56,13 +55,14 @@ namespace QuestNav.QuestNav.AprilTag
         /// order does not let a custom file silently override a bundled one.
         /// </summary>
         /// <param name="fileName">The filename to load (must include extension).</param>
-        public async Task<bool> LoadJsonFromFileAsync(string fileName)
+        public async Task LoadJsonFromFileAsync(string fileName)
         {
             // 1) Custom-uploaded JSONs live in persistentDataPath; check there first.
             string customPath = Path.Combine(FileManager.GetCustomFieldLayoutDir(), fileName);
             if (File.Exists(customPath))
             {
-                return TryLoadFrom(customPath);
+                TryLoadFrom(customPath);
+                return;
             }
 
             // 2) Fall through to bundled. On Android this requires extracting the
@@ -83,13 +83,13 @@ namespace QuestNav.QuestNav.AprilTag
                 QueuedLogger.LogError(
                     $"Failed to extract bundled field layout '{fileName}' from APK: {ex.Message}"
                 );
-                return false;
+                return;
             }
 #else
             await Task.CompletedTask;
 #endif
             string bundledPath = Path.Combine(bundledDir, fileName);
-            return TryLoadFrom(bundledPath);
+            TryLoadFrom(bundledPath);
         }
 
         /// <summary>
@@ -101,12 +101,6 @@ namespace QuestNav.QuestNav.AprilTag
         {
             try
             {
-                if (!File.Exists(filePath))
-                {
-                    QueuedLogger.LogError($"Field layout file does not exist: {filePath}");
-                    return false;
-                }
-
                 using var file = File.OpenText(filePath);
                 var jsonSerializer = new JsonSerializer();
                 var root = (AprilTagFieldLayout)
@@ -211,20 +205,11 @@ namespace QuestNav.QuestNav.AprilTag
 
                 return fieldTransforms;
             }
-            // ID does not exist in our list. Defense in depth: callers should now
-            // pre-filter via ContainsId, but we still log once per unknown ID so a
-            // regression in the filter is visible without spamming the log every
-            // frame at the detection rate.
-            if (loggedUnknownIds.Add(id))
-            {
-                QueuedLogger.LogWarning(
-                    $"Attempted to get corners of non-existent ID in the current field layout! ID: {id} "
-                        + "(further occurrences of this ID will be silenced)"
-                );
-            }
+            // ID does not exist in our list.
+            QueuedLogger.LogWarning(
+                $"Attempted to get corners of non-existent ID in the current field layout! ID: {id}"
+            );
             return new Translation3d[] { };
         }
-
-        private readonly HashSet<int> loggedUnknownIds = new HashSet<int>();
     }
 }

@@ -324,7 +324,6 @@ namespace QuestNav.Config
             await connection.CreateTableAsync<Config.System>();
             await connection.CreateTableAsync<Config.Camera>();
             await connection.CreateTableAsync<Config.AprilTag>();
-            await MigrateAprilTagAllowedIdToIgnoredIdAsync();
             await connection.CreateTableAsync<Config.AprilTagIgnoredId>();
             await connection.CreateTableAsync<Config.Logging>();
 
@@ -359,42 +358,6 @@ namespace QuestNav.Config
             OnEnableAprilTagDetectorChanged?.Invoke(await GetEnableAprilTagDetectorAsync());
 
             OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
-        }
-
-        /// <summary>
-        /// One-shot migration that renames the legacy <c>AprilTagAllowedId</c> table to
-        /// <c>AprilTagIgnoredId</c>. The semantics flipped from a whitelist to a blacklist;
-        /// silently reinterpreting the old rows would do the opposite of what the user
-        /// originally intended, so any pre-existing rows are dropped (with a warning) rather
-        /// than carried over. The previous UI was disabled, so no real-world data exists.
-        /// </summary>
-        private async Task MigrateAprilTagAllowedIdToIgnoredIdAsync()
-        {
-            try
-            {
-                int existing = await connection.ExecuteScalarAsync<int>(
-                    "SELECT COUNT(*) FROM AprilTagAllowedId"
-                );
-                if (existing > 0)
-                {
-                    QueuedLogger.LogWarning(
-                        $"Found {existing} legacy AprilTagAllowedId rows. The whitelist/blacklist "
-                            + "semantics have flipped; dropping legacy rows. Re-enter any IDs you "
-                            + "want ignored via the new Ignored Tag IDs field."
-                    );
-                }
-                // The table existed (the COUNT succeeded). Drop it; the fresh
-                // AprilTagIgnoredId table is created by the caller right after.
-                await connection.ExecuteAsync("DROP TABLE AprilTagAllowedId");
-                QueuedLogger.Log(
-                    "Migrated AprilTagAllowedId table out of the database (replaced by AprilTagIgnoredId)."
-                );
-            }
-            catch (SQLite.SQLiteException)
-            {
-                // Fresh database; the legacy table never existed. Normal path on first launch
-                // or on a database created after this migration was introduced.
-            }
         }
 
         /// <inheritdoc/>
@@ -588,43 +551,21 @@ namespace QuestNav.Config
         public async Task<string> GetAprilTagFieldLayoutFileAsync()
         {
             var config = await GetAprilTagConfigAsync();
-            // Defensive: defaults are normally enforced by the SQLite POCO default value
-            // but a corrupt or pre-migration row could yield empty/null.
-            return string.IsNullOrEmpty(config.AprilTagFieldLayoutFile)
-                ? QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE
-                : config.AprilTagFieldLayoutFile;
+            return config.AprilTagFieldLayoutFile;
         }
 
         /// <inheritdoc/>
         public async Task<int> GetAprilTagConfidencePresetAsync()
         {
             var config = await GetAprilTagConfigAsync();
-            // Clamp to the supported [0, 3] range to defend against a corrupt row.
-            // Range is 0=Permissive, 1=Balanced, 2=Strict, 3=Debug. Must stay in sync
-            // with SetAprilTagConfidencePresetAsync's clamp and the POST validator in
-            // ConfigServer; an out-of-range clamp here silently downgrades the user's
-            // selection on the next /api/config poll, which manifests as the AprilTag
-            // tab "snapping back" a few seconds after Apply.
-            int v = config.AprilTagConfidencePreset;
-            if (v < 0)
-                v = 0;
-            if (v > 3)
-                v = 3;
-            return v;
+            return config.AprilTagConfidencePreset;
         }
 
         /// <inheritdoc/>
         public async Task<double> GetAprilTagNoiseScaleAsync()
         {
             var config = await GetAprilTagConfigAsync();
-            // Clamp to the slider range so a corrupt row can't push the std-dev outside
-            // sensible bounds and tank the Kalman filter.
-            double v = config.AprilTagNoiseScale;
-            if (v < 0.5)
-                v = 0.5;
-            if (v > 2.0)
-                v = 2.0;
-            return v;
+            return config.AprilTagNoiseScale;
         }
         #endregion
 

@@ -1,4 +1,3 @@
-using System;
 using Meta.XR;
 using QuestNav.Camera;
 using QuestNav.Commands;
@@ -281,22 +280,7 @@ namespace QuestNav.Core
 
             var aprilTagFieldLayout = new AprilTagFieldLayout(0.1651); // TODO: no magic numbers
             string requestedFieldLayout = await configManager.GetAprilTagFieldLayoutFileAsync();
-            bool layoutLoaded = await aprilTagFieldLayout.LoadJsonFromFileAsync(
-                requestedFieldLayout
-            );
-            if (
-                !layoutLoaded
-                && requestedFieldLayout != QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE
-            )
-            {
-                QueuedLogger.LogWarning(
-                    $"Failed to load AprilTag field layout '{requestedFieldLayout}'. "
-                        + $"Falling back to default '{QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE}'."
-                );
-                await aprilTagFieldLayout.LoadJsonFromFileAsync(
-                    QuestNavConstants.AprilTag.DEFAULT_FIELD_LAYOUT_FILE
-                );
-            }
+            await aprilTagFieldLayout.LoadJsonFromFileAsync(requestedFieldLayout);
             aprilTagManager = new AprilTagManager(
                 configManager,
                 vioAprilTagPoseEstimator,
@@ -336,16 +320,8 @@ namespace QuestNav.Core
             );
             tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
 
-            // Use try-catch due to async
-            try
-            {
-                await configManager.InitializeAsync();
-                await webServerManager.InitializeAsync();
-            }
-            catch (Exception e)
-            {
-                QueuedLogger.LogException(e);
-            }
+            await configManager.InitializeAsync();
+            await webServerManager.InitializeAsync();
 
             networkTableConnection.Initialize();
 

@@ -378,10 +378,6 @@ namespace QuestNav.QuestNav.Estimation
         {
             // Refuse zero or negative; the estimator cannot work with no observations.
             int sanitized = minimumTags < 1 ? 1 : minimumTags;
-            if (userMinimumTags == sanitized)
-            {
-                return;
-            }
             userMinimumTags = sanitized;
             QueuedLogger.Log(
                 $"AprilTag minimum tags set to {sanitized} "

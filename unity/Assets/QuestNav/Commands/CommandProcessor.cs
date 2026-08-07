@@ -1,11 +1,11 @@
 ﻿using System.Linq;
 using QuestNav.Commands.Commands;
+using QuestNav.Config;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.QuestNav.Estimation;
 using QuestNav.Utils;
 using UnityEngine;
-using static QuestNav.Core.QuestNavConstants.Commands;
 
 namespace QuestNav.Commands
 {
@@ -41,6 +41,11 @@ namespace QuestNav.Commands
         private PoseResetCommand poseResetCommand;
 
         /// <summary>
+        /// Cached value of the allowed pose reset timeout, updated via config events
+        /// </summary>
+        private int cachedPoseResetTtlMs;
+
+        /// <summary>
         /// Initializes a new command processor with required dependencies
         /// </summary>
         /// <param name="networkTableConnection">Network connection for command communication</param>
@@ -48,16 +53,21 @@ namespace QuestNav.Commands
         /// <param name="vrCamera">Reference to the VR camera transform</param>
         /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
         /// <param name="resetTransform">Reference to the reset position transform</param>
+        /// <param name="configManager">Configuration manager for subscribing to setting changes</param>
         public CommandProcessor(
             INetworkTableConnection networkTableConnection,
             IVioAprilTagPoseEstimator vioAprilTagPoseEstimator,
             Transform vrCamera,
             Transform vrCameraRoot,
-            Transform resetTransform
+            Transform resetTransform,
+            IConfigManager configManager
         )
         {
             // Store network connection for command processing
             this.networkTableConnection = networkTableConnection;
+
+            // Subscribe to config change events
+            configManager.OnAllowedPoseResetTimeoutMsChanged += OnAllowedPoseResetTimeoutMsChanged;
 
             // Create NetworkTables command context for sending responses to robot
             var commandContext = new NetworkTablesCommandContext(networkTableConnection);
@@ -71,6 +81,13 @@ namespace QuestNav.Commands
                 vioAprilTagPoseEstimator
             );
         }
+
+        #region Event Subscribers
+        private void OnAllowedPoseResetTimeoutMsChanged(int timeoutMs)
+        {
+            cachedPoseResetTtlMs = timeoutMs;
+        }
+        #endregion
 
         /// <summary>
         /// Processes incoming commands from the robot and executes them in order
@@ -113,7 +130,7 @@ namespace QuestNav.Commands
                                 ) / 1000;
 
                             // Check if the command is fresh
-                            if (ageMs < POSE_RESET_TTL_MS)
+                            if (ageMs < cachedPoseResetTtlMs)
                             {
                                 // The command is fresh, process it
                                 QueuedLogger.Log(
@@ -127,11 +144,11 @@ namespace QuestNav.Commands
                                 // The command is too old, skip it
                                 QueuedLogger.Log(
                                     $"Skipping stale Pose Reset Command. ID: {receivedCommand.CommandId} "
-                                        + $"Age: {ageMs} ms > {POSE_RESET_TTL_MS} ms"
+                                        + $"Age: {ageMs} ms > {cachedPoseResetTtlMs} ms"
                                 );
                                 networkTableConnection.SendCommandErrorResponse(
                                     receivedCommand.CommandId,
-                                    $"Pose Reset Command too old. Age: {ageMs} ms > {POSE_RESET_TTL_MS} ms"
+                                    $"Pose Reset Command too old. Age: {ageMs} ms > {cachedPoseResetTtlMs} ms"
                                 );
                             }
                         }

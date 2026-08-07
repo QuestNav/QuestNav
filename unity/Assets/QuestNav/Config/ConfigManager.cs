@@ -50,6 +50,11 @@ namespace QuestNav.Config
 
         #region System
         /// <summary>
+        /// Raised when the allowed pose reset timeout changes.
+        /// </summary>
+        public event Action<int> OnAllowedPoseResetTimeoutMsChanged;
+
+        /// <summary>
         /// Raised when auto-start on boot setting changes.
         /// </summary>
         public event Action<bool> OnEnableAutoStartOnBootChanged;
@@ -122,6 +127,14 @@ namespace QuestNav.Config
         #endregion
 
         #region System
+        /// <summary>
+        /// Gets the allowed pose reset timeout in milliseconds.
+        /// </summary>
+        /// <returns>
+        /// The timeout in milliseconds for how stale a pose reset request can be.
+        /// </returns>
+        public Task<int> GetAllowedPoseResetTimeoutMsAsync();
+
         /// <summary>
         /// Gets whether auto-start on boot is enabled.
         /// </summary>
@@ -206,8 +219,8 @@ namespace QuestNav.Config
         #region Setters
         #region Network
         /// <summary>
-        /// Sets the team number and clears IP override
-        /// .</summary>
+        /// Sets the team number and clears IP override.
+        /// </summary>
         /// <seealso cref="SetDebugIpOverrideAsync"/>
         public Task SetTeamNumberAsync(int teamNumber);
 
@@ -219,6 +232,11 @@ namespace QuestNav.Config
         #endregion
 
         #region System
+        /// <summary>
+        /// Sets the allowed pose reset timeout in milliseconds.
+        /// </summary>
+        public Task SetAllowedPoseResetTimeoutMsAsync(int timeoutMs);
+
         /// <summary>
         /// Sets whether to auto-start on boot.
         /// </summary>
@@ -338,6 +356,7 @@ namespace QuestNav.Config
             // Fire initial values to all current subscribers
             OnTeamNumberChanged?.Invoke(await GetTeamNumberAsync());
             OnDebugIpOverrideChanged?.Invoke(await GetDebugIpOverrideAsync());
+            OnAllowedPoseResetTimeoutMsChanged?.Invoke(await GetAllowedPoseResetTimeoutMsAsync());
             OnEnableAutoStartOnBootChanged?.Invoke(await GetEnableAutoStartOnBootAsync());
 
             OnEnablePassthroughStreamChanged?.Invoke(await GetEnablePassthroughStreamAsync());
@@ -370,6 +389,7 @@ namespace QuestNav.Config
             var loggingDefaults = new Config.Logging();
 
             await SetTeamNumberAsync(networkDefaults.TeamNumber);
+            await SetAllowedPoseResetTimeoutMsAsync(networkDefaults.AllowedPoseResetTimeoutMs);
             await SetEnableAutoStartOnBootAsync(systemDefaults.EnableAutoStartOnBoot);
 
             await SetEnablePassthroughStreamAsync(cameraDefaults.EnablePassthroughStream);
@@ -426,7 +446,14 @@ namespace QuestNav.Config
 
         #region System
         /// <inheritdoc/>
+        public event Action<int> OnAllowedPoseResetTimeoutMsChanged;
+
+        /// <inheritdoc/>
         public event Action<bool> OnEnableAutoStartOnBootChanged;
+        
+        /// <inheritdoc/>
+        public event Action<int> OnStreamQualityChanged;
+        
         #endregion
 
         #region Camera
@@ -453,9 +480,7 @@ namespace QuestNav.Config
         /// <inheritdoc/>
         public event Action<double> OnAprilTagNoiseScaleChanged;
         #endregion
-
         #region Logging
-        /// <inheritdoc/>
         public event Action<bool> OnEnableDebugLoggingChanged;
         #endregion
         #endregion
@@ -476,6 +501,14 @@ namespace QuestNav.Config
             var config = await GetNetworkConfigAsync();
 
             return config.DebugIpOverride;
+        }
+
+        /// <inheritdoc/>
+        public async Task<int> GetAllowedPoseResetTimeoutMsAsync()
+        {
+            var config = await GetNetworkConfigAsync();
+
+            return config.AllowedPoseResetTimeoutMs;
         }
         #endregion
 
@@ -627,6 +660,18 @@ namespace QuestNav.Config
             invokeOnMainThread(() => OnDebugIpOverrideChanged?.Invoke(config.DebugIpOverride));
             invokeOnMainThread(() => OnTeamNumberChanged?.Invoke(config.TeamNumber));
             QueuedLogger.Log($"Updated Key 'debugIpOverride' to {ipOverride}");
+        }
+
+        /// <inheritdoc/>
+        public async Task SetAllowedPoseResetTimeoutMsAsync(int timeoutMs)
+        {
+            var config = await GetNetworkConfigAsync();
+            config.AllowedPoseResetTimeoutMs = timeoutMs;
+            await SaveNetworkConfigAsync(config);
+
+            // Notify subscribed methods on the main thread
+            invokeOnMainThread(() => OnAllowedPoseResetTimeoutMsChanged?.Invoke(timeoutMs));
+            QueuedLogger.Log($"Updated Key 'allowedPoseResetTimeoutMs' to {timeoutMs}");
         }
         #endregion
 

@@ -1,0 +1,76 @@
+---
+title: Webcam
+---
+# Webcam
+
+QuestNav can stream the Quest headset's passthrough camera feed to any device on the robot network. This turns the Quest into a remote webcam, providing a live view of the field from the headset's perspective. The stream can be used in a driver station display, for match recording, or for additional image processing.
+
+## Stream URL
+
+Once enabled, the MJPEG video stream is available at:
+
+```
+http://<Quest IP Address>:5801/video
+```
+
+This URL can be opened in any browser or embedded in an FRC dashboard.
+
+## Enabling the Stream
+
+The webcam stream is **disabled by default**. To enable it:
+
+1. Open the Quest's web interface in a browser: `http://<Quest IP Address>:5801`
+2. Go to the **Settings** tab
+3. Enable **Passthrough Camera Stream**
+
+### High Quality Mode
+
+By default, the stream is limited to 640x480 at 30 fps. To unlock higher resolutions and framerates:
+
+1. In the **Settings** tab, enable **High Quality Passthrough Stream**
+2. Select the desired resolution and framerate from the available video modes
+
+:::warning
+High quality streaming puts heavy load on the headset CPU. This may cause dropped tracking frames, increased battery drain, and bandwidth usage up to 100 Mbits/second, which far exceeds the bandwidth available during an FRC match. Use high quality mode for testing and practice only.
+:::
+
+### Selecting Video Modes
+
+The available video modes can be queried programmatically via the web API:
+
+```
+GET http://<Quest IP Address>:5801/api/video-modes
+```
+
+This returns a list of supported resolution and framerate combinations. FRC dashboards that support stream quality selection (such as Elastic) can use this endpoint to negotiate the desired mode. QuestNav will select the mode that meets or exceeds the requested values.
+
+## Camera Permission
+
+The Quest requires explicit permission to use the headset cameras. To verify QuestNav has been granted this permission:
+
+1. Open the Quest main menu
+2. Go to **Settings > Privacy and Safety > App Permissions > Headset Cameras**
+3. Ensure the toggle next to QuestNav is **enabled**
+
+If this permission is not granted, the stream will not produce any frames.
+
+## Dashboard Integration
+
+Once the stream is enabled, you can view it in your FRC dashboard:
+
+- **Elastic**: Add a camera widget and point it to `http://<Quest IP Address>:5801/video`
+- **Shuffleboard**: Use the CameraServer widget with the same URL
+- **Custom dashboards**: Embed the MJPEG stream URL in an `<img>` tag or use an MJPEG viewer library
+
+Most modern FRC dashboards allow you to adjust the requested stream quality. QuestNav respects these settings automatically.
+
+## Performance Notes
+
+- The stream is automatically paused when no clients are connected, reducing CPU and battery usage
+- When a client connects, frame capture and compression resume automatically
+- The stream uses MJPEG encoding (sequence of JPEG frames), which is widely compatible but less efficient than H.264. Keep this in mind when estimating bandwidth usage.
+- For competition, a resolution of 320x240 or 640x480 at 15-30 fps with moderate compression is a reasonable starting point
+
+## Next Steps
+
+Proceed to the [Troubleshooting](./troubleshooting) page if you encounter any issues with your QuestNav setup.

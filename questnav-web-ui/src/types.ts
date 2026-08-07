@@ -45,6 +45,7 @@ export interface ConfigResponse {
   success: boolean
   teamNumber: number
   debugIpOverride: string
+  allowedPoseResetTimeoutMs: number
   enableAutoStartOnBoot: boolean
   enablePassthroughStream: boolean
   enableHighQualityStream: boolean
@@ -58,6 +59,7 @@ export interface ConfigResponse {
 export interface ConfigUpdateRequest {
   teamNumber?: number
   debugIpOverride?: string
+  allowedPoseResetTimeoutMs?: number
   enableAutoStartOnBoot?: boolean
   enablePassthroughStream?: boolean
   enableHighQualityStream?: boolean
@@ -122,4 +124,3 @@ export interface HeadsetStatus {
 
   timestamp: number
 }
-

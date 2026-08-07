@@ -31,6 +31,8 @@ import gg.questnav.questnav.protos.wpilib.DeviceDataProto;
 import gg.questnav.questnav.protos.wpilib.FrameDataProto;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * The QuestNav class provides a comprehensive interface for communicating with an Oculus/Meta Quest
@@ -43,6 +45,7 @@ import java.util.OptionalInt;
  *   <li>Command sending and response handling
  *   <li>Device status monitoring (battery, tracking state, connectivity)
  *   <li>NetworkTables-based communication protocol
+ *   <li>Event-driven callbacks for connection, tracking, battery, and command state changes
  * </ul>
  *
  * <h2>Basic Usage</h2>
@@ -51,23 +54,25 @@ import java.util.OptionalInt;
  * // Create QuestNav instance
  * QuestNav questNav = new QuestNav();
  *
+ * // Register callbacks
+ * questNav.onConnected(() -> System.out.println("Quest connected!"));
+ * questNav.onDisconnected(() -> DriverStation.reportWarning("Quest disconnected!", false));
+ * questNav.onTrackingLost(() -> DriverStation.reportWarning("Quest tracking lost!", false));
+ * questNav.onTrackingAcquired(() -> System.out.println("Quest tracking acquired!"));
+ * questNav.onLowBattery(20, level -> DriverStation.reportWarning("Quest battery low: " + level + "%", false));
+ *
  * // Set initial robot pose (required for field-relative tracking)
  * Pose2d initialPose = new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(90));
  * questNav.setPose(initialPose);
  *
  * // In robot periodic methods
  * public void robotPeriodic() {
- *   questNav.commandPeriodic(); // Process command responses
+ *   questNav.commandPeriodic(); // Process command responses and fire callbacks
  *
  *   // Get latest pose data
  *   PoseFrame[] newFrames = questNav.getAllUnreadPoseFrames();
  *   for (PoseFrame frame : newFrames) {
  *     // Use frame.questPose() and frame.dataTimestamp() with pose estimator
- *   }
- *
- *   // Monitor connection and device status
- *   if (questNav.isConnected() && questNav.isTracking()) {
- *     // Quest is connected and tracking - safe to use pose data
  *   }
  * }
  * }</pre>
@@ -91,7 +96,7 @@ import java.util.OptionalInt;
  *   <li>All methods are thread-safe for typical FRC usage patterns
  *   <li>Uses cached objects to minimize garbage collection pressure
  *   <li>NetworkTables handles the underlying communication asynchronously
- *   <li>Call {@link #commandPeriodic()} regularly to process command responses
+ *   <li>Call {@link #commandPeriodic()} regularly to process command responses and fire callbacks
  * </ul>
  *
  * <h2>Error Handling</h2>
@@ -102,7 +107,8 @@ import java.util.OptionalInt;
  *   <li>Methods return {@link java.util.Optional} types when data might not be available
  *   <li>Connection status can be checked with {@link #isConnected()}
  *   <li>Tracking status can be monitored with {@link #isTracking()}
- *   <li>Command failures are reported through DriverStation error logging
+ *   <li>Command failures are reported through DriverStation error logging and via {@link
+ *       #onCommandFailure(Consumer)}
  * </ul>
  *
  * @see PoseFrame
@@ -117,6 +123,9 @@ public class QuestNav {
    * Interval at which to check and log if the QuestNavLib version matches the QuestNav app version
    */
   private static final double VERSION_CHECK_INTERVAL_SECONDS = 5.0;
+
+  /** Battery percentage at or below which {@link #onLowBatteryCallback} fires */
+  private int lowBatteryThreshold = 20;
 
   /** NetworkTable instance used for communication */
   private final NetworkTableInstance nt4Instance = NetworkTableInstance.getDefault();
@@ -185,13 +194,50 @@ public class QuestNav {
   private final Geometry3D.ProtobufPose3d cachedProtoPose = Geometry3D.ProtobufPose3d.newInstance();
 
   /** Last sent request id */
-  private int lastSentRequestId = 0; // Should be the same on the backend
+  private int lastSentRequestId = 0;
 
   /** True to check for QuestNavLib and QuestNav version match at an interval */
   private boolean versionCheckEnabled = true;
 
   /** The last time QuestNavLib and QuestNav were checked for a match */
   private double lastVersionCheckTime = 0.0;
+
+  // Callback state tracking
+
+  /** Cached connection state from the previous commandPeriodic() call */
+  private boolean lastConnectedState = false;
+
+  /** Cached tracking state from the previous commandPeriodic() call */
+  private boolean lastTrackingState = false;
+
+  /** Whether the low-battery callback has already fired for the current threshold crossing */
+  private boolean lowBatteryFired = false;
+
+  // Callbacks
+
+  /** Fired once when the Quest transitions from disconnected → connected */
+  private Runnable onConnectedCallback = null;
+
+  /** Fired once when the Quest transitions from connected → disconnected */
+  private Runnable onDisconnectedCallback = null;
+
+  /** Fired once when the Quest transitions from not-tracking → tracking */
+  private Runnable onTrackingAcquiredCallback = null;
+
+  /** Fired once when the Quest transitions from tracking → not-tracking */
+  private Runnable onTrackingLostCallback = null;
+
+  /**
+   * Fired once when battery drops at or below {@link #lowBatteryThreshold}. Resets when battery
+   * rises above the threshold again.
+   */
+  private IntConsumer onLowBatteryCallback = null;
+
+  /** Fired for each command response where {@code getSuccess() == true} */
+  private Consumer<Commands.ProtobufQuestNavCommandResponse> onSuccessCallback = null;
+
+  /** Fired for each command response where {@code getSuccess() == false} */
+  private Consumer<Commands.ProtobufQuestNavCommandResponse> onFailureCallback = null;
 
   /**
    * Creates a new QuestNav instance for communicating with a Quest headset.
@@ -212,6 +258,85 @@ public class QuestNav {
    */
   public QuestNav() {}
 
+  // Callback registration
+
+  /**
+   * Registers a callback that fires once when the Quest headset transitions from disconnected to
+   * connected. The callback is evaluated each {@link #commandPeriodic()} call.
+   *
+   * @param callback Runnable to invoke on connection
+   */
+  public void onConnected(Runnable callback) {
+    this.onConnectedCallback = callback;
+  }
+
+  /**
+   * Registers a callback that fires once when the Quest headset transitions from connected to
+   * disconnected. The callback is evaluated each {@link #commandPeriodic()} call.
+   *
+   * @param callback Runnable to invoke on disconnection
+   */
+  public void onDisconnected(Runnable callback) {
+    this.onDisconnectedCallback = callback;
+  }
+
+  /**
+   * Registers a callback that fires once when the Quest headset transitions from not-tracking to
+   * actively tracking. The callback is evaluated each {@link #commandPeriodic()} call.
+   *
+   * @param callback Runnable to invoke when tracking is acquired
+   */
+  public void onTrackingAcquired(Runnable callback) {
+    this.onTrackingAcquiredCallback = callback;
+  }
+
+  /**
+   * Registers a callback that fires once when the Quest headset transitions from actively tracking
+   * to not-tracking. The callback is evaluated each {@link #commandPeriodic()} call.
+   *
+   * @param callback Runnable to invoke when tracking is lost
+   */
+  public void onTrackingLost(Runnable callback) {
+    this.onTrackingLostCallback = callback;
+  }
+
+  /**
+   * Registers a callback that fires once when the Quest battery level drops at or below the given
+   * threshold. The callback will not fire again until the battery rises above the threshold and
+   * drops back down.
+   *
+   * @param thresholdPercent Battery percentage (0–100) at or below which the callback fires
+   * @param callback IntConsumer receiving the current battery percentage when the threshold is
+   *     crossed
+   */
+  public void onLowBattery(int thresholdPercent, IntConsumer callback) {
+    this.lowBatteryThreshold = thresholdPercent;
+    this.onLowBatteryCallback = callback;
+  }
+
+  /**
+   * Registers a callback that fires for each command response where the command succeeded. Called
+   * from {@link #commandPeriodic()}.
+   *
+   * @param callback Consumer receiving the raw {@link Commands.ProtobufQuestNavCommandResponse}
+   */
+  public void onCommandSuccess(Consumer<Commands.ProtobufQuestNavCommandResponse> callback) {
+    this.onSuccessCallback = callback;
+  }
+
+  /**
+   * Registers a callback that fires for each command response where the command failed. Called from
+   * {@link #commandPeriodic()}. The failure is also reported to the DriverStation regardless of
+   * whether a callback is registered.
+   *
+   * @param callback Consumer receiving the raw {@link Commands.ProtobufQuestNavCommandResponse}
+   */
+  public void onCommandFailure(Consumer<Commands.ProtobufQuestNavCommandResponse> callback) {
+    this.onFailureCallback = callback;
+  }
+
+  // Internal helpers
+
   /**
    * Checks the version of QuestNavLib and compares it to the version of QuestNav on the headset. If
    * the headset is connected and the versions don't match, a warning will be sent to the
@@ -223,22 +348,18 @@ public class QuestNav {
    */
   private void checkVersionMatch() {
     if (!versionCheckEnabled || !isConnected()) {
-      // Check is disabled or no QuestNav is connected
       return;
     }
 
-    // Check that the interval has passed, so we don't flood the DS with warnings
     var currentTime = Timer.getTimestamp();
     if ((currentTime - lastVersionCheckTime) < VERSION_CHECK_INTERVAL_SECONDS) {
       return;
     }
     lastVersionCheckTime = currentTime;
 
-    // Retreive the version info
     var libVersion = getLibVersion();
     var questNavVersion = getQuestNavVersion();
 
-    // Check if the versions match
     if (!questNavVersion.equals(libVersion)) {
       String warningMessage =
           String.format(
@@ -249,6 +370,51 @@ public class QuestNav {
       DriverStation.reportWarning(warningMessage, false);
     }
   }
+
+  /**
+   * Evaluates connection, tracking, and battery state against cached values and fires any
+   * registered callbacks when state transitions are detected.
+   */
+  private void checkStateCallbacks() {
+    // --- Connection state ---
+    boolean connected = isConnected();
+    if (connected != lastConnectedState) {
+      if (connected) {
+        if (onConnectedCallback != null) onConnectedCallback.run();
+      } else {
+        if (onDisconnectedCallback != null) onDisconnectedCallback.run();
+      }
+      lastConnectedState = connected;
+    }
+
+    // --- Tracking state ---
+    boolean tracking = isTracking();
+    if (tracking != lastTrackingState) {
+      if (tracking) {
+        if (onTrackingAcquiredCallback != null) onTrackingAcquiredCallback.run();
+      } else {
+        if (onTrackingLostCallback != null) onTrackingLostCallback.run();
+      }
+      lastTrackingState = tracking;
+    }
+
+    // --- Low battery ---
+    if (onLowBatteryCallback != null) {
+      getBatteryPercent()
+          .ifPresent(
+              level -> {
+                if (level <= lowBatteryThreshold && !lowBatteryFired) {
+                  onLowBatteryCallback.accept(level);
+                  lowBatteryFired = true;
+                } else if (level > lowBatteryThreshold) {
+                  // Reset so the callback can fire again if battery dips below again
+                  lowBatteryFired = false;
+                }
+              });
+    }
+  }
+
+  // Public API
 
   /**
    * Turns the version check on or off. When on, a warning will be reported to the DriverStation if
@@ -278,8 +444,9 @@ public class QuestNav {
    * know the robot's pose, you need to apply the mounting offset to get the Quest's pose before
    * calling this method.
    *
-   * <p>The command is sent asynchronously. Monitor command success/failure by calling {@link
-   * #commandPeriodic()} regularly, which will log any errors to the DriverStation.
+   * <p>The command is sent asynchronously. Success or failure is reported via {@link
+   * #onCommandSuccess(Consumer)} and {@link #onCommandFailure(Consumer)} respectively, and failures
+   * are also logged to the DriverStation.
    *
    * <h4>Usage Example:</h4>
    *
@@ -290,19 +457,19 @@ public class QuestNav {
    *
    * // If you know the robot pose, apply mounting offset to get Quest pose
    * Pose2d robotPose = poseEstimator.getEstimatedPosition();
-   * Pose3d questPose = new Pose3d(robotPose).transformBy(mountingOffset); // Apply your mounting offset
+   * Pose3d questPose = new Pose3d(robotPose).transformBy(mountingOffset);
    * questNav.setPose(questPose);
    * }</pre>
    *
    * @param pose The Quest's current field-relative pose in WPILib coordinates (meters for
    *     translation, radians for rotation)
    * @throws IllegalArgumentException if pose contains NaN or infinite values
-   * @see #commandPeriodic()
+   * @see #onCommandSuccess(Consumer)
+   * @see #onCommandFailure(Consumer)
    * @see #isConnected()
-   * @see edu.wpi.first.math.geometry.Pose2d
    */
   public void setPose(Pose3d pose) {
-    cachedProtoPose.clear(); // Clear instead of creating new
+    cachedProtoPose.clear();
     pose3dProto.pack(cachedProtoPose, pose);
     cachedCommandRequest.clear();
     var requestToSend =
@@ -317,16 +484,6 @@ public class QuestNav {
   /**
    * Returns the Quest headset's current battery level as a percentage.
    *
-   * <p>This method provides real-time battery status information from the Quest device, which is
-   * useful for:
-   *
-   * <ul>
-   *   <li>Monitoring device health during matches
-   *   <li>Implementing low-battery warnings or behaviors
-   *   <li>Planning charging schedules between matches
-   *   <li>Triggering graceful shutdown procedures when battery is critical
-   * </ul>
-   *
    * <p>Battery level guidelines:
    *
    * <ul>
@@ -339,8 +496,8 @@ public class QuestNav {
    *
    * @return An {@link OptionalInt} containing the battery percentage (0-100), or empty if no device
    *     data is available or Quest is disconnected
+   * @see #onLowBattery(int, IntConsumer)
    * @see #isConnected()
-   * @see #getLatency()
    */
   public OptionalInt getBatteryPercent() {
     Data.ProtobufQuestNavDeviceData latestDeviceData = deviceDataSubscriber.get();
@@ -353,7 +510,7 @@ public class QuestNav {
   /**
    * Gets the current frame count from the Quest headset.
    *
-   * @return The frame count value
+   * @return The frame count value, or empty if no frame data is available
    */
   public OptionalInt getFrameCount() {
     Data.ProtobufQuestNavFrameData latestFrameData = frameDataSubscriber.get();
@@ -366,7 +523,7 @@ public class QuestNav {
   /**
    * Gets the number of tracking lost events since the Quest connected to the robot.
    *
-   * @return The tracking lost counter value
+   * @return The tracking lost counter value, or empty if no device data is available
    */
   public OptionalInt getTrackingLostCounter() {
     Data.ProtobufQuestNavDeviceData latestDeviceData = deviceDataSubscriber.get();
@@ -385,7 +542,7 @@ public class QuestNav {
   public boolean isConnected() {
     return Seconds.of(Timer.getTimestamp())
         .minus(Microseconds.of(frameDataSubscriber.getLastChange()))
-        .lt(Milliseconds.of(50));
+        .lt(Milliseconds.of(120));
   }
 
   /**
@@ -404,19 +561,7 @@ public class QuestNav {
    * Returns the Quest app's uptime timestamp for debugging and diagnostics.
    *
    * <p><strong>Important:</strong> For integration with a pose estimator, use the timestamp from
-   * {@link PoseFrame#dataTimestamp()} instead! This method provides the Quest's internal
-   * application timestamp, which is useful for:
-   *
-   * <ul>
-   *   <li>Debugging timing issues between Quest and robot
-   *   <li>Calculating Quest-side processing latency
-   *   <li>Monitoring Quest application uptime
-   *   <li>Correlating with Quest-side logs
-   * </ul>
-   *
-   * <p>The timestamp represents seconds since the Quest application started and is independent of
-   * the robot's clock. For pose estimation, always use the NetworkTables timestamp from {@link
-   * PoseFrame#dataTimestamp()} which is synchronized with robot time.
+   * {@link PoseFrame#dataTimestamp()} instead.
    *
    * @return An {@link OptionalDouble} containing the Quest app uptime in seconds, or empty if no
    *     frame data is available
@@ -434,43 +579,22 @@ public class QuestNav {
   /**
    * Gets the current tracking state of the Quest headset.
    *
-   * <p>This method indicates whether the Quest's visual-inertial tracking system is currently
-   * functioning and providing reliable pose data. Tracking can be lost due to:
-   *
-   * <ul>
-   *   <li>Poor lighting conditions (too dark or too bright)
-   *   <li>Lack of visual features in the environment
-   *   <li>Rapid motion or high acceleration
-   *   <li>Camera occlusion or obstruction
-   *   <li>Hardware issues or overheating
-   * </ul>
-   *
    * <p><strong>Important:</strong> When tracking is lost, pose data becomes unreliable and should
    * not be used for robot control. Implement fallback localization methods (wheel odometry, vision,
    * etc.) for when Quest tracking is unavailable.
    *
-   * <p>To recover tracking:
-   *
-   * <ul>
-   *   <li>Improve lighting conditions
-   *   <li>Move to an area with more visual features
-   *   <li>Reduce robot motion to allow re-initialization
-   *   <li>Clear any obstructions from Quest cameras
-   *   <li>Call {@link #setPose(Pose3d)} once tracking recovers
-   * </ul>
-   *
    * @return {@code true} if the Quest is actively tracking and pose data is reliable, {@code false}
    *     if tracking is lost or no device data is available
+   * @see #onTrackingLost(Runnable)
+   * @see #onTrackingAcquired(Runnable)
    * @see #isConnected()
-   * @see #getTrackingLostCounter()
-   * @see #getAllUnreadPoseFrames()
    */
   public boolean isTracking() {
     var frameData = frameDataSubscriber.get();
     if (frameData != null) {
       return frameData.getIsTracking();
     }
-    return false; // Return false if no data for failsafe
+    return false;
   }
 
   /**
@@ -480,50 +604,29 @@ public class QuestNav {
    * returns an array of {@link PoseFrame} objects containing pose data and timestamps that can be
    * fed directly into a {@link edu.wpi.first.math.estimator.PoseEstimator}.
    *
-   * <p>Each frame contains:
-   *
-   * <ul>
-   *   <li><strong>Pose data:</strong> Robot position and orientation in field coordinates
-   *   <li><strong>NetworkTables timestamp:</strong> When the data was received (use this for pose
-   *       estimation)
-   *   <li><strong>App timestamp:</strong> Quest internal timestamp (for debugging only)
-   *   <li><strong>Frame count:</strong> Sequential frame number for detecting drops
-   * </ul>
-   *
    * <p><strong>Important:</strong> This method consumes the frame queue, so each frame is only
    * returned once. Call this method regularly (every robot loop) to avoid missing frames.
    *
    * <h4>Integration with Pose Estimator:</h4>
    *
    * <pre>{@code
-   * // In robotPeriodic() or subsystem periodic()
    * PoseFrame[] newFrames = questNav.getAllUnreadPoseFrames();
    * for (PoseFrame frame : newFrames) {
    *   if (questNav.isTracking() && questNav.isConnected()) {
-   *     // Add vision measurement to pose estimator
    *     poseEstimator.addVisionMeasurement(
-   *       frame.questPose(),           // Measured pose
-   *       frame.dataTimestamp(),       // When measurement was taken
-   *       VecBuilder.fill(0.1, 0.1, 0.05)  // Standard deviations (tune these)
+   *       frame.questPose(),
+   *       frame.dataTimestamp(),
+   *       VecBuilder.fill(0.1, 0.1, 0.05)
    *     );
    *   }
    * }
    * }</pre>
-   *
-   * <p>Performance notes:
-   *
-   * <ul>
-   *   <li>Returns a new array each call - consider caching if called multiple times per loop
-   *   <li>Frame rate is exactly 100 Hz (every 10 milliseconds)
-   *   <li>Empty array returned when no new frames are available
-   * </ul>
    *
    * @return Array of new {@link PoseFrame} objects received since the last call. Empty array if no
    *     new frames are available or Quest is disconnected.
    * @see PoseFrame
    * @see #isTracking()
    * @see #isConnected()
-   * @see edu.wpi.first.math.estimator.PoseEstimator
    */
   public PoseFrame[] getAllUnreadPoseFrames() {
     var frameDataArray = frameDataSubscriber.readQueue();
@@ -542,24 +645,22 @@ public class QuestNav {
   }
 
   /**
-   * Processes command responses from the Quest headset and handles any errors.
+   * Processes command responses from the Quest headset, fires command success/failure callbacks,
+   * and evaluates connection, tracking, and battery state callbacks.
    *
    * <p>This method must be called regularly (typically in {@code robotPeriodic()}) to:
    *
    * <ul>
    *   <li>Process responses to commands sent via {@link #setPose(Pose3d)}
-   *   <li>Log command failures to the DriverStation for debugging
-   *   <li>Maintain proper command/response synchronization
+   *   <li>Fire {@link #onCommandSuccess(Consumer)} and {@link #onCommandFailure(Consumer)}
+   *       callbacks
+   *   <li>Detect and fire connection state change callbacks ({@link #onConnected(Runnable)}, {@link
+   *       #onDisconnected(Runnable)})
+   *   <li>Detect and fire tracking state change callbacks ({@link #onTrackingAcquired(Runnable)},
+   *       {@link #onTrackingLost(Runnable)})
+   *   <li>Evaluate low battery threshold and fire {@link #onLowBattery(int, IntConsumer)} callback
+   *   <li>Log command failures to the DriverStation
    *   <li>Prevent command response queue overflow
-   * </ul>
-   *
-   * <p>The method automatically handles:
-   *
-   * <ul>
-   *   <li><strong>Success responses:</strong> Silently acknowledged
-   *   <li><strong>Error responses:</strong> Logged to DriverStation with error details
-   *   <li><strong>Duplicate responses:</strong> Ignored to prevent spam
-   *   <li><strong>Out-of-order responses:</strong> Handled gracefully
    * </ul>
    *
    * <h4>Usage Pattern:</h4>
@@ -571,25 +672,35 @@ public class QuestNav {
    *   @Override
    *   public void robotPeriodic() {
    *     questNav.commandPeriodic(); // Call every loop
-   *
-   *     // Other periodic tasks...
    *   }
    * }
    * }</pre>
    *
-   * <p><strong>Performance:</strong> This method is lightweight and safe to call every robot loop
-   * (20ms). It only processes new responses and exits quickly when none are available.
-   *
    * @see #setPose(Pose3d)
-   * @see edu.wpi.first.wpilibj.DriverStation#reportError(String, boolean)
+   * @see #onCommandSuccess(Consumer)
+   * @see #onCommandFailure(Consumer)
+   * @see #onConnected(Runnable)
+   * @see #onDisconnected(Runnable)
+   * @see #onTrackingAcquired(Runnable)
+   * @see #onTrackingLost(Runnable)
+   * @see #onLowBattery(int, IntConsumer)
    */
   public void commandPeriodic() {
     checkVersionMatch();
+    checkStateCallbacks();
+
     Commands.ProtobufQuestNavCommandResponse[] responses = responseSubscriber.readQueueValues();
 
     for (Commands.ProtobufQuestNavCommandResponse response : responses) {
-      if (!response.getSuccess()) {
+      if (response.getSuccess()) {
+        if (onSuccessCallback != null) {
+          onSuccessCallback.accept(response);
+        }
+      } else {
         DriverStation.reportError("QuestNav command failed!\n" + response.getErrorMessage(), false);
+        if (onFailureCallback != null) {
+          onFailureCallback.accept(response);
+        }
       }
     }
   }

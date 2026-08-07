@@ -125,6 +125,7 @@ namespace QuestNav.WebServer
         public bool success;
         public int teamNumber;
         public string debugIpOverride;
+        public int allowedPoseResetTimeoutMs;
         public bool enableAutoStartOnBoot;
         public bool enablePassthroughStream;
         public bool enableHighQualityStream;
@@ -143,6 +144,7 @@ namespace QuestNav.WebServer
     {
         public int? TeamNumber;
         public string debugIpOverride;
+        public int? AllowedPoseResetTimeoutMs;
         public bool? EnableAutoStartOnBoot;
         public bool? EnablePassthroughStream;
         public bool? EnableHighQualityStream;

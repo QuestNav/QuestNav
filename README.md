@@ -1,67 +1,47 @@
-# About QuestNav
+<p align="center">
+  <img src="docs/static/img/branding/QuestNavLogo.svg" alt="QuestNav" width="400"/>
+</p>
 
-**[JUMP TO DOCS](https://questnav.gg/)**
+<p align="center">
+  <strong>High-precision robot localization using Meta Quest headsets</strong>
+</p>
 
-QuestNav enables streaming Oculus VR headset pose information to an FRC robot using the Network Tables 4 (NT4) protocol. This pose data provides robot control systems with accurate mapping and navigation capabilities in competition fields, practice spaces, or any location.
+<p align="center">
+  <a href="https://questnav.gg/">Documentation</a> ·
+  <a href="https://github.com/QuestNav/QuestNav/releases">Releases</a> ·
+  <a href="https://discord.gg/CsRjKfn8Xa">Discord</a> ·
+  <a href="https://setup.questnav.gg/">Setup Tool</a>
+</p>
 
-QuestNav produces a more stable and reliable tracking pose than any other FRC vision solution (LimeLight, Photon Vision, etc.),
-making it an ideal choice for teams seeking precise robot localization.
+---
 
-## Key Benefits
+QuestNav streams Meta Quest headset pose data to an FRC robot over NetworkTables 4 (NT4). The Quest's Visual-Inertial Odometry (VIO) system provides stable, high-frequency position tracking that works in any environment.
 
-- More stable and reliable tracking than other FRC vision solutions
-- Lower cost compared to most FRC vision solutions
-- Multiple SLAM cameras for redundant, calibrated VIO (Visual Inertial Odometry)
-- Camera tracking fused with onboard IMU for accurate position and velocity estimates
-- Up to 120Hz robot odometry refresh rate (linked to the Quest headset framerate)
-- Powered by [Qualcomm XR2G2 platform](https://www.qualcomm.com/products/mobile/snapdragon/xr-vr-ar/snapdragon-xr2-gen-2-platform) with multiple CPU/GPU cores, 8GB RAM, dedicated video hardware, and 128GB+ storage
-- Well-supported ecosystem with off-the-shelf 3D mapping libraries
-- Self-contained, rechargeable battery
+## Getting Started
 
-The Quest 3S headset is recommended for FRC applications due to its lower cost and excellent tracking performance.
-The depth projector on the Quest 3 doesn't provide significant benefits for robot navigation.
+Full documentation is at **[questnav.gg](https://questnav.gg/)**. The [Quick Start](https://questnav.gg/docs/getting-started/quick-start) guide covers everything from unboxing to a working robot integration.
 
-## How It Works
+For automated headset configuration, use the [QuestNav Setup Page](https://setup.questnav.gg/).
 
-QuestNav uses the Quest headset's Visual-Inertial Odometry (VIO) system - the same technology that powers VR
-gaming - to track position in 3D space with remarkable accuracy. The system:
+## Repository Structure
 
-1. Captures visual data through the headset's cameras
-2. Combines this with inertial data from the built-in IMU
-3. Processes this information to determine position and orientation in real-time
-4. Transmits this data to the robot via a wired Ethernet connection
-5. Makes the information available through Network Tables for robot code to use
+| Directory | Description |
+|-----------|-------------|
+| `unity/` | Quest headset application (Unity/C#) |
+| `questnav-lib/` | Java vendor library for robot code |
+| `questnav-web-ui/` | Web interface for headset configuration |
+| `docs/` | Documentation site (Docusaurus) |
 
-The same technology that prevents motion sickness in VR by precisely tracking head movements is now used to track your
-robot's position with high precision.
+## Contributing
 
-## Software Architecture
+See the [Contributing Guide](https://questnav.gg/docs/development/contributing) and [Development Setup](https://questnav.gg/docs/development/development-setup) documentation.
 
-QuestNav implements a simple bidirectional communication structure between the VR headset and robot, enabling:
-- Heading/pose reset requests
-- Configuration updates
-- Ping functionality
-- Real-time pose data streaming
+## Contributors
 
-## Demo Video
+<a href="https://github.com/QuestNav/QuestNav/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=QuestNav/QuestNav" />
+</a>
 
-Check out this demo video to see QuestNav in action:
+## License
 
-View the [full video on YouTube](https://youtu.be/Mo0p1GGeasM).
-
-
-## Thanks
-
-QuestNav exists because of many sidebar discussions, technical deep-dives, and what-if conversations with coworkers and members of the FIRST community. Special thanks to the following contributors who made this project possible:
-
-- [@juchong](https://github.com/juchong)
-- [@SunnyBat](https://github.com/SunnyBat)
-- [@ThadHouse](https://github.com/ThadHouse)
-- [@SeanErn](https://github.com/SeanErn)
-- [@jasondaming](https://github.com/jasondaming)
-- [@allengregoryiv](https://github.com/allengregoryiv)
-
-## Support
-For questions, troubleshooting help, or to share your experiences with QuestNav, join the community discussion on our [Discord](https://discord.gg/Zfan2qgkRZ).
-
-# **Ready to get started? Read the docs [here!](https://questnav.gg/)**
+This project is licensed under the [MIT License](LICENSE).

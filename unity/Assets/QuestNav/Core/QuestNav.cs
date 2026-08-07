@@ -317,7 +317,8 @@ namespace QuestNav.Core
                 vioAprilTagPoseEstimator,
                 vrCamera,
                 vrCameraRoot,
-                resetTransform
+                resetTransform,
+                configManager
             );
             tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
 

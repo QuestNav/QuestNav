@@ -1,0 +1,179 @@
+---
+title: Quick Start
+---
+import CodeBlock from '@theme/CodeBlock';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+
+export const VendorDepUrl = () => {
+    const {siteConfig} = useDocusaurusContext();
+    const v = siteConfig.customFields.questnavLibVersion;
+    return `https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/${v}/questnavlib-json-${v}.json`;
+};
+
+export const VendorDepCodeBlock = () => {
+    const url = VendorDepUrl();
+    return <CodeBlock>{url}</CodeBlock>;
+};
+
+# Quick Start
+
+This page walks through the entire QuestNav setup from unboxing to a working robot integration. Each step links to a detailed page if you need more information.
+
+:::tip Recommended: Use the QuestNav Setup Page
+The [QuestNav Setup Page](https://setup.questnav.gg/) automates headset configuration and app installation over USB. This is more reliable and consistent than configuring everything manually. **We strongly recommend using the setup page for step 3 below.**
+:::
+
+## What You'll Need
+
+Before starting, gather the following:
+
+| Item | Notes |
+|------|-------|
+| Meta Quest 3S or Quest 3 headset | Quest 3S recommended for FRC |
+| USB-C to Ethernet adapter (with power passthrough) | See [Choosing an Ethernet Adapter](./adapters) for tested models |
+| Short CAT5e or CAT6 Ethernet cable | Under 1 meter / 3 feet preferred |
+| USB battery bank **or** regulated 5V converter (e.g. Redux Robotics [Zinc-V](https://shop.reduxrobotics.com/products/zinc-v)) | Powers the headset through the adapter — battery bank is preferred for simplicity, Zinc-V if you want to run off the robot's 12V system |
+| USB-A to USB-C cable | Connects the power source to the adapter's power input (forces a fixed 5V output) |
+| 3D printed headset mount | STL files available on the [Mounting](./mounting) page |
+
+## Setup Steps
+
+### 1. Purchase an adapter
+
+Buy a USB-C to Ethernet adapter from the [tested list](./adapters). We recommend one with power passthrough so the headset stays charged during matches.
+
+### 2. Enable Developer Mode
+
+You must enable Developer Mode on your Quest before installing QuestNav. This requires a smartphone with the **Meta Horizon mobile app** installed and paired with your headset.
+
+1. Create a Meta developer account at [developers.meta.com](https://developers.meta.com/sign-up/) and verify your account
+2. Open the **Meta Horizon** app on your phone
+3. Tap the **headset icon** in the toolbar
+4. Tap your paired headset at the top of the screen
+5. Tap **Headset Settings > Developer Mode**
+6. Toggle Developer Mode **On**
+
+See [Headset Setup](./device-setup) for the full procedure.
+
+### 3. Configure the headset and install QuestNav
+
+Visit [setup.questnav.gg](https://setup.questnav.gg/) and connect your Quest via USB. The setup page automatically applies all required settings (Wi-Fi, Bluetooth, Guardian, power options, etc.) and installs both the QuestNav app and the [QuestNav KeepAwake](https://github.com/QuestNav/QuestNavKeepAwake) companion app, which prevents the headset from sleeping during operation.
+
+### 4. Set your team number
+
+1. Launch QuestNav on the headset (Apps > Unknown Sources > QuestNav)
+2. Enter your FRC team number and click **Set**
+
+Your team number determines the IP address QuestNav connects to (`10.TE.AM.2`). If this is wrong, the Quest will not find your robot.
+
+### 5. Mount the headset
+
+Securely mount the Quest on your robot using a 3D printed mount. Keep it:
+- At least 30 cm (12 inches) above the floor
+- Upright with a clear view of the surroundings
+- Rigidly attached (no wobble)
+
+See [Mounting](./mounting) for 3D print files and detailed guidance.
+
+### 6. Wire Ethernet and power
+
+1. Connect the USB-C to Ethernet adapter to the Quest
+2. Run a short Ethernet cable from the adapter to your robot's network switch
+3. Power the adapter using one of:
+    - **USB battery bank** (preferred — simple and isolated from the robot's electrical system), connected with a USB-A to USB-C cable
+    - **Regulated 5V converter** such as the Redux Robotics [Zinc-V](https://shop.reduxrobotics.com/products/zinc-v), wired from a fused 12V rail on the PDH/PDP if you'd rather power the headset directly off the robot
+
+See [Wiring](./wiring) for cable selection, power details, and the trade-offs between the two power options.
+
+### 7. Add the vendor library
+
+In VS Code, press `Ctrl+Shift+P` (`Cmd+Shift+P` on macOS), select **WPILib: Manage Vendor Libraries > Install new libraries (online)**, and paste:
+
+<VendorDepCodeBlock />
+
+See [Robot Code Setup](./robot-code) for command-line and manual installation methods.
+
+### 8. Add minimal robot code
+
+Create a subsystem that calls `commandPeriodic()` and feeds pose data to your drive pose estimator:
+
+```java
+import gg.questnav.questnav.QuestNav;
+import gg.questnav.questnav.PoseFrame;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+
+public class QuestNavSubsystem extends SubsystemBase {
+    private final QuestNav questNav = new QuestNav();
+
+    // Offset from robot center to the Quest headset
+    // Example: Quest is 0.3m forward, 0.0m left, 0.5m up from robot center
+    private static final Transform3d ROBOT_TO_QUEST =
+        new Transform3d(0.3, 0.0, 0.5, new Rotation3d());
+
+    @Override
+    public void periodic() {
+        questNav.commandPeriodic();
+
+        for (PoseFrame frame : questNav.getAllUnreadPoseFrames()) {
+            if (frame.isTracking()) {
+                Pose3d robotPose = frame.questPose3d()
+                    .transformBy(ROBOT_TO_QUEST.inverse());
+                // Feed to your pose estimator:
+                // driveSubsystem.addVisionMeasurement(
+                //     robotPose.toPose2d(), frame.dataTimestamp(), stdDevs);
+            }
+        }
+    }
+}
+```
+
+See [Robot Code Setup](./robot-code) for the full integration guide.
+
+:::tip Want a fully wired-up example?
+The [QuestNav Robot Sim Example](https://github.com/juchong/QuestNav-Robot-Sim-Example) is a complete WPILib project that drops all of the above into a working subsystem with pose-estimator fusion, callbacks, and AdvantageScope telemetry. It runs in the desktop simulator without hardware.
+:::
+
+### 9. Deploy and verify
+
+1. Deploy your robot code
+2. Open [AdvantageScope](https://docs.wpilib.org/en/stable/docs/software/dashboards/advantagescope.html) or the WPILib simulation GUI
+3. Look for the `QuestNav` table in NetworkTables
+4. Verify that `QuestNav/Connected` = `true` and `QuestNav/Tracking` = `true`
+
+---
+
+## Competition Day Checklist
+
+Print this checklist and verify each item before every match.
+
+### Before the Event
+- [ ] Quest headset is fully charged
+- [ ] USB battery bank is fully charged
+- [ ] Spare Ethernet cable and adapter are packed
+- [ ] QuestNav app is the latest version
+- [ ] Robot code vendordep matches the QuestNav app version
+
+### Pre-Match (in the Pits)
+- [ ] QuestNav app is running on the headset
+- [ ] Wi-Fi is **off** on the headset
+- [ ] Bluetooth is **off** on the headset
+- [ ] Ethernet adapter is securely connected to the Quest
+- [ ] Ethernet cable is connected between adapter and robot network switch
+- [ ] USB battery bank is connected and powering the headset
+- [ ] Headset mount is secure (shake test: no wobble)
+- [ ] All cables are secured with zip ties or clips (no loose cables)
+
+### Pre-Match (on the Field)
+- [ ] Open your dashboard and verify `QuestNav/Connected` = `true`
+- [ ] Verify `QuestNav/Tracking` = `true`
+- [ ] Check `QuestNav/Battery%` is above 20%
+- [ ] Reset the pose to your starting position before autonomous
+- [ ] Verify the reported pose matches the physical position on the field
+
+### If Something Goes Wrong
+- **QuestNav/Connected = false**: Check the Ethernet cable and adapter. Verify the headset is powered on and QuestNav is running.
+- **QuestNav/Tracking = false**: Ensure the headset cameras have a clear view. Restart QuestNav if tracking doesn't recover.
+- **Pose is wrong after reset**: Make sure you're applying the `ROBOT_TO_QUEST` transform before calling `setPose()`. The reset pose is the *Quest's* position, not the robot's.
+- **Battery dropping fast**: Verify the USB battery bank is connected and outputting power. Check for a damaged cable.

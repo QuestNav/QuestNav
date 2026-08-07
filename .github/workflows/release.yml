@@ -73,7 +73,8 @@ jobs:
     if: |
       (needs.determine-publishable-changes.outputs.web-ui-changed == 'true' ||
       needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
-      needs.determine-publishable-changes.outputs.java-changed == 'true') ||
+      needs.determine-publishable-changes.outputs.java-changed == 'true' ||
+      needs.determine-publishable-changes.outputs.docs-changed == 'true') ||
       inputs.force-release
     needs: [determine-publishable-changes]
     uses: ./.github/workflows/reusable-build-web-ui.yml

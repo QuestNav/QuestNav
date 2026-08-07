@@ -1,8 +1,15 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
+
+const versions: string[] = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, 'versions.json'), 'utf-8')
+);
+const latestVersion = versions[0] ?? 'REPLACE_VERSION_HERE';
 
 
 const config: Config = {
@@ -41,6 +48,7 @@ const config: Config = {
       month: 'short',
       day: 'numeric'
     }),
+    questnavLibVersion: latestVersion,
   },
 
   plugins: [

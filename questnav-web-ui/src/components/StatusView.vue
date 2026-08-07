@@ -144,8 +144,8 @@ let intervalId: number | null = null
 
 // Check if debug IP override is active
 const isDebugIPActive = computed(() => {
-  const debugIP = configStore.values['WebServerConstants/debugNTServerAddressOverride']
-  return debugIP !== undefined && debugIP !== null && debugIP !== ''
+  const debugIP = configStore.config?.debugIpOverride
+  return typeof debugIP === 'string' && debugIP.trim() !== ''
 })
 
 async function loadStatus() {

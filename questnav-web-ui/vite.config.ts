@@ -14,7 +14,7 @@ export default defineConfig({
     assetsDir: 'assets',
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html')
+        main: resolve(import.meta.dirname, 'index.html')
       },
       output: {
         // Use consistent filenames (no hash) for easier Unity integration
@@ -48,8 +48,7 @@ export default defineConfig({
   // Path resolution
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src')
+      '@': resolve(import.meta.dirname, 'src')
     }
   }
 })
-

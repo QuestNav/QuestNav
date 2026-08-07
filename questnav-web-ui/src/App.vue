@@ -157,7 +157,6 @@ import type { ServerInfo } from './types'
 const configStore = useConfigStore()
 const { 
   connectionStatus, 
-  isConnected, 
   isDisconnected, 
   secondsUntilRetry,
   checkConnection, 

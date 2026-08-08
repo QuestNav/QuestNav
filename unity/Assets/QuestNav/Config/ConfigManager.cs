@@ -450,10 +450,10 @@ namespace QuestNav.Config
 
         /// <inheritdoc/>
         public event Action<bool> OnEnableAutoStartOnBootChanged;
-        
+
         /// <inheritdoc/>
         public event Action<int> OnStreamQualityChanged;
-        
+
         #endregion
 
         #region Camera

@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using Meta.XR;
 using QuestNav.Camera;
@@ -45,6 +44,10 @@ namespace QuestNav.QuestNav.AprilTag
         private readonly MonoBehaviour coroutineHost;
         private Coroutine captureCoroutine;
         private float frameDelaySeconds;
+        private Transform3d camToHeadset;
+        private bool isLensOffsetInitialized = false;
+        private int cachedWidth = 0;
+        private int cachedHeight = 0;
 
         /// <summary>
         /// Single source of truth for the detector lifecycle. The capture coroutine checks
@@ -141,23 +144,31 @@ namespace QuestNav.QuestNav.AprilTag
         }
 
         /// <summary>
-        /// Called when the camera arbiter applies a new effective resolution. Pulls the
-        /// latest intrinsics from the Meta SDK and forwards them to <see cref="PoseLibSolver"/>.
+        /// Called when the camera arbiter applies a new effective resolution. Sets a flag so the
+        /// next loop pulls the latest intrinsics from the Meta SDK and forwards them to
+        /// <see cref="PoseLibSolver"/>.
         /// Wrapped in try/catch because <see cref="PassthroughCameraAccess.Intrinsics"/> can
         /// throw if accessed while the camera is mid-state-change.
         /// </summary>
         private void OnCameraArbiterResolutionChanged(Vector2Int? newResolution)
         {
+            isLensOffsetInitialized = false;
             if (!detectorActive || !newResolution.HasValue || poseLibSolver == null)
             {
                 return;
             }
+        }
+
+        private void UpdateCameraIntrinsics(int targetWidth, int targetHeight)
+        {
+            if (cameraAccess?.Intrinsics == null)
+                return;
+
             try
             {
                 poseLibSolver.RefreshIntrinsics(cameraAccess.Intrinsics);
-                QueuedLogger.Log(
-                    $"PoseLib intrinsics refreshed for {newResolution.Value.x}x{newResolution.Value.y}"
-                );
+
+                QueuedLogger.Log($"PoseLib intrinsics refreshed for {targetWidth}x{targetHeight}");
             }
             catch (Exception ex)
             {
@@ -165,6 +176,28 @@ namespace QuestNav.QuestNav.AprilTag
                     $"Failed to refresh PoseLib intrinsics after resolution change: {ex.Message}"
                 );
             }
+
+            Pose lensOffset = cameraAccess.Intrinsics.LensOffset;
+            var lensTranslation = new Translation3d(
+                lensOffset.position.x,
+                lensOffset.position.y,
+                lensOffset.position.z
+            );
+            var lensRotation = new Rotation3d(
+                new Geometry.Quaternion(
+                    lensOffset.rotation.w,
+                    lensOffset.rotation.x,
+                    lensOffset.rotation.y,
+                    lensOffset.rotation.z
+                )
+            );
+
+            Pose3d headsetToCam = new Pose3d(lensTranslation, lensRotation);
+            camToHeadset = new Transform3d(headsetToCam, Pose3d.Zero);
+
+            cachedWidth = targetWidth;
+            cachedHeight = targetHeight;
+            isLensOffsetInitialized = true;
         }
 
         private void OnEnableAprilTagDetectorChanged(bool enable)
@@ -366,7 +399,12 @@ namespace QuestNav.QuestNav.AprilTag
                     continue;
                 }
 
-                float captureTimestamp = Time.time;
+                // Use hardware exposure time
+                // Calculate how far in the past the exposure occurred relative to current time,
+                // then use that to create a corrected timestamp in the Time.time domain.
+                TimeSpan timeSinceExposure = DateTime.Now - cameraAccess.Timestamp;
+                float captureTimestamp = Time.time - (float)timeSinceExposure.TotalSeconds;
+
                 NativeArray<Color32> colors;
 
                 try
@@ -447,125 +485,145 @@ namespace QuestNav.QuestNav.AprilTag
                     continue;
                 }
 
-                // Apply two filters before counting / solving:
-                //   1) User's ignored-IDs blacklist (empty set keeps every detection).
-                //   2) Drop detections whose ID is not in the loaded field layout.
-                //      tag36h11 readily produces false positives at high resolution
-                //      (e.g. lab logs show ID 554 decoding from random texture). Feeding
-                //      such an ID to PoseLib mismatches the 2D/3D corner buffer lengths
-                //      (8 push, 0 push) and produces a garbage pose tens of meters out,
-                //      which the estimator then has to reject as a position jump.
-                // Building the kept list in-line avoids allocating an AprilTagDetectionResults clone.
-                var kept = new List<AprilTagDetection>(results.NumberOfDetections);
-                int ignoredCount = 0;
-                int unknownIdCount = 0;
-                foreach (var detection in results)
+                using (results)
                 {
-                    if (ignoredIdSet.Contains(detection.Id))
+                    // Apply two filters before counting / solving:
+                    //   1) User's ignored-IDs blacklist (empty set keeps every detection).
+                    //   2) Drop detections whose ID is not in the loaded field layout.
+                    //      tag36h11 readily produces false positives at high resolution
+                    //      (e.g. lab logs show ID 554 decoding from random texture). Feeding
+                    //      such an ID to PoseLib mismatches the 2D/3D corner buffer lengths
+                    //      (8 push, 0 push) and produces a garbage pose tens of meters out,
+                    //      which the estimator then has to reject as a position jump.
+                    // Building the kept list in-line avoids allocating an AprilTagDetectionResults clone.
+                    var kept = new List<AprilTagDetection>(results.NumberOfDetections);
+                    int ignoredCount = 0;
+                    int unknownIdCount = 0;
+                    foreach (var detection in results)
                     {
-                        ignoredCount++;
-                        continue;
-                    }
-                    if (!aprilTagFieldLayout.ContainsId(detection.Id))
-                    {
-                        unknownIdCount++;
-                        continue;
-                    }
-                    kept.Add(detection);
-                }
-
-                if (kept.Count >= minimumNumberOfTags)
-                {
-                    QueuedLogger.Log(
-                        $"{kept.Count} usable tag(s) detected "
-                            + $"(ignore-set hides {ignoredCount}, "
-                            + $"unknown-IDs dropped {unknownIdCount})"
-                    );
-
-                    var poseLibResult = poseLibSolver.PoseLibSolve(kept);
-
-                    if (poseLibResult != null)
-                    {
-                        var (frcPos, frcRot) = Conversions.CvToFrc(poseLibResult.CameraPose);
-                        var measuredRotation = new Rotation3d(
-                            new Geometry.Quaternion(frcRot.w, frcRot.x, frcRot.y, frcRot.z)
-                        );
-
-                        int tagCount = kept.Count;
-                        double inlierRatio =
-                            (poseLibResult.TotalPoints > 0)
-                                ? poseLibResult.AcceptedPoints / poseLibResult.TotalPoints
-                                : 0.0;
-
-                        // FIX: previously avgTagDistance was ||camera_position||, i.e. the
-                        // camera's distance from the FIELD ORIGIN (blue alliance corner).
-                        // That value silently inflates the dynamic std dev whenever the camera
-                        // is far from the origin and made the user-facing maxDistance gate
-                        // behave incorrectly (a robot in the red corner with a tag 1 m away
-                        // would compute distance ~16 m). The pipeline appeared to work today
-                        // because (a) maxDistance was unenforced and (b) the dynamic std dev
-                        // only affects correction trust, not pass/fail. Switching to the true
-                        // mean camera-to-tag distance changes the std dev curve - if pose
-                        // behavior regresses after this change, suspect this block first.
-                        double avgTagDistance = 0.0;
-                        int distanceSamples = 0;
-                        foreach (var det in kept)
+                        if (ignoredIdSet.Contains(detection.Id))
                         {
-                            var tagPose = aprilTagFieldLayout.GetTagPose(det.Id);
-                            double dx = tagPose.X - frcPos.x;
-                            double dy = tagPose.Y - frcPos.y;
-                            double dz = tagPose.Z - frcPos.z;
-                            avgTagDistance += Math.Sqrt(dx * dx + dy * dy + dz * dz);
-                            distanceSamples++;
-                        }
-                        if (distanceSamples > 0)
-                        {
-                            avgTagDistance /= distanceSamples;
-                        }
-
-                        if (avgTagDistance > maxDistance)
-                        {
-                            QueuedLogger.Log(
-                                $"AprilTag observation rejected: avgTagDistance={avgTagDistance:F2}m "
-                                    + $"> maxDistance={maxDistance:F2}m"
-                            );
-                            yield return new WaitForSeconds(frameDelaySeconds);
+                            ignoredCount++;
                             continue;
                         }
+                        if (!aprilTagFieldLayout.ContainsId(detection.Id))
+                        {
+                            unknownIdCount++;
+                            continue;
+                        }
+                        kept.Add(detection);
+                    }
 
-                        // Dynamic std devs: uncertainty scales with distance^2 and decreases with tag count.
-                        // The user-tunable noiseScale multiplier (0.5x = high trust, 2.0x = low trust)
-                        // applies on top of the base; smaller std-dev = the KF trusts the AprilTag
-                        // measurement more relative to VIO.
-                        double stdDevFactor =
-                            (avgTagDistance * avgTagDistance) / Math.Max(1, tagCount);
-                        double linearStdDev =
-                            VioAprilTagPoseEstimatorConstants.MULTI_TAG_LINEAR_STD_DEV_BASE
-                            * noiseScale
-                            * stdDevFactor;
-                        var dynamicStdDevs = DenseMatrix.OfArray(
-                            new[,]
-                            {
-                                { linearStdDev },
-                                { linearStdDev },
-                                { linearStdDev * 2.0 },
-                            }
-                        );
-
-                        vioAprilTagPoseEstimator.AddAprilTagObservation(
-                            new Translation3d(frcPos.x, frcPos.y, frcPos.z),
-                            measuredRotation,
-                            captureTimestamp,
-                            dynamicStdDevs,
-                            tagCount,
-                            inlierRatio
-                        );
-
+                    if (kept.Count >= minimumNumberOfTags)
+                    {
                         QueuedLogger.Log(
-                            $"PoseLib estimate: Pos({frcPos.x:F3}, {frcPos.y:F3}, {frcPos.z:F3}) "
-                                + $"tags={tagCount} inliers={poseLibResult.AcceptedPoints}/{poseLibResult.TotalPoints} "
-                                + $"ratio={inlierRatio:F2} dist={avgTagDistance:F2}m stdDev={linearStdDev:F4}"
+                            $"{kept.Count} usable tag(s) detected "
+                                + $"(ignore-set hides {ignoredCount}, "
+                                + $"unknown-IDs dropped {unknownIdCount})"
                         );
+
+                        if (
+                            !isLensOffsetInitialized
+                            || actualW != cachedWidth
+                            || actualH != cachedHeight
+                        )
+                        {
+                            UpdateCameraIntrinsics(actualW, actualH);
+                            yield return null; // Skip this frame to avoid processing with mismatched intrinsics
+                        }
+
+                        var poseLibResult = poseLibSolver.PoseLibSolve(kept);
+
+                        if (poseLibResult != null)
+                        {
+                            // Get the raw camera pose (Pose3d) from PoseLib
+                            Pose3d cameraPose = poseLibResult.CameraPose;
+
+                            // Apply camera transform to get the corrected headset pose from the camera pose
+                            Pose3d correctedHeadsetPose = cameraPose + camToHeadset;
+
+                            // Convert the headset pose to FRC coordinates
+                            var (frcPos, frcRot) = Conversions.CvToFrc(correctedHeadsetPose);
+                            var measuredRotation = new Rotation3d(
+                                new Geometry.Quaternion(frcRot.w, frcRot.x, frcRot.y, frcRot.z)
+                            );
+
+                            int tagCount = kept.Count;
+                            double inlierRatio =
+                                (poseLibResult.TotalPoints > 0)
+                                    ? poseLibResult.AcceptedPoints / poseLibResult.TotalPoints
+                                    : 0.0;
+
+                            // FIX: previously avgTagDistance was ||camera_position||, i.e. the
+                            // camera's distance from the FIELD ORIGIN (blue alliance corner).
+                            // That value silently inflates the dynamic std dev whenever the camera
+                            // is far from the origin and made the user-facing maxDistance gate
+                            // behave incorrectly (a robot in the red corner with a tag 1 m away
+                            // would compute distance ~16 m). The pipeline appeared to work today
+                            // because (a) maxDistance was unenforced and (b) the dynamic std dev
+                            // only affects correction trust, not pass/fail. Switching to the true
+                            // mean camera-to-tag distance changes the std dev curve - if pose
+                            // behavior regresses after this change, suspect this block first.
+                            double avgTagDistance = 0.0;
+                            int distanceSamples = 0;
+                            foreach (var det in kept)
+                            {
+                                var tagPose = aprilTagFieldLayout.GetTagPose(det.Id);
+                                double dx = tagPose.X - frcPos.x;
+                                double dy = tagPose.Y - frcPos.y;
+                                double dz = tagPose.Z - frcPos.z;
+                                avgTagDistance += Math.Sqrt(dx * dx + dy * dy + dz * dz);
+                                distanceSamples++;
+                            }
+                            if (distanceSamples > 0)
+                            {
+                                avgTagDistance /= distanceSamples;
+                            }
+
+                            if (avgTagDistance > maxDistance)
+                            {
+                                QueuedLogger.Log(
+                                    $"AprilTag observation rejected: avgTagDistance={avgTagDistance:F2}m "
+                                        + $"> maxDistance={maxDistance:F2}m"
+                                );
+                                yield return new WaitForSeconds(frameDelaySeconds);
+                                continue;
+                            }
+
+                            // Dynamic std devs: uncertainty scales with distance^2 and decreases with tag count.
+                            // The user-tunable noiseScale multiplier (0.5x = high trust, 2.0x = low trust)
+                            // applies on top of the base; smaller std-dev = the KF trusts the AprilTag
+                            // measurement more relative to VIO.
+                            double stdDevFactor =
+                                (avgTagDistance * avgTagDistance) / Math.Max(1, tagCount);
+                            double linearStdDev =
+                                VioAprilTagPoseEstimatorConstants.MULTI_TAG_LINEAR_STD_DEV_BASE
+                                * noiseScale
+                                * stdDevFactor;
+                            var dynamicStdDevs = DenseMatrix.OfArray(
+                                new[,]
+                                {
+                                    { linearStdDev },
+                                    { linearStdDev },
+                                    { linearStdDev * 2.0 },
+                                }
+                            );
+
+                            vioAprilTagPoseEstimator.AddAprilTagObservation(
+                                new Translation3d(frcPos.x, frcPos.y, frcPos.z),
+                                measuredRotation,
+                                captureTimestamp,
+                                dynamicStdDevs,
+                                tagCount,
+                                inlierRatio
+                            );
+
+                            QueuedLogger.Log(
+                                $"PoseLib estimate: Pos({frcPos.x:F3}, {frcPos.y:F3}, {frcPos.z:F3}) "
+                                    + $"tags={tagCount} inliers={poseLibResult.AcceptedPoints}/{poseLibResult.TotalPoints} "
+                                    + $"ratio={inlierRatio:F2} dist={avgTagDistance:F2}m stdDev={linearStdDev:F4}"
+                            );
+                        }
                     }
                 }
 

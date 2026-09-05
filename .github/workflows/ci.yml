@@ -1,10 +1,14 @@
 name: CI
 
 on:
-  pull_request_target:
+  pull_request:
     branches: [main]
   push:
     branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -78,6 +82,8 @@ jobs:
   publish-java:
     if: |
       always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
       needs.build-java.result == 'success'
     needs: [build-java]
     uses: ./.github/workflows/reusable-publish-java.yml
@@ -108,6 +114,8 @@ jobs:
   build-csharp:
     if: |
       always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
       (needs.detect-changes.outputs.csharp-changed == 'true' ||
       needs.detect-changes.outputs.java-changed == 'true' ||
       needs.detect-changes.outputs.web-ui-changed == 'true') &&

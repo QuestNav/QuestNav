@@ -307,12 +307,7 @@ namespace QuestNav.Native.NTCore
         {
             // Get the file descriptor for the message type
             var file = descriptor.File;
-            if (file.Name.Equals("commands.proto"))
-            {
-                // The robot is publishing a conflicting and smaller schema for commands.proto, causing the robot to crash. Don't publish it until we have a solution.
-                // See https://www.chiefdelphi.com/t/publishing-protobuf-schema-for-nt4/509849
-                return;
-            }
+
             // Get the schema as a byte array, this is what will be published
             var schema = file.ToProto().ToByteArray();
             // Set the name and type

@@ -8,8 +8,8 @@
 */
 package gg.questnav.questnav.protos.wpilib;
 
-import edu.wpi.first.util.protobuf.Protobuf;
 import gg.questnav.questnav.protos.generated.Data;
+import org.wpilib.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors;
 
 /** WPILib Protobuf layer for FrameData Protobuf */

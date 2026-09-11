@@ -34,7 +34,11 @@ syntax = "proto3";
 
 package wpi.proto;
 
-option java_package = "edu.wpi.first.math.proto";
+option java_package = "org.wpilib.math.geometry.proto.detail";
+
+option java_outer_classname = "ProtobufGeometry3dDescriptor";
+
+option java_multiple_files = true;
 
 /*
  * Represents a 3D translation (displacement) vector.

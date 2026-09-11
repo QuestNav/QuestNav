@@ -26,8 +26,11 @@ syntax = "proto3";
  */
 
 package wpi.proto;
+option java_package = "org.wpilib.math.geometry.proto.detail";
 
-option java_package = "edu.wpi.first.math.proto";
+option java_outer_classname = "ProtobufGeometry2dDescriptor";
+
+option java_multiple_files = true;
 
 /*
  * Represents a 2D translation (displacement) vector.
@@ -126,13 +129,6 @@ message ProtobufRotation2d {
  * coordinate frame, allowing transformation of points between the two systems.
  */
 message ProtobufPose2d {
-  /*
-   * Position component of the pose.
-   * 
-   * This specifies where the robot is located on the field using the
-   * field coordinate system. The translation represents the position of
-   * the robot's coordinate frame origin (typically the robot center).
-   */
   ProtobufTranslation2d translation = 1;
   
   /*
@@ -250,133 +246,4 @@ message ProtobufTwist2d {
    * Units: radians per second
    */
   double dtheta = 3;
-}
-
-/*
- * Represents a 2D rectangle with arbitrary orientation.
- * 
- * This message defines a rectangular region in 2D space using a center pose
- * and width/height dimensions. The rectangle can be rotated to any orientation
- * based on the center pose's rotation component.
- * 
- * Geometric Properties:
- * - Center point and orientation defined by pose
- * - Width extends along the pose's X-axis (local forward direction)
- * - Height extends along the pose's Y-axis (local left direction)
- * - Total area = xWidth * yWidth
- * 
- * Applications:
- * - Robot footprint representation
- * - Obstacle and keep-out zone definitions
- * - Field element boundaries
- * - Collision detection regions
- * - Path planning constraints
- */
-message ProtobufRectangle2d {
-  /*
-   * Center pose of the rectangle.
-   * 
-   * The translation component specifies the center point of the rectangle
-   * in the coordinate system. The rotation component specifies the
-   * orientation of the rectangle's local coordinate frame.
-   * 
-   * The rectangle's edges are aligned with this local coordinate frame:
-   * - Width extends along local X-axis (rotated forward direction)
-   * - Height extends along local Y-axis (rotated left direction)
-   */
-  ProtobufPose2d center = 1;
-  
-  /*
-   * Width of the rectangle along its local X-axis.
-   * 
-   * This is the dimension of the rectangle in the direction of the
-   * center pose's forward direction (after rotation). The rectangle
-   * extends ±xWidth/2 from the center along this axis.
-   * 
-   * Units: meters
-   * Must be positive
-   */
-  double xWidth = 2;
-  
-  /*
-   * Height of the rectangle along its local Y-axis.
-   * 
-   * This is the dimension of the rectangle in the direction of the
-   * center pose's left direction (after rotation). The rectangle
-   * extends ±yWidth/2 from the center along this axis.
-   * 
-   * Units: meters
-   * Must be positive
-   */
-  double yWidth = 3;
-}
-
-/*
- * Represents a 2D ellipse with arbitrary orientation.
- * 
- * This message defines an elliptical region in 2D space using a center pose
- * and semi-axis lengths. The ellipse can be rotated to any orientation
- * based on the center pose's rotation component.
- * 
- * Geometric Properties:
- * - Center point and orientation defined by pose
- * - Major/minor axes aligned with pose's local coordinate frame
- * - X semi-axis extends along pose's X-axis (local forward direction)
- * - Y semi-axis extends along pose's Y-axis (local left direction)
- * - Total area = π * xSemiAxis * ySemiAxis
- * 
- * Applications:
- * - Uncertainty ellipses for localization
- * - Smooth obstacle representations
- * - Robot operating regions
- * - Sensor coverage areas
- * - Path planning with uncertainty
- * 
- * Special Cases:
- * - Circle: xSemiAxis = ySemiAxis
- * - Degenerate ellipse: one semi-axis approaches zero (becomes a line)
- */
-message ProtobufEllipse2d {
-  /*
-   * Center pose of the ellipse.
-   * 
-   * The translation component specifies the center point of the ellipse
-   * in the coordinate system. The rotation component specifies the
-   * orientation of the ellipse's local coordinate frame.
-   * 
-   * The ellipse's axes are aligned with this local coordinate frame:
-   * - X semi-axis extends along local X-axis (rotated forward direction)
-   * - Y semi-axis extends along local Y-axis (rotated left direction)
-   */
-  ProtobufPose2d center = 1;
-  
-  /*
-   * Semi-axis length along the ellipse's local X-axis.
-   * 
-   * This is half the width of the ellipse in the direction of the
-   * center pose's forward direction (after rotation). The ellipse
-   * extends ±xSemiAxis from the center along this axis.
-   * 
-   * Units: meters
-   * Must be positive
-   * 
-   * Note: This is the semi-axis, not the full width. The full width
-   * along this axis is 2 * xSemiAxis.
-   */
-  double xSemiAxis = 2;
-  
-  /*
-   * Semi-axis length along the ellipse's local Y-axis.
-   * 
-   * This is half the height of the ellipse in the direction of the
-   * center pose's left direction (after rotation). The ellipse
-   * extends ±ySemiAxis from the center along this axis.
-   * 
-   * Units: meters
-   * Must be positive
-   * 
-   * Note: This is the semi-axis, not the full height. The full height
-   * along this axis is 2 * ySemiAxis.
-   */
-  double ySemiAxis = 3;
 }

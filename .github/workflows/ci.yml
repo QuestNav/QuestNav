@@ -21,9 +21,9 @@ jobs:
       docs-changed: ${{ steps.changes.outputs.docs }}
       web-ui-changed: ${{ steps.changes.outputs.web-ui }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: changes
         with:
           filters: |

@@ -114,8 +114,9 @@ jobs:
   build-csharp:
     if: |
       always() &&
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/main' &&
+      ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository)) &&
       (needs.detect-changes.outputs.csharp-changed == 'true' ||
       needs.detect-changes.outputs.java-changed == 'true' ||
       needs.detect-changes.outputs.web-ui-changed == 'true') &&

@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           sparse-checkout: |
@@ -64,7 +64,7 @@ jobs:
           cache-key-suffix: Android-Windows
 
       - name: Build Unity APK
-        uses: game-ci/unity-builder@v4
+        uses: game-ci/unity-builder@v6
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -79,7 +79,7 @@ jobs:
 
       - name: Upload APK Artifact
         id: upload-apk
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: questnav-apk-${{ steps.version-info.outputs.version }}
           path: build/Android/*.apk

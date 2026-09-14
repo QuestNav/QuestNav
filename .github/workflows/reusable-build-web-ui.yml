@@ -20,7 +20,7 @@ jobs:
       artifact-id: ${{ steps.upload-web-ui.outputs.artifact-id }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           sparse-checkout: |
@@ -37,7 +37,7 @@ jobs:
           version: ${{ inputs.version }}
         
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '22'  # Using Node.js 22 LTS (Jod)
           cache: 'npm'
@@ -53,7 +53,7 @@ jobs:
         
       - name: Upload artifact
         id: upload-web-ui
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: questnav-web-ui-${{ steps.version-info.outputs.version }}
           path: unity/Assets/StreamingAssets/ui

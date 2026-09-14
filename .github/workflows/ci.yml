@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  pull_request_target:
+  pull_request:
     branches: [main]
   push:
     branches: [main]
@@ -15,18 +15,22 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
+      ci-changed: ${{ steps.changes.outputs.ci }}
       java-changed: ${{ steps.changes.outputs.java }}
       csharp-changed: ${{ steps.changes.outputs.csharp }}
       proto-changed: ${{ steps.changes.outputs.proto }}
       docs-changed: ${{ steps.changes.outputs.docs }}
       web-ui-changed: ${{ steps.changes.outputs.web-ui }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: changes
         with:
           filters: |
+            ci:
+              - '.github/actions/**'
+              - '.github/workflows/**'
             java:
               - 'questnav-lib/**/*.java'
               - 'questnav-lib/**/*.gradle'
@@ -47,6 +51,7 @@ jobs:
 # ----------------------- JAVA ----------------------- #
   build-proto-java:
     if: |
+      needs.detect-changes.outputs.ci-changed == 'true' ||
       needs.detect-changes.outputs.proto-changed == 'true' ||
       needs.detect-changes.outputs.csharp-changed == 'true' ||
       needs.detect-changes.outputs.java-changed == 'true' ||
@@ -55,19 +60,24 @@ jobs:
     uses: ./.github/workflows/reusable-build-proto-java.yml
 
   format-java:
-    if: needs.detect-changes.outputs.java-changed == 'true'
+    if: |
+      needs.detect-changes.outputs.ci-changed == 'true' ||
+      needs.detect-changes.outputs.java-changed == 'true'
     needs: [detect-changes, build-proto-java]
     uses: ./.github/workflows/reusable-format-java.yml
 
   docs-java:
-    if: needs.detect-changes.outputs.java-changed == 'true'
+    if: |
+      needs.detect-changes.outputs.ci-changed == 'true' ||
+      needs.detect-changes.outputs.java-changed == 'true'
     needs: [detect-changes, build-proto-java]
     uses: ./.github/workflows/reusable-docs-javadoc.yml
 
   build-java:
     if: |
       always() &&
-      (needs.detect-changes.outputs.java-changed == 'true' ||
+      (needs.detect-changes.outputs.ci-changed == 'true' ||
+      needs.detect-changes.outputs.java-changed == 'true' ||
       needs.detect-changes.outputs.csharp-changed == 'true' ||
       needs.detect-changes.outputs.web-ui-changed == 'true') &&
       (needs.format-java.result != 'failure' &&
@@ -78,7 +88,9 @@ jobs:
   publish-java:
     if: |
       always() &&
-      needs.build-java.result == 'success'
+      needs.build-java.result == 'success' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
     needs: [build-java]
     uses: ./.github/workflows/reusable-publish-java.yml
     secrets:
@@ -88,6 +100,7 @@ jobs:
 # ----------------------- C# ----------------------- #
   build-proto-csharp:
     if: |
+      needs.detect-changes.outputs.ci-changed == 'true' ||
       needs.detect-changes.outputs.proto-changed == 'true' ||
       needs.detect-changes.outputs.csharp-changed == 'true' ||
       needs.detect-changes.outputs.java-changed == 'true' ||
@@ -96,19 +109,24 @@ jobs:
     uses: ./.github/workflows/reusable-build-proto-csharp.yml
     
   format-csharp:
-    if: needs.detect-changes.outputs.csharp-changed == 'true'
+    if: |
+      needs.detect-changes.outputs.ci-changed == 'true' ||
+      needs.detect-changes.outputs.csharp-changed == 'true'
     needs: [detect-changes, build-proto-csharp, build-web-ui]
     uses: ./.github/workflows/reusable-format-csharp.yml
 
   docs-csharp:
-    if: needs.detect-changes.outputs.csharp-changed == 'true'
+    if: |
+      needs.detect-changes.outputs.ci-changed == 'true' ||
+      needs.detect-changes.outputs.csharp-changed == 'true'
     needs: [detect-changes, build-proto-csharp, build-web-ui]
     uses: ./.github/workflows/reusable-docs-docfx.yml
 
   build-csharp:
     if: |
       always() &&
-      (needs.detect-changes.outputs.csharp-changed == 'true' ||
+      (needs.detect-changes.outputs.ci-changed == 'true' ||
+      needs.detect-changes.outputs.csharp-changed == 'true' ||
       needs.detect-changes.outputs.java-changed == 'true' ||
       needs.detect-changes.outputs.web-ui-changed == 'true') &&
       (needs.format-csharp.result != 'failure' &&
@@ -123,6 +141,7 @@ jobs:
 # ----------------------- WEB UI ----------------------- #
   build-web-ui:
     if: |
+      needs.detect-changes.outputs.ci-changed == 'true' ||
       needs.detect-changes.outputs.web-ui-changed == 'true' ||
       needs.detect-changes.outputs.csharp-changed == 'true' ||
       needs.detect-changes.outputs.java-changed == 'true'
@@ -132,14 +151,17 @@ jobs:
   
 # ----------------------- PROTOBUF ----------------------- #
   docs-proto:
-    if: needs.detect-changes.outputs.proto-changed == 'true'
+    if: |
+      needs.detect-changes.outputs.ci-changed == 'true' ||
+      needs.detect-changes.outputs.proto-changed == 'true'
     needs: [detect-changes]
     uses: ./.github/workflows/reusable-docs-proto.yml
 
   # ----------------------- DOCS ----------------------- #
   build-docs:
     if: |
-      needs.detect-changes.outputs.docs-changed == 'true' &&
+      (needs.detect-changes.outputs.ci-changed == 'true' ||
+      needs.detect-changes.outputs.docs-changed == 'true') &&
       github.event_name == 'pull_request'
     needs: [detect-changes]
     uses: ./.github/workflows/reusable-docs-docs.yml
@@ -179,6 +201,7 @@ jobs:
           echo "# CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Changes Detected" >> $GITHUB_STEP_SUMMARY
+          echo "- CI configuration: \`${{ needs.detect-changes.outputs.ci-changed }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- Java: \`${{ needs.detect-changes.outputs.java-changed }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- C#: \`${{ needs.detect-changes.outputs.csharp-changed }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- Proto: \`${{ needs.detect-changes.outputs.proto-changed }}\`" >> $GITHUB_STEP_SUMMARY

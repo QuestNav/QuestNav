@@ -37,7 +37,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           sparse-checkout: |
@@ -51,37 +51,37 @@ jobs:
           version: ${{ inputs.version }}
           
       - name: Restore Docs Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: 'questnav-docs-${{ steps.version-info.outputs.version }}'
           path: docs
 
       - name: Restore DocFX Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: 'questnav-docfx-${{ steps.version-info.outputs.version }}'
           path: docs/static/api/csharp
 
       - name: Restore Javadoc Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: 'questnav-javadocs-${{ steps.version-info.outputs.version }}'
           path: docs/static/api/java
 
       - name: Restore Proto Docs Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: 'questnav-proto-docs-${{ steps.version-info.outputs.version }}'
           path: docs/static/api/proto
       
       - name: Upload Combined Docs Artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           name: 'questnav-combined-docs-${{ steps.version-info.outputs.version }}'
           path: docs/
 
       - name: Publish to GitHub Pages
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
         id: deployment
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

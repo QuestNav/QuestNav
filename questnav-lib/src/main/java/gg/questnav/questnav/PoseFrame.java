@@ -8,7 +8,7 @@
 */
 package gg.questnav.questnav;
 
-import edu.wpi.first.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Pose3d;
 
 /**
  * Represents a single frame of pose tracking data received from the Quest headset.
@@ -73,8 +73,8 @@ import edu.wpi.first.math.geometry.Pose3d;
  * @param isTracking Indicates whether the Quest is currently tracking its position
  * @see QuestNav#getAllUnreadPoseFrames()
  * @see QuestNav#setPose(Pose2d)
- * @see edu.wpi.first.math.estimator.PoseEstimator
- * @see edu.wpi.first.math.geometry.Pose2d
+ * @see org.wpilib.math.estimator.PoseEstimator
+ * @see org.wpilib.math.geometry.Pose2d
  * @since 2025.1.0
  */
 public record PoseFrame(

@@ -3,7 +3,7 @@
   "name": "questnavlib",
   "version": "${questnav_version}",
   "uuid": "${questnav_uuid}",
-  "frcYear": "${frc_year}",
+  "wpilibYear": "${frc_year}",
   "mavenUrls": [
     "https://maven.questnav.gg/releases",
     "https://maven.questnav.gg/snapshots"

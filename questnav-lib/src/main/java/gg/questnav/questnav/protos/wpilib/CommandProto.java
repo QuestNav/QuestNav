@@ -8,8 +8,8 @@
 */
 package gg.questnav.questnav.protos.wpilib;
 
-import edu.wpi.first.util.protobuf.Protobuf;
 import gg.questnav.questnav.protos.generated.Commands;
+import org.wpilib.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors;
 
 /**
@@ -33,8 +33,8 @@ import us.hebi.quickbuf.Descriptors;
  *
  * <h2>Protocol Buffer Integration</h2>
  *
- * <p>The class implements WPILib's {@link edu.wpi.first.util.protobuf.Protobuf} interface to
- * provide seamless integration with NetworkTables. This enables:
+ * <p>The class implements WPILib's {@link org.wpilib.util.protobuf.Protobuf} interface to provide
+ * seamless integration with NetworkTables. This enables:
  *
  * <ul>
  *   <li>Efficient binary serialization over the network
@@ -43,9 +43,9 @@ import us.hebi.quickbuf.Descriptors;
  *   <li>Cross-platform compatibility (Java robot code ↔ C# Quest app)
  * </ul>
  *
- * @see gg.questnav.questnav.QuestNav#setPose(edu.wpi.first.math.geometry.Pose3d)
+ * @see gg.questnav.questnav.QuestNav#setPose(org.wpilib.math.geometry.Pose3d)
  * @see gg.questnav.questnav.protos.generated.Commands.ProtobufQuestNavCommand
- * @see edu.wpi.first.util.protobuf.Protobuf
+ * @see org.wpilib.util.protobuf.Protobuf
  * @since 2025.1.0
  */
 public class CommandProto

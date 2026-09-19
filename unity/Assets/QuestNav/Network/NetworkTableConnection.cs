@@ -8,7 +8,6 @@ using QuestNav.Protos.Generated;
 using QuestNav.QuestNav.Geometry;
 using QuestNav.Utils;
 using UnityEngine;
-using Quaternion = UnityEngine.Quaternion;
 
 namespace QuestNav.Network
 {
@@ -311,7 +310,10 @@ namespace QuestNav.Network
 
             // Standard mode: Use team number to resolve robot address
             QueuedLogger.Log($"Setting Team number to {teamNumber}");
-            ntInstance.SetTeamNumber(teamNumber, QuestNavConstants.Network.NT_SERVER_PORT);
+            ntInstance.SetTeamNumber(
+                teamNumber.ToString(),
+                QuestNavConstants.Network.NT_SERVER_PORT
+            );
             teamNumberSet = true;
             ipAddressSet = false;
         }

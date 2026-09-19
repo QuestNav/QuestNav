@@ -34,6 +34,11 @@ namespace QuestNav.Core
         private double timeStamp;
 
         /// <summary>
+        /// Current timestamp from NetworkTables (NT Now)
+        /// </summary>
+        private long serverTimestamp;
+
+        /// <summary>
         /// Reference to the OVR Camera Rig for tracking
         /// </summary>
         [SerializeField]
@@ -360,6 +365,7 @@ namespace QuestNav.Core
             networkTableConnection.PublishFrameData(
                 frameCount,
                 timeStamp,
+                serverTimestamp,
                 vioAprilTagPoseEstimator.EstimatedPose,
                 currentlyTracking
             );
@@ -578,6 +584,10 @@ namespace QuestNav.Core
 
             // Time since Unity startup in seconds - provides temporal correlation for robot code
             timeStamp = Time.time;
+
+            // Time from NetworkTables server = NT Now plus offset to align with robot time
+            serverTimestamp =
+                networkTableConnection.NtNow + networkTableConnection.ServerTimeOffset;
 
             // Add latest VIO data to kalman filter
             pose = Conversions.UnityToFrc3d(

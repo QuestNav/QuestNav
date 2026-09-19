@@ -191,7 +191,13 @@ publishing {
             }
         }
 
-        // For local testing
+        // Publish directly to the WPILib local maven directory
+        maven {
+            name = "WpilibLocal"
+            url = "file:///C:/Users/Public/wpilib/2027_alpha7/maven"
+        }
+
+        // For standard local testing
         mavenLocal()
     }
 }

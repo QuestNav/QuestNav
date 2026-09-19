@@ -125,6 +125,20 @@ message ProtobufQuestNavFrameData {
    * fallback behaviors when tracking is lost.
    */
   bool isTracking = 4;
+
+  /*
+   * Timestamp in nanoseconds of the data in NT server time.
+   * 
+   * This provides timing information for the tracking data, allowing external
+   * systems to:
+   * - Calculate data age and latency
+   * - Interpolate or extrapolate poses for prediction
+   * - Synchronize with other sensor data
+   * - Implement timeout detection
+   * 
+   * This time is synchronized between devices by NT4.
+   */
+  int64 server_timestamp = 5;
 }
 
 /*

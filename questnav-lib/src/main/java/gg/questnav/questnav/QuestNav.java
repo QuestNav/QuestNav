@@ -8,21 +8,10 @@
 */
 package gg.questnav.questnav;
 
-import static edu.wpi.first.units.Units.Microseconds;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Seconds;
+import static org.wpilib.units.Units.Microseconds;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.Seconds;
 
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.proto.Pose3dProto;
-import edu.wpi.first.math.proto.Geometry3D;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.ProtobufPublisher;
-import edu.wpi.first.networktables.ProtobufSubscriber;
-import edu.wpi.first.networktables.PubSubOption;
-import edu.wpi.first.networktables.StringSubscriber;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import gg.questnav.questnav.protos.generated.Commands;
 import gg.questnav.questnav.protos.generated.Data;
 import gg.questnav.questnav.protos.wpilib.CommandProto;
@@ -33,6 +22,17 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import org.wpilib.driverstation.DriverStationErrors;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.proto.Pose3dProto;
+import org.wpilib.math.geometry.proto.detail.ProtobufPose3d;
+import org.wpilib.networktables.NetworkTable;
+import org.wpilib.networktables.NetworkTableInstance;
+import org.wpilib.networktables.ProtobufPublisher;
+import org.wpilib.networktables.ProtobufSubscriber;
+import org.wpilib.networktables.PubSubOption;
+import org.wpilib.networktables.StringSubscriber;
+import org.wpilib.system.Timer;
 
 /**
  * The QuestNav class provides a comprehensive interface for communicating with an Oculus/Meta Quest
@@ -112,8 +112,8 @@ import java.util.function.IntConsumer;
  * </ul>
  *
  * @see PoseFrame
- * @see edu.wpi.first.math.geometry.Pose2d
- * @see edu.wpi.first.networktables.NetworkTableInstance
+ * @see org.wpilib.math.geometry.Pose2d
+ * @see org.wpilib.networktables.NetworkTableInstance
  * @since 2025.1.0
  * @author QuestNav Team
  */
@@ -155,17 +155,17 @@ public class QuestNav {
           .subscribe(
               Commands.ProtobufQuestNavCommandResponse.newInstance(),
               PubSubOption.periodic(0.05),
-              PubSubOption.sendAll(true),
+              PubSubOption.SEND_ALL,
               PubSubOption.pollStorage(20));
 
   /** Subscriber for frame data */
-  private final ProtobufSubscriber<Data.ProtobufQuestNavFrameData> frameDataSubscriber =
+  private final ProtobufSubscriber<PoseFrame> frameDataSubscriber =
       questNavTable
           .getProtobufTopic("frameData", frameDataProto)
           .subscribe(
-              Data.ProtobufQuestNavFrameData.newInstance(),
+              new PoseFrame(new Pose3d(), 0, 0, 0, false),
               PubSubOption.periodic(0.01),
-              PubSubOption.sendAll(true),
+              PubSubOption.SEND_ALL,
               PubSubOption.pollStorage(20));
 
   /** Subscriber for device data */
@@ -191,7 +191,7 @@ public class QuestNav {
       Commands.ProtobufQuestNavPoseResetPayload.newInstance();
 
   /** Cached proto pose (for reset requests) to lessen GC pressure */
-  private final Geometry3D.ProtobufPose3d cachedProtoPose = Geometry3D.ProtobufPose3d.newInstance();
+  private final ProtobufPose3d cachedProtoPose = ProtobufPose3d.newInstance();
 
   /** Last sent request id */
   private int lastSentRequestId = 0;
@@ -367,7 +367,7 @@ public class QuestNav {
                   + "This may cause compatibility issues. Check the version of your vendordep and the app running on your headset.",
               libVersion, questNavVersion);
 
-      DriverStation.reportWarning(warningMessage, false);
+      DriverStationErrors.reportWarning(warningMessage, false);
     }
   }
 
@@ -513,9 +513,9 @@ public class QuestNav {
    * @return The frame count value, or empty if no frame data is available
    */
   public OptionalInt getFrameCount() {
-    Data.ProtobufQuestNavFrameData latestFrameData = frameDataSubscriber.get();
+    PoseFrame latestFrameData = frameDataSubscriber.get();
     if (latestFrameData != null) {
-      return OptionalInt.of(latestFrameData.getFrameCount());
+      return OptionalInt.of(latestFrameData.frameCount());
     }
     return OptionalInt.empty();
   }
@@ -569,9 +569,9 @@ public class QuestNav {
    * @see #getAllUnreadPoseFrames()
    */
   public OptionalDouble getAppTimestamp() {
-    Data.ProtobufQuestNavFrameData latestFrameData = frameDataSubscriber.get();
+    PoseFrame latestFrameData = frameDataSubscriber.get();
     if (latestFrameData != null) {
-      return OptionalDouble.of(latestFrameData.getTimestamp());
+      return OptionalDouble.of(latestFrameData.appTimestamp());
     }
     return OptionalDouble.empty();
   }
@@ -592,7 +592,7 @@ public class QuestNav {
   public boolean isTracking() {
     var frameData = frameDataSubscriber.get();
     if (frameData != null) {
-      return frameData.getIsTracking();
+      return frameData.isTracking();
     }
     return false;
   }
@@ -602,7 +602,7 @@ public class QuestNav {
    *
    * <p>This is the primary method for integrating QuestNav with FRC pose estimation systems. It
    * returns an array of {@link PoseFrame} objects containing pose data and timestamps that can be
-   * fed directly into a {@link edu.wpi.first.math.estimator.PoseEstimator}.
+   * fed directly into a {@link org.wpilib.math.estimator.PoseEstimator}.
    *
    * <p><strong>Important:</strong> This method consumes the frame queue, so each frame is only
    * returned once. Call this method regularly (every robot loop) to avoid missing frames.
@@ -633,13 +633,7 @@ public class QuestNav {
     var result = new PoseFrame[frameDataArray.length];
     for (int i = 0; i < result.length; i++) {
       var frameData = frameDataArray[i];
-      result[i] =
-          new PoseFrame(
-              pose3dProto.unpack(frameData.value.getPose3D()),
-              Microseconds.of(frameData.serverTime).in(Seconds),
-              frameData.value.getTimestamp(),
-              frameData.value.getFrameCount(),
-              frameData.value.getIsTracking());
+      result[i] = frameData.value;
     }
     return result;
   }
@@ -697,7 +691,8 @@ public class QuestNav {
           onSuccessCallback.accept(response);
         }
       } else {
-        DriverStation.reportError("QuestNav command failed!\n" + response.getErrorMessage(), false);
+        DriverStationErrors.reportError(
+            "QuestNav command failed!\n" + response.getErrorMessage(), false);
         if (onFailureCallback != null) {
           onFailureCallback.accept(response);
         }

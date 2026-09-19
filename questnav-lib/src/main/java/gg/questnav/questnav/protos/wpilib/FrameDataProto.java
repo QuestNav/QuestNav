@@ -8,16 +8,26 @@
 */
 package gg.questnav.questnav.protos.wpilib;
 
-import edu.wpi.first.util.protobuf.Protobuf;
+import static org.wpilib.units.Units.Nanoseconds;
+import static org.wpilib.units.Units.Seconds;
+
+import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.protos.generated.Data;
+import gg.questnav.questnav.protos.generated.Data.ProtobufQuestNavFrameData;
+import org.wpilib.math.geometry.proto.Pose3dProto;
+import org.wpilib.math.geometry.proto.detail.ProtobufPose3d;
+import org.wpilib.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors;
 
 /** WPILib Protobuf layer for FrameData Protobuf */
-public class FrameDataProto
-    implements Protobuf<Data.ProtobufQuestNavFrameData, Data.ProtobufQuestNavFrameData> {
+public class FrameDataProto implements Protobuf<PoseFrame, Data.ProtobufQuestNavFrameData> {
+
+  /** Protobuf instance for Pose3d */
+  private final Pose3dProto pose3dProto = new Pose3dProto();
+
   @Override
-  public Class<Data.ProtobufQuestNavFrameData> getTypeClass() {
-    return Data.ProtobufQuestNavFrameData.class;
+  public Class<PoseFrame> getTypeClass() {
+    return PoseFrame.class;
   }
 
   @Override
@@ -31,12 +41,24 @@ public class FrameDataProto
   }
 
   @Override
-  public Data.ProtobufQuestNavFrameData unpack(Data.ProtobufQuestNavFrameData msg) {
-    return msg.clone();
+  public PoseFrame unpack(Data.ProtobufQuestNavFrameData msg) {
+    return new PoseFrame(
+        pose3dProto.unpack(msg.getPose3D()),
+        msg.getTimestamp(),
+        Nanoseconds.of(msg.getServerTimestamp()).in(Seconds),
+        msg.getFrameCount(),
+        msg.getIsTracking());
   }
 
   @Override
-  public void pack(Data.ProtobufQuestNavFrameData msg, Data.ProtobufQuestNavFrameData value) {
-    msg.copyFrom(value);
+  public void pack(ProtobufQuestNavFrameData msg, PoseFrame value) {
+    var newPros3dProto = ProtobufPose3d.newInstance();
+    pose3dProto.pack(newPros3dProto, value.questPose3d());
+
+    msg.setPose3D(newPros3dProto);
+    msg.setTimestamp(value.appTimestamp());
+    msg.setServerTimestamp((long) Seconds.of(value.dataTimestamp()).in(Nanoseconds));
+    msg.setFrameCount(value.frameCount());
+    msg.setIsTracking(value.isTracking());
   }
 }

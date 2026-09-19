@@ -127,7 +127,7 @@ namespace QuestNav.Commands
                                 (
                                     networkTableConnection.NtNow
                                     - receivedTimestampedCommand.LastChange
-                                ) / 1000;
+                                ) / 1_000_000;
 
                             // Check if the command is fresh
                             if (ageMs < cachedPoseResetTtlMs)

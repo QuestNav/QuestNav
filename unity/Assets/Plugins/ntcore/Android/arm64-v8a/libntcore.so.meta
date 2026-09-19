@@ -17,6 +17,7 @@ PluginImporter:
         AndroidLibraryDependee: UnityLibrary
         AndroidSharedLibraryType: Executable
         CPU: ARM64
+        Is16KbAligned: true
     Any:
       enabled: 0
       settings:
@@ -24,7 +25,6 @@ PluginImporter:
         Exclude Editor: 1
         Exclude Linux64: 1
         Exclude OSXUniversal: 1
-        Exclude WebGL: 0
         Exclude Win: 1
         Exclude Win64: 1
     Editor:
@@ -36,14 +36,11 @@ PluginImporter:
     Linux64:
       enabled: 0
       settings:
-        CPU: None
+        CPU: AnyCPU
     OSXUniversal:
       enabled: 0
       settings:
-        CPU: None
-    WebGL:
-      enabled: 1
-      settings: {}
+        CPU: AnyCPU
     Win:
       enabled: 0
       settings:
@@ -51,7 +48,7 @@ PluginImporter:
     Win64:
       enabled: 0
       settings:
-        CPU: None
+        CPU: AnyCPU
   userData: 
   assetBundleName: 
   assetBundleVariant: 

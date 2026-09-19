@@ -159,11 +159,11 @@ public class QuestNav {
               PubSubOption.pollStorage(20));
 
   /** Subscriber for frame data */
-  private final ProtobufSubscriber<Data.ProtobufQuestNavFrameData> frameDataSubscriber =
+  private final ProtobufSubscriber<PoseFrame> frameDataSubscriber =
       questNavTable
           .getProtobufTopic("frameData", frameDataProto)
           .subscribe(
-              Data.ProtobufQuestNavFrameData.newInstance(),
+              new PoseFrame(new Pose3d(), 0, 0, 0, false),
               PubSubOption.periodic(0.01),
               PubSubOption.SEND_ALL,
               PubSubOption.pollStorage(20));
@@ -513,9 +513,9 @@ public class QuestNav {
    * @return The frame count value, or empty if no frame data is available
    */
   public OptionalInt getFrameCount() {
-    Data.ProtobufQuestNavFrameData latestFrameData = frameDataSubscriber.get();
+    PoseFrame latestFrameData = frameDataSubscriber.get();
     if (latestFrameData != null) {
-      return OptionalInt.of(latestFrameData.getFrameCount());
+      return OptionalInt.of(latestFrameData.frameCount());
     }
     return OptionalInt.empty();
   }
@@ -569,9 +569,9 @@ public class QuestNav {
    * @see #getAllUnreadPoseFrames()
    */
   public OptionalDouble getAppTimestamp() {
-    Data.ProtobufQuestNavFrameData latestFrameData = frameDataSubscriber.get();
+    PoseFrame latestFrameData = frameDataSubscriber.get();
     if (latestFrameData != null) {
-      return OptionalDouble.of(latestFrameData.getTimestamp());
+      return OptionalDouble.of(latestFrameData.appTimestamp());
     }
     return OptionalDouble.empty();
   }
@@ -592,7 +592,7 @@ public class QuestNav {
   public boolean isTracking() {
     var frameData = frameDataSubscriber.get();
     if (frameData != null) {
-      return frameData.getIsTracking();
+      return frameData.isTracking();
     }
     return false;
   }
@@ -633,13 +633,7 @@ public class QuestNav {
     var result = new PoseFrame[frameDataArray.length];
     for (int i = 0; i < result.length; i++) {
       var frameData = frameDataArray[i];
-      result[i] =
-          new PoseFrame(
-              pose3dProto.unpack(frameData.value.getPose3D()),
-              Microseconds.of(frameData.serverTime).in(Seconds),
-              frameData.value.getTimestamp(),
-              frameData.value.getFrameCount(),
-              frameData.value.getIsTracking());
+      result[i] = frameData.value;
     }
     return result;
   }

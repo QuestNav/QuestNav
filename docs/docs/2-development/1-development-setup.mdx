@@ -239,6 +239,73 @@ If you do not check the `Development Build` option, the build will fail to run o
 See the [Manual Headset Setup](./manual-setup#installing-questnav) page for a step-by-step tutorial on how to install the APK by hand.
 :::
 
+## Native Dependencies
+QuestNav uses a number of native libraries. These libraries have been pre-compiled and checked into this repo. However, they need to be
+rebuilt from time to time, for example, to update to the latest version. This section provides basic steps to build some of the native
+dependencies on Windows.
+
+### Prerequisites
+Software requirements
+- Visual Studio Community or other edition (not Visual Studio Code) with "Desktop development with C++" installed.
+- The Android NDK. The easiest way to install this is to install Android Studio, and then install the SDK, including the NDK.
+
+### Setup
+Create the following environment variables:
+<dl>
+  <dt>`NDK_HOME`</dt>
+  <dd>Your NDK directory, such as `C:\Users\me\AppData\Local\Android\Sdk\ndk\30.0.16138531`</dd>
+
+  <dt>`JAVA_HOME`</dt>
+  <dd>Your Android Studio JDK, such as `C:\Program Files\Android\Android Studio\jbr`</dd>
+</dl>
+
+Add the following values to your `PATH` environment variable.
+    - `%JAVA_HOME%\bin`
+
+### Building Network Tables (ntcore)
+[Network Tables 4](https://github.com/wpilibsuite/allwpilib/blob/main/ntcore/doc/networktables4.adoc) is used to communicate data to the
+robot.
+1. Clone the allwpilib repo from [https://github.com/wpilibsuite/allwpilib](https://github.com/wpilibsuite/allwpilib)
+1. Switch to the desired branch or tag if you don't want to build `main`.
+1. Configure CMake. In the allwpilib root directory, run this command:
+    ```powershell
+    cmake -B build-android -S . `
+        -G "Ninja" `
+        -DCMAKE_TOOLCHAIN_FILE="$env:NDK_HOME\build\cmake\android.toolchain.cmake" `
+        -DANDROID_ABI=arm64-v8a `
+        -DANDROID_PLATFORM=android-31 `
+        -DWPILIB_WITH_CSCORE=OFF `
+        -DWPILIB_WITH_WPILIB=OFF `
+        -DWPILIB_WITH_EXAMPLES=OFF `
+        -DWPILIB_WITH_TESTS=OFF `
+        -DWPILIB_WITH_GUI=OFF `
+        -DWPILIB_WITH_SIMULATION_MODULES=OFF `
+        -DWPILIB_WITH_BENCHMARK=OFF `
+        -DWPILIB_WITH_EXECUTABLES=OFF
+    ```
+1. Build ntcore
+    ```powershell
+    ninja -C build-android
+    ```
+1. Find the binaries in the `build-android\lib` directory. You will need `libntcore.so`, `libwpinet.so`, `libwpiutil.so`, and `libdatalog.so`.
+
+### Building libjpeg-turbo
+[libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo) is used to encode video frames for passthrough camera streaming.
+1. Clone the libjpeg-turbo repo from [https://github.com/libjpeg-turbo/libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo)
+1. Switch to the desired branch or tag if you don't want to build `main`.
+1. Configure CMake. In the libjpeg-turbo root directory, run this command:
+    ```powershell
+    cmake -B build-android -S . `
+        -G "Ninja" `
+        -DCMAKE_TOOLCHAIN_FILE="$env:NDK_HOME\build\cmake\android.toolchain.cmake" `
+        -DANDROID_ABI=arm64-v8a `
+        -DANDROID_PLATFORM=android-31
+    ```
+1. Build libjpeg-turbo
+    ```powershell
+    ninja -C build-android
+    ```
+1. Find the `libturbojpeg.so` binary in the `build-android` directory
 ## Troubleshooting Common Issues
 
 :::note

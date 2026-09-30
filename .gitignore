@@ -22,3 +22,6 @@ unity/Assets/StreamingAssets/RuntimeActionBindings.*
 unity/ProjectSettings/ProjectSettings.asset
 /.docs
 /docs/static/api
+
+#Visual Studio directory
+/.vs

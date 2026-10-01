@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 
 namespace QuestNav.Native.NTCore
@@ -14,33 +13,26 @@ namespace QuestNav.Native.NTCore
 
         public unsafe string Get(string defaultValue)
         {
-            byte[] valueUtf8 = defaultValue is not null
-                ? Encoding.UTF8.GetBytes(defaultValue)
-                : Array.Empty<byte>();
-
             string result = null;
-            fixed (byte* ptr = valueUtf8)
-            {
-                WpiString defaultWpi = new WpiString { str = ptr, len = (UIntPtr)valueUtf8.Length };
-                WpiString outValue = new WpiString();
-                NtCoreNatives.NT_GetString(handle, &defaultWpi, &outValue);
+            ManagedWpiString defaultWpi = new ManagedWpiString(defaultValue);
+            WpiString outValue = new WpiString();
+            NtCoreNatives.NT_GetString(handle, defaultWpi, &outValue);
 
-                if (outValue.str == defaultWpi.str)
+            if (outValue.str == defaultWpi)
+            {
+                // GetString returned our default value - no need to free.
+                result = defaultValue;
+            }
+            else if (outValue.str != null)
+            {
+                try
                 {
-                    // GetString returned our default value - no need to free.
-                    result = defaultValue;
+                    // Marshal string back to managed memory
+                    result = Encoding.UTF8.GetString(outValue.str, (int)outValue.len);
                 }
-                else if (outValue.str != null)
+                finally
                 {
-                    try
-                    {
-                        // Marshal string back to managed memory
-                        result = Encoding.UTF8.GetString(outValue.str, (int)outValue.len);
-                    }
-                    finally
-                    {
-                        NtCoreNatives.NT_FreeRaw(outValue.str);
-                    }
+                    NtCoreNatives.NT_FreeRaw(outValue.str);
                 }
             }
 

@@ -137,7 +137,7 @@ namespace QuestNav.Native.NTCore
         public WpiString remoteId;
         public WpiString remoteIp;
         public uint remotePort;
-        public ulong lastUpdate;
+        public long lastUpdate;
         public uint protocolVersion;
     }
 
@@ -262,6 +262,12 @@ namespace QuestNav.Native.NTCore
          * will not appear in metatopics.
          */
         public int hidden;
+
+        /**
+        * For subscriptions, don't signal the local handle when value updates are
+        * queued.
+        */
+        public int disableSignal;
     }
 
     public unsafe class NtCoreNatives
@@ -282,13 +288,16 @@ namespace QuestNav.Native.NTCore
         );
 
         [DllImport("ntcore")]
-        public static extern void NT_StartClient4(uint inst, WpiString* identity);
+        public static extern void NT_StartClient(uint inst, WpiString* identity);
 
         [DllImport("ntcore")]
-        public static extern void NT_SetServerTeam(uint inst, uint team, uint port);
+        public static extern void NT_SetServerTeam(uint inst, WpiString* team, uint port);
 
         [DllImport("ntcore")]
         public static extern int NT_IsConnected(uint inst);
+
+        [DllImport("ntcore")]
+        public static extern long NT_GetServerTimeOffset(uint inst, int* valid);
 
         [DllImport("ntcore")]
         public static extern uint NT_GetTopic(uint inst, WpiString* name);

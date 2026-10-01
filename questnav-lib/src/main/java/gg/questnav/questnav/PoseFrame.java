@@ -8,7 +8,9 @@
 */
 package gg.questnav.questnav;
 
-import edu.wpi.first.math.geometry.Pose3d;
+import gg.questnav.questnav.protos.wpilib.FrameDataProto;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.util.protobuf.ProtobufSerializable;
 
 /**
  * Represents a single frame of pose tracking data received from the Quest headset.
@@ -58,11 +60,11 @@ import edu.wpi.first.math.geometry.Pose3d;
  *
  * @param questPose3d The robot's pose on the field as measured by the Quest tracking system. This
  *     will only provide meaningful field-relative coordinates after {@link
- *     QuestNav#setPose(Pose2d)} has been called to establish the field reference frame.
- * @param dataTimestamp The NetworkTables timestamp indicating when this frame data was received by
- *     the robot. This timestamp should be used when adding vision measurements to pose estimators
- *     as it represents when the measurement was available to the robot code. Units: seconds since
- *     robot program start.
+ *     QuestNav#setPose(Pose3d)} has been called to establish the field reference frame.
+ * @param dataTimestamp The NetworkTables timestamp indicating when this frame data was recorded on
+ *     the Quest. This timestamp should be used when adding vision measurements to pose estimators
+ *     as it represents when the measurement was available to the robot code. Units: nanoseconds
+ *     since robot program start.
  * @param appTimestamp The Quest application's internal timestamp indicating when this frame was
  *     generated. This is primarily useful for debugging timing issues and calculating Quest-side
  *     latency. For pose estimation, use {@link #dataTimestamp()} instead. Units: seconds since
@@ -72,14 +74,17 @@ import edu.wpi.first.math.geometry.Pose3d;
  *     rate. Resets to 0 when the Quest app restarts.
  * @param isTracking Indicates whether the Quest is currently tracking its position
  * @see QuestNav#getAllUnreadPoseFrames()
- * @see QuestNav#setPose(Pose2d)
- * @see edu.wpi.first.math.estimator.PoseEstimator
- * @see edu.wpi.first.math.geometry.Pose2d
+ * @see QuestNav#setPose(Pose3d)
+ * @see org.wpilib.math.estimator.PoseEstimator
+ * @see org.wpilib.math.geometry.Pose2d
  * @since 2025.1.0
  */
 public record PoseFrame(
     Pose3d questPose3d,
-    double dataTimestamp,
     double appTimestamp,
+    double dataTimestamp,
     int frameCount,
-    boolean isTracking) {}
+    boolean isTracking)
+    implements ProtobufSerializable {
+  public static final FrameDataProto proto = new FrameDataProto();
+}

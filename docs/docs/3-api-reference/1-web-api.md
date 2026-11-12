@@ -153,7 +153,7 @@ This document describes the HTTP endpoints exposed by ConfigServer for QuestNav.
   - 200 OK → `Status`
     - position: `{ x: number, y: number, z: number }`
     - rotation: `{ x: number, y: number, z: number, w: number }` (quaternion)
-    - eulerAngles: `{ pitch: number, yaw: number, roll: number }`
+    - eulerAngles: `{ pitch: number, yaw: number, roll: number }` (degrees, FRC field frame: roll about X, pitch about Y, yaw about Z; roll and yaw in (-180, 180], pitch in [-90, 90])
     - isTracking: `boolean`
     - trackingLostEvents: `number`
     - batteryPercent: `number` (0–100)
@@ -182,9 +182,9 @@ This document describes the HTTP endpoints exposed by ConfigServer for QuestNav.
     "w": -0.8075928
   },
   "eulerAngles": {
-    "pitch": 71.04313,
-    "yaw": 345.878448,
-    "roll": 0.2092318
+    "pitch": -4.738478,
+    "yaw": 71.62263,
+    "roll": -13.319698
   },
   "isTracking": true,
   "trackingLostEvents": 0,

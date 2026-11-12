@@ -43,6 +43,7 @@ jobs:
               - 'unity/**/*.json'
               - 'unity/**/*.unity'
               - 'unity/**/*.meta'
+              - 'unity/**/*.asmdef'
             proto:
               - 'protos/*.proto'
             docs:
@@ -145,6 +146,23 @@ jobs:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
+  test-csharp:
+    if: |
+      ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository)) &&
+      (needs.detect-changes.outputs.ci-changed == 'true' ||
+      needs.detect-changes.outputs.csharp-changed == 'true')
+    needs: [detect-changes, build-proto-csharp, build-web-ui]
+    uses: ./.github/workflows/reusable-test-csharp.yml
+    permissions:
+      contents: read
+      checks: write
+    secrets:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
 # ----------------------- WEB UI ----------------------- #
   build-web-ui:
     if: |
@@ -195,6 +213,7 @@ jobs:
       - docs-java
       - format-csharp
       - build-csharp
+      - test-csharp
       - docs-csharp
       - build-proto-java
       - build-proto-csharp

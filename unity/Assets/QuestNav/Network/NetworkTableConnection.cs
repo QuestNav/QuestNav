@@ -8,7 +8,6 @@ using QuestNav.Protos.Generated;
 using QuestNav.QuestNav.Geometry;
 using QuestNav.Utils;
 using UnityEngine;
-using Quaternion = UnityEngine.Quaternion;
 
 namespace QuestNav.Network
 {

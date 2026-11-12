@@ -171,22 +171,13 @@ namespace QuestNav.QuestNav.AprilTag
                 );
             }
 
+            // LensOffset is the camera pose relative to the headset in Unity axes. Convert it to
+            // FRC body axes so it composes with the camera pose produced by CvToFrc.
             Pose lensOffset = cameraAccess.Intrinsics.LensOffset;
-            var lensTranslation = new Translation3d(
-                lensOffset.position.x,
-                lensOffset.position.y,
-                lensOffset.position.z
+            Pose3d headsetToCam = Conversions.UnityToFrc3d(
+                lensOffset.position,
+                lensOffset.rotation
             );
-            var lensRotation = new Rotation3d(
-                new Geometry.Quaternion(
-                    lensOffset.rotation.w,
-                    lensOffset.rotation.x,
-                    lensOffset.rotation.y,
-                    lensOffset.rotation.z
-                )
-            );
-
-            Pose3d headsetToCam = new Pose3d(lensTranslation, lensRotation);
             camToHeadset = new Transform3d(headsetToCam, Pose3d.Zero);
 
             cachedWidth = targetWidth;
@@ -536,17 +527,11 @@ namespace QuestNav.QuestNav.AprilTag
 
                         if (poseLibResult != null)
                         {
-                            // Get the raw camera pose (Pose3d) from PoseLib
-                            Pose3d cameraPose = poseLibResult.CameraPose;
+                            // Convert PoseLib's field-to-camera pose into the camera's pose on the field
+                            Pose3d cameraPose = Conversions.CvToFrc(poseLibResult.CameraPose);
 
-                            // Apply camera transform to get the corrected headset pose from the camera pose
-                            Pose3d correctedHeadsetPose = cameraPose + camToHeadset;
-
-                            // Convert the headset pose to FRC coordinates
-                            var (frcPos, frcRot) = Conversions.CvToFrc(correctedHeadsetPose);
-                            var measuredRotation = new Rotation3d(
-                                new Geometry.Quaternion(frcRot.w, frcRot.x, frcRot.y, frcRot.z)
-                            );
+                            // Step back from the lens to the headset center, in the camera's own frame
+                            Pose3d headsetPose = cameraPose.TransformBy(camToHeadset);
 
                             int tagCount = kept.Count;
                             double inlierRatio =
@@ -554,25 +539,15 @@ namespace QuestNav.QuestNav.AprilTag
                                     ? poseLibResult.AcceptedPoints / poseLibResult.TotalPoints
                                     : 0.0;
 
-                            // FIX: previously avgTagDistance was ||camera_position||, i.e. the
-                            // camera's distance from the FIELD ORIGIN (blue alliance corner).
-                            // That value silently inflates the dynamic std dev whenever the camera
-                            // is far from the origin and made the user-facing maxDistance gate
-                            // behave incorrectly (a robot in the red corner with a tag 1 m away
-                            // would compute distance ~16 m). The pipeline appeared to work today
-                            // because (a) maxDistance was unenforced and (b) the dynamic std dev
-                            // only affects correction trust, not pass/fail. Switching to the true
-                            // mean camera-to-tag distance changes the std dev curve - if pose
-                            // behavior regresses after this change, suspect this block first.
+                            // Mean headset-to-tag distance (not distance from the field origin)
                             double avgTagDistance = 0.0;
                             int distanceSamples = 0;
                             foreach (var det in kept)
                             {
                                 var tagPose = aprilTagFieldLayout.GetTagPose(det.Id);
-                                double dx = tagPose.X - frcPos.x;
-                                double dy = tagPose.Y - frcPos.y;
-                                double dz = tagPose.Z - frcPos.z;
-                                avgTagDistance += Math.Sqrt(dx * dx + dy * dy + dz * dz);
+                                avgTagDistance += tagPose.Translation.GetDistance(
+                                    headsetPose.Translation
+                                );
                                 distanceSamples++;
                             }
                             if (distanceSamples > 0)
@@ -610,8 +585,8 @@ namespace QuestNav.QuestNav.AprilTag
                             );
 
                             vioAprilTagPoseEstimator.AddAprilTagObservation(
-                                new Translation3d(frcPos.x, frcPos.y, frcPos.z),
-                                measuredRotation,
+                                headsetPose.Translation,
+                                headsetPose.Rotation,
                                 captureTimestamp,
                                 dynamicStdDevs,
                                 tagCount,
@@ -619,7 +594,7 @@ namespace QuestNav.QuestNav.AprilTag
                             );
 
                             QueuedLogger.Log(
-                                $"PoseLib estimate: Pos({frcPos.x:F3}, {frcPos.y:F3}, {frcPos.z:F3}) "
+                                $"PoseLib estimate: Pos({headsetPose.X:F3}, {headsetPose.Y:F3}, {headsetPose.Z:F3}) "
                                     + $"tags={tagCount} inliers={poseLibResult.AcceptedPoints}/{poseLibResult.TotalPoints} "
                                     + $"ratio={inlierRatio:F2} dist={avgTagDistance:F2}m stdDev={linearStdDev:F4}"
                             );

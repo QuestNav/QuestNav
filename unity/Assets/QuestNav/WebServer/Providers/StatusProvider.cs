@@ -1,3 +1,5 @@
+using System;
+using QuestNav.QuestNav.Geometry;
 using UnityEngine;
 
 namespace QuestNav.WebServer
@@ -18,14 +20,9 @@ namespace QuestNav.WebServer
         private readonly object statusLock = new object();
 
         /// <summary>
-        /// Current position of VR headset (FRC coordinates)
+        /// Current pose of VR headset (FRC coordinates)
         /// </summary>
-        private Vector3 position;
-
-        /// <summary>
-        /// Current rotation of VR headset (FRC coordinates)
-        /// </summary>
-        private Quaternion rotation;
+        private Pose3d pose = Pose3d.Zero;
 
         /// <summary>
         /// Whether headset is currently tracking
@@ -100,8 +97,7 @@ namespace QuestNav.WebServer
         /// Updates all status information at once.
         /// Called from WebServerManager.UpdateStatus() which is invoked from QuestNav.SlowUpdate() at 3Hz.
         /// </summary>
-        /// <param name="pos">Current position of VR headset (FRC coordinates)</param>
-        /// <param name="rot">Current rotation of VR headset (FRC coordinates)</param>
+        /// <param name="currentPose">Current pose of VR headset (FRC coordinates)</param>
         /// <param name="tracking">Whether headset is currently tracking</param>
         /// <param name="lostEvents">Number of tracking loss events this session</param>
         /// <param name="battery">Battery level (0.0 to 1.0)</param>
@@ -113,8 +109,7 @@ namespace QuestNav.WebServer
         /// <param name="currentFps">Current frames per second</param>
         /// <param name="currentFrameCount">Unity frame count</param>
         public void UpdateStatus(
-            Vector3 pos,
-            Quaternion rot,
+            Pose3d currentPose,
             bool tracking,
             int lostEvents,
             float battery,
@@ -129,8 +124,7 @@ namespace QuestNav.WebServer
         {
             lock (statusLock)
             {
-                position = pos;
-                rotation = rot;
+                pose = currentPose;
                 isTracking = tracking;
                 trackingLostEvents = lostEvents;
                 batteryLevel = battery;
@@ -188,29 +182,31 @@ namespace QuestNav.WebServer
         {
             lock (statusLock)
             {
-                var eulerAngles = rotation.eulerAngles;
+                var rotation = pose.Rotation;
+                var quaternion = rotation.Quaternion;
 
                 return new
                 {
                     // Pose (in FRC coordinates, converted by QuestNav before passing)
                     position = new
                     {
-                        x = position.x,
-                        y = position.y,
-                        z = position.z,
+                        x = pose.X,
+                        y = pose.Y,
+                        z = pose.Z,
                     },
                     rotation = new
                     {
-                        x = rotation.x,
-                        y = rotation.y,
-                        z = rotation.z,
-                        w = rotation.w,
+                        x = quaternion.X,
+                        y = quaternion.Y,
+                        z = quaternion.Z,
+                        w = quaternion.W,
                     },
+                    // Degrees: roll about FRC X, pitch about Y, yaw about Z. Roll/yaw in (-180, 180], pitch in [-90, 90]
                     eulerAngles = new
                     {
-                        pitch = eulerAngles.z,
-                        yaw = eulerAngles.y,
-                        roll = eulerAngles.x,
+                        pitch = rotation.Y * (180.0 / Math.PI),
+                        yaw = rotation.Z * (180.0 / Math.PI),
+                        roll = rotation.X * (180.0 / Math.PI),
                     },
 
                     // Tracking

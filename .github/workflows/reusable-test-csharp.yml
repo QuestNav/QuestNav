@@ -1,0 +1,72 @@
+name: Test C#
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version string to use (optional, auto-generated if not provided)'
+        required: false
+        type: string
+    secrets:
+      UNITY_LICENSE:
+        description: 'Unity License'
+        required: true
+      UNITY_EMAIL:
+        description: 'Unity Email'
+        required: true
+      UNITY_PASSWORD:
+        description: 'Unity Password'
+        required: true
+
+jobs:
+  test:
+    # EditMode tests are pure C#, so they run on GameCI's Linux image instead of the build runner
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          sparse-checkout: |
+            unity
+            .github
+          sparse-checkout-cone-mode: false
+          lfs: true
+
+      - name: Determine Version
+        id: version-info
+        uses: ./.github/actions/determine-version
+        with:
+          version: ${{ inputs.version }}
+
+      - name: Setup Unity Environment
+        uses: ./.github/actions/setup-unity-environment
+        with:
+          version: ${{ steps.version-info.outputs.version }}
+          unity-project-path: unity
+          cache-key-suffix: EditMode-Linux
+
+      - name: Run EditMode Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: unity
+          testMode: editmode
+          artifactsPath: test-results
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Unity EditMode Tests
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: questnav-unity-test-results-${{ steps.version-info.outputs.version }}
+          path: test-results
+          retention-days: 7

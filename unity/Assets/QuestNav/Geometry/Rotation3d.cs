@@ -462,11 +462,9 @@ namespace QuestNav.QuestNav.Geometry
         /// <summary>
         /// Creates a new Rotation3d from its protobuf counterpart
         /// </summary>
-        /// <param name="protobuf">The protobuf to convert</param>
+        /// <param name="protobuf">The protobuf to convert. The quaternion will be automatically normalized.</param>
         public Rotation3d(ProtobufRotation3d protobuf)
-        {
-            Quaternion = new Quaternion(protobuf.Q);
-        }
+            : this(new Quaternion(protobuf.Q)) { }
 
         /// <summary>
         /// Converts the Rotation3d to a protobuf

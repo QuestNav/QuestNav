@@ -52,11 +52,11 @@
           </div>
           <div class="status-item">
             <span class="label">Yaw:</span>
-            <span class="value mono">{{ status.eulerAngles.pitch.toFixed(1) }}°</span>
+            <span class="value mono">{{ status.eulerAngles.yaw.toFixed(1) }}°</span>
           </div>
           <div class="status-item">
             <span class="label">Pitch:</span>
-            <span class="value mono">{{ status.eulerAngles.yaw.toFixed(1) }}°</span>
+            <span class="value mono">{{ status.eulerAngles.pitch.toFixed(1) }}°</span>
           </div>
           <div class="status-item">
             <span class="label">Roll:</span>

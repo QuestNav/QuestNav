@@ -126,8 +126,7 @@ namespace QuestNav.QuestNav.Estimation
             double bufferDurationSeconds = VioAprilTagPoseEstimatorConstants.BUFFER_DURATION_SECONDS
         )
         {
-            Matrix<double> qStdDev =
-                vioStdDevs
+            Matrix<double> qStdDev = vioStdDevs
                 ?? DenseMatrix.OfArray(
                     new[,]
                     {

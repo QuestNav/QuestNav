@@ -29,7 +29,7 @@ The detection loop runs as a Unity Coroutine (`AprilTagFrameCaptureCoroutine`) a
 
 1. Records a monotonic timestamp via `Time.time`
 2. Calls `PassthroughCameraAccess.GetColors()` to get a `NativeArray<Color32>` (RGBA32) from the Quest's passthrough camera
-3. The Meta XR SDK provides camera intrinsics (focal length, principal point) that were captured during initialization
+3. The Meta XR SDK provides static sensor intrinsics (focal length, principal point), which are converted to the frame's `CurrentResolution` pixel space before solving
 
 :::note
 The "Headset Cameras" app permission must be enabled on the Quest for frame capture to work. Without it, `GetColors()` will throw a `NullReferenceException`.

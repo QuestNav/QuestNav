@@ -13,41 +13,46 @@ namespace QuestNav.Native.PoseLib
 {
     public class PoseLibSolver
     {
-        // Cached camera intrinsics. These MUST be refreshed via RefreshIntrinsics()
-        // whenever the camera resolution changes (the Meta SDK exposes intrinsics
-        // per-resolution: focal length, principal point, and sensor resolution all
-        // change when RequestedResolution changes). Solving with stale intrinsics
-        // produces a pose that's silently wrong by 5-50 cm.
+        // [fx, fy, cx, cy] in pixels of the captured image, not of the sensor.
         private double[] intrinsicsArray;
-        private int resolutionX;
-        private int resolutionY;
+        private Vector2Int imageResolution;
+        private bool hasIntrinsics;
         private readonly AprilTagFieldLayout fieldLayout;
 
-        public PoseLibSolver(
-            AprilTagFieldLayout fieldLayout,
-            PassthroughCameraAccess.CameraIntrinsics intrinsics
-        )
+        public PoseLibSolver(AprilTagFieldLayout fieldLayout)
         {
             this.fieldLayout = fieldLayout;
-            RefreshIntrinsics(intrinsics);
         }
 
         /// <summary>
-        /// Updates the cached camera intrinsics. Called from
-        /// <c>AprilTagManager.OnAprilTagDetectorModeChanged</c> after the camera arbiter
-        /// has applied a new resolution. The next solve uses the refreshed values.
+        /// Sets the intrinsics used for solving. Meta reports static sensor intrinsics, while
+        /// detections are in pixels of the captured image, so they are converted to
+        /// <paramref name="imageResolution"/>. Call again whenever the capture resolution changes.
         /// </summary>
-        public void RefreshIntrinsics(PassthroughCameraAccess.CameraIntrinsics intrinsics)
+        /// <returns>False if the intrinsics are not available yet; solving then fails until set.</returns>
+        public bool SetIntrinsics(
+            PassthroughCameraAccess.CameraIntrinsics sensorIntrinsics,
+            Vector2Int imageResolution
+        )
         {
-            intrinsicsArray = new double[]
+            if (
+                !ImageIntrinsics.TryFromSensor(
+                    sensorIntrinsics.FocalLength,
+                    sensorIntrinsics.PrincipalPoint,
+                    sensorIntrinsics.SensorResolution,
+                    imageResolution,
+                    out var intrinsics
+                )
+            )
             {
-                intrinsics.FocalLength.x,
-                intrinsics.FocalLength.y,
-                intrinsics.PrincipalPoint.x,
-                intrinsics.PrincipalPoint.y,
-            };
-            resolutionX = intrinsics.SensorResolution.x;
-            resolutionY = intrinsics.SensorResolution.y;
+                hasIntrinsics = false;
+                return false;
+            }
+
+            intrinsicsArray = new[] { intrinsics.Fx, intrinsics.Fy, intrinsics.Cx, intrinsics.Cy };
+            this.imageResolution = intrinsics.Resolution;
+            hasIntrinsics = true;
+            return true;
         }
 
         public PoseLibResult PoseLibSolve(AprilTagDetectionResults detections)
@@ -72,6 +77,11 @@ namespace QuestNav.Native.PoseLib
             int count = detections?.Count ?? 0;
             if (count == 0)
             {
+                return null;
+            }
+            if (!hasIntrinsics)
+            {
+                QueuedLogger.LogError("PoseLib solve skipped: camera intrinsics are not set");
                 return null;
             }
 
@@ -110,8 +120,8 @@ namespace QuestNav.Native.PoseLib
                 corners3d.ToArray(),
                 (ulong)(count * 4),
                 (int)PoseLibNatives.PoseLibCameraModelIdNative.POSELIB_CAMERA_PINHOLE,
-                resolutionX,
-                resolutionY,
+                imageResolution.x,
+                imageResolution.y,
                 intrinsicsArray,
                 4,
                 12,

@@ -121,10 +121,12 @@ poselib_estimate_absolute_pose_simple(
 )
 ```
 
-**Camera intrinsics** come from `PassthroughCameraAccess.Intrinsics`:
+**Camera intrinsics** come from `PassthroughCameraAccess.Intrinsics`, which holds static values in sensor pixels:
 - Focal length: `Intrinsics.FocalLength` (fx, fy)
 - Principal point: `Intrinsics.PrincipalPoint` (cx, cy)
-- Image dimensions: `Intrinsics.SensorResolution` (not `RequestedResolution` — they may differ if the capture resolution is downscaled)
+- Sensor size: `Intrinsics.SensorResolution`
+
+Detections are in pixels of the captured frame (`CurrentResolution`), which the SDK produces by centre-cropping the sensor to the frame's aspect ratio and scaling the crop. `ImageIntrinsics.TryFromSensor` applies the same crop and scale to fx, fy, cx and cy, and `CurrentResolution` is passed as the image size. `AprilTagManager` recomputes them whenever `CurrentResolution` changes.
 
 ### Memory Management
 

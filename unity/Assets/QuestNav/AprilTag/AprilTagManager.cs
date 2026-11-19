@@ -383,15 +383,16 @@ namespace QuestNav.QuestNav.AprilTag
                     continue;
                 }
 
-                // Use hardware exposure time to build a capture timestamp in the Time.time
-                // domain. Timestamp is UTC, so it must pair with UtcNow; clamped because the
-                // wall clock can step and an out-of-range value stalls the estimator's buffer.
+                // Use hardware exposure time to build a capture timestamp in the
+                // Time.timeAsDouble domain. Timestamp is UTC, so it must pair with UtcNow;
+                // clamped because the wall clock can step and an out-of-range value stalls
+                // the estimator's buffer.
                 double timeSinceExposure = Math.Clamp(
                     (DateTime.UtcNow - cameraAccess.Timestamp).TotalSeconds,
                     0.0,
                     VioAprilTagPoseEstimatorConstants.BUFFER_DURATION_SECONDS
                 );
-                float captureTimestamp = Time.time - (float)timeSinceExposure;
+                double captureTimestamp = Time.timeAsDouble - timeSinceExposure;
 
                 NativeArray<Color32> colors;
 

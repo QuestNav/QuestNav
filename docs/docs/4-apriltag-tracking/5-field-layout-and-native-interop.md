@@ -132,7 +132,7 @@ poselib_estimate_absolute_pose_simple(
 |----------|----------|
 | `ImageU8` | Static cached buffer; reallocated only on resolution change. Returned wrapper does not own the handle. |
 | `AprilTagDetectionResults` | Wraps a `zarray_t*`. Freed when `Detect()` is called again (libapriltag overwrites previous results). Not explicitly disposed in the coroutine. |
-| `AprilTagDetector` | `IDisposable`. Disposes all added families, clears, then destroys. |
+| `AprilTagDetector` | `IDisposable`. Owns the families added to it. Destroys the native detector first (which unregisters the families), then disposes the families. |
 | `AprilTagFamily` | `IDisposable` with a `Disposed` flag guard (safe for double-dispose). |
 
 :::caution

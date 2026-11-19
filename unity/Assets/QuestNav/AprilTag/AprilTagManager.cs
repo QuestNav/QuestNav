@@ -479,10 +479,8 @@ namespace QuestNav.QuestNav.AprilTag
                     //   1) User's ignored-IDs blacklist (empty set keeps every detection).
                     //   2) Drop detections whose ID is not in the loaded field layout.
                     //      tag36h11 readily produces false positives at high resolution
-                    //      (e.g. lab logs show ID 554 decoding from random texture). Feeding
-                    //      such an ID to PoseLib mismatches the 2D/3D corner buffer lengths
-                    //      (8 push, 0 push) and produces a garbage pose tens of meters out,
-                    //      which the estimator then has to reject as a position jump.
+                    //      (e.g. lab logs show ID 554 decoding from random texture). Such an
+                    //      ID has no field corners, so PoseLib would reject the whole frame.
                     // Building the kept list in-line avoids allocating an AprilTagDetectionResults clone.
                     var kept = new List<AprilTagDetection>(results.NumberOfDetections);
                     int ignoredCount = 0;

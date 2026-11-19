@@ -457,6 +457,19 @@ namespace QuestNav.Config
             await connection.CreateTableAsync<Config.AprilTag>();
             await connection.CreateTableAsync<Config.AprilTagIgnoredId>();
             await connection.CreateTableAsync<Config.Logging>();
+
+            // Only TRADITIONAL is implemented. Older builds could persist other modes, and the
+            // web UI posts the stored mode back on every AprilTag change, which the server rejects.
+            int traditional = (int)AprilTagDetectorMode.DetectionMode.TRADITIONAL;
+            int resetRows = await connection.ExecuteAsync(
+                "UPDATE AprilTag SET AprilTagDetectorMode = ? WHERE AprilTagDetectorMode != ?",
+                traditional,
+                traditional
+            );
+            if (resetRows > 0)
+                QueuedLogger.LogWarning(
+                    "Stored AprilTag detector mode is not implemented; reset it to TRADITIONAL."
+                );
         }
 
         /// <summary>

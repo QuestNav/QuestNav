@@ -439,11 +439,16 @@ namespace QuestNav.Config
         }
 
         /// <summary>
-        /// Opens the connection and creates any missing tables.
+        /// Opens the connection, checks it for corruption, and creates any missing tables.
         /// </summary>
         private async Task OpenConnectionAsync()
         {
             connection = new SQLiteAsyncConnection(dbPath);
+
+            // Opening and CREATE TABLE only read the schema; this also reads the data pages.
+            string check = await connection.ExecuteScalarAsync<string>("PRAGMA quick_check");
+            if (check != "ok")
+                throw SQLiteException.New(SQLite3.Result.Corrupt, $"quick_check failed: {check}");
 
             // Create with defaults if they don't already exist
             await connection.CreateTableAsync<Config.Network>();

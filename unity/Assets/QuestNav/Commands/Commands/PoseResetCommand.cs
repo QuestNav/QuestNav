@@ -6,12 +6,13 @@ using QuestNav.QuestNav.Geometry;
 using QuestNav.Utils;
 using UnityEngine;
 using Wpi.Proto;
-using Quaternion = UnityEngine.Quaternion;
 
 namespace QuestNav.Commands.Commands
 {
     /// <summary>
-    /// Resets the VR camera pose and the Kalman filter to a specified position.
+    /// Resets the VR camera pose and the Kalman filter to a specified position and heading.
+    /// Only the yaw of the requested rotation is applied; pitch and roll stay with the
+    /// gravity-aligned VIO tracking.
     /// </summary>
     public class PoseResetCommand : ICommand
     {
@@ -47,8 +48,8 @@ namespace QuestNav.Commands.Commands
         public string CommandNiceName => "PoseReset";
 
         /// <summary>
-        /// Executes the pose reset by applying the target pose to the VR camera system
-        /// and resetting the Kalman filter to match.
+        /// Executes the pose reset by moving the VR camera root so the camera sits at the
+        /// target position with the target yaw, and resetting the Kalman filter to match.
         /// </summary>
         public void Execute(ProtobufQuestNavCommand receivedCommand)
         {
@@ -87,27 +88,22 @@ namespace QuestNav.Commands.Commands
                 QueuedLogger.LogWarning($"Pose out of field bounds: ({poseX}, {poseY})");
             }
 
-            // Step 1: Convert FRC field coordinates to Unity coordinates
-            var (targetCameraPosition, targetCameraRotation) = Conversions.FrcToUnity3d(resetPose);
+            // Solved in FRC coordinates; the camera's local pose is relative to the root
+            var cameraLocalPose = Conversions.UnityToFrc3d(
+                vrCamera.localPosition,
+                vrCamera.localRotation
+            );
+            var (rootPose, cameraPose) = SolveYawOnlyRootPose(resetPose, cameraLocalPose);
 
-            // Step 2: Calculate rotation difference between current camera and target
-            Quaternion newRotation =
-                targetCameraRotation * Quaternion.Inverse(vrCamera.localRotation);
+            var (rootPosition, rootRotation) = Conversions.FrcToUnity3d(rootPose);
+            vrCameraRoot.rotation = rootRotation;
+            vrCameraRoot.position = rootPosition;
 
-            // Step 3: Apply rotation to root
-            vrCameraRoot.rotation = newRotation;
-
-            // Step 4: Recalculate position after rotation
-            Vector3 newRootPosition = targetCameraPosition - (newRotation * vrCamera.localPosition);
-
-            // Step 5: Apply the new position to vrCameraRoot
-            vrCameraRoot.position = newRootPosition;
-
-            // Step 6: Reset the Kalman filter so it agrees with the new VIO reference frame.
+            // Reset the Kalman filter so it agrees with the new VIO reference frame.
             // After moving vrCameraRoot, the next VIO reading will be relative to this new
             // origin. The filter must be told so it doesn't interpret the jump as displacement.
-            // The camera now sits at resetPose, which is also what the next VIO frame reports.
-            poseEstimator.ResetPosition(resetPose, Time.timeAsDouble);
+            // The camera now sits at cameraPose, which is also what the next VIO frame reports.
+            poseEstimator.ResetPosition(cameraPose, Time.timeAsDouble);
 
             QueuedLogger.Log(
                 $"Pose reset applied: X={poseX}, Y={poseY}, Z={poseZ} Rotation W={poseQW}, X={poseQx}, "
@@ -116,6 +112,36 @@ namespace QuestNav.Commands.Commands
 
             commandContext.SendSuccessResponse(receivedCommand.CommandId);
             QueuedLogger.Log("Pose reset completed successfully");
+        }
+
+        /// <summary>
+        /// Solves the camera root pose that puts the camera at the target position with the
+        /// target yaw, all in FRC coordinates. The root only rotates about the vertical axis,
+        /// so the camera keeps the pitch and roll it already has in the gravity-aligned
+        /// tracking space.
+        /// </summary>
+        /// <param name="targetPose">Requested field pose of the camera.</param>
+        /// <param name="cameraLocalPose">Camera pose relative to the root.</param>
+        /// <returns>The root pose and the resulting field pose of the camera.</returns>
+        public static (Pose3d rootPose, Pose3d cameraPose) SolveYawOnlyRootPose(
+            Pose3d targetPose,
+            Pose3d cameraLocalPose
+        )
+        {
+            // Rz(a) * R has yaw yaw(R) + a, so this root gives the camera the target yaw
+            var rootRotation = new Rotation3d(
+                0,
+                0,
+                targetPose.Rotation.Z - cameraLocalPose.Rotation.Z
+            );
+            var rootTranslation =
+                targetPose.Translation - cameraLocalPose.Translation.RotateBy(rootRotation);
+            var cameraRotation = cameraLocalPose.Rotation.RotateBy(rootRotation);
+
+            return (
+                new Pose3d(rootTranslation, rootRotation),
+                new Pose3d(targetPose.Translation, cameraRotation)
+            );
         }
 
         /// <summary>

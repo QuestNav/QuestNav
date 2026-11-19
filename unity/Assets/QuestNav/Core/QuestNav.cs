@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Meta.XR;
 using QuestNav.Camera;
 using QuestNav.Commands;
@@ -242,40 +244,85 @@ namespace QuestNav.Core
         /// </summary>
         private async void Awake()
         {
-            QueuedLogger.Initialize();
-            FileManager.Initialize();
-            // Disable stack traces for Log-level logging
-            Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+            try
+            {
+                QueuedLogger.Initialize();
+                FileManager.Initialize();
+                // Disable stack traces for Log-level logging
+                Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
 
-            versionText.text = Application.version;
+                RunNonCritical("Version text", () => versionText.text = Application.version);
 
+                try
+                {
+                    await InitializePoseLoopAsync();
+                }
+                catch (Exception ex)
+                {
+                    QueuedLogger.LogException(
+                        "Startup failed; pose data is not being published",
+                        ex
+                    );
+                    QueuedLogger.Flush();
+                }
+
+                // Started after the pose loop (and even if it failed) so a slow or failing web
+                // server cannot delay pose streaming, while logs stay reachable.
+                if (webServerManager != null)
+                {
+                    await RunNonCriticalAsync("Web server", webServerManager.InitializeAsync);
+                }
+            }
+            catch (Exception ex)
+            {
+                QueuedLogger.LogException("Unexpected startup failure", ex);
+            }
+            finally
+            {
+                QueuedLogger.Flush();
+            }
+        }
+
+        /// <summary>
+        /// Builds everything the pose loop needs and schedules MainUpdate/SlowUpdate.
+        /// Subsystems the pose loop can run without are constructed through
+        /// <see cref="RunNonCritical"/> so a failure there only disables that subsystem.
+        /// </summary>
+        private async Task InitializePoseLoopAsync()
+        {
             configManager = new ConfigManager();
 
             networkTableConnection = new NetworkTableConnection(configManager);
 
-            uiManager = new UIManager(
-                configManager,
-                networkTableConnection,
-                teamInput,
-                ipAddressText,
-                conStateText,
-                posXText,
-                posYText,
-                posZText,
-                xRotText,
-                yRotText,
-                zRotText,
-                teamUpdateButton,
-                autoStartToggle
+            RunNonCritical("UI manager", () =>
+                uiManager = new UIManager(
+                    configManager,
+                    networkTableConnection,
+                    teamInput,
+                    ipAddressText,
+                    conStateText,
+                    posXText,
+                    posYText,
+                    posZText,
+                    xRotText,
+                    yRotText,
+                    zRotText,
+                    teamUpdateButton,
+                    autoStartToggle
+                )
             );
 
             vioAprilTagPoseEstimator = new VioAprilTagPoseEstimator();
-            OVRManager.display.RecenteredPose += OnVioRecenter;
+            RunNonCritical("Recenter handler", () =>
+                OVRManager.display.RecenteredPose += OnVioRecenter
+            );
 
             // Construct the camera arbiter before any subsystem that touches the camera.
             // Both PassthroughFrameSource (Low priority) and AprilTagManager (High priority)
             // route enable/resolution changes through this single owner.
-            cameraArbiter = new CameraResourceManager(cameraAccess);
+            RunNonCritical("Camera arbiter", () =>
+                cameraArbiter = new CameraResourceManager(cameraAccess)
+            );
 
             // Open the SQLite connection now (without firing events) so we can read the
             // user-selected AprilTag field layout file before constructing the
@@ -283,37 +330,45 @@ namespace QuestNav.Core
             // value is read once at startup and changes require a restart to apply.
             await configManager.OpenAsync();
 
-            var aprilTagFieldLayout = new AprilTagFieldLayout();
-            string requestedFieldLayout = await configManager.GetAprilTagFieldLayoutFileAsync();
-            await aprilTagFieldLayout.LoadJsonFromFileAsync(requestedFieldLayout);
-            aprilTagManager = new AprilTagManager(
-                configManager,
-                vioAprilTagPoseEstimator,
-                cameraAccess,
-                cameraArbiter,
-                aprilTagFieldLayout,
-                this
+            await RunNonCriticalAsync("AprilTag detector", async () =>
+            {
+                var aprilTagFieldLayout = new AprilTagFieldLayout();
+                string requestedFieldLayout = await configManager.GetAprilTagFieldLayoutFileAsync();
+                await aprilTagFieldLayout.LoadJsonFromFileAsync(requestedFieldLayout);
+                aprilTagManager = new AprilTagManager(
+                    configManager,
+                    vioAprilTagPoseEstimator,
+                    cameraAccess,
+                    cameraArbiter,
+                    aprilTagFieldLayout,
+                    this
+                );
+            });
+
+            RunNonCritical("Passthrough stream", () =>
+                passthroughFrameSource = new PassthroughFrameSource(
+                    this,
+                    cameraAccess,
+                    cameraArbiter,
+                    networkTableConnection.CreateCameraSource("Passthrough"),
+                    configManager
+                )
             );
 
-            passthroughFrameSource = new PassthroughFrameSource(
-                this,
-                cameraAccess,
-                cameraArbiter,
-                networkTableConnection.CreateCameraSource("Passthrough"),
-                configManager
-            );
-
-            // Initialize web server manager with settings from WebServerConstants
-            webServerManager = new WebServerManager(
-                configManager,
-                networkTableConnection,
-                vioAprilTagPoseEstimator,
-                vrCamera,
-                vrCameraRoot,
-                passthroughFrameSource,
-                cameraArbiter,
-                cameraAccess,
-                resetTransform
+            // Constructed here so it receives the initial config events; the server itself
+            // is started from Awake once the pose loop is running.
+            RunNonCritical("Web server setup", () =>
+                webServerManager = new WebServerManager(
+                    configManager,
+                    networkTableConnection,
+                    vioAprilTagPoseEstimator,
+                    vrCamera,
+                    vrCameraRoot,
+                    passthroughFrameSource,
+                    cameraArbiter,
+                    cameraAccess,
+                    resetTransform
+                )
             );
 
             commandProcessor = new CommandProcessor(
@@ -324,20 +379,54 @@ namespace QuestNav.Core
                 resetTransform,
                 configManager
             );
-            tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
+            RunNonCritical("Tag-along UI", () =>
+                tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform)
+            );
 
+            // Fires the initial config events, so every subscriber must be constructed above.
             await configManager.InitializeAsync();
-            await webServerManager.InitializeAsync();
 
-            networkTableConnection.Initialize();
+            // Only pushes the initial connection state to the UI.
+            RunNonCritical("NetworkTables UI state", networkTableConnection.Initialize);
 
             // Set Oculus display frequency
-            OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY;
+            RunNonCritical("Display frequency", () =>
+                OVRPlugin.systemDisplayFrequency = QuestNavConstants.Display.DISPLAY_FREQUENCY
+            );
             // Schedule "SlowUpdate" loop for non loop critical applications
             InvokeRepeating(nameof(SlowUpdate), 0, 1f / QuestNavConstants.Timing.SLOW_UPDATE_HZ);
             InvokeRepeating(nameof(MainUpdate), 0, 1f / QuestNavConstants.Timing.MAIN_UPDATE_HZ);
 
             initialized = true;
+        }
+
+        /// <summary>
+        /// Runs a startup step the pose loop does not depend on. Failures are logged and
+        /// startup continues without that subsystem.
+        /// </summary>
+        private static void RunNonCritical(string step, Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                QueuedLogger.LogException($"{step} failed to start: {ex.Message}", ex);
+            }
+        }
+
+        /// <inheritdoc cref="RunNonCritical"/>
+        private static async Task RunNonCriticalAsync(string step, Func<Task> action)
+        {
+            try
+            {
+                await action();
+            }
+            catch (Exception ex)
+            {
+                QueuedLogger.LogException($"{step} failed to start: {ex.Message}", ex);
+            }
         }
 
         /// <summary>
@@ -375,7 +464,7 @@ namespace QuestNav.Core
             commandProcessor.ProcessCommands();
 
             // Update the UI position to keep it in view of the user
-            tagAlongUI.Periodic();
+            tagAlongUI?.Periodic();
         }
 
         /// <summary>
@@ -391,31 +480,36 @@ namespace QuestNav.Core
         /// </summary>
         private void SlowUpdate()
         {
-            // Poll for connection status, logging, ip address changes, etc.
-            networkTableConnection.Periodic();
+            try
+            {
+                // Poll for connection status, logging, ip address changes, etc.
+                networkTableConnection.Periodic();
 
-            // Update UI elements like connection status, IP address display, team number validation
-            // UI updates don't need to be real-time, 3Hz provides smooth visual feedback
-            uiManager.UpdatePositionText(vioAprilTagPoseEstimator.EstimatedPose);
+                // Update UI elements like connection status, IP address display, team number validation
+                // UI updates don't need to be real-time, 3Hz provides smooth visual feedback
+                uiManager?.UpdatePositionText(vioAprilTagPoseEstimator.EstimatedPose);
 
-            // Monitor device health: tracking status, battery level, tracking loss events
-            // This data helps diagnose issues but doesn't need high-frequency updates
-            UpdateDeviceData();
-            networkTableConnection.PublishDeviceData(trackingLostEvents, batteryPercent);
+                // Monitor device health: tracking status, battery level, tracking loss events
+                // This data helps diagnose issues but doesn't need high-frequency updates
+                UpdateDeviceData();
+                networkTableConnection.PublishDeviceData(trackingLostEvents, batteryPercent);
 
-            // Update web server with current pose data (it handles everything else internally)
-            webServerManager?.Periodic(
-                vioAprilTagPoseEstimator.EstimatedPose,
-                currentlyTracking,
-                trackingLostEvents
-            );
+                // Update web server with current pose data (it handles everything else internally)
+                webServerManager?.Periodic(
+                    vioAprilTagPoseEstimator.EstimatedPose,
+                    currentlyTracking,
+                    trackingLostEvents
+                );
 
-            // Update the list of video streams
-            UpdateCameraServers();
-
-            // Flush queued log messages to Unity console
-            // Batching log output improves performance and reduces console spam
-            QueuedLogger.Flush();
+                // Update the list of video streams
+                UpdateCameraServers();
+            }
+            finally
+            {
+                // Flush queued log messages to Unity console
+                // Batching log output improves performance and reduces console spam
+                QueuedLogger.Flush();
+            }
         }
 
         /// <summary>
@@ -424,8 +518,9 @@ namespace QuestNav.Core
         /// </summary>
         private void OnDestroy()
         {
-            OVRManager.display.RecenteredPose -= OnVioRecenter;
-            configManager.CloseAsync();
+            if (OVRManager.display != null)
+                OVRManager.display.RecenteredPose -= OnVioRecenter;
+            configManager?.CloseAsync();
             webServerManager?.Shutdown();
         }
 
@@ -641,7 +736,8 @@ namespace QuestNav.Core
         /// </summary>
         private void UpdateCameraServers()
         {
-            passthroughFrameSource.BaseUrl = webServerManager.BaseUrl;
+            if (passthroughFrameSource != null && webServerManager != null)
+                passthroughFrameSource.BaseUrl = webServerManager.BaseUrl;
         }
         #endregion
     }

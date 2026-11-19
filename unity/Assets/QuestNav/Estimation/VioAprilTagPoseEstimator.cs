@@ -126,8 +126,7 @@ namespace QuestNav.QuestNav.Estimation
             double bufferDurationSeconds = VioAprilTagPoseEstimatorConstants.BUFFER_DURATION_SECONDS
         )
         {
-            Matrix<double> qStdDev =
-                vioStdDevs
+            Matrix<double> qStdDev = vioStdDevs
                 ?? DenseMatrix.OfArray(
                     new[,]
                     {
@@ -284,17 +283,40 @@ namespace QuestNav.QuestNav.Estimation
                 var p0 = DenseMatrix.CreateDiagonal(3, 3, i => stdDevs[i, 0] * stdDevs[i, 0]);
                 filter = new DiscreteKalmanFilter(x0, p0);
 
-                snapshotBuffer.Clear();
-                snapshotBuffer.AddLast(
-                    new VIOSnapshot(
-                        timestampSeconds,
-                        previousVioPosition,
-                        latestRotation,
-                        x0.Clone()
-                    )
-                );
+                // The measurement is from capture time, so align against the VIO snapshot
+                // from then and replay the VIO motion since.
+                var captureNode = FindSnapshotAtOrBefore(timestampSeconds);
+                if (captureNode == null)
+                {
+                    ApplyYawCorrection(measuredRotation, latestRotation);
+                    snapshotBuffer.Clear();
+                    snapshotBuffer.AddLast(
+                        new VIOSnapshot(
+                            timestampSeconds,
+                            previousVioPosition,
+                            latestRotation,
+                            x0.Clone()
+                        )
+                    );
+                }
+                else
+                {
+                    ApplyYawCorrection(measuredRotation, captureNode.Value.Rotation);
 
-                ApplyYawCorrection(measuredRotation, timestampSeconds);
+                    // Older snapshots hold pre-alignment states that replay must never restore
+                    while (snapshotBuffer.First != captureNode)
+                        snapshotBuffer.RemoveFirst();
+
+                    var capture = captureNode.Value;
+                    captureNode.Value = new VIOSnapshot(
+                        capture.Timestamp,
+                        capture.Position,
+                        capture.Rotation,
+                        x0.Clone()
+                    );
+                    ReplayFrom(captureNode);
+                }
+
                 hasInitialAlignment = true;
                 QueuedLogger.Log(
                     $"AprilTag initial alignment accepted: tags={tagCount}, inlierRatio={inlierRatio:F2}, "
@@ -417,18 +439,7 @@ namespace QuestNav.QuestNav.Estimation
             var z = ToColumnVector(measuredPosition);
             var R = StdDevsToR(stdDevs);
 
-            LinkedListNode<VIOSnapshot> bestNode = null;
-            var node = snapshotBuffer.Last;
-            while (node != null)
-            {
-                if (node.Value.Timestamp <= timestampSeconds)
-                {
-                    bestNode = node;
-                    break;
-                }
-                node = node.Previous;
-            }
-
+            var bestNode = FindSnapshotAtOrBefore(timestampSeconds);
             if (bestNode == null)
             {
                 filter.Update(z, h, R);
@@ -442,60 +453,64 @@ namespace QuestNav.QuestNav.Estimation
                 );
 
                 filter.Update(z, h, R);
-
-                var replayNode = bestNode.Next;
-                var prevReplayNode = bestNode;
-
-                while (replayNode != null)
-                {
-                    Translation3d rawDisplacement =
-                        replayNode.Value.Position - prevReplayNode.Value.Position;
-                    Translation3d displacement = rawDisplacement.RotateBy(
-                        new Rotation3d(0, 0, yawOffset)
-                    );
-
-                    filter.Predict(f, q);
-
-                    var state = filter.State;
-                    var corrected = state + ToColumnVector(displacement);
-                    filter = new DiscreteKalmanFilter(corrected, filter.Cov.Clone());
-
-                    replayNode.Value = new VIOSnapshot(
-                        replayNode.Value.Timestamp,
-                        replayNode.Value.Position,
-                        replayNode.Value.Rotation,
-                        corrected.Clone()
-                    );
-
-                    prevReplayNode = replayNode;
-                    replayNode = replayNode.Next;
-                }
+                ReplayFrom(bestNode);
             }
         }
 
-        /// <summary>Computes and sets the yaw offset from the AprilTag-measured rotation.</summary>
-        private void ApplyYawCorrection(Rotation3d measuredRotation, double timestampSeconds)
+        /// <summary>Returns the newest snapshot at or before the timestamp, or null if none.</summary>
+        private LinkedListNode<VIOSnapshot> FindSnapshotAtOrBefore(double timestampSeconds)
+        {
+            var node = snapshotBuffer.Last;
+            while (node != null && node.Value.Timestamp > timestampSeconds)
+                node = node.Previous;
+            return node;
+        }
+
+        /// <summary>
+        /// Re-applies the VIO displacements recorded after startNode on top of the current
+        /// filter state, rewriting each later snapshot's estimated state.
+        /// </summary>
+        private void ReplayFrom(LinkedListNode<VIOSnapshot> startNode)
+        {
+            var prevReplayNode = startNode;
+            var replayNode = startNode.Next;
+
+            while (replayNode != null)
+            {
+                Translation3d rawDisplacement =
+                    replayNode.Value.Position - prevReplayNode.Value.Position;
+                Translation3d displacement = rawDisplacement.RotateBy(
+                    new Rotation3d(0, 0, yawOffset)
+                );
+
+                filter.Predict(f, q);
+
+                var state = filter.State;
+                var corrected = state + ToColumnVector(displacement);
+                filter = new DiscreteKalmanFilter(corrected, filter.Cov.Clone());
+
+                replayNode.Value = new VIOSnapshot(
+                    replayNode.Value.Timestamp,
+                    replayNode.Value.Position,
+                    replayNode.Value.Rotation,
+                    corrected.Clone()
+                );
+
+                prevReplayNode = replayNode;
+                replayNode = replayNode.Next;
+            }
+        }
+
+        /// <summary>Sets the yaw offset so the VIO yaw at capture maps onto the measured yaw.</summary>
+        private void ApplyYawCorrection(
+            Rotation3d measuredRotation,
+            Rotation3d vioRotationAtCapture
+        )
         {
             if (measuredRotation == null)
                 return;
 
-            LinkedListNode<VIOSnapshot> bestNode = null;
-            var node = snapshotBuffer.Last;
-            while (node != null)
-            {
-                if (node.Value.Timestamp <= timestampSeconds)
-                {
-                    bestNode = node;
-                    break;
-                }
-                node = node.Previous;
-            }
-
-            double measuredYaw = measuredRotation.Z;
-            Rotation3d vioRotationAtCapture =
-                (bestNode != null) ? bestNode.Value.Rotation : latestRotation;
-            double vioYaw = vioRotationAtCapture.Z;
-            yawOffset = NormalizeAngle(measuredYaw - vioYaw);
+            yawOffset = NormalizeAngle(measuredRotation.Z - vioRotationAtCapture.Z);
         }
 
         /// <summary>Removes snapshots older than the buffer duration, keeping at least one.</summary>

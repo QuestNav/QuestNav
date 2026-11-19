@@ -12,7 +12,6 @@ using QuestNav.WebServer;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Quaternion = UnityEngine.Quaternion;
 
 namespace QuestNav.Core
 {
@@ -399,12 +398,8 @@ namespace QuestNav.Core
             networkTableConnection.PublishDeviceData(trackingLostEvents, batteryPercent);
 
             // Update web server with current pose data (it handles everything else internally)
-            var (frcPosition, frcRotation) = Conversions.ProtobufPose3dToUnity(
-                vioAprilTagPoseEstimator.EstimatedPose.ToProtobuf()
-            );
             webServerManager?.Periodic(
-                frcPosition,
-                frcRotation,
+                vioAprilTagPoseEstimator.EstimatedPose,
                 currentlyTracking,
                 trackingLostEvents
             );
@@ -585,11 +580,9 @@ namespace QuestNav.Core
             timeStamp = Time.time;
 
             // Add latest VIO data to kalman filter
-            pose = new Pose3d(
-                Conversions.UnityToFrc3d(
-                    cameraRig.centerEyeAnchor.position,
-                    cameraRig.centerEyeAnchor.rotation
-                )
+            pose = Conversions.UnityToFrc3d(
+                cameraRig.centerEyeAnchor.position,
+                cameraRig.centerEyeAnchor.rotation
             );
             vioAprilTagPoseEstimator.AddVioObservation(pose, timeStamp);
         }
@@ -600,11 +593,9 @@ namespace QuestNav.Core
         /// </summary>
         private void OnVioRecenter()
         {
-            var newPose = new Pose3d(
-                Conversions.UnityToFrc3d(
-                    cameraRig.centerEyeAnchor.position,
-                    cameraRig.centerEyeAnchor.rotation
-                )
+            var newPose = Conversions.UnityToFrc3d(
+                cameraRig.centerEyeAnchor.position,
+                cameraRig.centerEyeAnchor.rotation
             );
             vioAprilTagPoseEstimator.HandleRecenter(newPose, Time.time);
         }

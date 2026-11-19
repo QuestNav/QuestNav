@@ -13,10 +13,10 @@ using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.QuestNav.Estimation;
+using QuestNav.QuestNav.Geometry;
 using QuestNav.Utils;
 using QuestNav.WebServer.Server;
 using UnityEngine;
-using Wpi.Proto;
 
 namespace QuestNav.WebServer
 {
@@ -43,12 +43,7 @@ namespace QuestNav.WebServer
         /// <summary>
         /// Periodic update method. Called from QuestNav.SlowUpdate() at 3Hz.
         /// </summary>
-        void Periodic(
-            Vector3 position,
-            Quaternion rotation,
-            bool isTracking,
-            int trackingLostEvents
-        );
+        void Periodic(Pose3d pose, bool isTracking, int trackingLostEvents);
 
         /// <summary>
         /// Stops the web server and cleans up resources.
@@ -215,19 +210,13 @@ namespace QuestNav.WebServer
         #endregion
 
         #region Periodic
-        public void Periodic(
-            Vector3 position,
-            Quaternion rotation,
-            bool isTracking,
-            int trackingLostEvents
-        )
+        public void Periodic(Pose3d pose, bool isTracking, int trackingLostEvents)
         {
             string ipAddress = GetLocalIPAddress();
             float currentFps = 1f / Time.deltaTime;
 
             statusProvider?.UpdateStatus(
-                position,
-                rotation,
+                pose,
                 isTracking,
                 trackingLostEvents,
                 SystemInfo.batteryLevel,
@@ -264,25 +253,7 @@ namespace QuestNav.WebServer
             QueuedLogger.Log("Web interface requested pose reset to origin");
 
             // Create a protobuf command payload for origin reset in FRC coordinates
-            var resetPose = new ProtobufPose3d
-            {
-                Translation = new ProtobufTranslation3d
-                {
-                    X = 0,
-                    Y = 0,
-                    Z = 0,
-                },
-                Rotation = new ProtobufRotation3d
-                {
-                    Q = new ProtobufQuaternion
-                    {
-                        X = 0,
-                        Y = 0,
-                        Z = 0,
-                        W = 1,
-                    },
-                },
-            };
+            var resetPose = Pose3d.Zero.ToProtobuf();
 
             var command = new ProtobufQuestNavCommand
             {

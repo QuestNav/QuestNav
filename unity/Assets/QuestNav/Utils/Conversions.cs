@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using Wpi.Proto;
+﻿using QuestNav.QuestNav.Geometry;
+using UnityEngine;
+using Quaternion = UnityEngine.Quaternion;
 
 namespace QuestNav.Utils
 {
@@ -8,6 +9,22 @@ namespace QuestNav.Utils
     /// </summary>
     public static class Conversions
     {
+        /// <summary>
+        /// Maps FRC body-frame coordinates (X-Fwd, Y-Left, Z-Up) to CV camera coordinates
+        /// (X-Right, Y-Down, Z-Fwd): v_cv = R * v_body.
+        /// </summary>
+        /// <remarks>
+        /// Corresponds to the rotation matrix:
+        /// <code>
+        /// [0 -1  0]
+        /// [0  0 -1]
+        /// [1  0  0]
+        /// </code>
+        /// </remarks>
+        private static readonly Rotation3d BodyToCv = new Rotation3d(
+            new QuestNav.Geometry.Quaternion(0.5, 0.5, -0.5, 0.5)
+        );
+
         /// <summary>
         /// Converts from FRC coordinate system to Unity coordinate system.
         /// </summary>
@@ -66,24 +83,23 @@ namespace QuestNav.Utils
         /// </remarks>
         /// <param name="targetPose3d">Target position in FRC coordinates (meters, radians)</param>
         /// <returns>Position and rotation in Unity coordinate system</returns>
-        public static (Vector3 position, Quaternion rotation) FrcToUnity3d(
-            ProtobufPose3d targetPose3d
-        )
+        public static (Vector3 position, Quaternion rotation) FrcToUnity3d(Pose3d targetPose3d)
         {
             // Convert 3D field position to 3D Unity position
             // FRC field is measured in meters with origin at blue alliance wall
             Vector3 unityPosition = new Vector3(
-                (float)-targetPose3d.Translation.Y, // FRC Y (left) → Unity -X (convert left to right-handed)
-                (float)targetPose3d.Translation.Z, // FRC Z (up) → Unity Y (up)
-                (float)targetPose3d.Translation.X // FRC X (forward) → Unity Z (forward)
+                (float)-targetPose3d.Y, // FRC Y (left) → Unity -X (convert left to right-handed)
+                (float)targetPose3d.Z, // FRC Z (up) → Unity Y (up)
+                (float)targetPose3d.X // FRC X (forward) → Unity Z (forward)
             );
 
             // Convert rotation
+            var q = targetPose3d.Rotation.Quaternion;
             Quaternion unityRotation = new Quaternion(
-                (float)targetPose3d.Rotation.Q.Y, // FRC Y → Unity X
-                (float)-targetPose3d.Rotation.Q.Z, // FRC Z → Unity -Y (convert left to right-handed)
-                (float)-targetPose3d.Rotation.Q.X, // FRC X → Unity -Z (convert left to right-handed)
-                (float)targetPose3d.Rotation.Q.W // FRC W → Unity W
+                (float)q.Y, // FRC Y → Unity X
+                (float)-q.Z, // FRC Z → Unity -Y (convert left to right-handed)
+                (float)-q.X, // FRC X → Unity -Z (convert left to right-handed)
+                (float)q.W // FRC W → Unity W
             );
 
             return (unityPosition, unityRotation);
@@ -156,97 +172,44 @@ namespace QuestNav.Utils
         /// </remarks>
         /// <param name="unityPosition">VR headset position in Unity world coordinates</param>
         /// <param name="unityRotation">VR headset orientation in Unity world coordinates</param>
-        /// <returns>2D pose in FRC field coordinates (meters, radians)</returns>
-        public static ProtobufPose3d UnityToFrc3d(Vector3 unityPosition, Quaternion unityRotation)
+        /// <returns>3D pose in FRC field coordinates (meters, radians)</returns>
+        public static Pose3d UnityToFrc3d(Vector3 unityPosition, Quaternion unityRotation)
         {
-            return new ProtobufPose3d
-            {
-                Translation = new ProtobufTranslation3d
-                {
-                    X = unityPosition.z, // Unity Z → FRC X
-                    Y = -unityPosition.x, // Unity X → FRC -Y
-                    Z = unityPosition.y, // Unity Y → FRC Z
-                },
-                Rotation = new ProtobufRotation3d
-                {
-                    Q = new ProtobufQuaternion
-                    {
-                        X = -unityRotation.z, // Unity Z → FRC -X (convert right to left-handed)
-                        Y = unityRotation.x, // Unity X → FRC Y
-                        Z = -unityRotation.y, // Unity Y → FRC -Z (convert right to left-handed)
-                        W = unityRotation.w, // Unity W → FRC W
-                    },
-                },
-            };
-        }
-
-        /// <summary>
-        /// Converts a protobuf Pose3d to Unity Vector3 and Quaternion types.
-        /// This is a utility method for extracting Unity-native types from the protobuf message structure.
-        /// </summary>
-        /// <param name="pose">Protobuf pose containing translation and rotation</param>
-        /// <returns>Tuple of Unity position and rotation</returns>
-        public static (Vector3 position, Quaternion rotation) ProtobufPose3dToUnity(
-            ProtobufPose3d pose
-        )
-        {
-            Vector3 position = new Vector3(
-                (float)pose.Translation.X,
-                (float)pose.Translation.Y,
-                (float)pose.Translation.Z
+            return new Pose3d(
+                new Translation3d(
+                    unityPosition.z, // Unity Z → FRC X
+                    -unityPosition.x, // Unity X → FRC -Y
+                    unityPosition.y // Unity Y → FRC Z
+                ),
+                new Rotation3d(
+                    new QuestNav.Geometry.Quaternion(
+                        unityRotation.w, // Unity W → FRC W
+                        -unityRotation.z, // Unity Z → FRC -X (convert right to left-handed)
+                        unityRotation.x, // Unity X → FRC Y
+                        -unityRotation.y // Unity Y → FRC -Z (convert right to left-handed)
+                    )
+                )
             );
-
-            Quaternion rotation = new Quaternion(
-                (float)pose.Rotation.Q.X,
-                (float)pose.Rotation.Q.Y,
-                (float)pose.Rotation.Q.Z,
-                (float)pose.Rotation.Q.W
-            );
-
-            return (position, rotation);
         }
 
         /// <summary>
         /// Converts a Computer Vision (CV) pose (World-to-Camera) to an FRC field pose (Camera-in-World).
         /// </summary>
-        /// <param name="tvec">The translation vector from CV (t in P_cv = R * P_world + t).</param>
-        /// <param name="rvec">The rotation quaternion from CV (R in P_cv = R * P_world + t).</param>
-        /// <returns>The position and rotation of the camera in FRC field coordinates.</returns>
-        public static (Vector3 position, Quaternion rotation) CvToFrc(Vector3 tvec, Quaternion rvec)
+        /// <param name="rawPose">
+        /// The pose directly from the definition libraries: translation t and rotation R in
+        /// P_cv = R * P_world + t.
+        /// </param>
+        /// <returns>The pose of the camera in FRC field coordinates.</returns>
+        public static Pose3d CvToFrc(Pose3d rawPose)
         {
             // 1. Invert the World-to-Camera transform to get Camera-in-World
-            Vector3 cameraPosition = -(Quaternion.Inverse(rvec) * tvec);
+            Rotation3d cvToWorld = -rawPose.Rotation;
+            Translation3d cameraPosition = -rawPose.Translation.RotateBy(cvToWorld);
 
-            // 2. Adjust Orientation
-            // We want the rotation of the Camera Body axes (FRC: X-Fwd, Y-Left, Z-Up)
-            // relative to the World axes.
-            //
-            // R_body_to_cv rotates FRC Body frame to CV frame.
-            // [0  0  1]
-            // [-1 0  0]
-            // [0 -1  0]
-            // This quaternion corresponds to: 0.5, -0.5, 0.5, 0.5
-            Quaternion cvToBody = new Quaternion(0.5f, -0.5f, 0.5f, 0.5f);
-            Quaternion cameraRotation = Quaternion.Inverse(rvec) * cvToBody;
+            // 2. Express the orientation in FRC body axes (X-Fwd, Y-Left, Z-Up) instead of CV axes
+            Rotation3d cameraRotation = BodyToCv.RotateBy(cvToWorld);
 
-            return (cameraPosition, cameraRotation);
-        }
-
-        /// <summary>
-        /// Converts a Computer Vision (CV) pose (World-to-Camera) to an FRC field pose (Camera-in-World).
-        /// </summary>
-        /// <param name="rawPose">The pose directly from the definition libraries.</param>
-        /// <returns>The position and rotation of the camera in FRC field coordinates.</returns>
-        public static (Vector3 position, Quaternion rotation) CvToFrc(
-            QuestNav.Geometry.Pose3d rawPose
-        )
-        {
-            var tvec = new Vector3((float)rawPose.X, (float)rawPose.Y, (float)rawPose.Z);
-
-            var q = rawPose.Rotation.Quaternion;
-            var rvec = new Quaternion((float)q.X, (float)q.Y, (float)q.Z, (float)q.W);
-
-            return CvToFrc(tvec, rvec);
+            return new Pose3d(cameraPosition, cameraRotation);
         }
     }
 }

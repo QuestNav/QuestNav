@@ -4,26 +4,29 @@ using System.Runtime.InteropServices;
 namespace QuestNav.Native.AprilTag
 {
     /// <summary>
-    /// Represents an AprilTag detection returned by a detector
+    /// Represents an AprilTag detection returned by a detector. This is a non-owning view:
+    /// the native detection is freed with its <see cref="AprilTagDetectionResults"/>, and
+    /// accessing it afterwards throws.
     /// </summary>
-    public unsafe class AprilTagDetection : IDisposable
+    public unsafe class AprilTagDetection
     {
         /// <summary>
-        /// The native detector pointer
+        /// The native detection pointer, owned by <see cref="results"/>
         /// </summary>
-        internal AprilTagDetectionNative* Handle { get; private set; }
+        internal AprilTagDetectionNative* Handle { get; }
 
-        /// <summary>
-        /// Tracks if the native structure has been disposed
-        /// </summary>
-        private bool disposed;
+        private readonly AprilTagDetectionResults results;
 
-        public AprilTagDetection(AprilTagDetectionNative* handle)
+        internal AprilTagDetection(
+            AprilTagDetectionNative* handle,
+            AprilTagDetectionResults results
+        )
         {
             if (handle == null)
                 throw new ArgumentNullException(nameof(handle));
 
             Handle = handle;
+            this.results = results ?? throw new ArgumentNullException(nameof(results));
         }
 
         /// <summary>
@@ -164,12 +167,12 @@ namespace QuestNav.Native.AprilTag
         }
 
         /// <summary>
-        /// Throws ObjectDisposedException if the detection has been disposed
+        /// Throws ObjectDisposedException if the owning results have been disposed
         /// </summary>
         private void ThrowIfDisposed()
         {
-            if (disposed)
-                throw new ObjectDisposedException(nameof(AprilTagDetection));
+            if (results.IsDisposed)
+                throw new ObjectDisposedException(nameof(AprilTagDetectionResults));
         }
 
         /// <summary>
@@ -184,19 +187,6 @@ namespace QuestNav.Native.AprilTag
                 + $"DecisionMargin: {DecisionMargin}\n"
                 + $"Center: X: {Center.x}, Y: {Center.y}\n"
                 + $"Corners: BR: {CornerBottomRight0}, BL: {CornerBottomLeft1}, UL: {CornerUpperLeft2}, UR: {CornerUpperRight3}";
-        }
-
-        public void Dispose()
-        {
-            if (!disposed)
-            {
-                if (Handle != null)
-                {
-                    AprilTagNatives.apriltag_detection_destroy(Handle);
-                    Handle = null;
-                }
-                disposed = true;
-            }
         }
     }
 }

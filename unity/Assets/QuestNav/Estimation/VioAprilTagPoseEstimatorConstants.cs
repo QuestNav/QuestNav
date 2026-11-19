@@ -59,10 +59,40 @@ namespace QuestNav.QuestNav.Estimation
         public const double CORRECTION_MIN_INLIER_RATIO = 0.8;
 
         /// <summary>
-        /// Maximum allowed distance (meters) between the measured position and the current
-        /// estimate. Observations beyond this are rejected as likely reflections.
+        /// Phase-2 outlier gate: an observation is rejected when the squared Mahalanobis
+        /// distance between the measured position and the capture-time estimate, using
+        /// S = P + R, exceeds this. 16.27 is the 99.9% chi-square quantile for 3 DOF.
+        /// </summary>
+        public const double CORRECTION_GATE_CHI_SQUARED = 16.27;
+
+        /// <summary>
+        /// Absolute cap (meters) on the distance between the measured position and the
+        /// capture-time estimate, applied on top of the Mahalanobis gate so a large
+        /// covariance after a long stretch without tags cannot admit a wild measurement.
         /// </summary>
         public const double CORRECTION_MAX_POSITION_JUMP = 2.0;
+
+        // --- Phase 2 -> Phase 1 recovery ---
+
+        /// <summary>
+        /// Number of consecutive gate-rejected multi-tag observations that must agree
+        /// with each other before the estimator drops back to Phase 1 and re-aligns.
+        /// </summary>
+        public const int REALIGN_REJECTION_COUNT = 5;
+
+        /// <summary>Minimum tag count for a gate rejection to count toward re-alignment.</summary>
+        public const int REALIGN_MIN_TAGS = 2;
+
+        /// <summary>
+        /// Radius (meters) within which the innovations (measured minus capture-time
+        /// estimate) of consecutive rejections must lie to count as agreeing.
+        /// </summary>
+        public const double REALIGN_CONSENSUS_RADIUS = 0.5;
+
+        // --- Input validation ---
+
+        /// <summary>The first dropped non-finite input is logged, then every Nth one after it.</summary>
+        public const int NON_FINITE_LOG_INTERVAL = 100;
 
         // --- Confidence presets ---
 

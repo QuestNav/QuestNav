@@ -17,15 +17,23 @@ namespace QuestNav.QuestNav.Estimation
         /// <summary>True after the first accepted AprilTag observation has aligned the VIO frame to FRC.</summary>
         bool HasInitialAlignment { get; }
 
-        /// <summary>Hard-resets the estimator to a known pose, clearing all history.</summary>
+        /// <summary>
+        /// Hard-resets the estimator to a known pose, clearing all history and returning to
+        /// Phase 1. A non-finite pose is ignored.
+        /// </summary>
         void ResetPosition(Pose3d pose, double timestamp);
 
-        /// <summary>Predicts state forward using VIO displacement. Call at VIO rate (~120 Hz).</summary>
+        /// <summary>
+        /// Predicts state forward using VIO displacement. Call at VIO rate (~120 Hz).
+        /// Non-finite samples are ignored.
+        /// </summary>
         void AddVioObservation(Pose3d vioPose, double timestamp);
 
         /// <summary>
-        /// Applies a latency-compensated AprilTag position and yaw correction,
-        /// subject to confidence-based gating.
+        /// Applies an AprilTag observation, subject to confidence-based gating. In Phase 1 it
+        /// aligns the VIO frame to the field (position and yaw); in Phase 2 it applies a
+        /// latency-compensated position correction if it passes the outlier gate.
+        /// Observations with non-finite values or non-positive std devs are ignored.
         /// </summary>
         void AddAprilTagObservation(
             Translation3d measuredPosition,
@@ -37,10 +45,12 @@ namespace QuestNav.QuestNav.Estimation
         );
 
         /// <summary>
-        /// Handles a VIO origin recenter (e.g., Quest logo long-press) by updating
-        /// the VIO baseline without disturbing the KF state or field alignment.
+        /// Handles a VIO origin recenter (e.g., Quest logo long-press). The next VIO
+        /// observation is taken as the new baseline: its jump is not integrated, and the yaw
+        /// offset is shifted so the published field heading and the direction of later
+        /// travel are unchanged. The KF state and alignment phase are kept.
         /// </summary>
-        void HandleRecenter(Pose3d newVioPose, double timestamp);
+        void HandleRecenter();
 
         /// <summary>
         /// Updates the Phase-2 correction confidence preset. Tighter presets reject more
@@ -65,8 +75,10 @@ namespace QuestNav.QuestNav.Estimation
     /// Operates in two phases:
     /// - Phase 1 (Unaligned): Accepts the first AprilTag observation that meets a minimum quality
     ///   bar to establish the yaw offset and initial position correction.
-    /// - Phase 2 (Aligned): VIO is primary. Only high-confidence AprilTag corrections are applied.
-    ///   Yaw offset is locked from Phase 1.
+    /// - Phase 2 (Aligned): VIO is primary. Only high-confidence AprilTag corrections that pass
+    ///   a Mahalanobis outlier gate are applied. The yaw offset is kept from Phase 1 and only
+    ///   re-based on a VIO recenter. A run of consistent rejected multi-tag observations drops
+    ///   back to Phase 1 to re-align.
     /// </summary>
     public class VioAprilTagPoseEstimator : IVioAprilTagPoseEstimator
     {
@@ -104,6 +116,14 @@ namespace QuestNav.QuestNav.Estimation
         private double yawOffset;
         private bool initialized;
         private bool hasInitialAlignment;
+        private bool recenterPending;
+
+        // Consecutive gate-rejected multi-tag observations whose innovations agree with
+        // rejectionStreakInnovation, the first of the run.
+        private int rejectionStreakCount;
+        private Translation3d rejectionStreakInnovation;
+
+        private int nonFiniteInputCount;
 
         // Runtime-tunable Phase-2 correction thresholds. Initialized from the BALANCED
         // preset; SetConfidencePreset(...) overrides them at runtime in response to a
@@ -191,9 +211,68 @@ namespace QuestNav.QuestNav.Estimation
             return angle > Math.PI ? angle - 2 * Math.PI : angle;
         }
 
+        private static bool IsFinite(Translation3d t)
+        {
+            return t != null
+                && double.IsFinite(t.X)
+                && double.IsFinite(t.Y)
+                && double.IsFinite(t.Z);
+        }
+
+        private static bool IsFinite(Rotation3d r)
+        {
+            var q = r?.Quaternion;
+            return q != null
+                && double.IsFinite(q.W)
+                && double.IsFinite(q.X)
+                && double.IsFinite(q.Y)
+                && double.IsFinite(q.Z);
+        }
+
+        private static bool IsFinite(Pose3d pose)
+        {
+            return pose != null && IsFinite(pose.Translation) && IsFinite(pose.Rotation);
+        }
+
+        /// <summary>True for a 3x1 matrix of finite, strictly positive std devs.</summary>
+        private static bool IsValidStdDevs(Matrix<double> stdDevs)
+        {
+            if (stdDevs == null || stdDevs.RowCount != 3 || stdDevs.ColumnCount != 1)
+                return false;
+            for (int i = 0; i < 3; i++)
+            {
+                if (!double.IsFinite(stdDevs[i, 0]) || stdDevs[i, 0] <= 0)
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>Logs a dropped input, rate-limited so a bad stream cannot flood the log.</summary>
+        private void LogNonFiniteInput(string source)
+        {
+            nonFiniteInputCount++;
+            if (
+                (nonFiniteInputCount - 1)
+                    % VioAprilTagPoseEstimatorConstants.NON_FINITE_LOG_INTERVAL
+                == 0
+            )
+            {
+                QueuedLogger.LogWarning(
+                    $"Ignored {source} with non-finite or invalid values "
+                        + $"({nonFiniteInputCount} ignored so far)"
+                );
+            }
+        }
+
         /// <inheritdoc/>
         public void ResetPosition(Pose3d pose, double timestamp)
         {
+            if (!IsFinite(pose) || !double.IsFinite(timestamp))
+            {
+                LogNonFiniteInput("pose reset");
+                return;
+            }
+
             var x0 = ToColumnVector(pose.Translation);
             var p0 = DenseMatrix.CreateIdentity(3) * 0.001;
 
@@ -203,6 +282,8 @@ namespace QuestNav.QuestNav.Estimation
             yawOffset = 0.0;
             hasInitialAlignment = false;
             initialized = true;
+            recenterPending = false;
+            rejectionStreakCount = 0;
 
             snapshotBuffer.Clear();
             snapshotBuffer.AddLast(
@@ -213,10 +294,22 @@ namespace QuestNav.QuestNav.Estimation
         /// <inheritdoc/>
         public void AddVioObservation(Pose3d vioPose, double timestamp)
         {
+            if (!IsFinite(vioPose) || !double.IsFinite(timestamp))
+            {
+                LogNonFiniteInput("VIO observation");
+                return;
+            }
+
             if (!initialized)
             {
                 ResetPosition(vioPose, timestamp);
                 return;
+            }
+
+            if (recenterPending)
+            {
+                RebaseAfterRecenter(vioPose);
+                recenterPending = false;
             }
 
             Translation3d rawDisplacement = vioPose.Translation - previousVioPosition;
@@ -252,6 +345,18 @@ namespace QuestNav.QuestNav.Estimation
         {
             if (!initialized)
                 return;
+
+            if (
+                !IsFinite(measuredPosition)
+                || (measuredRotation != null && !IsFinite(measuredRotation))
+                || !double.IsFinite(timestampSeconds)
+                || !IsValidStdDevs(stdDevs)
+                || !double.IsFinite(inlierRatio)
+            )
+            {
+                LogNonFiniteInput("AprilTag observation");
+                return;
+            }
 
             // --- Phase 1: Initial alignment ---
             if (!hasInitialAlignment)
@@ -318,6 +423,7 @@ namespace QuestNav.QuestNav.Estimation
                 }
 
                 hasInitialAlignment = true;
+                rejectionStreakCount = 0;
                 QueuedLogger.Log(
                     $"AprilTag initial alignment accepted: tags={tagCount}, inlierRatio={inlierRatio:F2}, "
                         + $"pos=({measuredPosition.X:F3}, {measuredPosition.Y:F3}, {measuredPosition.Z:F3})"
@@ -326,22 +432,6 @@ namespace QuestNav.QuestNav.Estimation
             }
 
             // --- Phase 2: VIO-primary with selective corrections ---
-
-            // Sanity check: reject large position jumps (likely reflections)
-            var s = filter.State;
-            double dx = measuredPosition.X - s[0, 0];
-            double dy = measuredPosition.Y - s[1, 0];
-            double dz = measuredPosition.Z - s[2, 0];
-            double distance = Math.Sqrt(dx * dx + dy * dy + dz * dz);
-
-            if (distance > VioAprilTagPoseEstimatorConstants.CORRECTION_MAX_POSITION_JUMP)
-            {
-                QueuedLogger.Log(
-                    $"AprilTag rejected (Phase 2): position jump {distance:F2}m > "
-                        + $"{VioAprilTagPoseEstimatorConstants.CORRECTION_MAX_POSITION_JUMP:F1}m limit"
-                );
-                return;
-            }
 
             // Phase-2 takes the max of the user's "Minimum Tags Required" and the
             // confidence preset's tag count. The user's setting is a HARD FLOOR; the
@@ -357,7 +447,14 @@ namespace QuestNav.QuestNav.Estimation
                 return;
             }
 
-            // High-confidence correction — update position only, yaw is locked from Phase 1
+            if (!PassesOutlierGate(measuredPosition, stdDevs, timestampSeconds, out var innovation))
+            {
+                TrackGateRejection(innovation, tagCount);
+                return;
+            }
+
+            // High-confidence correction — update position only, yaw is kept from Phase 1
+            rejectionStreakCount = 0;
             ApplyKfUpdate(measuredPosition, stdDevs, timestampSeconds);
         }
 
@@ -408,25 +505,122 @@ namespace QuestNav.QuestNav.Estimation
         }
 
         /// <inheritdoc/>
-        public void HandleRecenter(Pose3d newVioPose, double timestamp)
+        public void HandleRecenter()
         {
             if (!initialized)
                 return;
 
+            // The camera anchors may not reflect the recenter yet when the event fires, so
+            // the re-base waits for the next VIO observation.
+            recenterPending = true;
+            QueuedLogger.LogWarning("VIO recenter detected; re-basing on the next VIO frame");
+        }
+
+        /// <summary>
+        /// Re-bases onto the first VIO pose after a recenter. The recenter rotates the VIO
+        /// frame about the vertical axis and moves its origin; the snapshot history is
+        /// re-expressed in the new frame and the yaw offset absorbs the rotation, so the
+        /// recenter jump is never integrated as motion.
+        /// </summary>
+        private void RebaseAfterRecenter(Pose3d newVioPose)
+        {
+            double frameYaw = NormalizeAngle(newVioPose.Rotation.Z - latestRotation.Z);
+            var frameRotation = new Rotation3d(0, 0, frameYaw);
+            Translation3d oldVioPosition = previousVioPosition;
+
+            for (var node = snapshotBuffer.First; node != null; node = node.Next)
+            {
+                var snapshot = node.Value;
+                node.Value = new VIOSnapshot(
+                    snapshot.Timestamp,
+                    (snapshot.Position - oldVioPosition).RotateBy(frameRotation)
+                        + newVioPose.Translation,
+                    snapshot.Rotation.RotateBy(frameRotation),
+                    snapshot.EstimatedState
+                );
+            }
+
+            yawOffset = NormalizeAngle(yawOffset - frameYaw);
             previousVioPosition = newVioPose.Translation;
             latestRotation = newVioPose.Rotation;
 
-            snapshotBuffer.Clear();
-            snapshotBuffer.AddLast(
-                new VIOSnapshot(
-                    timestamp,
-                    newVioPose.Translation,
-                    newVioPose.Rotation,
-                    filter.State.Clone()
-                )
+            QueuedLogger.LogWarning(
+                $"VIO recenter applied: VIO yaw moved {frameYaw * 180.0 / Math.PI:F1} deg, "
+                    + "field heading kept"
             );
+        }
 
-            QueuedLogger.LogWarning("VIO recenter detected — estimator VIO baseline reset");
+        /// <summary>
+        /// Checks the measurement against the estimate at capture time: rejects it when the
+        /// squared Mahalanobis distance (S = P + R) or the Euclidean distance is too large.
+        /// </summary>
+        private bool PassesOutlierGate(
+            Translation3d measuredPosition,
+            Matrix<double> stdDevs,
+            double timestampSeconds,
+            out Translation3d innovation
+        )
+        {
+            var captureNode = FindSnapshotAtOrBefore(timestampSeconds);
+            var stateAtCapture =
+                captureNode != null ? captureNode.Value.EstimatedState : filter.State;
+
+            var nu = ToColumnVector(measuredPosition) - stateAtCapture;
+            innovation = new Translation3d(nu[0, 0], nu[1, 0], nu[2, 0]);
+
+            var innovationCov = filter.Cov + StdDevsToR(stdDevs);
+            double mahalanobisSquared = (nu.Transpose() * innovationCov.Solve(nu))[0, 0];
+            double distance = innovation.Norm;
+
+            if (
+                mahalanobisSquared <= VioAprilTagPoseEstimatorConstants.CORRECTION_GATE_CHI_SQUARED
+                && distance <= VioAprilTagPoseEstimatorConstants.CORRECTION_MAX_POSITION_JUMP
+            )
+                return true;
+
+            QueuedLogger.Log(
+                $"AprilTag rejected (Phase 2): {distance:F2}m from estimate, "
+                    + $"Mahalanobis^2={mahalanobisSquared:F1} (limits "
+                    + $"{VioAprilTagPoseEstimatorConstants.CORRECTION_GATE_CHI_SQUARED:F1}, "
+                    + $"{VioAprilTagPoseEstimatorConstants.CORRECTION_MAX_POSITION_JUMP:F1}m)"
+            );
+            return false;
+        }
+
+        /// <summary>
+        /// Counts consecutive gate rejections of multi-tag observations that agree with each
+        /// other. Enough of them mean the estimate, not the tags, is wrong, so the estimator
+        /// drops back to Phase 1 and re-aligns on the next accepted observation.
+        /// </summary>
+        private void TrackGateRejection(Translation3d innovation, int tagCount)
+        {
+            if (tagCount < VioAprilTagPoseEstimatorConstants.REALIGN_MIN_TAGS)
+                return;
+
+            if (
+                rejectionStreakCount == 0
+                || innovation.GetDistance(rejectionStreakInnovation)
+                    > VioAprilTagPoseEstimatorConstants.REALIGN_CONSENSUS_RADIUS
+            )
+            {
+                rejectionStreakInnovation = innovation;
+                rejectionStreakCount = 1;
+            }
+            else
+            {
+                rejectionStreakCount++;
+            }
+
+            if (rejectionStreakCount < VioAprilTagPoseEstimatorConstants.REALIGN_REJECTION_COUNT)
+                return;
+
+            rejectionStreakCount = 0;
+            hasInitialAlignment = false;
+            QueuedLogger.LogWarning(
+                $"{VioAprilTagPoseEstimatorConstants.REALIGN_REJECTION_COUNT} consistent AprilTag "
+                    + $"observations disagreed with the estimate by ~{innovation.Norm:F2}m; "
+                    + "dropping back to Phase 1 to re-align"
+            );
         }
 
         /// <summary>Applies a KF measurement update with latency-compensated replay.</summary>

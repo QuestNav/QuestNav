@@ -695,15 +695,11 @@ namespace QuestNav.Core
 
         /// <summary>
         /// Handles the OVR tracking recenter event (Quest logo long-press).
-        /// Resets the VIO baseline in the estimator without disturbing the KF state.
+        /// The estimator re-bases on the next VIO frame, keeping the field heading.
         /// </summary>
         private void OnVioRecenter()
         {
-            var newPose = Conversions.UnityToFrc3d(
-                cameraRig.centerEyeAnchor.position,
-                cameraRig.centerEyeAnchor.rotation
-            );
-            vioAprilTagPoseEstimator.HandleRecenter(newPose, Time.time);
+            vioAprilTagPoseEstimator.HandleRecenter();
         }
 
         /// <summary>

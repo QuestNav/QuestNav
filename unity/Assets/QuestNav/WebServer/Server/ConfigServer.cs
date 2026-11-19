@@ -473,6 +473,32 @@ namespace QuestNav.WebServer.Server
             string summary = SummarizeConfigUpdateRequest(request);
             QueuedLogger.Log($"POST /api/config from {clientIp}: {summary}");
 
+            // Checked before anything is saved: a persisted mode the detector cannot run is
+            // replayed on every boot.
+            if (request.AprilTagDetectorMode != null)
+            {
+                var requestedMode = (AprilTagDetectorMode.DetectionMode)
+                    request.AprilTagDetectorMode.mode;
+                if (
+                    !Enum.IsDefined(typeof(AprilTagDetectorMode.DetectionMode), requestedMode)
+                    || requestedMode != AprilTagDetectorMode.DetectionMode.TRADITIONAL
+                )
+                {
+                    context.Response.StatusCode = 400;
+                    await SendJsonResponse(
+                        context,
+                        new SimpleResponse
+                        {
+                            success = false,
+                            message =
+                                $"AprilTag detector mode {request.AprilTagDetectorMode.mode} is not supported. "
+                                + "Only 0 (TRADITIONAL) is currently implemented.",
+                        }
+                    );
+                    return;
+                }
+            }
+
             try
             {
                 if (request.TeamNumber.HasValue)

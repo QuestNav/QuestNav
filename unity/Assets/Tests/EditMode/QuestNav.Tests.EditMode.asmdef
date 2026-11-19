@@ -14,7 +14,9 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "nunit.framework.dll",
-        "Google.Protobuf.dll"
+        "Google.Protobuf.dll",
+        "MathNet.Numerics.dll",
+        "MathNet.Filtering.Kalman.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

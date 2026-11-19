@@ -354,29 +354,32 @@ namespace QuestNav.Config
             await OpenAsync();
 
             // Fire initial values to all current subscribers
-            OnTeamNumberChanged?.Invoke(await GetTeamNumberAsync());
-            OnDebugIpOverrideChanged?.Invoke(await GetDebugIpOverrideAsync());
-            OnAllowedPoseResetTimeoutMsChanged?.Invoke(await GetAllowedPoseResetTimeoutMsAsync());
-            OnEnableAutoStartOnBootChanged?.Invoke(await GetEnableAutoStartOnBootAsync());
+            RaiseEvent(OnTeamNumberChanged, await GetTeamNumberAsync());
+            RaiseEvent(OnDebugIpOverrideChanged, await GetDebugIpOverrideAsync());
+            RaiseEvent(
+                OnAllowedPoseResetTimeoutMsChanged,
+                await GetAllowedPoseResetTimeoutMsAsync()
+            );
+            RaiseEvent(OnEnableAutoStartOnBootChanged, await GetEnableAutoStartOnBootAsync());
 
-            OnEnablePassthroughStreamChanged?.Invoke(await GetEnablePassthroughStreamAsync());
-            OnPassthroughStreamModeChanged?.Invoke(await GetPassthroughStreamModeAsync());
-            OnEnableHighQualityStreamsChanged?.Invoke(await GetEnableHighQualityStreamsAsync());
+            RaiseEvent(OnEnablePassthroughStreamChanged, await GetEnablePassthroughStreamAsync());
+            RaiseEvent(OnPassthroughStreamModeChanged, await GetPassthroughStreamModeAsync());
+            RaiseEvent(OnEnableHighQualityStreamsChanged, await GetEnableHighQualityStreamsAsync());
 
             // Mode MUST fire before Enable. AprilTagManager caches the requested
             // resolution from the Mode event and uses it when Enable triggers the
             // camera reservation. If Enable fires first, the camera is reserved at
             // (0,0) and the first AprilTag frame fed to libapriltag is malformed,
             // which causes a native SIGSEGV in gradient_clusters.
-            OnAprilTagDetectorModeChanged?.Invoke(await GetAprilTagDetectorModeAsync());
+            RaiseEvent(OnAprilTagDetectorModeChanged, await GetAprilTagDetectorModeAsync());
             // Phase-2 confidence preset and noise scale must also fire BEFORE Enable so
             // the estimator and the dynamic-std-dev calc are configured with the user's
             // chosen values from the very first observation.
-            OnAprilTagConfidencePresetChanged?.Invoke(await GetAprilTagConfidencePresetAsync());
-            OnAprilTagNoiseScaleChanged?.Invoke(await GetAprilTagNoiseScaleAsync());
-            OnEnableAprilTagDetectorChanged?.Invoke(await GetEnableAprilTagDetectorAsync());
+            RaiseEvent(OnAprilTagConfidencePresetChanged, await GetAprilTagConfidencePresetAsync());
+            RaiseEvent(OnAprilTagNoiseScaleChanged, await GetAprilTagNoiseScaleAsync());
+            RaiseEvent(OnEnableAprilTagDetectorChanged, await GetEnableAprilTagDetectorAsync());
 
-            OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
+            RaiseEvent(OnEnableDebugLoggingChanged, await GetEnableDebugLoggingAsync());
         }
 
         /// <inheritdoc/>
@@ -634,8 +637,8 @@ namespace QuestNav.Config
             await SaveNetworkConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnTeamNumberChanged?.Invoke(config.TeamNumber));
-            invokeOnMainThread(() => OnDebugIpOverrideChanged?.Invoke(config.DebugIpOverride));
+            invokeOnMainThread(() => RaiseEvent(OnTeamNumberChanged, config.TeamNumber));
+            invokeOnMainThread(() => RaiseEvent(OnDebugIpOverrideChanged, config.DebugIpOverride));
             QueuedLogger.Log($"Updated Key 'teamNumber' to {teamNumber}");
         }
 
@@ -657,8 +660,8 @@ namespace QuestNav.Config
             await SaveNetworkConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnDebugIpOverrideChanged?.Invoke(config.DebugIpOverride));
-            invokeOnMainThread(() => OnTeamNumberChanged?.Invoke(config.TeamNumber));
+            invokeOnMainThread(() => RaiseEvent(OnDebugIpOverrideChanged, config.DebugIpOverride));
+            invokeOnMainThread(() => RaiseEvent(OnTeamNumberChanged, config.TeamNumber));
             QueuedLogger.Log($"Updated Key 'debugIpOverride' to {ipOverride}");
         }
 
@@ -670,7 +673,7 @@ namespace QuestNav.Config
             await SaveNetworkConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnAllowedPoseResetTimeoutMsChanged?.Invoke(timeoutMs));
+            invokeOnMainThread(() => RaiseEvent(OnAllowedPoseResetTimeoutMsChanged, timeoutMs));
             QueuedLogger.Log($"Updated Key 'allowedPoseResetTimeoutMs' to {timeoutMs}");
         }
         #endregion
@@ -684,7 +687,7 @@ namespace QuestNav.Config
             await SaveSystemConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnableAutoStartOnBootChanged?.Invoke(autoStart));
+            invokeOnMainThread(() => RaiseEvent(OnEnableAutoStartOnBootChanged, autoStart));
             QueuedLogger.Log($"Updated Key 'autoStartOnBoot' to {autoStart}");
         }
         #endregion
@@ -698,7 +701,7 @@ namespace QuestNav.Config
             await SaveCameraConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnablePassthroughStreamChanged?.Invoke(enable));
+            invokeOnMainThread(() => RaiseEvent(OnEnablePassthroughStreamChanged, enable));
             QueuedLogger.Log($"Updated Key 'enablePassthroughStream' to {enable}");
         }
 
@@ -713,7 +716,7 @@ namespace QuestNav.Config
             await SaveCameraConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnPassthroughStreamModeChanged?.Invoke(mode));
+            invokeOnMainThread(() => RaiseEvent(OnPassthroughStreamModeChanged, mode));
             QueuedLogger.Log($"Updated Key 'passthroughStreamMode' to {mode}");
         }
 
@@ -725,7 +728,7 @@ namespace QuestNav.Config
             await SaveCameraConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnableHighQualityStreamsChanged?.Invoke(enabled));
+            invokeOnMainThread(() => RaiseEvent(OnEnableHighQualityStreamsChanged, enabled));
             QueuedLogger.Log($"Updated Key 'enableHighQualityStreams' to {enabled}");
         }
         #endregion
@@ -739,7 +742,7 @@ namespace QuestNav.Config
             await SaveAprilTagConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnableAprilTagDetectorChanged?.Invoke(enable));
+            invokeOnMainThread(() => RaiseEvent(OnEnableAprilTagDetectorChanged, enable));
             QueuedLogger.Log($"Updated Key 'enableAprilTagDetector' to {enable}");
         }
 
@@ -757,7 +760,7 @@ namespace QuestNav.Config
             await SaveAprilTagIgnoredIdsAsync(mode.IgnoredIds ?? Array.Empty<int>());
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnAprilTagDetectorModeChanged?.Invoke(mode));
+            invokeOnMainThread(() => RaiseEvent(OnAprilTagDetectorModeChanged, mode));
             QueuedLogger.Log($"Updated Key 'aprilTagDetectorMode' to {mode}");
         }
 
@@ -783,7 +786,7 @@ namespace QuestNav.Config
             config.AprilTagConfidencePreset = sanitized;
             await SaveAprilTagConfigAsync(config);
 
-            invokeOnMainThread(() => OnAprilTagConfidencePresetChanged?.Invoke(sanitized));
+            invokeOnMainThread(() => RaiseEvent(OnAprilTagConfidencePresetChanged, sanitized));
             QueuedLogger.Log($"Updated Key 'aprilTagConfidencePreset' to {sanitized}");
         }
 
@@ -814,7 +817,7 @@ namespace QuestNav.Config
             config.AprilTagNoiseScale = sanitized;
             await SaveAprilTagConfigAsync(config);
 
-            invokeOnMainThread(() => OnAprilTagNoiseScaleChanged?.Invoke(sanitized));
+            invokeOnMainThread(() => RaiseEvent(OnAprilTagNoiseScaleChanged, sanitized));
             QueuedLogger.Log($"Updated Key 'aprilTagNoiseScale' to {sanitized:F2}");
         }
 
@@ -859,7 +862,7 @@ namespace QuestNav.Config
             await SaveLoggingConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnableDebugLoggingChanged?.Invoke(enableDebugLogging));
+            invokeOnMainThread(() => RaiseEvent(OnEnableDebugLoggingChanged, enableDebugLogging));
             QueuedLogger.Log($"Updated Key 'enableDebugLogging' to {enableDebugLogging}");
         }
         #endregion
@@ -1093,6 +1096,31 @@ namespace QuestNav.Config
                     and <= QuestNavConstants.Network.MAX_TEAM_NUMBER;
         }
         #endregion
+
+        /// <summary>
+        /// Invokes each subscriber in its own try/catch so one throwing handler cannot skip
+        /// the remaining subscribers or abort the caller (e.g. <see cref="InitializeAsync"/>).
+        /// </summary>
+        private static void RaiseEvent<T>(Action<T> handlers, T value)
+        {
+            if (handlers == null)
+                return;
+
+            foreach (var handler in handlers.GetInvocationList())
+            {
+                try
+                {
+                    ((Action<T>)handler)(value);
+                }
+                catch (Exception ex)
+                {
+                    QueuedLogger.LogException(
+                        $"Config event handler {handler.Method.DeclaringType?.Name}.{handler.Method.Name} threw: {ex.Message}",
+                        ex
+                    );
+                }
+            }
+        }
 
         /// <summary>
         /// Invokes an action on the main thread using the captured SynchronizationContext.

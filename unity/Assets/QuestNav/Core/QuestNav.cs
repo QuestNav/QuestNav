@@ -31,7 +31,7 @@ namespace QuestNav.Core
         private int frameCount;
 
         /// <summary>
-        /// Current timestamp from Unity's Time.time
+        /// Current timestamp from Unity's Time.timeAsDouble
         /// </summary>
         private double timeStamp;
 
@@ -678,7 +678,7 @@ namespace QuestNav.Core
             frameCount = Time.frameCount;
 
             // Time since Unity startup in seconds - provides temporal correlation for robot code
-            timeStamp = Time.time;
+            timeStamp = Time.timeAsDouble;
 
             // NT server (robot) time; 0 tells the robot it is unknown because time sync isn't established
             serverTimestamp = networkTableConnection.TryGetServerTimeOffset(out long offsetNs)

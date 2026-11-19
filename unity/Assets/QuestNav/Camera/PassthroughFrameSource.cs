@@ -513,6 +513,10 @@ namespace QuestNav.Camera
                         streamMode.Framerate
                     );
 
+                    // The Mode setter only raises SelectedModeChanged (which reserves the
+                    // camera) when the mode changes. Disabling keeps the old mode, so
+                    // re-enabling with it has to reserve explicitly.
+                    var previousMode = cameraSource.Mode;
                     if (bestMatch.HasValue)
                     {
                         cameraSource.Mode = bestMatch.Value;
@@ -527,6 +531,10 @@ namespace QuestNav.Camera
                         QueuedLogger.LogWarning(
                             $"Could not find matching mode for {streamMode}, using {cameraSource.Mode}"
                         );
+                    }
+                    if (cameraSource.Mode.Equals(previousMode))
+                    {
+                        OnSelectedModeChanged(cameraSource.Mode);
                     }
 
                     // Start initialization coroutine

@@ -133,12 +133,13 @@ Detections are in pixels of the captured frame (`CurrentResolution`), which the 
 | Resource | Strategy |
 |----------|----------|
 | `ImageU8` | Static cached buffer; reallocated only on resolution change. Returned wrapper does not own the handle. |
-| `AprilTagDetectionResults` | Wraps a `zarray_t*`. Freed when `Detect()` is called again (libapriltag overwrites previous results). Not explicitly disposed in the coroutine. |
+| `AprilTagDetectionResults` | `IDisposable`. Wraps the `zarray_t*` returned by `Detect()` and frees it and every detection in it. The coroutine disposes it with `using` each frame. |
+| `AprilTagDetection` | Non-owning view into its `AprilTagDetectionResults`. Not disposable; throws `ObjectDisposedException` once its results are disposed. |
 | `AprilTagDetector` | `IDisposable`. Owns the families added to it. Destroys the native detector first (which unregisters the families), then disposes the families. |
 | `AprilTagFamily` | `IDisposable` with a `Disposed` flag guard (safe for double-dispose). |
 
 :::caution
-`AprilTagDetectionResults` from `Detect()` is valid only until the next `Detect()` call. Do not hold references to detection objects across frames.
+An `AprilTagDetection` is valid only until its `AprilTagDetectionResults` is disposed. Do not hold references to detection objects across frames.
 :::
 
 ## WPILib Geometry Library

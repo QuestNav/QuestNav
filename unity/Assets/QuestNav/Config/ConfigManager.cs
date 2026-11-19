@@ -21,6 +21,7 @@ namespace QuestNav.Config
         /// Opens the configuration database (creates tables if needed) without firing
         /// any initial events. Idempotent. Use this when a caller needs to read a
         /// boot-only setting before constructing the subsystems that subscribe to events.
+        /// A corrupt database is moved aside and recreated with defaults.
         /// </summary>
         public Task OpenAsync();
 
@@ -34,6 +35,14 @@ namespace QuestNav.Config
         /// Closes the database connection.
         /// </summary>
         public Task CloseAsync();
+
+        /// <summary>
+        /// Validates the SQLite file at <paramref name="candidatePath"/> and, if it is an intact
+        /// config database, closes the live connection, replaces the database file with it and
+        /// reopens. Throws <see cref="InvalidDataException"/> and leaves the live database
+        /// untouched if validation fails. Running subsystems pick up the new values on restart.
+        /// </summary>
+        public Task ReplaceDatabaseAsync(string candidatePath);
 
         #region Events
         #region Network
@@ -312,6 +321,20 @@ namespace QuestNav.Config
             Application.persistentDataPath,
             "config.db"
         );
+        private static readonly string[] SqliteSidecarSuffixes = { "-journal", "-wal", "-shm" };
+
+        /// <summary>
+        /// Tables every released config schema has. Newer tables (AprilTag) are created on
+        /// open, so older backups stay uploadable.
+        /// </summary>
+        private static readonly string[] RequiredTables =
+        {
+            nameof(Config.Network),
+            nameof(Config.System),
+            nameof(Config.Camera),
+            nameof(Config.Logging),
+        };
+
         private SQLiteAsyncConnection connection;
         private SynchronizationContext mainThreadContext;
 
@@ -327,14 +350,99 @@ namespace QuestNav.Config
         /// </summary>
         public async Task OpenAsync()
         {
-            // Capture the main thread context for event callbacks
-            mainThreadContext = SynchronizationContext.Current;
+            // Capture the main thread context for event callbacks. Keep the first one so a
+            // reopen from a web server thread does not clear it.
+            if (mainThreadContext == null)
+                mainThreadContext = SynchronizationContext.Current;
 
             SQLitePCL.Batteries_V2.Init();
 
             if (connection != null)
                 return;
 
+            try
+            {
+                await OpenConnectionAsync();
+            }
+            catch (SQLiteException ex)
+                when (ex.Result == SQLite3.Result.Corrupt || ex.Result == SQLite3.Result.NonDBFile)
+            {
+                await CloseAsync();
+
+                string corruptPath = $"{dbPath}.corrupt-{DateTime.UtcNow:yyyyMMdd'T'HHmmss'Z'}";
+                MoveDatabaseFiles(dbPath, corruptPath);
+                QueuedLogger.LogError(
+                    $"Config database is unreadable ({ex.Message}). Moved it to {corruptPath} "
+                        + "and recreated it with default settings."
+                );
+
+                await OpenConnectionAsync();
+            }
+
+            QueuedLogger.Log($"Database initialized at: {dbPath}");
+        }
+
+        /// <inheritdoc/>
+        public async Task ReplaceDatabaseAsync(string candidatePath)
+        {
+            ValidateDatabaseFile(candidatePath);
+
+            await CloseAsync();
+            try
+            {
+                foreach (string suffix in SqliteSidecarSuffixes)
+                {
+                    File.Delete(dbPath + suffix);
+                }
+
+                if (File.Exists(dbPath))
+                    File.Replace(candidatePath, dbPath, null);
+                else
+                    File.Move(candidatePath, dbPath);
+            }
+            finally
+            {
+                await OpenAsync();
+            }
+
+            QueuedLogger.Log("Config database replaced from upload");
+        }
+
+        /// <summary>
+        /// Throws <see cref="InvalidDataException"/> unless the file is an intact SQLite
+        /// database containing the config tables.
+        /// </summary>
+        private static void ValidateDatabaseFile(string path)
+        {
+            try
+            {
+                using var db = new SQLiteConnection(path, SQLiteOpenFlags.ReadOnly);
+
+                string integrity = db.ExecuteScalar<string>("PRAGMA integrity_check");
+                if (integrity != "ok")
+                    throw new InvalidDataException($"Integrity check failed: {integrity}");
+
+                var tables = new HashSet<string>(
+                    db.QueryScalars<string>("SELECT name FROM sqlite_master WHERE type = 'table'"),
+                    StringComparer.OrdinalIgnoreCase
+                );
+                string[] missing = RequiredTables.Where(t => !tables.Contains(t)).ToArray();
+                if (missing.Length > 0)
+                    throw new InvalidDataException(
+                        $"Not a QuestNav config database (missing tables: {string.Join(", ", missing)})"
+                    );
+            }
+            catch (SQLiteException ex)
+            {
+                throw new InvalidDataException($"Not a readable SQLite database: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Opens the connection and creates any missing tables.
+        /// </summary>
+        private async Task OpenConnectionAsync()
+        {
             connection = new SQLiteAsyncConnection(dbPath);
 
             // Create with defaults if they don't already exist
@@ -344,8 +452,19 @@ namespace QuestNav.Config
             await connection.CreateTableAsync<Config.AprilTag>();
             await connection.CreateTableAsync<Config.AprilTagIgnoredId>();
             await connection.CreateTableAsync<Config.Logging>();
+        }
 
-            QueuedLogger.Log($"Database initialized at: {dbPath}");
+        /// <summary>
+        /// Moves a database file and any journal files next to it.
+        /// </summary>
+        private static void MoveDatabaseFiles(string fromPath, string toPath)
+        {
+            File.Move(fromPath, toPath);
+            foreach (string suffix in SqliteSidecarSuffixes)
+            {
+                if (File.Exists(fromPath + suffix))
+                    File.Move(fromPath + suffix, toPath + suffix);
+            }
         }
 
         /// <inheritdoc/>

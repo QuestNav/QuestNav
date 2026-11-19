@@ -23,8 +23,7 @@ namespace QuestNav.QuestNav.AprilTag
         /// load (<see cref="TryLoadFrom"/>). The detection pipeline calls
         /// <see cref="ContainsId"/> on every detected tag to drop false-positive IDs
         /// (e.g. tag36h11 noise that decodes to ID 554 when no such tag is on the field).
-        /// Feeding such IDs into <c>PoseLibSolver</c> would mismatch the 2D/3D corner
-        /// buffer lengths and produce a garbage pose tens of meters from the field.
+        /// Such IDs have no field corners, so <c>PoseLibSolver</c> would reject the whole frame.
         /// </summary>
         private HashSet<int> knownIds = new HashSet<int>();
 

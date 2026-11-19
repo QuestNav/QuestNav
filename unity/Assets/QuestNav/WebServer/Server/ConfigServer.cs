@@ -185,7 +185,16 @@ namespace QuestNav.WebServer.Server
                 }
             });
 
-            await listeningTcs.Task;
+            var startTimeout = Task.Delay(
+                TimeSpan.FromSeconds(QuestNavConstants.WebServer.START_TIMEOUT_SECONDS)
+            );
+            if (await Task.WhenAny(listeningTcs.Task, startTimeout) != listeningTcs.Task)
+            {
+                QueuedLogger.LogError(
+                    $"Server did not start listening within {QuestNavConstants.WebServer.START_TIMEOUT_SECONDS}s"
+                );
+                return;
+            }
 
             QueuedLogger.Log($"Server started at {BaseUrl}");
         }

@@ -111,6 +111,17 @@ namespace QuestNav.Native.PoseLib
                 }
             }
 
+            // Native code reads numPoints entries from both buffers, so they must agree.
+            int numPoints = corners2d.Count / 2;
+            if (numPoints == 0 || corners3d.Count != numPoints * 3)
+            {
+                QueuedLogger.LogError(
+                    $"PoseLib solve skipped: {corners2d.Count} 2D values do not match "
+                        + $"{corners3d.Count} 3D values"
+                );
+                return null;
+            }
+
             // 12 px RANSAC reprojection-error threshold was tuned for the Quest 3 / 3S
             // 1280-wide passthrough frames. (An earlier attempt to scale this with
             // colors.Length was based on a misread of the Meta SDK's GetColors over-
@@ -118,7 +129,7 @@ namespace QuestNav.Native.PoseLib
             int status = PoseLibNatives.poselib_estimate_absolute_pose_simple(
                 corners2d.ToArray(),
                 corners3d.ToArray(),
-                (ulong)(count * 4),
+                (ulong)numPoints,
                 (int)PoseLibNatives.PoseLibCameraModelIdNative.POSELIB_CAMERA_PINHOLE,
                 imageResolution.x,
                 imageResolution.y,
@@ -131,7 +142,7 @@ namespace QuestNav.Native.PoseLib
 
             if (status == 0)
             {
-                return new PoseLibResult(resultPose, resultInliers, count * 4);
+                return new PoseLibResult(resultPose, resultInliers, numPoints);
             }
 
             QueuedLogger.LogError($"PoseLib solve failed! Error code: {status}");

@@ -250,7 +250,8 @@ The QuestNav app aligns itself to the field with AprilTags and keeps correcting 
 [AprilTag Tracking](../4-apriltag-tracking/1-apriltag-overview.md)). `setPose()` is still useful without tags in
 view, for example to seed the auto start position, or to apply a pose from another system
 ([Limelight](https://limelightvision.io/), [PhotonVision](https://photonvision.org/), etc.). After a `setPose()` the
-next good AprilTag view aligns the headset to the tags again.
+next good AprilTag view (at least 2 tags in one frame) aligns the headset to the tags again. A single tag never
+moves the pose.
 :::
 :::info
 QuestNav uses [Visual Inertial Odometry (VIO)](https://en.wikipedia.org/wiki/Visual_odometry) to estimate the headset's

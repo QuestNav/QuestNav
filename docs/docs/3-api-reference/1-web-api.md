@@ -109,7 +109,7 @@ The values shown are the defaults.
 | `streamMode` | Passthrough stream resolution, frame rate and JPEG quality. |
 | `aprilTagDetectorMode.mode` | Detector mode. Only `0` (traditional) is implemented. |
 | `maxDistance` | Detections whose average tag distance is above this many meters are dropped. |
-| `minimumNumberOfTags` | Tags required in one frame before it is used. |
+| `minimumNumberOfTags` | Tags required in one frame before it is used: 2, 3 or 4. A stored 1 from an older version reads as 2. |
 | `fieldLayoutFile` | Selected field layout. |
 | `confidencePreset` | `0` Permissive, `1` Balanced, `2` Strict, `3` Debug. See [Kalman filter](../4-apriltag-tracking/4-kalman-filter.md#confidence-presets). |
 | `noiseScale` | AprilTag trust multiplier from 0.5 to 2.0. Higher values trust tags less. |
@@ -166,7 +166,7 @@ names are matched case-insensitively. The body has the same shape as the `GET` r
 | `mode` is anything but `0` | `AprilTag detector mode N is not supported.` |
 | `ignoredIds` has more than 64 entries, or an ID outside 0 to 586 | `ignoredIds has N entries` / `ignoredIds contains N` |
 | `width`/`height`/`framerate` is not in [`/api/apriltag-video-modes`](#get-apiapriltag-video-modes) | `Resolution WxH @ Ffps is not supported on this camera.` |
-| `minimumNumberOfTags` is not 1, 2, 3 or 4 | `minimumNumberOfTags=N is not in the supported set` |
+| `minimumNumberOfTags` is not 2, 3 or 4 | `minimumNumberOfTags=N is not in the supported set` |
 | `fieldLayoutFile` is not a bundled layout or an existing custom layout | `Unknown field layout '...'.` |
 | `confidencePreset` is outside 0 to 3 | `confidencePreset=N is out of range.` |
 | `noiseScale` is not a finite number from 0.5 to 2.0 | `noiseScale=N is out of range.` |

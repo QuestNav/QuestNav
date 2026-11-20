@@ -156,11 +156,14 @@ jobs:
       MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
       MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
 
-  # A skipped publish-docs (no docs changes) must not skip the release.
+  # A skipped publish-docs (no docs changes) must not skip the release, but the
+  # signed APK and vendor JSON it uploads must exist.
   github-release:
     if: |
       !cancelled() &&
       !contains(needs.*.result, 'failure') &&
+      needs.sign-apk.result == 'success' &&
+      needs.publish-java.result == 'success' &&
       ((needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
       needs.determine-publishable-changes.outputs.java-changed == 'true' ||
       needs.determine-publishable-changes.outputs.web-ui-changed == 'true') ||

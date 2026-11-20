@@ -30,6 +30,23 @@ namespace QuestNav.Tests
             Assert.IsFalse(RequestValidation.IsAllowedOrigin(origin, host));
         }
 
+        [TestCase("cross-site")]
+        [TestCase(" Cross-Site ")]
+        public void DetectsCrossSiteRequest(string secFetchSite)
+        {
+            Assert.IsTrue(RequestValidation.IsCrossSiteRequest(secFetchSite));
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("same-origin")]
+        [TestCase("same-site")]
+        [TestCase("none")]
+        public void AllowsOtherFetchSites(string secFetchSite)
+        {
+            Assert.IsFalse(RequestValidation.IsCrossSiteRequest(secFetchSite));
+        }
+
         [TestCase("application/json")]
         [TestCase("application/json; charset=utf-8")]
         [TestCase(" APPLICATION/JSON ")]

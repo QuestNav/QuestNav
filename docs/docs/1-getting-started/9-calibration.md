@@ -73,8 +73,10 @@ To check it:
 
 1. Point the headset at two or more tags on the field
 2. Check that the alignment state is `TAG_ALIGNED` (2027 QuestNavLib: `questNav.getAlignmentState()`) and that the
-   reported pose matches where the robot is. The 2026 QuestNavLib can't read the alignment state: look for
-   `AprilTag initial alignment accepted` in the **Logs** tab of the web interface instead
+   reported pose matches where the robot is. The 2026 QuestNavLib can't read the alignment state, so check the pose.
+   The **Logs** tab of the web interface shows `AprilTag initial alignment accepted` when tags first place the
+   headset, but with tags in view that line scrolls away within seconds. Rejected tag views logged as
+   `AprilTag rejected (Phase 2)` mean the headset is aligned; `AprilTag rejected (Phase 1)` means it isn't yet
 
 Before tags are in view, or without them, set a known pose at the start of each match: for example, seed your pose
 estimator from the selected autonomous start position, or use another vision system. See

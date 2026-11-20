@@ -116,12 +116,16 @@ namespace QuestNav.QuestNav.Estimation
             public Matrix<double> EstimatedState;
             public Matrix<double> Covariance;
 
+            // Elapsed time process noise was added for on the step into this snapshot
+            public double NoiseSeconds;
+
             public VIOSnapshot(
                 double timestamp,
                 Translation3d position,
                 Rotation3d rotation,
                 Matrix<double> estimatedState,
-                Matrix<double> covariance
+                Matrix<double> covariance,
+                double noiseSeconds
             )
             {
                 Timestamp = timestamp;
@@ -129,6 +133,7 @@ namespace QuestNav.QuestNav.Estimation
                 Rotation = rotation;
                 EstimatedState = estimatedState;
                 Covariance = covariance;
+                NoiseSeconds = noiseSeconds;
             }
         }
 
@@ -300,18 +305,26 @@ namespace QuestNav.QuestNav.Estimation
         }
 
         /// <summary>
-        /// Process noise for a VIO step of <paramref name="dt"/> seconds. The step is clamped
-        /// so a pause or app hitch does not inflate the covariance.
+        /// Elapsed time to add process noise for on a VIO step of <paramref name="dt"/>
+        /// seconds. An ordinary step is clamped so a pause or app hitch does not inflate the
+        /// covariance; the step across a tracking outage is not, since the VIO pose after
+        /// it really is less certain.
         /// </summary>
-        private Matrix<double> ProcessNoise(double dt)
+        private static double NoiseSeconds(double dt, bool acrossOutage)
         {
-            double clamped = Math.Clamp(
-                dt,
-                0.0,
-                VioAprilTagPoseEstimatorConstants.VIO_NOISE_MAX_DT_SECONDS
-            );
+            return acrossOutage
+                ? Math.Max(dt, 0.0)
+                : Math.Clamp(dt, 0.0, VioAprilTagPoseEstimatorConstants.VIO_NOISE_MAX_DT_SECONDS);
+        }
+
+        /// <summary>Process noise for <paramref name="noiseSeconds"/> of elapsed time.</summary>
+        private Matrix<double> ProcessNoise(double noiseSeconds)
+        {
             return q
-                * (clamped / VioAprilTagPoseEstimatorConstants.VIO_NOISE_REFERENCE_PERIOD_SECONDS);
+                * (
+                    noiseSeconds
+                    / VioAprilTagPoseEstimatorConstants.VIO_NOISE_REFERENCE_PERIOD_SECONDS
+                );
         }
 
         /// <inheritdoc/>
@@ -338,7 +351,14 @@ namespace QuestNav.QuestNav.Estimation
 
             snapshotBuffer.Clear();
             snapshotBuffer.AddLast(
-                new VIOSnapshot(timestamp, pose.Translation, pose.Rotation, x0.Clone(), p0.Clone())
+                new VIOSnapshot(
+                    timestamp,
+                    pose.Translation,
+                    pose.Rotation,
+                    x0.Clone(),
+                    p0.Clone(),
+                    0.0
+                )
             );
         }
 
@@ -368,7 +388,8 @@ namespace QuestNav.QuestNav.Estimation
             previousVioPosition = vioPose.Translation;
             latestRotation = vioPose.Rotation;
 
-            if (trackingLost)
+            bool acrossOutage = trackingLost;
+            if (acrossOutage)
             {
                 trackingLost = false;
                 double maxJump =
@@ -386,7 +407,8 @@ namespace QuestNav.QuestNav.Estimation
             // orientation at startup. The yawOffset aligns VIO north with true FRC north.
             Translation3d displacement = rawDisplacement.RotateBy(new Rotation3d(0, 0, yawOffset));
 
-            filter.Predict(f, ProcessNoise(dt));
+            double noiseSeconds = NoiseSeconds(dt, acrossOutage);
+            filter.Predict(f, ProcessNoise(noiseSeconds));
 
             var state = filter.State;
             var corrected = state + ToColumnVector(displacement);
@@ -399,7 +421,8 @@ namespace QuestNav.QuestNav.Estimation
                     vioPose.Translation,
                     vioPose.Rotation,
                     corrected.Clone(),
-                    filter.Cov.Clone()
+                    filter.Cov.Clone(),
+                    noiseSeconds
                 )
             );
         }
@@ -498,7 +521,8 @@ namespace QuestNav.QuestNav.Estimation
                     capture.Position,
                     capture.Rotation,
                     x0.Clone(),
-                    p0.Clone()
+                    p0.Clone(),
+                    capture.NoiseSeconds
                 );
                 ReplayFrom(captureNode);
 
@@ -639,7 +663,7 @@ namespace QuestNav.QuestNav.Estimation
             double jumpMeters
         )
         {
-            filter.Predict(f, ProcessNoise(outageSeconds));
+            filter.Predict(f, ProcessNoise(NoiseSeconds(outageSeconds, true)));
             snapshotBuffer.Clear();
             snapshotBuffer.AddLast(
                 new VIOSnapshot(
@@ -647,7 +671,8 @@ namespace QuestNav.QuestNav.Estimation
                     newVioPose.Translation,
                     newVioPose.Rotation,
                     filter.State.Clone(),
-                    filter.Cov.Clone()
+                    filter.Cov.Clone(),
+                    0.0
                 )
             );
 
@@ -686,7 +711,8 @@ namespace QuestNav.QuestNav.Estimation
                         + newVioPose.Translation,
                     snapshot.Rotation.RotateBy(frameRotation),
                     snapshot.EstimatedState,
-                    snapshot.Covariance
+                    snapshot.Covariance,
+                    snapshot.NoiseSeconds
                 );
             }
 
@@ -797,7 +823,8 @@ namespace QuestNav.QuestNav.Estimation
                 snapshot.Position,
                 snapshot.Rotation,
                 filter.State.Clone(),
-                filter.Cov.Clone()
+                filter.Cov.Clone(),
+                snapshot.NoiseSeconds
             );
             ReplayFrom(captureNode);
         }
@@ -844,10 +871,7 @@ namespace QuestNav.QuestNav.Estimation
                     new Rotation3d(0, 0, yawOffset)
                 );
 
-                filter.Predict(
-                    f,
-                    ProcessNoise(replayNode.Value.Timestamp - prevReplayNode.Value.Timestamp)
-                );
+                filter.Predict(f, ProcessNoise(replayNode.Value.NoiseSeconds));
 
                 var state = filter.State;
                 var corrected = state + ToColumnVector(displacement);
@@ -858,7 +882,8 @@ namespace QuestNav.QuestNav.Estimation
                     replayNode.Value.Position,
                     replayNode.Value.Rotation,
                     corrected.Clone(),
-                    filter.Cov.Clone()
+                    filter.Cov.Clone(),
+                    replayNode.Value.NoiseSeconds
                 );
 
                 prevReplayNode = replayNode;

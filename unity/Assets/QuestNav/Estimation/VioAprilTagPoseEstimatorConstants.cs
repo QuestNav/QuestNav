@@ -46,8 +46,9 @@ namespace QuestNav.QuestNav.Estimation
         public const double VIO_NOISE_REFERENCE_PERIOD_SECONDS = 1.0 / 120.0;
 
         /// <summary>
-        /// Longest time step (seconds) process noise is added for, so a pause, app hitch or
-        /// tracking outage does not inflate the covariance.
+        /// Longest time step (seconds) process noise is added for, so a pause or app hitch
+        /// does not inflate the covariance. The step across a tracking outage is not clamped:
+        /// the VIO pose after an outage is less certain, so the next tags can correct it.
         /// </summary>
         public const double VIO_NOISE_MAX_DT_SECONDS = 0.1;
 

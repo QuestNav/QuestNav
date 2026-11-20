@@ -3,7 +3,7 @@ title: Calibration
 ---
 # Calibration
 
-Once QuestNav is installed and your robot code is set up, the final step before competition is calibrating the headset on your robot. This guide covers headset calibration — getting the Quest running, mounted, and reporting a usable pose — and introduces field calibration for aligning that pose to the field.
+Once QuestNav is installed and your robot code is set up, the final step before competition is calibrating the headset on your robot. This guide covers headset calibration — getting the Quest running, mounted, and reporting a usable pose — and field calibration, which aligns that pose to the field.
 
 :::note One-time setup
 Calibration is a **one-time** step. You only need to redo it if you **change the headset mount** or **replace the headset** — anything that changes where the Quest sits relative to the robot. If the mount and headset are unchanged, your existing offset transform still applies, and there's no extra work to do before each match.
@@ -65,11 +65,20 @@ With the headset mounted and the offset determined, complete the software integr
 
 Field calibration aligns the Quest's tracking origin with the field coordinate system, so the pose QuestNav reports matches the robot's true position on the field.
 
-:::warning Big TODO
-Automatic field calibration is a **work in progress**. It depends on spatial anchor support, which is not yet available in QuestNav. This section will be expanded once that work lands.
+QuestNav does this itself with the AprilTags on the field. With the AprilTag detector on (the default) and the field
+layout for your event selected in the web interface's **AprilTag** tab, the first view of enough tags places the headset
+on the field, and later views correct drift. See [AprilTag Tracking](../4-apriltag-tracking/1-apriltag-overview.md).
 
-In the meantime, align the robot to the field by resetting the pose to a known location at the start of each match — for example, seeding your pose estimator from the selected autonomous start position, or using an external source such as AprilTags ([Limelight](https://limelightvision.io/) / [PhotonVision](https://photonvision.org/)). See [Setting Robot Pose](./robot-code#setting-robot-pose) for how to push a known pose to QuestNav.
-:::
+To check it:
+
+1. Point the headset at two or more tags on the field
+2. Check that the alignment state is `TAG_ALIGNED` (2027 QuestNavLib: `questNav.getAlignmentState()`) and that the
+   reported pose matches where the robot is
+
+Before tags are in view, or without them, set a known pose at the start of each match: for example, seed your pose
+estimator from the selected autonomous start position, or use another vision system. See
+[Setting Robot Pose](./8-robot-code.mdx#setting-robot-pose) for how to push a known pose to QuestNav. Only the pose's
+yaw is applied, and the next good tag view re-aligns the headset to the tags.
 
 ## Next Steps
 

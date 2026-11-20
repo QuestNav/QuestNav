@@ -29,11 +29,12 @@ A gently pulsing white LED means the headset is awake. If it is off, tap the pow
 Publishing QuestNav status (connected, tracking, battery) to your dashboard makes these checks fast. See [Publishing Diagnostics](./robot-code#publishing-diagnostics) for an example.
 :::
 
-## Spatial Anchors
+## AprilTags
 
-:::note TODO
-Setup instructions for spatial anchors will be added here once spatial anchor support lands in QuestNav. See [Field Calibration](./calibration#field-calibration) for background.
-:::
+- [ ] **The right field layout is selected** in the AprilTag tab of the web interface (a change needs an app restart).
+- [ ] **AprilTag alignment** — with tags in view, the alignment state reaches `TAG_ALIGNED` (2027 QuestNavLib: `questNav.getAlignmentState()`). If you seed the pose with `setPose()` instead, it reads `POSE_RESET` until the headset sees tags.
+
+See [Field Calibration](./9-calibration.md#field-calibration) for background.
 
 ## Next Steps
 

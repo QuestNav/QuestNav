@@ -297,6 +297,29 @@ class QuestNavNetworkTest {
   }
 
   @Test
+  void trackingIsLostWhenTheQuestDisconnects() throws InterruptedException {
+    List<String> events = new ArrayList<>();
+    questNav.onTrackingAcquired(() -> events.add("acquired"));
+    questNav.onTrackingLost(() -> events.add("lost"));
+    // Wait for each frame so commandPeriodic sees the same state as the check after it
+    waitFor(
+        () -> {
+          int count = sendFrame(0);
+          waitFor(() -> questNav.getFrameCount().orElse(-1) == count, 2.0, "frame delivery");
+          questNav.commandPeriodic();
+          return questNav.isTracking();
+        },
+        2.0,
+        "tracking");
+
+    Thread.sleep(250);
+    assertFalse(questNav.isTracking());
+    questNav.commandPeriodic();
+    assertFalse(events.isEmpty());
+    assertEquals("lost", events.get(events.size() - 1));
+  }
+
+  @Test
   void commandResponsesAreMatchedById() {
     List<Integer> successes = new ArrayList<>();
     List<Integer> failures = new ArrayList<>();

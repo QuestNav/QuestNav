@@ -108,6 +108,71 @@ namespace QuestNav.Tests
         }
 
         [Test]
+        public void ApplyMotionSince_NoMotionKeepsTarget()
+        {
+            var target = new Pose3d(4.0, 2.0, 0.5, new Rotation3d(0, 0, 1.0));
+            var vio = new Pose3d(-3.0, 7.0, 1.1, new Rotation3d(0.05, -0.1, -2.5));
+
+            var compensated = PoseResetCommand.ApplyMotionSince(target, vio, vio);
+
+            Assert.AreEqual(
+                0.0,
+                compensated.Translation.GetDistance(target.Translation),
+                Tolerance
+            );
+            Assert.AreEqual(0.0, AngleBetween(target.Rotation, compensated.Rotation), Tolerance);
+        }
+
+        [Test]
+        public void ApplyMotionSince_RotatesDisplacementIntoTargetFrame()
+        {
+            var target = new Pose3d(2.0, 1.0, 0.5, new Rotation3d(0, 0, Math.PI / 2));
+            var vioThen = new Pose3d(5.0, 5.0, 1.0, new Rotation3d(0, 0, Math.PI / 6));
+            var vioNow = new Pose3d(6.0, 5.0, 1.0, new Rotation3d(0, 0, 2 * Math.PI / 9));
+
+            var compensated = PoseResetCommand.ApplyMotionSince(target, vioThen, vioNow);
+
+            // VIO maps onto the field by +60 deg, so 1 m along VIO x is 1 m at 60 deg
+            Assert.AreEqual(2.5, compensated.X, Tolerance);
+            Assert.AreEqual(1.0 + Math.Sqrt(3) / 2, compensated.Y, Tolerance);
+            Assert.AreEqual(0.5, compensated.Z, Tolerance);
+            Assert.AreEqual(
+                0.0,
+                AngleDiff(Math.PI / 2 + Math.PI / 18, compensated.Rotation.Z),
+                Tolerance
+            );
+        }
+
+        [Test]
+        public void ApplyMotionSince_GivesCurrentFieldPose()
+        {
+            // The VIO frame is the field turned by 0.8 rad and shifted
+            var vioFrame = new Rotation3d(0, 0, 0.8);
+            var vioOffset = new Translation3d(-2.0, 1.5, 0.2);
+            Pose3d ToVio(Pose3d field) =>
+                new Pose3d(
+                    field.Translation.RotateBy(vioFrame) + vioOffset,
+                    field.Rotation.RotateBy(vioFrame)
+                );
+
+            var fieldThen = new Pose3d(3.0, 4.0, 0.5, new Rotation3d(0.03, -0.08, 0.4));
+            var fieldNow = new Pose3d(3.3, 3.8, 0.5, new Rotation3d(0.03, -0.08, 0.9));
+
+            var compensated = PoseResetCommand.ApplyMotionSince(
+                fieldThen,
+                ToVio(fieldThen),
+                ToVio(fieldNow)
+            );
+
+            Assert.AreEqual(
+                0.0,
+                compensated.Translation.GetDistance(fieldNow.Translation),
+                Tolerance
+            );
+            Assert.AreEqual(0.0, AngleDiff(fieldNow.Rotation.Z, compensated.Rotation.Z), Tolerance);
+        }
+
+        [Test]
         public void UnityRootTransform_PutsCameraAtSolvedPose()
         {
             var target = new Pose3d(7.0, 2.0, 0.55, new Rotation3d(0, 0, -0.7));

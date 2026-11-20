@@ -186,10 +186,14 @@ message ProtobufQuestNavFrameData {
   AlignmentState alignment_state = 6;
 
   /*
-   * Counter that changes whenever the pose jumps instead of following the headset's motion:
-   * a pose reset, an AprilTag alignment or re-alignment, or a tracking relocalization the
-   * app could not follow. Pose changes between two frames with the same reset_epoch are
-   * real motion; across a change they are not.
+   * Counter that changes whenever the pose is re-placed instead of following the headset's
+   * motion: a pose reset, an AprilTag alignment or re-alignment, or a tracking relocalization
+   * the app could not follow. Across a change, the pose change is not motion.
+   *
+   * Within one reset_epoch the pose follows the headset's motion plus filtered AprilTag
+   * position corrections. A correction is usually small, but the app accepts one from a tag
+   * measurement up to 2 m away, so it can step the pose by that much in one frame (for
+   * example after a tracking outage).
    *
    * Compare it for equality only. It restarts when the app restarts and wraps around.
    * A tracking-origin recenter keeps the field pose, so it does not change the counter.

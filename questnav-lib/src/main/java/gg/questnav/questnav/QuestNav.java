@@ -685,9 +685,10 @@ public class QuestNav {
   }
 
   /**
-   * Gets the Quest's current reset epoch, a counter that changes whenever its pose jumps instead of
-   * following its motion (pose reset, AprilTag alignment, tracking relocalization). Compare it with
-   * an earlier value to tell whether the pose has jumped since.
+   * Gets the Quest's current reset epoch, a counter that changes whenever its pose is re-placed
+   * instead of following its motion (pose reset, AprilTag alignment, tracking relocalization).
+   * Compare it with an earlier value to tell whether the pose has been re-placed since. AprilTag
+   * corrections within an epoch don't change it; see {@link PoseFrame#resetEpoch()}.
    *
    * @return The latest frame's reset epoch, or empty if the Quest is disconnected or its QuestNav
    *     app is too old to report it

@@ -76,11 +76,13 @@ import org.wpilib.util.protobuf.ProtobufSerializable;
  * @param isTracking Indicates whether the Quest is currently tracking its position
  * @param alignmentState What {@code questPose3d} is referenced to. {@link AlignmentState#UNKNOWN}
  *     when the QuestNav app is too old to send it.
- * @param resetEpoch Counter that changes whenever the Quest's pose jumps instead of following its
- *     motion: a pose reset, an AprilTag alignment or re-alignment, or a tracking relocalization.
- *     The change in pose between two frames with the same epoch is real motion; across a change it
- *     is not. Compare it for equality only: it restarts when the app restarts and wraps around. 0
- *     when the QuestNav app is too old to send it.
+ * @param resetEpoch Counter that changes whenever the Quest's pose is re-placed instead of
+ *     following its motion: a pose reset, an AprilTag alignment or re-alignment, or a tracking
+ *     relocalization. Across a change, the change in pose is not motion. Within one epoch the pose
+ *     follows the Quest's motion plus filtered AprilTag corrections, which are usually small but
+ *     can step it by up to 2 m in one frame (for example after a tracking outage). Compare it for
+ *     equality only: it restarts when the app restarts and wraps around. 0 when the QuestNav app is
+ *     too old to send it.
  * @see QuestNav#getAllUnreadPoseFrames()
  * @see QuestNav#setPose(Pose3d)
  * @see org.wpilib.math.estimator.PoseEstimator

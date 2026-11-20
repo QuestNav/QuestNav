@@ -33,7 +33,7 @@ jobs:
     
       - name: Get last release tag
         id: get-last-release
-        uses: WyriHaximus/github-action-get-previous-tag@v2
+        uses: WyriHaximus/github-action-get-previous-tag@83f26fea93bc7efcbca2eb5591f5eaaf66b8f206 # v2.1.0
 
       - name: Determine publishable changes
         uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
@@ -149,7 +149,7 @@ jobs:
           path: 'release'
 
       - name: Release to GitHub Releases
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           generate_release_notes: true
           fail_on_unmatched_files: true

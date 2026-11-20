@@ -1032,6 +1032,44 @@ namespace QuestNav.Tests
         }
 
         [Test]
+        public void AlignmentState_RelocalizationAfterPoseResetIsRealigning()
+        {
+            var sim = new Sim();
+            sim.Estimator.AddVioObservation(sim.Vio, sim.Time);
+            sim.Estimator.ResetPosition(sim.Field, sim.Time);
+            sim.Step(Translation3d.Zero, 5);
+            uint epoch = sim.Estimator.ResetEpoch;
+
+            sim.Outage(Translation3d.Zero, 0.2);
+            sim.VioOffset += new Translation3d(2.0, -1.0, 0.0);
+            sim.Step(Translation3d.Zero, 1);
+
+            Assert.AreEqual(AlignmentState.Realigning, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 1, sim.Estimator.ResetEpoch);
+
+            sim.Step(Translation3d.Zero, 5);
+            sim.ObserveTruth();
+            Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 2, sim.Estimator.ResetEpoch);
+        }
+
+        [Test]
+        public void AlignmentState_UnalignedRelocalizationStaysUnaligned()
+        {
+            var sim = new Sim();
+            sim.Estimator.AddVioObservation(sim.Vio, sim.Time);
+            sim.Step(Translation3d.Zero, 5);
+            uint epoch = sim.Estimator.ResetEpoch;
+
+            sim.Outage(Translation3d.Zero, 0.2);
+            sim.VioOffset += new Translation3d(2.0, -1.0, 0.0);
+            sim.Step(Translation3d.Zero, 1);
+
+            Assert.AreEqual(AlignmentState.Unaligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 1, sim.Estimator.ResetEpoch);
+        }
+
+        [Test]
         public void AlignmentState_DrivableOutageKeepsEpoch()
         {
             var sim = new Sim();

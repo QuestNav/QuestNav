@@ -693,8 +693,9 @@ namespace QuestNav.QuestNav.Estimation
         /// <summary>
         /// Re-bases onto the first VIO pose after a tracking outage whose jump is too large
         /// to be robot motion. The estimate holds its position instead of integrating the
-        /// jump, the history from before the jump is dropped, and an aligned estimator drops
-        /// back to Phase 1 so the next tags re-anchor position and heading.
+        /// jump, the history from before the jump is dropped, and an estimator placed on the
+        /// field (by tags or a pose reset) drops back to Phase 1 so the next tags re-anchor
+        /// position and heading.
         /// </summary>
         private void RebaseAfterRelocalization(
             Pose3d newVioPose,
@@ -716,9 +717,12 @@ namespace QuestNav.QuestNav.Estimation
                 )
             );
 
-            if (hasInitialAlignment)
+            // The held position and old heading no longer match the field, whether tags or a
+            // pose reset placed them
+            if (hasInitialAlignment || placedByPoseReset)
             {
                 hasInitialAlignment = false;
+                placedByPoseReset = false;
                 realignPending = true;
             }
             rejectionStreakCount = 0;

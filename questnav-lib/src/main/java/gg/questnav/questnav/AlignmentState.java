@@ -34,9 +34,9 @@ public enum AlignmentState {
   TAG_ALIGNED,
 
   /**
-   * Was aligned by AprilTags, but the alignment is no longer trusted: the tags have consistently
-   * disagreed with the pose, or tracking relocalized after an outage. The pose continues from the
-   * old alignment until the tags re-align it.
+   * Was placed on the field (by AprilTags or a pose reset), but the placement is no longer trusted:
+   * the tags have consistently disagreed with the pose, or tracking relocalized after an outage.
+   * The pose continues from the old placement until the tags re-align it.
    */
   REALIGNING
 }

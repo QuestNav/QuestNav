@@ -322,7 +322,8 @@ namespace QuestNav.Core
                 vrCamera,
                 vrCameraRoot,
                 resetTransform,
-                configManager
+                configManager,
+                aprilTagFieldLayout.Field
             );
             tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform);
 

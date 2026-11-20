@@ -67,7 +67,9 @@ public class CommandProto
 
   @Override
   public Commands.ProtobufQuestNavCommand unpack(Commands.ProtobufQuestNavCommand msg) {
-    return msg.clone();
+    // WPILib decodes into a reused message after clearQuick(), which keeps the values of fields
+    // a message leaves out (such as false or 0); copying only the fields it has drops them
+    return Commands.ProtobufQuestNavCommand.newInstance().mergeFrom(msg);
   }
 
   @Override

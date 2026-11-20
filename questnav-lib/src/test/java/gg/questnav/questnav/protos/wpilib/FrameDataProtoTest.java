@@ -22,6 +22,7 @@ import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.geometry.Quaternion;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation3d;
+import org.wpilib.util.protobuf.ProtobufBuffer;
 
 class FrameDataProtoTest {
   private final FrameDataProto proto = new FrameDataProto();
@@ -87,6 +88,29 @@ class FrameDataProtoTest {
     assertEquals(5.0, decoded.appTimestamp());
     assertEquals(6, decoded.frameCount());
     assertFalse(decoded.isTracking());
+  }
+
+  @Test
+  void decodingDoesNotKeepFieldsOfThePreviousFrame() throws IOException {
+    // NT subscribers decode every frame into one reused message
+    var buffer = ProtobufBuffer.create(proto);
+    var pose = new Pose3d(1.25, -2.5, 0.75, new Rotation3d(0.1, -0.2, 2.9));
+    var msg = proto.createMessage();
+    proto.pack(msg, new PoseFrame(pose, 1.0, 2.0, 3, true, AlignmentState.TAG_ALIGNED, 7));
+    assertEquals(pose, buffer.read(msg.toByteArray()).questPose3d());
+
+    // The app's encoder leaves out zero values, as here for a lost-tracking frame at the origin
+    // from an app that predates the alignment fields
+    var lostMsg = Data.ProtobufQuestNavFrameData.newInstance().setFrameCount(4).setTimestamp(2.5);
+    lostMsg.getMutablePose3D().getMutableTranslation();
+    lostMsg.getMutablePose3D().getMutableRotation().getMutableQ().setW(1.0);
+    var lost = buffer.read(lostMsg.toByteArray());
+    assertEquals(new Pose3d(), lost.questPose3d());
+    assertEquals(0.0, lost.dataTimestamp());
+    assertEquals(4, lost.frameCount());
+    assertFalse(lost.isTracking());
+    assertEquals(AlignmentState.UNKNOWN, lost.alignmentState());
+    assertEquals(0, lost.resetEpoch());
   }
 
   @Test

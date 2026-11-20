@@ -64,6 +64,17 @@ namespace QuestNav.QuestNav.Estimation
         /// </summary>
         public const double MAX_CAPTURE_VIO_GAP_SECONDS = 0.05;
 
+        // --- Tracking outages ---
+
+        /// <summary>Fastest plausible robot speed (m/s), used to bound the VIO jump on reacquire.</summary>
+        public const double MAX_ROBOT_SPEED_MPS = 6.0;
+
+        /// <summary>
+        /// Margin (meters) added to <see cref="MAX_ROBOT_SPEED_MPS"/> times the outage
+        /// duration. A larger jump on tracking reacquire is a relocalization, not motion.
+        /// </summary>
+        public const double TRACKING_JUMP_MARGIN_METERS = 0.25;
+
         // --- Phase 1: Initial alignment gating (NOT user-configurable) ---
 
         /// <summary>Minimum number of detected tags to accept the first alignment observation.</summary>

@@ -685,12 +685,14 @@ namespace QuestNav.Core
                 ? networkTableConnection.NtNow + offsetNs
                 : 0;
 
-            // Add latest VIO data to kalman filter
+            // Add latest VIO data to kalman filter. Untracked poses are not motion; the
+            // estimator checks the jump across the outage once tracking is back.
             pose = Conversions.UnityToFrc3d(
                 cameraRig.centerEyeAnchor.position,
                 cameraRig.centerEyeAnchor.rotation
             );
-            vioAprilTagPoseEstimator.AddVioObservation(pose, timeStamp);
+            if (currentlyTracking)
+                vioAprilTagPoseEstimator.AddVioObservation(pose, timeStamp);
         }
 
         /// <summary>
@@ -722,6 +724,7 @@ namespace QuestNav.Core
             {
                 trackingLostEvents++;
                 QueuedLogger.LogWarning($"Tracking Lost! Times this session: {trackingLostEvents}");
+                vioAprilTagPoseEstimator.HandleTrackingLost();
             }
 
             hadTracking = currentlyTracking;

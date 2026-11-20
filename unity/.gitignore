@@ -19,6 +19,11 @@
 **/Assets/XR/UserSimulationSettings/
 **/Assets/XR/UserSimulationSettings.meta
 
+# Meta Immersive Debugger DevAgent settings: the editor recreates this on load and
+# fills in a per-developer access token and LAN IP
+**/Assets/Resources/DevAgentSettings.asset
+**/Assets/Resources/DevAgentSettings.asset.meta
+
 # Composition Layers user settings (auto-generated)
 **/Assets/CompositionLayers/
 **/Assets/CompositionLayers.meta

@@ -274,6 +274,12 @@ namespace QuestNav.Native.NTCore
     {
         public const int NT_DEFAULT_PORT4 = 5810;
 
+        /// <summary>
+        /// allwpilib tag the bundled ntcore libraries were built from. ntcore has no version API,
+        /// so this must match allwpilib-tag in Assets/Plugins/ntcore/VERSION (checked by a test).
+        /// </summary>
+        public const string ALLWPILIB_TAG = "v2027.0.0-alpha-8";
+
         // public const string NT_LIBRARY = "ntcore";
 
         [DllImport("ntcore")]
@@ -298,6 +304,15 @@ namespace QuestNav.Native.NTCore
 
         [DllImport("ntcore")]
         public static extern long NT_GetServerTimeOffset(uint inst, int* valid);
+
+        [DllImport("ntcore")]
+        public static extern NativeConnectionInfo* NT_GetConnections(uint inst, UIntPtr* count);
+
+        [DllImport("ntcore")]
+        public static extern void NT_DisposeConnectionInfoArray(
+            NativeConnectionInfo* arr,
+            UIntPtr count
+        );
 
         [DllImport("ntcore")]
         public static extern uint NT_GetTopic(uint inst, WpiString* name);

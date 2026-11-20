@@ -234,22 +234,28 @@ task buildInfo {
     description = "Print build information"
     group = "QuestNavLib"
 
+    // Resolve everything at configuration time; touching project in doLast is deprecated
+    def repoType = isSnapshot ? 'snapshots' : 'releases'
+    def info = [
+        "Release Type: ${versionType}",
+        "Full Version: ${version}",
+        "WPILib Year: ${wpilibYear}",
+        "WPILib Version: ${wpilibVersion}",
+        "Group ID: ${mavenGroupId}",
+        "Artifact ID: ${artifactId}",
+        "UUID: ${vendorUuid}",
+        "Is Snapshot: ${isSnapshot}",
+        "Repository Type: ${repoType}",
+    ]
+    if (project.hasProperty('mavenRepoUrl')) {
+        info << "Repository: ${mavenRepoUrl}"
+    }
+    info << "Vendor JSON URL: https://maven.questnav.gg/${repoType}/gg/questnav/questnavlib-json/${version}/questnavlib-json-${version}.json"
+    def lines = info.collect { it.toString() }
+
     doLast {
         println "QuestNavLib Build Information:"
-        println "  Release Type: ${versionType}"
-        println "  Full Version: ${version}"
-        println "  WPILib Year: ${wpilibYear}"
-        println "  WPILib Version: ${wpilibVersion}"
-        println "  Group ID: ${mavenGroupId}"
-        println "  Artifact ID: ${artifactId}"
-        println "  UUID: ${vendorUuid}"
-        println "  Is Snapshot: ${isSnapshot}"
-        println "  Repository Type: ${isSnapshot ? 'snapshots' : 'release'}"
-        if (project.hasProperty('mavenRepoUrl')) {
-            println "  Repository: ${mavenRepoUrl}"
-        }
-        def jsonUrl = "https://maven.questnav.gg/repository/${isSnapshot ? 'snapshots' : 'release'}/gg/questnav/questnavlib-json/${version}/questnavlib-json-${version}.json"
-        println "  Vendor JSON URL: ${jsonUrl}"
+        lines.each { println "  ${it}" }
     }
 }
 

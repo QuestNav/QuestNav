@@ -215,6 +215,14 @@ namespace QuestNav.WebServer
             string ipAddress = GetLocalIPAddress();
             float currentFps = 1f / Time.deltaTime;
 
+            // Show where NT actually connected; the configured target is only a guess, since
+            // ntcore also tries the USB and access point addresses
+            string robotIpAddress = networkTableConnection.RobotIpAddress;
+            if (string.IsNullOrEmpty(robotIpAddress))
+            {
+                robotIpAddress = cachedRobotIpAddress;
+            }
+
             statusProvider?.UpdateStatus(
                 pose,
                 isTracking,
@@ -224,7 +232,7 @@ namespace QuestNav.WebServer
                 networkTableConnection.IsConnected,
                 ipAddress,
                 cachedTeamNumber,
-                cachedRobotIpAddress,
+                robotIpAddress,
                 currentFps,
                 Time.frameCount
             );

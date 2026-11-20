@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 using QuestNav.Utils;
@@ -119,6 +120,40 @@ namespace QuestNav.Native.NTCore
             int valid = 0;
             offsetNs = NtCoreNatives.NT_GetServerTimeOffset(handle, &valid);
             return valid != 0;
+        }
+
+        /// <summary>
+        /// Gets the current server connections. A client has at most one.
+        /// </summary>
+        /// <returns>The connections, or an empty array when not connected</returns>
+        public NtConnectionInfo[] GetConnections()
+        {
+            UIntPtr count = UIntPtr.Zero;
+            NativeConnectionInfo* infos = NtCoreNatives.NT_GetConnections(handle, &count);
+            if (infos == null)
+            {
+                return Array.Empty<NtConnectionInfo>();
+            }
+
+            try
+            {
+                // Copy out before the native array is freed
+                var connections = new NtConnectionInfo[(int)count];
+                for (int i = 0; i < connections.Length; i++)
+                {
+                    var ip = infos[i].remoteIp;
+                    connections[i] = new NtConnectionInfo(
+                        ip.len != UIntPtr.Zero ? Encoding.UTF8.GetString(ip.str, (int)ip.len) : "",
+                        infos[i].remotePort,
+                        infos[i].protocolVersion
+                    );
+                }
+                return connections;
+            }
+            finally
+            {
+                NtCoreNatives.NT_DisposeConnectionInfoArray(infos, count);
+            }
         }
 
         public BooleanPublisher GetBooleanPublisher(string name, PubSubOptions options)

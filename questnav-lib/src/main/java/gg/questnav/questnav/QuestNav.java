@@ -52,10 +52,10 @@ import org.wpilib.system.Timer;
  *
  * // Register callbacks
  * questNav.onConnected(() -> System.out.println("Quest connected!"));
- * questNav.onDisconnected(() -> DriverStation.reportWarning("Quest disconnected!", false));
- * questNav.onTrackingLost(() -> DriverStation.reportWarning("Quest tracking lost!", false));
+ * questNav.onDisconnected(() -> DriverStationErrors.reportWarning("Quest disconnected!", false));
+ * questNav.onTrackingLost(() -> DriverStationErrors.reportWarning("Quest tracking lost!", false));
  * questNav.onTrackingAcquired(() -> System.out.println("Quest tracking acquired!"));
- * questNav.onLowBattery(20, level -> DriverStation.reportWarning("Quest battery low: " + level + "%", false));
+ * questNav.onLowBattery(20, level -> DriverStationErrors.reportWarning("Quest battery low: " + level + "%", false));
  *
  * // Set initial robot pose (required for field-relative tracking)
  * Pose2d initialPose = new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(90));
@@ -502,11 +502,10 @@ public class QuestNav {
    * @see #isConnected()
    */
   public OptionalInt getBatteryPercent() {
-    Data.ProtobufQuestNavDeviceData latestDeviceData = deviceDataSubscriber.get();
-    if (latestDeviceData != null) {
-      return OptionalInt.of(latestDeviceData.getBatteryPercent());
+    if (!hasDeviceData()) {
+      return OptionalInt.empty();
     }
-    return OptionalInt.empty();
+    return OptionalInt.of(deviceDataSubscriber.get().getBatteryPercent());
   }
 
   /**
@@ -515,24 +514,31 @@ public class QuestNav {
    * @return The frame count value, or empty if no frame data is available
    */
   public OptionalInt getFrameCount() {
-    PoseFrame latestFrameData = frameDataSubscriber.get();
-    if (latestFrameData != null) {
-      return OptionalInt.of(latestFrameData.frameCount());
+    if (frameDataSubscriber.getLastChange() == 0) {
+      return OptionalInt.empty();
     }
-    return OptionalInt.empty();
+    return OptionalInt.of(frameDataSubscriber.get().frameCount());
   }
 
   /**
    * Gets the number of tracking lost events since the Quest connected to the robot.
    *
-   * @return The tracking lost counter value, or empty if no device data is available
+   * @return The tracking lost counter value, or empty if no device data is available or Quest is
+   *     disconnected
    */
   public OptionalInt getTrackingLostCounter() {
-    Data.ProtobufQuestNavDeviceData latestDeviceData = deviceDataSubscriber.get();
-    if (latestDeviceData != null) {
-      return OptionalInt.of(latestDeviceData.getTrackingLostCounter());
+    if (!hasDeviceData()) {
+      return OptionalInt.empty();
     }
-    return OptionalInt.empty();
+    return OptionalInt.of(deviceDataSubscriber.get().getTrackingLostCounter());
+  }
+
+  /**
+   * Whether the Quest is connected and has published device data. The subscriber returns a default
+   * instance until then, so a zero battery level would otherwise look like real data.
+   */
+  private boolean hasDeviceData() {
+    return deviceDataSubscriber.getLastChange() != 0 && isConnected();
   }
 
   /**
@@ -569,11 +575,10 @@ public class QuestNav {
    * @see #getAllUnreadPoseFrames()
    */
   public OptionalDouble getAppTimestamp() {
-    PoseFrame latestFrameData = frameDataSubscriber.get();
-    if (latestFrameData != null) {
-      return OptionalDouble.of(latestFrameData.appTimestamp());
+    if (frameDataSubscriber.getLastChange() == 0) {
+      return OptionalDouble.empty();
     }
-    return OptionalDouble.empty();
+    return OptionalDouble.of(frameDataSubscriber.get().appTimestamp());
   }
 
   /**

@@ -14,12 +14,11 @@ java:
   - 'questnav-lib/src/generate/**'
 csharp:
   - *proto
-  - 'unity/**/*.cs'
-  - 'unity/**/*.json'
-  - 'unity/**/*.unity'
-  - 'unity/**/*.meta'
-  - 'unity/**/*.asmdef'
-  - 'unity/Assets/Plugins/**'
+  # Any asset, package or project setting can change the APK.
+  - 'unity/Assets/**'
+  - 'unity/Packages/**'
+  - 'unity/ProjectSettings/**'
+  - 'unity/DocFX/**'
 docs:
   - 'docs/**'
 web-ui:

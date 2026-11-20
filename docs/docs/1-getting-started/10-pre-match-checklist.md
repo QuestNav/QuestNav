@@ -32,7 +32,7 @@ Publishing QuestNav status (connected, tracking, battery) to your dashboard make
 ## AprilTags
 
 - [ ] **The right field layout is selected** in the AprilTag tab of the web interface (a change needs an app restart).
-- [ ] **AprilTag alignment** — with tags in view, the alignment state reaches `TAG_ALIGNED` (2027 QuestNavLib: `questNav.getAlignmentState()`). If you seed the pose with `setPose()` instead, it reads `POSE_RESET` until the headset sees tags.
+- [ ] **AprilTag alignment** — with tags in view, the alignment state reaches `TAG_ALIGNED` (2027 QuestNavLib: `questNav.getAlignmentState()`). If you seed the pose with `setPose()` instead, it reads `POSE_RESET` until the headset sees tags. The 2026 QuestNavLib can't read the alignment state: look for `AprilTag initial alignment accepted` in the **Logs** tab of the web interface, and check that the reported pose matches where the robot is.
 
 See [Field Calibration](./9-calibration.md#field-calibration) for background.
 

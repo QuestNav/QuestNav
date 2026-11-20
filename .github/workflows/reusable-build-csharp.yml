@@ -7,6 +7,11 @@ on:
         description: 'Version string to use (optional, auto-generated if not provided)'
         required: false
         type: string
+      development-build:
+        description: 'Build a Unity Development build (debuggable, ships Meta dev-only layers). Not for releases.'
+        required: false
+        type: boolean
+        default: false
     secrets:
       UNITY_LICENSE:
         description: 'Unity License'
@@ -74,7 +79,9 @@ jobs:
           cliVersion: v0.1.76
           projectPath: unity
           targetPlatform: Android
-          customParameters: -developmentBuild
+          # The default game-ci build method turns only BuildOptions names (e.g.
+          # -Development) into build options; other flags are ignored.
+          customParameters: ${{ inputs.development-build && '-Development' || '' }}
           versioning: Custom
           version: ${{ steps.version-info.outputs.version }}
           androidVersionCode: ${{ steps.version-info.outputs.version-code }}

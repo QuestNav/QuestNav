@@ -473,8 +473,8 @@ public class QuestNavSubsystem extends SubsystemBase {
 | `onTrackingAcquired(Runnable)` | Quest transitions not-tracking → tracking | Fires once per transition |
 | `onTrackingLost(Runnable)` | Quest transitions tracking → not-tracking | Fires once per transition |
 | `onLowBattery(int, IntConsumer)` | Battery drops at or below threshold % | Resets when battery rises above threshold |
-| `onCommandSuccess(Consumer)` | A command response arrives with `success == true` | Fires per response |
-| `onCommandFailure(Consumer)` | A command response arrives with `success == false` | Also logged to DriverStation automatically |
+| `onCommandSuccess(Consumer)` | A command response arrives with `success == true` | Fires once per command this `QuestNav` sent |
+| `onCommandFailure(Consumer)` | A command response arrives with `success == false` | Fires once per command this `QuestNav` sent; also logged to DriverStation automatically |
 
 ---
 

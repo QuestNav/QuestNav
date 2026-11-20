@@ -14,7 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import gg.questnav.questnav.protos.generated.Commands;
 import gg.questnav.questnav.protos.generated.Data;
+import gg.questnav.questnav.protos.wpilib.CommandProto;
+import gg.questnav.questnav.protos.wpilib.CommandResponseProto;
 import gg.questnav.questnav.protos.wpilib.DeviceDataProto;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -39,6 +42,7 @@ import org.wpilib.math.geometry.proto.Pose3dProto;
 import org.wpilib.networktables.IntegerPublisher;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.networktables.ProtobufPublisher;
+import org.wpilib.networktables.ProtobufSubscriber;
 import org.wpilib.networktables.PubSubOption;
 import org.wpilib.networktables.RawPublisher;
 import org.wpilib.networktables.RawSubscriber;
@@ -53,6 +57,8 @@ class QuestNavNetworkTest {
   private static final String FRAME_TOPIC = "/QuestNav/frameData";
   private static final String DEVICE_TOPIC = "/QuestNav/deviceData";
   private static final String PROTOCOL_TOPIC = "/QuestNav/protocolVersion";
+  private static final String REQUEST_TOPIC = "/QuestNav/request";
+  private static final String RESPONSE_TOPIC = "/QuestNav/response";
 
   @TempDir static Path tempDir;
 
@@ -266,6 +272,60 @@ class QuestNavNetworkTest {
     }
   }
 
+  @Test
+  void commandResponsesAreMatchedById() {
+    List<Integer> successes = new ArrayList<>();
+    List<Integer> failures = new ArrayList<>();
+    questNav.onCommandSuccess(response -> successes.add(response.getCommandId()));
+    questNav.onCommandFailure(response -> failures.add(response.getCommandId()));
+    try (ProtobufSubscriber<Commands.ProtobufQuestNavCommand> requests =
+            client
+                .getProtobufTopic(REQUEST_TOPIC, new CommandProto())
+                .subscribe(
+                    Commands.ProtobufQuestNavCommand.newInstance(),
+                    PubSubOption.SEND_ALL,
+                    PubSubOption.pollStorage(20));
+        ProtobufPublisher<Commands.ProtobufQuestNavCommandResponse> responses =
+            client
+                .getProtobufTopic(RESPONSE_TOPIC, new CommandResponseProto())
+                .publish(PubSubOption.SEND_ALL, PubSubOption.KEEP_DUPLICATES)) {
+      questNav.setPose(new Pose3d());
+      int first = waitForRequestId(requests);
+
+      // Responses to commands this run hasn't sent, e.g. one left on the topic by an earlier run
+      respond(responses, first + 1, true);
+      respond(responses, first + 1000, false);
+      respond(responses, first, true);
+      waitFor(
+          () -> {
+            questNav.commandPeriodic();
+            return !successes.isEmpty();
+          },
+          2.0,
+          "first response");
+
+      // A second response to an answered command is ignored
+      respond(responses, first, false);
+      questNav.setPose(new Pose3d());
+      int second = waitForRequestId(requests);
+      assertEquals(first + 1, second);
+      respond(responses, second, false);
+      waitFor(
+          () -> {
+            questNav.commandPeriodic();
+            return !failures.isEmpty();
+          },
+          2.0,
+          "second response");
+
+      assertEquals(List.of(first), successes);
+      assertEquals(List.of(second), failures);
+    } finally {
+      questNav.onCommandSuccess(null);
+      questNav.onCommandFailure(null);
+    }
+  }
+
   /** Waits until the app's protocol version reads as {@code version}, then runs a few checks. */
   private static void waitForProtocolVersion(int version) {
     waitFor(
@@ -279,6 +339,35 @@ class QuestNavNetworkTest {
       sendFrame(0);
       questNav.commandPeriodic();
     }
+  }
+
+  /** Waits for the next command the robot sends and returns its ID. */
+  private static int waitForRequestId(
+      ProtobufSubscriber<Commands.ProtobufQuestNavCommand> requests) {
+    List<Integer> ids = new ArrayList<>();
+    waitFor(
+        () -> {
+          for (var request : requests.readQueueValues()) {
+            ids.add(request.getCommandId());
+          }
+          return !ids.isEmpty();
+        },
+        2.0,
+        "command request");
+    assertEquals(1, ids.size());
+    return ids.get(0);
+  }
+
+  private static void respond(
+      ProtobufPublisher<Commands.ProtobufQuestNavCommandResponse> responses,
+      int commandId,
+      boolean success) {
+    responses.set(
+        Commands.ProtobufQuestNavCommandResponse.newInstance()
+            .setCommandId(commandId)
+            .setSuccess(success)
+            .setErrorMessage(success ? "" : "test failure"));
+    client.flush();
   }
 
   /** Publishes one frame from the "Quest" and returns its frame count. */

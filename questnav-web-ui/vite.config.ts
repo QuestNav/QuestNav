@@ -35,7 +35,12 @@ export default defineConfig({
       '/api': {
         target: process.env.VITE_API_TARGET || 'http://192.168.1.100:5801',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        // The headset rejects state-changing requests whose Origin does not match its
+        // Host, and changeOrigin only rewrites Host
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => proxyReq.removeHeader('origin'))
+        }
       },
       '/ws': {
         target: process.env.VITE_WS_TARGET || 'ws://192.168.1.100:5801',

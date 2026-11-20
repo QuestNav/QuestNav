@@ -72,11 +72,20 @@ namespace QuestNav.QuestNav.AprilTag
         /// APK on Android). Bundled-name shadowing is rejected at upload time, so this
         /// order does not let a custom file silently override a bundled one.
         /// </summary>
-        /// <param name="fileName">The filename to load (must include extension).</param>
+        /// <param name="fileName">The file name to load, e.g. "2026-rebuilt-welded.json".
+        /// Anything other than a plain .json file name is rejected.</param>
         public async Task LoadJsonFromFileAsync(string fileName)
         {
+            // A persisted name can predate request validation, so check it here too.
+            if (!FileManager.TryResolveCustomFieldLayoutPath(fileName, out string customPath))
+            {
+                QueuedLogger.LogError(
+                    $"Field layout name '{fileName}' is not a plain .json file name; not loading it."
+                );
+                return;
+            }
+
             // 1) Custom-uploaded JSONs live in persistentDataPath; check there first.
-            string customPath = Path.Combine(FileManager.GetCustomFieldLayoutDir(), fileName);
             if (File.Exists(customPath))
             {
                 TryLoadFrom(customPath);

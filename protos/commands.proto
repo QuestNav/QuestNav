@@ -25,7 +25,7 @@ option csharp_namespace = "QuestNav.Protos.Generated";
 option java_package = "gg.questnav.questnav.protos.generated";
 
 // Import geometry messages for pose-related commands
-import "geometry3d.proto";
+import "wpimath/protobuf/geometry3d.proto";
 
 /*
  * Enumeration of available command types in the QuestNav system.

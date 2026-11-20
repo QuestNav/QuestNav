@@ -8,10 +8,6 @@
 */
 package gg.questnav.questnav;
 
-import static org.wpilib.units.Units.Microseconds;
-import static org.wpilib.units.Units.Milliseconds;
-import static org.wpilib.units.Units.Seconds;
-
 import gg.questnav.questnav.protos.generated.Commands;
 import gg.questnav.questnav.protos.generated.Data;
 import gg.questnav.questnav.protos.wpilib.CommandProto;
@@ -123,6 +119,9 @@ public class QuestNav {
    * Interval at which to check and log if the QuestNavLib version matches the QuestNav app version
    */
   private static final double VERSION_CHECK_INTERVAL_SECONDS = 5.0;
+
+  /** Time without a new frame after which the Quest is considered disconnected */
+  private static final double CONNECTION_TIMEOUT_SECONDS = 0.120;
 
   /** Battery percentage at or below which {@link #onLowBatteryCallback} fires */
   private int lowBatteryThreshold = 20;
@@ -540,9 +539,9 @@ public class QuestNav {
    * @return Boolean indicating if the Quest is connected (true) or not (false)
    */
   public boolean isConnected() {
-    return Seconds.of(Timer.getTimestamp())
-        .minus(Microseconds.of(frameDataSubscriber.getLastChange()))
-        .lt(Milliseconds.of(120));
+    long lastChange = frameDataSubscriber.getLastChange();
+    return lastChange != 0
+        && Timer.getTimestamp() - ntTimeToSeconds(lastChange) < CONNECTION_TIMEOUT_SECONDS;
   }
 
   /**
@@ -552,9 +551,7 @@ public class QuestNav {
    * @return The latency in milliseconds
    */
   public double getLatency() {
-    return Seconds.of(Timer.getTimestamp())
-        .minus(Microseconds.of(frameDataSubscriber.getLastChange()))
-        .in(Milliseconds);
+    return (Timer.getTimestamp() - ntTimeToSeconds(frameDataSubscriber.getLastChange())) * 1000.0;
   }
 
   /**
@@ -633,9 +630,30 @@ public class QuestNav {
     var result = new PoseFrame[frameDataArray.length];
     for (int i = 0; i < result.length; i++) {
       var frameData = frameDataArray[i];
-      result[i] = frameData.value;
+      var frame = frameData.value;
+      if (frame.dataTimestamp() == 0) {
+        // Older QuestNav apps don't send a capture time; fall back to the NT receive time
+        frame =
+            new PoseFrame(
+                frame.questPose3d(),
+                ntTimeToSeconds(frameData.serverTime),
+                frame.appTimestamp(),
+                frame.frameCount(),
+                frame.isTracking());
+      }
+      result[i] = frame;
     }
     return result;
+  }
+
+  /**
+   * Converts a NetworkTables timestamp (integer nanoseconds) to seconds.
+   *
+   * @param ntTime NetworkTables timestamp in nanoseconds
+   * @return The timestamp in seconds
+   */
+  private static double ntTimeToSeconds(long ntTime) {
+    return ntTime * 1e-9;
   }
 
   /**

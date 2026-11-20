@@ -118,7 +118,7 @@ namespace QuestNav.QuestNav.AprilTag
         /// </summary>
         private void OnAprilTagConfidencePresetChanged(int presetInt)
         {
-            // Convert via cast (validated 0..2 by ConfigManager). Default to Balanced
+            // Convert via cast (validated 0..3 by ConfigManager). Default to Balanced
             // for any future enum addition we don't recognize.
             ConfidencePreset preset = ConfidencePreset.Balanced;
             if (Enum.IsDefined(typeof(ConfidencePreset), presetInt))
@@ -338,11 +338,14 @@ namespace QuestNav.QuestNav.AprilTag
                     ? new HashSet<int>()
                     : new HashSet<int>(configuration.IgnoredIds);
             maxDistance = configuration.MaxDistance;
-            minimumNumberOfTags = configuration.MinimumNumberOfTags;
+            // A single-tag solve is ambiguous, so it is never solved or fused
+            minimumNumberOfTags = Math.Max(
+                configuration.MinimumNumberOfTags,
+                VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+            );
 
             // Forward the user's minimum-tags floor to the estimator so its Phase 1
-            // alignment gate honors the same value (otherwise the estimator's hardcoded
-            // INITIAL_ALIGNMENT_MIN_TAGS = 2 would override a user setting of 1).
+            // alignment gate honors the same value.
             vioAprilTagPoseEstimator.SetMinimumTags(minimumNumberOfTags);
         }
 
@@ -532,7 +535,8 @@ namespace QuestNav.QuestNav.AprilTag
                             // Step back from the lens to the headset center, in the camera's own frame
                             Pose3d headsetPose = cameraPose.TransformBy(camToHeadset);
 
-                            int tagCount = kept.Count;
+                            // Only tags that fit the solve count toward the two-tag floor
+                            int tagCount = poseLibResult.SupportingTags;
                             double inlierRatio =
                                 (poseLibResult.TotalPoints > 0)
                                     ? poseLibResult.AcceptedPoints / poseLibResult.TotalPoints
@@ -594,7 +598,7 @@ namespace QuestNav.QuestNav.AprilTag
 
                             QueuedLogger.Log(
                                 $"PoseLib estimate: Pos({headsetPose.X:F3}, {headsetPose.Y:F3}, {headsetPose.Z:F3}) "
-                                    + $"tags={tagCount} inliers={poseLibResult.AcceptedPoints}/{poseLibResult.TotalPoints} "
+                                    + $"tags={tagCount}/{kept.Count} inliers={poseLibResult.AcceptedPoints}/{poseLibResult.TotalPoints} "
                                     + $"ratio={inlierRatio:F2} dist={avgTagDistance:F2}m stdDev={linearStdDev:F4}"
                             );
                         }

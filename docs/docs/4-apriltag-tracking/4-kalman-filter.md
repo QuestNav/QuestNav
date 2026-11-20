@@ -79,9 +79,9 @@ Observations must pass phase-dependent quality gates before updating the filter.
 Before any accepted AprilTag observation, the Kalman filter runs on pure VIO in an arbitrary coordinate frame. The first observation meeting the minimum quality bar establishes the field alignment. Phase 1 also runs again after a `setPose` (the next good observation re-aligns to the tags) and during [re-alignment](#re-alignment).
 
 **Gate conditions:**
-- `tagCount >= userMinimumTags` (the **Minimum Tags Required** setting, default 2)
+- `tagCount >= max(2, userMinimumTags)` (the **Minimum Tags Required** setting, default 2; `MIN_TAGS_FOR_POSITION_UPDATE` is the floor)
 - `inlierRatio >= 0.6` (`INITIAL_ALIGNMENT_MIN_INLIER_RATIO`, not configurable)
-- While re-aligning, the stricter of these and the confidence preset's values: `tagCount >= max(userMinimumTags, presetMinTags)` and `inlierRatio >= max(0.6, presetMinInlierRatio)`
+- While re-aligning, the stricter of these and the confidence preset's values: `tagCount >= max(2, userMinimumTags, presetMinTags)` and `inlierRatio >= max(0.6, presetMinInlierRatio)`
 
 **On accept:**
 1. **Hard-reset the KF state** to the measured AprilTag position:
@@ -117,7 +117,7 @@ P = diag(σ_x², σ_y², σ_z²)
 After initial alignment, VIO is the primary pose source. AprilTag corrections are applied only if they meet the quality bar and agree with the estimate.
 
 **Quality gate:**
-- `tagCount >= max(userMinimumTags, presetMinTags)`; the **Minimum Tags Required** setting is a floor the preset cannot lower
+- `tagCount >= max(2, userMinimumTags, presetMinTags)`; the **Minimum Tags Required** setting is a floor the preset cannot lower, and neither can go below 2
 - `inlierRatio >= presetMinInlierRatio`
 
 ##### Confidence presets
@@ -129,9 +129,9 @@ The preset is chosen in the AprilTag tab (**Advanced**) and applies immediately.
 | Permissive | 0 | 2 | 0.75 |
 | Balanced (default) | 1 | 3 | 0.80 |
 | Strict | 2 | 4 | 0.90 |
-| Debug | 3 | 1 | 0.60 |
+| Debug | 3 | 2 | 0.60 |
 
-The Debug preset accepts single-tag solves, which can flip or misjudge depth. It is for bench testing only.
+The Debug preset accepts noisy solves with a low inlier ratio. It is for bench testing only. No preset accepts a single-tag solve, which can flip or misjudge depth.
 
 **Outlier gate:** the innovation `ν = z − x̂_capture` is compared with the estimate at capture time, using `S = P_capture + R`:
 
@@ -148,7 +148,7 @@ accept if  ‖ν‖ <= 0.5 m
 
 #### Re-alignment
 
-A wrong estimate (for example from a bad Phase 1 frame) makes good observations fail the outlier gate. Each rejected observation with at least 2 tags (`REALIGN_MIN_TAGS`) is compared with the first one of the current streak:
+A wrong estimate (for example from a bad Phase 1 frame) makes good observations fail the outlier gate. Each rejected observation (all of them passed the quality gate, so they have at least 2 tags) is compared with the first one of the current streak:
 
 - **Innovation within 0.5 m of the first** (`REALIGN_CONSENSUS_RADIUS`): the streak grows.
 - **Otherwise:** this observation starts a new streak.
@@ -312,7 +312,7 @@ While the headset reports position tracking as lost, QuestNav stops feeding VIO 
 
 ## Pose Reset
 
-A pose reset (`setPose` from the robot, or **Reset Pose** in the web API) moves the VR camera root so the headset sits at the requested position with the requested **yaw**. Pitch and roll of the request are ignored: the root only turns about the vertical axis, so the headset keeps the pitch and roll its gravity-aligned tracking measures. The filter is then re-initialized at that pose (`P = 0.001 × I`, yaw offset 0, history cleared), the reset epoch changes and the state becomes `POSE_RESET`. The next observation that passes Phase 1 aligns to the tags again.
+A pose reset (`setPose` from the robot, or **Reset Pose** in the web API) moves the VR camera root so the headset sits at the requested position with the requested **yaw**. Pitch and roll of the request are ignored: the root only turns about the vertical axis, so the headset keeps the pitch and roll its gravity-aligned tracking measures. The filter is then re-initialized at that pose (`P = 0.001 × I`, yaw offset 0, history cleared), the reset epoch changes and the state becomes `POSE_RESET`. The next observation that passes Phase 1 aligns to the tags again; it needs at least 2 tags, so a single tag never overrides the reset.
 
 Before applying it, the app validates the pose (finite values, a non-zero quaternion) and answers an invalid one with an error response. A pose outside the loaded field layout's bounds (plus 0.25 m) is applied, but logged as a warning.
 
@@ -353,6 +353,7 @@ It is published in `/QuestNav/frameData` on every main-loop frame (up to 120 Hz)
 | `defaultVioStdDevs` | 0.02, 0.02, 0.01 m | Process noise (x, y, z) per `VIO_NOISE_REFERENCE_PERIOD_SECONDS` |
 | `VIO_NOISE_REFERENCE_PERIOD_SECONDS` | 1/120 s | Time step the process noise is specified for |
 | `MULTI_TAG_LINEAR_STD_DEV_BASE` | 0.05 m | Base measurement noise |
+| `MIN_TAGS_FOR_POSITION_UPDATE` | 2 | Hard floor on tags in one frame for any position update, in every phase and preset |
 | `INITIAL_ALIGNMENT_MIN_TAGS` | 2 | Phase 1 tag minimum until the **Minimum Tags Required** setting is applied |
 | `INITIAL_ALIGNMENT_MIN_INLIER_RATIO` | 0.6 | Min inlier ratio for Phase 1 |
 | `CORRECTION_MIN_TAGS` | 3 | Phase 2 tags for the Balanced preset (`PRESET_*_MIN_TAGS` for the others) |
@@ -361,7 +362,6 @@ It is published in `/QuestNav/frameData` on every main-loop frame (up to 120 Hz)
 | `CORRECTION_GATE_MIN_DISTANCE` | 0.5 m | Innovations up to this size are always accepted |
 | `CORRECTION_MAX_POSITION_JUMP` | 2.0 m | Absolute cap on an accepted innovation |
 | `REALIGN_REJECTION_COUNT` | 5 | Agreeing rejections that trigger re-alignment |
-| `REALIGN_MIN_TAGS` | 2 | Min tags for a rejection to count toward re-alignment |
 | `REALIGN_CONSENSUS_RADIUS` | 0.5 m | How closely those rejections must agree |
 | `BUFFER_DURATION_SECONDS` | 0.5 s | Replay buffer duration |
 | `VIO_NOISE_MAX_DT_SECONDS` | 0.1 s | Longest time step process noise is added for, except across a tracking outage |

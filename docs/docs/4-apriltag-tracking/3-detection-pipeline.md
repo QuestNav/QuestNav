@@ -75,7 +75,7 @@ Two kinds of detection are dropped before anything else:
 1. IDs in the **Ignored Tag IDs** list
 2. IDs that are not in the loaded field layout, such as false decodes that would otherwise spoil the solve
 
-The frame is used only if at least **Minimum Tags Required** (1 to 4, default 2) detections remain.
+The frame is used only if at least **Minimum Tags Required** (2 to 4, default 2) detections remain. A single-tag frame is never solved, since a one-tag pose is ambiguous.
 
 ## Step 5: Multi-Tag PnP Solve
 
@@ -156,7 +156,7 @@ Before the observation reaches the Kalman filter, several confidence metrics are
 | Metric | Formula | Purpose |
 |--------|---------|---------|
 | **Inlier ratio** | `AcceptedPoints / TotalPoints` | Fraction of correspondences that PoseLib's RANSAC accepted. Higher = more reliable. |
-| **Tag count** | Detections left after filtering | More tags provide stronger geometric constraints. |
+| **Tag count** | Distinct tags with at least 3 of 4 corners fitting the solved pose (within the 12 px RANSAC threshold) | More tags provide stronger geometric constraints. A tag the solve mostly rejected does not count, so it cannot make up the two-tag floor. |
 | **Average tag distance** | Mean distance from the headset to each tag used | Distant tags are less precise. A frame above **Max Tag Distance** (default 4 m) is dropped here. |
 | **Dynamic std dev** | `0.05 × noiseScale × avgDist² / tagCount` | Measurement noise for the Kalman filter. Scales with distance, inversely with tag count. `noiseScale` is the **AprilTag Trust** setting (0.5 to 2.0). |
 

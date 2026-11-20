@@ -136,7 +136,8 @@ message ProtobufQuestNavFrameData {
    * - Synchronize with other sensor data
    * - Implement timeout detection
    * 
-   * This time is synchronized between devices by NT4.
+   * This time is synchronized between devices by NT4. It is 0 when unknown
+   * (time sync not yet established, or a QuestNav app too old to send it).
    */
   int64 server_timestamp = 5;
 }

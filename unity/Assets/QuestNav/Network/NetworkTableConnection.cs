@@ -48,13 +48,13 @@ namespace QuestNav.Network
         long NtNow { get; }
 
         /// <summary>
-        /// Get the time offset between server time and local time. Add this value to
-        /// local time to get the estimated equivalent server time. This returns the time
-        /// offset only if the client and server are connected and have exchanged
-        /// synchronization messages. Note the time offset may change over time as it is
-        /// periodically updated.
+        /// Gets the time offset between server time and local time. Add it to
+        /// <see cref="NtNow"/> to get the equivalent server time. The offset is only valid
+        /// once connected and time-synchronized with the server.
         /// </summary>
-        long ServerTimeOffset { get; }
+        /// <param name="offsetNs">Time offset in nanoseconds; only meaningful when this returns true</param>
+        /// <returns>True if the offset is valid</returns>
+        bool TryGetServerTimeOffset(out long offsetNs);
 
         /// <summary>
         /// Caches the last known IP address to detect changes
@@ -66,7 +66,7 @@ namespace QuestNav.Network
         /// </summary>
         /// <param name="frameCount">Current frame index</param>
         /// <param name="timeStamp">Current timestamp</param>
-        /// <param name="serverTimestamp">Current timestamp in server time</param>
+        /// <param name="serverTimestamp">Current NT server time in nanoseconds, or 0 if unknown</param>
         /// <param name="pose">Current field-relative position of the Quest headset</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
         void PublishFrameData(
@@ -295,14 +295,9 @@ namespace QuestNav.Network
         /// </summary>
         public long NtNow => ntInstance.Now();
 
-        /// <summary>
-        /// Get the time offset between server time and local time. Add this value to
-        /// local time to get the estimated equivalent server time. This returns the time
-        /// offset only if the client and server are connected and have exchanged
-        /// synchronization messages. Note the time offset may change over time as it is
-        /// periodically updated.
-        /// </summary>
-        public long ServerTimeOffset => ntInstance.GetServerTimeOffset();
+        /// <inheritdoc />
+        public bool TryGetServerTimeOffset(out long offsetNs) =>
+            ntInstance.TryGetServerTimeOffset(out offsetNs);
         #endregion
 
         #region Event Publishers
@@ -394,7 +389,7 @@ namespace QuestNav.Network
         /// </summary>
         /// <param name="frameCount">Unity frame count</param>
         /// <param name="timeStamp">Unity time stamp</param>
-        /// <param name="serverTimestamp">Current timestamp in server time</param>
+        /// <param name="serverTimestamp">Current NT server time in nanoseconds, or 0 if unknown</param>
         /// <param name="pose">Current VR headset position</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
         public void PublishFrameData(

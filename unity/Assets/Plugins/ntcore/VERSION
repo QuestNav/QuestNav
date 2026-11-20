@@ -1,0 +1,29 @@
+# Native NetworkTables libraries in this folder. Build steps: Assets/QuestNav/Native/NTCore/README.md
+allwpilib-tag: v2027.0.0-alpha-8
+allwpilib-commit: 4817543253e343afcf2b630537e995d74d21db62
+date: 2026-11-19
+
+# Android/arm64-v8a: libntcore.so libwpinet.so libwpiutil.so libdatalog.so
+# Built from the tag above with no patches, then llvm-strip --strip-unneeded.
+android-ndk: r27c (27.2.12479018, bundled with Unity 6000.3.21f1)
+android-platform: android-31
+android-stl: c++_static
+android-page-size: 16 KB (ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON)
+android-sha256:
+  cb2b560d40d48857c626c64c0e19248ff485253a6566ab7947fc7d29171d85b5  libntcore.so
+  25ce9774dc3ac8546be7447820f7e226ac185986d6b8f00b0424412b98ff28db  libwpinet.so
+  cf67ff486c69edf640854ec1a9bee0bff0741aa95854b1a995687ad595a70ef2  libwpiutil.so
+  61987d524e74f6537877834118caa764076b5fce870394c97ddfc287f1dfd3d5  libdatalog.so
+
+# Windows/x64: official WPILib release DLLs, windows/x86-64/shared/<name>.dll from each zip.
+# https://frcmaven.wpi.edu/artifactory/release/org/wpilib/<name>/<name>-cpp/2027.0.0-alpha-8/
+windows-artifacts (sha1 of the zip, matches the published .sha1):
+  org.wpilib.ntcore:ntcore-cpp:2027.0.0-alpha-8:windowsx86-64@zip     3405df83676c123ba73f920ffbac7ae2cebbfae2
+  org.wpilib.wpinet:wpinet-cpp:2027.0.0-alpha-8:windowsx86-64@zip     6f5309c8f00ce69e96cb0f2871d11f7a49aa916c
+  org.wpilib.wpiutil:wpiutil-cpp:2027.0.0-alpha-8:windowsx86-64@zip   27e55e6506c5044628d8e5ce4120f5236d6b4093
+  org.wpilib.datalog:datalog-cpp:2027.0.0-alpha-8:windowsx86-64@zip   b95e82f5b66064d1fc251c989d3c5182925011d4
+windows-sha256:
+  5b105f77d1205cb602035ca42e1ea2fb47428439dd88fd6c94eb8600abc2062f  ntcore.dll
+  134fe11c70a7ef34834aa3f0f3f436aa4b7f926d78dbf8ee1d0d2a903c342fb4  wpinet.dll
+  2fc6c62263a0ae19bfc849a30d9df658f7dfec4e978f1c0f21aa13bd80550345  wpiutil.dll
+  b8c1e27a72d81b402044c27db637edfffb4ccac92f1c616eeb2e518547b7543d  datalog.dll

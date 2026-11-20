@@ -61,12 +61,12 @@ namespace QuestNav.Tests
                 }
             }
 
-            public void Step(Translation3d fieldVelocity, int steps = 1)
+            public void Step(Translation3d fieldVelocity, int steps = 1, double dt = Dt)
             {
                 for (int i = 0; i < steps; i++)
                 {
-                    Time += Dt;
-                    Field = new Pose3d(Field.Translation + fieldVelocity * Dt, Field.Rotation);
+                    Time += dt;
+                    Field = new Pose3d(Field.Translation + fieldVelocity * dt, Field.Rotation);
                     Estimator.AddVioObservation(Vio, Time);
                 }
             }
@@ -107,7 +107,20 @@ namespace QuestNav.Tests
 
             public double PositionError =>
                 Estimator.EstimatedPose.Translation.GetDistance(Field.Translation);
+
+            /// <summary>
+            /// Applies a correction 0.3 m off the truth, inside the gate's minimum distance,
+            /// and returns the fraction of it the estimate moved: the Kalman gain.
+            /// </summary>
+            public double CorrectionGain()
+            {
+                var before = Estimator.EstimatedPose.Translation;
+                Observe(new Pose3d(Field.Translation + GainProbeOffset, Field.Rotation), Time);
+                return (Estimator.EstimatedPose.Translation - before).X / GainProbeOffset.X;
+            }
         }
+
+        private static readonly Translation3d GainProbeOffset = new Translation3d(0.3, 0.0, 0.0);
 
         [Test]
         public void FirstVioObservation_InitializesAtVioPose()
@@ -274,6 +287,110 @@ namespace QuestNav.Tests
                 sim.Estimator.EstimatedPose.Translation.GetDistance(sim.Field.Translation + biased),
                 0.01
             );
+        }
+
+        [Test]
+        public void ProcessNoise_ScalesWithElapsedTime()
+        {
+            var fast = new Sim();
+            fast.Align();
+            fast.Step(Translation3d.Zero, 30);
+
+            var slow = new Sim();
+            slow.Align();
+            slow.Step(Translation3d.Zero, 15, 2 * Dt);
+
+            double fastGain = fast.CorrectionGain();
+            Assert.Greater(fastGain, 0.0);
+            Assert.AreEqual(fastGain, slow.CorrectionGain(), 1e-9);
+        }
+
+        [Test]
+        public void ProcessNoise_ClampsLongSteps()
+        {
+            var hitch = new Sim();
+            hitch.Align();
+            hitch.Step(Translation3d.Zero, 1, 2.0);
+
+            var capped = new Sim();
+            capped.Align();
+            capped.Step(
+                Translation3d.Zero,
+                1,
+                VioAprilTagPoseEstimatorConstants.VIO_NOISE_MAX_DT_SECONDS
+            );
+
+            Assert.AreEqual(capped.CorrectionGain(), hitch.CorrectionGain(), 1e-9);
+        }
+
+        [Test]
+        public void Phase2_LatentCorrectionMatchesImmediateCorrection()
+        {
+            var velocity = new Translation3d(1.0, -0.5, 0.0);
+            var offset = new Translation3d(0.2, 0.1, 0.0);
+
+            // Applied when captured
+            var immediate = new Sim();
+            immediate.Align();
+            immediate.Step(velocity, 20);
+            immediate.Observe(
+                new Pose3d(immediate.Field.Translation + offset, immediate.Field.Rotation),
+                immediate.Time
+            );
+            immediate.Step(velocity, 20);
+
+            // Same capture, delivered 20 VIO steps later
+            var latent = new Sim();
+            latent.Align();
+            latent.Step(velocity, 20);
+            var captured = new Pose3d(latent.Field.Translation + offset, latent.Field.Rotation);
+            double captureTime = latent.Time;
+            latent.Step(velocity, 20);
+            latent.Observe(captured, captureTime);
+
+            Assert.AreEqual(
+                0.0,
+                latent.Estimator.EstimatedPose.Translation.GetDistance(
+                    immediate.Estimator.EstimatedPose.Translation
+                ),
+                1e-9
+            );
+
+            // Replay adds the process noise since capture once, so the covariance agrees too
+            Assert.AreEqual(immediate.CorrectionGain(), latent.CorrectionGain(), 1e-9);
+        }
+
+        [Test]
+        public void AprilTagObservation_OlderThanBufferIsIgnored()
+        {
+            var sim = new Sim();
+            sim.Estimator.AddVioObservation(sim.Vio, sim.Time);
+            var captured = sim.Field;
+            double captureTime = sim.Time - Dt;
+            sim.Step(Translation3d.Zero, 5);
+
+            sim.Observe(captured, captureTime);
+
+            Assert.IsFalse(sim.Estimator.HasInitialAlignment);
+        }
+
+        [Test]
+        public void AprilTagObservation_PastVioGapIsIgnored()
+        {
+            var sim = new Sim();
+            sim.Align();
+            var before = sim.Estimator.EstimatedPose;
+
+            // No VIO since the last snapshot to compensate a capture this far past it
+            sim.Observe(
+                new Pose3d(
+                    sim.Field.Translation + new Translation3d(0.3, 0.0, 0.0),
+                    sim.Field.Rotation
+                ),
+                sim.Time + 2 * VioAprilTagPoseEstimatorConstants.MAX_CAPTURE_VIO_GAP_SECONDS
+            );
+
+            Assert.AreEqual(before, sim.Estimator.EstimatedPose);
         }
 
         [Test]

@@ -33,7 +33,8 @@ namespace QuestNav.QuestNav.Estimation
         /// Applies an AprilTag observation, subject to confidence-based gating. In Phase 1 it
         /// aligns the VIO frame to the field (position and yaw); in Phase 2 it applies a
         /// latency-compensated position correction if it passes the outlier gate.
-        /// Observations with non-finite values or non-positive std devs are ignored.
+        /// Observations with non-finite values or non-positive std devs are ignored, as are
+        /// captures older than the snapshot buffer or not covered by recent VIO.
         /// </summary>
         void AddAprilTagObservation(
             Translation3d measuredPosition,
@@ -91,18 +92,21 @@ namespace QuestNav.QuestNav.Estimation
             public Translation3d Position;
             public Rotation3d Rotation;
             public Matrix<double> EstimatedState;
+            public Matrix<double> Covariance;
 
             public VIOSnapshot(
                 double timestamp,
                 Translation3d position,
                 Rotation3d rotation,
-                Matrix<double> estimatedState
+                Matrix<double> estimatedState,
+                Matrix<double> covariance
             )
             {
                 Timestamp = timestamp;
                 Position = position;
                 Rotation = rotation;
                 EstimatedState = estimatedState;
+                Covariance = covariance;
             }
         }
 
@@ -131,6 +135,7 @@ namespace QuestNav.QuestNav.Estimation
         private Translation3d rejectionStreakInnovation;
 
         private int nonFiniteInputCount;
+        private int uncompensatedObservationCount;
 
         // Runtime-tunable Phase-2 correction thresholds. Initialized from the BALANCED
         // preset; SetConfidencePreset(...) overrides them at runtime in response to a
@@ -257,18 +262,33 @@ namespace QuestNav.QuestNav.Estimation
         /// <summary>Logs a dropped input, rate-limited so a bad stream cannot flood the log.</summary>
         private void LogNonFiniteInput(string source)
         {
-            nonFiniteInputCount++;
-            if (
-                (nonFiniteInputCount - 1)
-                    % VioAprilTagPoseEstimatorConstants.NON_FINITE_LOG_INTERVAL
-                == 0
-            )
-            {
-                QueuedLogger.LogWarning(
-                    $"Ignored {source} with non-finite or invalid values "
-                        + $"({nonFiniteInputCount} ignored so far)"
-                );
-            }
+            LogRateLimited(
+                ref nonFiniteInputCount,
+                $"Ignored {source} with non-finite or invalid values"
+            );
+        }
+
+        /// <summary>Logs the first of a kind of dropped input, then every Nth one.</summary>
+        private static void LogRateLimited(ref int count, string message)
+        {
+            count++;
+            if ((count - 1) % VioAprilTagPoseEstimatorConstants.NON_FINITE_LOG_INTERVAL == 0)
+                QueuedLogger.LogWarning($"{message} ({count} ignored so far)");
+        }
+
+        /// <summary>
+        /// Process noise for a VIO step of <paramref name="dt"/> seconds. The step is clamped
+        /// so a pause or app hitch does not inflate the covariance.
+        /// </summary>
+        private Matrix<double> ProcessNoise(double dt)
+        {
+            double clamped = Math.Clamp(
+                dt,
+                0.0,
+                VioAprilTagPoseEstimatorConstants.VIO_NOISE_MAX_DT_SECONDS
+            );
+            return q
+                * (clamped / VioAprilTagPoseEstimatorConstants.VIO_NOISE_REFERENCE_PERIOD_SECONDS);
         }
 
         /// <inheritdoc/>
@@ -295,7 +315,7 @@ namespace QuestNav.QuestNav.Estimation
 
             snapshotBuffer.Clear();
             snapshotBuffer.AddLast(
-                new VIOSnapshot(timestamp, pose.Translation, pose.Rotation, x0.Clone())
+                new VIOSnapshot(timestamp, pose.Translation, pose.Rotation, x0.Clone(), p0.Clone())
             );
         }
 
@@ -321,6 +341,7 @@ namespace QuestNav.QuestNav.Estimation
             }
 
             Translation3d rawDisplacement = vioPose.Translation - previousVioPosition;
+            double dt = timestamp - snapshotBuffer.Last.Value.Timestamp;
             previousVioPosition = vioPose.Translation;
             latestRotation = vioPose.Rotation;
 
@@ -329,7 +350,7 @@ namespace QuestNav.QuestNav.Estimation
             // orientation at startup. The yawOffset aligns VIO north with true FRC north.
             Translation3d displacement = rawDisplacement.RotateBy(new Rotation3d(0, 0, yawOffset));
 
-            filter.Predict(f, q);
+            filter.Predict(f, ProcessNoise(dt));
 
             var state = filter.State;
             var corrected = state + ToColumnVector(displacement);
@@ -337,7 +358,13 @@ namespace QuestNav.QuestNav.Estimation
 
             PruneBuffer(timestamp);
             snapshotBuffer.AddLast(
-                new VIOSnapshot(timestamp, vioPose.Translation, vioPose.Rotation, corrected.Clone())
+                new VIOSnapshot(
+                    timestamp,
+                    vioPose.Translation,
+                    vioPose.Rotation,
+                    corrected.Clone(),
+                    filter.Cov.Clone()
+                )
             );
         }
 
@@ -363,6 +390,19 @@ namespace QuestNav.QuestNav.Estimation
             )
             {
                 LogNonFiniteInput("AprilTag observation");
+                return;
+            }
+
+            // The measurement is from capture time, so it is fused against the VIO snapshot
+            // from then and the VIO motion since is replayed on top
+            var captureNode = FindCaptureSnapshot(timestampSeconds);
+            if (captureNode == null)
+            {
+                LogRateLimited(
+                    ref uncompensatedObservationCount,
+                    $"Ignored AprilTag observation captured at {timestampSeconds:F3}s: "
+                        + "no VIO history to latency-compensate it against"
+                );
                 return;
             }
 
@@ -398,42 +438,24 @@ namespace QuestNav.QuestNav.Estimation
                 // VIO origin and tight covariance (P=0.001*I), so a standard KF update would
                 // barely move the state. Instead, directly reset to the measured position.
                 var x0 = ToColumnVector(measuredPosition);
-                var p0 = DenseMatrix.CreateDiagonal(3, 3, i => stdDevs[i, 0] * stdDevs[i, 0]);
+                var p0 = StdDevsToR(stdDevs);
                 filter = new DiscreteKalmanFilter(x0, p0);
 
-                // The measurement is from capture time, so align against the VIO snapshot
-                // from then and replay the VIO motion since.
-                var captureNode = FindSnapshotAtOrBefore(timestampSeconds);
-                if (captureNode == null)
-                {
-                    ApplyYawCorrection(measuredRotation, latestRotation);
-                    snapshotBuffer.Clear();
-                    snapshotBuffer.AddLast(
-                        new VIOSnapshot(
-                            timestampSeconds,
-                            previousVioPosition,
-                            latestRotation,
-                            x0.Clone()
-                        )
-                    );
-                }
-                else
-                {
-                    ApplyYawCorrection(measuredRotation, captureNode.Value.Rotation);
+                ApplyYawCorrection(measuredRotation, captureNode.Value.Rotation);
 
-                    // Older snapshots hold pre-alignment states that replay must never restore
-                    while (snapshotBuffer.First != captureNode)
-                        snapshotBuffer.RemoveFirst();
+                // Older snapshots hold pre-alignment states that replay must never restore
+                while (snapshotBuffer.First != captureNode)
+                    snapshotBuffer.RemoveFirst();
 
-                    var capture = captureNode.Value;
-                    captureNode.Value = new VIOSnapshot(
-                        capture.Timestamp,
-                        capture.Position,
-                        capture.Rotation,
-                        x0.Clone()
-                    );
-                    ReplayFrom(captureNode);
-                }
+                var capture = captureNode.Value;
+                captureNode.Value = new VIOSnapshot(
+                    capture.Timestamp,
+                    capture.Position,
+                    capture.Rotation,
+                    x0.Clone(),
+                    p0.Clone()
+                );
+                ReplayFrom(captureNode);
 
                 hasInitialAlignment = true;
                 realignPending = false;
@@ -461,7 +483,9 @@ namespace QuestNav.QuestNav.Estimation
                 return;
             }
 
-            if (!PassesOutlierGate(measuredPosition, stdDevs, timestampSeconds, out var innovation))
+            if (
+                !PassesOutlierGate(measuredPosition, stdDevs, captureNode.Value, out var innovation)
+            )
             {
                 TrackGateRejection(innovation, tagCount);
                 return;
@@ -469,7 +493,7 @@ namespace QuestNav.QuestNav.Estimation
 
             // High-confidence correction — update position only, yaw is kept from Phase 1
             rejectionStreakCount = 0;
-            ApplyKfUpdate(measuredPosition, stdDevs, timestampSeconds);
+            ApplyKfUpdate(measuredPosition, stdDevs, captureNode);
         }
 
         /// <inheritdoc/>
@@ -550,7 +574,8 @@ namespace QuestNav.QuestNav.Estimation
                     (snapshot.Position - oldVioPosition).RotateBy(frameRotation)
                         + newVioPose.Translation,
                     snapshot.Rotation.RotateBy(frameRotation),
-                    snapshot.EstimatedState
+                    snapshot.EstimatedState,
+                    snapshot.Covariance
                 );
             }
 
@@ -567,23 +592,19 @@ namespace QuestNav.QuestNav.Estimation
         /// <summary>
         /// Checks the measurement against the estimate at capture time. It is accepted within
         /// the minimum distance; beyond it, it must also pass the squared Mahalanobis distance
-        /// (S = P + R) and the absolute distance cap.
+        /// (S = P + R, both at capture time) and the absolute distance cap.
         /// </summary>
         private bool PassesOutlierGate(
             Translation3d measuredPosition,
             Matrix<double> stdDevs,
-            double timestampSeconds,
+            VIOSnapshot capture,
             out Translation3d innovation
         )
         {
-            var captureNode = FindSnapshotAtOrBefore(timestampSeconds);
-            var stateAtCapture =
-                captureNode != null ? captureNode.Value.EstimatedState : filter.State;
-
-            var nu = ToColumnVector(measuredPosition) - stateAtCapture;
+            var nu = ToColumnVector(measuredPosition) - capture.EstimatedState;
             innovation = new Translation3d(nu[0, 0], nu[1, 0], nu[2, 0]);
 
-            var innovationCov = filter.Cov + StdDevsToR(stdDevs);
+            var innovationCov = capture.Covariance + StdDevsToR(stdDevs);
             double mahalanobisSquared = (nu.Transpose() * innovationCov.Solve(nu))[0, 0];
             double distance = innovation.Norm;
 
@@ -643,32 +664,31 @@ namespace QuestNav.QuestNav.Estimation
             );
         }
 
-        /// <summary>Applies a KF measurement update with latency-compensated replay.</summary>
+        /// <summary>
+        /// Applies a KF measurement update at capture time, rewinding the state and
+        /// covariance to the capture snapshot, then replays the VIO motion since.
+        /// </summary>
         private void ApplyKfUpdate(
             Translation3d measuredPosition,
             Matrix<double> stdDevs,
-            double timestampSeconds
+            LinkedListNode<VIOSnapshot> captureNode
         )
         {
-            var z = ToColumnVector(measuredPosition);
-            var R = StdDevsToR(stdDevs);
+            var snapshot = captureNode.Value;
+            filter = new DiscreteKalmanFilter(
+                snapshot.EstimatedState.Clone(),
+                snapshot.Covariance.Clone()
+            );
 
-            var bestNode = FindSnapshotAtOrBefore(timestampSeconds);
-            if (bestNode == null)
-            {
-                filter.Update(z, h, R);
-            }
-            else
-            {
-                var snapshot = bestNode.Value;
-                filter = new DiscreteKalmanFilter(
-                    snapshot.EstimatedState.Clone(),
-                    filter.Cov.Clone()
-                );
-
-                filter.Update(z, h, R);
-                ReplayFrom(bestNode);
-            }
+            filter.Update(ToColumnVector(measuredPosition), h, StdDevsToR(stdDevs));
+            captureNode.Value = new VIOSnapshot(
+                snapshot.Timestamp,
+                snapshot.Position,
+                snapshot.Rotation,
+                filter.State.Clone(),
+                filter.Cov.Clone()
+            );
+            ReplayFrom(captureNode);
         }
 
         /// <summary>Returns the newest snapshot at or before the timestamp, or null if none.</summary>
@@ -681,8 +701,24 @@ namespace QuestNav.QuestNav.Estimation
         }
 
         /// <summary>
+        /// Returns the snapshot an AprilTag capture is fused against, or null when the capture
+        /// is older than the buffer or too far past the snapshot before it.
+        /// </summary>
+        private LinkedListNode<VIOSnapshot> FindCaptureSnapshot(double timestampSeconds)
+        {
+            var node = FindSnapshotAtOrBefore(timestampSeconds);
+            if (
+                node == null
+                || timestampSeconds - node.Value.Timestamp
+                    > VioAprilTagPoseEstimatorConstants.MAX_CAPTURE_VIO_GAP_SECONDS
+            )
+                return null;
+            return node;
+        }
+
+        /// <summary>
         /// Re-applies the VIO displacements recorded after startNode on top of the current
-        /// filter state, rewriting each later snapshot's estimated state.
+        /// filter state, rewriting each later snapshot's estimated state and covariance.
         /// </summary>
         private void ReplayFrom(LinkedListNode<VIOSnapshot> startNode)
         {
@@ -697,7 +733,10 @@ namespace QuestNav.QuestNav.Estimation
                     new Rotation3d(0, 0, yawOffset)
                 );
 
-                filter.Predict(f, q);
+                filter.Predict(
+                    f,
+                    ProcessNoise(replayNode.Value.Timestamp - prevReplayNode.Value.Timestamp)
+                );
 
                 var state = filter.State;
                 var corrected = state + ToColumnVector(displacement);
@@ -707,7 +746,8 @@ namespace QuestNav.QuestNav.Estimation
                     replayNode.Value.Timestamp,
                     replayNode.Value.Position,
                     replayNode.Value.Rotation,
-                    corrected.Clone()
+                    corrected.Clone(),
+                    filter.Cov.Clone()
                 );
 
                 prevReplayNode = replayNode;

@@ -8,13 +8,19 @@
 */
 package gg.questnav.questnav;
 
+import org.wpilib.util.struct.Struct;
+import org.wpilib.util.struct.StructGenerator;
+import org.wpilib.util.struct.StructSerializable;
+
 /**
  * What the pose the Quest reports is referenced to.
+ *
+ * <p>Struct logs store the constant's ordinal, so new constants go at the end.
  *
  * @see PoseFrame#alignmentState()
  * @see QuestNav#getAlignmentState()
  */
-public enum AlignmentState {
+public enum AlignmentState implements StructSerializable {
   /**
    * Not known: the QuestNav app is too old to report it (protocol version 1), it reported a state
    * this library doesn't know, or there is no data.
@@ -38,5 +44,8 @@ public enum AlignmentState {
    * the tags have consistently disagreed with the pose, or tracking relocalized after an outage.
    * The pose continues from the old placement until the tags re-align it.
    */
-  REALIGNING
+  REALIGNING;
+
+  /** Struct serializer, so {@link PoseFrame} can be logged as a struct */
+  public static final Struct<AlignmentState> struct = StructGenerator.genEnum(AlignmentState.class);
 }

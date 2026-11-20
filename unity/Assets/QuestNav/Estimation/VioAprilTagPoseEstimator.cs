@@ -551,8 +551,9 @@ namespace QuestNav.QuestNav.Estimation
         }
 
         /// <summary>
-        /// Checks the measurement against the estimate at capture time: rejects it when the
-        /// squared Mahalanobis distance (S = P + R) or the Euclidean distance is too large.
+        /// Checks the measurement against the estimate at capture time. It is accepted within
+        /// the minimum distance; beyond it, it must also pass the squared Mahalanobis distance
+        /// (S = P + R) and the absolute distance cap.
         /// </summary>
         private bool PassesOutlierGate(
             Translation3d measuredPosition,
@@ -573,8 +574,12 @@ namespace QuestNav.QuestNav.Estimation
             double distance = innovation.Norm;
 
             if (
-                mahalanobisSquared <= VioAprilTagPoseEstimatorConstants.CORRECTION_GATE_CHI_SQUARED
-                && distance <= VioAprilTagPoseEstimatorConstants.CORRECTION_MAX_POSITION_JUMP
+                distance <= VioAprilTagPoseEstimatorConstants.CORRECTION_GATE_MIN_DISTANCE
+                || (
+                    mahalanobisSquared
+                        <= VioAprilTagPoseEstimatorConstants.CORRECTION_GATE_CHI_SQUARED
+                    && distance <= VioAprilTagPoseEstimatorConstants.CORRECTION_MAX_POSITION_JUMP
+                )
             )
                 return true;
 

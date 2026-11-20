@@ -38,6 +38,8 @@ jobs:
             java:
               - 'questnav-lib/**/*.java'
               - 'questnav-lib/**/*.gradle'
+              - 'questnav-lib/gradle.properties'
+              - 'questnav-lib/src/generate/**'
             csharp:
               - 'unity/**/*.cs'
               - 'unity/**/*.json'

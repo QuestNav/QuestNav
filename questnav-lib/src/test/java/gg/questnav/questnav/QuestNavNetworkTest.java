@@ -223,11 +223,13 @@ class QuestNavNetworkTest {
     Consumer<String> reporter = questNav.warningReporter;
     questNav.warningReporter = warnings::add;
     try {
+      // A legacy app sends neither field; the epoch here shows it is ignored for version 1
       waitFor(
           () -> {
-            sendFrame(0);
+            sendFrame(0, 0, 5);
             questNav.commandPeriodic();
-            return questNav.getQuestNavProtocolVersion().equals(OptionalInt.of(1));
+            return questNav.getQuestNavProtocolVersion().equals(OptionalInt.of(1))
+                && questNav.getResetEpoch().isEmpty();
           },
           2.0,
           "legacy protocol version");
@@ -258,6 +260,28 @@ class QuestNavNetworkTest {
       assertTrue(warnings.get(1).contains("needs at least version"), warnings.get(1));
     } finally {
       questNav.warningReporter = reporter;
+    }
+  }
+
+  @Test
+  void alignmentStateAndResetEpochAreReported() {
+    try (IntegerPublisher protocolPublisher = client.getIntegerTopic(PROTOCOL_TOPIC).publish()) {
+      protocolPublisher.set(2);
+      questNav.getAllUnreadPoseFrames();
+      waitFor(
+          () -> {
+            sendFrame(0, Data.AlignmentState.ALIGNMENT_STATE_TAG_ALIGNED_VALUE, 7);
+            return questNav.getAlignmentState() == AlignmentState.TAG_ALIGNED
+                && questNav.getResetEpoch().equals(OptionalInt.of(7));
+          },
+          2.0,
+          "alignment state");
+
+      // Also kept when the frame's capture time falls back to the receive time
+      PoseFrame[] frames = questNav.getAllUnreadPoseFrames();
+      PoseFrame last = frames[frames.length - 1];
+      assertEquals(AlignmentState.TAG_ALIGNED, last.alignmentState());
+      assertEquals(7, last.resetEpoch());
     }
   }
 
@@ -361,11 +385,25 @@ class QuestNavNetworkTest {
 
   /** Publishes one frame from the "Quest" and returns its frame count. */
   private static int sendFrame(long serverTimestampNs) {
+    return sendFrame(serverTimestampNs, 0, 0);
+  }
+
+  /**
+   * Publishes one frame from the "Quest" with an alignment state and reset epoch (0 = not sent) and
+   * returns its frame count.
+   */
+  private static int sendFrame(long serverTimestampNs, int alignmentState, int resetEpoch) {
     var msg =
         Data.ProtobufQuestNavFrameData.newInstance()
             .setFrameCount(++frameCount)
             .setTimestamp(frameCount * 0.02)
             .setIsTracking(true);
+    if (alignmentState != 0) {
+      msg.setAlignmentStateValue(alignmentState);
+    }
+    if (resetEpoch != 0) {
+      msg.setResetEpoch(resetEpoch);
+    }
     new Pose3dProto().pack(msg.getMutablePose3D(), new Pose3d(1, 2, 0, new Rotation3d(0, 0, 0.5)));
     if (serverTimestampNs != 0) {
       msg.setServerTimestamp(serverTimestampNs);

@@ -132,6 +132,9 @@ public class QuestNav {
   /** Protocol version of QuestNav apps that don't publish one */
   private static final int LEGACY_PROTOCOL_VERSION = 1;
 
+  /** First protocol version whose frames carry the alignment state and reset epoch */
+  private static final int ALIGNMENT_PROTOCOL_VERSION = 2;
+
   /** Number of sent commands remembered while waiting for their responses */
   private static final int MAX_PENDING_COMMANDS = 32;
 
@@ -669,6 +672,39 @@ public class QuestNav {
   }
 
   /**
+   * Gets what the Quest's pose is currently referenced to: raw tracking, a pose reset, or AprilTag
+   * alignment. Use it, for example, to only trust the Quest's field position once AprilTags have
+   * aligned it.
+   *
+   * @return The latest frame's alignment state, or {@link AlignmentState#UNKNOWN} if the Quest is
+   *     disconnected or its QuestNav app is too old to report it
+   * @see PoseFrame#alignmentState()
+   */
+  public AlignmentState getAlignmentState() {
+    if (!isConnected()) {
+      return AlignmentState.UNKNOWN;
+    }
+    return frameDataSubscriber.get().alignmentState();
+  }
+
+  /**
+   * Gets the Quest's current reset epoch, a counter that changes whenever its pose jumps instead of
+   * following its motion (pose reset, AprilTag alignment, tracking relocalization). Compare it with
+   * an earlier value to tell whether the pose has jumped since.
+   *
+   * @return The latest frame's reset epoch, or empty if the Quest is disconnected or its QuestNav
+   *     app is too old to report it
+   * @see PoseFrame#resetEpoch()
+   */
+  public OptionalInt getResetEpoch() {
+    var protocolVersion = getQuestNavProtocolVersion();
+    if (protocolVersion.isEmpty() || protocolVersion.getAsInt() < ALIGNMENT_PROTOCOL_VERSION) {
+      return OptionalInt.empty();
+    }
+    return OptionalInt.of(frameDataSubscriber.get().resetEpoch());
+  }
+
+  /**
    * Retrieves all new pose frames received from the Quest since the last call to this method.
    *
    * <p>This is the primary method for integrating QuestNav with FRC pose estimation systems. It
@@ -713,7 +749,9 @@ public class QuestNav {
                 ntTimeToSeconds(frameData.serverTime),
                 frame.appTimestamp(),
                 frame.frameCount(),
-                frame.isTracking());
+                frame.isTracking(),
+                frame.alignmentState(),
+                frame.resetEpoch());
       }
       result[i] = frame;
     }

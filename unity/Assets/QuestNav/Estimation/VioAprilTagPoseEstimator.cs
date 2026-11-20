@@ -63,6 +63,19 @@ namespace QuestNav.QuestNav.Estimation
         void HandleTrackingLost();
 
         /// <summary>
+        /// Gets the raw VIO pose at <paramref name="timestamp"/> (the newest snapshot at or
+        /// before it, or the oldest one kept when it is older than the buffer) and the latest
+        /// raw VIO pose, to latency-compensate a pose reset. Returns false when there is no
+        /// consistent VIO history: before the first observation, while tracking is lost, or
+        /// while a recenter is pending.
+        /// </summary>
+        bool TryGetVioMotionSince(
+            double timestamp,
+            out Pose3d vioAtTimestamp,
+            out Pose3d latestVio
+        );
+
+        /// <summary>
         /// Updates the Phase-2 correction confidence preset. Tighter presets reject more
         /// observations but produce a more conservative pose; looser presets are useful
         /// when the default tuning never converges (e.g. only a single tag is visible).
@@ -584,6 +597,24 @@ namespace QuestNav.QuestNav.Estimation
             // the re-base waits for the next VIO observation.
             recenterPending = true;
             QueuedLogger.LogWarning("VIO recenter detected; re-basing on the next VIO frame");
+        }
+
+        /// <inheritdoc/>
+        public bool TryGetVioMotionSince(
+            double timestamp,
+            out Pose3d vioAtTimestamp,
+            out Pose3d latestVio
+        )
+        {
+            vioAtTimestamp = null;
+            latestVio = null;
+            if (!initialized || trackingLost || recenterPending || !double.IsFinite(timestamp))
+                return false;
+
+            var node = FindSnapshotAtOrBefore(timestamp) ?? snapshotBuffer.First;
+            vioAtTimestamp = new Pose3d(node.Value.Position, node.Value.Rotation);
+            latestVio = new Pose3d(previousVioPosition, latestRotation);
+            return true;
         }
 
         /// <inheritdoc/>

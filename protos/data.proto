@@ -171,6 +171,10 @@ message ProtobufQuestNavFrameData {
  * troubleshooting scenarios.
  */
 message ProtobufQuestNavDeviceData {
+  // Was the tracking state, which moved to ProtobufQuestNavFrameData.isTracking.
+  reserved 2;
+  reserved "currently_tracking";
+
   /*
    * Count of tracking loss events since app startup.
    * 

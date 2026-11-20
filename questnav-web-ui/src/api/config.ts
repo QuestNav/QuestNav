@@ -39,6 +39,7 @@ class ConfigApi extends QuestNavApi {
   async uploadDatabase(file: File): Promise<SimpleResponse> {
     const response = await fetch(`${this.baseUrl}/api/upload-database`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/octet-stream' },
       body: file
     })
     if (!response.ok) {

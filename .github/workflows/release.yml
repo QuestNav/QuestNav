@@ -95,6 +95,7 @@ jobs:
     uses: ./.github/workflows/reusable-build-csharp.yml
     with:
       version: ${{ inputs.version }}
+      development-build: false
     secrets:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}

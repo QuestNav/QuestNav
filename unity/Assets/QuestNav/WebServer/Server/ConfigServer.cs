@@ -45,7 +45,6 @@ namespace QuestNav.WebServer.Server
         private CancellationTokenSource cancellationTokenSource;
         private readonly IConfigManager configManager;
         private readonly int port;
-        private readonly bool enableCorsDevMode;
         private readonly string staticPath;
         private readonly WebServerManager webServerManager;
         private readonly StatusProvider statusProvider;
@@ -82,7 +81,6 @@ namespace QuestNav.WebServer.Server
         /// </summary>
         /// <param name="configManager">Configuration manager for reading/writing settings.</param>
         /// <param name="port">HTTP server port.</param>
-        /// <param name="enableCorsDevMode">Enable CORS for development.</param>
         /// <param name="staticPath">Path to static web UI files.</param>
         /// <param name="webServerManager">Web server manager for restart/reset callbacks.</param>
         /// <param name="statusProvider">Status provider instance for runtime data.</param>
@@ -92,7 +90,6 @@ namespace QuestNav.WebServer.Server
         public ConfigServer(
             IConfigManager configManager,
             int port,
-            bool enableCorsDevMode,
             string staticPath,
             WebServerManager webServerManager,
             StatusProvider statusProvider,
@@ -103,7 +100,6 @@ namespace QuestNav.WebServer.Server
         {
             this.configManager = configManager;
             this.port = port;
-            this.enableCorsDevMode = enableCorsDevMode;
             this.staticPath = staticPath;
             this.webServerManager = webServerManager;
             this.statusProvider = statusProvider;
@@ -269,6 +265,114 @@ namespace QuestNav.WebServer.Server
             await context.SendStringAsync(json, "application/json", System.Text.Encoding.UTF8);
         }
 
+        private static bool IsStateChanging(HttpVerbs verb)
+        {
+            return verb == HttpVerbs.Post
+                || verb == HttpVerbs.Put
+                || verb == HttpVerbs.Patch
+                || verb == HttpVerbs.Delete;
+        }
+
+        /// <summary>
+        /// The layout name from a /api/apriltag-field-layouts/{name} path, URL-decoded once.
+        /// </summary>
+        private static string DecodeLayoutSegment(string path)
+        {
+            return Uri.UnescapeDataString(path.Substring("/api/apriltag-field-layouts/".Length));
+        }
+
+        /// <summary>
+        /// Reads the request body into memory, refusing more than <paramref name="maxBytes"/>.
+        /// Returns null after sending 413 if the body is too large.
+        /// </summary>
+        private async Task<byte[]> ReadBodyCappedAsync(IHttpContext context, int maxBytes)
+        {
+            if (context.Request.ContentLength64 > maxBytes)
+            {
+                await SendBodyTooLarge(context, maxBytes);
+                return null;
+            }
+
+            using var buffer = new MemoryStream();
+            var input = context.Request.InputStream;
+            byte[] chunk = new byte[81920];
+            int read;
+            while ((read = await input.ReadAsync(chunk, 0, chunk.Length)) > 0)
+            {
+                if (buffer.Length + read > maxBytes)
+                {
+                    await SendBodyTooLarge(context, maxBytes);
+                    return null;
+                }
+                buffer.Write(chunk, 0, read);
+            }
+            return buffer.ToArray();
+        }
+
+        /// <summary>
+        /// Reads a JSON request body. Returns null after sending 415 if the Content-Type is
+        /// not application/json (which also stops cross-site "simple" form and text/plain
+        /// posts), or 413 if the body is larger than <paramref name="maxBytes"/>.
+        /// </summary>
+        private async Task<string> ReadJsonBodyAsync(IHttpContext context, int maxBytes)
+        {
+            if (
+                !RequestValidation.HasMediaType(
+                    context.Request.Headers["Content-Type"],
+                    "application/json"
+                )
+            )
+            {
+                await SendUnsupportedMediaType(context, "application/json");
+                return null;
+            }
+
+            byte[] bytes = await ReadBodyCappedAsync(context, maxBytes);
+            if (bytes == null)
+            {
+                return null;
+            }
+            using var reader = new StreamReader(
+                new MemoryStream(bytes),
+                Encoding.UTF8,
+                detectEncodingFromByteOrderMarks: true
+            );
+            return await reader.ReadToEndAsync();
+        }
+
+        private async Task SendBodyTooLarge(IHttpContext context, int maxBytes)
+        {
+            string limit =
+                maxBytes % (1024 * 1024) == 0
+                    ? $"{maxBytes / (1024 * 1024)} MB"
+                    : $"{maxBytes / 1024} KB";
+            QueuedLogger.LogWarning(
+                $"Rejected {context.Request.HttpVerb} {context.Request.Url.AbsolutePath}: body over {limit}"
+            );
+            context.Response.StatusCode = 413;
+            await SendJsonResponse(
+                context,
+                new SimpleResponse
+                {
+                    success = false,
+                    message = $"Request body too large (max {limit}).",
+                }
+            );
+        }
+
+        private async Task SendUnsupportedMediaType(IHttpContext context, string expected)
+        {
+            context.Response.StatusCode = 415;
+            await SendJsonResponse(
+                context,
+                new SimpleResponse
+                {
+                    success = false,
+                    message = $"Content-Type must be {expected}.",
+                }
+            );
+        }
+
         private async Task HandleApiRequest(IHttpContext context)
         {
             try
@@ -276,16 +380,36 @@ namespace QuestNav.WebServer.Server
                 string clientIp = context.Request.RemoteEndPoint?.Address?.ToString();
                 RecordClientActivity(clientIp);
 
-                if (enableCorsDevMode)
-                {
-                    context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
-                }
-                context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-                context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
-
+                // No CORS headers: the web UI is served from this origin, and the Vite dev
+                // server proxies /api.
                 if (context.Request.HttpVerb == HttpVerbs.Options)
                 {
-                    context.Response.StatusCode = 200;
+                    context.Response.Headers.Add("Allow", "GET, POST, PATCH, DELETE, OPTIONS");
+                    context.Response.StatusCode = 204;
+                    return;
+                }
+
+                if (
+                    IsStateChanging(context.Request.HttpVerb)
+                    && !RequestValidation.IsAllowedOrigin(
+                        context.Request.Headers["Origin"],
+                        context.Request.Headers["Host"]
+                    )
+                )
+                {
+                    QueuedLogger.LogWarning(
+                        $"Rejected cross-origin {context.Request.HttpVerb} {context.Request.Url.AbsolutePath} "
+                            + $"from {clientIp} (Origin '{context.Request.Headers["Origin"]}')"
+                    );
+                    context.Response.StatusCode = 403;
+                    await SendJsonResponse(
+                        context,
+                        new SimpleResponse
+                        {
+                            success = false,
+                            message = "Cross-origin requests are not allowed.",
+                        }
+                    );
                     return;
                 }
 
@@ -364,30 +488,21 @@ namespace QuestNav.WebServer.Server
                     && context.Request.HttpVerb == HttpVerbs.Get
                 )
                 {
-                    await HandleGetAprilTagFieldLayoutContent(
-                        context,
-                        path.Substring("/api/apriltag-field-layouts/".Length)
-                    );
+                    await HandleGetAprilTagFieldLayoutContent(context, DecodeLayoutSegment(path));
                 }
                 else if (
                     path.StartsWith("/api/apriltag-field-layouts/")
                     && context.Request.HttpVerb == HttpVerbs.Patch
                 )
                 {
-                    await HandlePatchAprilTagFieldLayout(
-                        context,
-                        path.Substring("/api/apriltag-field-layouts/".Length)
-                    );
+                    await HandlePatchAprilTagFieldLayout(context, DecodeLayoutSegment(path));
                 }
                 else if (
                     path.StartsWith("/api/apriltag-field-layouts/")
                     && context.Request.HttpVerb == HttpVerbs.Delete
                 )
                 {
-                    await HandleDeleteAprilTagFieldLayout(
-                        context,
-                        path.Substring("/api/apriltag-field-layouts/".Length)
-                    );
+                    await HandleDeleteAprilTagFieldLayout(context, DecodeLayoutSegment(path));
                 }
                 else if (
                     path == "/api/apriltag-video-modes"
@@ -458,7 +573,14 @@ namespace QuestNav.WebServer.Server
 
         private async Task HandlePostConfig(IHttpContext context)
         {
-            string body = await context.GetRequestBodyAsStringAsync();
+            string body = await ReadJsonBodyAsync(
+                context,
+                QuestNavConstants.WebServer.MAX_JSON_BODY_BYTES
+            );
+            if (body == null)
+            {
+                return;
+            }
             var request = JsonConvert.DeserializeObject<ConfigUpdateRequest>(body);
 
             if (request == null)
@@ -503,6 +625,21 @@ namespace QuestNav.WebServer.Server
                                 $"AprilTag detector mode {request.AprilTagDetectorMode.mode} is not supported. "
                                 + "Only 0 (TRADITIONAL) is currently implemented.",
                         }
+                    );
+                    return;
+                }
+
+                if (
+                    !RequestValidation.TryValidateIgnoredIds(
+                        request.AprilTagDetectorMode.ignoredIds,
+                        out string ignoredIdsError
+                    )
+                )
+                {
+                    context.Response.StatusCode = 400;
+                    await SendJsonResponse(
+                        context,
+                        new SimpleResponse { success = false, message = ignoredIdsError }
                     );
                     return;
                 }
@@ -785,33 +922,31 @@ namespace QuestNav.WebServer.Server
             string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
             QueuedLogger.Log($"POST /api/upload-database from {clientIp}");
 
-            // Config databases are tens of KB; this only guards against abuse.
-            const int MAX_DATABASE_BYTES = 4 * 1024 * 1024;
+            // The web UI sends application/octet-stream. Requiring a non-form type keeps
+            // cross-site "simple" posts out, as for the JSON endpoints.
+            if (
+                !RequestValidation.HasMediaType(
+                    context.Request.Headers["Content-Type"],
+                    "application/octet-stream",
+                    "application/vnd.sqlite3",
+                    "application/x-sqlite3"
+                )
+            )
+            {
+                await SendUnsupportedMediaType(context, "application/octet-stream");
+                return;
+            }
+
             string uploadPath = cachedDatabasePath + ".upload";
             try
             {
-                if (context.Request.ContentLength64 > MAX_DATABASE_BYTES)
+                byte[] fileBytes = await ReadBodyCappedAsync(
+                    context,
+                    QuestNavConstants.WebServer.MAX_DATABASE_BYTES
+                );
+                if (fileBytes == null)
                 {
-                    await SendDatabaseTooLarge(context);
                     return;
-                }
-
-                byte[] fileBytes;
-                using (var memoryStream = new MemoryStream())
-                {
-                    var input = context.Request.InputStream;
-                    byte[] buffer = new byte[81920];
-                    int read;
-                    while ((read = await input.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                    {
-                        if (memoryStream.Length + read > MAX_DATABASE_BYTES)
-                        {
-                            await SendDatabaseTooLarge(context);
-                            return;
-                        }
-                        memoryStream.Write(buffer, 0, read);
-                    }
-                    fileBytes = memoryStream.ToArray();
                 }
 
                 if (fileBytes.Length == 0)
@@ -880,20 +1015,6 @@ namespace QuestNav.WebServer.Server
                     return false;
             }
             return true;
-        }
-
-        private async Task SendDatabaseTooLarge(IHttpContext context)
-        {
-            QueuedLogger.LogWarning("Rejected database upload: file too large");
-            context.Response.StatusCode = 413;
-            await SendJsonResponse(
-                context,
-                new SimpleResponse
-                {
-                    success = false,
-                    message = "Database file too large (max 4 MB).",
-                }
-            );
         }
 
         private async Task SendDatabaseRejected(IHttpContext context, string reason)
@@ -1044,8 +1165,8 @@ namespace QuestNav.WebServer.Server
                     return true;
                 }
             }
-            string customPath = Path.Combine(FileManager.GetCustomFieldLayoutDir(), fileName);
-            return File.Exists(customPath);
+            return FileManager.TryResolveCustomFieldLayoutPath(fileName, out string customPath)
+                && File.Exists(customPath);
         }
 
         /// <summary>
@@ -1166,17 +1287,23 @@ namespace QuestNav.WebServer.Server
         }
 
         /// <summary>
-        /// Sanitize and validate a user-supplied layout name. Returns the canonical
-        /// "&lt;name&gt;.json" form on success or null on failure (caller returns 400 with
-        /// the message). Forbids path traversal and collisions with bundled names.
+        /// Validates the name for a new or renamed custom layout. A missing ".json" suffix
+        /// is added, so "practice" and "practice.json" name the same file. Bundled names
+        /// cannot be shadowed.
         /// </summary>
-        private static bool TrySanitizeFieldLayoutName(
+        /// <param name="name">The name from the request.</param>
+        /// <param name="canonical">The file name, ending in ".json".</param>
+        /// <param name="fullPath">The resolved path in the custom-layout directory.</param>
+        /// <param name="error">Why the name was rejected, or null.</param>
+        private static bool TryResolveNewLayoutName(
             string name,
             out string canonical,
+            out string fullPath,
             out string error
         )
         {
             canonical = null;
+            fullPath = null;
             error = null;
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -1184,32 +1311,50 @@ namespace QuestNav.WebServer.Server
                 return false;
             }
 
-            // Strip any caller-supplied .json suffix so the regex below sees only the stem.
-            string stem = name;
-            if (stem.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            string stem = name.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
+                ? name.Substring(0, name.Length - 5)
+                : name;
+            string candidate = stem + ".json";
+            if (!FileManager.TryResolveCustomFieldLayoutPath(candidate, out fullPath))
             {
-                stem = stem.Substring(0, stem.Length - 5);
-            }
-
-            // Reject anything that isn't [A-Za-z0-9._-]{1,64}. This covers path-traversal
-            // attempts (../, /, \\), Windows reserved characters, leading dots, etc.
-            if (!System.Text.RegularExpressions.Regex.IsMatch(stem, @"^[A-Za-z0-9._-]{1,64}$"))
-            {
-                error =
-                    "Invalid layout name. Use only letters, numbers, '.', '_', and '-' (max 64 chars).";
+                error = FileManager.INVALID_FIELD_LAYOUT_NAME_MESSAGE;
                 return false;
             }
-
-            canonical = stem + ".json";
-            if (IsBundledLayoutName(canonical))
+            if (IsBundledLayoutName(candidate))
             {
                 error =
-                    $"'{canonical}' is a bundled layout name. Custom layouts cannot shadow "
+                    $"'{candidate}' is a bundled layout name. Custom layouts cannot shadow "
                     + "bundled layouts; choose a different name.";
-                canonical = null;
+                fullPath = null;
                 return false;
             }
+            canonical = candidate;
             return true;
+        }
+
+        /// <summary>
+        /// Resolves the {name} segment of a custom-layout URL. Sends 400 and returns null
+        /// if the name is not a valid layout file name.
+        /// </summary>
+        private async Task<string> ResolveExistingLayoutNameAsync(
+            IHttpContext context,
+            string fileName
+        )
+        {
+            if (FileManager.TryResolveCustomFieldLayoutPath(fileName, out string fullPath))
+            {
+                return fullPath;
+            }
+            context.Response.StatusCode = 400;
+            await SendJsonResponse(
+                context,
+                new SimpleResponse
+                {
+                    success = false,
+                    message = FileManager.INVALID_FIELD_LAYOUT_NAME_MESSAGE,
+                }
+            );
+            return null;
         }
 
         /// <summary>
@@ -1306,7 +1451,11 @@ namespace QuestNav.WebServer.Server
                 );
                 return;
             }
-            string path = Path.Combine(FileManager.GetCustomFieldLayoutDir(), fileName);
+            string path = await ResolveExistingLayoutNameAsync(context, fileName);
+            if (path == null)
+            {
+                return;
+            }
             if (!File.Exists(path))
             {
                 context.Response.StatusCode = 404;
@@ -1350,70 +1499,12 @@ namespace QuestNav.WebServer.Server
             string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
             QueuedLogger.Log($"POST /api/apriltag-field-layouts from {clientIp}");
 
-            // 10 MB body cap. Field layouts are ~30 KB; this is generous abuse-protection.
-            const long MAX_BODY_BYTES = 10L * 1024L * 1024L;
-            if (
-                context.Request.ContentLength64 > 0
-                && context.Request.ContentLength64 > MAX_BODY_BYTES
-            )
+            string body = await ReadJsonBodyAsync(
+                context,
+                QuestNavConstants.WebServer.MAX_FIELD_LAYOUT_BODY_BYTES
+            );
+            if (body == null)
             {
-                context.Response.StatusCode = 413;
-                await SendJsonResponse(
-                    context,
-                    new SimpleResponse
-                    {
-                        success = false,
-                        message = "Layout body too large (max 10 MB).",
-                    }
-                );
-                return;
-            }
-
-            string body;
-            try
-            {
-                using var reader = new StreamReader(
-                    context.Request.InputStream,
-                    Encoding.UTF8,
-                    detectEncodingFromByteOrderMarks: false,
-                    bufferSize: 1024,
-                    leaveOpen: false
-                );
-                var sb = new StringBuilder();
-                char[] buf = new char[8192];
-                long total = 0;
-                int read;
-                while ((read = await reader.ReadAsync(buf, 0, buf.Length)) > 0)
-                {
-                    total += read;
-                    if (total > MAX_BODY_BYTES)
-                    {
-                        context.Response.StatusCode = 413;
-                        await SendJsonResponse(
-                            context,
-                            new SimpleResponse
-                            {
-                                success = false,
-                                message = "Layout body too large (max 10 MB).",
-                            }
-                        );
-                        return;
-                    }
-                    sb.Append(buf, 0, read);
-                }
-                body = sb.ToString();
-            }
-            catch (Exception ex)
-            {
-                context.Response.StatusCode = 400;
-                await SendJsonResponse(
-                    context,
-                    new SimpleResponse
-                    {
-                        success = false,
-                        message = $"Could not read request body: {ex.Message}",
-                    }
-                );
                 return;
             }
 
@@ -1449,7 +1540,14 @@ namespace QuestNav.WebServer.Server
                 return;
             }
 
-            if (!TrySanitizeFieldLayoutName(req.name, out string canonical, out string sanError))
+            if (
+                !TryResolveNewLayoutName(
+                    req.name,
+                    out string canonical,
+                    out string finalPath,
+                    out string sanError
+                )
+            )
             {
                 context.Response.StatusCode = 400;
                 await SendJsonResponse(
@@ -1469,8 +1567,6 @@ namespace QuestNav.WebServer.Server
                 return;
             }
 
-            string customDir = FileManager.GetCustomFieldLayoutDir();
-            string finalPath = Path.Combine(customDir, canonical);
             string tmpPath = finalPath + ".tmp";
 
             try
@@ -1543,7 +1639,20 @@ namespace QuestNav.WebServer.Server
                 return;
             }
 
-            string body = await context.GetRequestBodyAsStringAsync();
+            string oldPath = await ResolveExistingLayoutNameAsync(context, fileName);
+            if (oldPath == null)
+            {
+                return;
+            }
+
+            string body = await ReadJsonBodyAsync(
+                context,
+                QuestNavConstants.WebServer.MAX_JSON_BODY_BYTES
+            );
+            if (body == null)
+            {
+                return;
+            }
             FieldLayoutRenameRequest req = null;
             try
             {
@@ -1577,9 +1686,10 @@ namespace QuestNav.WebServer.Server
             }
 
             if (
-                !TrySanitizeFieldLayoutName(
+                !TryResolveNewLayoutName(
                     req.newName,
                     out string newCanonical,
+                    out string newPath,
                     out string sanError
                 )
             )
@@ -1591,10 +1701,6 @@ namespace QuestNav.WebServer.Server
                 );
                 return;
             }
-
-            string customDir = FileManager.GetCustomFieldLayoutDir();
-            string oldPath = Path.Combine(customDir, fileName);
-            string newPath = Path.Combine(customDir, newCanonical);
 
             if (!File.Exists(oldPath))
             {
@@ -1687,8 +1793,11 @@ namespace QuestNav.WebServer.Server
                 );
                 return;
             }
-            string customDir = FileManager.GetCustomFieldLayoutDir();
-            string path = Path.Combine(customDir, fileName);
+            string path = await ResolveExistingLayoutNameAsync(context, fileName);
+            if (path == null)
+            {
+                return;
+            }
             if (!File.Exists(path))
             {
                 context.Response.StatusCode = 404;
@@ -1847,7 +1956,7 @@ namespace QuestNav.WebServer.Server
                     $"fps={a.framerate}",
                     $"maxDist={a.maxDistance}",
                     $"minTags={a.minimumNumberOfTags}",
-                    $"ignoredIds=[{string.Join(",", a.ignoredIds ?? Array.Empty<int>())}]",
+                    $"ignoredIds={a.ignoredIds?.Length ?? 0} ids",
                 };
                 if (!string.IsNullOrEmpty(a.fieldLayoutFile))
                     atParts.Add($"fieldLayoutFile='{a.fieldLayoutFile}'");

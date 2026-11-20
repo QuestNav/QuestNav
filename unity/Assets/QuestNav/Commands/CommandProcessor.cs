@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using QuestNav.Commands.Commands;
 using QuestNav.Config;
+using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.QuestNav.Estimation;
@@ -119,6 +120,13 @@ namespace QuestNav.Commands
                 switch (receivedCommand.Type)
                 {
                     case QuestNavCommandType.CommandTypeUnspecified:
+                        QueuedLogger.LogWarning(
+                            $"Received command with no type. ID: {receivedCommand.CommandId}"
+                        );
+                        networkTableConnection.SendCommandErrorResponse(
+                            receivedCommand.CommandId,
+                            "Command type not set"
+                        );
                         break;
                     case QuestNavCommandType.PoseReset:
                         if (supersededPoseResetCommands.Contains(receivedTimestampedCommand))
@@ -168,9 +176,16 @@ namespace QuestNav.Commands
                         }
                         break;
                     default:
-                        QueuedLogger.Log(
-                            $"Execute called with unknown command. ID: {receivedCommand.CommandId} Type: {receivedCommand.Type}",
-                            QueuedLogger.LogLevel.WARNING
+                        // A newer robot library may send commands this app predates; answer
+                        // so it does not wait for a response that never comes
+                        QueuedLogger.LogWarning(
+                            $"Received unknown command. ID: {receivedCommand.CommandId} Type: {(int)receivedCommand.Type}"
+                        );
+                        networkTableConnection.SendCommandErrorResponse(
+                            receivedCommand.CommandId,
+                            $"Unknown command type {(int)receivedCommand.Type}: this QuestNav app "
+                                + $"(protocol version {QuestNavConstants.Network.PROTOCOL_VERSION}) "
+                                + "does not support it. Update the QuestNav app."
                         );
                         break;
                 }

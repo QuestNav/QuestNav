@@ -18,6 +18,10 @@
  * 1. Client sends ProtobufQuestNavCommand with unique command_id
  * 2. QuestNav processes the command asynchronously
  * 3. QuestNav sends back ProtobufQuestNavCommandResponse with matching command_id
+ *
+ * Since protocol version 2 (see data.proto), every command with a non-zero command_id
+ * gets a response, including command types the app does not know: those are answered
+ * with success = false, so a client newer than the app can tell the command was not run.
  */
 
 package questnav.protos.commands;

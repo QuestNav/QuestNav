@@ -75,7 +75,7 @@ Two kinds of detection are dropped before anything else:
 1. IDs in the **Ignored Tag IDs** list
 2. IDs that are not in the loaded field layout, such as false decodes that would otherwise spoil the solve
 
-The frame is used only if at least **Minimum Tags Required** (1 to 4, default 2) detections remain.
+The frame is used only if at least **Minimum Tags Required** (2 to 4, default 2) detections remain. A single-tag frame is never solved, since a one-tag pose is ambiguous.
 
 ## Step 5: Multi-Tag PnP Solve
 

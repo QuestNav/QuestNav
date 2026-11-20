@@ -81,7 +81,7 @@ To check it:
 Before tags are in view, or without them, set a known pose at the start of each match: for example, seed your pose
 estimator from the selected autonomous start position, or use another vision system. See
 [Setting Robot Pose](./8-robot-code.mdx#setting-robot-pose) for how to push a known pose to QuestNav. Only the pose's
-yaw is applied, and the next good tag view re-aligns the headset to the tags.
+yaw is applied, and the next good tag view (at least 2 tags in one frame) re-aligns the headset to the tags.
 
 ## Next Steps
 

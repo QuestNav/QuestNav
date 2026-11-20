@@ -51,7 +51,7 @@ delivers frames.
 1. **Capture** a passthrough camera frame and convert it to grayscale.
 2. **Detect** tag36h11 tags with libapriltag.
 3. **Filter**: drop tags in the **Ignored Tag IDs** list and tags that are not in the field layout. The frame is
-   used only if at least **Minimum Tags Required** tags are left.
+   used only if at least **Minimum Tags Required** tags are left (2 to 4).
 4. **Solve** the camera pose from all tag corners at once with PoseLib, convert it to FRC field coordinates, and
    move it from the camera lens to the headset center.
 5. **Check distance**: drop the frame if the average headset-to-tag distance is above **Max Tag Distance**.
@@ -64,7 +64,7 @@ delivers frames.
 Until tags have placed it, the headset runs on VIO in its own frame, so its position and heading on the field
 are unknown. The first frame that passes these checks aligns it:
 
-- at least **Minimum Tags Required** tags (default 2)
+- at least **Minimum Tags Required** tags (default 2, the lowest allowed)
 - inlier ratio of at least 0.6 (the share of tag corners that fit the solved pose)
 
 On alignment the position is set directly from the measurement and the heading offset is set from the
@@ -82,9 +82,12 @@ After alignment VIO leads, and tags only correct position. A frame is used when 
 | Permissive | 2 | 0.75 |
 | Balanced (default) | 3 | 0.80 |
 | Strict | 4 | 0.90 |
-| Debug | 1 | 0.60 |
+| Debug | 2 | 0.60 |
 
-The **Debug** preset accepts single-tag solves, which can be ambiguous. Use it only for bench testing.
+The **Debug** preset accepts noisy solves with a low inlier ratio. Use it only for bench testing.
+
+A single tag never moves the pose, in either phase and under any setting. A one-tag solve is ambiguous: it can
+flip to a mirror pose or misjudge depth.
 
 A frame that passes is then checked against the estimate at the moment it was captured:
 
@@ -129,7 +132,8 @@ only nudges the estimate.
 - **`setPose` from the robot.** Places the headset at the requested position, but uses only the **yaw** of the
   requested rotation; pitch and roll come from the headset's own gravity-aligned tracking. The alignment state
   becomes `POSE_RESET` and the reset epoch changes. The next tag frame that passes Phase 1 aligns the headset to
-  the tags again.
+  the tags again. Like every alignment, that takes at least 2 tags in one frame, so a lone tag in view leaves the
+  `setPose` position and heading alone.
 
 ## What gets published
 
@@ -157,7 +161,8 @@ QuestNavLib turns these into `PoseFrame`s. See [Robot Code](../1-getting-started
 
 - **Check the reason.** The log names it on lines starting with `AprilTag rejected (Phase 1)` or
   `AprilTag rejected (Phase 2)`, or with `AprilTag observation rejected: avgTagDistance`.
-- **Too few tags or too low inlier ratio.** Lower the preset, or lower **Minimum Tags Required**.
+- **Too few tags or too low inlier ratio.** Lower the preset, or lower **Minimum Tags Required** (2 is the
+  lowest; a single tag is never used).
 - **Tags too far away.** Raise **Max Tag Distance**.
 
 ### Position jumps near certain tags

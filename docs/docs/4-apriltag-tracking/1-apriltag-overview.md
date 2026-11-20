@@ -64,7 +64,7 @@ delivers frames.
 Until tags have placed it, the headset runs on VIO in its own frame, so its position and heading on the field
 are unknown. The first frame that passes these checks aligns it:
 
-- at least **Minimum Tags Required** tags (default 2, the lowest allowed)
+- at least **Minimum Tags Required** tags (default 2, the lowest allowed), each with at least 3 corners fitting the solved pose
 - inlier ratio of at least 0.6 (the share of tag corners that fit the solved pose)
 
 On alignment the position is set directly from the measurement and the heading offset is set from the

@@ -1,6 +1,8 @@
 ---
 title: Quick Start
 ---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 import CodeBlock from '@theme/CodeBlock';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
@@ -63,7 +65,9 @@ Visit [setup.questnav.gg](https://setup.questnav.gg/) and connect your Quest via
 1. Launch QuestNav on the headset (Apps > Unknown Sources > QuestNav)
 2. Enter your FRC team number and click **Set**
 
-Your team number determines the IP address QuestNav connects to (`10.TE.AM.2`). If this is wrong, the Quest will not find your robot.
+Your team number determines the robot address QuestNav connects to (`10.TE.AM.2`). If this is wrong, the Quest will not find your robot. On a SystemCore it also tries the SystemCore's USB and Wi-Fi access point addresses; see [SystemCore and WPILib 2027](./14-systemcore-2027.md).
+
+Everything else is set in the web interface at `http://<quest-ip>:5801/` (the headset shows its IP address): the **Status**, **Logs**, **Camera**, **AprilTag** and **Settings** tabs.
 
 ### 5. Mount the headset
 
@@ -86,15 +90,22 @@ See [Wiring](./wiring) for cable selection, power details, and the trade-offs be
 
 ### 7. Add the vendor library
 
-In VS Code, press `Ctrl+Shift+P` (`Cmd+Shift+P` on macOS), select **WPILib: Manage Vendor Libraries > Install new libraries (online)**, and paste:
+The QuestNav app is the same for every robot, but QuestNavLib comes in a 2026 and a 2027 line, matching your WPILib year.
+
+**2026 robot (roboRIO, WPILib 2026):** in VS Code, press `Ctrl+Shift+P` (`Cmd+Shift+P` on macOS), select **WPILib: Manage Vendor Libraries > Install new libraries (online)**, and paste:
 
 <VendorDepCodeBlock />
 
-See [Robot Code Setup](./robot-code) for command-line and manual installation methods.
+**2027 robot (SystemCore, WPILib 2027):** use the `questnavlib.json` from a 2027 release; see [SystemCore and WPILib 2027](./14-systemcore-2027.md).
+
+See [Robot Code Setup](./8-robot-code.mdx) for command-line and manual installation methods.
 
 ### 8. Add minimal robot code
 
 Create a subsystem that calls `commandPeriodic()` and feeds pose data to your drive pose estimator:
+
+<Tabs groupId="wpilib-year">
+<TabItem value="2026" label="2026 (roboRIO)" default>
 
 ```java
 import gg.questnav.questnav.QuestNav;
@@ -102,6 +113,7 @@ import gg.questnav.questnav.PoseFrame;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class QuestNavSubsystem extends SubsystemBase {
     private final QuestNav questNav = new QuestNav();
@@ -128,7 +140,51 @@ public class QuestNavSubsystem extends SubsystemBase {
 }
 ```
 
-See [Robot Code Setup](./robot-code) for the full integration guide.
+</TabItem>
+<TabItem value="2027" label="2027 (SystemCore)">
+
+The same code with the 2027 `org.wpilib` geometry classes. Call `update()` from a periodic method, such as your
+subsystem's `periodic()` or `robotPeriodic()`.
+
+```java
+import gg.questnav.questnav.AlignmentState;
+import gg.questnav.questnav.QuestNav;
+import gg.questnav.questnav.PoseFrame;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Transform3d;
+import org.wpilib.math.geometry.Rotation3d;
+
+public class QuestNavLocalizer {
+    private final QuestNav questNav = new QuestNav();
+
+    // Offset from robot center to the Quest headset
+    // Example: Quest is 0.3m forward, 0.0m left, 0.5m up from robot center
+    private static final Transform3d ROBOT_TO_QUEST =
+        new Transform3d(0.3, 0.0, 0.5, new Rotation3d());
+
+    public void update() {
+        questNav.commandPeriodic();
+
+        for (PoseFrame frame : questNav.getAllUnreadPoseFrames()) {
+            // Use frames once AprilTags have placed the headset on the field
+            // (also accept POSE_RESET if you place it with setPose instead)
+            if (frame.isTracking() && frame.alignmentState() == AlignmentState.TAG_ALIGNED) {
+                Pose3d robotPose = frame.questPose3d()
+                    .transformBy(ROBOT_TO_QUEST.inverse());
+                // Feed to your pose estimator:
+                // driveSubsystem.addVisionMeasurement(
+                //     robotPose.toPose2d(), frame.dataTimestamp(), stdDevs);
+            }
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+See [Robot Code Setup](./8-robot-code.mdx) for the full integration guide, including the alignment state and the
+version checks.
 
 :::tip Want a fully wired-up example?
 The [QuestNav Robot Sim Example](https://github.com/juchong/QuestNav-Robot-Sim-Example) is a complete WPILib project that drops all of the above into a working subsystem with pose-estimator fusion, callbacks, and AdvantageScope telemetry. It runs in the desktop simulator without hardware.
@@ -138,8 +194,11 @@ The [QuestNav Robot Sim Example](https://github.com/juchong/QuestNav-Robot-Sim-E
 
 1. Deploy your robot code
 2. Open [AdvantageScope](https://docs.wpilib.org/en/stable/docs/software/dashboards/advantagescope.html)
-3. Look for the `QuestNav` table in NetworkTables
-4. Verify that `QuestNav/framedata/isTracking` = `true`
+3. Look for the `QuestNav` table in NetworkTables and check that `QuestNav/frameData` is updating
+4. Check `isTracking` inside `frameData`, or log `questNav.isConnected()` and `questNav.isTracking()` from robot code
+
+On a 2026 robot the dashboard may not decode `frameData`; use the robot code values instead (see
+[SystemCore and WPILib 2027](./14-systemcore-2027.md#dashboards-on-2026-robots)).
 
 ---
 
@@ -152,7 +211,7 @@ Print this checklist and verify each item before every match.
 - [ ] USB battery bank is fully charged
 - [ ] Spare Ethernet cable and adapter are packed
 - [ ] QuestNav app is the latest version
-- [ ] Robot code vendordep matches the QuestNav app version
+- [ ] Robot code uses the QuestNavLib line for your WPILib year (2026 or 2027) and no version warning you don't expect
 
 ### Pre-Match (in the Pits)
 - [ ] QuestNav app is running on the headset
@@ -165,13 +224,13 @@ Print this checklist and verify each item before every match.
 - [ ] All cables are secured with zip ties or clips (no loose cables)
 
 ### Pre-Match (on the Field)
-- [ ] Open your dashboard and verify `QuestNav/framedata/isTracking` = `true`
-- [ ] Check `QuestNav/deviceData/battery_percent` is above 20%
-- [ ] Reset the pose to your starting position before autonomous
+- [ ] Verify the Quest is connected and tracking (`questNav.isConnected()` and `questNav.isTracking()`, or `isTracking` in `QuestNav/frameData`)
+- [ ] Check the battery is above 20% (`questNav.getBatteryPercent()`, or `battery_percent` in `QuestNav/deviceData`)
+- [ ] Reset the pose to your starting position before autonomous, unless AprilTags will align it
 - [ ] Verify the reported pose matches the physical position on the field
 
 ### If Something Goes Wrong
-- **QuestNav/Connected = false**: Check the Ethernet cable and adapter. Verify the headset is powered on and QuestNav is running.
-- **`QuestNav.isConnected()` returns `false`**: Ensure the headset cameras have a clear view. Restart QuestNav if tracking doesn't recover.
+- **`questNav.isConnected()` returns `false`**: Check the Ethernet cable and adapter. Verify the headset is powered on, QuestNav is running and the team number is right.
+- **`questNav.isTracking()` returns `false`**: Ensure the headset cameras have a clear view. Restart QuestNav if tracking doesn't recover.
 - **Pose is wrong after reset**: Make sure you're applying the `ROBOT_TO_QUEST` transform before calling `setPose()`. The reset pose is the *Quest's* position, not the robot's.
 - **Battery dropping fast**: Verify the USB battery bank is connected and outputting power. Check for a damaged cable.

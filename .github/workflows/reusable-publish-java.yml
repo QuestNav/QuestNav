@@ -55,13 +55,15 @@ jobs:
           version-type: ${{ steps.version-info.outputs.version-type }}
           year: ${{ steps.version-info.outputs.year }}
 
+      # Gradle maps ORG_GRADLE_PROJECT_* env vars to the mavenUsername/mavenPassword properties.
       - name: Publish to Maven
+        env:
+          ORG_GRADLE_PROJECT_mavenUsername: ${{ secrets.MAVEN_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenPassword: ${{ secrets.MAVEN_PASSWORD }}
         run: |
           ./gradlew publish \
             -Pversion="${{ steps.version-info.outputs.version }}" \
-            -PversionType="${{ steps.version-info.outputs.version-type }}" \
-            -PmavenUsername="${{ secrets.MAVEN_USERNAME }}" \
-            -PmavenPassword="${{ secrets.MAVEN_PASSWORD }}" \
+            -PversionType="${{ steps.version-info.outputs.version-type }}"
 
       - name: Upload Vendor JSON Artifact
         id: upload-json

@@ -676,6 +676,60 @@ namespace QuestNav.Tests
         }
 
         [Test]
+        public void VioMotionSince_ReturnsPoseThenAndLatest()
+        {
+            var sim = new Sim();
+            sim.Align();
+            var velocity = new Translation3d(2.0, 1.0, 0.0);
+            sim.Step(velocity, 20);
+            var vioThen = sim.Vio;
+            double then = sim.Time;
+            sim.Step(velocity, 10);
+
+            Assert.IsTrue(
+                sim.Estimator.TryGetVioMotionSince(then + Dt / 2, out var atThen, out var latest)
+            );
+            Assert.AreEqual(0.0, atThen.Translation.GetDistance(vioThen.Translation), Tolerance);
+            Assert.AreEqual(0.0, AngleDiff(vioThen.Rotation.Z, atThen.Rotation.Z), Tolerance);
+            Assert.AreEqual(0.0, latest.Translation.GetDistance(sim.Vio.Translation), Tolerance);
+        }
+
+        [Test]
+        public void VioMotionSince_ClampsToBuffer()
+        {
+            var sim = new Sim();
+            sim.Align();
+            var velocity = new Translation3d(1.0, 0.0, 0.0);
+            sim.Step(velocity, 240);
+
+            Assert.IsTrue(
+                sim.Estimator.TryGetVioMotionSince(sim.Time - 10.0, out var oldest, out var latest)
+            );
+            Assert.AreEqual(
+                VioAprilTagPoseEstimatorConstants.BUFFER_DURATION_SECONDS,
+                latest.Translation.GetDistance(oldest.Translation),
+                Dt
+            );
+        }
+
+        [Test]
+        public void VioMotionSince_UnavailableWithoutConsistentHistory()
+        {
+            var sim = new Sim();
+            Assert.IsFalse(sim.Estimator.TryGetVioMotionSince(sim.Time, out _, out _));
+
+            sim.Align();
+            Assert.IsTrue(sim.Estimator.TryGetVioMotionSince(sim.Time, out _, out _));
+
+            sim.Estimator.HandleTrackingLost();
+            Assert.IsFalse(sim.Estimator.TryGetVioMotionSince(sim.Time, out _, out _));
+            sim.Step(Translation3d.Zero, 1);
+
+            sim.Estimator.HandleRecenter();
+            Assert.IsFalse(sim.Estimator.TryGetVioMotionSince(sim.Time, out _, out _));
+        }
+
+        [Test]
         public void NonFiniteVioObservation_IsIgnored()
         {
             var sim = new Sim();

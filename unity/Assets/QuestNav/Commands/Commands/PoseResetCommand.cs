@@ -55,10 +55,20 @@ namespace QuestNav.Commands.Commands
         public string CommandNiceName => "PoseReset";
 
         /// <summary>
+        /// Executes the pose reset with no latency compensation.
+        /// </summary>
+        public void Execute(ProtobufQuestNavCommand receivedCommand) => Execute(receivedCommand, 0);
+
+        /// <summary>
         /// Executes the pose reset by moving the VR camera root so the camera sits at the
         /// target position with the target yaw, and resetting the Kalman filter to match.
         /// </summary>
-        public void Execute(ProtobufQuestNavCommand receivedCommand)
+        /// <param name="receivedCommand">The command data received from the robot</param>
+        /// <param name="ageMs">
+        /// How long ago the robot sent the command; 0 or less when unknown. The target is the
+        /// pose at that time, so the VIO motion since is added to it.
+        /// </param>
+        public void Execute(ProtobufQuestNavCommand receivedCommand, long ageMs)
         {
             QueuedLogger.Log("Received pose reset request, initiating reset...");
 
@@ -93,7 +103,10 @@ namespace QuestNav.Commands.Commands
                 vrCamera.localPosition,
                 vrCamera.localRotation
             );
-            var (rootPose, cameraPose) = SolveYawOnlyRootPose(resetPose, cameraLocalPose);
+            var (rootPose, cameraPose) = SolveYawOnlyRootPose(
+                CompensateForAge(resetPose, ageMs),
+                cameraLocalPose
+            );
 
             var (rootPosition, rootRotation) = Conversions.FrcToUnity3d(rootPose);
             vrCameraRoot.rotation = rootRotation;
@@ -112,6 +125,50 @@ namespace QuestNav.Commands.Commands
 
             commandContext.SendSuccessResponse(receivedCommand.CommandId);
             QueuedLogger.Log("Pose reset completed successfully");
+        }
+
+        /// <summary>
+        /// Moves the target by the VIO motion since the command was sent. The age is limited
+        /// to the estimator's snapshot buffer.
+        /// </summary>
+        private Pose3d CompensateForAge(Pose3d targetPose, long ageMs)
+        {
+            if (
+                ageMs <= 0
+                || !poseEstimator.TryGetVioMotionSince(
+                    Time.timeAsDouble - ageMs / 1000.0,
+                    out var vioAtSend,
+                    out var vioNow
+                )
+            )
+                return targetPose;
+
+            var compensated = ApplyMotionSince(targetPose, vioAtSend, vioNow);
+            QueuedLogger.Log(
+                $"Pose reset compensated for {ageMs} ms of motion: moved "
+                    + $"{compensated.Translation.GetDistance(targetPose.Translation):F3} m"
+            );
+            return compensated;
+        }
+
+        /// <summary>
+        /// Moves a target pose by the VIO motion between two VIO poses. The VIO frame maps
+        /// onto the field by the yaw between the target and <paramref name="vioThen"/>, so
+        /// the displacement is rotated by that, and the yaw change is added to the target.
+        /// </summary>
+        /// <param name="targetPose">Field pose of the camera at the time of <paramref name="vioThen"/>.</param>
+        /// <param name="vioThen">Raw VIO pose of the camera when the target applied.</param>
+        /// <param name="vioNow">Latest raw VIO pose of the camera.</param>
+        /// <returns>The field pose of the camera now.</returns>
+        public static Pose3d ApplyMotionSince(Pose3d targetPose, Pose3d vioThen, Pose3d vioNow)
+        {
+            var vioToField = new Rotation3d(0, 0, targetPose.Rotation.Z - vioThen.Rotation.Z);
+            var displacement = (vioNow.Translation - vioThen.Translation).RotateBy(vioToField);
+            var yawChange = new Rotation3d(0, 0, vioNow.Rotation.Z - vioThen.Rotation.Z);
+            return new Pose3d(
+                targetPose.Translation + displacement,
+                targetPose.Rotation.RotateBy(yawChange)
+            );
         }
 
         /// <summary>

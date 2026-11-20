@@ -2,8 +2,8 @@
   "dependencies": {
     "com.boxqkrtm.ide.cursor": "https://github.com/boxqkrtm/com.unity.ide.cursor.git",
     "com.meta.xr.mrutilitykit": "205.0.0",
-    "com.meta.xr.sdk.core": "81.0.0",
-    "com.meta.xr.sdk.interaction": "81.0.0",
+    "com.meta.xr.sdk.core": "205.0.0",
+    "com.meta.xr.sdk.interaction": "205.0.0",
     "com.meta.xr.sdk.interaction.ovr": "205.0.0",
     "com.meta.xr.sdk.platform": "205.0.0",
     "com.unity.ai.navigation": "2.0.14",

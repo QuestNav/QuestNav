@@ -45,11 +45,9 @@ The same technology that enables VR by precisely tracking head movements is now 
 ## Software Architecture
 
 QuestNav implements a simple bidirectional communication structure between the VR headset and robot, enabling:
-- Heading/pose reset requests
-- Configuration updates
-- Ping functionality
-- Real-time pose data streaming
-- Passthrough camera video streaming
+- Real-time pose data streaming over NetworkTables, with tracking, AprilTag alignment state and device status
+- Pose reset requests from robot code
+- Configuration, logs and passthrough camera video streaming through the headset's web interface
 
 ## Demo Video
 

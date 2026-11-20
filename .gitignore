@@ -25,3 +25,10 @@ unity/ProjectSettings/ProjectSettings.asset
 
 #Visual Studio directory
 /.vs
+# Protoc plugins downloaded per the development setup docs
+protoc-gen-quickbuf*
+protoc-gen-doc*
+
+# Merge tool backups
+*.orig
+*.orig.meta

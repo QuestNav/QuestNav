@@ -67,8 +67,9 @@ Download `questnavlib.json` from a QuestNav release on the
 your project's `vendordeps` folder, or install its `jsonUrl` with **WPILib: Manage Vendor Libraries**.
 
 - **No release yet.** At the time of writing no 2027 QuestNavLib release has been published.
-- **Matching the WPILib release.** The vendordep's `wpilibYear` (currently `2027_alpha7`) names the WPILib 2027
-  release the library was built for. Use it with that WPILib release.
+- **Matching the WPILib release.** The library is built against WPILib `2027.0.0-alpha-8`, so install that
+  release. Its year key is `2027_alpha7`, which is the vendordep's `wpilibYear`, so the vendordep loads in a
+  `2027.0.0-alpha-8` project.
 - **Imports.** Code is the same as on a 2026 robot apart from the WPILib imports; see
   [2026 and 2027 imports](./8-robot-code.mdx#2026-and-2027-imports).
 

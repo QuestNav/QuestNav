@@ -44,6 +44,9 @@ jobs:
           unity-project-path: unity
           cache-key-suffix: DocFX
 
+      - name: Install DocFX
+        run: dotnet tool install --global docfx --version 2.81.0
+
       - name: Build DocFX
         run: |
           cd unity/DocFX

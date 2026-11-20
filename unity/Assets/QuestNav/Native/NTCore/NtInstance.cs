@@ -32,15 +32,14 @@ namespace QuestNav.Native.NTCore
         }
 
         /// <summary>
-        /// Sets server addresses and port for client(without restarting client).
-        /// Attempts connections to the following addresses in parallel:
-        /// - 10.TE.AM.2
-        /// - 172.26.0.1 on Windows, or 172.27.0.1 on other platforms(USB)
-        /// -172.30.0.1 (WiFi)
-        /// It also connects using matching Systemcore mDNS announcements.
-        /// The team - specific 10.TE.AM.2 address is only added if the team string
-        /// parses as an integer in the range 0 to 25599 inclusive.
-        /// @param inst instance handle
+        /// Sets the client to connect to a team's robot (without restarting the client).
+        /// ntcore tries these addresses in parallel:
+        /// - 10.TE.AM.2 (only if the team string parses as an integer from 0 to 25599)
+        /// - 172.27.0.1 (USB; 172.26.0.1 on Windows)
+        /// - 172.30.0.1 (SystemCore WiFi access point)
+        /// ntcore's SystemCore mDNS discovery does not work on the Quest, and the old roboRIO
+        /// hostname fallbacks are gone, so a 2026 robot is reachable only at 10.TE.AM.2 or
+        /// through an IP override (<see cref="SetAddresses"/>).
         /// </summary>
         /// <param name="teamNumber">The FRC team number string</param>
         /// <param name="port">The NetworkTables port (defaults to standard port)</param>

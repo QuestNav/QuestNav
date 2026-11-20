@@ -179,32 +179,43 @@ class QuestNavNetworkTest {
                 PubSubOption.SEND_ALL,
                 PubSubOption.pollStorage(20))) {
       questNav.getAllUnreadPoseFrames();
-      // 0 = what apps that predate the field send (proto3 omits it on the wire)
+      // 0 = what apps that predate the field send, and what the app sends before time sync
+      // (proto3 omits it on the wire)
       int legacyCount = sendFrame(0);
       long embeddedNs = Math.round((Timer.getTimestamp() - 0.5) * 1e9);
       int embeddedCount = sendFrame(embeddedNs);
+      // A frame without the field after one with it, as after the Quest reconnects, must not
+      // keep the earlier frame's time
+      int unsyncedCount = sendFrame(0);
 
       List<PoseFrame> frames = new ArrayList<>();
       waitFor(
           () -> {
             frames.addAll(List.of(questNav.getAllUnreadPoseFrames()));
-            return frames.size() >= 2;
+            return frames.size() >= 3;
           },
           2.0,
           "frame delivery");
-      assertEquals(2, frames.size());
+      assertEquals(3, frames.size());
       assertEquals(legacyCount, frames.get(0).frameCount());
       assertEquals(embeddedCount, frames.get(1).frameCount());
+      assertEquals(unsyncedCount, frames.get(2).frameCount());
 
       long legacyServerTime = 0;
+      long unsyncedServerTime = 0;
       for (var value : raw.readQueue()) {
-        if (Data.ProtobufQuestNavFrameData.parseFrom(value.value).getFrameCount() == legacyCount) {
+        int count = Data.ProtobufQuestNavFrameData.parseFrom(value.value).getFrameCount();
+        if (count == legacyCount) {
           legacyServerTime = value.serverTime;
+        } else if (count == unsyncedCount) {
+          unsyncedServerTime = value.serverTime;
         }
       }
       assertNotEquals(0, legacyServerTime);
+      assertNotEquals(0, unsyncedServerTime);
       assertEquals(legacyServerTime * 1e-9, frames.get(0).dataTimestamp());
       assertEquals(embeddedNs * 1e-9, frames.get(1).dataTimestamp());
+      assertEquals(unsyncedServerTime * 1e-9, frames.get(2).dataTimestamp());
     }
   }
 

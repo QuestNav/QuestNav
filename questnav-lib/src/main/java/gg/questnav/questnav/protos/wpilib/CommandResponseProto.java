@@ -34,7 +34,9 @@ public class CommandResponseProto
   @Override
   public Commands.ProtobufQuestNavCommandResponse unpack(
       Commands.ProtobufQuestNavCommandResponse msg) {
-    return msg.clone();
+    // WPILib decodes into a reused message after clearQuick(), which keeps the values of fields
+    // a message leaves out (such as false or 0); copying only the fields it has drops them
+    return Commands.ProtobufQuestNavCommandResponse.newInstance().mergeFrom(msg);
   }
 
   @Override

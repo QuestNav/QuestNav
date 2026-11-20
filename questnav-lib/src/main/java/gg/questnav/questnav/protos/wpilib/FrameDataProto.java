@@ -42,7 +42,10 @@ public class FrameDataProto implements Protobuf<PoseFrame, Data.ProtobufQuestNav
   }
 
   @Override
-  public PoseFrame unpack(Data.ProtobufQuestNavFrameData msg) {
+  public PoseFrame unpack(Data.ProtobufQuestNavFrameData received) {
+    // WPILib decodes into a reused message after clearQuick(), which keeps the values of fields
+    // a message leaves out (such as false or 0); copying only the fields it has drops them
+    var msg = Data.ProtobufQuestNavFrameData.newInstance().mergeFrom(received);
     return new PoseFrame(
         pose3dProto.unpack(msg.getPose3D()),
         msg.getServerTimestamp() * 1e-9,

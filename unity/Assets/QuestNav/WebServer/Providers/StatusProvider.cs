@@ -60,7 +60,7 @@ namespace QuestNav.WebServer
         private int teamNumber;
 
         /// <summary>
-        /// Current robot IP address (resolved from team number or debug override)
+        /// Robot IP address NT is connected to, or the configured target while disconnected
         /// </summary>
         private string robotIpAddress = "";
 
@@ -105,7 +105,7 @@ namespace QuestNav.WebServer
         /// <param name="connected">Whether connected to NetworkTables</param>
         /// <param name="ip">Current IP address of headset</param>
         /// <param name="team">Current team number for connection</param>
-        /// <param name="robotIp">Robot IP address (from debug override or calculated from team number)</param>
+        /// <param name="robotIp">Robot IP address NT is connected to, or the configured target (debug override or 10.TE.AM.2) while disconnected</param>
         /// <param name="currentFps">Current frames per second</param>
         /// <param name="currentFrameCount">Unity frame count</param>
         public void UpdateStatus(

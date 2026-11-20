@@ -1015,7 +1015,7 @@ namespace QuestNav.Tests
             Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
             Assert.AreEqual(2u, sim.Estimator.ResetEpoch);
 
-            // Phase-2 corrections and motion are continuous
+            // Phase-2 corrections, even ones that move the pose, keep the epoch
             sim.Step(new Translation3d(1.0, 0.0, 0.0), 20);
             sim.Observe(
                 new Pose3d(sim.Field.Translation + GainProbeOffset, sim.Field.Rotation),

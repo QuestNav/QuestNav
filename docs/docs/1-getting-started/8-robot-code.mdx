@@ -519,9 +519,11 @@ them to your pose estimator.
 ### Alignment State and Pose Jumps
 
 Each `PoseFrame` says what its pose is referenced to (`alignmentState()`), and carries a `resetEpoch()` counter
-that changes whenever the Quest's pose jumps instead of following its motion: a pose reset, an AprilTag alignment or
-re-alignment, or a tracking relocalization. The change between two frames with the same epoch is real motion; across
-a change it is not. Compare epochs for equality only.
+that changes whenever the Quest's pose is re-placed instead of following its motion: a pose reset, an AprilTag
+alignment or re-alignment, or a tracking relocalization. The change between two frames with different epochs is not
+motion. Within one epoch the pose follows the Quest's motion plus filtered AprilTag corrections: these are usually
+small, but one can step the pose by up to 2 m in a single frame (for example after a tracking outage), so don't treat
+same-epoch changes as pure odometry. Compare epochs for equality only.
 
 | `AlignmentState` | Meaning |
 |------------------|---------|

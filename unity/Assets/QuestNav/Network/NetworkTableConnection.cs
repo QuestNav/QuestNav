@@ -77,7 +77,7 @@ namespace QuestNav.Network
         /// <param name="pose">Current field-relative position of the Quest headset</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
         /// <param name="alignmentState">What the pose is referenced to</param>
-        /// <param name="resetEpoch">Counter that changes whenever the pose jumps</param>
+        /// <param name="resetEpoch">Counter that changes whenever the pose is re-placed</param>
         void PublishFrameData(
             int frameCount,
             double timeStamp,
@@ -423,7 +423,7 @@ namespace QuestNav.Network
         /// <param name="pose">Current VR headset position</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
         /// <param name="alignmentState">What the pose is referenced to</param>
-        /// <param name="resetEpoch">Counter that changes whenever the pose jumps</param>
+        /// <param name="resetEpoch">Counter that changes whenever the pose is re-placed</param>
         public void PublishFrameData(
             int frameCount,
             double timeStamp,

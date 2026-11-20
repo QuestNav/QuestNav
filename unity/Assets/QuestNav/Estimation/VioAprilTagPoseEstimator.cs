@@ -22,9 +22,11 @@ namespace QuestNav.QuestNav.Estimation
         AlignmentState AlignmentState { get; }
 
         /// <summary>
-        /// Changes whenever <see cref="EstimatedPose"/> jumps instead of following VIO motion:
-        /// a reset, an AprilTag alignment or re-alignment, or a relocalization that is not
-        /// integrated. A recenter keeps the field pose, so it does not change it. Wraps around.
+        /// Changes whenever <see cref="EstimatedPose"/> is re-placed instead of following VIO
+        /// motion: a reset, an AprilTag alignment or re-alignment, or a relocalization that is
+        /// not integrated. Phase-2 AprilTag corrections keep it, though one can move the pose by
+        /// up to <see cref="VioAprilTagPoseEstimatorConstants.CORRECTION_MAX_POSITION_JUMP"/>.
+        /// A recenter keeps the field pose, so it does not change it. Wraps around.
         /// </summary>
         uint ResetEpoch { get; }
 

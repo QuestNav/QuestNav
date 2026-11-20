@@ -66,6 +66,14 @@ namespace QuestNav.QuestNav.Estimation
         public const double CORRECTION_GATE_CHI_SQUARED = 16.27;
 
         /// <summary>
+        /// Distance (meters) from the capture-time estimate within which a measurement is
+        /// always accepted, whatever its Mahalanobis distance. With small covariances the
+        /// chi-square gate alone would reject the consistent 0.1-0.3 m biases that
+        /// timestamp error, extrinsic error and tag placement error produce.
+        /// </summary>
+        public const double CORRECTION_GATE_MIN_DISTANCE = 0.5;
+
+        /// <summary>
         /// Absolute cap (meters) on the distance between the measured position and the
         /// capture-time estimate, applied on top of the Mahalanobis gate so a large
         /// covariance after a long stretch without tags cannot admit a wild measurement.

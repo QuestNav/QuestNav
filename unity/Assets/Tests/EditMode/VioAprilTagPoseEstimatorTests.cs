@@ -232,6 +232,51 @@ namespace QuestNav.Tests
         }
 
         [Test]
+        public void Phase2_AcceptsSmallBiasBeyondTightCovariance()
+        {
+            var sim = new Sim();
+            sim.Align();
+            var tightStdDevs = StdDevs(0.006);
+            for (int i = 0; i < 10; i++)
+            {
+                sim.Step(Translation3d.Zero, 2);
+                sim.Estimator.AddAprilTagObservation(
+                    sim.Field.Translation,
+                    sim.Field.Rotation,
+                    sim.Time,
+                    tightStdDevs,
+                    GoodTags,
+                    GoodInlierRatio
+                );
+            }
+
+            // A 0.3 m bias is far outside S = P + R here, but within the gate's minimum distance
+            var biased = new Translation3d(0.3, 0.0, 0.0);
+            for (int i = 0; i < 2 * VioAprilTagPoseEstimatorConstants.REALIGN_REJECTION_COUNT; i++)
+            {
+                sim.Step(Translation3d.Zero, 2);
+                sim.Estimator.AddAprilTagObservation(
+                    sim.Field.Translation + biased,
+                    sim.Field.Rotation,
+                    sim.Time,
+                    tightStdDevs,
+                    GoodTags,
+                    GoodInlierRatio
+                );
+
+                Assert.IsTrue(sim.Estimator.HasInitialAlignment);
+                if (i == 0)
+                    Assert.Greater(sim.PositionError, 0.2);
+            }
+
+            Assert.AreEqual(
+                0.0,
+                sim.Estimator.EstimatedPose.Translation.GetDistance(sim.Field.Translation + biased),
+                0.01
+            );
+        }
+
+        [Test]
         public void Phase2_ConsistentRejectionsDropBackToPhase1()
         {
             var sim = new Sim();

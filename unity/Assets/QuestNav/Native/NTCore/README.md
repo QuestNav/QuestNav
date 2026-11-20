@@ -77,6 +77,7 @@ Visual C++ 2015-2022 x64 runtime, version 14.30 or newer.
 ## After updating
 
 1. Replace the files in place so the existing `.meta` files, and their GUIDs and import settings, are kept.
-2. Update `Assets/Plugins/ntcore/VERSION` with the tag, commit, NDK, artifact checksums and file hashes.
+2. Update `Assets/Plugins/ntcore/VERSION` with the tag, commit, NDK, artifact checksums and file hashes, and set
+   `NtCoreNatives.ALLWPILIB_TAG` to the same tag (an EditMode test checks they match; the app logs it at startup).
 3. Check that `git lfs ls-files` lists every new `.so` and `.dll` before pushing.
 4. If the NT C API changed, update the bindings in this folder to match `ntcore/src/main/native/include/wpi/nt/ntcore_c.h`.

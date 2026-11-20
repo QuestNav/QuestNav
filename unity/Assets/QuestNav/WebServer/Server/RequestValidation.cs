@@ -45,6 +45,20 @@ namespace QuestNav.WebServer.Server
         }
 
         /// <summary>
+        /// Returns true if the Sec-Fetch-Site header says a page on another site made the
+        /// request. Browsers send it; dashboards and other non-browser clients do not.
+        /// </summary>
+        /// <param name="secFetchSite">The Sec-Fetch-Site header, or null if absent.</param>
+        public static bool IsCrossSiteRequest(string secFetchSite)
+        {
+            return string.Equals(
+                secFetchSite?.Trim(),
+                "cross-site",
+                StringComparison.OrdinalIgnoreCase
+            );
+        }
+
+        /// <summary>
         /// Returns true if the Content-Type header names one of the accepted media types.
         /// Parameters such as "; charset=utf-8" are ignored.
         /// </summary>

@@ -6,7 +6,7 @@ import styles from './styles.module.css';
  *
  * A theme-aware SVG diagram of a typical QuestNav robot wiring layout:
  *
- *   Quest headset --USB-C--> USB-C Ethernet adapter --Ethernet--> [switch] --> radio --> roboRIO
+ *   Quest headset --USB-C--> USB-C Ethernet adapter --Ethernet--> [switch] --> radio --> robot controller
  *   USB battery bank --USB-A to USB-C (5 V)--> adapter power input
  *
  * Colors reference Infima CSS variables (see styles.module.css) so the diagram
@@ -18,7 +18,7 @@ export default function WiringDiagram(): React.ReactElement {
       <svg
         viewBox="0 0 960 430"
         role="img"
-        aria-label="QuestNav wiring diagram: the Quest headset connects over USB-C to a USB-C to Ethernet adapter. The adapter's Ethernet output runs through an optional Ethernet switch to the robot radio and then the roboRIO. A USB battery bank powers the adapter over a USB-A to USB-C cable at 5 volts."
+        aria-label="QuestNav wiring diagram: the Quest headset connects over USB-C to a USB-C to Ethernet adapter. The adapter's Ethernet output runs through an optional Ethernet switch to the robot radio and then the robot controller (roboRIO or SystemCore). A USB battery bank powers the adapter over a USB-A to USB-C cable at 5 volts."
       >
         <title>QuestNav wiring diagram</title>
 
@@ -81,9 +81,10 @@ export default function WiringDiagram(): React.ReactElement {
         <rect className={styles.box} x="615" y="64" width="130" height="84" rx="8" />
         <text className={styles.label} x="680" y="111">Robot Radio</text>
 
-        {/* roboRIO */}
+        {/* Robot controller */}
         <rect className={styles.box} x="800" y="64" width="145" height="84" rx="8" />
-        <text className={styles.label} x="872" y="111">roboRIO</text>
+        <text className={styles.label} x="872" y="102">roboRIO /</text>
+        <text className={styles.label} x="872" y="122">SystemCore</text>
 
         {/* USB battery bank */}
         <rect className={styles.box} x="215" y="296" width="140" height="80" rx="8" />

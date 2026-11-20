@@ -15,20 +15,21 @@ This page tracks planned and completed improvements to QuestNav.
 - ✅ **Enable streaming passthrough video to devices on the robot network** (#40)
   - Remote visualization capability
 
-## In Beta
-
-- **AprilTag detection and tracking** (#31)
-  - An upcoming release of QuestNav will include AprilTag detection and FRC field absolute positioning.<br /><br />
+- ✅ **AprilTag detection and tracking** (#31)
+  - The app detects the field's AprilTags and fuses them with the headset's tracking to report a field-relative pose.
+    See [AprilTag Tracking](./4-apriltag-tracking/1-apriltag-overview.md).<br /><br />
 
   <iframe width="560" height="315" src="https://www.youtube.com/embed/EBK9KA7otfA" title="QuestNav AprilTag detection preview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
+- ✅ **Field calibration** (#34)
+  - AprilTag alignment places the headset on the field, so no separate calibration mode or per-tag spatial anchors
+    (#32) are needed. See [Field Calibration](./1-getting-started/9-calibration.md#field-calibration).
+
 ## In Progress
 
-- **Get each AprilTag position and place a spatial anchor** (#32)
-  - Building on detection capabilities
-
-- **Develop initial field calibration procedure and "calibration mode"** (#34)
-  - Essential for accurate positioning
+- **WPILib 2027 and SystemCore support**
+  - A 2027 QuestNavLib for SystemCore, used with the same headset app as 2026 robots. Not yet tested on SystemCore
+    hardware. See [SystemCore and WPILib 2027](./1-getting-started/14-systemcore-2027.md).
 
 ## Planned
 

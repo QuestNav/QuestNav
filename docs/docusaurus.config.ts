@@ -9,39 +9,42 @@ import * as path from 'path';
 const versions: string[] = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, 'versions.json'), 'utf-8')
 );
-const latestVersion = versions[0] ?? 'REPLACE_VERSION_HERE';
+const latestVersion = versions[0];
 
+// Newest QuestNavLib release for 2026 (roboRIO) robots. Update it when a new 2026 lib is published.
+const questnavLib2026Version = '2026-3.0.0-beta';
+
+// Mirrors the repository choice in questnav-lib/build.gradle: plain, dev, snapshot and pr
+// versions are published to /snapshots, prereleases such as -beta and -rc to /releases.
+function questnavLibJsonUrl(version: string): string {
+  const versionType = version.split('-').slice(2).join('-');
+  const isSnapshot =
+    ['', 'dev', 'snapshot', 'pr'].includes(versionType) || version.includes('-SNAPSHOT');
+  const repo = isSnapshot ? 'snapshots' : 'releases';
+  return `https://maven.questnav.gg/${repo}/gg/questnav/questnavlib-json/${version}/questnavlib-json-${version}.json`;
+}
 
 const config: Config = {
   title: 'QuestNav',
   tagline: 'The next generation navigation solution',
   favicon: 'img/branding/QuestNavLogoSquare.svg',
 
-  // Set the production url of your site here
   url: 'https://questnav.gg',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'QuestNav', // Usually your GitHub org/user name.
-  projectName: 'QuestNav', // Usually your repo name.
+  organizationName: 'QuestNav',
+  projectName: 'QuestNav',
 
-  // Ignore broken links to keep CI builds clean
-  // The /api/* paths are static files served separately from Docusaurus
-  // and will be available at runtime after deployment
-  onBrokenLinks: 'ignore',
+  // Generated API docs under /static/api/ are added by CI after the build; link them with pathname:///
+  onBrokenLinks: 'throw',
 
   markdown: {
+    mermaid: true,
     hooks: {
       onBrokenMarkdownLinks: 'warn',
     },
   },
 
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
@@ -53,7 +56,10 @@ const config: Config = {
       month: 'short',
       day: 'numeric'
     }),
-    questnavLibVersion: latestVersion,
+    // Vendordep for the latest versioned docs
+    questnavLibJsonUrl: questnavLibJsonUrl(latestVersion),
+    questnavLib2026Version,
+    questnavLib2026JsonUrl: questnavLibJsonUrl(questnavLib2026Version),
   },
 
   plugins: [
@@ -68,14 +74,14 @@ const config: Config = {
     ]
   ],
 
+  themes: ['@docusaurus/theme-mermaid'],
+
   presets: [
     [
       'classic',
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/QuestNav/QuestNav/tree/main/docs/',
           versions: {
@@ -91,15 +97,6 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Announcement bar for the rewrite, should be removed when the rewrite is done
-    announcementBar: {
-      id: 'version_notification',
-      content: '⚠️ A major rewrite is in progress for the 2026 season! <a href="/docs/rewrite">Learn more</a>',
-      backgroundColor: 'var(--ifm-background-color)',
-      textColor: 'var(--ifm-color-primary)',
-      isCloseable: false,
-    },
-    // Replace with your project's social card
     navbar: {
       title: '',
       logo: {

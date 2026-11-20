@@ -10,11 +10,17 @@ package gg.questnav.questnav;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.RecordComponent;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.util.struct.Struct;
+import org.wpilib.util.struct.StructGenerator;
 
 class PoseFrameTest {
   @Test
@@ -61,5 +67,25 @@ class PoseFrameTest {
   void nullAlignmentStateIsUnknown() {
     var frame = new PoseFrame(new Pose3d(), 1.0, 2.0, 3, true, null, 4);
     assertEquals(AlignmentState.UNKNOWN, frame.alignmentState());
+  }
+
+  @Test
+  void recordStructCanBeGenerated() {
+    // Logging frameworks log records with genRecord, which gives an empty struct (size 0) when a
+    // component can't be serialized
+    Struct<PoseFrame> struct = StructGenerator.genRecord(PoseFrame.class);
+    assertTrue(struct.getSize() > 0);
+    assertTrue(struct.getSchema().contains("alignmentState"), struct.getSchema());
+    assertTrue(struct.getSchema().contains("resetEpoch"), struct.getSchema());
+
+    for (AlignmentState state : AlignmentState.values()) {
+      var frame =
+          new PoseFrame(
+              new Pose3d(1, 2, 3, new Rotation3d(0.1, 0.2, 0.3)), 1.5, 2.5, 42, true, state, -7);
+      ByteBuffer buffer = ByteBuffer.allocate(struct.getSize()).order(ByteOrder.LITTLE_ENDIAN);
+      struct.pack(buffer, frame);
+      buffer.rewind();
+      assertEquals(frame, struct.unpack(buffer));
+    }
   }
 }

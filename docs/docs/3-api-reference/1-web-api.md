@@ -1,391 +1,466 @@
-# QuestNav ConfigServer Web API
+# Web API
 
-This document describes the HTTP endpoints exposed by ConfigServer for QuestNav. It includes the path to each endpoint, supported methods, parameters, request/response formats, and response codes.
+The QuestNav app runs a small HTTP server on the headset. It serves the web interface and the JSON API that the
+interface uses. This page lists every route the server handles (`unity/Assets/QuestNav/WebServer/Server/ConfigServer.cs`).
 
-# Overview
-- Base URL: `http://<device-ip>:<port>/`
-  - Default port is 5801 and is configurable via WebServerConstants.serverPort.
-- Content Type: application/json for all /api endpoints, unless otherwise noted.
-- Same origin only: the server sends no CORS headers. A POST, PATCH or DELETE whose `Origin` header does not match its `Host` header gets 403. Requests without an `Origin` header (curl, scripts) are allowed.
-- Request bodies: JSON bodies must be sent with `Content-Type: application/json` (otherwise 415) and are limited to 64 KB, or 1 MB for field-layout uploads (otherwise 413).
-- Errors: Unhandled exceptions return HTTP 500 with a JSON body `{ "success": false, "message": "..." }`.
+## Basics
 
-## Common Models
-- SimpleResponse
-  - success: `boolean`
-  - message: `string`
+| | |
+|---|---|
+| Base URL | `http://<quest-ip>:5801/` |
+| Web interface | `/` (static files) |
+| JSON API | `/api/...` |
+| Camera stream | `/video` |
 
-# Endpoints
+The server starts after the tracking loop is running, so it can take a few seconds after the app opens before it
+answers.
 
-## GET /api/config
-- Description: Returns current configuration values.
-- Request: none
-- Responses:
-  - 200 OK → `ConfigValuesResponse`
-    - success: `boolean`
-    - timestamp: `number` (Unix seconds)
-    - teamNumber: `number`
-    - debugIpOverride: `string` (empty string if not set)
-    - enableAutoStartOnBoot: `boolean`
-    - enablePassthroughStream: `boolean`
-    - enableDebugLogging: `boolean`
+### Common rules for `/api`
+
+- **Response format.** Responses are JSON. Errors use a `SimpleResponse`:
+  ```json
+  { "success": false, "message": "..." }
+  ```
+- **Same origin only.** The server sends no CORS headers. A `POST`, `PUT`, `PATCH` or `DELETE` whose `Origin`
+  header is present and does not match its `Host` header gets **403** with the message
+  `Cross-origin requests are not allowed.` An `Origin` of `null` is also rejected. Requests without an `Origin`
+  header, such as curl or scripts, are allowed. `GET` requests are not checked.
+- **`OPTIONS`.** Any `OPTIONS /api/...` request returns **204** with
+  `Allow: GET, POST, PATCH, DELETE, OPTIONS`.
+- **JSON bodies.** These must be sent with `Content-Type: application/json`; parameters such as `charset` are
+  ignored. Any other type gets **415** `Content-Type must be application/json.`
+- **Body size limits.** A body over the limit gets **413** `Request body too large (max ...).`
+
+  | Request | Limit |
+  |---|---|
+  | JSON requests | 64 KB |
+  | Field-layout uploads | 1 MB |
+  | Database uploads | 4 MB |
+
+- **Unknown routes.** An unknown route or verb gets **404** `Not found`.
+- **Unhandled errors.** These return **500** with the exception message.
+
+### Endpoint summary
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | [`/api/config`](#get-apiconfig) | Read the configuration |
+| POST | [`/api/config`](#post-apiconfig) | Change configuration values |
+| POST | [`/api/reset-config`](#post-apireset-config) | Reset the configuration to defaults |
+| GET | [`/api/download-database`](#get-apidownload-database) | Download the configuration database |
+| POST | [`/api/upload-database`](#post-apiupload-database) | Replace the configuration database |
+| GET | [`/api/info`](#get-apiinfo) | App and device information |
+| GET | [`/api/status`](#get-apistatus) | Live tracking, battery and network status |
+| GET | [`/api/logs`](#get-apilogs) | Recent log messages |
+| DELETE | [`/api/logs`](#delete-apilogs) | Clear the log buffer |
+| POST | [`/api/restart`](#post-apirestart) | Restart the app |
+| POST | [`/api/reset-pose`](#post-apireset-pose) | Reset the pose to the field origin |
+| GET | [`/api/video-modes`](#get-apivideo-modes) | Camera modes for the passthrough stream |
+| GET | [`/api/apriltag-video-modes`](#get-apiapriltag-video-modes) | Camera modes the AprilTag detector accepts |
+| GET | [`/api/apriltag-field-layouts`](#get-apiapriltag-field-layouts) | List field layouts |
+| POST | [`/api/apriltag-field-layouts`](#post-apiapriltag-field-layouts) | Upload or replace a custom layout |
+| GET | [`/api/apriltag-field-layouts/{name}`](#get-apiapriltag-field-layoutsname) | Download a custom layout |
+| PATCH | [`/api/apriltag-field-layouts/{name}`](#patch-apiapriltag-field-layoutsname) | Rename a custom layout |
+| DELETE | [`/api/apriltag-field-layouts/{name}`](#delete-apiapriltag-field-layoutsname) | Delete a custom layout |
+| GET | [`/video`](#get-video) | MJPEG passthrough camera stream |
+
+## Configuration
+
+### GET /api/config
+
+Returns the current configuration.
+
 ```json
 {
   "success": true,
   "teamNumber": 9999,
   "debugIpOverride": "",
+  "allowedPoseResetTimeoutMs": 120,
   "enableAutoStartOnBoot": true,
   "enablePassthroughStream": false,
+  "enableHighQualityStream": false,
+  "streamMode": { "width": 320, "height": 240, "framerate": 24, "quality": 75 },
+  "enableAprilTagDetector": true,
+  "aprilTagDetectorMode": {
+    "mode": 0,
+    "width": 1280,
+    "height": 1280,
+    "framerate": 30,
+    "ignoredIds": [],
+    "maxDistance": 4.0,
+    "minimumNumberOfTags": 2,
+    "fieldLayoutFile": "2026-rebuilt-welded.json",
+    "confidencePreset": 1,
+    "noiseScale": 1.0
+  },
   "enableDebugLogging": false,
   "timestamp": 1765759907
 }
 ```
-- Errors:
-  - 500 Internal Server Error → SimpleResponse
+
+The values shown are the defaults.
+
+| Field | Meaning |
+|---|---|
+| `teamNumber` | Team number used to find the robot. It is `-1` while a debug IP override is set. |
+| `debugIpOverride` | IP address the app connects to instead of the team address, or `""` when unset. |
+| `allowedPoseResetTimeoutMs` | Pose reset commands older than this are rejected. |
+| `enableHighQualityStream` | Allows passthrough stream modes above 640x480 at 30 fps. |
+| `streamMode` | Passthrough stream resolution, frame rate and JPEG quality. |
+| `aprilTagDetectorMode.mode` | Detector mode. Only `0` (traditional) is implemented. |
+| `maxDistance` | Detections whose average tag distance is above this many meters are dropped. |
+| `minimumNumberOfTags` | Tags required in one frame before it is used. |
+| `fieldLayoutFile` | Selected field layout. |
+| `confidencePreset` | `0` Permissive, `1` Balanced, `2` Strict, `3` Debug. See [Kalman filter](../4-apriltag-tracking/4-kalman-filter.md#confidence-presets). |
+| `noiseScale` | AprilTag trust multiplier from 0.5 to 2.0. Higher values trust tags less. |
+| `timestamp` | Unix time in seconds. |
+
+**Errors:** 500.
+
+### POST /api/config
+
+Changes one or more configuration values. Every field is optional; send only what you want to change. Field
+names are matched case-insensitively. The body has the same shape as the `GET` response, without `success` and
+`timestamp`.
+
 ```json
-{ "success": false, "message": "Failed to load config" }
+{ "teamNumber": 5152 }
 ```
 
-## POST /api/config
-- Description: Updates a single configuration value and persists it.
-- Request:
-  - Headers: `Content-Type: application/json`
-  - Body → `ConfigUpdateRequest`
-    - teamNumber: `number` (optional)
-    - debugIpOverride: `string` (empty string if not set)
-    - enableAutoStartOnBoot: `boolean` (optional)
-    - enablePassthroughStream: `boolean` (optional)
-    - enableDebugLogging: `boolean` (optional)
-- Request example:
 ```json
-{ "path": "WebServerConstants/webConfigTeamNumber", "value": 1234 }
-```
-- Responses:
-  - 200 OK → `ConfigUpdateResponse` (on success)
-    - success: `boolean`
-    - message: `string`
-    - oldValue: `any`
-    - newValue: `any`
-```json
-{ "success": true, "message": "Configuration updated" }
-```
-  - 400 Bad Request → SimpleResponse
-```json
-{ "success": false, "message": "Invalid request" }
-```
-  - 500 Internal Server Error → SimpleResponse
-```json
-{ "success": false, "message": "Unexpected error" }
+{
+  "enableAprilTagDetector": true,
+  "aprilTagDetectorMode": {
+    "mode": 0,
+    "width": 1280,
+    "height": 960,
+    "framerate": 30,
+    "ignoredIds": [],
+    "maxDistance": 4.0,
+    "minimumNumberOfTags": 2,
+    "fieldLayoutFile": "2026-rebuilt-welded.json",
+    "confidencePreset": 1,
+    "noiseScale": 1.0
+  }
+}
 ```
 
-## POST /api/reset-config
-- Description: Resets all configuration values to their defaults and persists them.
-- Request: none (no body)
-- Responses:
-- 200 OK → SimpleResponse
-```json
-{ "success": true, "message": "Configuration reset to defaults" }
-```
-- 500 Internal Server Error → SimpleResponse
-```json
-{ "success": false, "message": "Unexpected error" }
+**Behavior**
+
+- **`aprilTagDetectorMode` is all or nothing.** It replaces the whole detector mode, so send every field. The
+  exceptions are `fieldLayoutFile`, `confidencePreset` and `noiseScale`: when one of these is missing or empty,
+  its current value is kept.
+- **Field layout changes take effect after a restart.** The app reads the layout only at startup. Every other
+  detector setting applies right away.
+- **Team number and override are linked.** Setting `teamNumber` clears `debugIpOverride`, and setting
+  `debugIpOverride` sets the team number to `-1`. An empty `debugIpOverride` is ignored, so to clear an override
+  you set the team number.
+- **Some invalid values are ignored, not rejected.** An invalid `teamNumber` (outside 1 to 25599) or
+  `debugIpOverride` (not a dotted IPv4 address) is logged as an error and ignored, but the request still returns
+  200.
+
+**Validation (400)**
+
+| Check | Message starts with |
+|---|---|
+| `mode` is anything but `0` | `AprilTag detector mode N is not supported.` |
+| `ignoredIds` has more than 64 entries, or an ID outside 0 to 586 | `ignoredIds has N entries` / `ignoredIds contains N` |
+| `width`/`height`/`framerate` is not in [`/api/apriltag-video-modes`](#get-apiapriltag-video-modes) | `Resolution WxH @ Ffps is not supported on this camera.` |
+| `minimumNumberOfTags` is not 1, 2, 3 or 4 | `minimumNumberOfTags=N is not in the supported set` |
+| `fieldLayoutFile` is not a bundled layout or an existing custom layout | `Unknown field layout '...'.` |
+| `confidencePreset` is outside 0 to 3 | `confidencePreset=N is out of range.` |
+| `noiseScale` is not a finite number from 0.5 to 2.0 | `noiseScale=N is out of range.` |
+| The body is the JSON literal `null` | `Invalid request` |
+
+A body that is not valid JSON returns 500 with the parser's message.
+
+The `mode` and `ignoredIds` checks run before anything is saved. The other checks run while the request is being
+applied, so the fields applied before the failing check stay saved:
+
+| Failing check | Already saved |
+|---|---|
+| Resolution or minimum tags | `teamNumber`, `debugIpOverride`, `allowedPoseResetTimeoutMs`, `enableAutoStartOnBoot`, `enablePassthroughStream`, `enableHighQualityStream`, `streamMode` |
+| Field layout | Those fields, plus the rest of `aprilTagDetectorMode` |
+
+**Success:** 200 `{ "success": true, "message": "Configuration updated" }`.
+
+**Errors:** 400, 403, 413, 415, and 500 if saving fails.
+
+### POST /api/reset-config
+
+Resets every setting to its default.
+
+**Success:** 200 `Configuration reset to defaults`.
+
+**Errors:** 403, 500.
+
+### GET /api/download-database
+
+Downloads the configuration database as `config.db`. The response has `Content-Type: application/octet-stream`
+and `Content-Disposition: attachment; filename="config.db"`.
+
+**Errors:** 404 `Database file not found`, 500.
+
+### POST /api/upload-database
+
+Replaces the configuration database with the raw SQLite file sent as the request body. Restart the app to load it.
+
+- **Content-Type** must be `application/octet-stream`, `application/vnd.sqlite3` or `application/x-sqlite3`,
+  otherwise you get **415** `Content-Type must be application/octet-stream.`
+- **Size limit:** 4 MB, otherwise **413**.
+
+```bash
+curl -X POST --data-binary @config.db -H "Content-Type: application/octet-stream" \
+  http://<quest-ip>:5801/api/upload-database
 ```
 
-## GET /api/download-database
-- Description: Downloads the entire SQLite configuration database.
-- Request: none
-- Responses:
-- 200 OK → `application/octet-stream` containing the SQLite database file.
+**Success:** 200 `Database uploaded. Restart app to apply changes.`
 
-## POST /api/upload-database
-- Description: Uploads a new SQLite configuration database file.
-- Request:
-  - Headers: `Content-Type: application/octet-stream` (`application/vnd.sqlite3` and `application/x-sqlite3` are also accepted; anything else gets 415)
-  - Body: the SQLite database file, at most 4 MB (otherwise 413)
-- Responses:
-- 200 OK → SimpleResponse
-```json
-{ "success": true, "message": "Database uploaded. Restart app to apply changes." }
-```
-- 500 Internal Server Error → SimpleResponse
-```json
-{ "success": false, "message": "No file data received" }
-```
+**400** keeps the current configuration and reports the reason. The message starts with
+`Database not uploaded:` and is returned when:
 
-## GET /api/info
-- Description: Returns application and environment information.
-- Request: none
-- Responses:
-  - 200 OK → `SystemInfoResponse`
-    - appName: `string`
-    - version: `string`
-    - unityVersion: `string`
-    - buildDate: `string` (yyyy-MM-dd HH:mm:ss)
-    - platform: `string`
-    - deviceModel: `string`
-    - operatingSystem: `string`
-    - connectedClients: `number`
-    - configPath: `string`
-    - serverPort: `number`
-    - timestamp: `number` (Unix seconds)
+- the body is empty
+- the file is not a SQLite database (it lacks the `SQLite format 3` header)
+- the file fails validation
+
+**Errors:** 403, 413, 415, 500.
+
+## Status and control
+
+### GET /api/info
+
 ```json
 {
   "appName": "QuestNav",
-  "version": "1b1a5c0-dev",
-  "unityVersion": "6000.2.7f2",
-  "buildDate": "2025-12-05 23:32:54",
+  "version": "<app version>",
+  "unityVersion": "<Unity version>",
+  "buildDate": "yyyy-MM-dd HH:mm:ss",
   "platform": "Android",
-  "deviceModel": "Oculus Quest",
-  "operatingSystem": "Android OS 14 / API-34 (UP1A.231005.007.A1/1871560095600610)",
+  "deviceModel": "<headset model>",
+  "operatingSystem": "<Android version>",
   "connectedClients": 1,
-  "configPath": "/storage/emulated/0/Android/data/gg.QuestNav.QuestNav/files/config.json",
   "serverPort": 5801,
-  "timestamp": 1765372725
+  "timestamp": 1765759907
 }
 ```
-- Errors:
-  - 500 Internal Server Error → SimpleResponse
-```json
-{ "success": false, "message": "Unexpected error" }
-```
 
-## GET /api/status
-- Description: Returns current runtime status from StatusProvider.
-- Request: none
-- Responses:
-  - 200 OK → `Status`
-    - position: `{ x: number, y: number, z: number }`
-    - rotation: `{ x: number, y: number, z: number, w: number }` (quaternion)
-    - eulerAngles: `{ pitch: number, yaw: number, roll: number }` (degrees, FRC field frame: roll about X, pitch about Y, yaw about Z; roll and yaw in (-180, 180], pitch in [-90, 90])
-    - isTracking: `boolean`
-    - trackingLostEvents: `number`
-    - batteryPercent: `number` (0–100)
-    - batteryLevel: `number` (0.0–1.0)
-    - batteryStatus: `string` (e.g., Charging, Discharging)
-    - batteryCharging: `boolean`
-    - networkConnected: `boolean`
-    - ipAddress: `string`
-    - teamNumber: `number`
-    - robotIpAddress: `string` (address NetworkTables is connected to; while disconnected, the debug IP override or `10.TE.AM.2`)
-    - fps: `number`
-    - frameCount: `number`
-    - connectedClients: `number`
-    - timestamp: `number` (Unix seconds)
-```json
-{
-  "position": {
-    "x": 1.45210493,
-    "y": 0.9311298,
-    "z": 1.32042563
-  },
-  "rotation": {
-    "x": 0.069944,
-    "y": 0.101098642,
-    "z": -0.5767848,
-    "w": -0.8075928
-  },
-  "eulerAngles": {
-    "pitch": -4.738478,
-    "yaw": 71.62263,
-    "roll": -13.319698
-  },
-  "isTracking": true,
-  "trackingLostEvents": 0,
-  "batteryPercent": 14,
-  "batteryLevel": 0.14,
-  "batteryStatus": "Charging",
-  "batteryCharging": true,
-  "networkConnected": false,
-  "ipAddress": "192.168.0.195",
-  "teamNumber": 9999,
-  "robotIpAddress": "192.168.0.130",
-  "fps": 112.0,
-  "frameCount": 67927,
-  "connectedClients": 1,
-  "timestamp": 1765372907
-}
-```
-- Errors:
-  - 500 Internal Server Error → SimpleResponse
-```json
-{ "success": false, "message": "Unexpected error" }
-```
+`connectedClients` counts the IP addresses that called the API in the last 30 seconds. `buildDate` is the
+modification time of the installed app package, which is not necessarily when it was built.
 
-## GET /api/logs
-- Description: Returns recent Unity log entries (chronological, oldest first).
-- Request:
-  - Query parameters:
-    - count: `number` (optional, default 100) – maximum number of logs
-- Request examples:
-```
-GET /api/logs HTTP/1.1
-Host: <device-ip>:5801
-```
-```
-GET /api/logs?count=200 HTTP/1.1
-Host: <device-ip>:5801
-```
-- Responses:
-  - 200 OK → `LogsResponse`
-    - success: `boolean`
-    - logs: `LogEntry[]`
-      - LogEntry
-        - message: `string`
-        - stackTrace: `string`
-        - type: `string` (Log | Warning | Error | Assert | Exception)
-        - timestamp: `number` (Unix ms)
+### GET /api/status
+
+Live state. The app refreshes it three times a second.
+
+| Field | Meaning |
+|---|---|
+| `position` | `{x, y, z}` field pose in meters (FRC axes) |
+| `rotation` | `{x, y, z, w}` quaternion |
+| `eulerAngles` | `{pitch, yaw, roll}` in degrees |
+| `isTracking`, `trackingLostEvents` | Headset tracking state and how many times it was lost |
+| `batteryPercent`, `batteryLevel`, `batteryStatus`, `batteryCharging` | Battery |
+| `networkConnected` | Whether the app is connected to a NetworkTables server |
+| `ipAddress` | The headset's IP address |
+| `teamNumber` | Configured team number (`-1` while an IP override is set) |
+| `robotIpAddress` | Address of the connected NetworkTables server. While disconnected: the IP override if set, otherwise `10.TE.AM.2`, otherwise empty. |
+| `fps`, `frameCount` | App frame rate and frame counter |
+| `connectedClients` | Web clients seen in the last 30 seconds |
+| `passthroughResolutionLockedByAprilTag` | `true` while the AprilTag detector controls the camera resolution |
+| `effectivePassthroughResolution` | `{width, height}` the stream actually uses, or `null` |
+| `timestamp` | Unix seconds |
+
+### GET /api/logs
+
+Returns the most recent log messages, oldest first. The app keeps the last 500 messages.
+
+| Query parameter | Default | Meaning |
+|---|---|---|
+| `count` | 100 | Number of messages to return. A value that is not a number returns none. |
+
 ```json
 {
   "success": true,
   "logs": [
-    {
-      "message": "[WebServerManager] Server started successfully",
-      "stackTrace": "UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)\nQuestNav.WebServer.<StartServerCoroutine>d__25:MoveNext()\nUnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)\n",
-      "type": "Log",
-      "timestamp": 1765372337970
-    },
-    {
-      "message": "[OVRManager] TrackingAcquired event",
-      "stackTrace": "UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)\nOVRManager:Update()\n",
-      "type": "Log",
-      "timestamp": 1765372369208
-    }
+    { "Message": "Server started at http://...", "StackTrace": "", "Type": "Log", "Timestamp": 1765759907123 }
   ]
 }
-``` 
-- Errors:
-  - 500 Internal Server Error → SimpleResponse
-```json
-{ "success": false, "message": "Unexpected error" }
 ```
 
-## DELETE /api/logs
-- Description: Clears all collected logs.
-- Request: none
-- Responses:
-  - 200 OK → `SimpleResponse`
+The entry keys are PascalCase. `Timestamp` is in Unix milliseconds.
+
+### DELETE /api/logs
+
+Clears the log buffer.
+
+**Success:** 200 `Logs cleared`.
+
+### POST /api/restart
+
+Restarts the app after the response is sent.
+
+**Success:** 200 `Restart initiated`.
+
+### POST /api/reset-pose
+
+Resets the pose to the field origin: position (0, 0, 0), heading 0. It goes through the same path as a robot
+`setPose` command, with these differences:
+
+- there is no latency compensation
+- the result is not checked against the field bounds
+
+Afterwards the alignment state is `POSE_RESET` and the reset epoch changes.
+
+**Success:** 200 `Pose reset initiated`.
+
+## Camera
+
+### GET /api/video-modes
+
+Lists the modes the passthrough stream can use:
+
 ```json
-{ "success": true, "message": "Logs cleared" }
-```
-- Errors:
-  - 500 Internal Server Error → `SimpleResponse`
-```json
-{ "success": false, "message": "Unexpected error" }
+[ { "width": 320, "height": 240, "framerate": 24 } ]
 ```
 
-## POST /api/restart
-- Description: Triggers application restart (asynchronously).
-- Request: none (no body)
-- Responses:
-  - 200 OK → `SimpleResponse`
-```json
-{ "success": true, "message": "Restart initiated" }
-```
-- Notes: The restart is triggered after the response is sent.
-- Errors:
-  - 500 Internal Server Error → SimpleResponse
-```json
-{ "success": false, "message": "Unexpected error" }
-```
+**Errors:** 503 `Passthrough stream not available`, or 503 `Stream not initialized. Enable passthrough stream first.`
 
-## POST /api/reset-pose
-- Description: Triggers VR pose reset on the device.
-- Request: none (no body)
-- Response: 200 OK → `SimpleResponse`
-```json
-{ "success": true, "message": "Pose reset initiated" }
-```
-- Errors:
-  - 500 Internal Server Error → `SimpleResponse`
-```json
-{ "success": false, "message": "Unexpected error" }
-```
+### GET /api/apriltag-video-modes
 
-## GET /api/video-modes
-- Description: Gets the available passthrough stream capture video modes
-- Request: none (no body)
-- Response: 200 OK → VideoModeModel[]
+Lists the `width`/`height`/`framerate` combinations the AprilTag detector accepts: every camera resolution the
+headset reports, combined with every frame rate in `1, 5, 15, 24, 30, 48, 60`. If the headset reports no
+resolutions, the list uses 1280x1280 and 1280x960.
+
+### GET /video
+
+MJPEG stream of the passthrough camera (`Content-Type: multipart/x-mixed-replace; boundary=--frame`). Each part
+is a JPEG image with its own `Content-Type` and `Content-Length`. Turn the stream on in the **Camera** tab first.
+
+| Query parameter | Meaning |
+|---|---|
+| `resolution` | `WIDTHxHEIGHT` |
+| `fps` | Frame rate |
+| `compression` | JPEG quality from 1 to 100 (clamped) |
+
+These parameters change the mode for every viewer. The change is not saved, and lasts until the stream settings
+change or the app restarts.
+
+While the AprilTag detector is running, it has priority over the camera, so the stream uses the detector's
+resolution.
+
+**Errors:**
+
+- 503 `The stream is unavailable` if the app has no camera source for the stream
+- 204 if the stream provider has not been set up
+
+`/video` is outside `/api`, so the origin check does not apply.
+
+## AprilTag field layouts
+
+The app ships two layouts, `2026-rebuilt-welded.json` (the default) and `2025-reefscape-welded.json`. You can add
+your own. Custom layouts are stored on the headset and are looked up before the bundled ones. See
+[Field layout](../4-apriltag-tracking/5-field-layout-and-native-interop.md) for the file format.
+
+**Layout names**
+
+- **Allowed characters:** letters, digits, `.`, `_` and `-`.
+- **Length:** at most 64 characters before `.json`.
+- **First character:** must not be `.`.
+- **Extension:** `.json` is added when missing.
+- **Bundled names:** a custom layout cannot use one (compared case-insensitively).
+
+**Applying a change**
+
+The selected layout is loaded only when the app starts. Uploading, renaming or deleting the layout in use takes
+effect after a restart.
+
+### GET /api/apriltag-field-layouts
+
 ```json
 [
-  {"width": 100, "height": 100, "framerate": 24},
-  {"width": 200, "height": 200, "framerate": 24}
+  { "fileName": "2026-rebuilt-welded.json", "displayName": "2026 rebuilt welded", "source": "bundled", "tagCount": 32 },
+  { "fileName": "practice-field.json", "displayName": "practice field", "source": "custom", "tagCount": 8 }
 ]
 ```
-- Errors:
-  - 503 Service Unavailable → `SimpleResponse`
+
+`displayName` is the file name without `.json`, with `-` and `_` replaced by spaces.
+
+### POST /api/apriltag-field-layouts
+
+Creates a custom layout, or replaces one with the same name. Limit: 1 MB.
+
 ```json
-{ "success": false, "message": "Passthrough stream not available" }
+{ "name": "practice-field", "content": "{ \"tags\": [ ... ], \"field\": { \"length\": 16.5, \"width\": 8.1 } }" }
 ```
+
+`content` is the WPILib `AprilTagFieldLayout` JSON, sent as a string. It must parse, contain at least one tag,
+give every tag a pose with finite numbers, and have no duplicate IDs.
+
+**Success:** 200 `{ "success": true, "fileName": "practice-field.json", "tagCount": 8 }`.
+
+**400** when:
+
+- the body is not valid JSON
+- `name` or `content` is missing or empty
+- the name is invalid
+- the name is a bundled layout's name
+- the content fails validation
+
+**Errors:** 403, 413, 415, 500.
+
+### GET /api/apriltag-field-layouts/\{name\}
+
+Returns the stored JSON of a custom layout. Bundled layouts can't be downloaded.
+
+**Errors:**
+
+| Status | When |
+|---|---|
+| 400 | The name is empty or invalid |
+| 403 | The name is a bundled layout |
+| 404 | No such custom layout |
+| 500 | The file could not be read |
+
+### PATCH /api/apriltag-field-layouts/\{name\}
+
+Renames a custom layout.
+
+Request: `{ "newName": "practice-field-2" }`.
+
+If the renamed layout was selected, the configuration is updated to the new name.
+
+**Success:**
+
 ```json
-{ "success": false, "message": "Stream not initialized. Enable passthrough stream first." }
+{ "success": true, "oldFileName": "practice-field.json", "newFileName": "practice-field-2.json", "reselectedConfigPointer": true }
 ```
 
-## GET /video
-- Description: MJPEG video stream endpoint (multipart/x-mixed-replace) for passthrough camera or other frame sources.
-- Request: none
-- Responses:
-  - 200 OK when streaming is available.
-    - Headers: `Content-Type: multipart/x-mixed-replace; boundary=--frame`
-    - Body: sequence of JPEG frames separated by boundary `--frame` with per-frame headers including `Content-Type: image/jpeg` and `Content-Length`.
-    - Sample (truncated):
-```
---frame
-Content-Type: image/jpeg
-Content-Length: 12345
+**Errors:**
 
-<binary jpg bytes>
---frame
-Content-Type: image/jpeg
-Content-Length: 12001
+| Status | When |
+|---|---|
+| 400 | Invalid name, or `newName` missing or invalid |
+| 403 | The name is empty or a bundled layout |
+| 404 | No such custom layout |
+| 409 | A layout named `newName` already exists |
+| 413, 415, 500 | See the common rules |
 
-<binary jpg bytes>
---frame
-```
-  - 204 No Content → if the stream provider is not initialized in ConfigServer (text/plain message: "streamProvider is not initialized").
-  - 503 Service Unavailable → if the VideoStreamProvider has no frame source configured (text/plain message: "The stream is unavailable").
-- Notes: This endpoint is not JSON.
+### DELETE /api/apriltag-field-layouts/\{name\}
 
-Other behaviors
-- `OPTIONS` on any /api path returns 204 with an `Allow` header and no CORS headers.
-- Unknown routes under /api: 404 Not Found with JSON body `{ "success": false, "message": "Not found" }`.
+Deletes a custom layout.
 
-Examples
-- Get schema:
-```
-  curl -s http://<device-ip>:5801/api/schema
+**Success:**
+
+```json
+{ "success": true, "deletedFileName": "practice-field.json", "fellBackTo": "2026-rebuilt-welded.json" }
 ```
 
-- Get config values:
-```
-  curl -s http://<device-ip>:5801/api/config
-```
+If the deleted layout was selected, the configuration falls back to `2026-rebuilt-welded.json`, and `fellBackTo`
+names it. Otherwise `fellBackTo` is `null`.
 
-- Update config value:
-```
-  curl -s -X POST http://<device-ip>:5801/api/config \
-       -H "Content-Type: application/json" \
-       -d '{"path":"WebServerConstants/webConfigTeamNumber","value":1234}'
-```
+**Errors:**
 
-- Fetch logs (last 200):
-```
-  curl -s "http://<device-ip>:5801/api/logs?count=200"
-```
-
-- Clear logs:
-```
-  curl -s -X DELETE http://<device-ip>:5801/api/logs
-```
-
-- Restart app:
-```
-  curl -s -X POST http://<device-ip>:5801/api/restart
-```
-
-- Reset pose:
-```
-  curl -s -X POST http://<device-ip>:5801/api/reset-pose
-```
-
-- View MJPEG stream (in a browser):
-  `http://<device-ip>:5801/video`
+| Status | When |
+|---|---|
+| 400 | Invalid name |
+| 403 | The name is empty or a bundled layout |
+| 404 | No such custom layout |
+| 500 | The file could not be deleted |

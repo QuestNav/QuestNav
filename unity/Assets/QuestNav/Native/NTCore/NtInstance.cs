@@ -108,22 +108,18 @@ namespace QuestNav.Native.NTCore
         }
 
         /// <summary>
-        ///  Get the time offset between server time and local time. Add this value to
-        ///  local time to get the estimated equivalent server time. This returns the time
-        ///  offset only if the client and server are connected and have exchanged
-        ///  synchronization messages. Note the time offset may change over time as it is
-        ///  periodically updated.
+        /// Gets the time offset between server time and local time. Add it to local time
+        /// (<see cref="Now"/>) to get the equivalent server time. The offset is only valid
+        /// once the client is connected and has exchanged time sync messages with the server,
+        /// and ntcore resets it on every disconnect.
         /// </summary>
-        /// <returns>Time offset in nanoseconds, or zero if not available</returns>
-        public long GetServerTimeOffset()
+        /// <param name="offsetNs">Time offset in nanoseconds; only meaningful when this returns true</param>
+        /// <returns>True if the offset is valid</returns>
+        public bool TryGetServerTimeOffset(out long offsetNs)
         {
             int valid = 0;
-            long offset = NtCoreNatives.NT_GetServerTimeOffset(handle, &valid);
-            if (valid == 0)
-            {
-                return 0;
-            }
-            return offset;
+            offsetNs = NtCoreNatives.NT_GetServerTimeOffset(handle, &valid);
+            return valid != 0;
         }
 
         public BooleanPublisher GetBooleanPublisher(string name, PubSubOptions options)

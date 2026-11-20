@@ -34,7 +34,7 @@ namespace QuestNav.Core
         private double timeStamp;
 
         /// <summary>
-        /// Current timestamp from NetworkTables (NT Now)
+        /// Current NT server time in nanoseconds, or 0 when time sync is unavailable
         /// </summary>
         private long serverTimestamp;
 
@@ -585,9 +585,10 @@ namespace QuestNav.Core
             // Time since Unity startup in seconds - provides temporal correlation for robot code
             timeStamp = Time.time;
 
-            // Time from NetworkTables server = NT Now plus offset to align with robot time
-            serverTimestamp =
-                networkTableConnection.NtNow + networkTableConnection.ServerTimeOffset;
+            // NT server (robot) time; 0 tells the robot it is unknown because time sync isn't established
+            serverTimestamp = networkTableConnection.TryGetServerTimeOffset(out long offsetNs)
+                ? networkTableConnection.NtNow + offsetNs
+                : 0;
 
             // Add latest VIO data to kalman filter
             pose = Conversions.UnityToFrc3d(

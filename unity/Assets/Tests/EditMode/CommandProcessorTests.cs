@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using QuestNav.Commands;
+using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Protos.Generated;
 
@@ -58,6 +59,39 @@ namespace QuestNav.Tests
         {
             // Without a payload Execute rejects the pose, which shows it got past the age check
             connection.CommandRequests = new[] { PoseReset(7, ageMs) };
+
+            processor.ProcessCommands();
+
+            Assert.AreEqual(1, connection.ErrorResponses.Count);
+            Assert.AreEqual(
+                "Failed to get valid pose data (invalid)",
+                connection.ErrorResponses[0].Message
+            );
+        }
+
+        [Test]
+        public void PoseResetFromTheFutureIsRejected()
+        {
+            long ageMs = -QuestNavConstants.Network.MAX_COMMAND_CLOCK_SKEW_MS - 1;
+            connection.CommandRequests = new[] { PoseReset(7, ageMs) };
+
+            processor.ProcessCommands();
+
+            Assert.AreEqual(1, connection.ErrorResponses.Count);
+            Assert.AreEqual(7u, connection.ErrorResponses[0].CommandId);
+            StringAssert.StartsWith(
+                $"Pose Reset Command timestamp is {-ageMs} ms in the future",
+                connection.ErrorResponses[0].Message
+            );
+        }
+
+        [Test]
+        public void PoseResetWithinClockSkewIsExecuted()
+        {
+            connection.CommandRequests = new[]
+            {
+                PoseReset(7, -QuestNavConstants.Network.MAX_COMMAND_CLOCK_SKEW_MS),
+            };
 
             processor.ProcessCommands();
 

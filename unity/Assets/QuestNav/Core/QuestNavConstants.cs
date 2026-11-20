@@ -50,6 +50,13 @@ namespace QuestNav.Core
             /// history in data.proto.
             /// </summary>
             public const int PROTOCOL_VERSION = 2;
+
+            /// <summary>
+            /// How far in the future, in milliseconds, a command's timestamp may be before the
+            /// command is rejected. A small negative age is NT time-sync error; a larger one
+            /// means the timestamp, and so the command's age, can't be trusted.
+            /// </summary>
+            public const long MAX_COMMAND_CLOCK_SKEW_MS = 50;
         }
 
         /// <summary>

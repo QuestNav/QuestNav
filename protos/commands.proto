@@ -213,6 +213,8 @@ message ProtobufQuestNavCommandResponse {
    * - "Invalid pose coordinates: x value out of field bounds"
    * - "Tracking system not initialized"
    * - "Unknown command type"
+   * - "Pose Reset Command too old", or its timestamp is "in the future" (the
+   *   command's age is outside what the app accepts)
    */
   string error_message = 3;
 }

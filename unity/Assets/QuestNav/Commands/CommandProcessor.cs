@@ -147,8 +147,21 @@ namespace QuestNav.Commands
                                 receivedTimestampedCommand.LastChange
                             );
 
-                            // Check if the command is fresh
-                            if (ageMs < cachedPoseResetTtlMs)
+                            if (ageMs < -QuestNavConstants.Network.MAX_COMMAND_CLOCK_SKEW_MS)
+                            {
+                                // Sent "in the future": the clocks disagree, so the age is unknown
+                                QueuedLogger.LogWarning(
+                                    $"Skipping Pose Reset Command from the future. ID: {receivedCommand.CommandId} "
+                                        + $"Age: {ageMs} ms"
+                                );
+                                networkTableConnection.SendCommandErrorResponse(
+                                    receivedCommand.CommandId,
+                                    $"Pose Reset Command timestamp is {-ageMs} ms in the future "
+                                        + $"(limit {QuestNavConstants.Network.MAX_COMMAND_CLOCK_SKEW_MS} ms); "
+                                        + "NetworkTables time sync may be off"
+                                );
+                            }
+                            else if (ageMs < cachedPoseResetTtlMs)
                             {
                                 // The command is fresh, process it
                                 QueuedLogger.Log(

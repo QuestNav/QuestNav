@@ -4,10 +4,16 @@
   <assembly fullname="SQLitePCLRaw.core" preserve="all" />
   <assembly fullname="SQLitePCLRaw.batteries_v2" preserve="all" />
   <assembly fullname="SQLitePCLRaw.provider.e_sqlite3" preserve="all" />
-  <!-- Preserve your config classes -->
-  <assembly fullname="Assembly-CSharp">
+  <assembly fullname="QuestNav">
+    <!-- Config tables, mapped by SQLite-net through reflection -->
     <type fullname="QuestNav.Config.Config/Network" preserve="all" />
     <type fullname="QuestNav.Config.Config/System" preserve="all" />
+    <type fullname="QuestNav.Config.Config/Camera" preserve="all" />
+    <type fullname="QuestNav.Config.Config/AprilTag" preserve="all" />
+    <type fullname="QuestNav.Config.Config/AprilTagIgnoredId" preserve="all" />
     <type fullname="QuestNav.Config.Config/Logging" preserve="all" />
+    <!-- Field layouts and the geometry they contain, read by Newtonsoft through reflection -->
+    <type fullname="QuestNav.QuestNav.AprilTag.*" preserve="all" />
+    <type fullname="QuestNav.QuestNav.Geometry.*" preserve="all" />
   </assembly>
 </linker>

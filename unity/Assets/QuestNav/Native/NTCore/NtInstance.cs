@@ -326,6 +326,10 @@ namespace QuestNav.Native.NTCore
                 return;
             }
 
+            // Imports such as wpimath/protobuf/geometry3d.proto are left for the robot to publish. A
+            // 2026 robot defines the same wpi.proto types in "geometry3d.proto", and a second file
+            // defining them can stop dashboards decoding the robot's own Pose3d topics.
+
             // Get the schema as a byte array, this is what will be published
             var schema = file.ToProto().ToByteArray();
 

@@ -15,22 +15,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import gg.questnav.questnav.protos.generated.Data;
+import gg.questnav.questnav.protos.wpilib.DeviceDataProto;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.function.BooleanSupplier;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.io.TempDir;
 import org.wpilib.hardware.hal.HAL;
 import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.proto.Pose3dProto;
 import org.wpilib.networktables.NetworkTableInstance;
+import org.wpilib.networktables.ProtobufPublisher;
 import org.wpilib.networktables.PubSubOption;
 import org.wpilib.networktables.RawPublisher;
 import org.wpilib.networktables.RawSubscriber;
@@ -40,8 +46,10 @@ import org.wpilib.system.Timer;
  * Runs QuestNav against a real NT4 connection: the default instance is the robot (server) and a
  * second instance plays the Quest (client), publishing raw frame bytes the way the app does.
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class QuestNavNetworkTest {
   private static final String FRAME_TOPIC = "/QuestNav/frameData";
+  private static final String DEVICE_TOPIC = "/QuestNav/deviceData";
 
   @TempDir static Path tempDir;
 
@@ -75,6 +83,65 @@ class QuestNavNetworkTest {
     framePublisher.close();
     client.close();
     server.stopServer();
+  }
+
+  // Must run before anything is published, while the subscribers still hold their defaults
+  @Test
+  @Order(1)
+  void gettersAreEmptyBeforeQuestPublishes() {
+    List<Integer> lowBatteryLevels = new ArrayList<>();
+    questNav.onLowBattery(20, lowBatteryLevels::add);
+    questNav.commandPeriodic();
+
+    assertFalse(questNav.isConnected());
+    assertFalse(questNav.isTracking());
+    assertTrue(questNav.getBatteryPercent().isEmpty());
+    assertTrue(questNav.getFrameCount().isEmpty());
+    assertTrue(questNav.getTrackingLostCounter().isEmpty());
+    assertTrue(questNav.getAppTimestamp().isEmpty());
+    assertTrue(lowBatteryLevels.isEmpty());
+  }
+
+  @Test
+  void deviceDataIsReportedWhileConnected() throws InterruptedException {
+    List<Integer> lowBatteryLevels = new ArrayList<>();
+    questNav.onLowBattery(20, lowBatteryLevels::add);
+    try (ProtobufPublisher<Data.ProtobufQuestNavDeviceData> devicePublisher =
+        client.getProtobufTopic(DEVICE_TOPIC, new DeviceDataProto()).publish()) {
+      devicePublisher.set(
+          Data.ProtobufQuestNavDeviceData.newInstance()
+              .setBatteryPercent(15)
+              .setTrackingLostCounter(3));
+
+      // Device data only counts while frames keep the connection alive; retry as in
+      // connectionFollowsFrameFlow in case a pause outlasts the 120 ms window
+      OptionalInt lostCounter = OptionalInt.empty();
+      for (int attempt = 0; attempt < 5; attempt++) {
+        waitFor(
+            () -> {
+              sendFrame(0);
+              return questNav.getBatteryPercent().isPresent();
+            },
+            2.0,
+            "device data");
+        questNav.commandPeriodic();
+        lostCounter = questNav.getTrackingLostCounter();
+        if (!lowBatteryLevels.isEmpty() && lostCounter.isPresent()) {
+          break;
+        }
+      }
+      assertEquals(List.of(15), lowBatteryLevels);
+      assertEquals(OptionalInt.of(3), lostCounter);
+      assertTrue(questNav.getAppTimestamp().isPresent());
+
+      Thread.sleep(250);
+      questNav.commandPeriodic();
+      assertFalse(questNav.isConnected());
+      assertTrue(questNav.getBatteryPercent().isEmpty());
+      assertTrue(questNav.getTrackingLostCounter().isEmpty());
+      assertTrue(questNav.getFrameCount().isPresent());
+      assertEquals(List.of(15), lowBatteryLevels);
+    }
   }
 
   @Test

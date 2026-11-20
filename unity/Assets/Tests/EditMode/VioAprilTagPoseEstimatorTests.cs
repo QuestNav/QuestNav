@@ -80,6 +80,14 @@ namespace QuestNav.Tests
                 Estimator.HandleRecenter();
             }
 
+            /// <summary>Loses tracking while the robot drives; no VIO reaches the estimator.</summary>
+            public void Outage(Translation3d fieldVelocity, double seconds)
+            {
+                Estimator.HandleTrackingLost();
+                Time += seconds;
+                Field = new Pose3d(Field.Translation + fieldVelocity * seconds, Field.Rotation);
+            }
+
             public void Observe(Pose3d measured, double captureTime, int tags = GoodTags)
             {
                 Estimator.AddAprilTagObservation(
@@ -581,6 +589,90 @@ namespace QuestNav.Tests
                 AngleDiff(sim.Field.Rotation.Z, sim.Estimator.EstimatedPose.Rotation.Z),
                 Tolerance
             );
+        }
+
+        [Test]
+        public void TrackingOutage_PlausibleJumpIsIntegrated()
+        {
+            var sim = new Sim();
+            sim.Align();
+            var velocity = new Translation3d(3.0, -1.0, 0.0);
+            sim.Step(velocity, 10);
+
+            sim.Outage(velocity, 0.8);
+            sim.Step(velocity, 1);
+
+            Assert.IsTrue(sim.Estimator.HasInitialAlignment);
+            Assert.AreEqual(0.0, sim.PositionError, Tolerance);
+        }
+
+        [Test]
+        public void TrackingOutage_RelocalizationJumpIsNotIntegrated()
+        {
+            var sim = new Sim();
+            sim.Align();
+            sim.Step(Translation3d.Zero, 10);
+            var before = sim.Estimator.EstimatedPose.Translation;
+
+            // Tracking comes back with the VIO frame shifted further than the robot can drive
+            sim.Outage(Translation3d.Zero, 0.2);
+            sim.VioOffset += new Translation3d(2.0, -1.0, 0.0);
+            sim.Step(Translation3d.Zero, 1);
+
+            Assert.IsFalse(sim.Estimator.HasInitialAlignment);
+            Assert.AreEqual(
+                0.0,
+                sim.Estimator.EstimatedPose.Translation.GetDistance(before),
+                Tolerance
+            );
+
+            // Later motion is integrated from the new baseline, and tags re-anchor it
+            var velocity = new Translation3d(1.0, 0.0, 0.0);
+            sim.Step(velocity, 12);
+            Assert.AreEqual(0.1, (sim.Estimator.EstimatedPose.Translation - before).X, Tolerance);
+
+            sim.ObserveTruth();
+            Assert.IsTrue(sim.Estimator.HasInitialAlignment);
+            Assert.AreEqual(0.0, sim.PositionError, Tolerance);
+        }
+
+        [Test]
+        public void TrackingOutage_RealignNeedsPresetQuality()
+        {
+            var sim = new Sim();
+            sim.Align();
+            sim.Outage(Translation3d.Zero, 0.1);
+            sim.VioOffset += new Translation3d(0.0, 3.0, 0.0);
+            sim.Step(Translation3d.Zero, 1);
+
+            sim.Observe(
+                sim.Field,
+                sim.Time,
+                tags: VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_TAGS
+            );
+            Assert.IsFalse(sim.Estimator.HasInitialAlignment);
+
+            sim.ObserveTruth();
+            Assert.IsTrue(sim.Estimator.HasInitialAlignment);
+        }
+
+        [Test]
+        public void TrackingOutage_IgnoresAprilTagsUntilReacquired()
+        {
+            var sim = new Sim();
+            sim.Align();
+            var before = sim.Estimator.EstimatedPose;
+
+            sim.Estimator.HandleTrackingLost();
+            sim.Observe(
+                new Pose3d(
+                    sim.Field.Translation + new Translation3d(0.3, 0.0, 0.0),
+                    sim.Field.Rotation
+                ),
+                sim.Time
+            );
+
+            Assert.AreEqual(before, sim.Estimator.EstimatedPose);
         }
 
         [Test]

@@ -45,7 +45,7 @@ if (Test-Path $LogPath) { Remove-Item $LogPath -Force }
 
 $startTime = Get-Date
 
-$env:QUESTNAV_DEVELOPMENT_BUILD = "1" # matches '-developmentBuild' in workflow
+$env:QUESTNAV_DEVELOPMENT_BUILD = "1" # local builds are Development builds; CI and release builds are not
 
 # Derive version like CI if not supplied: short hash + commit count
 try {

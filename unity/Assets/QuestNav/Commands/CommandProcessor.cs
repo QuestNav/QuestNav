@@ -82,6 +82,14 @@ namespace QuestNav.Commands
             );
         }
 
+        /// <summary>
+        /// Gets the age in milliseconds of a value received at <paramref name="lastChangeNs"/>
+        /// </summary>
+        /// <param name="ntNowNs">Current NT local time in nanoseconds</param>
+        /// <param name="lastChangeNs">NT local time of the value's last change in nanoseconds</param>
+        public static long GetAgeMs(long ntNowNs, long lastChangeNs) =>
+            (ntNowNs - lastChangeNs) / 1_000_000;
+
         #region Event Subscribers
         private void OnAllowedPoseResetTimeoutMsChanged(int timeoutMs)
         {
@@ -122,12 +130,10 @@ namespace QuestNav.Commands
                         }
                         else
                         {
-                            // Get the age of the command, in milliseconds
-                            var ageMs =
-                                (
-                                    networkTableConnection.NtNow
-                                    - receivedTimestampedCommand.LastChange
-                                ) / 1_000_000;
+                            var ageMs = GetAgeMs(
+                                networkTableConnection.NtNow,
+                                receivedTimestampedCommand.LastChange
+                            );
 
                             // Check if the command is fresh
                             if (ageMs < cachedPoseResetTtlMs)

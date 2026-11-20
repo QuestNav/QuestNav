@@ -519,6 +519,120 @@ namespace QuestNav.Tests
             Assert.IsTrue(sim.Estimator.HasInitialAlignment);
         }
 
+        /// <summary>Sets the loosest settings a user can ask for: Debug preset, one tag.</summary>
+        private static void AllowFewestTags(Sim sim)
+        {
+            sim.Estimator.SetConfidencePreset(ConfidencePreset.Debug);
+            sim.Estimator.SetMinimumTags(1);
+        }
+
+        [Test]
+        public void Phase1_SingleTagRejectedWhateverTheSettings()
+        {
+            var sim = new Sim();
+            AllowFewestTags(sim);
+            sim.Estimator.AddVioObservation(sim.Vio, sim.Time);
+            sim.Step(Translation3d.Zero, 5);
+            var before = sim.Estimator.EstimatedPose;
+
+            sim.Observe(sim.Field, sim.Time, tags: 1);
+            Assert.IsFalse(sim.Estimator.HasInitialAlignment);
+            Assert.AreEqual(before, sim.Estimator.EstimatedPose);
+
+            sim.Observe(
+                sim.Field,
+                sim.Time,
+                tags: VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+            );
+            Assert.IsTrue(sim.Estimator.HasInitialAlignment);
+            Assert.AreEqual(0.0, sim.PositionError, Tolerance);
+        }
+
+        [Test]
+        public void ResetPosition_SingleTagDoesNotMovePose()
+        {
+            var sim = new Sim();
+            AllowFewestTags(sim);
+            sim.Align();
+
+            // setPose places the robot 1 m and 0.4 rad away from where the tags say it is
+            sim.VioYaw = 0.4;
+            sim.VioOffset = new Translation3d(1.0, 0.0, 0.0);
+            sim.Estimator.ResetPosition(sim.Vio, sim.Time);
+            sim.Step(Translation3d.Zero, 5);
+            var before = sim.Estimator.EstimatedPose;
+
+            for (int i = 0; i < 5; i++)
+            {
+                sim.Observe(sim.Field, sim.Time, tags: 1);
+                sim.Step(Translation3d.Zero, 1);
+            }
+
+            Assert.AreEqual(AlignmentState.PoseReset, sim.Estimator.AlignmentState);
+            Assert.AreEqual(before, sim.Estimator.EstimatedPose);
+
+            sim.Observe(
+                sim.Field,
+                sim.Time,
+                tags: VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+            );
+            Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(0.0, sim.PositionError, Tolerance);
+        }
+
+        [Test]
+        public void Phase2_DebugPresetRejectsSingleTag()
+        {
+            var sim = new Sim();
+            AllowFewestTags(sim);
+            sim.Align();
+            var before = sim.Estimator.EstimatedPose;
+            var probe = new Pose3d(sim.Field.Translation + GainProbeOffset, sim.Field.Rotation);
+
+            sim.Observe(probe, sim.Time, tags: 1);
+            Assert.AreEqual(before, sim.Estimator.EstimatedPose);
+
+            sim.Observe(
+                probe,
+                sim.Time,
+                tags: VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+            );
+            Assert.Greater(sim.Estimator.EstimatedPose.Translation.X, before.Translation.X);
+        }
+
+        [Test]
+        public void Phase2_GateRealignRejectsSingleTag()
+        {
+            var sim = new Sim();
+            AllowFewestTags(sim);
+            sim.Align();
+            sim.VioOffset += new Translation3d(0.0, 1.0, 0.0);
+            sim.Step(Translation3d.Zero, 1);
+            for (int i = 0; i < VioAprilTagPoseEstimatorConstants.REALIGN_REJECTION_COUNT; i++)
+            {
+                sim.Observe(
+                    sim.Field,
+                    sim.Time,
+                    tags: VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+                );
+                sim.Step(Translation3d.Zero, 4);
+            }
+            Assert.AreEqual(AlignmentState.Realigning, sim.Estimator.AlignmentState);
+            var before = sim.Estimator.EstimatedPose;
+
+            sim.Observe(sim.Field, sim.Time, tags: 1);
+            Assert.AreEqual(AlignmentState.Realigning, sim.Estimator.AlignmentState);
+            Assert.AreEqual(before, sim.Estimator.EstimatedPose);
+
+            sim.Observe(
+                sim.Field,
+                sim.Time,
+                tags: VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+            );
+            Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(0.0, sim.PositionError, Tolerance);
+        }
+
         [Test]
         public void Recenter_KeepsHeadingAndTravelDirection()
         {

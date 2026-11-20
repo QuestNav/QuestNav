@@ -36,16 +36,17 @@ jobs:
           version: ${{ inputs.version }}
 
       - name: Install Protoc
-        uses: arduino/setup-protoc@v3
+        uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3.0.0
         with:
+          version: '23.4'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download protoc-gen-doc
-        uses: robinraju/release-downloader@v1
+        uses: robinraju/release-downloader@28fc21f50d76778e7023361aa1f863e717d3d56f # v1.13
         with:
           repository: 'pseudomuto/protoc-gen-doc'
-          latest: true
-          fileName: 'protoc-gen-doc_*_linux_amd64.tar.gz '
+          tag: 'v1.5.1'
+          fileName: 'protoc-gen-doc_1.5.1_linux_amd64.tar.gz'
           extract: true
           token: ${{ secrets.GITHUB_TOKEN }}
           

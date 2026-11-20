@@ -23,7 +23,7 @@
     },
     "com.meta.xr.sdk.core": {
       "version": "205.0.0",
-      "depth": 1,
+      "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.xr.hands": "1.7.2",
@@ -38,7 +38,7 @@
     },
     "com.meta.xr.sdk.interaction": {
       "version": "205.0.0",
-      "depth": 1,
+      "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.ugui": "1.0.0",
@@ -352,7 +352,7 @@
     },
     "com.unity.xr.hands": {
       "version": "1.7.3",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.modules.xr": "1.0.0",

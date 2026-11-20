@@ -23,3 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 
+# NetworkTables persistence written by local sim runs
+networktables.json

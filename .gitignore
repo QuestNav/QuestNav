@@ -19,9 +19,15 @@ unity/Assets/StreamingAssets/RuntimeActionBindings.*
 /.cursor
 /unity/Assets/XR/Resources/*
 /unity/.cursor
-unity/ProjectSettings/ProjectSettings.asset
 /.docs
 /docs/static/api
 
 #Visual Studio directory
 /.vs
+# Protoc plugins downloaded per the development setup docs
+protoc-gen-quickbuf*
+protoc-gen-doc*
+
+# Merge tool backups
+*.orig
+*.orig.meta

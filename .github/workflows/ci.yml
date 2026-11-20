@@ -46,6 +46,7 @@ jobs:
               - 'unity/**/*.unity'
               - 'unity/**/*.meta'
               - 'unity/**/*.asmdef'
+              - 'unity/Assets/Plugins/**'
             proto:
               - 'protos/**'
             docs:

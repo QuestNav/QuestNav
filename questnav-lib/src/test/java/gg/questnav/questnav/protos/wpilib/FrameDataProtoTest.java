@@ -14,9 +14,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.protos.generated.Data;
+import java.io.IOException;
+import java.io.InputStream;
 import org.junit.jupiter.api.Test;
 import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Quaternion;
 import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.geometry.Translation3d;
 
 class FrameDataProtoTest {
   private final FrameDataProto proto = new FrameDataProto();
@@ -58,6 +62,31 @@ class FrameDataProtoTest {
   void missingServerTimestampUnpacksAsZero() {
     var msg = Data.ProtobufQuestNavFrameData.newInstance().setTimestamp(3.5).setFrameCount(7);
     assertEquals(0.0, proto.unpack(msg).dataTimestamp());
+  }
+
+  /**
+   * frame_data_golden.bin was encoded by the Unity app's C# protobuf code; FrameDataGoldenTests on
+   * the C# side checks it still encodes the same bytes.
+   */
+  @Test
+  void decodesGoldenBytesFromTheApp() throws IOException {
+    byte[] golden;
+    try (InputStream in = getClass().getResourceAsStream("frame_data_golden.bin")) {
+      golden = in.readAllBytes();
+    }
+
+    var msg = Data.ProtobufQuestNavFrameData.parseFrom(golden);
+    var frame = proto.unpack(msg);
+    assertEquals(
+        new Pose3d(
+            new Translation3d(1.5, -2.25, 0.125),
+            new Rotation3d(new Quaternion(0.5, 0.5, 0.5, 0.5))),
+        frame.questPose3d());
+    assertEquals(1_234_567_890_123L, msg.getServerTimestamp());
+    assertEquals(1_234.567890123, frame.dataTimestamp(), 1e-9);
+    assertEquals(123.456, frame.appTimestamp());
+    assertEquals(4242, frame.frameCount());
+    assertTrue(frame.isTracking());
   }
 
   @Test

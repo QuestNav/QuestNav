@@ -18,6 +18,16 @@
  * - Frame data is sent every 10 milliseconds (100 Hz)
  * - Device data is sent every 333 milliseconds (3 Hz)
  * - External systems receive and process this data for robot localization
+ *
+ * Wire Protocol Version:
+ * The app publishes an integer wire-protocol version on the NT topic
+ * /QuestNav/protocolVersion, next to the release string on /QuestNav/version. It is a
+ * plain integer topic so it can be read even where these protobuf schemas can't be decoded.
+ * The version only changes when the messages or topics change in a way robot code may
+ * need to know about; new fields alone stay readable by older libraries.
+ * - 1: Apps that predate the topic (a missing topic means version 1).
+ * - 2: Adds alignment_state and reset_epoch to frame data, and a failure response for
+ *      command types the app does not know.
  */
 
 package questnav.protos.data;

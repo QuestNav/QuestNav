@@ -12,7 +12,9 @@ jobs:
         uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
-          sparse-checkout: unity
+          sparse-checkout: |
+            unity
+            .csharpierrc.json
           sparse-checkout-cone-mode: false
 
       - name: Setup .NET
@@ -21,7 +23,7 @@ jobs:
           dotnet-version: '8.x'
 
       - name: Install CSharpier
-        run: dotnet tool install -g csharpier
+        run: dotnet tool install -g csharpier --version 1.4.0
 
       - name: Check CSharp Formatting
-        run: csharpier check unity/Assets/QuestNav/
+        run: csharpier check unity/Assets/QuestNav unity/Assets/Tests unity/Assets/Editor

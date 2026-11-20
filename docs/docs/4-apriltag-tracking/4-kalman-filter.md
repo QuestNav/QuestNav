@@ -15,7 +15,7 @@ The Kalman filter operates on a **3D position** state vector in FRC field coordi
 | **State vector x** | `[x, y, z]` | 3D position in meters (FRC field frame) |
 | **F (state transition)** | 3×3 Identity | Prediction uses explicit displacement, not a velocity model |
 | **H (observation)** | 3×3 Identity | AprilTags provide a direct position measurement |
-| **Q (process noise)** | `diag(0.02², 0.02², 0.01²)` | VIO displacement uncertainty per step |
+| **Q (process noise)** | `diag(0.02², 0.02², 0.01²) × dt / (1/120 s)` | VIO displacement uncertainty, scaled by the time step `dt` (clamped to 0.1 s) |
 | **R (measurement noise)** | Dynamic | Computed per observation; see [Dynamic Measurement Noise](#dynamic-measurement-noise) |
 | **P₀ (initial covariance)** | `0.001 × I` | Very high initial confidence in VIO position |
 
@@ -62,7 +62,7 @@ x̂(k|k-1) = x̂(k|k-1) + d_corrected
 
 6. **Reconstruct filter** with the corrected state (the MathNet Kalman filter does not expose state mutation, so a new instance is created).
 
-7. **Store snapshot** in the replay buffer: `(timestamp, vioPosition, vioRotation, kfState)`.
+7. **Store snapshot** in the replay buffer: `(timestamp, vioPosition, vioRotation, kfState, kfCovariance)`.
 
 8. **Prune** snapshots older than the buffer duration (default 0.5 seconds).
 
@@ -145,13 +145,15 @@ AprilTag observations are processed with a non-trivial delay relative to when th
 1. **Find the matching snapshot** — search backwards through the buffer for the latest snapshot with `timestamp <= aprilTagTimestamp`.
 
 2. **If a match is found:**
-   - Roll the KF state back to the snapshot's stored state
+   - Roll the KF state and covariance back to the snapshot's stored values
    - Apply the KF update at that historical point
    - **Replay forward**: re-apply all subsequent VIO displacements (each rotated by the current yaw offset) to bring the state to the present
    - Update each replayed snapshot's stored state in-place
 
-3. **If no match is found** (observation is very recent or buffer is empty):
-   - Apply the KF update directly to the current state (no replay)
+3. **If no match is found** (the capture is older than the buffer, or more than 50 ms past the snapshot before it, e.g. during a tracking outage):
+   - The observation is dropped, since it cannot be latency-compensated
+
+Replay adds the process noise for each replayed step once, so the covariance after a correction matches what it would be had the observation arrived with no delay.
 
 ```mermaid
 sequenceDiagram
@@ -188,7 +190,7 @@ When the first accepted AprilTag observation arrives (Phase 1):
 
 The `.Z` component of a `Rotation3d` corresponds to rotation around the FRC Z-axis (up), which is yaw.
 
-2. Look up the **VIO yaw at capture time** from the snapshot buffer (or fall back to the latest VIO rotation if no match):
+2. Look up the **VIO yaw at capture time** from the snapshot buffer:
 
 ```
 ψ_vio = Rotation3d.Z(q_vioAtCapture)
@@ -268,6 +270,17 @@ QuestNav listens for the `OVRManager.display.RecenteredPose` event and calls `Ha
 
 The key insight is that the headset hasn't actually moved — only the VIO coordinate frame has changed. The Kalman filter's field-relative state remains valid.
 
+## Tracking Outages
+
+While the headset reports position tracking as lost, QuestNav stops feeding VIO to the estimator and AprilTag observations are ignored. When tracking returns, the jump between the last VIO pose before the outage and the first one after it is compared with what the robot could have driven in that time (`MAX_ROBOT_SPEED_MPS × outage + TRACKING_JUMP_MARGIN_METERS`):
+
+- **Within the bound**, the jump is the robot's real motion during the outage and is integrated as usual.
+- **Beyond the bound**, it is a relocalization. The estimate keeps its position instead of integrating the jump, the snapshot history from before it is dropped, and an aligned estimator drops back to Phase 1. The re-alignment needs an observation that also meets the Phase-2 confidence preset.
+
+## Pose Reset Latency Compensation
+
+A pose reset from the robot (`setPose`) describes where the headset was when the command was sent. When NetworkTables time is synced with the robot, QuestNav takes the command's age, looks up the raw VIO pose from that long ago in the snapshot buffer (clamped to the buffer length), and moves the target by the VIO motion since. The VIO displacement is rotated into the field by the target yaw minus the VIO yaw at that time, and the yaw change is added to the target heading. Without time sync, or for resets from the web UI, the reset is applied as received.
+
 ## Output
 
 The `EstimatedPose` property returns a `Pose3d` combining:
@@ -295,3 +308,7 @@ This is published to NetworkTables at 120 Hz for consumption by the robot's driv
 | `CORRECTION_MIN_INLIER_RATIO` | 0.8 | Min inlier ratio for Phase 2 |
 | `CORRECTION_MAX_POSITION_JUMP` | 2.0 m | Max position jump for Phase 2 |
 | `SNAPSHOT_BUFFER_DURATION` | 0.5 s | Replay buffer duration |
+| `VIO_NOISE_MAX_DT_SECONDS` | 0.1 s | Longest time step process noise is added for |
+| `MAX_CAPTURE_VIO_GAP_SECONDS` | 0.05 s | Max gap between a capture and the VIO snapshot before it |
+| `MAX_ROBOT_SPEED_MPS` | 6.0 m/s | Fastest plausible robot speed for the reacquire jump check |
+| `TRACKING_JUMP_MARGIN_METERS` | 0.25 m | Margin on the reacquire jump check |

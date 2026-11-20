@@ -97,14 +97,6 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Announcement bar for the rewrite, should be removed when the rewrite is done
-    announcementBar: {
-      id: 'version_notification',
-      content: '⚠️ A major rewrite is in progress for the 2026 season! <a href="/docs/rewrite">Learn more</a>',
-      backgroundColor: 'var(--ifm-background-color)',
-      textColor: 'var(--ifm-color-primary)',
-      isCloseable: false,
-    },
     navbar: {
       title: '',
       logo: {

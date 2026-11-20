@@ -334,11 +334,11 @@ namespace QuestNav.Core
 
             /// <summary>
             /// Allowed values for the "Minimum Tags Required" dropdown. The estimator
-            /// already rejects pose updates with fewer than this many kept tags; the
-            /// list is constrained to plausible single-frame tag counts on the Quest
-            /// passthrough camera (the camera FOV makes 5+ tags vanishingly rare).
+            /// already rejects pose updates with fewer than this many kept tags. The list
+            /// starts at two because a single-tag solve never moves the pose, and stops at
+            /// four because the camera FOV makes 5+ tags in one frame vanishingly rare.
             /// </summary>
-            public static readonly int[] MINIMUM_TAGS_OPTIONS = { 1, 2, 3, 4 };
+            public static readonly int[] MINIMUM_TAGS_OPTIONS = { 2, 3, 4 };
         }
 
         /// <summary>

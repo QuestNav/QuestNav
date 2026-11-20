@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using QuestNav.Core;
+using QuestNav.QuestNav.Estimation;
 using QuestNav.Utils;
 using SQLite;
 using UnityEngine;
@@ -757,6 +758,21 @@ namespace QuestNav.Config
         {
             var config = await GetAprilTagConfigAsync();
             var ignoredIds = await GetAprilTagIgnoredIdsAsync();
+
+            // Older builds allowed a minimum of one tag; single-tag solves no longer move the pose
+            if (
+                config.AprilTagDetectorMinimumNumberOfTags
+                < VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+            )
+            {
+                QueuedLogger.Log(
+                    $"Raised stored minimumNumberOfTags from {config.AprilTagDetectorMinimumNumberOfTags} "
+                        + $"to {VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE}"
+                );
+                config.AprilTagDetectorMinimumNumberOfTags =
+                    VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE;
+                await SaveAprilTagConfigAsync(config);
+            }
 
             return new AprilTagDetectorMode(
                 (AprilTagDetectorMode.DetectionMode)config.AprilTagDetectorMode,

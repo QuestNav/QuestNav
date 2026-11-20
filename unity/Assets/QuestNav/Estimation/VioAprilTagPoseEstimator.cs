@@ -72,10 +72,11 @@ namespace QuestNav.QuestNav.Estimation
         /// Marks a VIO tracking outage; stop calling <see cref="AddVioObservation"/> until
         /// tracking is back. AprilTag observations are ignored until then. The jump to the
         /// first VIO observation after the outage is integrated when the robot could have
-        /// driven it in that time. For a tag-aligned estimator a larger jump, or a recenter
-        /// during the outage, is a relocalization: it is not integrated, and the estimator
-        /// drops back to Phase 1 so the next tags re-anchor it. Without tag alignment the
-        /// VIO is the only estimate, so the jump is integrated either way.
+        /// driven it in that time. For an estimator placed on the field (by tags or a pose
+        /// reset) a larger jump, or a recenter during the outage, is a relocalization: it is
+        /// not integrated, and the estimator drops back to Phase 1 so the next tags re-anchor
+        /// it. An unplaced estimator has only the VIO, so it follows a larger jump, in a new
+        /// reset epoch.
         /// </summary>
         void HandleTrackingLost();
 
@@ -449,9 +450,11 @@ namespace QuestNav.QuestNav.Estimation
                 double maxJump =
                     VioAprilTagPoseEstimatorConstants.MAX_ROBOT_SPEED_MPS * Math.Max(dt, 0.0)
                     + VioAprilTagPoseEstimatorConstants.TRACKING_JUMP_MARGIN_METERS;
-                // Holding position only helps when tags can re-align it; without tag
-                // alignment the VIO is the only estimate, so the jump is integrated
-                if (hasInitialAlignment && (recenterAcrossOutage || rawDisplacement.Norm > maxJump))
+                // Holding position only helps an estimator placed on the field, which reports
+                // REALIGNING until tags re-place it; an unplaced one has only the VIO, so it
+                // follows the jump
+                bool jumped = rawDisplacement.Norm > maxJump;
+                if ((hasInitialAlignment || placedByPoseReset) && (recenterAcrossOutage || jumped))
                 {
                     RebaseAfterRelocalization(
                         vioPose,
@@ -464,6 +467,11 @@ namespace QuestNav.QuestNav.Estimation
                                 + "outage, more than the robot can drive; not integrating it"
                     );
                     return;
+                }
+                if (jumped)
+                {
+                    // Followed, but not motion: the robot must not take it for driving
+                    resetEpoch++;
                 }
             }
 
@@ -731,11 +739,11 @@ namespace QuestNav.QuestNav.Estimation
         }
 
         /// <summary>
-        /// Re-bases an aligned estimator onto the first VIO pose after a tracking outage
-        /// whose jump is too large to be robot motion, or that a recenter hid. The estimate
-        /// holds its position instead of integrating the jump, the history from before the
-        /// jump is dropped, and the estimator drops back to Phase 1 so the next tags
-        /// re-anchor position and heading.
+        /// Re-bases an estimator placed on the field (by tags or a pose reset) onto the first
+        /// VIO pose after a tracking outage whose jump is too large to be robot motion, or
+        /// that a recenter hid. The estimate holds its position instead of integrating the
+        /// jump, the history from before the jump is dropped, and the estimator drops back to
+        /// Phase 1 so the next tags re-anchor position and heading.
         /// </summary>
         private void RebaseAfterRelocalization(
             Pose3d newVioPose,
@@ -757,7 +765,10 @@ namespace QuestNav.QuestNav.Estimation
                 )
             );
 
+            // The held position and old heading no longer match the field, whether tags or a
+            // pose reset placed them
             hasInitialAlignment = false;
+            placedByPoseReset = false;
             realignPending = true;
             rejectionStreakCount = 0;
             resetEpoch++;

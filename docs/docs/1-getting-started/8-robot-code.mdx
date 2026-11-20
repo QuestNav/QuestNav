@@ -530,7 +530,7 @@ same-epoch changes as pure odometry. Compare epochs for equality only.
 | `UNALIGNED` | Raw tracking: nothing has placed the pose on the field yet |
 | `POSE_RESET` | Placed by `setPose()` (or the web UI), not yet aligned by AprilTags |
 | `TAG_ALIGNED` | Aligned to the field by AprilTags |
-| `REALIGNING` | Was tag aligned, but the tags disagree or tracking relocalized; waiting for the tags to re-align it |
+| `REALIGNING` | Was placed on the field (by tags or `setPose()`), but the tags disagree or tracking relocalized; waiting for the tags to re-align it |
 | `UNKNOWN` | The QuestNav app is too old to report it |
 
 ```java

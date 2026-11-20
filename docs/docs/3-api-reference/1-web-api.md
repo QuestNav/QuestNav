@@ -180,7 +180,9 @@ applied, so the fields applied before the failing check stay saved:
 | Failing check | Already saved |
 |---|---|
 | Resolution or minimum tags | `teamNumber`, `debugIpOverride`, `allowedPoseResetTimeoutMs`, `enableAutoStartOnBoot`, `enablePassthroughStream`, `enableHighQualityStream`, `streamMode` |
-| Field layout | Those fields, plus the rest of `aprilTagDetectorMode` |
+| Field layout | Those fields, plus the other detector fields: `mode`, `width`, `height`, `framerate`, `ignoredIds`, `maxDistance`, `minimumNumberOfTags` |
+| Confidence preset | Those fields, plus `fieldLayoutFile` |
+| Noise scale | Those fields, plus `fieldLayoutFile` and `confidencePreset` |
 
 **Success:** 200 `{ "success": true, "message": "Configuration updated" }`.
 
@@ -364,7 +366,9 @@ your own. Custom layouts are stored on the headset and are looked up before the 
 - **Allowed characters:** letters, digits, `.`, `_` and `-`.
 - **Length:** at most 64 characters before `.json`.
 - **First character:** must not be `.`.
-- **Extension:** `.json` is added when missing.
+- **No `..`:** a name must not contain `..` anywhere.
+- **Extension:** `.json` is added when missing, but only to the POST `name` and the PATCH `newName`. The `{name}` in a
+  URL must be the full file name, such as `practice-field.json`.
 - **Bundled names:** a custom layout cannot use one (compared case-insensitively).
 
 **Applying a change**

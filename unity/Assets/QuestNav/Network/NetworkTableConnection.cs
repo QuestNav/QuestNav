@@ -198,6 +198,7 @@ namespace QuestNav.Network
         /// - /QuestNav/frameData: High-frequency pose updates (100Hz)
         /// - /QuestNav/deviceData: Device status updates (3Hz)
         /// - /QuestNav/response: Command execution results
+        /// - /QuestNav/version, /QuestNav/protocolVersion: App release and wire-protocol version
         ///
         /// Subscribers (Robot → Quest):
         /// - /QuestNav/request: Commands from robot (pose resets, etc.)
@@ -259,6 +260,14 @@ namespace QuestNav.Network
                     new PubSubOptions { Periodic = 0.01 }
                 )
                 .Set(Application.version);
+
+            // Integer, so robot code can check compatibility even if it can't decode the protos
+            ntInstance
+                .GetIntegerPublisher(
+                    QuestNavConstants.Topics.PROTOCOL_VERSION,
+                    new PubSubOptions { Periodic = 0.01 }
+                )
+                .Set(QuestNavConstants.Network.PROTOCOL_VERSION);
 
             /*
              * SUBSCRIBER SETUP - Quest receives data FROM robot

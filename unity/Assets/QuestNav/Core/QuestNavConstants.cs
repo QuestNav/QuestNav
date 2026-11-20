@@ -42,6 +42,14 @@ namespace QuestNav.Core
             /// Maximum team number allowed to be set
             /// </summary>
             public const int MAX_TEAM_NUMBER = 25599;
+
+            /// <summary>
+            /// Wire-protocol version this app speaks, published on
+            /// <see cref="Topics.PROTOCOL_VERSION"/>. Apps without the topic are version 1.
+            /// Keep in step with QuestNav.PROTOCOL_VERSION in questnav-lib and the version
+            /// history in data.proto.
+            /// </summary>
+            public const int PROTOCOL_VERSION = 2;
         }
 
         /// <summary>
@@ -88,6 +96,11 @@ namespace QuestNav.Core
             /// QuestNav version topic
             /// </summary>
             public const string VERSION = NT_BASE_PATH + "/version";
+
+            /// <summary>
+            /// Wire-protocol version topic, an integer
+            /// </summary>
+            public const string PROTOCOL_VERSION = NT_BASE_PATH + "/protocolVersion";
         }
 
         /// <summary>

@@ -36,29 +36,10 @@ jobs:
         uses: WyriHaximus/github-action-get-previous-tag@v2
 
       - name: Determine publishable changes
-        uses: dorny/paths-filter@v4
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: changes
         with:
-          filters: |
-            java:
-              - 'questnav-lib/**.java'
-              - 'questnav-lib/**.gradle'
-              - 'questnav-lib/gradle.properties'
-              - 'questnav-lib/src/generate/**'
-            csharp:
-              - 'unity/**.cs'
-              - 'unity/**.json'
-              - 'unity/**.unity'
-              - 'unity/**.meta'
-              - 'unity/**.asmdef'
-              - 'unity/Assets/Plugins/**'
-            proto:
-              - 'protos/**'
-            docs:
-              - 'docs/**'
-            web-ui:
-              - 'questnav-web-ui/**'
-              - 'unity/Assets/StreamingAssets/ui/**'
+          filters: .github/filters.yml
           base: ${{ steps.get-last-release.outputs.tag }}
 
   build-proto-java:
@@ -87,10 +68,12 @@ jobs:
 
   build-apk:
     if: |
-      (needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
+      !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      ((needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
       needs.determine-publishable-changes.outputs.java-changed == 'true' ||
       needs.determine-publishable-changes.outputs.web-ui-changed == 'true') ||
-      inputs.force-release
+      inputs.force-release)
     needs: [build-proto-csharp, build-web-ui, determine-publishable-changes]
     uses: ./.github/workflows/reusable-build-csharp.yml
     with:
@@ -146,8 +129,10 @@ jobs:
 
   publish-docs:
     if: |
-      (needs.determine-publishable-changes.outputs.docs-changed == 'true') ||
-      inputs.force-release
+      !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      (needs.determine-publishable-changes.outputs.docs-changed == 'true' ||
+      inputs.force-release)
     needs: [build-proto-java, build-proto-csharp, build-web-ui, determine-publishable-changes]
     uses: ./.github/workflows/reusable-publish-docs.yml
     permissions:
@@ -171,12 +156,15 @@ jobs:
       MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
       MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
 
+  # A skipped publish-docs (no docs changes) must not skip the release.
   github-release:
     if: |
-      (needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
+      !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      ((needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
       needs.determine-publishable-changes.outputs.java-changed == 'true' ||
       needs.determine-publishable-changes.outputs.web-ui-changed == 'true') ||
-      inputs.force-release
+      inputs.force-release)
     runs-on: ubuntu-latest
     permissions:
       contents: write

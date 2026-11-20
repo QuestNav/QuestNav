@@ -8,18 +8,19 @@
 */
 package gg.questnav.questnav.protos.wpilib;
 
-import static org.wpilib.units.Units.Nanoseconds;
-import static org.wpilib.units.Units.Seconds;
-
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.protos.generated.Data;
-import gg.questnav.questnav.protos.generated.Data.ProtobufQuestNavFrameData;
 import org.wpilib.math.geometry.proto.Pose3dProto;
-import org.wpilib.math.geometry.proto.detail.ProtobufPose3d;
 import org.wpilib.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors;
 
-/** WPILib Protobuf layer for FrameData Protobuf */
+/**
+ * WPILib Protobuf layer for FrameData Protobuf. Serializes {@link PoseFrame} (it serialized the raw
+ * {@code ProtobufQuestNavFrameData} message before 2027).
+ *
+ * <p>{@code dataTimestamp} is carried as nanoseconds in the message's {@code server_timestamp}
+ * field; 0 means the sender did not provide one.
+ */
 public class FrameDataProto implements Protobuf<PoseFrame, Data.ProtobufQuestNavFrameData> {
 
   /** Protobuf instance for Pose3d */
@@ -44,21 +45,23 @@ public class FrameDataProto implements Protobuf<PoseFrame, Data.ProtobufQuestNav
   public PoseFrame unpack(Data.ProtobufQuestNavFrameData msg) {
     return new PoseFrame(
         pose3dProto.unpack(msg.getPose3D()),
+        msg.getServerTimestamp() * 1e-9,
         msg.getTimestamp(),
-        Nanoseconds.of(msg.getServerTimestamp()).in(Seconds),
         msg.getFrameCount(),
         msg.getIsTracking());
   }
 
   @Override
-  public void pack(ProtobufQuestNavFrameData msg, PoseFrame value) {
-    var newPros3dProto = ProtobufPose3d.newInstance();
-    pose3dProto.pack(newPros3dProto, value.questPose3d());
-
-    msg.setPose3D(newPros3dProto);
+  public void pack(Data.ProtobufQuestNavFrameData msg, PoseFrame value) {
+    pose3dProto.pack(msg.getMutablePose3D(), value.questPose3d());
+    msg.setServerTimestamp(Math.round(value.dataTimestamp() * 1e9));
     msg.setTimestamp(value.appTimestamp());
-    msg.setServerTimestamp((long) Seconds.of(value.dataTimestamp()).in(Nanoseconds));
     msg.setFrameCount(value.frameCount());
     msg.setIsTracking(value.isTracking());
+  }
+
+  @Override
+  public boolean isImmutable() {
+    return true;
   }
 }

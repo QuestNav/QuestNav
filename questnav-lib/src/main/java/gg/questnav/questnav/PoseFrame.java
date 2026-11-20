@@ -41,8 +41,8 @@ import org.wpilib.util.protobuf.ProtobufSerializable;
  * <p>Two timestamps are provided for different use cases:
  *
  * <ul>
- *   <li><strong>{@link #dataTimestamp()}:</strong> NetworkTables reception time - use this for pose
- *       estimation
+ *   <li><strong>{@link #dataTimestamp()}:</strong> When the pose was captured, in NetworkTables
+ *       server time - use this for pose estimation
  *   <li><strong>{@link #appTimestamp()}:</strong> Quest internal time - use only for
  *       debugging/diagnostics
  * </ul>
@@ -61,10 +61,11 @@ import org.wpilib.util.protobuf.ProtobufSerializable;
  * @param questPose3d The robot's pose on the field as measured by the Quest tracking system. This
  *     will only provide meaningful field-relative coordinates after {@link
  *     QuestNav#setPose(Pose3d)} has been called to establish the field reference frame.
- * @param dataTimestamp The NetworkTables timestamp indicating when this frame data was recorded on
- *     the Quest. This timestamp should be used when adding vision measurements to pose estimators
- *     as it represents when the measurement was available to the robot code. Units: nanoseconds
- *     since robot program start.
+ * @param dataTimestamp When the Quest captured this frame, in the NetworkTables server time base
+ *     (on the robot, the same time base as {@link org.wpilib.system.Timer#getTimestamp()}). Use
+ *     this timestamp when adding vision measurements to pose estimators. If the QuestNav app does
+ *     not send a capture time, this is the time the robot received the frame instead. Units:
+ *     seconds.
  * @param appTimestamp The Quest application's internal timestamp indicating when this frame was
  *     generated. This is primarily useful for debugging timing issues and calculating Quest-side
  *     latency. For pose estimation, use {@link #dataTimestamp()} instead. Units: seconds since
@@ -81,10 +82,11 @@ import org.wpilib.util.protobuf.ProtobufSerializable;
  */
 public record PoseFrame(
     Pose3d questPose3d,
-    double appTimestamp,
     double dataTimestamp,
+    double appTimestamp,
     int frameCount,
     boolean isTracking)
     implements ProtobufSerializable {
+  /** Protobuf serializer for {@link PoseFrame} */
   public static final FrameDataProto proto = new FrameDataProto();
 }

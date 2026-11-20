@@ -229,12 +229,35 @@ If your Quest is losing charge during operation despite being connected to power
 
 ### Version Mismatch Warnings
 
+The warning, and what to do about it, depends on your QuestNavLib line. See
+[Version Checks](./8-robot-code.mdx#version-checks).
+
+#### 2026 QuestNavLib (roboRIO)
+
+**Symptoms:**
+- A warning in the console every 5 seconds while the Quest is connected:
+  `WARNING FROM QUESTNAV: QuestNavLib version (X.X.X) on your robot does not match QuestNav app version (Y.Y.Y) on your headset. ...`
+
+The 2026 library compares release version strings. The app is shared by the 2026 and 2027 libraries, so its release
+version usually won't match a 2026 library, and the warning is then expected.
+
+**Solutions:**
+1. **Install the latest of each**: the latest QuestNav APK on the headset and the latest 2026 `questnavlib.json`
+   vendordep on the robot.
+
+2. **Silence it**: if this is the only warning, you can turn the check off:
+    ```java
+    questNav.setVersionCheckEnabled(false);
+    ```
+
+#### 2027 QuestNavLib (SystemCore)
+
 **Symptoms:**
 - A warning in the console, once per headset app version:
   `WARNING FROM QUESTNAV: The QuestNav app on your headset (Y.Y.Y) uses protocol version N, ...`
 
-QuestNavLib compares the app's wire-protocol version, not its release version, so the same app release works with the
-QuestNavLib releases for different WPILib years. It only warns when the app is older than the library supports, or
+The 2027 library compares the app's wire-protocol version, not its release version, so the same app release works with
+the QuestNavLib releases for different WPILib years. It only warns when the app is older than the library supports, or
 newer than it knows.
 
 **Solutions:**
@@ -248,7 +271,8 @@ newer than it knows.
     ```
 
 :::warning
-Re-enable version checking before competition. Mismatched protocol versions can cause subtle compatibility issues.
+With the 2027 library, re-enable version checking before competition. Mismatched protocol versions can cause subtle
+compatibility issues.
 :::
 
 ### App Crashes

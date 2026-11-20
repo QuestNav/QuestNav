@@ -1,4 +1,6 @@
+using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -99,6 +101,63 @@ namespace QuestNav.Utils
                 Directory.CreateDirectory(path);
             }
             return path;
+        }
+
+        /// <summary>
+        /// Error text for a name rejected by <see cref="TryResolveFieldLayoutPath"/>.
+        /// </summary>
+        public const string INVALID_FIELD_LAYOUT_NAME_MESSAGE =
+            "Invalid layout name. Use only letters, numbers, '.', '_' and '-' (max 64 characters before '.json').";
+
+        private static readonly Regex FieldLayoutNamePattern = new Regex(
+            @"^[A-Za-z0-9_-][A-Za-z0-9._-]{0,63}\.json$",
+            RegexOptions.CultureInvariant
+        );
+
+        /// <summary>
+        /// Resolves a field-layout file name to a full path directly inside
+        /// <paramref name="directory"/>. Accepts only a plain "name.json" file name: no
+        /// directory separators, no "..", no leading dot, at most 64 characters before
+        /// ".json". Every layout name that comes from a request or from config goes
+        /// through this.
+        /// </summary>
+        /// <returns>False if the name is not acceptable or would resolve outside the directory.</returns>
+        public static bool TryResolveFieldLayoutPath(
+            string directory,
+            string fileName,
+            out string fullPath
+        )
+        {
+            fullPath = null;
+            if (
+                string.IsNullOrEmpty(directory)
+                || string.IsNullOrEmpty(fileName)
+                || !FieldLayoutNamePattern.IsMatch(fileName)
+                || fileName.Contains("..")
+                || Path.GetFileName(fileName) != fileName
+            )
+            {
+                return false;
+            }
+
+            string root = Path.GetFullPath(directory)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            string candidate = Path.GetFullPath(Path.Combine(root, fileName));
+            if (!candidate.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            fullPath = candidate;
+            return true;
+        }
+
+        /// <summary>
+        /// <see cref="TryResolveFieldLayoutPath"/> against <see cref="GetCustomFieldLayoutDir"/>.
+        /// </summary>
+        public static bool TryResolveCustomFieldLayoutPath(string fileName, out string fullPath)
+        {
+            return TryResolveFieldLayoutPath(GetCustomFieldLayoutDir(), fileName, out fullPath);
         }
     }
 }

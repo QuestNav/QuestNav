@@ -321,6 +321,11 @@ namespace QuestNav.Native.NTCore
         {
             // Get the file descriptor for the message type
             var file = descriptor.File;
+            if (file.Name.Equals("commands.proto"))
+            {
+                // Publishing this schema crashes 2026 Glass/SimGui (allwpilib #8553, not fixed upstream)
+                return;
+            }
 
             // Get the schema as a byte array, this is what will be published
             var schema = file.ToProto().ToByteArray();

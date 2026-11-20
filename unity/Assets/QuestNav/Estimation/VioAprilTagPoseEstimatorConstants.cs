@@ -17,10 +17,10 @@ namespace QuestNav.QuestNav.Estimation
         Strict = 2,
 
         /// <summary>
-        /// Debug (1 tag, ratio >= 0.60). For benchtop / confined-space testing where only
-        /// one tag fits in view. Single-tag PnP is geometrically ambiguous (left/right
-        /// reflection, depth uncertainty) so corrections under this preset can introduce
-        /// pose jumps; do NOT use on a robot during competition.
+        /// Debug (2 tags, ratio >= 0.60). For benchtop / confined-space testing where the
+        /// tags are seen at poor angles. The low inlier ratio admits noisier solves, so
+        /// corrections under this preset can introduce pose jumps; do NOT use on a robot
+        /// during competition.
         /// </summary>
         Debug = 3,
     }
@@ -76,10 +76,17 @@ namespace QuestNav.QuestNav.Estimation
         /// </summary>
         public const double TRACKING_JUMP_MARGIN_METERS = 0.25;
 
+        /// <summary>
+        /// Hard floor on the tags in one frame for any observation to move the pose, in
+        /// every phase and preset. A single-tag solve is ambiguous (mirror flips, depth
+        /// error), so it is never trusted, whatever the user or preset asks for.
+        /// </summary>
+        public const int MIN_TAGS_FOR_POSITION_UPDATE = 2;
+
         // --- Phase 1: Initial alignment gating (NOT user-configurable) ---
 
         /// <summary>Minimum number of detected tags to accept the first alignment observation.</summary>
-        public const int INITIAL_ALIGNMENT_MIN_TAGS = 2;
+        public const int INITIAL_ALIGNMENT_MIN_TAGS = MIN_TAGS_FOR_POSITION_UPDATE;
 
         /// <summary>Minimum inlier ratio (acceptedPoints / totalPoints) for the first alignment.</summary>
         public const double INITIAL_ALIGNMENT_MIN_INLIER_RATIO = 0.6;
@@ -123,7 +130,7 @@ namespace QuestNav.QuestNav.Estimation
         public const int REALIGN_REJECTION_COUNT = 5;
 
         /// <summary>Minimum tag count for a gate rejection to count toward re-alignment.</summary>
-        public const int REALIGN_MIN_TAGS = 2;
+        public const int REALIGN_MIN_TAGS = MIN_TAGS_FOR_POSITION_UPDATE;
 
         /// <summary>
         /// Radius (meters) within which the innovations (measured minus capture-time
@@ -152,11 +159,11 @@ namespace QuestNav.QuestNav.Estimation
 
         /// <summary>
         /// Debug preset: (min tags, min inlier ratio). For benchtop / confined-space
-        /// testing only. The 0.60 ratio mirrors INITIAL_ALIGNMENT_MIN_INLIER_RATIO so a
-        /// single tag that's good enough to lock in Phase 1 is also good enough to
-        /// correct under this preset.
+        /// testing only. The 0.60 ratio mirrors INITIAL_ALIGNMENT_MIN_INLIER_RATIO so an
+        /// observation good enough to lock in Phase 1 is also good enough to correct
+        /// under this preset. The tag count is the <see cref="MIN_TAGS_FOR_POSITION_UPDATE"/> floor.
         /// </summary>
-        public const int PRESET_DEBUG_MIN_TAGS = 1;
+        public const int PRESET_DEBUG_MIN_TAGS = MIN_TAGS_FOR_POSITION_UPDATE;
         public const double PRESET_DEBUG_MIN_INLIER_RATIO = 0.6;
 
         // --- Dynamic standard deviation scaling ---

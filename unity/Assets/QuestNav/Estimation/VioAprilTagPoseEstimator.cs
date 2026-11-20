@@ -93,7 +93,7 @@ namespace QuestNav.QuestNav.Estimation
         /// <summary>
         /// Updates the Phase-2 correction confidence preset. Tighter presets reject more
         /// observations but produce a more conservative pose; looser presets are useful
-        /// when the default tuning never converges (e.g. only a single tag is visible).
+        /// when the default tuning never converges (e.g. only two tags are ever in view).
         /// The initial Phase-1 thresholds are not affected; a re-align after consistent
         /// gate rejections must meet both.
         /// </summary>
@@ -103,7 +103,9 @@ namespace QuestNav.QuestNav.Estimation
         /// Sets the user-supplied "Minimum Tags Required" floor used by both Phase-1
         /// alignment and Phase-2 corrections. Phase-2 takes the max of this and the
         /// preset's tag count, as does a re-align; the initial Phase-1 alignment uses this
-        /// value directly.
+        /// value directly. Values below
+        /// <see cref="VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE"/>
+        /// are raised to it.
         /// </summary>
         void SetMinimumTags(int minimumTags);
     }
@@ -525,11 +527,15 @@ namespace QuestNav.QuestNav.Estimation
             if (!hasInitialAlignment)
             {
                 // Phase-1 tag count uses the user's "Minimum Tags Required" setting
-                // (forwarded by AprilTagManager via SetMinimumTags). The inlier-ratio
-                // threshold is intentionally still hardcoded (INITIAL_ALIGNMENT_MIN_INLIER_RATIO)
-                // because a bad first observation mis-aligns the field origin for the
-                // whole session, so a quality safety floor is non-negotiable.
-                int alignMinTags = userMinimumTags;
+                // (forwarded by AprilTagManager via SetMinimumTags), never below the
+                // two-tag floor. The inlier-ratio threshold is intentionally still hardcoded
+                // (INITIAL_ALIGNMENT_MIN_INLIER_RATIO) because a bad first observation
+                // mis-aligns the field origin for the whole session, so a quality safety
+                // floor is non-negotiable. This also gates the first fix after a pose reset.
+                int alignMinTags = Math.Max(
+                    userMinimumTags,
+                    VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+                );
                 double alignMinInlierRatio =
                     VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_INLIER_RATIO;
                 if (realignPending)
@@ -586,10 +592,13 @@ namespace QuestNav.QuestNav.Estimation
 
             // --- Phase 2: VIO-primary with selective corrections ---
 
-            // Phase-2 takes the max of the user's "Minimum Tags Required" and the
-            // confidence preset's tag count. The user's setting is a HARD FLOOR; the
-            // preset cannot loosen it below what the user explicitly chose.
-            int effectiveMinTags = Math.Max(userMinimumTags, correctionMinTags);
+            // Phase-2 takes the max of the user's "Minimum Tags Required", the confidence
+            // preset's tag count and the two-tag floor. Neither the user nor the preset can
+            // loosen it below the floor.
+            int effectiveMinTags = Math.Max(
+                VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE,
+                Math.Max(userMinimumTags, correctionMinTags)
+            );
             if (tagCount < effectiveMinTags || inlierRatio < correctionMinInlierRatio)
             {
                 QueuedLogger.Log(
@@ -650,8 +659,11 @@ namespace QuestNav.QuestNav.Estimation
         /// <inheritdoc/>
         public void SetMinimumTags(int minimumTags)
         {
-            // Refuse zero or negative; the estimator cannot work with no observations.
-            int sanitized = minimumTags < 1 ? 1 : minimumTags;
+            // A single-tag solve is ambiguous, so the floor is never below two
+            int sanitized = Math.Max(
+                minimumTags,
+                VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+            );
             userMinimumTags = sanitized;
             QueuedLogger.Log(
                 $"AprilTag minimum tags set to {sanitized} "

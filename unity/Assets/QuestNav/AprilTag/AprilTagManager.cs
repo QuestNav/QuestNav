@@ -338,11 +338,14 @@ namespace QuestNav.QuestNav.AprilTag
                     ? new HashSet<int>()
                     : new HashSet<int>(configuration.IgnoredIds);
             maxDistance = configuration.MaxDistance;
-            minimumNumberOfTags = configuration.MinimumNumberOfTags;
+            // A single-tag solve is ambiguous, so it is never solved or fused
+            minimumNumberOfTags = Math.Max(
+                configuration.MinimumNumberOfTags,
+                VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+            );
 
             // Forward the user's minimum-tags floor to the estimator so its Phase 1
-            // alignment gate honors the same value (otherwise the estimator's hardcoded
-            // INITIAL_ALIGNMENT_MIN_TAGS = 2 would override a user setting of 1).
+            // alignment gate honors the same value.
             vioAprilTagPoseEstimator.SetMinimumTags(minimumNumberOfTags);
         }
 

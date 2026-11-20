@@ -607,6 +607,54 @@ namespace QuestNav.Tests
         }
 
         [Test]
+        public void TrackingOutage_IntegratedJumpErrorIsCorrected()
+        {
+            var sim = new Sim();
+            sim.Align();
+            var velocity = new Translation3d(1.2, 0.5, 0.0);
+            sim.Step(velocity, 10);
+
+            // The VIO comes back 0.8 m off, beyond the gate's minimum distance but within
+            // what the robot could have driven over the outage
+            sim.Outage(velocity, 3.0);
+            sim.VioOffset += new Translation3d(0.8, 0.0, 0.0);
+            sim.Step(velocity, 1);
+            Assert.IsTrue(sim.Estimator.HasInitialAlignment);
+            Assert.AreEqual(0.8, sim.PositionError, 1e-9);
+
+            sim.ObserveTruth();
+
+            Assert.IsTrue(sim.Estimator.HasInitialAlignment);
+            Assert.Less(sim.PositionError, 0.05);
+        }
+
+        [Test]
+        public void TrackingOutage_LatentCorrectionKeepsOutageNoise()
+        {
+            var velocity = new Translation3d(1.2, 0.5, 0.0);
+
+            var immediate = new Sim();
+            immediate.Align();
+            immediate.Step(velocity, 10);
+            immediate.ObserveTruth();
+            immediate.Outage(velocity, 3.0);
+            immediate.Step(velocity, 1);
+
+            // Captured just before the outage, delivered after tracking is back
+            var latent = new Sim();
+            latent.Align();
+            latent.Step(velocity, 10);
+            var captured = latent.Field;
+            double captureTime = latent.Time;
+            latent.Outage(velocity, 3.0);
+            latent.Step(velocity, 1);
+            latent.Observe(captured, captureTime);
+
+            Assert.AreEqual(0.0, latent.PositionError, Tolerance);
+            Assert.AreEqual(immediate.CorrectionGain(), latent.CorrectionGain(), 1e-9);
+        }
+
+        [Test]
         public void TrackingOutage_RelocalizationJumpIsNotIntegrated()
         {
             var sim = new Sim();

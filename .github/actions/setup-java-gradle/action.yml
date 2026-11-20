@@ -1,5 +1,5 @@
 name: 'Setup Java and Gradle'
-description: 'Sets up JDK 17, Gradle 8.11, and caches Gradle dependencies'
+description: 'Sets up JDK 25, Gradle 9.4.1, and caches Gradle dependencies'
 
 inputs:
   version:

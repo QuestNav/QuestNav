@@ -426,10 +426,11 @@ public QuestNavSubsystem() {
 
 :::tip
 Use `onTrackingLost` to switch your robot to a fallback localization strategy (wheel odometry, [Limelight](https://limelightvision.io/), [PhotonVision](https://photonvision.org/), etc.)
-until tracking is restored.
+until tracking is restored. With the 2026 library, also use `onDisconnected`: its `onTrackingLost` doesn't fire when
+the Quest disconnects.
 :::
 
-These callbacks follow `isTracking()`, which is also false while the Quest is disconnected (no frame for 120 ms),
+In the 2027 library these callbacks follow `isTracking()`, which is also false while the Quest is disconnected (no frame for 120 ms),
 so they fire when frames stall even if the headset itself kept tracking. Code that must react only to the headset
 losing its own tracking can watch `getTrackingLostCounter()` instead.
 
@@ -518,11 +519,11 @@ public class QuestNavSubsystem extends SubsystemBase {
 |--------|---------|-------|
 | `onConnected(Runnable)` | Quest transitions disconnected → connected | Fires once per transition |
 | `onDisconnected(Runnable)` | Quest transitions connected → disconnected | Fires once per transition |
-| `onTrackingAcquired(Runnable)` | Quest transitions not-tracking → tracking | Fires once per transition, including when the Quest reconnects |
-| `onTrackingLost(Runnable)` | Quest transitions tracking → not-tracking | Fires once per transition, including when the Quest disconnects |
+| `onTrackingAcquired(Runnable)` | Quest transitions not-tracking → tracking | Fires once per transition. The 2027 library also fires it when the Quest reconnects |
+| `onTrackingLost(Runnable)` | Quest transitions tracking → not-tracking | Fires once per transition. The 2027 library also fires it when the Quest disconnects; the 2026 library doesn't, so check `isConnected()` too |
 | `onLowBattery(int, IntConsumer)` | Battery drops at or below threshold % | Resets when battery rises above threshold |
-| `onCommandSuccess(Consumer)` | A command response arrives with `success == true` | Fires once per command this `QuestNav` sent |
-| `onCommandFailure(Consumer)` | A command response arrives with `success == false` | Fires once per command this `QuestNav` sent; also logged to DriverStation automatically |
+| `onCommandSuccess(Consumer)` | A command response arrives with `success == true` | 2027 library: fires once per command this `QuestNav` sent. 2026 library: fires for every response on the topic |
+| `onCommandFailure(Consumer)` | A command response arrives with `success == false` | 2027 library: fires once per command this `QuestNav` sent. 2026 library: fires for every response on the topic. Also logged to DriverStation automatically |
 
 ---
 

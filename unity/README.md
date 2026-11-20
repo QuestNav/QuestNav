@@ -101,7 +101,7 @@ These libraries are included as precompiled DLLs in `Assets/Plugins/`:
 
 - **EmbedIO** - Lightweight HTTP server (WebServer assembly)
   - Location: `Assets/NuGet/EmbedIO.dll`
-  - Provides: REST API, static file serving, CORS support
+  - Provides: REST API, static file serving
   - Endpoints: `/api/status`, `/api/config`, `/api/logs`, `/api/reset-pose`
 
 - **Newtonsoft.Json** - JSON serialization (WebServer assembly)
@@ -554,22 +554,9 @@ private IEnumerator ExtractAndroidUIFiles(string targetPath)
 4. EmbedIO serves files from persistent storage path
 5. Fresh extraction on each app start ensures UI is always up-to-date
 
-### CORS Configuration
+### Web UI Development
 
-**Development Mode** (optional):
-```csharp
-// WebServerConstants.cs
-[Config(
-    DisplayName = "Enable CORS Dev Mode",
-    Description = "Allow web UI development from your computer",
-    Category = "General",
-    ControlType = "checkbox",
-    Order = 41
-)]
-public static bool enableCORSDevMode = false;
-```
-
-When enabled, CORS headers allow requests from `localhost:5173` for local development.
+The built UI is served from the same origin as the API, so the server sends no CORS headers. For local UI work, `npm run dev` in `questnav-web-ui/` proxies `/api` to the headset set in `VITE_API_TARGET` and strips the `Origin` header, so dev requests pass the server's same-origin check.
 
 ### Web UI Type Safety
 

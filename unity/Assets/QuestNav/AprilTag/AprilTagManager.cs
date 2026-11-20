@@ -535,7 +535,8 @@ namespace QuestNav.QuestNav.AprilTag
                             // Step back from the lens to the headset center, in the camera's own frame
                             Pose3d headsetPose = cameraPose.TransformBy(camToHeadset);
 
-                            int tagCount = kept.Count;
+                            // Only tags that fit the solve count toward the two-tag floor
+                            int tagCount = poseLibResult.SupportingTags;
                             double inlierRatio =
                                 (poseLibResult.TotalPoints > 0)
                                     ? poseLibResult.AcceptedPoints / poseLibResult.TotalPoints
@@ -597,7 +598,7 @@ namespace QuestNav.QuestNav.AprilTag
 
                             QueuedLogger.Log(
                                 $"PoseLib estimate: Pos({headsetPose.X:F3}, {headsetPose.Y:F3}, {headsetPose.Z:F3}) "
-                                    + $"tags={tagCount} inliers={poseLibResult.AcceptedPoints}/{poseLibResult.TotalPoints} "
+                                    + $"tags={tagCount}/{kept.Count} inliers={poseLibResult.AcceptedPoints}/{poseLibResult.TotalPoints} "
                                     + $"ratio={inlierRatio:F2} dist={avgTagDistance:F2}m stdDev={linearStdDev:F4}"
                             );
                         }

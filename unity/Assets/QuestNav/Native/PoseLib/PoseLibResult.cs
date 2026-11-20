@@ -5,7 +5,8 @@ namespace QuestNav.QuestNav.Native.PoseLib
     public unsafe class PoseLibResult
     {
         /// <summary>
-        /// Represents the position of the camera in 3d field-relative FRC coordinate space
+        /// PoseLib's field-to-camera transform (x_cam = R * X + t, CV camera axes).
+        /// Conversions.CvToFrc turns it into the camera's field pose.
         /// </summary>
         public Pose3d CameraPose { get; }
 
@@ -18,6 +19,12 @@ namespace QuestNav.QuestNav.Native.PoseLib
         /// Total number of 2D-3D point correspondences fed to the solver
         /// </summary>
         public int TotalPoints { get; }
+
+        /// <summary>
+        /// Distinct tags with enough corners fitting the solved pose to count toward the
+        /// tag-count floor. Can be lower than the number of tags passed in.
+        /// </summary>
+        public int SupportingTags { get; internal set; }
 
         /// <summary>
         /// Creates a new CPnPResult from the native struct returned by the estimator

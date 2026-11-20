@@ -116,7 +116,7 @@ namespace QuestNav.QuestNav.AprilTag
         /// Captures the parse failure modes so the caller (which is async) can return
         /// a simple bool.
         /// </summary>
-        private bool TryLoadFrom(string filePath)
+        public bool TryLoadFrom(string filePath)
         {
             try
             {

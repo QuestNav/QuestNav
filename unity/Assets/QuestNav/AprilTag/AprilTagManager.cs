@@ -118,7 +118,7 @@ namespace QuestNav.QuestNav.AprilTag
         /// </summary>
         private void OnAprilTagConfidencePresetChanged(int presetInt)
         {
-            // Convert via cast (validated 0..2 by ConfigManager). Default to Balanced
+            // Convert via cast (validated 0..3 by ConfigManager). Default to Balanced
             // for any future enum addition we don't recognize.
             ConfidencePreset preset = ConfidencePreset.Balanced;
             if (Enum.IsDefined(typeof(ConfidencePreset), presetInt))

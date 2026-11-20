@@ -81,7 +81,7 @@ Before any accepted AprilTag observation, the Kalman filter runs on pure VIO in 
 **Gate conditions:**
 - `tagCount >= max(2, userMinimumTags)` (the **Minimum Tags Required** setting, default 2; `MIN_TAGS_FOR_POSITION_UPDATE` is the floor)
 - `inlierRatio >= 0.6` (`INITIAL_ALIGNMENT_MIN_INLIER_RATIO`, not configurable)
-- While re-aligning, the stricter of these and the confidence preset's values: `tagCount >= max(userMinimumTags, presetMinTags)` and `inlierRatio >= max(0.6, presetMinInlierRatio)`
+- While re-aligning, the stricter of these and the confidence preset's values: `tagCount >= max(2, userMinimumTags, presetMinTags)` and `inlierRatio >= max(0.6, presetMinInlierRatio)`
 
 **On accept:**
 1. **Hard-reset the KF state** to the measured AprilTag position:
@@ -148,7 +148,7 @@ accept if  ‖ν‖ <= 0.5 m
 
 #### Re-alignment
 
-A wrong estimate (for example from a bad Phase 1 frame) makes good observations fail the outlier gate. Each rejected observation with at least 2 tags (`REALIGN_MIN_TAGS`) is compared with the first one of the current streak:
+A wrong estimate (for example from a bad Phase 1 frame) makes good observations fail the outlier gate. Each rejected observation (all of them passed the quality gate, so they have at least 2 tags) is compared with the first one of the current streak:
 
 - **Innovation within 0.5 m of the first** (`REALIGN_CONSENSUS_RADIUS`): the streak grows.
 - **Otherwise:** this observation starts a new streak.
@@ -362,7 +362,6 @@ It is published in `/QuestNav/frameData` on every main-loop frame (up to 120 Hz)
 | `CORRECTION_GATE_MIN_DISTANCE` | 0.5 m | Innovations up to this size are always accepted |
 | `CORRECTION_MAX_POSITION_JUMP` | 2.0 m | Absolute cap on an accepted innovation |
 | `REALIGN_REJECTION_COUNT` | 5 | Agreeing rejections that trigger re-alignment |
-| `REALIGN_MIN_TAGS` | 2 | Min tags for a rejection to count toward re-alignment |
 | `REALIGN_CONSENSUS_RADIUS` | 0.5 m | How closely those rejections must agree |
 | `BUFFER_DURATION_SECONDS` | 0.5 s | Replay buffer duration |
 | `VIO_NOISE_MAX_DT_SECONDS` | 0.1 s | Longest time step process noise is added for, except across a tracking outage |

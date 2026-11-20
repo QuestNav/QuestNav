@@ -22,6 +22,7 @@ import org.wpilib.driverstation.DriverStationErrors;
 import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.geometry.proto.Pose3dProto;
 import org.wpilib.math.geometry.proto.detail.ProtobufPose3d;
+import org.wpilib.networktables.IntegerSubscriber;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.networktables.ProtobufPublisher;
@@ -116,9 +117,17 @@ import org.wpilib.system.Timer;
 public class QuestNav {
 
   /**
-   * Interval at which to check and log if the QuestNavLib version matches the QuestNav app version
+   * Wire-protocol version this library speaks. The QuestNav app publishes its own on the {@code
+   * protocolVersion} topic; apps without the topic are version 1. Keep in step with
+   * QuestNavConstants.Network.PROTOCOL_VERSION in the app and the version history in data.proto.
    */
-  private static final double VERSION_CHECK_INTERVAL_SECONDS = 5.0;
+  public static final int PROTOCOL_VERSION = 2;
+
+  /** Oldest QuestNav app protocol version this library works with */
+  public static final int MIN_SUPPORTED_PROTOCOL_VERSION = 1;
+
+  /** Protocol version of QuestNav apps that don't publish one */
+  private static final int LEGACY_PROTOCOL_VERSION = 1;
 
   /** Time without a new frame after which the Quest is considered disconnected */
   private static final double CONNECTION_TIMEOUT_SECONDS = 0.120;
@@ -177,6 +186,10 @@ public class QuestNav {
   private final StringSubscriber versionSubscriber =
       questNavTable.getStringTopic("version").subscribe("unknown");
 
+  /** Subscriber for the QuestNav app's wire-protocol version */
+  private final IntegerSubscriber protocolVersionSubscriber =
+      questNavTable.getIntegerTopic("protocolVersion").subscribe(0);
+
   /** Publisher for command requests */
   private final ProtobufPublisher<Commands.ProtobufQuestNavCommand> requestPublisher =
       questNavTable.getProtobufTopic("request", commandProto).publish();
@@ -195,11 +208,14 @@ public class QuestNav {
   /** Last sent request id */
   private int lastSentRequestId = 0;
 
-  /** True to check for QuestNavLib and QuestNav version match at an interval */
+  /** True to warn when the QuestNav app's protocol version is not supported */
   private boolean versionCheckEnabled = true;
 
-  /** The last time QuestNavLib and QuestNav were checked for a match */
-  private double lastVersionCheckTime = 0.0;
+  /** The app protocol version last checked, so each one is only reported once */
+  private int lastCheckedProtocolVersion = -1;
+
+  /** Reports version warnings; replaced in tests */
+  Consumer<String> warningReporter = message -> DriverStationErrors.reportWarning(message, false);
 
   // Callback state tracking
 
@@ -337,37 +353,55 @@ public class QuestNav {
   // Internal helpers
 
   /**
-   * Checks the version of QuestNavLib and compares it to the version of QuestNav on the headset. If
-   * the headset is connected and the versions don't match, a warning will be sent to the
-   * driverstation at an interval.
+   * Checks the QuestNav app's protocol version while connected, and reports a warning to the
+   * DriverStation if this library doesn't support it. Each version is only reported once, so a
+   * mismatch does not flood the console. The release versions are not compared, since the same app
+   * release is used with the QuestNavLib releases for different WPILib years.
    *
-   * @see #VERSION_CHECK_INTERVAL_SECONDS
-   * @see #getLibVersion()
-   * @see #getQuestNavVersion()
+   * @see #getQuestNavProtocolVersion()
    */
-  private void checkVersionMatch() {
-    if (!versionCheckEnabled || !isConnected()) {
+  private void checkProtocolVersion() {
+    if (!versionCheckEnabled) {
       return;
     }
-
-    var currentTime = Timer.getTimestamp();
-    if ((currentTime - lastVersionCheckTime) < VERSION_CHECK_INTERVAL_SECONDS) {
+    var protocolVersion = getQuestNavProtocolVersion();
+    if (protocolVersion.isEmpty() || protocolVersion.getAsInt() == lastCheckedProtocolVersion) {
       return;
     }
-    lastVersionCheckTime = currentTime;
+    lastCheckedProtocolVersion = protocolVersion.getAsInt();
 
-    var libVersion = getLibVersion();
-    var questNavVersion = getQuestNavVersion();
-
-    if (!questNavVersion.equals(libVersion)) {
-      String warningMessage =
-          String.format(
-              "WARNING FROM QUESTNAV: QuestNavLib version (%s) on your robot does not match QuestNav app version (%s) on your headset. "
-                  + "This may cause compatibility issues. Check the version of your vendordep and the app running on your headset.",
-              libVersion, questNavVersion);
-
-      DriverStationErrors.reportWarning(warningMessage, false);
+    String warning =
+        protocolVersionWarning(lastCheckedProtocolVersion, getQuestNavVersion(), getLibVersion());
+    if (warning != null) {
+      warningReporter.accept(warning);
     }
+  }
+
+  /**
+   * Gets the warning for a QuestNav app protocol version this library doesn't support.
+   *
+   * @param appProtocolVersion The app's protocol version
+   * @param appVersion The app's release version, for the message
+   * @param libVersion This library's release version, for the message
+   * @return The warning, or null when the version is supported
+   */
+  static String protocolVersionWarning(
+      int appProtocolVersion, String appVersion, String libVersion) {
+    if (appProtocolVersion < MIN_SUPPORTED_PROTOCOL_VERSION) {
+      return String.format(
+          "WARNING FROM QUESTNAV: The QuestNav app on your headset (%s) uses protocol version %d, "
+              + "but QuestNavLib %s on your robot needs at least version %d. "
+              + "Update the QuestNav app on your headset.",
+          appVersion, appProtocolVersion, libVersion, MIN_SUPPORTED_PROTOCOL_VERSION);
+    }
+    if (appProtocolVersion > PROTOCOL_VERSION) {
+      return String.format(
+          "WARNING FROM QUESTNAV: The QuestNav app on your headset (%s) uses protocol version %d, "
+              + "newer than QuestNavLib %s on your robot knows (up to %d). "
+              + "Some features may not work until you update the QuestNavLib vendordep.",
+          appVersion, appProtocolVersion, libVersion, PROTOCOL_VERSION);
+    }
+    return null;
   }
 
   /**
@@ -416,10 +450,12 @@ public class QuestNav {
   // Public API
 
   /**
-   * Turns the version check on or off. When on, a warning will be reported to the DriverStation if
-   * the QuestNavLib and QuestNav app versions do not match.
+   * Turns the version check on or off. When on, a warning is reported to the DriverStation once if
+   * the QuestNav app's protocol version is older than this QuestNavLib supports or newer than it
+   * knows. Different release versions alone don't warn.
    *
    * @param enabled true to enable version checking, false to disable it. Default is true.
+   * @see #getQuestNavProtocolVersion()
    */
   public void setVersionCheckEnabled(boolean enabled) {
     this.versionCheckEnabled = enabled;
@@ -706,7 +742,7 @@ public class QuestNav {
    * @see #onLowBattery(int, IntConsumer)
    */
   public void commandPeriodic() {
-    checkVersionMatch();
+    checkProtocolVersion();
     checkStateCallbacks();
 
     Commands.ProtobufQuestNavCommandResponse[] responses = responseSubscriber.readQueueValues();
@@ -736,11 +772,30 @@ public class QuestNav {
   }
 
   /**
-   * Retrieves the QuestNav app version running on the Quest headset.
+   * Retrieves the QuestNav app version running on the Quest headset, for display and logging.
+   * Compatibility is decided by {@link #getQuestNavProtocolVersion()}, not by this.
    *
    * @return The version number as a String, or "unknown" if unable to retrieve.
    */
   public String getQuestNavVersion() {
     return versionSubscriber.get();
+  }
+
+  /**
+   * Gets the wire-protocol version of the QuestNav app on the headset. Apps that don't publish one
+   * predate it and are version 1.
+   *
+   * @return The app's protocol version, or empty if the Quest is disconnected
+   * @see #PROTOCOL_VERSION
+   * @see #MIN_SUPPORTED_PROTOCOL_VERSION
+   */
+  public OptionalInt getQuestNavProtocolVersion() {
+    if (!isConnected()) {
+      return OptionalInt.empty();
+    }
+    if (!protocolVersionSubscriber.exists()) {
+      return OptionalInt.of(LEGACY_PROTOCOL_VERSION);
+    }
+    return OptionalInt.of((int) protocolVersionSubscriber.get());
   }
 }

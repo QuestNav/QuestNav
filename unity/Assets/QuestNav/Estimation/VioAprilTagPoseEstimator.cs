@@ -127,7 +127,7 @@ namespace QuestNav.QuestNav.Estimation
     ///   bar to establish the yaw offset and initial position correction.
     /// - Phase 2 (Aligned): VIO is primary. Only high-confidence AprilTag corrections that pass
     ///   a Mahalanobis outlier gate are applied. The yaw offset is kept from Phase 1 and only
-    ///   re-based on a VIO recenter. A run of consistent rejected multi-tag observations drops
+    ///   re-based on a VIO recenter. A run of consistent gate-rejected observations drops
     ///   back to Phase 1 to re-align, which then needs an observation that also meets the
     ///   Phase-2 confidence preset.
     /// </summary>
@@ -188,7 +188,7 @@ namespace QuestNav.QuestNav.Estimation
         // needs a Phase-2 quality observation, since it also resets the heading.
         private bool realignPending;
 
-        // Consecutive gate-rejected multi-tag observations whose innovations agree with
+        // Consecutive gate-rejected observations whose innovations agree with
         // rejectionStreakInnovation, the first of the run.
         private int rejectionStreakCount;
         private Translation3d rejectionStreakInnovation;
@@ -647,7 +647,7 @@ namespace QuestNav.QuestNav.Estimation
                 !PassesOutlierGate(measuredPosition, stdDevs, captureNode.Value, out var innovation)
             )
             {
-                TrackGateRejection(innovation, tagCount);
+                TrackGateRejection(innovation);
                 return;
             }
 
@@ -871,15 +871,13 @@ namespace QuestNav.QuestNav.Estimation
         }
 
         /// <summary>
-        /// Counts consecutive gate rejections of multi-tag observations that agree with each
-        /// other. Enough of them mean the estimate, not the tags, is wrong, so the estimator
-        /// drops back to Phase 1 and re-aligns on the next accepted observation.
+        /// Counts consecutive gate rejections that agree with each other (the tag-count check
+        /// runs first, so each has at least two tags). Enough of them mean the estimate, not
+        /// the tags, is wrong, so the estimator drops back to Phase 1 and re-aligns on the
+        /// next accepted observation.
         /// </summary>
-        private void TrackGateRejection(Translation3d innovation, int tagCount)
+        private void TrackGateRejection(Translation3d innovation)
         {
-            if (tagCount < VioAprilTagPoseEstimatorConstants.REALIGN_MIN_TAGS)
-                return;
-
             if (
                 rejectionStreakCount == 0
                 || innovation.GetDistance(rejectionStreakInnovation)

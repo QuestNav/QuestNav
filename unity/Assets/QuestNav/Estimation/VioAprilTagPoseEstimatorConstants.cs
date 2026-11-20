@@ -124,13 +124,10 @@ namespace QuestNav.QuestNav.Estimation
         // --- Phase 2 -> Phase 1 recovery ---
 
         /// <summary>
-        /// Number of consecutive gate-rejected multi-tag observations that must agree
+        /// Number of consecutive gate-rejected observations that must agree
         /// with each other before the estimator drops back to Phase 1 and re-aligns.
         /// </summary>
         public const int REALIGN_REJECTION_COUNT = 5;
-
-        /// <summary>Minimum tag count for a gate rejection to count toward re-alignment.</summary>
-        public const int REALIGN_MIN_TAGS = MIN_TAGS_FOR_POSITION_UPDATE;
 
         /// <summary>
         /// Radius (meters) within which the innovations (measured minus capture-time

@@ -498,27 +498,6 @@ namespace QuestNav.Tests
             Assert.AreEqual(0.0, sim.PositionError, Tolerance);
         }
 
-        [Test]
-        public void Phase2_SingleTagRejectionsDoNotDropBack()
-        {
-            var sim = new Sim();
-            sim.Estimator.SetConfidencePreset(ConfidencePreset.Debug);
-            sim.Estimator.SetMinimumTags(1);
-            sim.Align();
-
-            var offset = new Pose3d(
-                sim.Field.Translation + new Translation3d(1.0, 0.0, 0.0),
-                sim.Field.Rotation
-            );
-            for (int i = 0; i < VioAprilTagPoseEstimatorConstants.REALIGN_REJECTION_COUNT; i++)
-            {
-                sim.Observe(offset, sim.Time, tags: 1);
-                sim.Step(Translation3d.Zero, 1);
-            }
-
-            Assert.IsTrue(sim.Estimator.HasInitialAlignment);
-        }
-
         /// <summary>Sets the loosest settings a user can ask for: Debug preset, one tag.</summary>
         private static void AllowFewestTags(Sim sim)
         {
@@ -588,8 +567,21 @@ namespace QuestNav.Tests
             sim.Align();
             var before = sim.Estimator.EstimatedPose;
             var probe = new Pose3d(sim.Field.Translation + GainProbeOffset, sim.Field.Rotation);
+            var offset = new Pose3d(
+                sim.Field.Translation + new Translation3d(1.0, 0.0, 0.0),
+                sim.Field.Rotation
+            );
 
             sim.Observe(probe, sim.Time, tags: 1);
+            Assert.AreEqual(before, sim.Estimator.EstimatedPose);
+
+            // Agreeing single-tag frames neither move the pose nor start a re-align
+            for (int i = 0; i < VioAprilTagPoseEstimatorConstants.REALIGN_REJECTION_COUNT; i++)
+            {
+                sim.Observe(offset, sim.Time, tags: 1);
+                sim.Step(Translation3d.Zero, 1);
+            }
+            Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
             Assert.AreEqual(before, sim.Estimator.EstimatedPose);
 
             sim.Observe(

@@ -855,7 +855,8 @@ public class QuestNav {
    * Gets the wire-protocol version of the QuestNav app on the headset. Apps that don't publish one
    * predate it and are version 1.
    *
-   * @return The app's protocol version, or empty if the Quest is disconnected
+   * @return The app's protocol version, or empty if the Quest is disconnected or its version has
+   *     been announced but not received yet
    * @see #PROTOCOL_VERSION
    * @see #MIN_SUPPORTED_PROTOCOL_VERSION
    */
@@ -866,6 +867,11 @@ public class QuestNav {
     if (!protocolVersionSubscriber.exists()) {
       return OptionalInt.of(LEGACY_PROTOCOL_VERSION);
     }
-    return OptionalInt.of((int) protocolVersionSubscriber.get());
+    // The topic can be announced before its value arrives; the default is not a version
+    var protocolVersion = protocolVersionSubscriber.getAtomic();
+    if (protocolVersion.timestamp == 0) {
+      return OptionalInt.empty();
+    }
+    return OptionalInt.of((int) protocolVersion.value);
   }
 }

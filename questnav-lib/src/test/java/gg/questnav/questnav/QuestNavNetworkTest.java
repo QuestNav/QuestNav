@@ -264,6 +264,39 @@ class QuestNavNetworkTest {
   }
 
   @Test
+  void announcedProtocolVersionWithoutValueIsNotChecked() {
+    List<String> warnings = new ArrayList<>();
+    Consumer<String> reporter = questNav.warningReporter;
+    questNav.warningReporter = warnings::add;
+    // Start from a checked legacy app, so a version read as 0 would be reported
+    waitForProtocolVersion(1);
+    try (IntegerPublisher protocolPublisher = client.getIntegerTopic(PROTOCOL_TOPIC).publish()) {
+      waitFor(
+          () -> {
+            sendFrame(0);
+            return server.getTopic(PROTOCOL_TOPIC).exists() && questNav.isConnected();
+          },
+          2.0,
+          "protocol version announcement");
+      for (int i = 0; i < 10; i++) {
+        sendFrame(0);
+        questNav.commandPeriodic();
+        assertTrue(questNav.getQuestNavProtocolVersion().isEmpty());
+        assertTrue(questNav.getResetEpoch().isEmpty());
+      }
+      assertTrue(warnings.isEmpty(), warnings.toString());
+
+      // Checked once the value arrives
+      protocolPublisher.set(QuestNav.PROTOCOL_VERSION + 1);
+      waitForProtocolVersion(QuestNav.PROTOCOL_VERSION + 1);
+      assertEquals(1, warnings.size(), warnings.toString());
+      assertTrue(warnings.get(0).contains("newer than QuestNavLib"), warnings.get(0));
+    } finally {
+      questNav.warningReporter = reporter;
+    }
+  }
+
+  @Test
   void alignmentStateAndResetEpochAreReported() {
     try (IntegerPublisher protocolPublisher = client.getIntegerTopic(PROTOCOL_TOPIC).publish()) {
       protocolPublisher.set(2);

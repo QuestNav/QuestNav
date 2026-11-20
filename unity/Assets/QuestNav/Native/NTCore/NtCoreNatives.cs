@@ -306,6 +306,15 @@ namespace QuestNav.Native.NTCore
         public static extern long NT_GetServerTimeOffset(uint inst, int* valid);
 
         [DllImport("ntcore")]
+        public static extern NativeConnectionInfo* NT_GetConnections(uint inst, UIntPtr* count);
+
+        [DllImport("ntcore")]
+        public static extern void NT_DisposeConnectionInfoArray(
+            NativeConnectionInfo* arr,
+            UIntPtr count
+        );
+
+        [DllImport("ntcore")]
         public static extern uint NT_GetTopic(uint inst, WpiString* name);
 
         [DllImport("ntcore")]

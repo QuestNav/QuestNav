@@ -18,5 +18,12 @@ namespace QuestNav.Tests
 
             Assert.AreEqual(NtCoreNatives.ALLWPILIB_TAG, tagLine.Substring(TagKey.Length).Trim());
         }
+
+        [TestCase(0x0400u, "4.0")]
+        [TestCase(0x0401u, "4.1")]
+        public void FormatsProtocolVersion(uint version, string expected)
+        {
+            Assert.AreEqual(expected, new NtConnectionInfo("", 0, version).ProtocolVersionString);
+        }
     }
 }

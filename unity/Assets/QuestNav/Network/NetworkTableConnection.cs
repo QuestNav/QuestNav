@@ -43,6 +43,13 @@ namespace QuestNav.Network
         bool IsReadyToConnect { get; }
 
         /// <summary>
+        /// Gets the IP address of the NT server this client is connected to, or an empty string
+        /// while disconnected. With a team number ntcore tries several addresses, so this is the
+        /// only reliable record of which one it reached.
+        /// </summary>
+        string RobotIpAddress { get; }
+
+        /// <summary>
         /// Gets the current NT time
         /// </summary>
         long NtNow { get; }
@@ -291,6 +298,9 @@ namespace QuestNav.Network
         /// Gets whether the connection is currently established.
         /// </summary>
         public bool IsReadyToConnect => teamNumberSet || ipAddressSet;
+
+        /// <inheritdoc />
+        public string RobotIpAddress { get; private set; } = "";
 
         /// <summary>
         /// Gets the current NT time
@@ -561,17 +571,39 @@ namespace QuestNav.Network
             {
                 case true when !wasConnected:
                     // If we connected and weren't previously
-                    QueuedLogger.Log("Connected to NT4");
+                    LogNewConnection();
                     wasConnected = true;
                     OnConnect?.Invoke();
                     break;
                 case false when wasConnected:
                     // If we disconnected and were previously
                     QueuedLogger.Log("Disconnected from NT4");
+                    RobotIpAddress = "";
                     wasConnected = false;
                     OnDisconnect?.Invoke();
                     break;
             }
+        }
+
+        /// <summary>
+        /// Records and logs which server the client reached and the protocol it negotiated.
+        /// </summary>
+        private void LogNewConnection()
+        {
+            var connections = ntInstance.GetConnections();
+            if (connections.Length == 0)
+            {
+                // Dropped again between NT_IsConnected and NT_GetConnections
+                QueuedLogger.Log("Connected to NT4");
+                return;
+            }
+
+            var connection = connections[0];
+            RobotIpAddress = connection.RemoteIp;
+            QueuedLogger.Log(
+                $"Connected to NT4 at {connection.RemoteIp}:{connection.RemotePort} "
+                    + $"(protocol {connection.ProtocolVersionString})"
+            );
         }
 
         /// <summary>

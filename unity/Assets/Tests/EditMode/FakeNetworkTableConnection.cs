@@ -45,6 +45,8 @@ namespace QuestNav.Tests
 
         public bool IsReadyToConnect => true;
 
+        public string RobotIpAddress => "127.0.0.1";
+
         public string IpAddress => "127.0.0.1";
 
         public bool TryGetServerTimeOffset(out long offsetNs)

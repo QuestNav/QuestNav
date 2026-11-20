@@ -69,7 +69,7 @@ jobs:
           cache-key-suffix: Android-Windows
 
       - name: Build Unity APK
-        uses: game-ci/unity-builder@v6
+        uses: game-ci/unity-builder@eb1b9fba120c6e62c9fb7a7a81d6c107ce004c45 # v6.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}

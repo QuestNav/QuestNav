@@ -38,6 +38,32 @@ option java_package = "gg.questnav.questnav.protos.generated";
 import "wpimath/protobuf/geometry3d.proto";
 
 /*
+ * What the published pose is referenced to.
+ *
+ * Apps older than protocol version 2 don't send it, so it reads as
+ * ALIGNMENT_STATE_UNSPECIFIED.
+ */
+enum AlignmentState {
+  // Not sent (an older app) or not known.
+  ALIGNMENT_STATE_UNSPECIFIED = 0;
+
+  // Raw tracking frame: nothing has placed the pose on the field yet.
+  ALIGNMENT_STATE_UNALIGNED = 1;
+
+  // Placed on the field by a pose reset (setPose from the robot or the web UI), and not
+  // yet aligned by AprilTags. The next accepted AprilTag alignment replaces it.
+  ALIGNMENT_STATE_POSE_RESET = 2;
+
+  // Aligned to the field by AprilTags; later tag observations correct the position.
+  ALIGNMENT_STATE_TAG_ALIGNED = 3;
+
+  // Was aligned by AprilTags, but the alignment is no longer trusted: the tags have
+  // consistently disagreed with the pose, or tracking relocalized after an outage. The
+  // pose continues from the old alignment until the tags re-align it.
+  ALIGNMENT_STATE_REALIGNING = 4;
+}
+
+/*
  * High-frequency tracking data sent from Quest to external systems.
  * 
  * This message contains the core tracking information that external systems
@@ -151,6 +177,26 @@ message ProtobufQuestNavFrameData {
    * receivers should then fall back to the NT server time the frame arrived with.
    */
   int64 server_timestamp = 5;
+
+  /*
+   * What the pose is referenced to; see AlignmentState.
+   *
+   * Added in protocol version 2.
+   */
+  AlignmentState alignment_state = 6;
+
+  /*
+   * Counter that changes whenever the pose jumps instead of following the headset's motion:
+   * a pose reset, an AprilTag alignment or re-alignment, or a tracking relocalization the
+   * app could not follow. Pose changes between two frames with the same reset_epoch are
+   * real motion; across a change they are not.
+   *
+   * Compare it for equality only. It restarts when the app restarts and wraps around.
+   * A tracking-origin recenter keeps the field pose, so it does not change the counter.
+   *
+   * Added in protocol version 2; older apps send 0.
+   */
+  uint32 reset_epoch = 7;
 }
 
 /*

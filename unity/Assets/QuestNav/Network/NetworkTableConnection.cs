@@ -76,12 +76,16 @@ namespace QuestNav.Network
         /// <param name="serverTimestamp">Current NT server time in nanoseconds, or 0 if unknown</param>
         /// <param name="pose">Current field-relative position of the Quest headset</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
+        /// <param name="alignmentState">What the pose is referenced to</param>
+        /// <param name="resetEpoch">Counter that changes whenever the pose jumps</param>
         void PublishFrameData(
             int frameCount,
             double timeStamp,
             long serverTimestamp,
             Pose3d pose,
-            bool isTracking
+            bool isTracking,
+            AlignmentState alignmentState,
+            uint resetEpoch
         );
 
         /// <summary>
@@ -418,12 +422,16 @@ namespace QuestNav.Network
         /// <param name="serverTimestamp">Current NT server time in nanoseconds, or 0 if unknown</param>
         /// <param name="pose">Current VR headset position</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
+        /// <param name="alignmentState">What the pose is referenced to</param>
+        /// <param name="resetEpoch">Counter that changes whenever the pose jumps</param>
         public void PublishFrameData(
             int frameCount,
             double timeStamp,
             long serverTimestamp,
             Pose3d pose,
-            bool isTracking
+            bool isTracking,
+            AlignmentState alignmentState,
+            uint resetEpoch
         )
         {
             frameData.FrameCount = frameCount;
@@ -431,6 +439,8 @@ namespace QuestNav.Network
             frameData.ServerTimestamp = serverTimestamp;
             frameData.Pose3D = pose.ToProtobuf();
             frameData.IsTracking = isTracking;
+            frameData.AlignmentState = alignmentState;
+            frameData.ResetEpoch = resetEpoch;
 
             // Publish data
             frameDataPublisher.Set(frameData);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MathNet.Filtering.Kalman;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using QuestNav.Protos.Generated;
 using QuestNav.QuestNav.Geometry;
 using QuestNav.Utils;
 
@@ -17,9 +18,19 @@ namespace QuestNav.QuestNav.Estimation
         /// <summary>True after the first accepted AprilTag observation has aligned the VIO frame to FRC.</summary>
         bool HasInitialAlignment { get; }
 
+        /// <summary>What <see cref="EstimatedPose"/> is referenced to.</summary>
+        AlignmentState AlignmentState { get; }
+
+        /// <summary>
+        /// Changes whenever <see cref="EstimatedPose"/> jumps instead of following VIO motion:
+        /// a reset, an AprilTag alignment or re-alignment, or a relocalization that is not
+        /// integrated. A recenter keeps the field pose, so it does not change it. Wraps around.
+        /// </summary>
+        uint ResetEpoch { get; }
+
         /// <summary>
         /// Hard-resets the estimator to a known pose, clearing all history and returning to
-        /// Phase 1. A non-finite pose is ignored.
+        /// Phase 1 in the PoseReset alignment state. A non-finite pose is ignored.
         /// </summary>
         void ResetPosition(Pose3d pose, double timestamp);
 
@@ -157,6 +168,8 @@ namespace QuestNav.QuestNav.Estimation
         private double yawOffset;
         private bool initialized;
         private bool hasInitialAlignment;
+        private bool placedByPoseReset;
+        private uint resetEpoch;
         private bool recenterPending;
         private bool trackingLost;
 
@@ -235,6 +248,22 @@ namespace QuestNav.QuestNav.Estimation
 
         /// <inheritdoc/>
         public bool HasInitialAlignment => hasInitialAlignment;
+
+        /// <inheritdoc/>
+        public AlignmentState AlignmentState
+        {
+            get
+            {
+                if (hasInitialAlignment)
+                    return AlignmentState.TagAligned;
+                if (realignPending)
+                    return AlignmentState.Realigning;
+                return placedByPoseReset ? AlignmentState.PoseReset : AlignmentState.Unaligned;
+            }
+        }
+
+        /// <inheritdoc/>
+        public uint ResetEpoch => resetEpoch;
 
         /// <summary>Converts a Translation3d to a 3x1 column matrix for the Kalman filter.</summary>
         private static Matrix<double> ToColumnVector(Translation3d t)
@@ -347,6 +376,13 @@ namespace QuestNav.QuestNav.Estimation
                 return;
             }
 
+            Reinitialize(pose, timestamp);
+            placedByPoseReset = true;
+        }
+
+        /// <summary>Restarts the filter and history at <paramref name="pose"/> in Phase 1.</summary>
+        private void Reinitialize(Pose3d pose, double timestamp)
+        {
             var x0 = ToColumnVector(pose.Translation);
             var p0 = DenseMatrix.CreateIdentity(3) * 0.001;
 
@@ -359,6 +395,7 @@ namespace QuestNav.QuestNav.Estimation
             recenterPending = false;
             realignPending = false;
             rejectionStreakCount = 0;
+            resetEpoch++;
 
             snapshotBuffer.Clear();
             snapshotBuffer.AddLast(
@@ -384,7 +421,7 @@ namespace QuestNav.QuestNav.Estimation
 
             if (!initialized)
             {
-                ResetPosition(vioPose, timestamp);
+                Reinitialize(vioPose, timestamp);
                 return;
             }
 
@@ -555,6 +592,7 @@ namespace QuestNav.QuestNav.Estimation
                 hasInitialAlignment = true;
                 realignPending = false;
                 rejectionStreakCount = 0;
+                resetEpoch++;
                 QueuedLogger.Log(
                     $"AprilTag initial alignment accepted: tags={tagCount}, inlierRatio={inlierRatio:F2}, "
                         + $"pos=({measuredPosition.X:F3}, {measuredPosition.Y:F3}, {measuredPosition.Z:F3})"
@@ -720,6 +758,7 @@ namespace QuestNav.QuestNav.Estimation
             hasInitialAlignment = false;
             realignPending = true;
             rejectionStreakCount = 0;
+            resetEpoch++;
 
             QueuedLogger.LogWarning($"{reason}; re-aligning on the next AprilTag observation");
         }

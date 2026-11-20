@@ -67,7 +67,9 @@ namespace QuestNav.Tests
             double timeStamp,
             long serverTimestamp,
             Pose3d pose,
-            bool isTracking
+            bool isTracking,
+            AlignmentState alignmentState,
+            uint resetEpoch
         ) => throw new NotSupportedException();
 
         public void PublishDeviceData(int trackingLostCounter, int batteryPercent) =>

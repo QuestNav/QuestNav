@@ -740,7 +740,8 @@ namespace QuestNav.WebServer.Server
                                 success = false,
                                 message =
                                     $"minimumNumberOfTags={atm.minimumNumberOfTags} is not in the supported set "
-                                    + "[1, 2, 3, 4]. Use one of those values.",
+                                    + $"[{string.Join(", ", QuestNavConstants.AprilTag.MINIMUM_TAGS_OPTIONS)}]. "
+                                    + "Single-tag solves never move the pose.",
                             }
                         );
                         return;

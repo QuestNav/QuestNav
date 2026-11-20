@@ -1,4 +1,6 @@
+using System;
 using QuestNav.Core;
+using QuestNav.QuestNav.Estimation;
 using SQLite;
 
 namespace QuestNav.Config
@@ -168,7 +170,8 @@ namespace QuestNav.Config
             public double AprilTagDetectorMaxDistance { get; set; } = 4.0;
 
             /// <summary>
-            /// Minimum number of tags required to report a valid pose. Default is 2.
+            /// Minimum number of tags required to report a valid pose. Default is 2. Older
+            /// databases may hold 1, which is read as 2.
             /// </summary>
             public int AprilTagDetectorMinimumNumberOfTags { get; set; } = 2;
 
@@ -309,7 +312,8 @@ namespace QuestNav.Config
             public double MaxDistance { get; }
 
             /// <summary>
-            /// Minimum number of tags required to report a valid pose.
+            /// Minimum number of tags required to report a valid pose. Never below
+            /// <see cref="VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE"/>.
             /// </summary>
             public int MinimumNumberOfTags { get; }
 
@@ -322,7 +326,7 @@ namespace QuestNav.Config
             /// <param name="framerate">The detection framerate in frames per second.</param>
             /// <param name="ignoredIds">Array of AprilTag IDs to ignore. Empty array detects every tag.</param>
             /// <param name="maxDistance">Maximum detection distance in meters.</param>
-            /// <param name="minimumNumberOfTags">Minimum number of tags required to report a valid pose.</param>
+            /// <param name="minimumNumberOfTags">Minimum number of tags required to report a valid pose. Raised to the two-tag floor if lower.</param>
             public AprilTagDetectorMode(
                 DetectionMode mode,
                 int width,
@@ -339,7 +343,10 @@ namespace QuestNav.Config
                 Framerate = framerate;
                 IgnoredIds = ignoredIds;
                 MaxDistance = maxDistance;
-                MinimumNumberOfTags = minimumNumberOfTags;
+                MinimumNumberOfTags = Math.Max(
+                    minimumNumberOfTags,
+                    VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+                );
             }
         }
     }

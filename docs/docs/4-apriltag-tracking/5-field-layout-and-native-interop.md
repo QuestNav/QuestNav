@@ -35,7 +35,9 @@ rename and delete your own layouts, such as a practice field.
   - Allowed characters: letters, digits, `.`, `_` and `-`.
   - Length: at most 64 characters before `.json`.
   - First character: must not be `.`.
-  - Extension: `.json` is added when missing.
+  - No `..` anywhere in the name.
+  - Extension: `.json` is added when missing to a name you upload or rename to. The web API's `{name}` URLs need the
+    full file name, such as `practice-field.json`.
   - Bundled names: a custom layout cannot use one (compared case-insensitively), so it never shadows a bundled
     layout.
 - **Content.** The upload must:

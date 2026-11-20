@@ -66,12 +66,31 @@ Download `questnavlib.json` from a QuestNav release on the
 [releases page](https://github.com/QuestNav/QuestNav/releases) whose file has a `wpilibYear` key. Then copy it into
 your project's `vendordeps` folder, or install its `jsonUrl` with **WPILib: Manage Vendor Libraries**.
 
-- **No release yet.** At the time of writing no 2027 QuestNavLib release has been published.
+- **No release yet.** At the time of writing no 2027 QuestNavLib release has been published. Until one is, build
+  the library yourself; see [Until a 2027 release is published](#until-a-2027-release-is-published).
 - **Matching the WPILib release.** The library is built against WPILib `2027.0.0-alpha-8`, so install that
   release. Its year key is `2027_alpha7`, which is the vendordep's `wpilibYear`, so the vendordep loads in a
   `2027.0.0-alpha-8` project.
 - **Imports.** Code is the same as on a 2026 robot apart from the WPILib imports; see
   [2026 and 2027 imports](./8-robot-code.mdx#2026-and-2027-imports).
+
+#### Until a 2027 release is published
+
+Build QuestNavLib from the `main` branch of the [QuestNav repository](https://github.com/QuestNav/QuestNav) and
+publish it into the Maven folder of your WPILib 2027 install, which robot projects already search:
+
+1. Generate the Java protobuf classes as in
+   [Development Setup](../2-development/1-development-setup.mdx#java-quickbuf).
+2. With `JAVA_HOME` set to a JDK 25, run this from the `questnav-lib` folder:
+   ```bash
+   ./gradlew publishAllPublicationsToWpilibLocalRepository -PwpilibLocalMaven=<WPILib Maven folder>
+   ```
+   The folder is `C:\Users\Public\wpilib\2027_alpha7\maven` on Windows and
+   `~/.local/share/wpilib/2027_alpha7/maven` on Linux and macOS.
+3. Copy `questnav-lib/build/generated/vendordeps/questnavlib.json` into your robot project's `vendordeps` folder.
+
+This builds version `2027-1.0.0-dev`. Rebuild to update it, and switch to a release's `questnavlib.json` once one is
+published.
 
 ## Dashboards on 2026 Robots
 

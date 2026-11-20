@@ -203,6 +203,8 @@ namespace QuestNav.Network
         {
             this.configManager = configManager;
 
+            QueuedLogger.Log($"ntcore {NtCoreNatives.ALLWPILIB_TAG} (timestamps in ns)");
+
             // Create NetworkTables instance with QuestNav namespace
             // This isolates QuestNav topics from other NetworkTables data
             ntInstance = new NtInstance(QuestNavConstants.Topics.NT_BASE_PATH);

@@ -303,6 +303,52 @@ namespace QuestNav.Tests
         }
 
         [Test]
+        public void Phase2_RealignNeedsPresetQuality()
+        {
+            var sim = new Sim();
+            sim.Align();
+            sim.VioOffset += new Translation3d(0.0, 1.0, 0.0);
+            sim.Step(Translation3d.Zero, 1);
+            for (int i = 0; i < VioAprilTagPoseEstimatorConstants.REALIGN_REJECTION_COUNT; i++)
+            {
+                sim.ObserveTruth();
+                sim.Step(Translation3d.Zero, 4);
+            }
+            Assert.IsFalse(sim.Estimator.HasInitialAlignment);
+
+            // Enough for the initial alignment, but below the Balanced preset
+            sim.Observe(
+                sim.Field,
+                sim.Time,
+                tags: VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_TAGS
+            );
+            Assert.IsFalse(sim.Estimator.HasInitialAlignment);
+            sim.Estimator.AddAprilTagObservation(
+                sim.Field.Translation,
+                sim.Field.Rotation,
+                sim.Time,
+                TagStdDevs,
+                GoodTags,
+                VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_INLIER_RATIO
+            );
+            Assert.IsFalse(sim.Estimator.HasInitialAlignment);
+
+            sim.ObserveTruth();
+            Assert.IsTrue(sim.Estimator.HasInitialAlignment);
+            Assert.AreEqual(0.0, sim.PositionError, Tolerance);
+
+            // Later losses of alignment start from the initial bar again
+            sim.Estimator.ResetPosition(sim.Vio, sim.Time);
+            sim.Step(Translation3d.Zero, 1);
+            sim.Observe(
+                sim.Field,
+                sim.Time,
+                tags: VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_TAGS
+            );
+            Assert.IsTrue(sim.Estimator.HasInitialAlignment);
+        }
+
+        [Test]
         public void Phase2_InconsistentRejectionsKeepAlignment()
         {
             var sim = new Sim();

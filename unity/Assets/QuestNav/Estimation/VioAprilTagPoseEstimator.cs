@@ -56,14 +56,16 @@ namespace QuestNav.QuestNav.Estimation
         /// Updates the Phase-2 correction confidence preset. Tighter presets reject more
         /// observations but produce a more conservative pose; looser presets are useful
         /// when the default tuning never converges (e.g. only a single tag is visible).
-        /// The Phase-1 inlier-ratio threshold is not affected.
+        /// The initial Phase-1 thresholds are not affected; a re-align after consistent
+        /// gate rejections must meet both.
         /// </summary>
         void SetConfidencePreset(ConfidencePreset preset);
 
         /// <summary>
         /// Sets the user-supplied "Minimum Tags Required" floor used by both Phase-1
         /// alignment and Phase-2 corrections. Phase-2 takes the max of this and the
-        /// preset's tag count; Phase-1 uses this value directly.
+        /// preset's tag count, as does a re-align; the initial Phase-1 alignment uses this
+        /// value directly.
         /// </summary>
         void SetMinimumTags(int minimumTags);
     }
@@ -78,7 +80,8 @@ namespace QuestNav.QuestNav.Estimation
     /// - Phase 2 (Aligned): VIO is primary. Only high-confidence AprilTag corrections that pass
     ///   a Mahalanobis outlier gate are applied. The yaw offset is kept from Phase 1 and only
     ///   re-based on a VIO recenter. A run of consistent rejected multi-tag observations drops
-    ///   back to Phase 1 to re-align.
+    ///   back to Phase 1 to re-align, which then needs an observation that also meets the
+    ///   Phase-2 confidence preset.
     /// </summary>
     public class VioAprilTagPoseEstimator : IVioAprilTagPoseEstimator
     {
@@ -117,6 +120,10 @@ namespace QuestNav.QuestNav.Estimation
         private bool initialized;
         private bool hasInitialAlignment;
         private bool recenterPending;
+
+        // Set when consistent gate rejections dropped back to Phase 1; the re-align then
+        // needs a Phase-2 quality observation, since it also resets the heading.
+        private bool realignPending;
 
         // Consecutive gate-rejected multi-tag observations whose innovations agree with
         // rejectionStreakInnovation, the first of the run.
@@ -283,6 +290,7 @@ namespace QuestNav.QuestNav.Estimation
             hasInitialAlignment = false;
             initialized = true;
             recenterPending = false;
+            realignPending = false;
             rejectionStreakCount = 0;
 
             snapshotBuffer.Clear();
@@ -366,16 +374,21 @@ namespace QuestNav.QuestNav.Estimation
                 // threshold is intentionally still hardcoded (INITIAL_ALIGNMENT_MIN_INLIER_RATIO)
                 // because a bad first observation mis-aligns the field origin for the
                 // whole session, so a quality safety floor is non-negotiable.
-                if (
-                    tagCount < userMinimumTags
-                    || inlierRatio
-                        < VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_INLIER_RATIO
-                )
+                int alignMinTags = userMinimumTags;
+                double alignMinInlierRatio =
+                    VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_INLIER_RATIO;
+                if (realignPending)
+                {
+                    alignMinTags = Math.Max(alignMinTags, correctionMinTags);
+                    alignMinInlierRatio = Math.Max(alignMinInlierRatio, correctionMinInlierRatio);
+                }
+
+                if (tagCount < alignMinTags || inlierRatio < alignMinInlierRatio)
                 {
                     QueuedLogger.Log(
                         $"AprilTag rejected (Phase 1): tags={tagCount}, inlierRatio={inlierRatio:F2} "
-                            + $"(need >={userMinimumTags} tags, "
-                            + $">={VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_INLIER_RATIO:F2} inlier ratio)"
+                            + $"(need >={alignMinTags} tags, "
+                            + $">={alignMinInlierRatio:F2} inlier ratio)"
                     );
                     return;
                 }
@@ -423,6 +436,7 @@ namespace QuestNav.QuestNav.Estimation
                 }
 
                 hasInitialAlignment = true;
+                realignPending = false;
                 rejectionStreakCount = 0;
                 QueuedLogger.Log(
                     $"AprilTag initial alignment accepted: tags={tagCount}, inlierRatio={inlierRatio:F2}, "
@@ -621,6 +635,7 @@ namespace QuestNav.QuestNav.Estimation
 
             rejectionStreakCount = 0;
             hasInitialAlignment = false;
+            realignPending = true;
             QueuedLogger.LogWarning(
                 $"{VioAprilTagPoseEstimatorConstants.REALIGN_REJECTION_COUNT} consistent AprilTag "
                     + $"observations disagreed with the estimate by ~{innovation.Norm:F2}m; "

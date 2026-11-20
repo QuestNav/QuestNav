@@ -54,6 +54,15 @@ namespace QuestNav.QuestNav.Estimation
         void HandleRecenter();
 
         /// <summary>
+        /// Marks a VIO tracking outage; stop calling <see cref="AddVioObservation"/> until
+        /// tracking is back. AprilTag observations are ignored until then. The jump to the
+        /// first VIO observation after the outage is integrated when the robot could have
+        /// driven it in that time; a larger jump is a relocalization: it is not integrated,
+        /// and the estimator drops back to Phase 1 so the next tags re-anchor it.
+        /// </summary>
+        void HandleTrackingLost();
+
+        /// <summary>
         /// Updates the Phase-2 correction confidence preset. Tighter presets reject more
         /// observations but produce a more conservative pose; looser presets are useful
         /// when the default tuning never converges (e.g. only a single tag is visible).
@@ -124,6 +133,7 @@ namespace QuestNav.QuestNav.Estimation
         private bool initialized;
         private bool hasInitialAlignment;
         private bool recenterPending;
+        private bool trackingLost;
 
         // Set when consistent gate rejections dropped back to Phase 1; the re-align then
         // needs a Phase-2 quality observation, since it also resets the heading.
@@ -345,6 +355,19 @@ namespace QuestNav.QuestNav.Estimation
             previousVioPosition = vioPose.Translation;
             latestRotation = vioPose.Rotation;
 
+            if (trackingLost)
+            {
+                trackingLost = false;
+                double maxJump =
+                    VioAprilTagPoseEstimatorConstants.MAX_ROBOT_SPEED_MPS * Math.Max(dt, 0.0)
+                    + VioAprilTagPoseEstimatorConstants.TRACKING_JUMP_MARGIN_METERS;
+                if (rawDisplacement.Norm > maxJump)
+                {
+                    RebaseAfterRelocalization(vioPose, timestamp, dt, rawDisplacement.Norm);
+                    return;
+                }
+            }
+
             // Rotate displacement from VIO frame to corrected FRC frame.
             // UnityToFrc3d produces a fixed axis mapping that depends on headset
             // orientation at startup. The yawOffset aligns VIO north with true FRC north.
@@ -390,6 +413,15 @@ namespace QuestNav.QuestNav.Estimation
             )
             {
                 LogNonFiniteInput("AprilTag observation");
+                return;
+            }
+
+            if (trackingLost)
+            {
+                LogRateLimited(
+                    ref uncompensatedObservationCount,
+                    "Ignored AprilTag observation: VIO tracking is lost"
+                );
                 return;
             }
 
@@ -552,6 +584,54 @@ namespace QuestNav.QuestNav.Estimation
             // the re-base waits for the next VIO observation.
             recenterPending = true;
             QueuedLogger.LogWarning("VIO recenter detected; re-basing on the next VIO frame");
+        }
+
+        /// <inheritdoc/>
+        public void HandleTrackingLost()
+        {
+            if (!initialized)
+                return;
+
+            trackingLost = true;
+        }
+
+        /// <summary>
+        /// Re-bases onto the first VIO pose after a tracking outage whose jump is too large
+        /// to be robot motion. The estimate holds its position instead of integrating the
+        /// jump, the history from before the jump is dropped, and an aligned estimator drops
+        /// back to Phase 1 so the next tags re-anchor position and heading.
+        /// </summary>
+        private void RebaseAfterRelocalization(
+            Pose3d newVioPose,
+            double timestamp,
+            double outageSeconds,
+            double jumpMeters
+        )
+        {
+            filter.Predict(f, ProcessNoise(outageSeconds));
+            snapshotBuffer.Clear();
+            snapshotBuffer.AddLast(
+                new VIOSnapshot(
+                    timestamp,
+                    newVioPose.Translation,
+                    newVioPose.Rotation,
+                    filter.State.Clone(),
+                    filter.Cov.Clone()
+                )
+            );
+
+            if (hasInitialAlignment)
+            {
+                hasInitialAlignment = false;
+                realignPending = true;
+            }
+            rejectionStreakCount = 0;
+
+            QueuedLogger.LogWarning(
+                $"VIO jumped {jumpMeters:F2}m over a {outageSeconds:F2}s tracking outage, "
+                    + "more than the robot can drive; not integrating it, re-aligning on the "
+                    + "next AprilTag observation"
+            );
         }
 
         /// <summary>

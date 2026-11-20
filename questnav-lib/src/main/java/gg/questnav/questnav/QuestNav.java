@@ -657,18 +657,15 @@ public class QuestNav {
    * not be used for robot control. Implement fallback localization methods (wheel odometry, vision,
    * etc.) for when Quest tracking is unavailable.
    *
-   * @return {@code true} if the Quest is actively tracking and pose data is reliable, {@code false}
-   *     if tracking is lost or no device data is available
+   * @return {@code true} if the Quest is connected and actively tracking, so pose data is reliable;
+   *     {@code false} if tracking is lost or the Quest is disconnected
    * @see #onTrackingLost(Runnable)
    * @see #onTrackingAcquired(Runnable)
    * @see #isConnected()
    */
   public boolean isTracking() {
-    var frameData = frameDataSubscriber.get();
-    if (frameData != null) {
-      return frameData.isTracking();
-    }
-    return false;
+    // The last frame stays in the subscriber after the Quest disconnects
+    return isConnected() && frameDataSubscriber.get().isTracking();
   }
 
   /**

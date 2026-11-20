@@ -5,8 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EmbedIO;
-using QuestNav.Utils;
-using QuestNav.WebServer.Server;
 using UnityEngine;
 
 namespace QuestNav.WebServer
@@ -218,20 +216,12 @@ namespace QuestNav.WebServer
                 fps = parsedFps;
             }
 
+            // Unauthenticated: any client, including an <img> on another site's page, can change
+            // the shared runtime mode. It is not saved, so the next stream config change or a
+            // restart restores the saved mode.
             if (width.HasValue || height.HasValue || fps.HasValue || compression.HasValue)
             {
-                // An <img> on another site's page can open this stream, so ignore its parameters.
-                if (RequestValidation.IsCrossSiteRequest(context.Request.Headers["Sec-Fetch-Site"]))
-                {
-                    QueuedLogger.LogWarning(
-                        "Ignoring stream parameters from a cross-site request "
-                            + $"(Referer '{context.Request.Headers["Referer"]}')"
-                    );
-                }
-                else
-                {
-                    frameSource.RequestModeAndCompression(width, height, fps, compression);
-                }
+                frameSource.RequestModeAndCompression(width, height, fps, compression);
             }
 
             try

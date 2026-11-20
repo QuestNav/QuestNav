@@ -31,7 +31,7 @@ namespace QuestNav.Core
         private int frameCount;
 
         /// <summary>
-        /// Current timestamp from Unity's Time.time
+        /// Current timestamp from Unity's Time.timeAsDouble
         /// </summary>
         private double timeStamp;
 
@@ -678,32 +678,30 @@ namespace QuestNav.Core
             frameCount = Time.frameCount;
 
             // Time since Unity startup in seconds - provides temporal correlation for robot code
-            timeStamp = Time.time;
+            timeStamp = Time.timeAsDouble;
 
             // NT server (robot) time; 0 tells the robot it is unknown because time sync isn't established
             serverTimestamp = networkTableConnection.TryGetServerTimeOffset(out long offsetNs)
                 ? networkTableConnection.NtNow + offsetNs
                 : 0;
 
-            // Add latest VIO data to kalman filter
+            // Add latest VIO data to kalman filter. Untracked poses are not motion; the
+            // estimator checks the jump across the outage once tracking is back.
             pose = Conversions.UnityToFrc3d(
                 cameraRig.centerEyeAnchor.position,
                 cameraRig.centerEyeAnchor.rotation
             );
-            vioAprilTagPoseEstimator.AddVioObservation(pose, timeStamp);
+            if (currentlyTracking)
+                vioAprilTagPoseEstimator.AddVioObservation(pose, timeStamp);
         }
 
         /// <summary>
         /// Handles the OVR tracking recenter event (Quest logo long-press).
-        /// Resets the VIO baseline in the estimator without disturbing the KF state.
+        /// The estimator re-bases on the next VIO frame, keeping the field heading.
         /// </summary>
         private void OnVioRecenter()
         {
-            var newPose = Conversions.UnityToFrc3d(
-                cameraRig.centerEyeAnchor.position,
-                cameraRig.centerEyeAnchor.rotation
-            );
-            vioAprilTagPoseEstimator.HandleRecenter(newPose, Time.time);
+            vioAprilTagPoseEstimator.HandleRecenter();
         }
 
         /// <summary>
@@ -726,6 +724,7 @@ namespace QuestNav.Core
             {
                 trackingLostEvents++;
                 QueuedLogger.LogWarning($"Tracking Lost! Times this session: {trackingLostEvents}");
+                vioAprilTagPoseEstimator.HandleTrackingLost();
             }
 
             hadTracking = currentlyTracking;

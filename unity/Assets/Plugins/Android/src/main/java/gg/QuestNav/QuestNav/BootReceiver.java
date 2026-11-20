@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -19,6 +20,17 @@ public class BootReceiver extends BroadcastReceiver {
     private static final String DB_NAME = "config.db";
     private static final String TABLE_NAME = "System";
     private static final String COLUMN_AUTO_START = "enableAutoStartOnBoot";
+
+    /**
+     * The default handler deletes a corrupt database. Only log, so the app can move the file
+     * aside and keep it for diagnosis.
+     */
+    private static final DatabaseErrorHandler LOG_ONLY_ERROR_HANDLER = new DatabaseErrorHandler() {
+        @Override
+        public void onCorruption(SQLiteDatabase dbObj) {
+            Log.e(TAG, "Database corruption detected in " + dbObj.getPath() + ", leaving file in place");
+        }
+    };
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -57,7 +69,7 @@ public class BootReceiver extends BroadcastReceiver {
             return true;
         }
 
-        try (SQLiteDatabase db = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
+        try (SQLiteDatabase db = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY, LOG_ONLY_ERROR_HANDLER);
             Cursor cursor = db.query(TABLE_NAME, new String[]{COLUMN_AUTO_START}, "id = 1", null, null, null, null)) {
         
             if (cursor != null && cursor.moveToFirst()) {

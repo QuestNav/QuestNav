@@ -35,6 +35,8 @@ namespace QuestNav.Tests
 
         public Task CloseAsync() => throw new NotSupportedException();
 
+        public Task ReplaceDatabaseAsync(string candidatePath) => throw new NotSupportedException();
+
         public Task<int> GetTeamNumberAsync() => throw new NotSupportedException();
 
         public Task<string> GetDebugIpOverrideAsync() => throw new NotSupportedException();

@@ -516,6 +516,34 @@ private boolean shouldReject(Pose3d pose) {
 Use this in your pose processing loop to skip measurements that are clearly outside the field before feeding
 them to your pose estimator.
 
+### Alignment State and Pose Jumps
+
+Each `PoseFrame` says what its pose is referenced to (`alignmentState()`), and carries a `resetEpoch()` counter
+that changes whenever the Quest's pose jumps instead of following its motion: a pose reset, an AprilTag alignment or
+re-alignment, or a tracking relocalization. The change between two frames with the same epoch is real motion; across
+a change it is not. Compare epochs for equality only.
+
+| `AlignmentState` | Meaning |
+|------------------|---------|
+| `UNALIGNED` | Raw tracking: nothing has placed the pose on the field yet |
+| `POSE_RESET` | Placed by `setPose()` (or the web UI), not yet aligned by AprilTags |
+| `TAG_ALIGNED` | Aligned to the field by AprilTags |
+| `REALIGNING` | Was tag aligned, but the tags disagree or tracking relocalized; waiting for the tags to re-align it |
+| `UNKNOWN` | The QuestNav app is too old to report it |
+
+```java
+private int lastResetEpoch = -1;
+
+for (PoseFrame frame : questNav.getAllUnreadPoseFrames()) {
+    if (frame.resetEpoch() != lastResetEpoch) {
+        // The Quest pose jumped: don't treat the change since the last frame as motion
+        lastResetEpoch = frame.resetEpoch();
+    }
+}
+```
+
+`questNav.getAlignmentState()` and `questNav.getResetEpoch()` give the latest values.
+
 ## Complete Example
 
 For a full working subsystem that combines everything covered above, see the [QuestNav Robot Sim Example](https://github.com/juchong/QuestNav-Robot-Sim-Example) repository. It demonstrates:

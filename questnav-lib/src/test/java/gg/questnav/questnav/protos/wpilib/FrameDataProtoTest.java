@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import gg.questnav.questnav.AlignmentState;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.protos.generated.Data;
 import java.io.IOException;
@@ -29,7 +30,8 @@ class FrameDataProtoTest {
   @Test
   void roundTripsAllFields() throws Exception {
     var pose = new Pose3d(1.25, -2.5, 0.75, new Rotation3d(0.1, -0.2, 2.9));
-    var frame = new PoseFrame(pose, 123.456789012, 42.125, 9876, true);
+    var frame =
+        new PoseFrame(pose, 123.456789012, 42.125, 9876, true, AlignmentState.REALIGNING, 77);
 
     var msg = proto.createMessage();
     proto.pack(msg, frame);
@@ -43,6 +45,35 @@ class FrameDataProtoTest {
     assertEquals(42.125, decoded.appTimestamp());
     assertEquals(9876, decoded.frameCount());
     assertTrue(decoded.isTracking());
+    assertEquals(AlignmentState.REALIGNING, decoded.alignmentState());
+    assertEquals(77, decoded.resetEpoch());
+  }
+
+  @Test
+  void roundTripsEveryAlignmentState() throws Exception {
+    for (AlignmentState state : AlignmentState.values()) {
+      var msg = proto.createMessage();
+      proto.pack(msg, new PoseFrame(new Pose3d(), 1.0, 2.0, 3, true, state, 4));
+      var decoded = proto.unpack(Data.ProtobufQuestNavFrameData.parseFrom(msg.toByteArray()));
+      assertEquals(state, decoded.alignmentState());
+    }
+  }
+
+  @Test
+  void unknownAlignmentStateUnpacksAsUnknown() {
+    // A state from an app newer than this library
+    var msg = Data.ProtobufQuestNavFrameData.newInstance().setAlignmentStateValue(99);
+    assertEquals(AlignmentState.UNKNOWN, proto.unpack(msg).alignmentState());
+  }
+
+  /** Same bytes as FrameDataGoldenTests.AlignmentFieldsEncodeToGoldenBytes on the C# side. */
+  @Test
+  void decodesAlignmentFieldsFromTheApp() throws IOException {
+    byte[] golden = {0x30, 0x03, 0x38, (byte) 0xAC, 0x02};
+
+    var frame = proto.unpack(Data.ProtobufQuestNavFrameData.parseFrom(golden));
+    assertEquals(AlignmentState.TAG_ALIGNED, frame.alignmentState());
+    assertEquals(300, frame.resetEpoch());
   }
 
   @Test
@@ -113,6 +144,9 @@ class FrameDataProtoTest {
     assertEquals(123.456, frame.appTimestamp());
     assertEquals(4242, frame.frameCount());
     assertTrue(frame.isTracking());
+    // Encoded before protocol version 2
+    assertEquals(AlignmentState.UNKNOWN, frame.alignmentState());
+    assertEquals(0, frame.resetEpoch());
   }
 
   @Test

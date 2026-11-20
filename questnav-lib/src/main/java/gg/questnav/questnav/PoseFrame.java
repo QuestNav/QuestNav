@@ -74,6 +74,13 @@ import org.wpilib.util.protobuf.ProtobufSerializable;
  *     with each tracking frame and can be used to detect dropped frames or measure effective frame
  *     rate. Resets to 0 when the Quest app restarts.
  * @param isTracking Indicates whether the Quest is currently tracking its position
+ * @param alignmentState What {@code questPose3d} is referenced to. {@link AlignmentState#UNKNOWN}
+ *     when the QuestNav app is too old to send it.
+ * @param resetEpoch Counter that changes whenever the Quest's pose jumps instead of following its
+ *     motion: a pose reset, an AprilTag alignment or re-alignment, or a tracking relocalization.
+ *     The change in pose between two frames with the same epoch is real motion; across a change it
+ *     is not. Compare it for equality only: it restarts when the app restarts and wraps around. 0
+ *     when the QuestNav app is too old to send it.
  * @see QuestNav#getAllUnreadPoseFrames()
  * @see QuestNav#setPose(Pose3d)
  * @see org.wpilib.math.estimator.PoseEstimator
@@ -85,8 +92,44 @@ public record PoseFrame(
     double dataTimestamp,
     double appTimestamp,
     int frameCount,
-    boolean isTracking)
+    boolean isTracking,
+    AlignmentState alignmentState,
+    int resetEpoch)
     implements ProtobufSerializable {
   /** Protobuf serializer for {@link PoseFrame} */
   public static final FrameDataProto proto = new FrameDataProto();
+
+  /** A null alignment state is stored as {@link AlignmentState#UNKNOWN}. */
+  public PoseFrame {
+    if (alignmentState == null) {
+      alignmentState = AlignmentState.UNKNOWN;
+    }
+  }
+
+  /**
+   * Creates a frame without alignment information, as from a QuestNav app that predates it: the
+   * alignment state is {@link AlignmentState#UNKNOWN} and the reset epoch 0. This is the canonical
+   * constructor from before those were added, so existing code keeps compiling.
+   *
+   * @param questPose3d The Quest's pose on the field
+   * @param dataTimestamp When the Quest captured this frame, in NetworkTables server time, seconds
+   * @param appTimestamp The Quest app's internal timestamp, seconds since app startup
+   * @param frameCount Sequential frame number from the Quest tracking system
+   * @param isTracking Whether the Quest is currently tracking its position
+   */
+  public PoseFrame(
+      Pose3d questPose3d,
+      double dataTimestamp,
+      double appTimestamp,
+      int frameCount,
+      boolean isTracking) {
+    this(
+        questPose3d,
+        dataTimestamp,
+        appTimestamp,
+        frameCount,
+        isTracking,
+        AlignmentState.UNKNOWN,
+        0);
+  }
 }

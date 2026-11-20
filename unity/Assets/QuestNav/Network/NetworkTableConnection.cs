@@ -48,6 +48,15 @@ namespace QuestNav.Network
         long NtNow { get; }
 
         /// <summary>
+        /// Gets the time offset between server time and local time. Add it to
+        /// <see cref="NtNow"/> to get the equivalent server time. The offset is only valid
+        /// once connected and time-synchronized with the server.
+        /// </summary>
+        /// <param name="offsetNs">Time offset in nanoseconds; only meaningful when this returns true</param>
+        /// <returns>True if the offset is valid</returns>
+        bool TryGetServerTimeOffset(out long offsetNs);
+
+        /// <summary>
         /// Caches the last known IP address to detect changes
         /// </summary>
         string IpAddress { get; }
@@ -57,9 +66,16 @@ namespace QuestNav.Network
         /// </summary>
         /// <param name="frameCount">Current frame index</param>
         /// <param name="timeStamp">Current timestamp</param>
+        /// <param name="serverTimestamp">Current NT server time in nanoseconds, or 0 if unknown</param>
         /// <param name="pose">Current field-relative position of the Quest headset</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
-        void PublishFrameData(int frameCount, double timeStamp, Pose3d pose, bool isTracking);
+        void PublishFrameData(
+            int frameCount,
+            double timeStamp,
+            long serverTimestamp,
+            Pose3d pose,
+            bool isTracking
+        );
 
         /// <summary>
         /// Publishes device data to NetworkTables.
@@ -278,6 +294,10 @@ namespace QuestNav.Network
         /// Gets the current NT time
         /// </summary>
         public long NtNow => ntInstance.Now();
+
+        /// <inheritdoc />
+        public bool TryGetServerTimeOffset(out long offsetNs) =>
+            ntInstance.TryGetServerTimeOffset(out offsetNs);
         #endregion
 
         #region Event Publishers
@@ -310,7 +330,10 @@ namespace QuestNav.Network
 
             // Standard mode: Use team number to resolve robot address
             QueuedLogger.Log($"Setting Team number to {teamNumber}");
-            ntInstance.SetTeamNumber(teamNumber, QuestNavConstants.Network.NT_SERVER_PORT);
+            ntInstance.SetTeamNumber(
+                teamNumber.ToString(),
+                QuestNavConstants.Network.NT_SERVER_PORT
+            );
             teamNumberSet = true;
             ipAddressSet = false;
         }
@@ -366,12 +389,20 @@ namespace QuestNav.Network
         /// </summary>
         /// <param name="frameCount">Unity frame count</param>
         /// <param name="timeStamp">Unity time stamp</param>
+        /// <param name="serverTimestamp">Current NT server time in nanoseconds, or 0 if unknown</param>
         /// <param name="pose">Current VR headset position</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
-        public void PublishFrameData(int frameCount, double timeStamp, Pose3d pose, bool isTracking)
+        public void PublishFrameData(
+            int frameCount,
+            double timeStamp,
+            long serverTimestamp,
+            Pose3d pose,
+            bool isTracking
+        )
         {
             frameData.FrameCount = frameCount;
             frameData.Timestamp = timeStamp;
+            frameData.ServerTimestamp = serverTimestamp;
             frameData.Pose3D = pose.ToProtobuf();
             frameData.IsTracking = isTracking;
 

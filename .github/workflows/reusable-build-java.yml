@@ -57,6 +57,24 @@ jobs:
             -Pversion="${{ steps.version-info.outputs.version }}" \
             -PversionType="${{ steps.version-info.outputs.version-type }}"
 
+      - name: Check Vendor JSON
+        uses: ./.github/actions/check-vendor-json
+        with:
+          version: ${{ steps.version-info.outputs.version }}
+          version-type: ${{ steps.version-info.outputs.version-type }}
+          year: ${{ steps.version-info.outputs.year }}
+
+      # Exercises the publish configuration without credentials
+      - name: Publish to Local File Repository
+        run: |
+          REPO="${{ runner.temp }}/questnav-maven"
+          ./gradlew publish \
+            -Pversion="${{ steps.version-info.outputs.version }}" \
+            -PversionType="${{ steps.version-info.outputs.version-type }}" \
+            -PmavenRepoUrl="file://$REPO"
+          find "$REPO" -name 'questnavlib-java-*.jar' | grep -q . || { echo "::error::questnavlib-java jar was not published"; exit 1; }
+          find "$REPO" -name 'questnavlib-json-*.json' | grep -q . || { echo "::error::questnavlib-json was not published"; exit 1; }
+
       - name: Upload JAR Artifact
         id: upload-jar
         uses: actions/upload-artifact@v7

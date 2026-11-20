@@ -25,7 +25,7 @@ option csharp_namespace = "QuestNav.Protos.Generated";
 option java_package = "gg.questnav.questnav.protos.generated";
 
 // Import geometry messages for pose representation
-import "geometry3d.proto";
+import "wpimath/protobuf/geometry3d.proto";
 
 /*
  * High-frequency tracking data sent from Quest to external systems.
@@ -125,6 +125,22 @@ message ProtobufQuestNavFrameData {
    * fallback behaviors when tracking is lost.
    */
   bool isTracking = 4;
+
+  /*
+   * Timestamp in nanoseconds of the data in NT server time.
+   * 
+   * This provides timing information for the tracking data, allowing external
+   * systems to:
+   * - Calculate data age and latency
+   * - Interpolate or extrapolate poses for prediction
+   * - Synchronize with other sensor data
+   * - Implement timeout detection
+   * 
+   * This time is synchronized between devices by NT4. It is 0 when unknown
+   * (time sync not yet established, or a QuestNav app too old to send it);
+   * receivers should then fall back to the NT server time the frame arrived with.
+   */
+  int64 server_timestamp = 5;
 }
 
 /*

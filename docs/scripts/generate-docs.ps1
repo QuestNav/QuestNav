@@ -371,7 +371,7 @@ try {
         Write-ColorOutput "[INFO] Generating protobuf documentation..." "Yellow"
         Set-Location $ProjectRoot
         
-        $protoResult = & protoc --doc_out="$ProtoOutDir" --doc_opt=html,index.html -I=protos protos/*.proto
+        $protoResult = & protoc --doc_out="$ProtoOutDir" --doc_opt=html,index.html --proto_path=protos protos/data.proto protos/commands.proto protos/wpimath/protobuf/geometry3d.proto
         if ($LASTEXITCODE -ne 0) {
             throw "Failed to generate protocol buffer documentation"
         }

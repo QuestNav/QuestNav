@@ -215,7 +215,7 @@ if "%JAVA_ONLY%"=="false" if "%CSHARP_ONLY%"=="false" (
     echo [INFO] Generating protobuf documentation...
     cd /d "%PROJECT_ROOT%"
     
-    protoc --doc_out="%PROTO_OUT_DIR%" --doc_opt=html,index.html -I=protos protos/*.proto
+    protoc --doc_out="%PROTO_OUT_DIR%" --doc_opt=html,index.html --proto_path=protos protos/data.proto protos/commands.proto protos/wpimath/protobuf/geometry3d.proto
     if !errorlevel! neq 0 (
         echo [ERROR] Failed to generate protocol buffer documentation
         exit /b 1

@@ -18,6 +18,10 @@
  * 1. Client sends ProtobufQuestNavCommand with unique command_id
  * 2. QuestNav processes the command asynchronously
  * 3. QuestNav sends back ProtobufQuestNavCommandResponse with matching command_id
+ *
+ * Since protocol version 2 (see data.proto), every command with a non-zero command_id
+ * gets a response, including command types the app does not know: those are answered
+ * with success = false, so a client newer than the app can tell the command was not run.
  */
 
 package questnav.protos.commands;
@@ -125,7 +129,10 @@ message ProtobufQuestNavCommand {
    * communication. The client should generate unique IDs for each command
    * to avoid confusion. The Quest will echo this ID in the response message.
    * 
-   * Recommended: Use incrementing integers or timestamps for uniqueness.
+   * Recommended: Use incrementing integers or timestamps for uniqueness. Avoid 0, and
+   * don't restart from the same value each time the client starts: the app's last
+   * response stays on the response topic, so a client that reconnects can receive a
+   * response to an earlier session's command with the same ID.
    * 
    * Note: For FRC users, the vendor dependency will handle this automatically.
    */
@@ -209,6 +216,8 @@ message ProtobufQuestNavCommandResponse {
    * - "Invalid pose coordinates: x value out of field bounds"
    * - "Tracking system not initialized"
    * - "Unknown command type"
+   * - "Pose Reset Command too old", or its timestamp is "in the future" (the
+   *   command's age is outside what the app accepts)
    */
   string error_message = 3;
 }

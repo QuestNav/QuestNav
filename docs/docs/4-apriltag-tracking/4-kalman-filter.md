@@ -275,7 +275,7 @@ The key insight is that the headset hasn't actually moved — only the VIO coord
 While the headset reports position tracking as lost, QuestNav stops feeding VIO to the estimator and AprilTag observations are ignored. When tracking returns, the jump between the last VIO pose before the outage and the first one after it is compared with what the robot could have driven in that time (`MAX_ROBOT_SPEED_MPS × outage + TRACKING_JUMP_MARGIN_METERS`):
 
 - **Within the bound**, the jump is the robot's real motion during the outage and is integrated as usual. The process noise for this step covers the whole outage instead of being clamped to 0.1 s, so the covariance grows and the next AprilTag observations can correct any error the VIO picked up while it was lost.
-- **Beyond the bound**, it is a relocalization. The estimate keeps its position instead of integrating the jump, the snapshot history from before it is dropped, and an aligned estimator drops back to Phase 1. The re-alignment needs an observation that also meets the Phase-2 confidence preset.
+- **Beyond the bound**, it is a relocalization. The estimate keeps its position instead of integrating the jump, the snapshot history from before it is dropped, and an estimator that was placed on the field (by AprilTags or a pose reset) drops back to Phase 1 and reports `REALIGNING`. The re-alignment needs an observation that also meets the Phase-2 confidence preset.
 
 ## Pose Reset Latency Compensation
 

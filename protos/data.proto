@@ -18,6 +18,18 @@
  * - Frame data is sent every 10 milliseconds (100 Hz)
  * - Device data is sent every 333 milliseconds (3 Hz)
  * - External systems receive and process this data for robot localization
+ *
+ * Wire Protocol Version:
+ * The app publishes an integer wire-protocol version on the NT topic
+ * /QuestNav/protocolVersion, next to the release string on /QuestNav/version. It is a
+ * plain integer topic so it can be read even where these protobuf schemas can't be decoded.
+ * The version only changes when the messages or topics change in a way robot code may
+ * need to know about; new fields alone stay readable by older libraries.
+ * - 1: Apps that predate the topic. NT announces and removes an app's topics one at a
+ *      time, so the topic can be missing for a moment while a newer app connects or
+ *      disconnects; only frames without alignment_state and reset_epoch mean version 1.
+ * - 2: Adds alignment_state and reset_epoch to frame data, and a failure response for
+ *      command types the app does not know.
  */
 
 package questnav.protos.data;
@@ -26,6 +38,32 @@ option java_package = "gg.questnav.questnav.protos.generated";
 
 // Import geometry messages for pose representation
 import "wpimath/protobuf/geometry3d.proto";
+
+/*
+ * What the published pose is referenced to.
+ *
+ * Apps older than protocol version 2 don't send it, so it reads as
+ * ALIGNMENT_STATE_UNSPECIFIED.
+ */
+enum AlignmentState {
+  // Not sent (an older app) or not known.
+  ALIGNMENT_STATE_UNSPECIFIED = 0;
+
+  // Raw tracking frame: nothing has placed the pose on the field yet.
+  ALIGNMENT_STATE_UNALIGNED = 1;
+
+  // Placed on the field by a pose reset (setPose from the robot or the web UI), and not
+  // yet aligned by AprilTags. The next accepted AprilTag alignment replaces it.
+  ALIGNMENT_STATE_POSE_RESET = 2;
+
+  // Aligned to the field by AprilTags; later tag observations correct the position.
+  ALIGNMENT_STATE_TAG_ALIGNED = 3;
+
+  // Was placed on the field (by AprilTags or a pose reset), but the placement is no longer
+  // trusted: the tags have consistently disagreed with the pose, or tracking relocalized
+  // after an outage. The pose continues from the old placement until the tags re-align it.
+  ALIGNMENT_STATE_REALIGNING = 4;
+}
 
 /*
  * High-frequency tracking data sent from Quest to external systems.
@@ -141,6 +179,32 @@ message ProtobufQuestNavFrameData {
    * receivers should then fall back to the NT server time the frame arrived with.
    */
   int64 server_timestamp = 5;
+
+  /*
+   * What the pose is referenced to; see AlignmentState.
+   *
+   * Added in protocol version 2. Apps from version 2 on set it in every frame (never
+   * ALIGNMENT_STATE_UNSPECIFIED), which tells their frames from a version-1 app's.
+   */
+  AlignmentState alignment_state = 6;
+
+  /*
+   * Counter that changes whenever the pose is re-placed instead of following the headset's
+   * motion: a pose reset, an AprilTag alignment or re-alignment, or a tracking relocalization
+   * the app could not follow. Across a change, the pose change is not motion.
+   *
+   * Within one reset_epoch the pose follows the headset's motion plus filtered AprilTag
+   * position corrections. A correction is usually small, but the app accepts one from a tag
+   * measurement up to 2 m away, so it can step the pose by that much in one frame (for
+   * example after a tracking outage).
+   *
+   * Compare it for equality only. It starts at a random value when the app starts, so a
+   * restarted app is very unlikely to repeat the last value, and wraps around.
+   * A tracking-origin recenter keeps the field pose, so it does not change the counter.
+   *
+   * Added in protocol version 2; older apps send 0.
+   */
+  uint32 reset_epoch = 7;
 }
 
 /*
@@ -161,6 +225,10 @@ message ProtobufQuestNavFrameData {
  * troubleshooting scenarios.
  */
 message ProtobufQuestNavDeviceData {
+  // Was the tracking state, which moved to ProtobufQuestNavFrameData.isTracking.
+  reserved 2;
+  reserved "currently_tracking";
+
   /*
    * Count of tracking loss events since app startup.
    * 

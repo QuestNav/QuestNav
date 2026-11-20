@@ -76,12 +76,16 @@ namespace QuestNav.Network
         /// <param name="serverTimestamp">Current NT server time in nanoseconds, or 0 if unknown</param>
         /// <param name="pose">Current field-relative position of the Quest headset</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
+        /// <param name="alignmentState">What the pose is referenced to</param>
+        /// <param name="resetEpoch">Counter that changes whenever the pose is re-placed</param>
         void PublishFrameData(
             int frameCount,
             double timeStamp,
             long serverTimestamp,
             Pose3d pose,
-            bool isTracking
+            bool isTracking,
+            AlignmentState alignmentState,
+            uint resetEpoch
         );
 
         /// <summary>
@@ -198,6 +202,7 @@ namespace QuestNav.Network
         /// - /QuestNav/frameData: High-frequency pose updates (100Hz)
         /// - /QuestNav/deviceData: Device status updates (3Hz)
         /// - /QuestNav/response: Command execution results
+        /// - /QuestNav/version, /QuestNav/protocolVersion: App release and wire-protocol version
         ///
         /// Subscribers (Robot → Quest):
         /// - /QuestNav/request: Commands from robot (pose resets, etc.)
@@ -259,6 +264,14 @@ namespace QuestNav.Network
                     new PubSubOptions { Periodic = 0.01 }
                 )
                 .Set(Application.version);
+
+            // Integer, so robot code can check compatibility even if it can't decode the protos
+            ntInstance
+                .GetIntegerPublisher(
+                    QuestNavConstants.Topics.PROTOCOL_VERSION,
+                    new PubSubOptions { Periodic = 0.01 }
+                )
+                .Set(QuestNavConstants.Network.PROTOCOL_VERSION);
 
             /*
              * SUBSCRIBER SETUP - Quest receives data FROM robot
@@ -404,12 +417,16 @@ namespace QuestNav.Network
         /// <param name="serverTimestamp">Current NT server time in nanoseconds, or 0 if unknown</param>
         /// <param name="pose">Current VR headset position</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
+        /// <param name="alignmentState">What the pose is referenced to</param>
+        /// <param name="resetEpoch">Counter that changes whenever the pose is re-placed</param>
         public void PublishFrameData(
             int frameCount,
             double timeStamp,
             long serverTimestamp,
             Pose3d pose,
-            bool isTracking
+            bool isTracking,
+            AlignmentState alignmentState,
+            uint resetEpoch
         )
         {
             frameData.FrameCount = frameCount;
@@ -417,6 +434,8 @@ namespace QuestNav.Network
             frameData.ServerTimestamp = serverTimestamp;
             frameData.Pose3D = pose.ToProtobuf();
             frameData.IsTracking = isTracking;
+            frameData.AlignmentState = alignmentState;
+            frameData.ResetEpoch = resetEpoch;
 
             // Publish data
             frameDataPublisher.Set(frameData);

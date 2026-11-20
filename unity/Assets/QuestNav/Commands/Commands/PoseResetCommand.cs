@@ -23,16 +23,22 @@ namespace QuestNav.Commands.Commands
         private readonly Transform vrCameraRoot;
         private readonly Transform resetTransform;
         private readonly IVioAprilTagPoseEstimator poseEstimator;
+        private readonly Field2d field;
 
         /// <summary>
         /// Initializes a new instance of the PoseResetCommand.
         /// </summary>
+        /// <param name="field">
+        /// Dimensions of the loaded field layout, used only to warn about out-of-bounds resets;
+        /// null skips the check.
+        /// </param>
         public PoseResetCommand(
             ICommandContext commandContext,
             Transform vrCamera,
             Transform vrCameraRoot,
             Transform resetTransform,
-            IVioAprilTagPoseEstimator poseEstimator
+            IVioAprilTagPoseEstimator poseEstimator,
+            Field2d field = null
         )
         {
             this.commandContext = commandContext;
@@ -40,6 +46,7 @@ namespace QuestNav.Commands.Commands
             this.vrCameraRoot = vrCameraRoot;
             this.resetTransform = resetTransform;
             this.poseEstimator = poseEstimator;
+            this.field = field;
         }
 
         /// <summary>
@@ -86,14 +93,7 @@ namespace QuestNav.Commands.Commands
             double poseQz = resetPose.Rotation.Quaternion.Z;
             double poseQW = resetPose.Rotation.Quaternion.W;
 
-            // Additional validation for field boundaries
-            bool inBounds =
-                poseX >= 0
-                && poseX <= QuestNavConstants.Field.FIELD_LENGTH
-                && poseY >= 0
-                && poseY <= QuestNavConstants.Field.FIELD_WIDTH;
-
-            if (!inBounds)
+            if (IsOutsideField(poseX, poseY, field))
             {
                 QueuedLogger.LogWarning($"Pose out of field bounds: ({poseX}, {poseY})");
             }
@@ -199,6 +199,23 @@ namespace QuestNav.Commands.Commands
                 new Pose3d(rootTranslation, rootRotation),
                 new Pose3d(targetPose.Translation, cameraRotation)
             );
+        }
+
+        /// <summary>
+        /// Whether a position is clearly outside the field, allowing
+        /// <see cref="QuestNavConstants.Field.BOUNDS_MARGIN_METERS"/> for measurement error.
+        /// Returns false when the field size is unknown.
+        /// </summary>
+        public static bool IsOutsideField(double x, double y, Field2d field)
+        {
+            if (field == null || !(field.Length > 0) || !(field.Width > 0))
+                return false;
+
+            const double margin = QuestNavConstants.Field.BOUNDS_MARGIN_METERS;
+            return x < -margin
+                || x > field.Length + margin
+                || y < -margin
+                || y > field.Width + margin;
         }
 
         /// <summary>

@@ -330,9 +330,11 @@ namespace QuestNav.Core
             // value is read once at startup and changes require a restart to apply.
             await configManager.OpenAsync();
 
+            // Also gives pose resets the field size, even if the detector fails to start
+            AprilTagFieldLayout aprilTagFieldLayout = null;
             await RunNonCriticalAsync("AprilTag detector", async () =>
             {
-                var aprilTagFieldLayout = new AprilTagFieldLayout();
+                aprilTagFieldLayout = new AprilTagFieldLayout();
                 string requestedFieldLayout = await configManager.GetAprilTagFieldLayoutFileAsync();
                 await aprilTagFieldLayout.LoadJsonFromFileAsync(requestedFieldLayout);
                 aprilTagManager = new AprilTagManager(
@@ -377,7 +379,8 @@ namespace QuestNav.Core
                 vrCamera,
                 vrCameraRoot,
                 resetTransform,
-                configManager
+                configManager,
+                aprilTagFieldLayout?.Field
             );
             RunNonCritical("Tag-along UI", () =>
                 tagAlongUI = new TagAlongUI(vrCamera, tagalongUiTransform)

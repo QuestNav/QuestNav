@@ -8,15 +8,46 @@ This page describes how field layout data is loaded and how QuestNav interfaces 
 
 ## Field Layout
 
-### Loading
+### Choosing a Layout
 
-The field layout is loaded during `QuestNav.Awake()` from a JSON file in `StreamingAssets/apriltag/fieldlayouts/`. The filename is currently **hardcoded**:
+The layout is chosen in the AprilTag tab of the web interface (**Field Layout**). The app ships two:
 
-```csharp
-await aprilTagFieldLayout.LoadJsonFromFileAsync("2026-rebuilt-welded.json");
-```
+| File | Field |
+|---|---|
+| `2026-rebuilt-welded.json` | 2026 REBUILT, welded field (default) |
+| `2025-reefscape-welded.json` | 2025 REEFSCAPE, welded field |
 
-To use a different field layout, this line must be edited and the app rebuilt.
+The app reads the selected layout once, at startup (`QuestNav.cs` calls `LoadJsonFromFileAsync` with the configured
+file name). **A layout change takes effect after a restart**; the web interface shows a banner when one is needed.
+
+Tag IDs that are not in the loaded layout are ignored by the detector, and pose resets outside the layout's field
+bounds (plus 0.25 m) are logged as warnings.
+
+### Custom Layouts
+
+Use **Manage Custom Layouts...** in the AprilTag tab, or the
+[field-layout endpoints](../3-api-reference/1-web-api.md#apriltag-field-layouts) of the web API, to upload, download,
+rename and delete your own layouts, such as a practice field.
+
+- **Storage.** Custom layouts are stored in `persistentDataPath/apriltag/fieldlayouts-custom/` on the headset.
+- **Lookup order.** The custom folder is checked before the bundled one.
+- **File names.**
+  - Allowed characters: letters, digits, `.`, `_` and `-`.
+  - Length: at most 64 characters before `.json`.
+  - First character: must not be `.`.
+  - Extension: `.json` is added when missing.
+  - Bundled names: a custom layout cannot use one (compared case-insensitively), so it never shadows a bundled
+    layout.
+- **Content.** The upload must:
+  - parse as a WPILib `AprilTagFieldLayout`
+  - contain at least one tag
+  - give every tag a pose with finite numbers
+  - have no duplicate IDs
+- **Size limit:** 1 MB.
+- **Deleting the selected layout.** The configuration falls back to `2026-rebuilt-welded.json`.
+- **Renaming the selected layout.** The configuration follows the new name.
+
+If the selected file can't be loaded at startup, the error is logged and the detector has no tags to look for.
 
 ### JSON Format
 

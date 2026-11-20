@@ -27,7 +27,7 @@ Called by `AddVioObservation(pose, timestamp)` every time the VIO system provide
 
 ### Algorithm
 
-1. **First call only**: Initialize the filter with the current VIO position via `ResetPosition()` and return.
+1. **First call only**: Initialize the filter at the current VIO position (`P = 0.001 × I`, yaw offset 0) and return.
 
 2. **Compute raw displacement**:
 
@@ -76,11 +76,12 @@ Observations must pass phase-dependent quality gates before updating the filter.
 
 #### Phase 1: Initial Alignment
 
-Before any accepted AprilTag observation, the Kalman filter runs on pure VIO in an arbitrary coordinate frame. The first observation meeting the minimum quality bar establishes the field alignment.
+Before any accepted AprilTag observation, the Kalman filter runs on pure VIO in an arbitrary coordinate frame. The first observation meeting the minimum quality bar establishes the field alignment. Phase 1 also runs again after a `setPose` (the next good observation re-aligns to the tags) and during [re-alignment](#re-alignment).
 
 **Gate conditions:**
-- `tagCount >= 2`
-- `inlierRatio >= 0.6`
+- `tagCount >= userMinimumTags` (the **Minimum Tags Required** setting, default 2)
+- `inlierRatio >= 0.6` (`INITIAL_ALIGNMENT_MIN_INLIER_RATIO`, not configurable)
+- While re-aligning, the stricter of these and the confidence preset's values: `tagCount >= max(userMinimumTags, presetMinTags)` and `inlierRatio >= max(0.6, presetMinInlierRatio)`
 
 **On accept:**
 1. **Hard-reset the KF state** to the measured AprilTag position:
@@ -103,26 +104,56 @@ This would cause the filter to almost entirely ignore the first AprilTag measure
 P = diag(σ_x², σ_y², σ_z²)
 ```
 
-3. **Clear and re-seed** the snapshot buffer with the current VIO baseline and new KF state.
+3. **Compute yaw correction** (see [Yaw Correction](#yaw-correction) below) from the VIO yaw at capture time.
 
-4. **Compute yaw correction** (see [Yaw Correction](#yaw-correction) below).
+4. **Re-seed the history**: snapshots older than the capture are dropped, the capture snapshot gets the new state and covariance, and the VIO motion since the capture is replayed on top.
 
-5. Set `hasInitialAlignment = true` → transition to Phase 2.
+5. Set `hasInitialAlignment = true`, change the reset epoch, and report `TAG_ALIGNED` → transition to Phase 2.
 
 **On reject:** Observation discarded.
 
 #### Phase 2: Confidence-Gated Corrections
 
-After initial alignment, VIO is the primary pose source. AprilTag corrections are applied only if they meet strict quality requirements.
+After initial alignment, VIO is the primary pose source. AprilTag corrections are applied only if they meet the quality bar and agree with the estimate.
 
-**Gate conditions (all must pass):**
-- Position jump: `‖z_measured − x̂_current‖ < 2.0m`
-- `tagCount >= 3`
-- `inlierRatio >= 0.8`
+**Quality gate:**
+- `tagCount >= max(userMinimumTags, presetMinTags)`; the **Minimum Tags Required** setting is a floor the preset cannot lower
+- `inlierRatio >= presetMinInlierRatio`
 
-**On accept:** Standard KF update with latency compensation (see below). No yaw update.
+##### Confidence presets
 
-**On reject:** Observation discarded.
+The preset is chosen in the AprilTag tab (**Advanced**) and applies immediately.
+
+| Preset | Value | `presetMinTags` | `presetMinInlierRatio` |
+|---|---|---|---|
+| Permissive | 0 | 2 | 0.75 |
+| Balanced (default) | 1 | 3 | 0.80 |
+| Strict | 2 | 4 | 0.90 |
+| Debug | 3 | 1 | 0.60 |
+
+The Debug preset accepts single-tag solves, which can flip or misjudge depth. It is for bench testing only.
+
+**Outlier gate:** the innovation `ν = z − x̂_capture` is compared with the estimate at capture time, using `S = P_capture + R`:
+
+```
+accept if  ‖ν‖ <= 0.5 m
+       or (νᵀ S⁻¹ ν <= 16.27  and  ‖ν‖ <= 2.0 m)
+```
+
+16.27 is the 99.9% chi-square quantile for 3 degrees of freedom (`CORRECTION_GATE_CHI_SQUARED`). The 0.5 m floor (`CORRECTION_GATE_MIN_DISTANCE`) keeps small, consistent biases from timestamp, extrinsic and tag placement error from being rejected when the covariance is small. The 2.0 m cap (`CORRECTION_MAX_POSITION_JUMP`) stops a large covariance, after a long stretch without tags, from admitting a wild measurement.
+
+**On accept:** Standard KF update with latency compensation (see below). No yaw update. The re-alignment count is reset.
+
+**On reject:** Observation discarded, and counted toward re-alignment.
+
+#### Re-alignment
+
+A wrong estimate (for example from a bad Phase 1 frame) makes good observations fail the outlier gate. Each rejected observation with at least 2 tags (`REALIGN_MIN_TAGS`) is compared with the first one of the current streak:
+
+- **Innovation within 0.5 m of the first** (`REALIGN_CONSENSUS_RADIUS`): the streak grows.
+- **Otherwise:** this observation starts a new streak.
+
+After 5 agreeing rejections (`REALIGN_REJECTION_COUNT`) the estimator drops back to Phase 1 with re-alignment pending and reports `REALIGNING`. The position keeps following VIO until a Phase 1 observation that also meets the preset is accepted.
 
 ### Standard KF Update (Phase 2)
 
@@ -176,7 +207,7 @@ sequenceDiagram
 
 ## Yaw Correction
 
-The Kalman filter handles position. Yaw (heading) is corrected separately via a scalar offset that is computed **once** during Phase 1 and then locked.
+The Kalman filter handles position. Yaw (heading) is corrected separately via a scalar offset. It is set at each Phase 1 alignment or re-alignment, adjusted on a recenter, and otherwise left alone.
 
 ### Computing the Yaw Offset
 
@@ -218,9 +249,9 @@ q_output = q_latestVio ∘ Rz(yawOffset)
 
 where `Rz` is a rotation around the Z-axis and `∘` denotes quaternion composition.
 
-### Why Yaw Is Locked After Phase 1
+### Why Phase 2 Does Not Update Yaw
 
-Continuing to update yaw from AprilTag measurements would be susceptible to noisy or erroneous observations (reflections, partial occlusions). The Quest headset's VIO provides excellent short-term rotational tracking with minimal drift. By locking the yaw offset after the initial alignment, the system leverages VIO's rotational stability while using AprilTags only for the initial frame alignment.
+Updating yaw from every AprilTag measurement would let noisy or wrong observations (reflections, partial occlusions) turn the heading. The headset's VIO tracks rotation with little drift, so Phase 2 corrects position only and leaves heading to VIO and to the alignments.
 
 :::info
 Only yaw (rotation around Z) is corrected. Pitch and roll pass through directly from VIO unfiltered. The Quest's IMU and VIO are sufficiently accurate for pitch and roll in FRC applications.
@@ -233,13 +264,15 @@ The Kalman filter's R matrix is computed dynamically for each AprilTag observati
 ### Formula
 
 ```
-σ_linear = σ_base × (d_avg² / n_tags)
+σ_linear = σ_base × noiseScale × (d_avg² / n_tags)
 ```
 
 where:
-- `σ_base` = 0.05 m (compile-time constant `MULTI_TAG_LINEAR_STD_DEV_BASE`)
-- `d_avg` = average distance to tags (approximated as `‖position‖`)
-- `n_tags` = number of detected tags
+- `σ_base` = 0.05 m (`MULTI_TAG_LINEAR_STD_DEV_BASE`), multiplied by the **AprilTag Trust** setting `noiseScale` (0.5 to 2.0, default 1.0)
+- `d_avg` = mean distance from the headset to each tag used
+- `n_tags` = number of tags used
+
+The table below uses `noiseScale = 1.0`.
 
 The R matrix is then:
 
@@ -259,16 +292,16 @@ The Z-axis noise is doubled because vertical position is less precisely determin
 
 ## Recenter Handling
 
-When the user presses and holds the Quest logo button, the Meta Quest headset **recenters** the VIO tracking origin. This causes a discontinuous jump in `centerEyeAnchor.position`, which would produce a massive fake displacement in the next `AddVioObservation` call and corrupt the KF state.
+When the user presses and holds the Quest logo button, the headset **recenters** the VIO tracking origin. The VIO pose jumps, and its yaw can turn, without the headset moving. Integrated as motion, that jump would corrupt the estimate.
 
-QuestNav listens for the `OVRManager.display.RecenteredPose` event and calls `HandleRecenter()`, which:
+QuestNav listens for the `OVRManager.display.RecenteredPose` event and calls `HandleRecenter()`. The anchors may not reflect the recenter yet when the event fires, so it only marks a re-base as pending. On the next VIO frame, `RebaseAfterRecenter()`:
 
-1. Updates `previousVioPosition` to the new VIO position (so the next displacement computes as zero)
-2. Updates `latestRotation` to the new VIO rotation
-3. Clears the snapshot buffer and re-seeds it with the current KF state
-4. **Preserves**: `yawOffset`, `hasInitialAlignment`, KF state, and KF covariance
+1. Computes the frame change: `Δψ = yaw(new VIO) − yaw(last VIO)`
+2. Re-expresses every snapshot's raw VIO pose in the new frame (rotated by `Δψ` about the last VIO position and moved to the new one), so replay and latency compensation keep working
+3. Shifts the heading offset: `yawOffset −= Δψ`, so the published field heading does not change
+4. Sets the previous VIO position and rotation to the new ones, so the step is not integrated
 
-The key insight is that the headset hasn't actually moved — only the VIO coordinate frame has changed. The Kalman filter's field-relative state remains valid.
+The KF state, covariance, alignment state and reset epoch are kept: the field pose has not changed. The app logs `VIO recenter applied: VIO yaw moved ... deg, field heading kept`. While a re-base is pending, pose resets are not latency-compensated.
 
 ## Tracking Outages
 
@@ -277,9 +310,28 @@ While the headset reports position tracking as lost, QuestNav stops feeding VIO 
 - **Within the bound**, the jump is the robot's real motion during the outage and is integrated as usual. The process noise for this step covers the whole outage instead of being clamped to 0.1 s, so the covariance grows and the next AprilTag observations can correct any error the VIO picked up while it was lost.
 - **Beyond the bound**, it is a relocalization. The estimate keeps its position instead of integrating the jump, the snapshot history from before it is dropped, and an estimator that was placed on the field (by AprilTags or a pose reset) drops back to Phase 1 and reports `REALIGNING`. The re-alignment needs an observation that also meets the Phase-2 confidence preset.
 
-## Pose Reset Latency Compensation
+## Pose Reset
 
-A pose reset from the robot (`setPose`) describes where the headset was when the command was sent. When NetworkTables time is synced with the robot, QuestNav takes the command's age, looks up the raw VIO pose from that long ago in the snapshot buffer (clamped to the buffer length), and moves the target by the VIO motion since. The VIO displacement is rotated into the field by the target yaw minus the VIO yaw at that time, and the yaw change is added to the target heading. Without time sync, or for resets from the web UI, the reset is applied as received.
+A pose reset (`setPose` from the robot, or **Reset Pose** in the web API) moves the VR camera root so the headset sits at the requested position with the requested **yaw**. Pitch and roll of the request are ignored: the root only turns about the vertical axis, so the headset keeps the pitch and roll its gravity-aligned tracking measures. The filter is then re-initialized at that pose (`P = 0.001 × I`, yaw offset 0, history cleared), the reset epoch changes and the state becomes `POSE_RESET`. The next observation that passes Phase 1 aligns to the tags again.
+
+Before applying it, the app validates the pose (finite values, a non-zero quaternion) and answers an invalid one with an error response. A pose outside the loaded field layout's bounds (plus 0.25 m) is applied, but logged as a warning.
+
+### Latency compensation
+
+A pose reset from the robot describes where the headset was when the command was sent. When NetworkTables time is synced with the robot, QuestNav takes the command's age, looks up the raw VIO pose from that long ago in the snapshot buffer (clamped to the buffer length), and moves the target by the VIO motion since. The VIO displacement is rotated into the field by the target yaw minus the VIO yaw at that time, and the yaw change is added to the target heading. Without time sync, or for resets from the web UI, the reset is applied as received.
+
+## Alignment State and Reset Epoch
+
+Each published frame carries two fields that say how far the pose can be trusted:
+
+| `AlignmentState` | When |
+|---|---|
+| `UNALIGNED` | Not placed on the field yet: pure VIO since startup |
+| `POSE_RESET` | Placed by a pose reset, not by tags |
+| `TAG_ALIGNED` | Aligned by AprilTags (Phase 2 corrections may follow) |
+| `REALIGNING` | Was placed, but a relocalization or the re-alignment check invalidated it; waiting for a Phase 1 observation |
+
+The **reset epoch** changes whenever the pose is re-placed instead of following motion: a pose reset, an AprilTag alignment or re-alignment, or a relocalization that is not integrated. It starts at a random value, wraps around, and is only meant to be compared for equality. Phase 2 corrections and recenters do not change it, although a Phase 2 correction can move the pose by up to 2 m.
 
 ## Output
 
@@ -292,22 +344,26 @@ The `EstimatedPose` property returns a `Pose3d` combining:
 EstimatedPose = Pose3d(x̂[0], x̂[1], x̂[2], q_vio ∘ Rz(yawOffset))
 ```
 
-This is published to NetworkTables at 120 Hz for consumption by the robot's drive code.
+It is published in `/QuestNav/frameData` on every main-loop frame (up to 120 Hz), with the alignment state and reset epoch.
 
 ## Summary of Constants
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `VIO_POSITION_STD_DEV_X` | 0.02 m | Process noise, X |
-| `VIO_POSITION_STD_DEV_Y` | 0.02 m | Process noise, Y |
-| `VIO_POSITION_STD_DEV_Z` | 0.01 m | Process noise, Z |
+| `defaultVioStdDevs` | 0.02, 0.02, 0.01 m | Process noise (x, y, z) per `VIO_NOISE_REFERENCE_PERIOD_SECONDS` |
+| `VIO_NOISE_REFERENCE_PERIOD_SECONDS` | 1/120 s | Time step the process noise is specified for |
 | `MULTI_TAG_LINEAR_STD_DEV_BASE` | 0.05 m | Base measurement noise |
-| `INITIAL_ALIGNMENT_MIN_TAGS` | 2 | Min tags for Phase 1 |
+| `INITIAL_ALIGNMENT_MIN_TAGS` | 2 | Phase 1 tag minimum until the **Minimum Tags Required** setting is applied |
 | `INITIAL_ALIGNMENT_MIN_INLIER_RATIO` | 0.6 | Min inlier ratio for Phase 1 |
-| `CORRECTION_MIN_TAGS` | 3 | Min tags for Phase 2 |
-| `CORRECTION_MIN_INLIER_RATIO` | 0.8 | Min inlier ratio for Phase 2 |
-| `CORRECTION_MAX_POSITION_JUMP` | 2.0 m | Max position jump for Phase 2 |
-| `SNAPSHOT_BUFFER_DURATION` | 0.5 s | Replay buffer duration |
+| `CORRECTION_MIN_TAGS` | 3 | Phase 2 tags for the Balanced preset (`PRESET_*_MIN_TAGS` for the others) |
+| `CORRECTION_MIN_INLIER_RATIO` | 0.8 | Phase 2 inlier ratio for the Balanced preset (`PRESET_*_MIN_INLIER_RATIO` for the others) |
+| `CORRECTION_GATE_CHI_SQUARED` | 16.27 | Squared Mahalanobis limit of the outlier gate |
+| `CORRECTION_GATE_MIN_DISTANCE` | 0.5 m | Innovations up to this size are always accepted |
+| `CORRECTION_MAX_POSITION_JUMP` | 2.0 m | Absolute cap on an accepted innovation |
+| `REALIGN_REJECTION_COUNT` | 5 | Agreeing rejections that trigger re-alignment |
+| `REALIGN_MIN_TAGS` | 2 | Min tags for a rejection to count toward re-alignment |
+| `REALIGN_CONSENSUS_RADIUS` | 0.5 m | How closely those rejections must agree |
+| `BUFFER_DURATION_SECONDS` | 0.5 s | Replay buffer duration |
 | `VIO_NOISE_MAX_DT_SECONDS` | 0.1 s | Longest time step process noise is added for, except across a tracking outage |
 | `MAX_CAPTURE_VIO_GAP_SECONDS` | 0.05 s | Max gap between a capture and the VIO snapshot before it |
 | `MAX_ROBOT_SPEED_MPS` | 6.0 m/s | Fastest plausible robot speed for the reacquire jump check |

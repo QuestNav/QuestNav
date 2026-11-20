@@ -459,7 +459,9 @@ namespace QuestNav.Core
                 timeStamp,
                 serverTimestamp,
                 vioAprilTagPoseEstimator.EstimatedPose,
-                currentlyTracking
+                currentlyTracking,
+                vioAprilTagPoseEstimator.AlignmentState,
+                vioAprilTagPoseEstimator.ResetEpoch
             );
 
             // Check for and execute any pending commands from the robot

@@ -14,8 +14,11 @@ import gg.questnav.questnav.protos.wpilib.CommandProto;
 import gg.questnav.questnav.protos.wpilib.CommandResponseProto;
 import gg.questnav.questnav.protos.wpilib.DeviceDataProto;
 import gg.questnav.questnav.protos.wpilib.FrameDataProto;
+import java.util.LinkedHashSet;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import org.wpilib.driverstation.DriverStationErrors;
@@ -129,6 +132,9 @@ public class QuestNav {
   /** Protocol version of QuestNav apps that don't publish one */
   private static final int LEGACY_PROTOCOL_VERSION = 1;
 
+  /** Number of sent commands remembered while waiting for their responses */
+  private static final int MAX_PENDING_COMMANDS = 32;
+
   /** Time without a new frame after which the Quest is considered disconnected */
   private static final double CONNECTION_TIMEOUT_SECONDS = 0.120;
 
@@ -205,8 +211,14 @@ public class QuestNav {
   /** Cached proto pose (for reset requests) to lessen GC pressure */
   private final ProtobufPose3d cachedProtoPose = ProtobufPose3d.newInstance();
 
-  /** Last sent request id */
-  private int lastSentRequestId = 0;
+  /**
+   * Last sent command ID. Starts at a random value so a response left on the topic from an earlier
+   * robot program run is not taken for one of this run's commands.
+   */
+  private int lastSentRequestId = ThreadLocalRandom.current().nextInt();
+
+  /** IDs of sent commands that have not had a response yet, oldest first */
+  private final Set<Integer> pendingCommandIds = new LinkedHashSet<>();
 
   /** True to warn when the QuestNav app's protocol version is not supported */
   private boolean versionCheckEnabled = true;
@@ -405,6 +417,18 @@ public class QuestNav {
   }
 
   /**
+   * Gets the ID for the command after {@code lastId}, skipping 0, which a command that never set an
+   * ID has.
+   *
+   * @param lastId The last command ID used
+   * @return The next command ID
+   */
+  static int nextCommandId(int lastId) {
+    int id = lastId + 1;
+    return id == 0 ? 1 : id;
+  }
+
+  /**
    * Evaluates connection, tracking, and battery state against cached values and fires any
    * registered callbacks when state transitions are detected.
    */
@@ -510,12 +534,18 @@ public class QuestNav {
     cachedProtoPose.clear();
     pose3dProto.pack(cachedProtoPose, pose);
     cachedCommandRequest.clear();
+    lastSentRequestId = nextCommandId(lastSentRequestId);
     var requestToSend =
         cachedCommandRequest
             .setType(Commands.QuestNavCommandType.POSE_RESET)
-            .setCommandId(++lastSentRequestId)
+            .setCommandId(lastSentRequestId)
             .setPoseResetPayload(cachedPoseResetPayload.clear().setTargetPose(cachedProtoPose));
 
+    pendingCommandIds.add(lastSentRequestId);
+    if (pendingCommandIds.size() > MAX_PENDING_COMMANDS) {
+      // The oldest has most likely been answered while disconnected or dropped
+      pendingCommandIds.remove(pendingCommandIds.iterator().next());
+    }
     requestPublisher.set(requestToSend);
   }
 
@@ -748,6 +778,10 @@ public class QuestNav {
     Commands.ProtobufQuestNavCommandResponse[] responses = responseSubscriber.readQueueValues();
 
     for (Commands.ProtobufQuestNavCommandResponse response : responses) {
+      // Responses to other commands: an earlier run's, a duplicate, or another client's
+      if (!pendingCommandIds.remove(response.getCommandId())) {
+        continue;
+      }
       if (response.getSuccess()) {
         if (onSuccessCallback != null) {
           onSuccessCallback.accept(response);

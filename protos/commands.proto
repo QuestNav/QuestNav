@@ -129,7 +129,10 @@ message ProtobufQuestNavCommand {
    * communication. The client should generate unique IDs for each command
    * to avoid confusion. The Quest will echo this ID in the response message.
    * 
-   * Recommended: Use incrementing integers or timestamps for uniqueness.
+   * Recommended: Use incrementing integers or timestamps for uniqueness. Avoid 0, and
+   * don't restart from the same value each time the client starts: the app's last
+   * response stays on the response topic, so a client that reconnects can receive a
+   * response to an earlier session's command with the same ID.
    * 
    * Note: For FRC users, the vendor dependency will handle this automatically.
    */

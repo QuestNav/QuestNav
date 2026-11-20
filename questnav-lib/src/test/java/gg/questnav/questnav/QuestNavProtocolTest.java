@@ -8,6 +8,7 @@
 */
 package gg.questnav.questnav;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -47,5 +48,12 @@ class QuestNavProtocolTest {
     assertNotNull(warning);
     assertTrue(warning.contains("protocol version " + (QuestNav.PROTOCOL_VERSION + 1)), warning);
     assertTrue(warning.contains("update the QuestNavLib vendordep"), warning);
+  }
+
+  @Test
+  void commandIdsSkipZero() {
+    assertEquals(6, QuestNav.nextCommandId(5));
+    assertEquals(1, QuestNav.nextCommandId(-1));
+    assertEquals(Integer.MIN_VALUE, QuestNav.nextCommandId(Integer.MAX_VALUE));
   }
 }

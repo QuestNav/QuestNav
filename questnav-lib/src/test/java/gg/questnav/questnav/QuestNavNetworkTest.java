@@ -223,10 +223,10 @@ class QuestNavNetworkTest {
     Consumer<String> reporter = questNav.warningReporter;
     questNav.warningReporter = warnings::add;
     try {
-      // A legacy app sends neither field; the epoch here shows it is ignored for version 1
+      // A legacy app sends neither field
       waitFor(
           () -> {
-            sendFrame(0, 0, 5);
+            sendFrame(0, 0, 0);
             questNav.commandPeriodic();
             return questNav.getQuestNavProtocolVersion().equals(OptionalInt.of(1))
                 && questNav.getResetEpoch().isEmpty();
@@ -289,6 +289,52 @@ class QuestNavNetworkTest {
       // Checked once the value arrives
       protocolPublisher.set(QuestNav.PROTOCOL_VERSION + 1);
       waitForProtocolVersion(QuestNav.PROTOCOL_VERSION + 1);
+      assertEquals(1, warnings.size(), warnings.toString());
+      assertTrue(warnings.get(0).contains("newer than QuestNavLib"), warnings.get(0));
+    } finally {
+      questNav.warningReporter = reporter;
+    }
+  }
+
+  @Test
+  void currentAppIsNotTakenForLegacyWithoutItsProtocolTopic() {
+    List<String> warnings = new ArrayList<>();
+    Consumer<String> reporter = questNav.warningReporter;
+    questNav.warningReporter = warnings::add;
+    int newerVersion = QuestNav.PROTOCOL_VERSION + 2;
+    try {
+      // NT announces and unpublishes an app's topics one at a time, so a current app's frames can
+      // arrive before its protocol topic, and outlast it when the app disconnects
+      for (int session = 0; session < 2; session++) {
+        waitFor(() -> !server.getTopic(PROTOCOL_TOPIC).exists(), 2.0, "protocol topic removal");
+        waitFor(
+            () -> {
+              sendFrame(0, Data.AlignmentState.ALIGNMENT_STATE_TAG_ALIGNED_VALUE, 3);
+              questNav.commandPeriodic();
+              return questNav.getResetEpoch().equals(OptionalInt.of(3));
+            },
+            2.0,
+            "aligned frames");
+        for (int i = 0; i < 10; i++) {
+          sendFrame(0, Data.AlignmentState.ALIGNMENT_STATE_TAG_ALIGNED_VALUE, 3);
+          questNav.commandPeriodic();
+          assertTrue(questNav.getQuestNavProtocolVersion().isEmpty());
+        }
+
+        try (IntegerPublisher protocolPublisher =
+            client.getIntegerTopic(PROTOCOL_TOPIC).publish()) {
+          protocolPublisher.set(newerVersion);
+          waitFor(
+              () -> {
+                sendFrame(0, Data.AlignmentState.ALIGNMENT_STATE_TAG_ALIGNED_VALUE, 3);
+                questNav.commandPeriodic();
+                return questNav.getQuestNavProtocolVersion().equals(OptionalInt.of(newerVersion));
+              },
+              2.0,
+              "protocol version " + newerVersion);
+        }
+      }
+      // The same app reconnecting isn't reported again
       assertEquals(1, warnings.size(), warnings.toString());
       assertTrue(warnings.get(0).contains("newer than QuestNavLib"), warnings.get(0));
     } finally {

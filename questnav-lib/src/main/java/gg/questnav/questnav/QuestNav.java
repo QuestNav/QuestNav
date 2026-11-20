@@ -132,9 +132,6 @@ public class QuestNav {
   /** Protocol version of QuestNav apps that don't publish one */
   private static final int LEGACY_PROTOCOL_VERSION = 1;
 
-  /** First protocol version whose frames carry the alignment state and reset epoch */
-  private static final int ALIGNMENT_PROTOCOL_VERSION = 2;
-
   /** Number of sent commands remembered while waiting for their responses */
   private static final int MAX_PENDING_COMMANDS = 32;
 
@@ -695,11 +692,20 @@ public class QuestNav {
    * @see PoseFrame#resetEpoch()
    */
   public OptionalInt getResetEpoch() {
-    var protocolVersion = getQuestNavProtocolVersion();
-    if (protocolVersion.isEmpty() || protocolVersion.getAsInt() < ALIGNMENT_PROTOCOL_VERSION) {
+    if (!isConnected()) {
       return OptionalInt.empty();
     }
-    return OptionalInt.of(frameDataSubscriber.get().resetEpoch());
+    PoseFrame frame = frameDataSubscriber.get();
+    return isLegacyFrame(frame) ? OptionalInt.empty() : OptionalInt.of(frame.resetEpoch());
+  }
+
+  /**
+   * Whether a frame lacks the fields protocol version 2 added, as from an app that predates them.
+   * From version 2 on, apps set the alignment state in every frame; a nonzero epoch also marks a
+   * newer app's frame whose state this library doesn't know.
+   */
+  private static boolean isLegacyFrame(PoseFrame frame) {
+    return frame.alignmentState() == AlignmentState.UNKNOWN && frame.resetEpoch() == 0;
   }
 
   /**
@@ -855,8 +861,8 @@ public class QuestNav {
    * Gets the wire-protocol version of the QuestNav app on the headset. Apps that don't publish one
    * predate it and are version 1.
    *
-   * @return The app's protocol version, or empty if the Quest is disconnected or its version has
-   *     been announced but not received yet
+   * @return The app's protocol version, or empty if the Quest is disconnected or its version is not
+   *     known yet (or any more) while the app connects or disconnects
    * @see #PROTOCOL_VERSION
    * @see #MIN_SUPPORTED_PROTOCOL_VERSION
    */
@@ -865,7 +871,11 @@ public class QuestNav {
       return OptionalInt.empty();
     }
     if (!protocolVersionSubscriber.exists()) {
-      return OptionalInt.of(LEGACY_PROTOCOL_VERSION);
+      // NT announces and unpublishes an app's topics one at a time, so a current app's frames can
+      // arrive before this topic or outlast it; only legacy frames mean a legacy app
+      return isLegacyFrame(frameDataSubscriber.get())
+          ? OptionalInt.of(LEGACY_PROTOCOL_VERSION)
+          : OptionalInt.empty();
     }
     // The topic can be announced before its value arrives; the default is not a version
     var protocolVersion = protocolVersionSubscriber.getAtomic();

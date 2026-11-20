@@ -9,8 +9,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 export const VendorDepUrl = () => {
     const {siteConfig} = useDocusaurusContext();
-    const v = siteConfig.customFields.questnavLibVersion;
-    return `https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/${v}/questnavlib-json-${v}.json`;
+    return siteConfig.customFields.questnavLibJsonUrl;
 };
 
 export const VendorDepCodeBlock = () => {

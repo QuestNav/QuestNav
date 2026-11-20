@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using MathNet.Filtering.Kalman;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -26,7 +27,8 @@ namespace QuestNav.QuestNav.Estimation
         /// motion: a reset, an AprilTag alignment or re-alignment, or a relocalization that is
         /// not integrated. Phase-2 AprilTag corrections keep it, though one can move the pose by
         /// up to <see cref="VioAprilTagPoseEstimatorConstants.CORRECTION_MAX_POSITION_JUMP"/>.
-        /// A recenter keeps the field pose, so it does not change it. Wraps around.
+        /// A recenter keeps the field pose, so it does not change it. Starts at a random value
+        /// and wraps around.
         /// </summary>
         uint ResetEpoch { get; }
 
@@ -222,6 +224,12 @@ namespace QuestNav.QuestNav.Estimation
             yawOffset = 0.0;
             initialized = false;
             hasInitialAlignment = false;
+
+            // A random start, so a restarted app doesn't repeat the epoch robot code last saw
+            var epochBytes = new byte[sizeof(uint)];
+            using (var rng = RandomNumberGenerator.Create())
+                rng.GetBytes(epochBytes);
+            resetEpoch = BitConverter.ToUInt32(epochBytes, 0);
         }
 
         /// <inheritdoc/>

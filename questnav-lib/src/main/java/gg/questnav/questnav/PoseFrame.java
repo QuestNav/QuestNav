@@ -81,8 +81,9 @@ import org.wpilib.util.protobuf.ProtobufSerializable;
  *     relocalization. Across a change, the change in pose is not motion. Within one epoch the pose
  *     follows the Quest's motion plus filtered AprilTag corrections, which are usually small but
  *     can step it by up to 2 m in one frame (for example after a tracking outage). Compare it for
- *     equality only: it restarts when the app restarts and wraps around. 0 when the QuestNav app is
- *     too old to send it.
+ *     equality only: it starts at a random value when the app starts, so a restarted app is very
+ *     unlikely to repeat the last value, can be negative, and wraps around. 0 when the QuestNav app
+ *     is too old to send it.
  * @see QuestNav#getAllUnreadPoseFrames()
  * @see QuestNav#setPose(Pose3d)
  * @see org.wpilib.math.estimator.PoseEstimator

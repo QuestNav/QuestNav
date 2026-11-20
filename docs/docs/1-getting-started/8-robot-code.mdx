@@ -523,7 +523,8 @@ that changes whenever the Quest's pose is re-placed instead of following its mot
 alignment or re-alignment, or a tracking relocalization. The change between two frames with different epochs is not
 motion. Within one epoch the pose follows the Quest's motion plus filtered AprilTag corrections: these are usually
 small, but one can step the pose by up to 2 m in a single frame (for example after a tracking outage), so don't treat
-same-epoch changes as pure odometry. Compare epochs for equality only.
+same-epoch changes as pure odometry. Compare epochs for equality only: the counter starts at a random value whenever
+the app starts, so an app restart also shows up as a change, and it can be negative.
 
 | `AlignmentState` | Meaning |
 |------------------|---------|

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using NUnit.Framework;
@@ -924,17 +925,17 @@ namespace QuestNav.Tests
         {
             var sim = new Sim();
             Assert.AreEqual(AlignmentState.Unaligned, sim.Estimator.AlignmentState);
-            Assert.AreEqual(0u, sim.Estimator.ResetEpoch);
+            uint epoch = sim.Estimator.ResetEpoch;
 
             // The first VIO pose replaces the zero pose published before it
             sim.Estimator.AddVioObservation(sim.Vio, sim.Time);
             sim.Step(Translation3d.Zero, 5);
             Assert.AreEqual(AlignmentState.Unaligned, sim.Estimator.AlignmentState);
-            Assert.AreEqual(1u, sim.Estimator.ResetEpoch);
+            Assert.AreEqual(epoch + 1, sim.Estimator.ResetEpoch);
 
             sim.ObserveTruth();
             Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
-            Assert.AreEqual(2u, sim.Estimator.ResetEpoch);
+            Assert.AreEqual(epoch + 2, sim.Estimator.ResetEpoch);
 
             // Phase-2 corrections, even ones that move the pose, keep the epoch
             sim.Step(new Translation3d(1.0, 0.0, 0.0), 20);
@@ -943,7 +944,7 @@ namespace QuestNav.Tests
                 sim.Time
             );
             Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
-            Assert.AreEqual(2u, sim.Estimator.ResetEpoch);
+            Assert.AreEqual(epoch + 2, sim.Estimator.ResetEpoch);
         }
 
         [Test]
@@ -968,12 +969,23 @@ namespace QuestNav.Tests
         public void AlignmentState_PoseResetBeforeAnyTags()
         {
             var sim = new Sim();
+            uint epoch = sim.Estimator.ResetEpoch;
             sim.Estimator.AddVioObservation(sim.Vio, sim.Time);
 
             sim.Estimator.ResetPosition(sim.Field, sim.Time);
 
             Assert.AreEqual(AlignmentState.PoseReset, sim.Estimator.AlignmentState);
-            Assert.AreEqual(2u, sim.Estimator.ResetEpoch);
+            Assert.AreEqual(epoch + 2, sim.Estimator.ResetEpoch);
+        }
+
+        [Test]
+        public void ResetEpoch_StartsAtRandom()
+        {
+            // So a restarted app doesn't repeat the epoch robot code last saw
+            var epochs = new HashSet<uint>();
+            for (int i = 0; i < 4; i++)
+                epochs.Add(new VioAprilTagPoseEstimator().ResetEpoch);
+            Assert.Greater(epochs.Count, 1);
         }
 
         [Test]

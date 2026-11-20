@@ -198,7 +198,8 @@ message ProtobufQuestNavFrameData {
    * measurement up to 2 m away, so it can step the pose by that much in one frame (for
    * example after a tracking outage).
    *
-   * Compare it for equality only. It restarts when the app restarts and wraps around.
+   * Compare it for equality only. It starts at a random value when the app starts, so a
+   * restarted app is very unlikely to repeat the last value, and wraps around.
    * A tracking-origin recenter keeps the field pose, so it does not change the counter.
    *
    * Added in protocol version 2; older apps send 0.

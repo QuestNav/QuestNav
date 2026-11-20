@@ -33,14 +33,36 @@ namespace QuestNav.QuestNav.Estimation
     /// </summary>
     public static class VioAprilTagPoseEstimatorConstants
     {
-        /// <summary>VIO displacement noise standard deviations [x, y, z] in meters.</summary>
+        /// <summary>
+        /// VIO displacement noise standard deviations [x, y, z] in meters, per
+        /// <see cref="VIO_NOISE_REFERENCE_PERIOD_SECONDS"/> of elapsed time.
+        /// </summary>
         public static readonly double[] defaultVioStdDevs = { 0.02, 0.02, 0.01 };
+
+        /// <summary>
+        /// Time step the VIO std devs are specified for (the main loop period). Process
+        /// noise is scaled by the elapsed time over this.
+        /// </summary>
+        public const double VIO_NOISE_REFERENCE_PERIOD_SECONDS = 1.0 / 120.0;
+
+        /// <summary>
+        /// Longest time step (seconds) process noise is added for, so a pause, app hitch or
+        /// tracking outage does not inflate the covariance.
+        /// </summary>
+        public const double VIO_NOISE_MAX_DT_SECONDS = 0.1;
 
         /// <summary>AprilTag measurement noise standard deviations [x, y, z] in meters.</summary>
         public static readonly double[] defaultAprilTagStdDevs = { 0.05, 0.05, 0.10 };
 
         /// <summary>How far back in time AprilTag corrections can be applied.</summary>
         public const double BUFFER_DURATION_SECONDS = 0.5;
+
+        /// <summary>
+        /// Longest gap (seconds) between an AprilTag capture and the VIO snapshot before it.
+        /// A capture with no VIO snapshot that close cannot be latency-compensated and is
+        /// dropped.
+        /// </summary>
+        public const double MAX_CAPTURE_VIO_GAP_SECONDS = 0.05;
 
         // --- Phase 1: Initial alignment gating (NOT user-configurable) ---
 
@@ -99,7 +121,7 @@ namespace QuestNav.QuestNav.Estimation
 
         // --- Input validation ---
 
-        /// <summary>The first dropped non-finite input is logged, then every Nth one after it.</summary>
+        /// <summary>The first dropped input of a kind is logged, then every Nth one after it.</summary>
         public const int NON_FINITE_LOG_INTERVAL = 100;
 
         // --- Confidence presets ---

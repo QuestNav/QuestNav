@@ -39,6 +39,8 @@ namespace QuestNav.Native.NTCore
 
     /// <summary>
     /// Represents a managed wrapper for a native WpiString struct, handling UTF-8 conversion and unmanaged memory lifetimes.
+    /// Hold it in a <c>using</c> block that spans the native call: the <see cref="WpiString"/> pointer alone
+    /// does not keep the wrapper alive. Hot paths should use <see cref="Utf8Buffer"/> instead.
     /// </summary>
     internal sealed unsafe class ManagedWpiString : IDisposable
     {

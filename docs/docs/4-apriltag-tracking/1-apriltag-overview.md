@@ -4,169 +4,169 @@ title: AprilTag Tracking
 
 # AprilTag Tracking
 
-QuestNav can use AprilTag fiducial markers placed around the FRC field to establish and correct the headset's absolute position on the field. This page provides a high-level overview. For in-depth details, see:
+QuestNav can place itself on the field with the AprilTags around it. The headset's own tracking (VIO) is
+combined with tag sightings inside the app, and robot code receives the result as an ordinary field pose. This
+page is an overview. The details are in:
 
-- [Coordinate Systems](./coordinate-systems) — All three coordinate systems, axis mappings, quaternion conventions, and the math behind each conversion
-- [Detection Pipeline](./detection-pipeline) — Step-by-step walkthrough from camera capture through PnP solving to confidence metrics
-- [Kalman Filter & Pose Estimation](./kalman-filter) — State model, prediction/correction math, two-phase gating derivations, latency compensation, and yaw correction
-- [Field Layout & Native Interop](./field-layout-and-native-interop) — JSON field layouts, 3D corner computation, and native library (libapriltag, PoseLib, ntcore) architecture
+- [Coordinate Systems](./2-coordinate-systems.md): the three coordinate systems, axis mappings and quaternion
+  conventions
+- [Detection Pipeline](./3-detection-pipeline.md): from camera frame to a headset pose measurement
+- [Kalman Filter & Pose Estimation](./4-kalman-filter.md): the filter, the two phases, the outlier gate,
+  latency compensation and recovery
+- [Field Layout & Native Interop](./5-field-layout-and-native-interop.md): field layouts, custom uploads and
+  the native libraries
 
 :::info
-AprilTag tracking is an **experimental feature** on the `SeanErn/AprilTag` branch. It augments the existing VIO-based tracking with field-relative position corrections.
+AprilTag tracking is on by default. Turn it on or off, and tune it, in the **AprilTag** tab of the web interface.
+It needs the **Headset Cameras** permission on the Quest.
 :::
 
 ## Why AprilTags?
 
-VIO alone provides smooth, high-rate (120 Hz) position tracking, but it has two limitations:
+VIO gives smooth position tracking at 120 Hz, but on its own it has two limits:
 
-1. **No absolute position** — VIO tracks relative movement from wherever the headset started. It doesn't know where on the field it is.
-2. **Drift** — Over time, small errors in VIO accumulate, causing the estimated position to slowly diverge from reality.
+1. **No absolute position.** VIO measures motion from wherever the headset started. It does not know where on
+   the field that is.
+2. **Drift.** Small errors add up, so the estimate slowly moves away from the truth.
 
-AprilTags solve both problems. When the headset sees AprilTags with known positions on the field, it can compute its absolute field position and correct VIO drift.
+Tags fix both. When the headset sees tags whose field positions it knows, it can measure its field position and
+correct the drift.
 
-## High-Level Architecture
-
-The system fuses two data sources using a Kalman filter:
-
-- **VIO** (120 Hz): Smooth, relative position updates from the Quest headset's built-in tracking. Provides the "between-tag" dead reckoning.
-- **AprilTag observations** (~30 Hz): Absolute position measurements from detecting field AprilTags. Provides corrections when tags are visible.
+## Architecture
 
 ```mermaid
 flowchart LR
-  VIO["VIO Pipeline (120 Hz)"] -->|Displacement| KF["Kalman Filter"]
-  AT["AprilTag Pipeline (~30 Hz)"] -->|"Position + Rotation"| Gate["Confidence Gating"]
+  VIO["VIO (120 Hz)"] -->|Displacement| KF["Kalman filter"]
+  AT["AprilTag detector"] -->|"Headset pose + quality"| Gate["Phase 1 / Phase 2 gates"]
   Gate -->|"Accepted"| KF
-  Gate -->|"Rejected"| Drop["Discard"]
-  KF --> Output["Estimated Pose → NetworkTables → Robot"]
+  Gate -->|"Rejected"| Drop["Discarded"]
+  KF --> Output["/QuestNav/frameData → robot"]
 ```
 
-## Detection Pipeline
+The detector runs at the rate set in the AprilTag tab (30 fps by default) and never faster than the camera
+delivers frames.
 
-Each AprilTag detection cycle runs the following steps:
+## Detection in brief
 
-1. **Capture** — A grayscale frame is captured from the Quest headset's passthrough camera.
-2. **Detect** — The native AprilTag library (libapriltag) scans the frame for tag36h11 markers and returns their 2D corner positions in the image.
-3. **Solve** — If 2+ tags are detected, PoseLib (a multi-tag PnP solver) computes the camera's 3D pose relative to the known tag positions on the field.
-4. **Convert** — The camera pose is converted from the Computer Vision coordinate system to the FRC field coordinate system.
-5. **Gate** — Confidence metrics are evaluated to decide whether the observation is trustworthy enough to use.
-6. **Correct** — If accepted, the observation is fed into the Kalman filter to correct position (and, during initial alignment, heading).
+1. **Capture** a passthrough camera frame and convert it to grayscale.
+2. **Detect** tag36h11 tags with libapriltag.
+3. **Filter**: drop tags in the **Ignored Tag IDs** list and tags that are not in the field layout. The frame is
+   used only if at least **Minimum Tags Required** tags are left.
+4. **Solve** the camera pose from all tag corners at once with PoseLib, convert it to FRC field coordinates, and
+   move it from the camera lens to the headset center.
+5. **Check distance**: drop the frame if the average headset-to-tag distance is above **Max Tag Distance**.
+6. **Fuse** it into the Kalman filter through the phase gates below.
 
-## Coordinate Systems
+## Two phases
 
-Three coordinate systems are involved:
+### Phase 1: alignment
 
-| System | X | Y | Z | Handedness |
-|--------|---|---|---|------------|
-| **FRC Field** | Toward red alliance | Left | Up | Right-handed |
-| **Unity World** | Right | Up | Forward | Left-handed |
-| **Computer Vision** | Right | Down | Forward | Right-handed |
+Until tags have placed it, the headset runs on VIO in its own frame, so its position and heading on the field
+are unknown. The first frame that passes these checks aligns it:
 
-The field layout JSON (e.g., `2026-rebuilt-welded.json`) stores tag positions in **FRC field coordinates** with the origin at the blue alliance driver station corner. QuestNav's internal geometry library (`Pose3d`, `Translation3d`, `Rotation3d`) operates in FRC coordinates.
+- at least **Minimum Tags Required** tags (default 2)
+- inlier ratio of at least 0.6 (the share of tag corners that fit the solved pose)
 
-## Two-Phase Alignment
+On alignment the position is set directly from the measurement and the heading offset is set from the
+measured yaw. The pose's reset epoch changes and the alignment state becomes `TAG_ALIGNED`.
 
-AprilTag corrections operate in two phases to prevent corrupted observations (reflections, partial occlusions) from ruining the pose estimate.
+### Phase 2: corrections
 
-### Phase 1: Initial Alignment
+After alignment VIO leads, and tags only correct position. A frame is used when it has:
 
-Before any AprilTag has been accepted, the system runs on pure VIO in an arbitrary coordinate frame. The headset doesn't know where it is on the field or which direction it's facing.
+- at least the larger of **Minimum Tags Required** and the confidence preset's tag count
+- at least the preset's inlier ratio
 
-The first observation that passes the minimum quality bar establishes the field alignment:
+| Preset | Tags | Inlier ratio |
+|---|---|---|
+| Permissive | 2 | 0.75 |
+| Balanced (default) | 3 | 0.80 |
+| Strict | 4 | 0.90 |
+| Debug | 1 | 0.60 |
 
-- **Minimum tags**: 2
-- **Minimum inlier ratio**: 60%
+The **Debug** preset accepts single-tag solves, which can be ambiguous. Use it only for bench testing.
 
-When accepted, Phase 1:
+A frame that passes is then checked against the estimate at the moment it was captured:
 
-1. **Sets the absolute position** directly from the AprilTag measurement (the Kalman filter state is hard-reset to the measured position)
-2. **Computes the heading offset** between the AprilTag-measured heading and the VIO heading, so all future VIO data is rotated into the correct field frame
-3. **Transitions to Phase 2** — the system is now aligned
+- **Within 0.5 m:** always accepted.
+- **Farther than 0.5 m:** accepted only if it is statistically consistent with the filter (squared
+  Mahalanobis distance at most 16.27, the 99.9% level for 3 degrees of freedom) **and** no more than 2 m away.
 
-:::tip
-Phase 1 fires once and is designed to be lenient. Two tags with 60% inlier ratio is a low bar, allowing alignment to happen quickly after the headset first sees the field.
-:::
+Accepted corrections go through a normal Kalman update at capture time, and the motion since then is replayed on
+top. Heading is not changed in Phase 2.
 
-### Phase 2: VIO-Primary with Selective Corrections
+### Re-alignment
 
-After alignment, VIO is the primary tracking source. AprilTag corrections are only applied when confidence is high:
+If the estimate is wrong, for example after a bad first alignment, good tag frames start failing the gate. When
+**5 consecutive rejected frames** (each with 2 or more tags) agree with each other to within 0.5 m, the app
+goes back to Phase 1 and reports `REALIGNING`. A frame accepted in Phase 2 resets the count.
 
-- **Minimum tags**: 3
-- **Minimum inlier ratio**: 80%
-- **Maximum position jump**: 2.0 meters (observations further than this from the current estimate are rejected as likely reflections or misdetections)
+Re-alignment needs a frame that passes both the Phase 1 checks and the preset's tag count and inlier ratio. It
+then sets position and heading again and changes the reset epoch.
 
-The heading offset computed in Phase 1 is **locked** — VIO handles heading from then on. This prevents noisy AprilTag heading estimates from fighting the VIO's smooth rotation tracking.
+## Measurement noise
 
-:::note
-The stricter Phase 2 thresholds mean that distant, noisy, or partially-occluded tag detections are automatically filtered out. This is intentional — VIO is more reliable than a low-confidence AprilTag measurement.
-:::
-
-## Confidence Metrics
-
-Each AprilTag observation is evaluated using these signals:
-
-| Metric | Source | Meaning |
-|--------|--------|---------|
-| **Inlier ratio** | PoseLib RANSAC | Fraction of 2D-3D point correspondences that fit the estimated pose. Higher = more consistent detection. |
-| **Tag count** | AprilTag detector | Number of tags detected in the frame. More tags provide stronger geometric constraints. |
-| **Position jump** | KF state vs. measurement | Distance between the measured position and the current estimate. A large jump signals a likely false detection. |
-
-## Dynamic Measurement Noise
-
-The Kalman filter's measurement noise (how much it trusts each AprilTag observation) is computed dynamically based on the observation quality:
+Each measurement's standard deviation is:
 
 ```
-linearStdDev = BASE_STD_DEV * (avgDistance² / tagCount)
+σ = 0.05 × noiseScale × avgTagDistance² / tagCount
 ```
 
-- **Closer tags + more tags** = lower noise = stronger correction
-- **Distant tags + fewer tags** = higher noise = weaker correction
+The vertical value is doubled. `noiseScale` is the **AprilTag Trust** slider (0.5 to 2.0, default 1.0); higher
+values make the filter trust tags less. Close views of many tags correct strongly, while a far view of a few tags
+only nudges the estimate.
 
-This means a close-up view of many tags will snap the position confidently, while a distant glimpse of a few tags will only gently nudge the estimate.
+## Recenter, tracking loss and setPose
 
-## Field Layout
+- **Recenter.** Holding the Quest button recenters the headset's tracking. The app re-expresses its history in
+  the new tracking frame and adjusts the heading offset, so the field position and heading stay the same, the
+  alignment state is kept and the reset epoch does not change. The app logs `VIO recenter applied`.
+- **Tracking lost.** While tracking is lost, tag frames are ignored. When it comes back, a jump larger than the
+  robot could have driven (6 m/s × outage + 0.25 m) is treated as a relocalization:
+  - the position is held
+  - the reset epoch changes
+  - a headset that tags or `setPose` had placed goes back to `REALIGNING`
+- **`setPose` from the robot.** Places the headset at the requested position, but uses only the **yaw** of the
+  requested rotation; pitch and roll come from the headset's own gravity-aligned tracking. The alignment state
+  becomes `POSE_RESET` and the reset epoch changes. The next tag frame that passes Phase 1 aligns the headset to
+  the tags again.
 
-Tag positions are loaded from a JSON file in `StreamingAssets/apriltag/fieldlayouts/`. The default layout is `2026-rebuilt-welded.json`, which contains all 32 tag positions for the 2026 FRC field.
+## What gets published
 
-Each tag entry specifies:
-- **ID** — The tag's numeric identifier
-- **Pose** — The tag's position (x, y, z in meters) and orientation (quaternion) in FRC field coordinates
+The fused pose goes out on `/QuestNav/frameData` (a `ProtobufQuestNavFrameData` protobuf) on every main-loop
+frame, up to 120 Hz. This happens even with the detector off, in which case it is the VIO pose. Each frame carries:
 
-The tag size (the black square portion) comes from `QuestNavConstants.AprilTag.TAG_SIZE_METERS` (0.1651 m / 6.5 inches), the standard FRC size.
+- `pose3d`: the headset pose in FRC field coordinates (meters, origin at the blue alliance corner)
+- `isTracking`, `frame_count`, `timestamp`, `server_timestamp`
+- `alignment_state`: `UNALIGNED`, `POSE_RESET`, `TAG_ALIGNED` or `REALIGNING`
+- `reset_epoch`: changes whenever the pose is re-placed instead of following motion
 
-## Recenter Handling
+QuestNavLib turns these into `PoseFrame`s. See [Robot Code](../1-getting-started/8-robot-code.mdx).
 
-Pressing and holding the Quest logo button triggers a tracking recenter, which redefines the VIO origin. QuestNav detects this via the `OVRManager.display.RecenteredPose` event and resets the VIO baseline without disturbing the Kalman filter state or field alignment. This means:
+## Troubleshooting
 
-- The estimated field position is preserved
-- The heading offset is preserved
-- No position jump occurs after a recenter
+### Position stays at the VIO origin (state `UNALIGNED`)
 
-## What Gets Published
+- **Too few tags.** Phase 1 never passed. Make sure **Minimum Tags Required** tags are in view at once.
+- **Detector off or failing.** Check that the detector is enabled, the **Headset Cameras** permission is
+  granted, and the log shows no camera errors.
+- **Wrong layout.** Check that the selected field layout matches the field. A layout change takes effect only
+  after a restart.
 
-The fused pose is published to NetworkTables at the VIO update rate (~120 Hz) as a `Pose3d` protobuf under `QuestNav/LatestRobotPose`. The pose contains:
+### Corrections are rejected
 
-- **Position** (x, y, z) in FRC field coordinates (meters, origin at blue alliance corner)
-- **Rotation** as a quaternion in FRC convention
+- **Check the reason.** The log names it on lines starting with `AprilTag rejected (Phase 1)` or
+  `AprilTag rejected (Phase 2)`, or with `AprilTag observation rejected: avgTagDistance`.
+- **Too few tags or too low inlier ratio.** Lower the preset, or lower **Minimum Tags Required**.
+- **Tags too far away.** Raise **Max Tag Distance**.
 
-Robot code can subscribe to this topic to get the headset's field-relative position and heading.
+### Position jumps near certain tags
 
-## Tuning and Troubleshooting
+- **Reflections.** Polycarbonate and shiny surfaces can show tags that aren't there. The Phase 2 gate rejects
+  most of them. Add persistent bad IDs to **Ignored Tag IDs**.
 
-### The headset position appears wrong on the field visualization
+### Heading is rotated
 
-- Verify the correct field layout JSON is loaded (check `QuestNav.Awake()`)
-- Ensure the visualization tool (AdvantageScope, etc.) uses the same coordinate convention as QuestNav (corner-origin, blue alliance)
-- Check the log output for "AprilTag rejected" messages — if all observations are being rejected, the gating thresholds may be too strict for your environment
-
-### Position is stuck near the origin
-
-- This indicates Phase 1 never completed. Ensure the headset can see at least 2 AprilTags simultaneously.
-- Check that the `Headset Cameras` app permission is enabled on the Quest.
-
-### Position jumps when seeing certain tags
-
-- This may indicate tag reflections (e.g., from polycarbonate panels or shiny surfaces). The Phase 2 position jump filter (2.0m) should reject most of these. If not, consider reducing `CORRECTION_MAX_POSITION_JUMP`.
-
-### Heading appears rotated
-
-- The heading is set once during Phase 1 from the AprilTag measurement. If the initial observation had a bad heading estimate, the offset will be wrong for the entire session. Restarting the app forces a new Phase 1 alignment.
+- **Bad alignment frame.** Heading comes from the Phase 1 frame and is not corrected in Phase 2. If that frame
+  was bad, the position error it causes makes the gate reject good frames, and the re-alignment above sets the
+  heading again. A heading error small enough to keep passing the gate stays until the next alignment.

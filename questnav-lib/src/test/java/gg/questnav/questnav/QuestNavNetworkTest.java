@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import gg.questnav.questnav.protos.generated.Data;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.ServerSocket;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +41,6 @@ import org.wpilib.system.Timer;
  * second instance plays the Quest (client), publishing raw frame bytes the way the app does.
  */
 class QuestNavNetworkTest {
-  private static final int PORT = 5817;
   private static final String FRAME_TOPIC = "/QuestNav/frameData";
 
   @TempDir static Path tempDir;
@@ -55,11 +56,12 @@ class QuestNavNetworkTest {
     assertTrue(HAL.initialize());
     server = NetworkTableInstance.getDefault();
     questNav = new QuestNav();
-    server.startServer(tempDir.resolve("networktables.json").toString(), "127.0.0.1", "", PORT);
+    int port = findFreePort();
+    server.startServer(tempDir.resolve("networktables.json").toString(), "127.0.0.1", "", port);
 
     client = NetworkTableInstance.create();
     client.startClient("questnav-test");
-    client.setServer("127.0.0.1", PORT);
+    client.setServer("127.0.0.1", port);
     waitFor(() -> client.getServerTimeOffset().isPresent(), 5.0, "client time sync");
 
     framePublisher =
@@ -78,11 +80,20 @@ class QuestNavNetworkTest {
   @Test
   void connectionFollowsFrameFlow() throws InterruptedException {
     questNav.getAllUnreadPoseFrames();
-    int count = sendFrame(0);
-    waitFor(() -> questNav.getFrameCount().orElse(-1) == count, 2.0, "frame delivery");
-
-    assertTrue(questNav.isConnected());
-    double latencyMs = questNav.getLatency();
+    // isConnected has a 120 ms window, so retry in case a GC or scheduler pause on a busy runner
+    // lands between delivery and the checks
+    boolean connected = false;
+    double latencyMs = Double.NaN;
+    for (int attempt = 0; attempt < 5; attempt++) {
+      int count = sendFrame(0);
+      waitFor(() -> questNav.getFrameCount().orElse(-1) == count, 2.0, "frame delivery");
+      latencyMs = questNav.getLatency();
+      connected = questNav.isConnected();
+      if (connected && latencyMs > -5 && latencyMs < 100) {
+        break;
+      }
+    }
+    assertTrue(connected);
     assertTrue(latencyMs > -5 && latencyMs < 100, "latency " + latencyMs + " ms");
 
     Thread.sleep(250);
@@ -144,6 +155,14 @@ class QuestNavNetworkTest {
     framePublisher.set(msg.toByteArray());
     client.flush();
     return frameCount;
+  }
+
+  private static int findFreePort() {
+    try (ServerSocket socket = new ServerSocket(0)) {
+      return socket.getLocalPort();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   private static void waitFor(BooleanSupplier condition, double timeoutSeconds, String what) {

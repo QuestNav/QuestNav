@@ -19,16 +19,24 @@ Clone the example and run `./gradlew simulateJava` for a known-good baseline bef
 
 ## Connecting to PC
 
-Once your team number has been configured QuestNav will attempt to connect to a Network Tables server at 10.TE.AM.2. 
-QuestNav can also be configured to use a specific IP address:
+Once your team number has been configured, QuestNav looks for a NetworkTables server at `10.TE.AM.2` (and, for a
+SystemCore, at its USB and access point addresses; see [SystemCore and WPILib 2027](./14-systemcore-2027.md)). To
+reach a simulation on your PC instead, point it at a specific IP address:
+
 1. Open a browser to `http://<Quest IP Address>:5801`
-2. Select the `General` tab
-3. Enter the IP Address of the network table server in `Debug IP Override`
-   
+2. Select the **Settings** tab
+3. Enter your PC's IPv4 address in **Debug IP Override** and apply it
+
 <img src="/img/web-interface/DebugIP.webp" width="800"/>
 
+While an override is set, QuestNav connects only to that address, the team number shows as overridden, and the
+settings show a **DEBUG MODE** badge.
+
 :::warning
-Revert this setting before connecting the headset to a real robot and RoboRIO. With `Debug IP Override` set, the Quest will keep trying to reach your dev machine instead of the roboRIO at `10.TE.AM.2`. To clear it, follow steps 1-2 above and empty the `Debug IP Override` field.
+Clear the override before connecting the headset to a real robot, or the Quest will keep trying to reach your PC.
+Emptying the **Debug IP Override** field does **not** clear it: an empty value is ignored. To clear it, enter your
+team number in **Settings > Team Number** and apply it (or set the team number on the headset with **Set**). Setting
+the team number removes the override.
 :::
 
 :::info
@@ -38,15 +46,16 @@ During simulation, the Quest needs network access to reach your development mach
 ## WPILib Desktop Simulation
 
 QuestNav works with WPILib's desktop simulation mode (`simulateJava` / `simulateNative`). This allows you to test
-QuestNav integration without a roboRIO by running your robot code on your development machine.
+QuestNav integration without a robot controller by running your robot code on your development machine.
 
 ### Setup
 
 1. **Start the simulation**: run `.\gradlew simulateJava` from your robot project directory in a terminal
 2. **Configure the Quest**: set the `Debug IP Override` on the Quest's web interface (`http://<Quest IP>:5801`) to
    your development machine's IP address on the same network as the Quest
-3. **Verify connection**: check that `QuestNav/Connected` shows `true` in the WPILib simulation GUI's
-   NetworkTables viewer or in AdvantageScope
+3. **Verify connection**: check that the `QuestNav` table appears and `QuestNav/frameData` updates in the WPILib
+   simulation GUI's NetworkTables viewer or in AdvantageScope, or log `questNav.isConnected()` from robot code. The
+   **Status** tab of the Quest's web interface also shows the address it connected to.
 
 :::tip
 The Quest and your development machine must be on the same network. To find your PC's IP address:
@@ -75,6 +84,6 @@ You can check which `java.exe` is in use via Task Manager while the simulation i
 
 ### Port Conflicts
 
-The NetworkTables server binds to ports **1735** (NT3) and **5810** (NT4). If a previous simulation instance
-didn't shut down cleanly, these ports may still be in use. Open Task Manager, look for stale `java.exe`
+QuestNav connects over NT4 on port **5810**. The WPILib 2026 simulation's NetworkTables server also binds port
+**1735** (NT3). If a previous simulation instance didn't shut down cleanly, these ports may still be in use. Open Task Manager, look for stale `java.exe`
 processes, and end them before restarting the simulation.

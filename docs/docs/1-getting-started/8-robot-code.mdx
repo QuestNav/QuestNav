@@ -480,15 +480,16 @@ public class QuestNavSubsystem extends SubsystemBase {
 
 ### Suppressing Version Mismatch Warnings
 
-During development, you may see repeated warnings if the QuestNav library version on the robot doesn't exactly match
-the QuestNav app version on the headset. To suppress these warnings:
+QuestNavLib warns once if the QuestNav app on the headset uses a wire-protocol version it doesn't support: older than
+it needs, or newer than it knows. Different release versions alone don't warn. To suppress the warning during
+development:
 
 ```java
 questNav.setVersionCheckEnabled(false);
 ```
 
 :::warning
-Re-enable version checking for competition use. Version mismatches can cause subtle compatibility issues.
+Re-enable version checking for competition use. Protocol version mismatches can cause subtle compatibility issues.
 :::
 
 ### Field-Bounds Filtering

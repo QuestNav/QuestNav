@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -35,6 +36,7 @@ import org.wpilib.hardware.hal.HAL;
 import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.proto.Pose3dProto;
+import org.wpilib.networktables.IntegerPublisher;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.networktables.ProtobufPublisher;
 import org.wpilib.networktables.PubSubOption;
@@ -50,6 +52,7 @@ import org.wpilib.system.Timer;
 class QuestNavNetworkTest {
   private static final String FRAME_TOPIC = "/QuestNav/frameData";
   private static final String DEVICE_TOPIC = "/QuestNav/deviceData";
+  private static final String PROTOCOL_TOPIC = "/QuestNav/protocolVersion";
 
   @TempDir static Path tempDir;
 
@@ -205,6 +208,65 @@ class QuestNavNetworkTest {
       assertNotEquals(0, legacyServerTime);
       assertEquals(legacyServerTime * 1e-9, frames.get(0).dataTimestamp());
       assertEquals(embeddedNs * 1e-9, frames.get(1).dataTimestamp());
+    }
+  }
+
+  @Test
+  void appWithoutProtocolTopicIsLegacy() {
+    List<String> warnings = new ArrayList<>();
+    Consumer<String> reporter = questNav.warningReporter;
+    questNav.warningReporter = warnings::add;
+    try {
+      waitFor(
+          () -> {
+            sendFrame(0);
+            questNav.commandPeriodic();
+            return questNav.getQuestNavProtocolVersion().equals(OptionalInt.of(1));
+          },
+          2.0,
+          "legacy protocol version");
+      assertTrue(warnings.isEmpty(), warnings.toString());
+    } finally {
+      questNav.warningReporter = reporter;
+    }
+  }
+
+  @Test
+  void unsupportedProtocolVersionWarnsOncePerVersion() {
+    List<String> warnings = new ArrayList<>();
+    Consumer<String> reporter = questNav.warningReporter;
+    questNav.warningReporter = warnings::add;
+    try (IntegerPublisher protocolPublisher = client.getIntegerTopic(PROTOCOL_TOPIC).publish()) {
+      protocolPublisher.set(QuestNav.PROTOCOL_VERSION);
+      waitForProtocolVersion(QuestNav.PROTOCOL_VERSION);
+      assertTrue(warnings.isEmpty(), warnings.toString());
+
+      protocolPublisher.set(QuestNav.PROTOCOL_VERSION + 1);
+      waitForProtocolVersion(QuestNav.PROTOCOL_VERSION + 1);
+      assertEquals(1, warnings.size(), warnings.toString());
+      assertTrue(warnings.get(0).contains("newer than QuestNavLib"), warnings.get(0));
+
+      protocolPublisher.set(QuestNav.MIN_SUPPORTED_PROTOCOL_VERSION - 1);
+      waitForProtocolVersion(QuestNav.MIN_SUPPORTED_PROTOCOL_VERSION - 1);
+      assertEquals(2, warnings.size(), warnings.toString());
+      assertTrue(warnings.get(1).contains("needs at least version"), warnings.get(1));
+    } finally {
+      questNav.warningReporter = reporter;
+    }
+  }
+
+  /** Waits until the app's protocol version reads as {@code version}, then runs a few checks. */
+  private static void waitForProtocolVersion(int version) {
+    waitFor(
+        () -> {
+          sendFrame(0);
+          return questNav.getQuestNavProtocolVersion().equals(OptionalInt.of(version));
+        },
+        2.0,
+        "protocol version " + version);
+    for (int i = 0; i < 10; i++) {
+      sendFrame(0);
+      questNav.commandPeriodic();
     }
   }
 

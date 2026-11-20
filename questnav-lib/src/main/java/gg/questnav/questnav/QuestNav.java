@@ -52,10 +52,10 @@ import org.wpilib.system.Timer;
  *
  * // Register callbacks
  * questNav.onConnected(() -> System.out.println("Quest connected!"));
- * questNav.onDisconnected(() -> DriverStation.reportWarning("Quest disconnected!", false));
- * questNav.onTrackingLost(() -> DriverStation.reportWarning("Quest tracking lost!", false));
+ * questNav.onDisconnected(() -> DriverStationErrors.reportWarning("Quest disconnected!", false));
+ * questNav.onTrackingLost(() -> DriverStationErrors.reportWarning("Quest tracking lost!", false));
  * questNav.onTrackingAcquired(() -> System.out.println("Quest tracking acquired!"));
- * questNav.onLowBattery(20, level -> DriverStation.reportWarning("Quest battery low: " + level + "%", false));
+ * questNav.onLowBattery(20, level -> DriverStationErrors.reportWarning("Quest battery low: " + level + "%", false));
  *
  * // Set initial robot pose (required for field-relative tracking)
  * Pose2d initialPose = new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(90));

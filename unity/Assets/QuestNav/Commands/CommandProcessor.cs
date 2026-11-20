@@ -4,6 +4,7 @@ using QuestNav.Config;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.QuestNav.Estimation;
+using QuestNav.QuestNav.Geometry;
 using QuestNav.Utils;
 using UnityEngine;
 
@@ -54,13 +55,15 @@ namespace QuestNav.Commands
         /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
         /// <param name="resetTransform">Reference to the reset position transform</param>
         /// <param name="configManager">Configuration manager for subscribing to setting changes</param>
+        /// <param name="field">Field size from the loaded layout, or null if unknown</param>
         public CommandProcessor(
             INetworkTableConnection networkTableConnection,
             IVioAprilTagPoseEstimator vioAprilTagPoseEstimator,
             Transform vrCamera,
             Transform vrCameraRoot,
             Transform resetTransform,
-            IConfigManager configManager
+            IConfigManager configManager,
+            Field2d field = null
         )
         {
             // Store network connection for command processing
@@ -78,7 +81,8 @@ namespace QuestNav.Commands
                 vrCamera,
                 vrCameraRoot,
                 resetTransform,
-                vioAprilTagPoseEstimator
+                vioAprilTagPoseEstimator,
+                field
             );
         }
 

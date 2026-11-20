@@ -195,5 +195,30 @@ namespace QuestNav.Tests
             Assert.AreEqual(0.0, AngleBetween(world.Rotation, cameraPose.Rotation), FloatTolerance);
             Assert.AreEqual(0.0, AngleDiff(-0.7, world.Rotation.Z), FloatTolerance);
         }
+
+        [TestCase(0.0, 0.0)]
+        [TestCase(16.5, 8.0)]
+        [TestCase(-0.2, 8.2)]
+        public void PoseInsideFieldIsNotFlagged(double x, double y)
+        {
+            Assert.IsFalse(PoseResetCommand.IsOutsideField(x, y, new Field2d(16.541, 8.069)));
+        }
+
+        [TestCase(-1.0, 4.0)]
+        [TestCase(17.5, 4.0)]
+        [TestCase(8.0, -1.0)]
+        [TestCase(8.0, 9.0)]
+        public void PoseOutsideFieldIsFlagged(double x, double y)
+        {
+            Assert.IsTrue(PoseResetCommand.IsOutsideField(x, y, new Field2d(16.541, 8.069)));
+        }
+
+        [Test]
+        public void UnknownFieldSizeSkipsBoundsCheck()
+        {
+            Assert.IsFalse(PoseResetCommand.IsOutsideField(100, 100, null));
+            Assert.IsFalse(PoseResetCommand.IsOutsideField(100, 100, new Field2d(0, 0)));
+            Assert.IsFalse(PoseResetCommand.IsOutsideField(100, 100, new Field2d(16.541, -1)));
+        }
     }
 }

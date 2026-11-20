@@ -107,14 +107,10 @@ namespace QuestNav.Core
         public static class Field
         {
             /// <summary>
-            /// FRC field length in meters
+            /// How far outside the loaded layout's field a pose reset can be, in meters, before
+            /// it is logged as out of bounds. The field size comes from the layout JSON.
             /// </summary>
-            public const float FIELD_LENGTH = 16.54f;
-
-            /// <summary>
-            /// FRC field width in meters
-            /// </summary>
-            public const float FIELD_WIDTH = 8.02f;
+            public const double BOUNDS_MARGIN_METERS = 0.25;
         }
 
         /// <summary>

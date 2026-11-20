@@ -13,41 +13,46 @@ namespace QuestNav.Native.PoseLib
 {
     public class PoseLibSolver
     {
-        // Cached camera intrinsics. These MUST be refreshed via RefreshIntrinsics()
-        // whenever the camera resolution changes (the Meta SDK exposes intrinsics
-        // per-resolution: focal length, principal point, and sensor resolution all
-        // change when RequestedResolution changes). Solving with stale intrinsics
-        // produces a pose that's silently wrong by 5-50 cm.
+        // [fx, fy, cx, cy] in pixels of the captured image, not of the sensor.
         private double[] intrinsicsArray;
-        private int resolutionX;
-        private int resolutionY;
+        private Vector2Int imageResolution;
+        private bool hasIntrinsics;
         private readonly AprilTagFieldLayout fieldLayout;
 
-        public PoseLibSolver(
-            AprilTagFieldLayout fieldLayout,
-            PassthroughCameraAccess.CameraIntrinsics intrinsics
-        )
+        public PoseLibSolver(AprilTagFieldLayout fieldLayout)
         {
             this.fieldLayout = fieldLayout;
-            RefreshIntrinsics(intrinsics);
         }
 
         /// <summary>
-        /// Updates the cached camera intrinsics. Called from
-        /// <c>AprilTagManager.OnAprilTagDetectorModeChanged</c> after the camera arbiter
-        /// has applied a new resolution. The next solve uses the refreshed values.
+        /// Sets the intrinsics used for solving. Meta reports static sensor intrinsics, while
+        /// detections are in pixels of the captured image, so they are converted to
+        /// <paramref name="imageResolution"/>. Call again whenever the capture resolution changes.
         /// </summary>
-        public void RefreshIntrinsics(PassthroughCameraAccess.CameraIntrinsics intrinsics)
+        /// <returns>False if the intrinsics are not available yet; solving then fails until set.</returns>
+        public bool SetIntrinsics(
+            PassthroughCameraAccess.CameraIntrinsics sensorIntrinsics,
+            Vector2Int imageResolution
+        )
         {
-            intrinsicsArray = new double[]
+            if (
+                !ImageIntrinsics.TryFromSensor(
+                    sensorIntrinsics.FocalLength,
+                    sensorIntrinsics.PrincipalPoint,
+                    sensorIntrinsics.SensorResolution,
+                    imageResolution,
+                    out var intrinsics
+                )
+            )
             {
-                intrinsics.FocalLength.x,
-                intrinsics.FocalLength.y,
-                intrinsics.PrincipalPoint.x,
-                intrinsics.PrincipalPoint.y,
-            };
-            resolutionX = intrinsics.SensorResolution.x;
-            resolutionY = intrinsics.SensorResolution.y;
+                hasIntrinsics = false;
+                return false;
+            }
+
+            intrinsicsArray = new[] { intrinsics.Fx, intrinsics.Fy, intrinsics.Cx, intrinsics.Cy };
+            this.imageResolution = intrinsics.Resolution;
+            hasIntrinsics = true;
+            return true;
         }
 
         public PoseLibResult PoseLibSolve(AprilTagDetectionResults detections)
@@ -72,6 +77,11 @@ namespace QuestNav.Native.PoseLib
             int count = detections?.Count ?? 0;
             if (count == 0)
             {
+                return null;
+            }
+            if (!hasIntrinsics)
+            {
+                QueuedLogger.LogError("PoseLib solve skipped: camera intrinsics are not set");
                 return null;
             }
 
@@ -101,6 +111,17 @@ namespace QuestNav.Native.PoseLib
                 }
             }
 
+            // Native code reads numPoints entries from both buffers, so they must agree.
+            int numPoints = corners2d.Count / 2;
+            if (numPoints == 0 || corners3d.Count != numPoints * 3)
+            {
+                QueuedLogger.LogError(
+                    $"PoseLib solve skipped: {corners2d.Count} 2D values do not match "
+                        + $"{corners3d.Count} 3D values"
+                );
+                return null;
+            }
+
             // 12 px RANSAC reprojection-error threshold was tuned for the Quest 3 / 3S
             // 1280-wide passthrough frames. (An earlier attempt to scale this with
             // colors.Length was based on a misread of the Meta SDK's GetColors over-
@@ -108,10 +129,10 @@ namespace QuestNav.Native.PoseLib
             int status = PoseLibNatives.poselib_estimate_absolute_pose_simple(
                 corners2d.ToArray(),
                 corners3d.ToArray(),
-                (ulong)(count * 4),
+                (ulong)numPoints,
                 (int)PoseLibNatives.PoseLibCameraModelIdNative.POSELIB_CAMERA_PINHOLE,
-                resolutionX,
-                resolutionY,
+                imageResolution.x,
+                imageResolution.y,
                 intrinsicsArray,
                 4,
                 12,
@@ -121,7 +142,7 @@ namespace QuestNav.Native.PoseLib
 
             if (status == 0)
             {
-                return new PoseLibResult(resultPose, resultInliers, count * 4);
+                return new PoseLibResult(resultPose, resultInliers, numPoints);
             }
 
             QueuedLogger.LogError($"PoseLib solve failed! Error code: {status}");

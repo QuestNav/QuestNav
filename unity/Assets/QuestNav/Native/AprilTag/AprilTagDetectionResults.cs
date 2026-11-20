@@ -13,6 +13,8 @@ namespace QuestNav.Native.AprilTag
         /// </summary>
         private bool disposed;
 
+        internal bool IsDisposed => disposed;
+
         /// <summary>
         /// The number of detections in the array
         /// </summary>
@@ -47,7 +49,7 @@ namespace QuestNav.Native.AprilTag
             AprilTagNatives.zarray_get(Handle, idx, out var ptr);
 
             // Return new AprilTagDetectionNative at that memory address
-            return new AprilTagDetection((AprilTagDetectionNative*)ptr);
+            return new AprilTagDetection((AprilTagDetectionNative*)ptr, this);
         }
 
         /// <summary>
@@ -71,7 +73,7 @@ namespace QuestNav.Native.AprilTag
         }
 
         /// <summary>
-        /// Disposes of ALL AprilTagDetection's
+        /// Frees the array and every detection in it. Detections obtained from it become unusable.
         /// </summary>
         public void Dispose()
         {

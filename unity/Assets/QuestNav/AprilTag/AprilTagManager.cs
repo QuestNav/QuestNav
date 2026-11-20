@@ -96,18 +96,15 @@ namespace QuestNav.QuestNav.AprilTag
             this.configManager = configManager;
             this.aprilTagFieldLayout = aprilTagFieldLayout;
             this.coroutineHost = coroutineHost;
-            poseLibSolver = new PoseLibSolver(aprilTagFieldLayout, cameraAccess.Intrinsics);
+            poseLibSolver = new PoseLibSolver(aprilTagFieldLayout);
 
             configManager.OnEnableAprilTagDetectorChanged += OnEnableAprilTagDetectorChanged;
             configManager.OnAprilTagDetectorModeChanged += OnAprilTagDetectorModeChanged;
             configManager.OnAprilTagConfidencePresetChanged += OnAprilTagConfidencePresetChanged;
             configManager.OnAprilTagNoiseScaleChanged += OnAprilTagNoiseScaleChanged;
 
-            // Refresh PoseLib's cached intrinsics whenever the camera arbiter changes
-            // the effective resolution. Meta SDK exposes per-resolution intrinsics
-            // (focal length, principal point, sensor resolution all change with the
-            // requested resolution), and PoseLib silently produces a wrong pose if
-            // we solve with stale values.
+            // The camera restarts on a resolution change, so recompute the image-space
+            // intrinsics and lens offset from the new session before the next solve.
             cameraArbiter.OnResolutionChanged += OnCameraArbiterResolutionChanged;
 
             QueuedLogger.Log("Initialized AprilTagManager");
@@ -145,7 +142,7 @@ namespace QuestNav.QuestNav.AprilTag
 
         /// <summary>
         /// Called when the camera arbiter applies a new effective resolution. Marks the cached
-        /// intrinsics stale so the next capture iteration refreshes them via
+        /// intrinsics stale so the next capture iteration recomputes them via
         /// <see cref="UpdateCameraIntrinsics"/> before solving.
         /// </summary>
         private void OnCameraArbiterResolutionChanged(Vector2Int? newResolution)
@@ -153,27 +150,29 @@ namespace QuestNav.QuestNav.AprilTag
             isLensOffsetInitialized = false;
         }
 
-        private void UpdateCameraIntrinsics(int targetWidth, int targetHeight)
+        /// <summary>
+        /// Converts Meta's sensor intrinsics to the pixel space of a
+        /// <paramref name="targetWidth"/> x <paramref name="targetHeight"/> frame for PoseLib and
+        /// caches the lens offset. Returns false if the camera has not reported intrinsics yet.
+        /// </summary>
+        private bool UpdateCameraIntrinsics(int targetWidth, int targetHeight)
         {
-            if (cameraAccess?.Intrinsics == null)
-                return;
-
-            try
+            var intrinsics = cameraAccess.Intrinsics;
+            if (!poseLibSolver.SetIntrinsics(intrinsics, new Vector2Int(targetWidth, targetHeight)))
             {
-                poseLibSolver.RefreshIntrinsics(cameraAccess.Intrinsics);
-
-                QueuedLogger.Log($"PoseLib intrinsics refreshed for {targetWidth}x{targetHeight}");
-            }
-            catch (Exception ex)
-            {
-                QueuedLogger.LogError(
-                    $"Failed to refresh PoseLib intrinsics after resolution change: {ex.Message}"
+                QueuedLogger.LogWarning(
+                    $"Camera intrinsics not available for {targetWidth}x{targetHeight}; skipping solve"
                 );
+                return false;
             }
+            QueuedLogger.Log(
+                $"PoseLib intrinsics set for {targetWidth}x{targetHeight} "
+                    + $"(sensor {intrinsics.SensorResolution.x}x{intrinsics.SensorResolution.y})"
+            );
 
             // LensOffset is the camera pose relative to the headset in Unity axes. Convert it to
             // FRC body axes so it composes with the camera pose produced by CvToFrc.
-            Pose lensOffset = cameraAccess.Intrinsics.LensOffset;
+            Pose lensOffset = intrinsics.LensOffset;
             Pose3d headsetToCam = Conversions.UnityToFrc3d(
                 lensOffset.position,
                 lensOffset.rotation
@@ -183,6 +182,7 @@ namespace QuestNav.QuestNav.AprilTag
             cachedWidth = targetWidth;
             cachedHeight = targetHeight;
             isLensOffsetInitialized = true;
+            return true;
         }
 
         private void OnEnableAprilTagDetectorChanged(bool enable)
@@ -479,10 +479,8 @@ namespace QuestNav.QuestNav.AprilTag
                     //   1) User's ignored-IDs blacklist (empty set keeps every detection).
                     //   2) Drop detections whose ID is not in the loaded field layout.
                     //      tag36h11 readily produces false positives at high resolution
-                    //      (e.g. lab logs show ID 554 decoding from random texture). Feeding
-                    //      such an ID to PoseLib mismatches the 2D/3D corner buffer lengths
-                    //      (8 push, 0 push) and produces a garbage pose tens of meters out,
-                    //      which the estimator then has to reject as a position jump.
+                    //      (e.g. lab logs show ID 554 decoding from random texture). Such an
+                    //      ID has no field corners, so PoseLib would reject the whole frame.
                     // Building the kept list in-line avoids allocating an AprilTagDetectionResults clone.
                     var kept = new List<AprilTagDetection>(results.NumberOfDetections);
                     int ignoredCount = 0;
@@ -516,10 +514,11 @@ namespace QuestNav.QuestNav.AprilTag
                             || actualH != cachedHeight
                         )
                         {
-                            UpdateCameraIntrinsics(actualW, actualH);
-                            // Skip this frame; these detections predate the refreshed intrinsics.
-                            yield return null;
-                            continue;
+                            if (!UpdateCameraIntrinsics(actualW, actualH))
+                            {
+                                yield return new WaitForSeconds(frameDelaySeconds);
+                                continue;
+                            }
                         }
 
                         var poseLibResult = poseLibSolver.PoseLibSolve(kept);

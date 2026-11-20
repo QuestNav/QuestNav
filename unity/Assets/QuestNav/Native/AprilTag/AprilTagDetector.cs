@@ -15,7 +15,9 @@ namespace QuestNav.Native.AprilTag
         internal AprilTagDetectorNative* Handle { get; private set; }
 
         /// <summary>
-        /// A list of family handles added to this detector (for tracking purposes)
+        /// Families registered with this detector. The detector owns them and disposes them in
+        /// <see cref="Dispose"/>; <see cref="RemoveFamily"/> and <see cref="RemoveAllFamilies"/>
+        /// hand ownership back to the caller.
         /// </summary>
         private readonly List<AprilTagFamily> tagFamilies = new List<AprilTagFamily>();
 
@@ -231,7 +233,7 @@ namespace QuestNav.Native.AprilTag
 
         /// <summary>
         /// Removes a specific family from the detector.
-        /// Does not destroy the family object itself.
+        /// Does not destroy the family; the caller owns it again and must dispose it.
         /// </summary>
         /// <param name="family">The tag family to remove</param>
         public void RemoveFamily(AprilTagFamily family)
@@ -246,7 +248,7 @@ namespace QuestNav.Native.AprilTag
 
         /// <summary>
         /// Removes all families from the detector.
-        /// Does not destroy the family objects themselves.
+        /// Does not destroy the families; the caller owns them again and must dispose them.
         /// </summary>
         public void RemoveAllFamilies()
         {
@@ -281,25 +283,25 @@ namespace QuestNav.Native.AprilTag
         }
 
         /// <summary>
-        /// Disposes of the native detector resources
+        /// Destroys the native detector, then disposes the families still registered with it.
         /// </summary>
         public void Dispose()
         {
             if (!disposed)
             {
-                // Remove all families and dispose them
-                foreach (var tagFamily in tagFamilies)
-                {
-                    tagFamily.Dispose();
-                }
-                RemoveAllFamilies();
-
-                // Dispose of the actual detector
+                // Destroy the detector first: apriltag_detector_destroy clears the families,
+                // which touches each family's quick-decode table, so they must still be alive.
                 if (Handle != null)
                 {
                     AprilTagNatives.apriltag_detector_destroy(Handle);
                     Handle = null;
                 }
+
+                foreach (var tagFamily in tagFamilies)
+                {
+                    tagFamily.Dispose();
+                }
+                tagFamilies.Clear();
 
                 disposed = true;
             }

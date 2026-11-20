@@ -106,7 +106,7 @@ See the [Testing & Simulation](./7-simulation.md) page for more details on runni
 1. **Let AprilTags correct it**
     - With the AprilTag detector on (the default) and the right field layout selected, the app corrects drift whenever it sees enough tags; see [AprilTag Tracking](../4-apriltag-tracking/1-apriltag-overview.md)
     - Check the alignment state: `TAG_ALIGNED` means tags placed the headset; `UNALIGNED` or `POSE_RESET` mean tags haven't (2027 QuestNavLib: `questNav.getAlignmentState()`)
-    - With the 2026 QuestNavLib, look for `AprilTag initial alignment accepted` in the app's logs instead (see [Viewing Logs](#viewing-logs))
+    - With the 2026 QuestNavLib, check that the reported pose matches where the robot is. In the app's logs (see [Viewing Logs](#viewing-logs)), `AprilTag initial alignment accepted` appears when tags first place the headset but scrolls away within seconds while tags are in view; after it, rejected tag views read `AprilTag rejected (Phase 2)` rather than `(Phase 1)`
 
 2. **Reset to a Known Field Pose from Robot Code**
     - Call `questNav.setPose(Pose3d)` at a known location (auto start position, a pose from another vision system, etc.) — see [Robot Code Setup → Setting Robot Pose](./8-robot-code.mdx#setting-robot-pose)
@@ -437,8 +437,10 @@ When functioning properly:
 - `http://<Quest IP>:5801/api/status` returns `isTracking: true` and `networkConnected: true`
 - The `QuestNav` table appears in NetworkTables, and robot code reports `questNav.isConnected()` and `questNav.isTracking()` as `true`
 - `QuestNav/frameData` updates smoothly, up to 120 times a second
-- With AprilTags in view, the alignment state reaches `TAG_ALIGNED` (2027 QuestNavLib), or the logs show
-  `AprilTag initial alignment accepted` (2026 QuestNavLib)
+- With AprilTags in view, the alignment state reaches `TAG_ALIGNED` (2027 QuestNavLib). With the 2026 QuestNavLib,
+  the reported pose matches where the robot is, and rejected tag views are logged as `AprilTag rejected (Phase 2)`
+  rather than `(Phase 1)` (the one-time `AprilTag initial alignment accepted` line scrolls out of the log within
+  seconds while tags are in view)
 
 :::tip Compare against a known-good baseline
 If you suspect your integration code is the problem, deploy the [QuestNav Robot Sim Example](https://github.com/juchong/QuestNav-Robot-Sim-Example) (or run it in the WPILib simulator) against the same headset. If it connects and tracks correctly, the issue is in your robot project rather than the Quest or network.

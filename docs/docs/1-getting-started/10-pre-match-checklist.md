@@ -32,7 +32,7 @@ Publishing QuestNav status (connected, tracking, battery) to your dashboard make
 ## AprilTags
 
 - [ ] **The right field layout is selected** in the AprilTag tab of the web interface (a change needs an app restart).
-- [ ] **AprilTag alignment** — with tags in view, the alignment state reaches `TAG_ALIGNED` (2027 QuestNavLib: `questNav.getAlignmentState()`). If you seed the pose with `setPose()` instead, it reads `POSE_RESET` until the headset sees tags. The 2026 QuestNavLib can't read the alignment state: look for `AprilTag initial alignment accepted` in the **Logs** tab of the web interface, and check that the reported pose matches where the robot is.
+- [ ] **AprilTag alignment** — with tags in view, the alignment state reaches `TAG_ALIGNED` (2027 QuestNavLib: `questNav.getAlignmentState()`). If you seed the pose with `setPose()` instead, it reads `POSE_RESET` until the headset sees tags. The 2026 QuestNavLib can't read the alignment state: check that the reported pose matches where the robot is. The **Logs** tab of the web interface shows `AprilTag initial alignment accepted` when tags first place the headset, but with tags in view the log fills fast and that line is gone within seconds. After it, rejected tag views are logged as `AprilTag rejected (Phase 2)`; `AprilTag rejected (Phase 1)` means the headset isn't aligned yet.
 
 See [Field Calibration](./9-calibration.md#field-calibration) for background.
 

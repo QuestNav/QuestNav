@@ -128,6 +128,7 @@ public class QuestNavSubsystem extends SubsystemBase {
         questNav.commandPeriodic();
 
         for (PoseFrame frame : questNav.getAllUnreadPoseFrames()) {
+            // Not field-relative until AprilTags have aligned the headset or setPose() has been called
             if (frame.isTracking()) {
                 Pose3d robotPose = frame.questPose3d()
                     .transformBy(ROBOT_TO_QUEST.inverse());
@@ -139,6 +140,10 @@ public class QuestNavSubsystem extends SubsystemBase {
     }
 }
 ```
+
+The 2026 library can't tell whether the pose is field-relative yet. Seed it with `setPose()` at the start of
+autonomous (see [Setting Robot Pose](./8-robot-code.mdx#setting-robot-pose)), or check that AprilTags have aligned the
+headset (see [Field Calibration](./9-calibration.md#field-calibration)) before trusting it.
 
 </TabItem>
 <TabItem value="2027" label="2027 (SystemCore)">

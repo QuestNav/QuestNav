@@ -209,12 +209,8 @@ Now you open a .cs script asset, it will open in Visual Studio 2022. You can als
 
 - Navigate to `File > Build Profiles`
 - Make sure you're on the Android platform
-- **IMPORTANT:** Check ✅ `Development Build` option
+- Optionally check `Development Build` for a debuggable build. Release APKs are built without it.
 - Click `Build and Run`
-
-:::warning
-If you do not check the `Development Build` option, the build will fail to run on the headset.
-:::
 
 #### Using OVR Build (Faster):
 
@@ -223,12 +219,8 @@ The OVR Build tool provides much faster build times but will consume more system
 :::
 
 - Navigate to `Meta > OVR Build > OVR Build APK...`
-- **IMPORTANT:** Check ✅ `Development Build?` option
+- Optionally check `Development Build?` for a debuggable build
 - Set your build path and click `Build`
-
-:::warning
-If you do not check the `Development Build` option, the build will fail to run on the headset.
-:::
 
 ### Installing on Your Quest Headset
 
@@ -295,6 +287,5 @@ If you encounter any issues during setup, check this section before reaching out
 
 - **Unity Crashes During Import**: Try closing and reopening Unity Hub, then reimport the project
 - **Missing SDK References**: Ensure you've added all required SDKs to your Unity account
-- **Build Fails**: Make sure you've enabled the Development Build option
 - **APK Doesn't Install**: Verify developer mode is enabled on your Quest headset
 - **App Crashes on Launch**: Check that you've restored all packages from NuGetForUnity

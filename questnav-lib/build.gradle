@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'org.wpilib.GradleRIO' version '2027.0.0-alpha-7'
+    id 'org.wpilib.GradleRIO' version '2027.0.0-alpha-8'
     id 'com.diffplug.spotless' version '8.10.1'
     id 'com.github.gmazzo.buildconfig' version '6.0.10'
 }
@@ -10,8 +10,8 @@ plugins {
 ext {
     version = project.findProperty('version') ?: '2027-1.0.0-dev'
     versionType = project.findProperty('versionType') ?: 'dev'
-    frcYear = project.findProperty('frcYear') ?: '2027_alpha7'
-    wpilibVersion = project.findProperty('wpilibVersion') ?: '2027.0.0-alpha-7'
+    wpilibYear = project.findProperty('wpilibYear') ?: '2027_alpha7'
+    wpilibVersion = project.findProperty('wpilibVersion') ?: '2027.0.0-alpha-8'
 
     // Vendor dependency configuration
     vendorUuid = 'a706fe68-86e5-4aed-92c5-ce05aca007f0'
@@ -56,16 +56,23 @@ repositories {
     }
 }
 
-dependencies {
-    // WPILib dependencies
-    implementation "org.wpilib.wpilibj:wpilibj-java:${wpilibVersion}"
-    implementation "org.wpilib.wpiutil:wpiutil-java:${wpilibVersion}"
-    implementation "org.wpilib.wpimath:wpimath-java:${wpilibVersion}"
-    implementation "org.wpilib.ntcore:ntcore-java:${wpilibVersion}"
-    implementation "org.wpilib.wpiunits:wpiunits-java:${wpilibVersion}"
-    implementation "us.hebi.quickbuf:quickbuf-runtime:1.4"
+// Keep GradleRIO's WPILib artifacts (used by the tests) on the same version as the compile deps
+wpi.versions.wpilibVersion = wpilibVersion
 
-    // Test dependencies
+dependencies {
+    // WPILib dependencies. compileOnly: the robot project provides WPILib and quickbuf, so the
+    // published POM must not pin a WPILib version onto it.
+    compileOnly "org.wpilib.wpilibj:wpilibj-java:${wpilibVersion}"
+    compileOnly "org.wpilib.wpiutil:wpiutil-java:${wpilibVersion}"
+    compileOnly "org.wpilib.wpimath:wpimath-java:${wpilibVersion}"
+    compileOnly "org.wpilib.ntcore:ntcore-java:${wpilibVersion}"
+    compileOnly "org.wpilib.wpiunits:wpiunits-java:${wpilibVersion}"
+    compileOnly "us.hebi.quickbuf:quickbuf-runtime:1.4"
+
+    // Test dependencies: full WPILib Java stack plus the desktop JNI natives (HAL, ntcore)
+    testImplementation wpi.java.deps.wpilib()
+    nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
+    nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -73,6 +80,9 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+// Extracts the desktop JNI natives and puts them on the test JVM's library path
+wpi.java.configureTestTasks(test)
 
 javadoc {
     exclude '**/generated/**'
@@ -89,7 +99,7 @@ task generateVendorJson() {
     inputs.file vendorJsonInput
     inputs.property("version", version)
     inputs.property("versionType", versionType)
-    inputs.property("frcYear", frcYear)
+    inputs.property("wpilibYear", wpilibYear)
     outputs.file vendorJsonOutput
 
     doLast {
@@ -103,7 +113,7 @@ task generateVendorJson() {
 
         def content = vendorJsonInput.text
                 .replace('${questnav_version}', version)
-                .replace('${frc_year}', frcYear)
+                .replace('${wpilib_year}', wpilibYear)
                 .replace('${questnav_uuid}', vendorUuid)
                 .replace('${json_url}', jsonUrl)
 
@@ -191,10 +201,13 @@ publishing {
             }
         }
 
-        // Publish directly to the WPILib local maven directory
-        maven {
-            name = "WpilibLocal"
-            url = "file:///C:/Users/Public/wpilib/2027_alpha7/maven"
+        // Opt-in: publish into a WPILib install's local maven, e.g.
+        // -PwpilibLocalMaven=C:/Users/Public/wpilib/2027_alpha7/maven
+        if (project.hasProperty('wpilibLocalMaven')) {
+            maven {
+                name = "WpilibLocal"
+                url = file(project.findProperty('wpilibLocalMaven'))
+            }
         }
 
         // For standard local testing
@@ -225,7 +238,7 @@ task buildInfo {
         println "QuestNavLib Build Information:"
         println "  Release Type: ${versionType}"
         println "  Full Version: ${version}"
-        println "  FRC Year: ${frcYear}"
+        println "  WPILib Year: ${wpilibYear}"
         println "  WPILib Version: ${wpilibVersion}"
         println "  Group ID: ${mavenGroupId}"
         println "  Artifact ID: ${artifactId}"
@@ -242,7 +255,7 @@ task buildInfo {
 
 // Gradle wrapper task
 wrapper {
-    gradleVersion = '8.11'
+    gradleVersion = '9.4.1'
 }
 
 // Clean task to remove generated files
@@ -266,11 +279,9 @@ buildConfig {
 // Add manifest to JAR (does not get deployed to the robot.)
 jar {
     manifest {
-        attributes(
-        'Implementation-Title': project.name,
-        'Implementation-Version': version,
-        'Build-Timestamp': new Date().format("yyyy-MM-dd HH:mm:ss")
-        )
+        attributes 'Implementation-Title': project.name
+        attributes 'Implementation-Version': version
+        attributes 'Build-Timestamp': new Date().format("yyyy-MM-dd HH:mm:ss")
     }
 }
 

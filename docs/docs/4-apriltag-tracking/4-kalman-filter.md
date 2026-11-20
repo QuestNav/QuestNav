@@ -15,7 +15,7 @@ The Kalman filter operates on a **3D position** state vector in FRC field coordi
 | **State vector x** | `[x, y, z]` | 3D position in meters (FRC field frame) |
 | **F (state transition)** | 3×3 Identity | Prediction uses explicit displacement, not a velocity model |
 | **H (observation)** | 3×3 Identity | AprilTags provide a direct position measurement |
-| **Q (process noise)** | `diag(0.02², 0.02², 0.01²) × dt / (1/120 s)` | VIO displacement uncertainty, scaled by the time step `dt` (clamped to 0.1 s) |
+| **Q (process noise)** | `diag(0.02², 0.02², 0.01²) × dt / (1/120 s)` | VIO displacement uncertainty, scaled by the time step `dt` (clamped to 0.1 s, except across a tracking outage) |
 | **R (measurement noise)** | Dynamic | Computed per observation; see [Dynamic Measurement Noise](#dynamic-measurement-noise) |
 | **P₀ (initial covariance)** | `0.001 × I` | Very high initial confidence in VIO position |
 
@@ -274,7 +274,7 @@ The key insight is that the headset hasn't actually moved — only the VIO coord
 
 While the headset reports position tracking as lost, QuestNav stops feeding VIO to the estimator and AprilTag observations are ignored. When tracking returns, the jump between the last VIO pose before the outage and the first one after it is compared with what the robot could have driven in that time (`MAX_ROBOT_SPEED_MPS × outage + TRACKING_JUMP_MARGIN_METERS`):
 
-- **Within the bound**, the jump is the robot's real motion during the outage and is integrated as usual.
+- **Within the bound**, the jump is the robot's real motion during the outage and is integrated as usual. The process noise for this step covers the whole outage instead of being clamped to 0.1 s, so the covariance grows and the next AprilTag observations can correct any error the VIO picked up while it was lost.
 - **Beyond the bound**, it is a relocalization. The estimate keeps its position instead of integrating the jump, the snapshot history from before it is dropped, and an aligned estimator drops back to Phase 1. The re-alignment needs an observation that also meets the Phase-2 confidence preset.
 
 ## Pose Reset Latency Compensation
@@ -308,7 +308,7 @@ This is published to NetworkTables at 120 Hz for consumption by the robot's driv
 | `CORRECTION_MIN_INLIER_RATIO` | 0.8 | Min inlier ratio for Phase 2 |
 | `CORRECTION_MAX_POSITION_JUMP` | 2.0 m | Max position jump for Phase 2 |
 | `SNAPSHOT_BUFFER_DURATION` | 0.5 s | Replay buffer duration |
-| `VIO_NOISE_MAX_DT_SECONDS` | 0.1 s | Longest time step process noise is added for |
+| `VIO_NOISE_MAX_DT_SECONDS` | 0.1 s | Longest time step process noise is added for, except across a tracking outage |
 | `MAX_CAPTURE_VIO_GAP_SECONDS` | 0.05 s | Max gap between a capture and the VIO snapshot before it |
 | `MAX_ROBOT_SPEED_MPS` | 6.0 m/s | Fastest plausible robot speed for the reacquire jump check |
 | `TRACKING_JUMP_MARGIN_METERS` | 0.25 m | Margin on the reacquire jump check |

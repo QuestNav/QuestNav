@@ -47,7 +47,7 @@ jobs:
               - 'unity/**/*.meta'
               - 'unity/**/*.asmdef'
             proto:
-              - 'protos/*.proto'
+              - 'protos/**'
             docs:
               - 'docs/**'
             web-ui:

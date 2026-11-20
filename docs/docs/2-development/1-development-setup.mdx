@@ -104,13 +104,13 @@ Generate C# files from proto definitions:
   <TabItem value="windows" label="Windows">
   From the base directory of the repository
   ```powershell
-  protoc --proto_path=protos --csharp_out=unity\Assets\QuestNav\Protos\Generated protos\*.proto
+  protoc --proto_path=protos --csharp_out=unity\Assets\QuestNav\Protos\Generated protos\data.proto protos\commands.proto protos\wpimath\protobuf\geometry3d.proto
   ```
   </TabItem>
   <TabItem value="linux-mac" label="Linux/Mac">
   From the base directory of the repository
   ```bash  
-  protoc --proto_path=protos --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/*.proto
+  protoc --proto_path=protos --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/data.proto protos/commands.proto protos/wpimath/protobuf/geometry3d.proto
   ```
   </TabItem>
 </Tabs>
@@ -127,7 +127,7 @@ Generate C# files from proto definitions:
     2. Generate Java files:
     # From the base directory of the repository
     ```powershell
-    protoc -I="protos" --plugin=protoc-gen-quickbuf=protoc-gen-quickbuf.exe --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib\src\main\java\ protos\data.proto protos\commands.proto
+    protoc --proto_path=protos --plugin=protoc-gen-quickbuf=protoc-gen-quickbuf.exe --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib\src\main\java\ protos\data.proto protos\commands.proto
     ```
   </TabItem>
   <TabItem value="linux-mac" label="Linux/Mac">
@@ -140,7 +140,7 @@ Generate C# files from proto definitions:
     2. Generate Java files:
     From the base directory of the repository
     ```bash
-    protoc -I="protos" --plugin=protoc-gen-quickbuf=./protoc-gen-quickbuf --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ protos/data.proto protos/commands.proto
+    protoc --proto_path=protos --plugin=protoc-gen-quickbuf=./protoc-gen-quickbuf --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ protos/data.proto protos/commands.proto
     ```
   </TabItem>
 </Tabs>

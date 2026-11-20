@@ -49,7 +49,7 @@ jobs:
               - 'unity/**.unity'
               - 'unity/**.meta'
             proto:
-              - 'protos/*.proto'
+              - 'protos/**'
             docs:
               - 'docs/**'
             web-ui:

@@ -443,6 +443,9 @@ public class QuestNav {
    * know the robot's pose, you need to apply the mounting offset to get the Quest's pose before
    * calling this method.
    *
+   * <p>Only the yaw of the pose's rotation is applied. The Quest keeps its own gravity-referenced
+   * pitch and roll, so a pitch or roll in the pose does not tilt its tracking.
+   *
    * <p>The command is sent asynchronously. Success or failure is reported via {@link
    * #onCommandSuccess(Consumer)} and {@link #onCommandFailure(Consumer)} respectively, and failures
    * are also logged to the DriverStation.

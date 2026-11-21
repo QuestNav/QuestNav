@@ -143,7 +143,11 @@ namespace QuestNav.Commands
                                     $"Executing Pose Reset Command. ID: {receivedCommand.CommandId} "
                                         + $"Age: {ageMs} ms"
                                 );
-                                poseResetCommand.Execute(receivedCommand);
+                                // Without time sync the age is not the robot's send time
+                                bool ageKnown = networkTableConnection.TryGetServerTimeOffset(
+                                    out _
+                                );
+                                poseResetCommand.Execute(receivedCommand, ageKnown ? ageMs : 0);
                             }
                             else
                             {

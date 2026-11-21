@@ -33,14 +33,48 @@ namespace QuestNav.QuestNav.Estimation
     /// </summary>
     public static class VioAprilTagPoseEstimatorConstants
     {
-        /// <summary>VIO displacement noise standard deviations [x, y, z] in meters.</summary>
+        /// <summary>
+        /// VIO displacement noise standard deviations [x, y, z] in meters, per
+        /// <see cref="VIO_NOISE_REFERENCE_PERIOD_SECONDS"/> of elapsed time.
+        /// </summary>
         public static readonly double[] defaultVioStdDevs = { 0.02, 0.02, 0.01 };
+
+        /// <summary>
+        /// Time step the VIO std devs are specified for (the main loop period). Process
+        /// noise is scaled by the elapsed time over this.
+        /// </summary>
+        public const double VIO_NOISE_REFERENCE_PERIOD_SECONDS = 1.0 / 120.0;
+
+        /// <summary>
+        /// Longest time step (seconds) process noise is added for, so a pause or app hitch
+        /// does not inflate the covariance. The step across a tracking outage is not clamped:
+        /// the VIO pose after an outage is less certain, so the next tags can correct it.
+        /// </summary>
+        public const double VIO_NOISE_MAX_DT_SECONDS = 0.1;
 
         /// <summary>AprilTag measurement noise standard deviations [x, y, z] in meters.</summary>
         public static readonly double[] defaultAprilTagStdDevs = { 0.05, 0.05, 0.10 };
 
         /// <summary>How far back in time AprilTag corrections can be applied.</summary>
         public const double BUFFER_DURATION_SECONDS = 0.5;
+
+        /// <summary>
+        /// Longest gap (seconds) between an AprilTag capture and the VIO snapshot before it.
+        /// A capture with no VIO snapshot that close cannot be latency-compensated and is
+        /// dropped.
+        /// </summary>
+        public const double MAX_CAPTURE_VIO_GAP_SECONDS = 0.05;
+
+        // --- Tracking outages ---
+
+        /// <summary>Fastest plausible robot speed (m/s), used to bound the VIO jump on reacquire.</summary>
+        public const double MAX_ROBOT_SPEED_MPS = 6.0;
+
+        /// <summary>
+        /// Margin (meters) added to <see cref="MAX_ROBOT_SPEED_MPS"/> times the outage
+        /// duration. A larger jump on tracking reacquire is a relocalization, not motion.
+        /// </summary>
+        public const double TRACKING_JUMP_MARGIN_METERS = 0.25;
 
         // --- Phase 1: Initial alignment gating (NOT user-configurable) ---
 
@@ -59,10 +93,48 @@ namespace QuestNav.QuestNav.Estimation
         public const double CORRECTION_MIN_INLIER_RATIO = 0.8;
 
         /// <summary>
-        /// Maximum allowed distance (meters) between the measured position and the current
-        /// estimate. Observations beyond this are rejected as likely reflections.
+        /// Phase-2 outlier gate: an observation is rejected when the squared Mahalanobis
+        /// distance between the measured position and the capture-time estimate, using
+        /// S = P + R, exceeds this. 16.27 is the 99.9% chi-square quantile for 3 DOF.
+        /// </summary>
+        public const double CORRECTION_GATE_CHI_SQUARED = 16.27;
+
+        /// <summary>
+        /// Distance (meters) from the capture-time estimate within which a measurement is
+        /// always accepted, whatever its Mahalanobis distance. With small covariances the
+        /// chi-square gate alone would reject the consistent 0.1-0.3 m biases that
+        /// timestamp error, extrinsic error and tag placement error produce.
+        /// </summary>
+        public const double CORRECTION_GATE_MIN_DISTANCE = 0.5;
+
+        /// <summary>
+        /// Absolute cap (meters) on the distance between the measured position and the
+        /// capture-time estimate, applied on top of the Mahalanobis gate so a large
+        /// covariance after a long stretch without tags cannot admit a wild measurement.
         /// </summary>
         public const double CORRECTION_MAX_POSITION_JUMP = 2.0;
+
+        // --- Phase 2 -> Phase 1 recovery ---
+
+        /// <summary>
+        /// Number of consecutive gate-rejected multi-tag observations that must agree
+        /// with each other before the estimator drops back to Phase 1 and re-aligns.
+        /// </summary>
+        public const int REALIGN_REJECTION_COUNT = 5;
+
+        /// <summary>Minimum tag count for a gate rejection to count toward re-alignment.</summary>
+        public const int REALIGN_MIN_TAGS = 2;
+
+        /// <summary>
+        /// Radius (meters) within which the innovations (measured minus capture-time
+        /// estimate) of consecutive rejections must lie to count as agreeing.
+        /// </summary>
+        public const double REALIGN_CONSENSUS_RADIUS = 0.5;
+
+        // --- Input validation ---
+
+        /// <summary>The first dropped input of a kind is logged, then every Nth one after it.</summary>
+        public const int NON_FINITE_LOG_INTERVAL = 100;
 
         // --- Confidence presets ---
 

@@ -102,19 +102,22 @@ task generateVendorJson() {
     inputs.property("wpilibYear", wpilibYear)
     outputs.file vendorJsonOutput
 
+    // Resolve everything at configuration time; touching project in doLast is deprecated
+    def repoType = isSnapshot ? "snapshots" : "releases"
+    def libVersion = version.toString()
+    def libWpilibYear = wpilibYear.toString()
+    def libVendorUuid = vendorUuid.toString()
+    def jsonUrl = "https://maven.questnav.gg/${repoType}/gg/questnav/questnavlib-json/${libVersion}/questnavlib-json-${libVersion}.json"
+
     doLast {
-        println "Generating vendor JSON ${version} to ${vendorJsonOutput}"
+        println "Generating vendor JSON ${libVersion} to ${vendorJsonOutput}"
 
         vendorJsonOutput.parentFile.mkdirs()
 
-        // Determine repository URL based on release type
-        def repoType = isSnapshot ? "snapshots" : "releases"
-        def jsonUrl = "https://maven.questnav.gg/${repoType}/gg/questnav/questnavlib-json/${version}/questnavlib-json-${version}.json"
-
         def content = vendorJsonInput.text
-                .replace('${questnav_version}', version)
-                .replace('${wpilib_year}', wpilibYear)
-                .replace('${questnav_uuid}', vendorUuid)
+                .replace('${questnav_version}', libVersion)
+                .replace('${wpilib_year}', libWpilibYear)
+                .replace('${questnav_uuid}', libVendorUuid)
                 .replace('${json_url}', jsonUrl)
 
         vendorJsonOutput.text = content

@@ -1,0 +1,79 @@
+name: Build development APK
+run-name: Development APK for ${{ inputs.source_sha }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Full 40-character commit SHA reviewed for this build
+        type: string
+        required: true
+
+permissions: {}
+
+jobs:
+  validate:
+    if: github.repository == 'QuestNav/QuestNav' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the source SHA
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          if [[ ! "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo 'Enter the full lowercase commit SHA.' >&2
+            exit 1
+          fi
+
+  build:
+    needs: validate
+    runs-on:
+      group: questnav-apk
+      labels: ${{ format('questnav-apk-{0}-{1}', github.run_id, github.run_attempt) }}
+    timeout-minutes: 115
+    steps:
+      - name: Build the reviewed commit and run EditMode tests
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$SOURCE_SHA" != "$QUESTNAV_REVIEWED_SHA" ]]; then
+            echo 'The runner was provisioned for a different commit.' >&2
+            exit 1
+          fi
+          test ! -S /var/run/docker.sock
+          touch "/tmp/questnav-request-$SOURCE_SHA"
+          while [[ ! -f /delivery/SHA256SUMS ]]; do
+            if [[ -f /delivery/failed ]]; then
+              echo 'The runner reported a build or test failure.' >&2
+              exit 1
+            fi
+            sleep 3
+          done
+          cd /delivery
+          test -s "questnav-${SOURCE_SHA:0:7}-dev.apk"
+          test -s editmode-results.xml
+          sha256sum --check --strict SHA256SUMS
+
+      - name: Upload APK, test results and checksums
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: questnav-dev-${{ inputs.source_sha }}
+          path: |
+            /delivery/*.apk
+            /delivery/editmode-results.xml
+            /delivery/SHA256SUMS
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload failing EditMode results
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: questnav-failed-tests-${{ inputs.source_sha }}
+          path: /delivery/editmode-results.xml
+          if-no-files-found: ignore
+          retention-days: 7

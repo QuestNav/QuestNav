@@ -127,6 +127,22 @@ jobs:
     needs: [detect-changes, build-proto-csharp, build-web-ui]
     uses: ./.github/workflows/reusable-docs-docfx.yml
 
+  build-csharp:
+    if: |
+      always() &&
+      ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository)) &&
+      (needs.detect-changes.outputs.ci-changed == 'true' ||
+      needs.detect-changes.outputs.csharp-changed == 'true' ||
+      needs.detect-changes.outputs.java-changed == 'true' ||
+      needs.detect-changes.outputs.web-ui-changed == 'true') &&
+      (needs.format-csharp.result != 'failure' &&
+      needs.docs-csharp.result != 'failure')
+    needs: [detect-changes, docs-csharp, format-csharp]
+    uses: QuestNav/QuestNav/.github/workflows/development-apk.yml@main
+    permissions: {}
+
   test-csharp:
     if: |
       ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
@@ -193,6 +209,7 @@ jobs:
       - build-java
       - docs-java
       - format-csharp
+      - build-csharp
       - test-csharp
       - docs-csharp
       - build-proto-java

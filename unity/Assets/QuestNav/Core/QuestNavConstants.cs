@@ -203,9 +203,19 @@ namespace QuestNav.Core
             public const int SERVER_PORT = 5801;
 
             /// <summary>
-            /// Whether to enable CORS headers for development mode
+            /// Largest JSON request body the API reads, in bytes
             /// </summary>
-            public const bool ENABLE_CORS_DEV_MODE = true;
+            public const int MAX_JSON_BODY_BYTES = 64 * 1024;
+
+            /// <summary>
+            /// Largest field-layout upload body, in bytes. Real layouts are tens of KB.
+            /// </summary>
+            public const int MAX_FIELD_LAYOUT_BODY_BYTES = 1024 * 1024;
+
+            /// <summary>
+            /// Largest config database upload, in bytes. Real databases are tens of KB.
+            /// </summary>
+            public const int MAX_DATABASE_BYTES = 4 * 1024 * 1024;
 
             /// <summary>
             /// How long startup waits for the web server to start listening
@@ -290,6 +300,16 @@ namespace QuestNav.Core
             /// every solved distance proportionally.
             /// </summary>
             public const double TAG_SIZE_METERS = 0.1651;
+
+            /// <summary>
+            /// Highest tag ID in the tag36h11 family (587 codes, IDs 0-586).
+            /// </summary>
+            public const int MAX_TAG36H11_ID = 586;
+
+            /// <summary>
+            /// Most entries accepted in the ignored-ID list. FRC fields use fewer than 40 tags.
+            /// </summary>
+            public const int MAX_IGNORED_IDS = 64;
 
             /// <summary>
             /// Allowed values for the "Minimum Tags Required" dropdown. The estimator

@@ -314,7 +314,6 @@ namespace QuestNav.WebServer
             server = new ConfigServer(
                 configManager,
                 QuestNavConstants.WebServer.SERVER_PORT,
-                QuestNavConstants.WebServer.ENABLE_CORS_DEV_MODE,
                 staticPath,
                 this,
                 statusProvider,

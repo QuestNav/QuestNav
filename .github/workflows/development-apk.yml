@@ -8,51 +8,65 @@ on:
         description: Full 40-character commit SHA reviewed for this build
         type: string
         required: true
+  workflow_call:
 
 permissions: {}
 
 jobs:
   validate:
-    if: github.repository == 'QuestNav/QuestNav' && github.ref == 'refs/heads/main'
+    if: >-
+      github.repository == 'QuestNav/QuestNav' &&
+      ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+       (github.event_name == 'pull_request' && github.base_ref == 'main' &&
+        github.event.pull_request.base.repo.id == 889452427 &&
+        github.event.pull_request.head.repo.id == 889452427))
     runs-on: ubuntu-latest
+    outputs:
+      source: ${{ steps.request.outputs.source }}
+      sha: ${{ steps.request.outputs.sha }}
     steps:
-      - name: Check the source SHA
+      - name: Identify the commit to build
+        id: request
         shell: bash
         env:
-          SOURCE_SHA: ${{ inputs.source_sha }}
+          EVENT: ${{ github.event_name }}
+          MANUAL_SHA: ${{ inputs.source_sha }}
+          PUSH_SHA: ${{ github.sha }}
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if [[ ! "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
-            echo 'Enter the full lowercase commit SHA.' >&2
-            exit 1
-          fi
+          set -euo pipefail
+          case "$EVENT" in
+            workflow_dispatch) source=manual; sha=$MANUAL_SHA ;;
+            push) source=main; sha=$PUSH_SHA ;;
+            pull_request)
+              [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]
+              source="pr-$PR_NUMBER"; sha=$PR_SHA ;;
+            *) exit 1 ;;
+          esac
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]]
+          printf 'source=%s\nsha=%s\n' "$source" "$sha" >> "$GITHUB_OUTPUT"
 
   build:
     needs: validate
     runs-on:
       group: questnav-apk
-      labels: ${{ format('questnav-apk-{0}-{1}', github.run_id, github.run_attempt) }}
+      labels: questnav-unity
     timeout-minutes: 115
+    env:
+      DELIVERY: /delivery/${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - name: Build the reviewed commit and run EditMode tests
+      - name: Build the APK and run EditMode tests
         shell: bash
         env:
-          SOURCE_SHA: ${{ inputs.source_sha }}
+          SOURCE: ${{ needs.validate.outputs.source }}
+          SOURCE_SHA: ${{ needs.validate.outputs.sha }}
         run: |
           set -euo pipefail
-          if [[ "$SOURCE_SHA" != "$QUESTNAV_REVIEWED_SHA" ]]; then
-            echo 'The runner was provisioned for a different commit.' >&2
-            exit 1
-          fi
           test ! -S /var/run/docker.sock
-          touch "/tmp/questnav-request-$SOURCE_SHA"
-          while [[ ! -f /delivery/SHA256SUMS ]]; do
-            if [[ -f /delivery/failed ]]; then
-              echo 'The runner reported a build or test failure.' >&2
-              exit 1
-            fi
-            sleep 3
-          done
-          cd /delivery
+          /opt/questnav/request-build "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" "$SOURCE" "$SOURCE_SHA"
+          cd "$DELIVERY"
           test -s "questnav-${SOURCE_SHA:0:7}-dev.apk"
           test -s editmode-results.xml
           sha256sum --check --strict SHA256SUMS
@@ -60,11 +74,11 @@ jobs:
       - name: Upload APK, test results and checksums
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: questnav-dev-${{ inputs.source_sha }}
+          name: questnav-dev-${{ needs.validate.outputs.sha }}
           path: |
-            /delivery/*.apk
-            /delivery/editmode-results.xml
-            /delivery/SHA256SUMS
+            ${{ env.DELIVERY }}/*.apk
+            ${{ env.DELIVERY }}/editmode-results.xml
+            ${{ env.DELIVERY }}/SHA256SUMS
           if-no-files-found: error
           compression-level: 0
           retention-days: 7
@@ -73,7 +87,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: questnav-failed-tests-${{ inputs.source_sha }}
-          path: /delivery/editmode-results.xml
+          name: questnav-failed-tests-${{ needs.validate.outputs.sha }}
+          path: ${{ env.DELIVERY }}/editmode-results.xml
           if-no-files-found: ignore
           retention-days: 7

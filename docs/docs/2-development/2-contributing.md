@@ -95,9 +95,7 @@ Always test your changes before submitting a pull request!
 
 #### Request a development APK
 
-Maintainers can build a reviewed commit without installing Unity or the Android toolchain. Copy the full commit SHA, then open **Actions → Build development APK → Run workflow**. Select `main` for the workflow and enter the SHA of the code to build. Contributors can ask a maintainer to request a build for their commit.
-
-Share the run URL and SHA with the runner operator. The operator stages that revision and connects a one-job runner. The job builds the APK and runs the Unity EditMode tests. Pushes and pull requests continue to run the hosted CI checks.
+A maintainer can open **Actions → Build development APK → Run workflow**, select `main`, and enter the full SHA of the reviewed commit. The dedicated worker receives the job directly from GitHub, builds the APK, and runs the Unity EditMode tests. Contributors can ask a maintainer to request a build for their commit.
 
 On success, download `questnav-dev-<full SHA>` from the run's **Artifacts** section within seven days. It contains the development APK, `editmode-results.xml` and `SHA256SUMS`. After extraction, run `sha256sum -c SHA256SUMS` on Linux or `shasum -a 256 -c SHA256SUMS` on macOS. If a test fails, look for the separate test-results artifact. These APKs use debug signing, and their signing certificates can differ between builds.
 

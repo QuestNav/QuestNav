@@ -93,9 +93,11 @@ Always test your changes before submitting a pull request!
 - Ensure there are no compiler errors or warnings
 - Verify that existing functionality still works
 
-#### Request a development APK
+#### Build a development APK
 
-A maintainer can open **Actions → Build development APK → Run workflow**, select `main`, and enter the full SHA of the reviewed commit. The dedicated worker receives the job directly from GitHub, builds the APK, and runs the Unity EditMode tests. Contributors can ask a maintainer to request a build for their commit.
+CI builds a development APK for qualifying pushes to `main` and pull requests from branches in `QuestNav/QuestNav` targeting `main`. Changes to CI, C#, Java, or the web UI qualify after the applicable C# formatting and documentation checks. The PR build uses the exact head commit and runs the Unity EditMode tests.
+
+For a fork PR or another reviewed revision, a maintainer can open **Actions → Build development APK → Run workflow**, select `main`, and enter the full commit SHA. The worker receives the job directly from GitHub.
 
 On success, download `questnav-dev-<full SHA>` from the run's **Artifacts** section within seven days. It contains the development APK, `editmode-results.xml` and `SHA256SUMS`. After extraction, run `sha256sum -c SHA256SUMS` on Linux or `shasum -a 256 -c SHA256SUMS` on macOS. If a test fails, look for the separate test-results artifact. These APKs use debug signing, and their signing certificates can differ between builds.
 

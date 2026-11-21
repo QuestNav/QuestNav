@@ -16,7 +16,7 @@ Before you begin, make sure you have the following:
 - A Meta Quest 3 or 3s headset
 - A Windows PC with a GPU capable of running Unity
 - Basic knowledge of Unity and C# programming
-- Git installed on your computer
+- Git and [Git LFS](https://git-lfs.com) installed on your computer (native libraries and images are stored in LFS)
   :::
 
 ## Installation Process
@@ -104,13 +104,13 @@ Generate C# files from proto definitions:
   <TabItem value="windows" label="Windows">
   From the base directory of the repository
   ```powershell
-  protoc --proto_path=protos --csharp_out=unity\Assets\QuestNav\Protos\Generated protos\*.proto
+  protoc --proto_path=protos --csharp_out=unity\Assets\QuestNav\Protos\Generated protos\data.proto protos\commands.proto protos\wpimath\protobuf\geometry3d.proto
   ```
   </TabItem>
   <TabItem value="linux-mac" label="Linux/Mac">
   From the base directory of the repository
   ```bash  
-  protoc --proto_path=protos --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/*.proto
+  protoc --proto_path=protos --csharp_out=unity/Assets/QuestNav/Protos/Generated protos/data.proto protos/commands.proto protos/wpimath/protobuf/geometry3d.proto
   ```
   </TabItem>
 </Tabs>
@@ -127,7 +127,7 @@ Generate C# files from proto definitions:
     2. Generate Java files:
     # From the base directory of the repository
     ```powershell
-    protoc -I="protos" --plugin=protoc-gen-quickbuf=protoc-gen-quickbuf.exe --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib\src\main\java\ protos\data.proto protos\commands.proto
+    protoc --proto_path=protos --plugin=protoc-gen-quickbuf=protoc-gen-quickbuf.exe --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib\src\main\java\ protos\data.proto protos\commands.proto
     ```
   </TabItem>
   <TabItem value="linux-mac" label="Linux/Mac">
@@ -140,7 +140,7 @@ Generate C# files from proto definitions:
     2. Generate Java files:
     From the base directory of the repository
     ```bash
-    protoc -I="protos" --plugin=protoc-gen-quickbuf=./protoc-gen-quickbuf --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ protos/data.proto protos/commands.proto
+    protoc --proto_path=protos --plugin=protoc-gen-quickbuf=./protoc-gen-quickbuf --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ protos/data.proto protos/commands.proto
     ```
   </TabItem>
 </Tabs>
@@ -264,30 +264,11 @@ Add the following values to your `PATH` environment variable.
 
 ### Building Network Tables (ntcore)
 [Network Tables 4](https://github.com/wpilibsuite/allwpilib/blob/main/ntcore/doc/networktables4.adoc) is used to communicate data to the
-robot.
-1. Clone the allwpilib repo from [https://github.com/wpilibsuite/allwpilib](https://github.com/wpilibsuite/allwpilib)
-1. Switch to the desired branch or tag if you don't want to build `main`.
-1. Configure CMake. In the allwpilib root directory, run this command:
-    ```powershell
-    cmake -B build-android -S . `
-        -G "Ninja" `
-        -DCMAKE_TOOLCHAIN_FILE="$env:NDK_HOME\build\cmake\android.toolchain.cmake" `
-        -DANDROID_ABI=arm64-v8a `
-        -DANDROID_PLATFORM=android-31 `
-        -DWPILIB_WITH_CSCORE=OFF `
-        -DWPILIB_WITH_WPILIB=OFF `
-        -DWPILIB_WITH_EXAMPLES=OFF `
-        -DWPILIB_WITH_TESTS=OFF `
-        -DWPILIB_WITH_GUI=OFF `
-        -DWPILIB_WITH_SIMULATION_MODULES=OFF `
-        -DWPILIB_WITH_BENCHMARK=OFF `
-        -DWPILIB_WITH_EXECUTABLES=OFF
-    ```
-1. Build ntcore
-    ```powershell
-    ninja -C build-android
-    ```
-1. Find the binaries in the `build-android\lib` directory. You will need `libntcore.so`, `libwpinet.so`, `libwpiutil.so`, and `libdatalog.so`.
+robot. QuestNav ships four libraries per platform (`ntcore`, `wpinet`, `wpiutil` and `datalog`), pinned to the allwpilib release recorded in
+`unity/Assets/Plugins/ntcore/VERSION`. The Android libraries are built from that tag with the NDK bundled with Unity, in Release mode, with
+16 KB page alignment, then stripped. The Windows DLLs are WPILib's published release artifacts. Follow
+[`unity/Assets/QuestNav/Native/NTCore/README.md`](https://github.com/QuestNav/QuestNav/blob/main/unity/Assets/QuestNav/Native/NTCore/README.md)
+for the exact commands, and update `VERSION` with the new files. The libraries are stored with Git LFS.
 
 ### Building libjpeg-turbo
 [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo) is used to encode video frames for passthrough camera streaming.

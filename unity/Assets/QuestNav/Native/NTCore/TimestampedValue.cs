@@ -12,12 +12,13 @@ namespace QuestNav.Native.NTCore
         public T Value { get; set; }
 
         /// <summary>
-        /// The NetworkTables server timestamp when this value was published (in microseconds since server start)
+        /// When this value was published, in the NetworkTables server time base (nanoseconds).
+        /// May be 0 or 1 for values set locally.
         /// </summary>
         public long ServerTime { get; set; }
 
         /// <summary>
-        /// The timestamp when this value was last changed (in microseconds since Unix epoch)
+        /// When this value last changed, in local NetworkTables time (nanoseconds, same base as <see cref="NtInstance.Now"/>)
         /// </summary>
         public long LastChange { get; set; }
 
@@ -25,8 +26,8 @@ namespace QuestNav.Native.NTCore
         /// Creates a new timestamped value
         /// </summary>
         /// <param name="value">The value</param>
-        /// <param name="serverTime">Server timestamp in microseconds since server start</param>
-        /// <param name="lastChange">Timestamp when value last changed in microseconds since Unix epoch</param>
+        /// <param name="serverTime">Publish time in server time, in nanoseconds</param>
+        /// <param name="lastChange">Last change time in local NetworkTables time, in nanoseconds</param>
         public TimestampedValue(T value, long serverTime, long lastChange)
         {
             Value = value;

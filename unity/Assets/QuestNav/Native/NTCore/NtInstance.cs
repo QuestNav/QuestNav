@@ -1,6 +1,4 @@
 using System;
-using System.Runtime.InteropServices;
-using System.Text;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 using QuestNav.Utils;
@@ -27,24 +25,30 @@ namespace QuestNav.Native.NTCore
             QueuedLogger.Log("Loading NTCore Natives");
             handle = NtCoreNatives.NT_GetDefaultInstance();
 
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(instanceName);
-
-            fixed (byte* ptr = nameUtf8)
+            using (var nameStr = new ManagedWpiString(instanceName))
             {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
-
-                NtCoreNatives.NT_StartClient4(handle, &str);
+                NtCoreNatives.NT_StartClient(handle, nameStr);
             }
         }
 
         /// <summary>
-        /// Sets the team number for automatic FRC robot connection
+        /// Sets the client to connect to a team's robot (without restarting the client).
+        /// ntcore tries these addresses in parallel:
+        /// - 10.TE.AM.2 (only if the team string parses as an integer from 0 to 25599)
+        /// - 172.27.0.1 (USB; 172.26.0.1 on Windows)
+        /// - 172.30.0.1 (SystemCore WiFi access point)
+        /// ntcore's SystemCore mDNS discovery does not work on the Quest, and the old roboRIO
+        /// hostname fallbacks are gone, so a 2026 robot is reachable only at 10.TE.AM.2 or
+        /// through an IP override (<see cref="SetAddresses"/>).
         /// </summary>
-        /// <param name="teamNumber">The FRC team number</param>
+        /// <param name="teamNumber">The FRC team number string</param>
         /// <param name="port">The NetworkTables port (defaults to standard port)</param>
-        public void SetTeamNumber(int teamNumber, int port = NtCoreNatives.NT_DEFAULT_PORT4)
+        public void SetTeamNumber(string teamNumber, int port = NtCoreNatives.NT_DEFAULT_PORT4)
         {
-            NtCoreNatives.NT_SetServerTeam(handle, (uint)teamNumber, (uint)port);
+            using (ManagedWpiString teamNumberStr = new ManagedWpiString(teamNumber))
+            {
+                NtCoreNatives.NT_SetServerTeam(handle, teamNumberStr, (uint)port);
+            }
         }
 
         /// <summary>
@@ -53,7 +57,7 @@ namespace QuestNav.Native.NTCore
         /// <param name="addressesAndPorts">Array of address/port tuples to connect to</param>
         public void SetAddresses((string addr, int port)[] addressesAndPorts)
         {
-            WpiString[] addresses = new WpiString[addressesAndPorts.Length];
+            var managedAddresses = new ManagedWpiString[addressesAndPorts.Length];
             uint[] ports = new uint[addressesAndPorts.Length];
 
             try
@@ -61,20 +65,17 @@ namespace QuestNav.Native.NTCore
                 for (int i = 0; i < addressesAndPorts.Length; i++)
                 {
                     ports[i] = (uint)addressesAndPorts[i].port;
-                    int byteCount = Encoding.UTF8.GetByteCount(addressesAndPorts[i].addr);
-                    addresses[i].str = (byte*)Marshal.AllocHGlobal(byteCount);
-                    addresses[i].len = (UIntPtr)byteCount;
-                    fixed (char* c = addressesAndPorts[i].addr)
-                    {
-                        Encoding.UTF8.GetBytes(
-                            c,
-                            addressesAndPorts[i].addr.Length,
-                            addresses[i].str,
-                            byteCount
-                        );
-                    }
+                    managedAddresses[i] = new ManagedWpiString(addressesAndPorts[i].addr);
                 }
-                fixed (WpiString* addrs = addresses)
+
+                // Marshal the managed wrappers to native pointers
+                WpiString[] nativeAddresses = new WpiString[addressesAndPorts.Length];
+                for (int i = 0; i < addressesAndPorts.Length; i++)
+                {
+                    nativeAddresses[i] = *managedAddresses[i].NativePointer;
+                }
+
+                fixed (WpiString* addrs = nativeAddresses)
                 {
                     fixed (uint* ps = ports)
                     {
@@ -89,12 +90,9 @@ namespace QuestNav.Native.NTCore
             }
             finally
             {
-                for (int i = 0; i < addresses.Length; i++)
+                for (int i = 0; i < managedAddresses.Length; i++)
                 {
-                    if (addresses[i].str != null)
-                    {
-                        Marshal.FreeHGlobal((IntPtr)addresses[i].str);
-                    }
+                    managedAddresses[i]?.Dispose();
                 }
             }
         }
@@ -106,6 +104,21 @@ namespace QuestNav.Native.NTCore
         public bool IsConnected()
         {
             return NtCoreNatives.NT_IsConnected(handle) != 0;
+        }
+
+        /// <summary>
+        /// Gets the time offset between server time and local time. Add it to local time
+        /// (<see cref="Now"/>) to get the equivalent server time. The offset is only valid
+        /// once the client is connected and has exchanged time sync messages with the server,
+        /// and ntcore resets it on every disconnect.
+        /// </summary>
+        /// <param name="offsetNs">Time offset in nanoseconds; only meaningful when this returns true</param>
+        /// <returns>True if the offset is valid</returns>
+        public bool TryGetServerTimeOffset(out long offsetNs)
+        {
+            int valid = 0;
+            offsetNs = NtCoreNatives.NT_GetServerTimeOffset(handle, &valid);
+            return valid != 0;
         }
 
         public BooleanPublisher GetBooleanPublisher(string name, PubSubOptions options)
@@ -303,38 +316,36 @@ namespace QuestNav.Native.NTCore
         /// of the protobuf file, and the type is "proto:FileDescriptorProto".
         /// </summary>
         /// <param name="descriptor">Protobuf MessageDescriptor whose schema to publish</param>
-        private void AddProtobufSchema(MessageDescriptor descriptor)
+        private unsafe void AddProtobufSchema(MessageDescriptor descriptor)
         {
             // Get the file descriptor for the message type
             var file = descriptor.File;
             if (file.Name.Equals("commands.proto"))
             {
-                // The robot is publishing a conflicting and smaller schema for commands.proto, causing the robot to crash. Don't publish it until we have a solution.
-                // See https://www.chiefdelphi.com/t/publishing-protobuf-schema-for-nt4/509849
+                // Publishing this schema crashes 2026 Glass/SimGui (allwpilib #8553, not fixed upstream)
                 return;
             }
+
+            // Imports such as wpimath/protobuf/geometry3d.proto are left for the robot to publish. A
+            // 2026 robot defines the same wpi.proto types in "geometry3d.proto", and a second file
+            // defining them can stop dashboards decoding the robot's own Pose3d topics.
+
             // Get the schema as a byte array, this is what will be published
             var schema = file.ToProto().ToByteArray();
-            // Set the name and type
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes("proto:" + file.Name);
-            byte[] typeUtf8 = Encoding.UTF8.GetBytes("proto:FileDescriptorProto");
 
-            fixed (
-                byte* namePtr = nameUtf8,
-                    typePtr = typeUtf8,
-                    schemaPtr = schema
-            )
+            using (var nameStr = new ManagedWpiString("proto:" + file.Name))
+            using (var typeStr = new ManagedWpiString("proto:FileDescriptorProto"))
             {
-                WpiString nameStr = new WpiString { str = namePtr, len = (UIntPtr)nameUtf8.Length };
-                WpiString typeStr = new WpiString { str = typePtr, len = (UIntPtr)typeUtf8.Length };
-
-                NtCoreNatives.NT_AddSchema(
-                    handle,
-                    &nameStr,
-                    &typeStr,
-                    schemaPtr,
-                    (UIntPtr)schema.Length
-                );
+                fixed (byte* schemaPtr = schema)
+                {
+                    NtCoreNatives.NT_AddSchema(
+                        handle,
+                        nameStr,
+                        typeStr,
+                        schemaPtr,
+                        (UIntPtr)schema.Length
+                    );
+                }
             }
         }
 
@@ -352,7 +363,7 @@ namespace QuestNav.Native.NTCore
         }
 
         /// <summary>
-        /// Returns monotonic current time in 1 us increments.
+        /// Returns monotonic current time in 1 ns increments.
         /// This is the same time base used for entry and connection timestamps.
         /// This function by default simply wraps WPI_Now(), but if NT_SetNow() is
         /// called, this function instead returns the value passed to NT_SetNow();
@@ -398,13 +409,11 @@ namespace QuestNav.Native.NTCore
         private uint Publish(string name, NtType type, string typeString, PubSubOptions options)
         {
             uint topicHandle = GetTopic(name);
-            byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
             uint pubHandle;
-            fixed (byte* ptr = typeStr)
+            using (var typeStr = new ManagedWpiString(typeString))
             {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
                 NativePubSubOptions nOptions = options.ToNative();
-                pubHandle = NtCoreNatives.NT_Publish(topicHandle, type, &str, &nOptions);
+                pubHandle = NtCoreNatives.NT_Publish(topicHandle, type, typeStr, &nOptions);
             }
             return pubHandle;
         }
@@ -419,13 +428,11 @@ namespace QuestNav.Native.NTCore
         private uint Subscribe(string name, NtType type, string typeString, PubSubOptions options)
         {
             uint topicHandle = GetTopic(name);
-            byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
             uint subHandle;
-            fixed (byte* ptr = typeStr)
+            using (var typeStr = new ManagedWpiString(typeString))
             {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
                 NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_Subscribe(topicHandle, type, &str, &nOptions);
+                subHandle = NtCoreNatives.NT_Subscribe(topicHandle, type, typeStr, &nOptions);
             }
             return subHandle;
         }
@@ -440,29 +447,21 @@ namespace QuestNav.Native.NTCore
         private uint GetEntry(string name, NtType type, string typeString, PubSubOptions options)
         {
             uint topicHandle = GetTopic(name);
-            byte[] typeStr = Encoding.UTF8.GetBytes(typeString);
             uint subHandle;
-            fixed (byte* ptr = typeStr)
+            using (var typeStr = new ManagedWpiString(typeString))
             {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)typeStr.Length };
                 NativePubSubOptions nOptions = options.ToNative();
-                subHandle = NtCoreNatives.NT_GetEntryEx(topicHandle, type, &str, &nOptions);
+                subHandle = NtCoreNatives.NT_GetEntryEx(topicHandle, type, typeStr, &nOptions);
             }
             return subHandle;
         }
 
         private uint GetTopic(string name)
         {
-            byte[] nameUtf8 = Encoding.UTF8.GetBytes(name);
-            uint topicHandle;
-
-            fixed (byte* ptr = nameUtf8)
+            using (var nameStr = new ManagedWpiString(name))
             {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)nameUtf8.Length };
-                topicHandle = NtCoreNatives.NT_GetTopic(handle, &str);
+                return NtCoreNatives.NT_GetTopic(handle, nameStr);
             }
-
-            return topicHandle;
         }
     }
 }

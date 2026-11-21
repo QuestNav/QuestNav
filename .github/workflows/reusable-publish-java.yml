@@ -48,6 +48,13 @@ jobs:
           working-directory: questnav-lib
           cache-key-prefix: gradle-publish
 
+      - name: Check Vendor JSON
+        uses: ./.github/actions/check-vendor-json
+        with:
+          version: ${{ steps.version-info.outputs.version }}
+          version-type: ${{ steps.version-info.outputs.version-type }}
+          year: ${{ steps.version-info.outputs.year }}
+
       - name: Publish to Maven
         run: |
           ./gradlew publish \

@@ -132,6 +132,15 @@ git rebase upstream/main
 - Link the related issue
 - Wait for review from maintainers
 
+## Release Lines
+
+QuestNav ships one Quest app for every robot year, but the robot library (`questnav-lib`) is built against one WPILib year at a time:
+
+- `main` builds the 2027 library (WPILib 2027, JDK 25) and every Quest app release. The app connects to both 2026 and 2027 robots.
+- `release/2026` builds the 2026 library (WPILib 2026, JDK 17). It only takes library bug fixes, so open those pull requests against `release/2026`.
+
+To publish a 2026 library fix, run the **Publish Release** workflow with **Use workflow from** set to `release/2026` and a `2026-x.y.z` version, so both the workflow and the code come from that branch. A `2026-` version run from `main` fails the vendordep year check instead of publishing a library 2026 robots can't use.
+
 ## Coding Standards
 
 :::note

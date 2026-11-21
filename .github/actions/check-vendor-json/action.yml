@@ -1,0 +1,56 @@
+name: 'Check Vendor JSON'
+description: 'Generates the vendordep JSON and checks it parses and targets the right WPILib year'
+
+inputs:
+  version:
+    description: 'Version string passed to Gradle'
+    required: true
+  version-type:
+    description: 'Version type passed to Gradle'
+    required: false
+    default: ''
+  year:
+    description: 'Release year from determine-version (empty for non-semantic versions)'
+    required: false
+    default: ''
+  working-directory:
+    description: 'Working directory for the Gradle project'
+    required: false
+    default: 'questnav-lib'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Generate and Check Vendor JSON
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        VERSION: ${{ inputs.version }}
+        VERSION_TYPE: ${{ inputs.version-type }}
+        RELEASE_YEAR: ${{ inputs.year }}
+      run: |
+        ./gradlew generateVendorJson -Pversion="$VERSION" -PversionType="$VERSION_TYPE"
+
+        WPILIB_YEAR=$(sed -n 's/^wpilibYear=//p' gradle.properties | tr -d '[:space:]')
+        python3 - build/generated/vendordeps/questnavlib.json "$WPILIB_YEAR" "$VERSION" "$RELEASE_YEAR" <<'PY'
+        import json, sys
+
+        path, wpilib_year, version, release_year = sys.argv[1:]
+        with open(path) as f:
+            vendordep = json.load(f)
+
+        errors = []
+        if vendordep.get("wpilibYear") != wpilib_year:
+            errors.append(f"wpilibYear is {vendordep.get('wpilibYear')!r}, gradle.properties says {wpilib_year!r}")
+        if vendordep.get("version") != version:
+            errors.append(f"version is {vendordep.get('version')!r}, expected {version!r}")
+        # A "2026-x.y.z" release built from a 2027 tree would ship a vendordep 2026 robots can't use
+        if release_year and wpilib_year.split("_")[0] != release_year:
+            errors.append(f"release year {release_year} does not match wpilibYear {wpilib_year!r}")
+
+        for error in errors:
+            print(f"::error file={path}::{error}")
+        if errors:
+            sys.exit(1)
+        print(f"{path}: wpilibYear={wpilib_year}, version={version}")
+        PY

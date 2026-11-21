@@ -185,7 +185,16 @@ namespace QuestNav.WebServer.Server
                 }
             });
 
-            await listeningTcs.Task;
+            var startTimeout = Task.Delay(
+                TimeSpan.FromSeconds(QuestNavConstants.WebServer.START_TIMEOUT_SECONDS)
+            );
+            if (await Task.WhenAny(listeningTcs.Task, startTimeout) != listeningTcs.Task)
+            {
+                QueuedLogger.LogError(
+                    $"Server did not start listening within {QuestNavConstants.WebServer.START_TIMEOUT_SECONDS}s"
+                );
+                return;
+            }
 
             QueuedLogger.Log($"Server started at {BaseUrl}");
         }
@@ -473,6 +482,32 @@ namespace QuestNav.WebServer.Server
             string summary = SummarizeConfigUpdateRequest(request);
             QueuedLogger.Log($"POST /api/config from {clientIp}: {summary}");
 
+            // Checked before anything is saved: a persisted mode the detector cannot run is
+            // replayed on every boot.
+            if (request.AprilTagDetectorMode != null)
+            {
+                var requestedMode = (AprilTagDetectorMode.DetectionMode)
+                    request.AprilTagDetectorMode.mode;
+                if (
+                    !Enum.IsDefined(typeof(AprilTagDetectorMode.DetectionMode), requestedMode)
+                    || requestedMode != AprilTagDetectorMode.DetectionMode.TRADITIONAL
+                )
+                {
+                    context.Response.StatusCode = 400;
+                    await SendJsonResponse(
+                        context,
+                        new SimpleResponse
+                        {
+                            success = false,
+                            message =
+                                $"AprilTag detector mode {request.AprilTagDetectorMode.mode} is not supported. "
+                                + "Only 0 (TRADITIONAL) is currently implemented.",
+                        }
+                    );
+                    return;
+                }
+            }
+
             try
             {
                 if (request.TeamNumber.HasValue)
@@ -749,48 +784,131 @@ namespace QuestNav.WebServer.Server
         {
             string clientIp = context.Request.RemoteEndPoint?.Address?.ToString() ?? "?";
             QueuedLogger.Log($"POST /api/upload-database from {clientIp}");
+
+            // Config databases are tens of KB; this only guards against abuse.
+            const int MAX_DATABASE_BYTES = 4 * 1024 * 1024;
+            string uploadPath = cachedDatabasePath + ".upload";
             try
             {
+                if (context.Request.ContentLength64 > MAX_DATABASE_BYTES)
+                {
+                    await SendDatabaseTooLarge(context);
+                    return;
+                }
+
+                byte[] fileBytes;
                 using (var memoryStream = new MemoryStream())
                 {
-                    await context.Request.InputStream.CopyToAsync(memoryStream);
-                    byte[] fileBytes = memoryStream.ToArray();
-
-                    if (fileBytes.Length == 0)
+                    var input = context.Request.InputStream;
+                    byte[] buffer = new byte[81920];
+                    int read;
+                    while ((read = await input.ReadAsync(buffer, 0, buffer.Length)) > 0)
                     {
-                        context.Response.StatusCode = 400;
-                        await SendJsonResponse(
-                            context,
-                            new SimpleResponse
-                            {
-                                success = false,
-                                message = "No file data received",
-                            }
-                        );
-                        return;
-                    }
-
-                    // Write the uploaded database
-                    File.WriteAllBytes(cachedDatabasePath, fileBytes);
-
-                    await SendJsonResponse(
-                        context,
-                        new SimpleResponse
+                        if (memoryStream.Length + read > MAX_DATABASE_BYTES)
                         {
-                            success = true,
-                            message = "Database uploaded. Restart app to apply changes.",
+                            await SendDatabaseTooLarge(context);
+                            return;
                         }
-                    );
+                        memoryStream.Write(buffer, 0, read);
+                    }
+                    fileBytes = memoryStream.ToArray();
                 }
+
+                if (fileBytes.Length == 0)
+                {
+                    await SendDatabaseRejected(context, "No file data received");
+                    return;
+                }
+
+                if (!HasSqliteHeader(fileBytes))
+                {
+                    await SendDatabaseRejected(context, "File is not a SQLite database");
+                    return;
+                }
+
+                File.WriteAllBytes(uploadPath, fileBytes);
+                try
+                {
+                    await configManager.ReplaceDatabaseAsync(uploadPath);
+                }
+                catch (InvalidDataException ex)
+                {
+                    await SendDatabaseRejected(context, ex.Message);
+                    return;
+                }
+
+                await SendJsonResponse(
+                    context,
+                    new SimpleResponse
+                    {
+                        success = true,
+                        message = "Database uploaded. Restart app to apply changes.",
+                    }
+                );
             }
             catch (Exception ex)
             {
+                QueuedLogger.LogError($"Database upload failed: {ex.Message}");
                 context.Response.StatusCode = 500;
                 await SendJsonResponse(
                     context,
                     new SimpleResponse { success = false, message = ex.Message }
                 );
             }
+            finally
+            {
+                try
+                {
+                    File.Delete(uploadPath);
+                }
+                catch (Exception ex)
+                {
+                    QueuedLogger.LogWarning($"Could not delete {uploadPath}: {ex.Message}");
+                }
+            }
+        }
+
+        private static readonly byte[] SqliteHeader = Encoding.ASCII.GetBytes("SQLite format 3\0");
+
+        private static bool HasSqliteHeader(byte[] bytes)
+        {
+            if (bytes.Length < SqliteHeader.Length)
+                return false;
+            for (int i = 0; i < SqliteHeader.Length; i++)
+            {
+                if (bytes[i] != SqliteHeader[i])
+                    return false;
+            }
+            return true;
+        }
+
+        private async Task SendDatabaseTooLarge(IHttpContext context)
+        {
+            QueuedLogger.LogWarning("Rejected database upload: file too large");
+            context.Response.StatusCode = 413;
+            await SendJsonResponse(
+                context,
+                new SimpleResponse
+                {
+                    success = false,
+                    message = "Database file too large (max 4 MB).",
+                }
+            );
+        }
+
+        private async Task SendDatabaseRejected(IHttpContext context, string reason)
+        {
+            QueuedLogger.LogWarning($"Rejected database upload: {reason}");
+            context.Response.StatusCode = 400;
+            await SendJsonResponse(
+                context,
+                new SimpleResponse
+                {
+                    success = false,
+                    message =
+                        $"Database not uploaded: {reason}. The current configuration was kept.",
+                }
+            );
         }
 
         private async Task HandleGetInfo(IHttpContext context)

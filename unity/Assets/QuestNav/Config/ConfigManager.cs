@@ -21,6 +21,7 @@ namespace QuestNav.Config
         /// Opens the configuration database (creates tables if needed) without firing
         /// any initial events. Idempotent. Use this when a caller needs to read a
         /// boot-only setting before constructing the subsystems that subscribe to events.
+        /// A corrupt database is moved aside and recreated with defaults.
         /// </summary>
         public Task OpenAsync();
 
@@ -34,6 +35,14 @@ namespace QuestNav.Config
         /// Closes the database connection.
         /// </summary>
         public Task CloseAsync();
+
+        /// <summary>
+        /// Validates the SQLite file at <paramref name="candidatePath"/> and, if it is an intact
+        /// config database, closes the live connection, replaces the database file with it and
+        /// reopens. Throws <see cref="InvalidDataException"/> and leaves the live database
+        /// untouched if validation fails. Running subsystems pick up the new values on restart.
+        /// </summary>
+        public Task ReplaceDatabaseAsync(string candidatePath);
 
         #region Events
         #region Network
@@ -312,6 +321,20 @@ namespace QuestNav.Config
             Application.persistentDataPath,
             "config.db"
         );
+        private static readonly string[] SqliteSidecarSuffixes = { "-journal", "-wal", "-shm" };
+
+        /// <summary>
+        /// Tables every released config schema has. Newer tables (AprilTag) are created on
+        /// open, so older backups stay uploadable.
+        /// </summary>
+        private static readonly string[] RequiredTables =
+        {
+            nameof(Config.Network),
+            nameof(Config.System),
+            nameof(Config.Camera),
+            nameof(Config.Logging),
+        };
+
         private SQLiteAsyncConnection connection;
         private SynchronizationContext mainThreadContext;
 
@@ -327,15 +350,105 @@ namespace QuestNav.Config
         /// </summary>
         public async Task OpenAsync()
         {
-            // Capture the main thread context for event callbacks
-            mainThreadContext = SynchronizationContext.Current;
+            // Capture the main thread context for event callbacks. Keep the first one so a
+            // reopen from a web server thread does not clear it.
+            if (mainThreadContext == null)
+                mainThreadContext = SynchronizationContext.Current;
 
             SQLitePCL.Batteries_V2.Init();
 
             if (connection != null)
                 return;
 
+            try
+            {
+                await OpenConnectionAsync();
+            }
+            catch (SQLiteException ex)
+                when (ex.Result == SQLite3.Result.Corrupt || ex.Result == SQLite3.Result.NonDBFile)
+            {
+                await CloseAsync();
+
+                string corruptPath = $"{dbPath}.corrupt-{DateTime.UtcNow:yyyyMMdd'T'HHmmss'Z'}";
+                MoveDatabaseFiles(dbPath, corruptPath);
+                QueuedLogger.LogError(
+                    $"Config database is unreadable ({ex.Message}). Moved it to {corruptPath} "
+                        + "and recreated it with default settings."
+                );
+
+                await OpenConnectionAsync();
+            }
+
+            QueuedLogger.Log($"Database initialized at: {dbPath}");
+        }
+
+        /// <inheritdoc/>
+        public async Task ReplaceDatabaseAsync(string candidatePath)
+        {
+            ValidateDatabaseFile(candidatePath);
+
+            await CloseAsync();
+            try
+            {
+                foreach (string suffix in SqliteSidecarSuffixes)
+                {
+                    File.Delete(dbPath + suffix);
+                }
+
+                if (File.Exists(dbPath))
+                    File.Replace(candidatePath, dbPath, null);
+                else
+                    File.Move(candidatePath, dbPath);
+            }
+            finally
+            {
+                await OpenAsync();
+            }
+
+            QueuedLogger.Log("Config database replaced from upload");
+        }
+
+        /// <summary>
+        /// Throws <see cref="InvalidDataException"/> unless the file is an intact SQLite
+        /// database containing the config tables.
+        /// </summary>
+        private static void ValidateDatabaseFile(string path)
+        {
+            try
+            {
+                using var db = new SQLiteConnection(path, SQLiteOpenFlags.ReadOnly);
+
+                string integrity = db.ExecuteScalar<string>("PRAGMA integrity_check");
+                if (integrity != "ok")
+                    throw new InvalidDataException($"Integrity check failed: {integrity}");
+
+                var tables = new HashSet<string>(
+                    db.QueryScalars<string>("SELECT name FROM sqlite_master WHERE type = 'table'"),
+                    StringComparer.OrdinalIgnoreCase
+                );
+                string[] missing = RequiredTables.Where(t => !tables.Contains(t)).ToArray();
+                if (missing.Length > 0)
+                    throw new InvalidDataException(
+                        $"Not a QuestNav config database (missing tables: {string.Join(", ", missing)})"
+                    );
+            }
+            catch (SQLiteException ex)
+            {
+                throw new InvalidDataException($"Not a readable SQLite database: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Opens the connection, checks it for corruption, and creates any missing tables.
+        /// </summary>
+        private async Task OpenConnectionAsync()
+        {
             connection = new SQLiteAsyncConnection(dbPath);
+
+            // Opening and CREATE TABLE only read the schema; this also reads the data pages.
+            string check = await connection.ExecuteScalarAsync<string>("PRAGMA quick_check");
+            if (check != "ok")
+                throw SQLiteException.New(SQLite3.Result.Corrupt, $"quick_check failed: {check}");
 
             // Create with defaults if they don't already exist
             await connection.CreateTableAsync<Config.Network>();
@@ -345,7 +458,31 @@ namespace QuestNav.Config
             await connection.CreateTableAsync<Config.AprilTagIgnoredId>();
             await connection.CreateTableAsync<Config.Logging>();
 
-            QueuedLogger.Log($"Database initialized at: {dbPath}");
+            // Only TRADITIONAL is implemented. Older builds could persist other modes, and the
+            // web UI posts the stored mode back on every AprilTag change, which the server rejects.
+            int traditional = (int)AprilTagDetectorMode.DetectionMode.TRADITIONAL;
+            int resetRows = await connection.ExecuteAsync(
+                "UPDATE AprilTag SET AprilTagDetectorMode = ? WHERE AprilTagDetectorMode != ?",
+                traditional,
+                traditional
+            );
+            if (resetRows > 0)
+                QueuedLogger.LogWarning(
+                    "Stored AprilTag detector mode is not implemented; reset it to TRADITIONAL."
+                );
+        }
+
+        /// <summary>
+        /// Moves a database file and any journal files next to it.
+        /// </summary>
+        private static void MoveDatabaseFiles(string fromPath, string toPath)
+        {
+            File.Move(fromPath, toPath);
+            foreach (string suffix in SqliteSidecarSuffixes)
+            {
+                if (File.Exists(fromPath + suffix))
+                    File.Move(fromPath + suffix, toPath + suffix);
+            }
         }
 
         /// <inheritdoc/>
@@ -354,29 +491,32 @@ namespace QuestNav.Config
             await OpenAsync();
 
             // Fire initial values to all current subscribers
-            OnTeamNumberChanged?.Invoke(await GetTeamNumberAsync());
-            OnDebugIpOverrideChanged?.Invoke(await GetDebugIpOverrideAsync());
-            OnAllowedPoseResetTimeoutMsChanged?.Invoke(await GetAllowedPoseResetTimeoutMsAsync());
-            OnEnableAutoStartOnBootChanged?.Invoke(await GetEnableAutoStartOnBootAsync());
+            RaiseEvent(OnTeamNumberChanged, await GetTeamNumberAsync());
+            RaiseEvent(OnDebugIpOverrideChanged, await GetDebugIpOverrideAsync());
+            RaiseEvent(
+                OnAllowedPoseResetTimeoutMsChanged,
+                await GetAllowedPoseResetTimeoutMsAsync()
+            );
+            RaiseEvent(OnEnableAutoStartOnBootChanged, await GetEnableAutoStartOnBootAsync());
 
-            OnEnablePassthroughStreamChanged?.Invoke(await GetEnablePassthroughStreamAsync());
-            OnPassthroughStreamModeChanged?.Invoke(await GetPassthroughStreamModeAsync());
-            OnEnableHighQualityStreamsChanged?.Invoke(await GetEnableHighQualityStreamsAsync());
+            RaiseEvent(OnEnablePassthroughStreamChanged, await GetEnablePassthroughStreamAsync());
+            RaiseEvent(OnPassthroughStreamModeChanged, await GetPassthroughStreamModeAsync());
+            RaiseEvent(OnEnableHighQualityStreamsChanged, await GetEnableHighQualityStreamsAsync());
 
             // Mode MUST fire before Enable. AprilTagManager caches the requested
             // resolution from the Mode event and uses it when Enable triggers the
             // camera reservation. If Enable fires first, the camera is reserved at
             // (0,0) and the first AprilTag frame fed to libapriltag is malformed,
             // which causes a native SIGSEGV in gradient_clusters.
-            OnAprilTagDetectorModeChanged?.Invoke(await GetAprilTagDetectorModeAsync());
+            RaiseEvent(OnAprilTagDetectorModeChanged, await GetAprilTagDetectorModeAsync());
             // Phase-2 confidence preset and noise scale must also fire BEFORE Enable so
             // the estimator and the dynamic-std-dev calc are configured with the user's
             // chosen values from the very first observation.
-            OnAprilTagConfidencePresetChanged?.Invoke(await GetAprilTagConfidencePresetAsync());
-            OnAprilTagNoiseScaleChanged?.Invoke(await GetAprilTagNoiseScaleAsync());
-            OnEnableAprilTagDetectorChanged?.Invoke(await GetEnableAprilTagDetectorAsync());
+            RaiseEvent(OnAprilTagConfidencePresetChanged, await GetAprilTagConfidencePresetAsync());
+            RaiseEvent(OnAprilTagNoiseScaleChanged, await GetAprilTagNoiseScaleAsync());
+            RaiseEvent(OnEnableAprilTagDetectorChanged, await GetEnableAprilTagDetectorAsync());
 
-            OnEnableDebugLoggingChanged?.Invoke(await GetEnableDebugLoggingAsync());
+            RaiseEvent(OnEnableDebugLoggingChanged, await GetEnableDebugLoggingAsync());
         }
 
         /// <inheritdoc/>
@@ -634,8 +774,8 @@ namespace QuestNav.Config
             await SaveNetworkConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnTeamNumberChanged?.Invoke(config.TeamNumber));
-            invokeOnMainThread(() => OnDebugIpOverrideChanged?.Invoke(config.DebugIpOverride));
+            invokeOnMainThread(() => RaiseEvent(OnTeamNumberChanged, config.TeamNumber));
+            invokeOnMainThread(() => RaiseEvent(OnDebugIpOverrideChanged, config.DebugIpOverride));
             QueuedLogger.Log($"Updated Key 'teamNumber' to {teamNumber}");
         }
 
@@ -657,8 +797,8 @@ namespace QuestNav.Config
             await SaveNetworkConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnDebugIpOverrideChanged?.Invoke(config.DebugIpOverride));
-            invokeOnMainThread(() => OnTeamNumberChanged?.Invoke(config.TeamNumber));
+            invokeOnMainThread(() => RaiseEvent(OnDebugIpOverrideChanged, config.DebugIpOverride));
+            invokeOnMainThread(() => RaiseEvent(OnTeamNumberChanged, config.TeamNumber));
             QueuedLogger.Log($"Updated Key 'debugIpOverride' to {ipOverride}");
         }
 
@@ -670,7 +810,7 @@ namespace QuestNav.Config
             await SaveNetworkConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnAllowedPoseResetTimeoutMsChanged?.Invoke(timeoutMs));
+            invokeOnMainThread(() => RaiseEvent(OnAllowedPoseResetTimeoutMsChanged, timeoutMs));
             QueuedLogger.Log($"Updated Key 'allowedPoseResetTimeoutMs' to {timeoutMs}");
         }
         #endregion
@@ -684,7 +824,7 @@ namespace QuestNav.Config
             await SaveSystemConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnableAutoStartOnBootChanged?.Invoke(autoStart));
+            invokeOnMainThread(() => RaiseEvent(OnEnableAutoStartOnBootChanged, autoStart));
             QueuedLogger.Log($"Updated Key 'autoStartOnBoot' to {autoStart}");
         }
         #endregion
@@ -698,7 +838,7 @@ namespace QuestNav.Config
             await SaveCameraConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnablePassthroughStreamChanged?.Invoke(enable));
+            invokeOnMainThread(() => RaiseEvent(OnEnablePassthroughStreamChanged, enable));
             QueuedLogger.Log($"Updated Key 'enablePassthroughStream' to {enable}");
         }
 
@@ -713,7 +853,7 @@ namespace QuestNav.Config
             await SaveCameraConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnPassthroughStreamModeChanged?.Invoke(mode));
+            invokeOnMainThread(() => RaiseEvent(OnPassthroughStreamModeChanged, mode));
             QueuedLogger.Log($"Updated Key 'passthroughStreamMode' to {mode}");
         }
 
@@ -725,7 +865,7 @@ namespace QuestNav.Config
             await SaveCameraConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnableHighQualityStreamsChanged?.Invoke(enabled));
+            invokeOnMainThread(() => RaiseEvent(OnEnableHighQualityStreamsChanged, enabled));
             QueuedLogger.Log($"Updated Key 'enableHighQualityStreams' to {enabled}");
         }
         #endregion
@@ -739,7 +879,7 @@ namespace QuestNav.Config
             await SaveAprilTagConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnableAprilTagDetectorChanged?.Invoke(enable));
+            invokeOnMainThread(() => RaiseEvent(OnEnableAprilTagDetectorChanged, enable));
             QueuedLogger.Log($"Updated Key 'enableAprilTagDetector' to {enable}");
         }
 
@@ -757,7 +897,7 @@ namespace QuestNav.Config
             await SaveAprilTagIgnoredIdsAsync(mode.IgnoredIds ?? Array.Empty<int>());
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnAprilTagDetectorModeChanged?.Invoke(mode));
+            invokeOnMainThread(() => RaiseEvent(OnAprilTagDetectorModeChanged, mode));
             QueuedLogger.Log($"Updated Key 'aprilTagDetectorMode' to {mode}");
         }
 
@@ -783,7 +923,7 @@ namespace QuestNav.Config
             config.AprilTagConfidencePreset = sanitized;
             await SaveAprilTagConfigAsync(config);
 
-            invokeOnMainThread(() => OnAprilTagConfidencePresetChanged?.Invoke(sanitized));
+            invokeOnMainThread(() => RaiseEvent(OnAprilTagConfidencePresetChanged, sanitized));
             QueuedLogger.Log($"Updated Key 'aprilTagConfidencePreset' to {sanitized}");
         }
 
@@ -814,7 +954,7 @@ namespace QuestNav.Config
             config.AprilTagNoiseScale = sanitized;
             await SaveAprilTagConfigAsync(config);
 
-            invokeOnMainThread(() => OnAprilTagNoiseScaleChanged?.Invoke(sanitized));
+            invokeOnMainThread(() => RaiseEvent(OnAprilTagNoiseScaleChanged, sanitized));
             QueuedLogger.Log($"Updated Key 'aprilTagNoiseScale' to {sanitized:F2}");
         }
 
@@ -859,7 +999,7 @@ namespace QuestNav.Config
             await SaveLoggingConfigAsync(config);
 
             // Notify subscribed methods on the main thread
-            invokeOnMainThread(() => OnEnableDebugLoggingChanged?.Invoke(enableDebugLogging));
+            invokeOnMainThread(() => RaiseEvent(OnEnableDebugLoggingChanged, enableDebugLogging));
             QueuedLogger.Log($"Updated Key 'enableDebugLogging' to {enableDebugLogging}");
         }
         #endregion
@@ -1093,6 +1233,31 @@ namespace QuestNav.Config
                     and <= QuestNavConstants.Network.MAX_TEAM_NUMBER;
         }
         #endregion
+
+        /// <summary>
+        /// Invokes each subscriber in its own try/catch so one throwing handler cannot skip
+        /// the remaining subscribers or abort the caller (e.g. <see cref="InitializeAsync"/>).
+        /// </summary>
+        private static void RaiseEvent<T>(Action<T> handlers, T value)
+        {
+            if (handlers == null)
+                return;
+
+            foreach (var handler in handlers.GetInvocationList())
+            {
+                try
+                {
+                    ((Action<T>)handler)(value);
+                }
+                catch (Exception ex)
+                {
+                    QueuedLogger.LogException(
+                        $"Config event handler {handler.Method.DeclaringType?.Name}.{handler.Method.Name} threw: {ex.Message}",
+                        ex
+                    );
+                }
+            }
+        }
 
         /// <summary>
         /// Invokes an action on the main thread using the captured SynchronizationContext.

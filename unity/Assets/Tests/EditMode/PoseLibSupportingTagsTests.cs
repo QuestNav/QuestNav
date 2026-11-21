@@ -28,6 +28,15 @@ namespace QuestNav.Tests
         private readonly List<double> corners2d = new List<double>();
         private readonly List<double> corners3d = new List<double>();
 
+        // NUnit reuses one fixture instance for every test, so start each with no tags
+        [SetUp]
+        public void ClearTags()
+        {
+            ids.Clear();
+            corners2d.Clear();
+            corners3d.Clear();
+        }
+
         /// <summary>Adds a tag 3 m ahead, projected by hand (CV x = -Y, y = -Z, z = X).</summary>
         private void AddTag(int id, double centerY, params int[] badCorners)
         {

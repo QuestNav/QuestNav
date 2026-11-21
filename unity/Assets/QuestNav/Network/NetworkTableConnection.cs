@@ -188,6 +188,11 @@ namespace QuestNav.Network
         /// Tracks previous connection state for change detection
         /// </summary>
         private bool wasConnected;
+
+        /// <summary>
+        /// Set when reading the NT4 connection threw, so it isn't retried on every poll
+        /// </summary>
+        private bool connectionLookupFailed;
         #endregion
 
         /// <summary>
@@ -571,9 +576,15 @@ namespace QuestNav.Network
             {
                 case true when !wasConnected:
                     // If we connected and weren't previously
-                    LogNewConnection();
                     wasConnected = true;
+                    if (!UpdateRobotAddress())
+                        QueuedLogger.Log("Connected to NT4");
                     OnConnect?.Invoke();
+                    break;
+                case true:
+                    // The address can be unknown at the connect edge, and a reconnect to another
+                    // address (USB to Wi-Fi) can happen between two polls
+                    UpdateRobotAddress();
                     break;
                 case false when wasConnected:
                     // If we disconnected and were previously
@@ -586,24 +597,46 @@ namespace QuestNav.Network
         }
 
         /// <summary>
-        /// Records and logs which server the client reached and the protocol it negotiated.
+        /// Records which server the client reached, and logs it with the negotiated protocol
+        /// when it changes. The address is diagnostic only, so a failed lookup never stops
+        /// connection handling.
         /// </summary>
-        private void LogNewConnection()
+        /// <returns>Whether the server's address is known</returns>
+        private bool UpdateRobotAddress()
         {
-            var connections = ntInstance.GetConnections();
+            if (connectionLookupFailed)
+                return false;
+
+            NtConnectionInfo[] connections;
+            try
+            {
+                connections = ntInstance.GetConnections();
+            }
+            catch (Exception e)
+            {
+                connectionLookupFailed = true;
+                QueuedLogger.LogWarning(
+                    $"Can't read the NT4 connection, so the robot address is unknown: {e.Message}"
+                );
+                return false;
+            }
+
             if (connections.Length == 0)
             {
                 // Dropped again between NT_IsConnected and NT_GetConnections
-                QueuedLogger.Log("Connected to NT4");
-                return;
+                return RobotIpAddress != "";
             }
 
             var connection = connections[0];
+            if (connection.RemoteIp == RobotIpAddress)
+                return true;
+
             RobotIpAddress = connection.RemoteIp;
             QueuedLogger.Log(
                 $"Connected to NT4 at {connection.RemoteIp}:{connection.RemotePort} "
                     + $"(protocol {connection.ProtocolVersionString})"
             );
+            return true;
         }
 
         /// <summary>

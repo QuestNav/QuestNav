@@ -25,7 +25,7 @@ on:
         description: 'The version code used for this build'
         value: ${{ jobs.build.outputs.version-code }}
       apk-artifact-id:
-        description: 'The artifact ID for the APK'
+        description: 'The artifact ID of the APK to be signed'
         value: ${{ jobs.build.outputs.apk-artifact-id }}
 jobs:
   build:
@@ -77,10 +77,11 @@ jobs:
           version: ${{ steps.version-info.outputs.version }}
           androidVersionCode: ${{ steps.version-info.outputs.version-code }}
 
-      - name: Upload APK Artifact
+      - name: Upload APK for release signing
         id: upload-apk
         uses: actions/upload-artifact@v7
         with:
-          name: questnav-apk-${{ steps.version-info.outputs.version }}
-          path: build/Android/*.apk
-          retention-days: 7
+          name: questnav-apk-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build/Android/Android.apk
+          if-no-files-found: error
+          retention-days: 1

@@ -37,7 +37,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           sparse-checkout: |
@@ -51,37 +51,37 @@ jobs:
           version: ${{ inputs.version }}
           
       - name: Restore Docs Artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: 'questnav-docs-${{ steps.version-info.outputs.version }}'
           path: docs
 
       - name: Restore DocFX Artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: 'questnav-docfx-${{ steps.version-info.outputs.version }}'
           path: docs/static/api/csharp
 
       - name: Restore Javadoc Artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: 'questnav-javadocs-${{ steps.version-info.outputs.version }}'
           path: docs/static/api/java
 
       - name: Restore Proto Docs Artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: 'questnav-proto-docs-${{ steps.version-info.outputs.version }}'
           path: docs/static/api/proto
       
       - name: Upload Combined Docs Artifact
-        uses: actions/upload-pages-artifact@v5
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           name: 'questnav-combined-docs-${{ steps.version-info.outputs.version }}'
           path: docs/
 
       - name: Publish to GitHub Pages
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
         id: deployment
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

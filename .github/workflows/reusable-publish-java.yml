@@ -7,19 +7,16 @@ on:
         description: 'Version string to use (optional, auto-generated if not provided)'
         required: false
         type: string
-    secrets:
-      MAVEN_USERNAME:
-        description: 'QuestNav Maven Username'
-        required: true
-      MAVEN_PASSWORD:
-        description: 'QuestNav Maven Password'
-        required: true
 
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
 
 jobs:
   publish:
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    environment: ${{ github.event_name == 'push' && 'maven-snapshots' || 'maven-releases' }}
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -27,9 +24,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          ref: ${{ github.sha }}
+          persist-credentials: false
           sparse-checkout: |
             questnav-lib
             .github
@@ -49,16 +47,19 @@ jobs:
           cache-key-prefix: gradle-publish
 
       - name: Publish to Maven
+        env:
+          ORG_GRADLE_PROJECT_mavenUsername: ${{ secrets.PUBLISH_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenPassword: ${{ secrets.PUBLISH_PASSWORD }}
+          VERSION_TYPE: ${{ steps.version-info.outputs.version-type }}
+          PROJECT_VERSION: ${{ steps.version-info.outputs.version }}
         run: |
-          ./gradlew publish \
-            -Pversion="${{ steps.version-info.outputs.version }}" \
-            -PversionType="${{ steps.version-info.outputs.version-type }}" \
-            -PmavenUsername="${{ secrets.MAVEN_USERNAME }}" \
-            -PmavenPassword="${{ secrets.MAVEN_PASSWORD }}" \
+          : "${ORG_GRADLE_PROJECT_mavenUsername:?Missing Maven environment username}"
+          : "${ORG_GRADLE_PROJECT_mavenPassword:?Missing Maven environment password}"
+          ./gradlew publish -Pversion="$PROJECT_VERSION" -PversionType="$VERSION_TYPE"
 
       - name: Upload Vendor JSON Artifact
         id: upload-json
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: questnav-json-${{ steps.version-info.outputs.version }}
           path: 'questnav-lib/build/generated/vendordeps/*.json'

@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           sparse-checkout: |
@@ -33,13 +33,13 @@ jobs:
           version: ${{ inputs.version }}
 
       - name: Install Protoc
-        uses: arduino/setup-protoc@v3
+        uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download QuickBuf plugin
         id: download-quickbuf
-        uses: clausnz/github-action-download-maven-artifact@master
+        uses: clausnz/github-action-download-maven-artifact@bad2e2130cb9d8c86412124298e5ba22ab9cfb66 # master
         with:
           url: 'https://repo1.maven.org'
           repository: 'maven2'
@@ -61,7 +61,7 @@ jobs:
           protos/data.proto protos/commands.proto
 
       - name: Upload Generated Proto Files
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: questnav-proto-java-${{ steps.version-info.outputs.version }}
           path: questnav-lib/src/main/java/gg/questnav/questnav/protos/generated

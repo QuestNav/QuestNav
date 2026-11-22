@@ -26,14 +26,15 @@ jobs:
       docs-changed: ${{ steps.changes.outputs.docs }}
       web-ui-changed: ${{ steps.changes.outputs.web-ui }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       
-      - uses: dorny/paths-filter@v4
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
         id: changes
         with:
           filters: |
             ci:
               - '.github/actions/**'
+              - '.github/scripts/**'
               - '.github/workflows/**'
             java:
               - 'questnav-lib/**/*.java'
@@ -98,9 +99,6 @@ jobs:
       github.ref == 'refs/heads/main'
     needs: [build-java]
     uses: ./.github/workflows/reusable-publish-java.yml
-    secrets:
-      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
 
 # ----------------------- C# ----------------------- #
   build-proto-csharp:
@@ -221,11 +219,18 @@ jobs:
     steps:
       - name: Generate CI Summary
         run: |
-          echo "# CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Changes Detected" >> $GITHUB_STEP_SUMMARY
-          echo "- CI configuration: \`${{ needs.detect-changes.outputs.ci-changed }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Java: \`${{ needs.detect-changes.outputs.java-changed }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- C#: \`${{ needs.detect-changes.outputs.csharp-changed }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Proto: \`${{ needs.detect-changes.outputs.proto-changed }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Docs: \`${{ needs.detect-changes.outputs.docs-changed }}\`" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "# CI Pipeline Summary"
+            echo ""
+            echo "## Changes Detected"
+            echo "- CI configuration: \`${{ needs.detect-changes.outputs.ci-changed }}\`"
+            echo "- Java: \`${{ needs.detect-changes.outputs.java-changed }}\`"
+            echo "- C#: \`${{ needs.detect-changes.outputs.csharp-changed }}\`"
+            echo "- Proto: \`${{ needs.detect-changes.outputs.proto-changed }}\`"
+            echo "- Docs: \`${{ needs.detect-changes.outputs.docs-changed }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Require successful CI jobs
+        env:
+          JOBS: ${{ toJSON(needs) }}
+        run: |
+          jq -e '."detect-changes".result == "success" and all(.[]; .result == "success" or .result == "skipped")' <<< "$JOBS"

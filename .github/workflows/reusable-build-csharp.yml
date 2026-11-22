@@ -1,87 +1,45 @@
-name: Build C#
+name: Build release APK
 
 on:
   workflow_call:
     inputs:
       version:
-        description: 'Version string to use (optional, auto-generated if not provided)'
-        required: false
+        description: Release version
         type: string
-    secrets:
-      UNITY_LICENSE:
-        description: 'Unity License'
-        required: true
-      UNITY_EMAIL:
-        description: 'Unity Email'
-        required: true
-      UNITY_PASSWORD:
-        description: 'Unity Password'
-        required: true
     outputs:
       version:
-        description: 'The version string used for this build'
-        value: ${{ jobs.build.outputs.version }}
+        value: ${{ jobs.version.outputs.name }}
       version-code:
-        description: 'The version code used for this build'
-        value: ${{ jobs.build.outputs.version-code }}
+        value: ${{ jobs.version.outputs.code }}
       apk-artifact-id:
-        description: 'The artifact ID of the APK to be signed'
-        value: ${{ jobs.build.outputs.apk-artifact-id }}
+        value: ${{ jobs.build.outputs.artifact-id }}
+
+permissions: {}
+
 jobs:
-  build:
-    runs-on: [self-hosted, Windows] # windows-latest
+  version:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.workflow_ref == 'QuestNav/QuestNav/.github/workflows/release.yml@refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
-      version: ${{ steps.version-info.outputs.version }}
-      version-code: ${{ steps.version-info.outputs.version-code }}
-      apk-artifact-id: ${{ steps.upload-apk.outputs.artifact-id }}
-
+      name: ${{ steps.version.outputs.version }}
+      code: ${{ steps.version.outputs.version-code }}
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.ref }}
-          sparse-checkout: |
-            unity
-            .github
-          sparse-checkout-cone-mode: false
-          lfs: true
-
-      # ONLY NEEDED WHEN USING GITHUB RUNNERS
-      # - name: Free Disk Space
-      #   uses: ./.github/actions/quest-windows-free-disk-space
-
-      - name: Determine Version
-        id: version-info
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - id: version
         uses: ./.github/actions/determine-version
         with:
           version: ${{ inputs.version }}
 
-      - name: Setup Unity Environment
-        uses: ./.github/actions/setup-unity-environment
-        with:
-          version: ${{ steps.version-info.outputs.version }}
-          unity-project-path: unity
-          cache-key-suffix: Android-Windows
-
-      - name: Build Unity APK
-        uses: game-ci/unity-builder@v6
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          projectPath: unity
-          targetPlatform: Android
-          customParameters: -developmentBuild
-          versioning: Custom
-          version: ${{ steps.version-info.outputs.version }}
-          androidVersionCode: ${{ steps.version-info.outputs.version-code }}
-
-      - name: Upload APK for release signing
-        id: upload-apk
-        uses: actions/upload-artifact@v7
-        with:
-          name: questnav-apk-candidate-${{ github.run_id }}-${{ github.run_attempt }}
-          path: build/Android/Android.apk
-          if-no-files-found: error
-          retention-days: 1
+  build:
+    needs: version
+    uses: QuestNav/QuestNav/.github/workflows/development-apk.yml@main
+    with:
+      release-version: ${{ needs.version.outputs.name }}
+      release-version-code: ${{ needs.version.outputs.code }}

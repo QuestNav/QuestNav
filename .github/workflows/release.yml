@@ -96,6 +96,49 @@ jobs:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
+  sign-apk:
+    needs: build-apk
+    runs-on: ubuntu-24.04
+    environment: android-release
+    permissions:
+      contents: read
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+
+      - name: Download this build's APK
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          artifact-ids: ${{ needs.build-apk.outputs.apk-artifact-id }}
+          merge-multiple: true
+          path: candidate
+
+      - name: Sign and verify the release APK
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ vars.ANDROID_KEY_ALIAS }}
+          ANDROID_SIGNER_SHA256: ${{ vars.ANDROID_SIGNER_SHA256 }}
+          RELEASE_VERSION: ${{ needs.build-apk.outputs.version }}
+          RELEASE_CODE: ${{ needs.build-apk.outputs.version-code }}
+        run: bash .github/scripts/sign-release-apk.sh candidate signed
+
+      - name: Upload signed Android.apk
+        id: upload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: questnav-apk-${{ needs.build-apk.outputs.version }}
+          path: signed/Android.apk
+          if-no-files-found: error
+          compression-level: 0
+          overwrite: true
+          retention-days: 7
+
   publish-docs:
     if: |
       (needs.determine-publishable-changes.outputs.docs-changed == 'true') ||
@@ -132,7 +175,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: [build-apk, publish-docs, publish-java, determine-publishable-changes]
+    needs: [sign-apk, publish-docs, publish-java, determine-publishable-changes]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
@@ -143,17 +186,26 @@ jobs:
         with:
           version: ${{ inputs.version }}
 
-      - name: Download APK
+      - name: Require a signed APK artifact
+        # An empty artifact-ids input would download every artifact in the run.
+        env:
+          ARTIFACT_ID: ${{ needs.sign-apk.outputs.artifact-id }}
+        shell: bash
+        run: |
+          [[ "$ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]] || { echo 'Missing signed APK artifact ID' >&2; exit 1; }
+
+      - name: Download signed Android.apk
         uses: actions/download-artifact@v8
         with:
-          name: 'questnav-apk-${{ steps.version-info.outputs.version }}'
-          path: 'release'
+          artifact-ids: ${{ needs.sign-apk.outputs.artifact-id }}
+          merge-multiple: true
+          path: release/apk
 
       - name: Download Vendor JSON
         uses: actions/download-artifact@v8
         with:
           name: 'questnav-json-${{ steps.version-info.outputs.version }}'
-          path: 'release'
+          path: release/vendor
 
       - name: Release to GitHub Releases
         uses: softprops/action-gh-release@v3
@@ -161,6 +213,8 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
           tag_name: ${{ steps.version-info.outputs.version }}
-          files: release/**
+          files: |
+            release/apk/Android.apk
+            release/vendor/*.json
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}

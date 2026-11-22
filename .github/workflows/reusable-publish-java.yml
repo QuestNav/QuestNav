@@ -12,16 +12,15 @@ env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
 
 jobs:
-  publish:
+  version:
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    environment: ${{ github.event_name == 'push' && 'maven-snapshots' || 'maven-releases' }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: questnav-lib
-
+    outputs:
+      name: ${{ steps.version-info.outputs.version }}
+      type: ${{ steps.version-info.outputs.version-type }}
+      repository: ${{ steps.destination.outputs.repository }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -39,10 +38,42 @@ jobs:
         with:
           version: ${{ inputs.version }}
 
+      - name: Select Maven repository
+        id: destination
+        env:
+          VERSION: ${{ steps.version-info.outputs.version }}
+          VERSION_TYPE: ${{ steps.version-info.outputs.version-type }}
+        run: |
+          repository=releases
+          case "$GITHUB_EVENT_NAME:$VERSION_TYPE:$VERSION" in
+            push:*|*:dev:*|*:snapshot:*|*:pr:*|*:*:*-SNAPSHOT*) repository=snapshots ;;
+          esac
+          echo "repository=$repository" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: version
+    environment: maven-${{ needs.version.outputs.repository }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: questnav-lib
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            questnav-lib
+            .github
+          sparse-checkout-cone-mode: false
+
       - name: Setup Java and Gradle
         uses: ./.github/actions/setup-java-gradle
         with:
-          version: ${{ steps.version-info.outputs.version }}
+          version: ${{ needs.version.outputs.name }}
           working-directory: questnav-lib
           cache-key-prefix: gradle-publish
 
@@ -50,17 +81,18 @@ jobs:
         env:
           ORG_GRADLE_PROJECT_mavenUsername: ${{ secrets.PUBLISH_USERNAME }}
           ORG_GRADLE_PROJECT_mavenPassword: ${{ secrets.PUBLISH_PASSWORD }}
-          VERSION_TYPE: ${{ steps.version-info.outputs.version-type }}
-          PROJECT_VERSION: ${{ steps.version-info.outputs.version }}
+          VERSION_TYPE: ${{ needs.version.outputs.type }}
+          MAVEN_REPOSITORY: ${{ needs.version.outputs.repository }}
+          PROJECT_VERSION: ${{ needs.version.outputs.name }}
         run: |
           : "${ORG_GRADLE_PROJECT_mavenUsername:?Missing Maven environment username}"
           : "${ORG_GRADLE_PROJECT_mavenPassword:?Missing Maven environment password}"
-          ./gradlew publish -Pversion="$PROJECT_VERSION" -PversionType="$VERSION_TYPE"
+          ./gradlew publish -Pversion="$PROJECT_VERSION" -PversionType="$VERSION_TYPE" -PmavenRepository="$MAVEN_REPOSITORY"
 
       - name: Upload Vendor JSON Artifact
         id: upload-json
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: questnav-json-${{ steps.version-info.outputs.version }}
+          name: questnav-json-${{ needs.version.outputs.name }}
           path: 'questnav-lib/build/generated/vendordeps/*.json'
           retention-days: 7

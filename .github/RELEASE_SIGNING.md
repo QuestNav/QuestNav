@@ -20,4 +20,4 @@ Read the public fingerprint with `keytool -list -v -keystore <file> -alias <alia
 
 ## Maven publishing
 
-CI publishes snapshots from `main` through the `maven-snapshots` environment. The manually dispatched release workflow uses `maven-releases`, which requires independent approval. Both environments allow only `main`. Configure `PUBLISH_USERNAME` and `PUBLISH_PASSWORD` separately in each environment, using registry credentials scoped to the corresponding repository.
+CI publishes snapshots from `main` through the `maven-snapshots` environment. Feature release versions use `maven-releases`, which requires independent approval. Development versions publish to the snapshot repository. Both environments allow only `main`. Configure `PUBLISH_USERNAME` and `PUBLISH_PASSWORD` separately in each environment, using registry credentials scoped to the corresponding repository.

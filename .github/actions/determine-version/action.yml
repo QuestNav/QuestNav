@@ -43,7 +43,7 @@ runs:
             MAJOR="${BASH_REMATCH[2]}"
             MINOR="${BASH_REMATCH[3]}"
             PATCH="${BASH_REMATCH[4]}"
-            TYPE="${BASH_REMATCH[6]}"
+            TYPE="${BASH_REMATCH[6]:-release}"
             
             TYPE_OFFSET=0
             case "$TYPE" in
@@ -57,6 +57,7 @@ runs:
             
             echo "strategy=semantic" >> $GITHUB_OUTPUT
           else
+            TYPE=dev
             # Non-semantic version, use commit count
             COMMIT_COUNT=$(git rev-list --count HEAD)
             VERSION_CODE=$(( 1000000 + $COMMIT_COUNT ))

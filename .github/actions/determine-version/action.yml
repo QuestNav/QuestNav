@@ -43,7 +43,9 @@ runs:
             MAJOR="${BASH_REMATCH[2]}"
             MINOR="${BASH_REMATCH[3]}"
             PATCH="${BASH_REMATCH[4]}"
-            TYPE="${BASH_REMATCH[6]}"
+            # No suffix is a full release. Left empty, Gradle reads it as "dev" and publishes the
+            # release to /snapshots, as happened to 2026-1.0.0 through 2026-2.2.0
+            TYPE="${BASH_REMATCH[6]:-release}"
             
             TYPE_OFFSET=0
             case "$TYPE" in
@@ -60,6 +62,7 @@ runs:
             # Non-semantic version, use commit count
             COMMIT_COUNT=$(git rev-list --count HEAD)
             VERSION_CODE=$(( 1000000 + $COMMIT_COUNT ))
+            TYPE="dev"
             
             echo "strategy=hash" >> $GITHUB_OUTPUT
           fi

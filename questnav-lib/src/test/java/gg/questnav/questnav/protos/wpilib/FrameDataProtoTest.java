@@ -96,13 +96,13 @@ class FrameDataProtoTest {
     var buffer = ProtobufBuffer.create(proto);
     var pose = new Pose3d(1.25, -2.5, 0.75, new Rotation3d(0.1, -0.2, 2.9));
     var msg = proto.createMessage();
-    proto.pack(msg, new PoseFrame(pose, 5.0, 2.0, 3, true));
+    proto.pack(msg, new PoseFrame(pose, 5.0, 2.0, 3, true, AlignmentState.TAG_ALIGNED, 7));
     var first = buffer.read(msg.toByteArray());
     assertEquals(pose, first.questPose3d());
     assertEquals(5.0, first.dataTimestamp());
 
     // The app's encoder leaves out zero values, as here for a lost-tracking frame at the origin
-    // sent before time sync, which has no server timestamp
+    // sent before time sync (no server timestamp) by an app that predates the alignment fields
     var lostMsg = Data.ProtobufQuestNavFrameData.newInstance().setFrameCount(4).setTimestamp(2.5);
     lostMsg.getMutablePose3D().getMutableTranslation();
     lostMsg.getMutablePose3D().getMutableRotation().getMutableQ().setW(1.0);
@@ -113,6 +113,8 @@ class FrameDataProtoTest {
     assertEquals(2.5, lost.appTimestamp());
     assertEquals(4, lost.frameCount());
     assertFalse(lost.isTracking());
+    assertEquals(AlignmentState.UNKNOWN, lost.alignmentState());
+    assertEquals(0, lost.resetEpoch());
   }
 
   @Test

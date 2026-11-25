@@ -14,12 +14,17 @@ const latestVersion = versions[0];
 // Newest QuestNavLib release for 2026 (roboRIO) robots. Update it when a new 2026 lib is published.
 const questnavLib2026Version = '2026-3.0.0-beta';
 
-// Mirrors the repository choice in questnav-lib/build.gradle: plain, dev, snapshot and pr
-// versions are published to /snapshots, prereleases such as -beta and -rc to /releases.
+// Releases CI published to /snapshots before it typed versions without a suffix as releases
+const plainReleasesInSnapshots = ['2026-1.0.0', '2026-2.1.0', '2026-2.2.0'];
+
+// Mirrors the repository choice in CI and questnav-lib/build.gradle: dev, snapshot and pr
+// versions go to /snapshots; releases and prereleases such as -beta and -rc go to /releases.
 function questnavLibJsonUrl(version: string): string {
   const versionType = version.split('-').slice(2).join('-');
   const isSnapshot =
-    ['', 'dev', 'snapshot', 'pr'].includes(versionType) || version.includes('-SNAPSHOT');
+    ['dev', 'snapshot', 'pr'].includes(versionType) ||
+    version.includes('-SNAPSHOT') ||
+    plainReleasesInSnapshots.includes(version);
   const repo = isSnapshot ? 'snapshots' : 'releases';
   return `https://maven.questnav.gg/${repo}/gg/questnav/questnavlib-json/${version}/questnavlib-json-${version}.json`;
 }

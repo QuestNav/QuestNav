@@ -37,10 +37,10 @@ namespace QuestNav.Config
         public Task CloseAsync();
 
         /// <summary>
-        /// Validates the SQLite file at <paramref name="candidatePath"/> and, if it is an intact
-        /// config database, closes the live connection, replaces the database file with it and
-        /// reopens. Throws <see cref="InvalidDataException"/> and leaves the live database
-        /// untouched if validation fails. Running subsystems pick up the new values on restart.
+        /// Validates the SQLite file at <paramref name="candidatePath"/> and, if it opens as a
+        /// config database, moves it aside to replace the live database on the next start.
+        /// Throws <see cref="InvalidDataException"/> and leaves the live database untouched if
+        /// validation fails.
         /// </summary>
         public Task ReplaceDatabaseAsync(string candidatePath);
 
@@ -317,10 +317,7 @@ namespace QuestNav.Config
     /// </summary>
     public class ConfigManager : IConfigManager
     {
-        private static readonly string dbPath = Path.Combine(
-            Application.persistentDataPath,
-            "config.db"
-        );
+        private readonly string dbPath;
         private static readonly string[] SqliteSidecarSuffixes = { "-journal", "-wal", "-shm" };
 
         /// <summary>
@@ -338,6 +335,25 @@ namespace QuestNav.Config
         private SQLiteAsyncConnection connection;
         private SynchronizationContext mainThreadContext;
 
+        /// <summary>
+        /// Uses config.db in the app's persistent data directory.
+        /// </summary>
+        public ConfigManager()
+            : this(Path.Combine(Application.persistentDataPath, "config.db")) { }
+
+        /// <summary>
+        /// Uses the database at <paramref name="dbPath"/>.
+        /// </summary>
+        public ConfigManager(string dbPath)
+        {
+            this.dbPath = dbPath;
+        }
+
+        /// <summary>
+        /// An uploaded database waiting to replace <see cref="dbPath"/> on the next open.
+        /// </summary>
+        private string PendingPath => dbPath + ".pending";
+
         #region Lifecycle Methods
         /// <summary>
         /// Opens the SQLite connection and creates / migrates tables, but does NOT fire
@@ -350,25 +366,23 @@ namespace QuestNav.Config
         /// </summary>
         public async Task OpenAsync()
         {
-            // Capture the main thread context for event callbacks. Keep the first one so a
-            // reopen from a web server thread does not clear it.
-            if (mainThreadContext == null)
-                mainThreadContext = SynchronizationContext.Current;
+            // Capture the main thread context for event callbacks
+            mainThreadContext = SynchronizationContext.Current;
 
             SQLitePCL.Batteries_V2.Init();
 
             if (connection != null)
                 return;
 
+            ApplyPendingDatabase();
+
             try
             {
-                await OpenConnectionAsync();
+                connection = await OpenConnectionAsync(dbPath);
             }
             catch (SQLiteException ex)
                 when (ex.Result == SQLite3.Result.Corrupt || ex.Result == SQLite3.Result.NonDBFile)
             {
-                await CloseAsync();
-
                 string corruptPath = $"{dbPath}.corrupt-{DateTime.UtcNow:yyyyMMdd'T'HHmmss'Z'}";
                 MoveDatabaseFiles(dbPath, corruptPath);
                 QueuedLogger.LogError(
@@ -376,7 +390,7 @@ namespace QuestNav.Config
                         + "and recreated it with default settings."
                 );
 
-                await OpenConnectionAsync();
+                connection = await OpenConnectionAsync(dbPath);
             }
 
             QueuedLogger.Log($"Database initialized at: {dbPath}");
@@ -385,91 +399,124 @@ namespace QuestNav.Config
         /// <inheritdoc/>
         public async Task ReplaceDatabaseAsync(string candidatePath)
         {
-            ValidateDatabaseFile(candidatePath);
+            await ValidateDatabaseFileAsync(candidatePath);
 
-            await CloseAsync();
-            try
+            // Swapped in on the next start rather than now, so requests still using the open
+            // connection can't end up on the replaced file
+            File.Delete(PendingPath);
+            File.Move(candidatePath, PendingPath);
+
+            QueuedLogger.Log("Uploaded config database will replace the current one on restart");
+        }
+
+        /// <summary>
+        /// Replaces the database with an uploaded one waiting from the last run, if there is one.
+        /// </summary>
+        private void ApplyPendingDatabase()
+        {
+            if (!File.Exists(PendingPath))
+                return;
+
+            // Journals of the old database must not be applied to the new one
+            foreach (string suffix in SqliteSidecarSuffixes)
             {
-                foreach (string suffix in SqliteSidecarSuffixes)
-                {
-                    File.Delete(dbPath + suffix);
-                }
-
-                if (File.Exists(dbPath))
-                    File.Replace(candidatePath, dbPath, null);
-                else
-                    File.Move(candidatePath, dbPath);
-            }
-            finally
-            {
-                await OpenAsync();
+                File.Delete(dbPath + suffix);
             }
 
-            QueuedLogger.Log("Config database replaced from upload");
+            if (File.Exists(dbPath))
+                File.Replace(PendingPath, dbPath, null);
+            else
+                File.Move(PendingPath, dbPath);
+
+            QueuedLogger.Log("Replaced the config database with the uploaded one");
         }
 
         /// <summary>
         /// Throws <see cref="InvalidDataException"/> unless the file is an intact SQLite
-        /// database containing the config tables.
+        /// database containing the config tables that opens the way it would at startup.
+        /// Opening it creates missing tables, so the file is changed in place.
         /// </summary>
-        private static void ValidateDatabaseFile(string path)
+        private static async Task ValidateDatabaseFileAsync(string path)
         {
             try
             {
-                using var db = new SQLiteConnection(path, SQLiteOpenFlags.ReadOnly);
+                using (var db = new SQLiteConnection(path, SQLiteOpenFlags.ReadOnly))
+                {
+                    string integrity = db.ExecuteScalar<string>("PRAGMA integrity_check");
+                    if (integrity != "ok")
+                        throw new InvalidDataException($"Integrity check failed: {integrity}");
 
-                string integrity = db.ExecuteScalar<string>("PRAGMA integrity_check");
-                if (integrity != "ok")
-                    throw new InvalidDataException($"Integrity check failed: {integrity}");
-
-                var tables = new HashSet<string>(
-                    db.QueryScalars<string>("SELECT name FROM sqlite_master WHERE type = 'table'"),
-                    StringComparer.OrdinalIgnoreCase
-                );
-                string[] missing = RequiredTables.Where(t => !tables.Contains(t)).ToArray();
-                if (missing.Length > 0)
-                    throw new InvalidDataException(
-                        $"Not a QuestNav config database (missing tables: {string.Join(", ", missing)})"
+                    var tables = new HashSet<string>(
+                        db.QueryScalars<string>(
+                            "SELECT name FROM sqlite_master WHERE type = 'table'"
+                        ),
+                        StringComparer.OrdinalIgnoreCase
                     );
+                    string[] missing = RequiredTables.Where(t => !tables.Contains(t)).ToArray();
+                    if (missing.Length > 0)
+                        throw new InvalidDataException(
+                            "Not a QuestNav config database (missing tables: "
+                                + $"{string.Join(", ", missing)})"
+                        );
+                }
+
+                // Tables with the right names can still fail to migrate, which would fail
+                // every start after the swap
+                var candidate = await OpenConnectionAsync(path);
+                await candidate.CloseAsync();
             }
             catch (SQLiteException ex)
             {
-                throw new InvalidDataException($"Not a readable SQLite database: {ex.Message}", ex);
+                throw new InvalidDataException($"Not a usable config database: {ex.Message}", ex);
             }
         }
 
         /// <summary>
-        /// Opens the connection, checks it for corruption, and creates any missing tables.
+        /// Opens a connection to <paramref name="path"/>, checks it for corruption, and creates
+        /// any missing tables. The connection is closed if any step fails.
         /// </summary>
-        private async Task OpenConnectionAsync()
+        private static async Task<SQLiteAsyncConnection> OpenConnectionAsync(string path)
         {
-            connection = new SQLiteAsyncConnection(dbPath);
+            var db = new SQLiteAsyncConnection(path);
+            try
+            {
+                // Opening and CREATE TABLE only read the schema; this also reads the data pages.
+                string check = await db.ExecuteScalarAsync<string>("PRAGMA quick_check");
+                if (check != "ok")
+                    throw SQLiteException.New(
+                        SQLite3.Result.Corrupt,
+                        $"quick_check failed: {check}"
+                    );
 
-            // Opening and CREATE TABLE only read the schema; this also reads the data pages.
-            string check = await connection.ExecuteScalarAsync<string>("PRAGMA quick_check");
-            if (check != "ok")
-                throw SQLiteException.New(SQLite3.Result.Corrupt, $"quick_check failed: {check}");
+                // Create with defaults if they don't already exist
+                await db.CreateTableAsync<Config.Network>();
+                await db.CreateTableAsync<Config.System>();
+                await db.CreateTableAsync<Config.Camera>();
+                await db.CreateTableAsync<Config.AprilTag>();
+                await db.CreateTableAsync<Config.AprilTagIgnoredId>();
+                await db.CreateTableAsync<Config.Logging>();
 
-            // Create with defaults if they don't already exist
-            await connection.CreateTableAsync<Config.Network>();
-            await connection.CreateTableAsync<Config.System>();
-            await connection.CreateTableAsync<Config.Camera>();
-            await connection.CreateTableAsync<Config.AprilTag>();
-            await connection.CreateTableAsync<Config.AprilTagIgnoredId>();
-            await connection.CreateTableAsync<Config.Logging>();
-
-            // Only TRADITIONAL is implemented. Older builds could persist other modes, and the
-            // web UI posts the stored mode back on every AprilTag change, which the server rejects.
-            int traditional = (int)AprilTagDetectorMode.DetectionMode.TRADITIONAL;
-            int resetRows = await connection.ExecuteAsync(
-                "UPDATE AprilTag SET AprilTagDetectorMode = ? WHERE AprilTagDetectorMode != ?",
-                traditional,
-                traditional
-            );
-            if (resetRows > 0)
-                QueuedLogger.LogWarning(
-                    "Stored AprilTag detector mode is not implemented; reset it to TRADITIONAL."
+                // Only TRADITIONAL is implemented. Older builds could persist other modes, and
+                // the web UI posts the stored mode back on every AprilTag change, which the
+                // server rejects.
+                int traditional = (int)AprilTagDetectorMode.DetectionMode.TRADITIONAL;
+                int resetRows = await db.ExecuteAsync(
+                    "UPDATE AprilTag SET AprilTagDetectorMode = ? WHERE AprilTagDetectorMode != ?",
+                    traditional,
+                    traditional
                 );
+                if (resetRows > 0)
+                    QueuedLogger.LogWarning(
+                        "Stored AprilTag detector mode is not implemented; reset it to TRADITIONAL."
+                    );
+
+                return db;
+            }
+            catch
+            {
+                await db.CloseAsync();
+                throw;
+            }
         }
 
         /// <summary>

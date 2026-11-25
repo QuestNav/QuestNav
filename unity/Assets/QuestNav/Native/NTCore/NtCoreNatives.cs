@@ -137,7 +137,7 @@ namespace QuestNav.Native.NTCore
         public WpiString remoteId;
         public WpiString remoteIp;
         public uint remotePort;
-        public ulong lastUpdate;
+        public long lastUpdate;
         public uint protocolVersion;
     }
 
@@ -262,11 +262,23 @@ namespace QuestNav.Native.NTCore
          * will not appear in metatopics.
          */
         public int hidden;
+
+        /**
+        * For subscriptions, don't signal the local handle when value updates are
+        * queued.
+        */
+        public int disableSignal;
     }
 
     public unsafe class NtCoreNatives
     {
         public const int NT_DEFAULT_PORT4 = 5810;
+
+        /// <summary>
+        /// allwpilib tag the bundled ntcore libraries were built from. ntcore has no version API,
+        /// so this must match allwpilib-tag in Assets/Plugins/ntcore/VERSION (checked by a test).
+        /// </summary>
+        public const string ALLWPILIB_TAG = "v2027.0.0-alpha-8";
 
         // public const string NT_LIBRARY = "ntcore";
 
@@ -282,13 +294,25 @@ namespace QuestNav.Native.NTCore
         );
 
         [DllImport("ntcore")]
-        public static extern void NT_StartClient4(uint inst, WpiString* identity);
+        public static extern void NT_StartClient(uint inst, WpiString* identity);
 
         [DllImport("ntcore")]
-        public static extern void NT_SetServerTeam(uint inst, uint team, uint port);
+        public static extern void NT_SetServerTeam(uint inst, WpiString* team, uint port);
 
         [DllImport("ntcore")]
         public static extern int NT_IsConnected(uint inst);
+
+        [DllImport("ntcore")]
+        public static extern long NT_GetServerTimeOffset(uint inst, int* valid);
+
+        [DllImport("ntcore")]
+        public static extern NativeConnectionInfo* NT_GetConnections(uint inst, UIntPtr* count);
+
+        [DllImport("ntcore")]
+        public static extern void NT_DisposeConnectionInfoArray(
+            NativeConnectionInfo* arr,
+            UIntPtr count
+        );
 
         [DllImport("ntcore")]
         public static extern uint NT_GetTopic(uint inst, WpiString* name);

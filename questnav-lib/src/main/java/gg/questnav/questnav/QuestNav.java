@@ -8,21 +8,6 @@
 */
 package gg.questnav.questnav;
 
-import static edu.wpi.first.units.Units.Microseconds;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Seconds;
-
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.proto.Pose3dProto;
-import edu.wpi.first.math.proto.Geometry3D;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.ProtobufPublisher;
-import edu.wpi.first.networktables.ProtobufSubscriber;
-import edu.wpi.first.networktables.PubSubOption;
-import edu.wpi.first.networktables.StringSubscriber;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import gg.questnav.questnav.protos.generated.Commands;
 import gg.questnav.questnav.protos.generated.Data;
 import gg.questnav.questnav.protos.wpilib.CommandProto;
@@ -33,6 +18,17 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import org.wpilib.driverstation.DriverStationErrors;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.proto.Pose3dProto;
+import org.wpilib.math.geometry.proto.detail.ProtobufPose3d;
+import org.wpilib.networktables.NetworkTable;
+import org.wpilib.networktables.NetworkTableInstance;
+import org.wpilib.networktables.ProtobufPublisher;
+import org.wpilib.networktables.ProtobufSubscriber;
+import org.wpilib.networktables.PubSubOption;
+import org.wpilib.networktables.StringSubscriber;
+import org.wpilib.system.Timer;
 
 /**
  * The QuestNav class provides a comprehensive interface for communicating with an Oculus/Meta Quest
@@ -56,10 +52,10 @@ import java.util.function.IntConsumer;
  *
  * // Register callbacks
  * questNav.onConnected(() -> System.out.println("Quest connected!"));
- * questNav.onDisconnected(() -> DriverStation.reportWarning("Quest disconnected!", false));
- * questNav.onTrackingLost(() -> DriverStation.reportWarning("Quest tracking lost!", false));
+ * questNav.onDisconnected(() -> DriverStationErrors.reportWarning("Quest disconnected!", false));
+ * questNav.onTrackingLost(() -> DriverStationErrors.reportWarning("Quest tracking lost!", false));
  * questNav.onTrackingAcquired(() -> System.out.println("Quest tracking acquired!"));
- * questNav.onLowBattery(20, level -> DriverStation.reportWarning("Quest battery low: " + level + "%", false));
+ * questNav.onLowBattery(20, level -> DriverStationErrors.reportWarning("Quest battery low: " + level + "%", false));
  *
  * // Set initial robot pose (required for field-relative tracking)
  * Pose2d initialPose = new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(90));
@@ -112,8 +108,8 @@ import java.util.function.IntConsumer;
  * </ul>
  *
  * @see PoseFrame
- * @see edu.wpi.first.math.geometry.Pose2d
- * @see edu.wpi.first.networktables.NetworkTableInstance
+ * @see org.wpilib.math.geometry.Pose2d
+ * @see org.wpilib.networktables.NetworkTableInstance
  * @since 2025.1.0
  * @author QuestNav Team
  */
@@ -123,6 +119,9 @@ public class QuestNav {
    * Interval at which to check and log if the QuestNavLib version matches the QuestNav app version
    */
   private static final double VERSION_CHECK_INTERVAL_SECONDS = 5.0;
+
+  /** Time without a new frame after which the Quest is considered disconnected */
+  private static final double CONNECTION_TIMEOUT_SECONDS = 0.120;
 
   /** Battery percentage at or below which {@link #onLowBatteryCallback} fires */
   private int lowBatteryThreshold = 20;
@@ -155,17 +154,17 @@ public class QuestNav {
           .subscribe(
               Commands.ProtobufQuestNavCommandResponse.newInstance(),
               PubSubOption.periodic(0.05),
-              PubSubOption.sendAll(true),
+              PubSubOption.SEND_ALL,
               PubSubOption.pollStorage(20));
 
   /** Subscriber for frame data */
-  private final ProtobufSubscriber<Data.ProtobufQuestNavFrameData> frameDataSubscriber =
+  private final ProtobufSubscriber<PoseFrame> frameDataSubscriber =
       questNavTable
           .getProtobufTopic("frameData", frameDataProto)
           .subscribe(
-              Data.ProtobufQuestNavFrameData.newInstance(),
+              new PoseFrame(new Pose3d(), 0, 0, 0, false),
               PubSubOption.periodic(0.01),
-              PubSubOption.sendAll(true),
+              PubSubOption.SEND_ALL,
               PubSubOption.pollStorage(20));
 
   /** Subscriber for device data */
@@ -191,7 +190,7 @@ public class QuestNav {
       Commands.ProtobufQuestNavPoseResetPayload.newInstance();
 
   /** Cached proto pose (for reset requests) to lessen GC pressure */
-  private final Geometry3D.ProtobufPose3d cachedProtoPose = Geometry3D.ProtobufPose3d.newInstance();
+  private final ProtobufPose3d cachedProtoPose = ProtobufPose3d.newInstance();
 
   /** Last sent request id */
   private int lastSentRequestId = 0;
@@ -367,7 +366,7 @@ public class QuestNav {
                   + "This may cause compatibility issues. Check the version of your vendordep and the app running on your headset.",
               libVersion, questNavVersion);
 
-      DriverStation.reportWarning(warningMessage, false);
+      DriverStationErrors.reportWarning(warningMessage, false);
     }
   }
 
@@ -500,11 +499,10 @@ public class QuestNav {
    * @see #isConnected()
    */
   public OptionalInt getBatteryPercent() {
-    Data.ProtobufQuestNavDeviceData latestDeviceData = deviceDataSubscriber.get();
-    if (latestDeviceData != null) {
-      return OptionalInt.of(latestDeviceData.getBatteryPercent());
+    if (!hasDeviceData()) {
+      return OptionalInt.empty();
     }
-    return OptionalInt.empty();
+    return OptionalInt.of(deviceDataSubscriber.get().getBatteryPercent());
   }
 
   /**
@@ -513,24 +511,31 @@ public class QuestNav {
    * @return The frame count value, or empty if no frame data is available
    */
   public OptionalInt getFrameCount() {
-    Data.ProtobufQuestNavFrameData latestFrameData = frameDataSubscriber.get();
-    if (latestFrameData != null) {
-      return OptionalInt.of(latestFrameData.getFrameCount());
+    if (frameDataSubscriber.getLastChange() == 0) {
+      return OptionalInt.empty();
     }
-    return OptionalInt.empty();
+    return OptionalInt.of(frameDataSubscriber.get().frameCount());
   }
 
   /**
    * Gets the number of tracking lost events since the Quest connected to the robot.
    *
-   * @return The tracking lost counter value, or empty if no device data is available
+   * @return The tracking lost counter value, or empty if no device data is available or Quest is
+   *     disconnected
    */
   public OptionalInt getTrackingLostCounter() {
-    Data.ProtobufQuestNavDeviceData latestDeviceData = deviceDataSubscriber.get();
-    if (latestDeviceData != null) {
-      return OptionalInt.of(latestDeviceData.getTrackingLostCounter());
+    if (!hasDeviceData()) {
+      return OptionalInt.empty();
     }
-    return OptionalInt.empty();
+    return OptionalInt.of(deviceDataSubscriber.get().getTrackingLostCounter());
+  }
+
+  /**
+   * Whether the Quest is connected and has published device data. The subscriber returns a default
+   * instance until then, so a zero battery level would otherwise look like real data.
+   */
+  private boolean hasDeviceData() {
+    return deviceDataSubscriber.getLastChange() != 0 && isConnected();
   }
 
   /**
@@ -540,9 +545,9 @@ public class QuestNav {
    * @return Boolean indicating if the Quest is connected (true) or not (false)
    */
   public boolean isConnected() {
-    return Seconds.of(Timer.getTimestamp())
-        .minus(Microseconds.of(frameDataSubscriber.getLastChange()))
-        .lt(Milliseconds.of(120));
+    long lastChange = frameDataSubscriber.getLastChange();
+    return lastChange != 0
+        && Timer.getTimestamp() - ntTimeToSeconds(lastChange) < CONNECTION_TIMEOUT_SECONDS;
   }
 
   /**
@@ -552,9 +557,7 @@ public class QuestNav {
    * @return The latency in milliseconds
    */
   public double getLatency() {
-    return Seconds.of(Timer.getTimestamp())
-        .minus(Microseconds.of(frameDataSubscriber.getLastChange()))
-        .in(Milliseconds);
+    return (Timer.getTimestamp() - ntTimeToSeconds(frameDataSubscriber.getLastChange())) * 1000.0;
   }
 
   /**
@@ -569,11 +572,10 @@ public class QuestNav {
    * @see #getAllUnreadPoseFrames()
    */
   public OptionalDouble getAppTimestamp() {
-    Data.ProtobufQuestNavFrameData latestFrameData = frameDataSubscriber.get();
-    if (latestFrameData != null) {
-      return OptionalDouble.of(latestFrameData.getTimestamp());
+    if (frameDataSubscriber.getLastChange() == 0) {
+      return OptionalDouble.empty();
     }
-    return OptionalDouble.empty();
+    return OptionalDouble.of(frameDataSubscriber.get().appTimestamp());
   }
 
   /**
@@ -592,7 +594,7 @@ public class QuestNav {
   public boolean isTracking() {
     var frameData = frameDataSubscriber.get();
     if (frameData != null) {
-      return frameData.getIsTracking();
+      return frameData.isTracking();
     }
     return false;
   }
@@ -602,7 +604,7 @@ public class QuestNav {
    *
    * <p>This is the primary method for integrating QuestNav with FRC pose estimation systems. It
    * returns an array of {@link PoseFrame} objects containing pose data and timestamps that can be
-   * fed directly into a {@link edu.wpi.first.math.estimator.PoseEstimator}.
+   * fed directly into a {@link org.wpilib.math.estimator.PoseEstimator}.
    *
    * <p><strong>Important:</strong> This method consumes the frame queue, so each frame is only
    * returned once. Call this method regularly (every robot loop) to avoid missing frames.
@@ -633,15 +635,30 @@ public class QuestNav {
     var result = new PoseFrame[frameDataArray.length];
     for (int i = 0; i < result.length; i++) {
       var frameData = frameDataArray[i];
-      result[i] =
-          new PoseFrame(
-              pose3dProto.unpack(frameData.value.getPose3D()),
-              Microseconds.of(frameData.serverTime).in(Seconds),
-              frameData.value.getTimestamp(),
-              frameData.value.getFrameCount(),
-              frameData.value.getIsTracking());
+      var frame = frameData.value;
+      if (frame.dataTimestamp() == 0) {
+        // Older QuestNav apps don't send a capture time; fall back to the NT receive time
+        frame =
+            new PoseFrame(
+                frame.questPose3d(),
+                ntTimeToSeconds(frameData.serverTime),
+                frame.appTimestamp(),
+                frame.frameCount(),
+                frame.isTracking());
+      }
+      result[i] = frame;
     }
     return result;
+  }
+
+  /**
+   * Converts a NetworkTables timestamp (integer nanoseconds) to seconds.
+   *
+   * @param ntTime NetworkTables timestamp in nanoseconds
+   * @return The timestamp in seconds
+   */
+  private static double ntTimeToSeconds(long ntTime) {
+    return ntTime * 1e-9;
   }
 
   /**
@@ -697,7 +714,8 @@ public class QuestNav {
           onSuccessCallback.accept(response);
         }
       } else {
-        DriverStation.reportError("QuestNav command failed!\n" + response.getErrorMessage(), false);
+        DriverStationErrors.reportError(
+            "QuestNav command failed!\n" + response.getErrorMessage(), false);
         if (onFailureCallback != null) {
           onFailureCallback.accept(response);
         }

@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 
 namespace QuestNav.Native.NTCore
 {
@@ -14,14 +13,11 @@ namespace QuestNav.Native.NTCore
 
         public unsafe bool Set(string value)
         {
-            byte[] valueUtf8 = value is not null
-                ? Encoding.UTF8.GetBytes(value)
-                : Array.Empty<byte>();
-
-            fixed (byte* ptr = valueUtf8)
+            Span<byte> scratch = stackalloc byte[Utf8Buffer.StackSize];
+            using var utf8 = new Utf8Buffer(value, scratch);
+            fixed (byte* ptr = utf8.Bytes)
             {
-                WpiString str = new WpiString { str = ptr, len = (UIntPtr)valueUtf8.Length };
-
+                WpiString str = new WpiString { str = ptr, len = (UIntPtr)utf8.Length };
                 return NtCoreNatives.NT_SetString(handle, 0, &str) != 0;
             }
         }

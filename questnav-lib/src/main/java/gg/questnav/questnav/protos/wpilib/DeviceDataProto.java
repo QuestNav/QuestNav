@@ -8,8 +8,8 @@
 */
 package gg.questnav.questnav.protos.wpilib;
 
-import edu.wpi.first.util.protobuf.Protobuf;
 import gg.questnav.questnav.protos.generated.Data;
+import org.wpilib.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors;
 
 /** WPILib Protobuf layer for DeviceData Protobuf */
@@ -32,7 +32,9 @@ public class DeviceDataProto
 
   @Override
   public Data.ProtobufQuestNavDeviceData unpack(Data.ProtobufQuestNavDeviceData msg) {
-    return msg.clone();
+    // WPILib decodes into a reused message after clearQuick(), which keeps the values of fields
+    // a message leaves out (such as false or 0); copying only the fields it has drops them
+    return Data.ProtobufQuestNavDeviceData.newInstance().mergeFrom(msg);
   }
 
   @Override

@@ -1,17 +1,17 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'edu.wpi.first.GradleRIO' version '2025.3.2'
-    id 'com.diffplug.spotless' version '6.20.0'
-    id 'com.github.gmazzo.buildconfig' version '6.0.7'
+    id 'org.wpilib.GradleRIO' version '2027.0.0-alpha-8'
+    id 'com.diffplug.spotless' version '8.10.1'
+    id 'com.github.gmazzo.buildconfig' version '6.0.10'
 }
 
 // Version and build configuration
 ext {
-    version = project.findProperty('version') ?: '2025-1.0.0-dev'
+    version = project.findProperty('version') ?: '2027-1.0.0-dev'
     versionType = project.findProperty('versionType') ?: 'dev'
-    frcYear = project.findProperty('frcYear') ?: '2025'
-    wpilibVersion = project.findProperty('wpilibVersion') ?: '2025.3.2'
+    wpilibYear = project.findProperty('wpilibYear') ?: '2027_alpha7'
+    wpilibVersion = project.findProperty('wpilibVersion') ?: '2027.0.0-alpha-8'
 
     // Vendor dependency configuration
     vendorUuid = 'a706fe68-86e5-4aed-92c5-ce05aca007f0'
@@ -29,12 +29,14 @@ ext {
 
 // Set the project version and base name for all archives globally
 version = ext.version
-archivesBaseName = ext.artifactId
+base {
+    archivesName = project.artifactId
+}
 
 // Java configuration
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
     withSourcesJar()
     withJavadocJar()
 }
@@ -54,18 +56,23 @@ repositories {
     }
 }
 
-dependencies {
-    // WPILib dependencies
-    implementation "edu.wpi.first.wpilibj:wpilibj-java:${wpilibVersion}"
-    implementation "edu.wpi.first.wpiutil:wpiutil-java:${wpilibVersion}"
-    implementation "edu.wpi.first.wpimath:wpimath-java:${wpilibVersion}"
-    implementation "edu.wpi.first.ntcore:ntcore-java:${wpilibVersion}"
-    implementation "edu.wpi.first.wpiunits:wpiunits-java:${wpilibVersion}"
-    implementation "com.google.protobuf:protobuf-java:4.31.1"
-    implementation "us.hebi.quickbuf:quickbuf-runtime:1.4"
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
+// Keep GradleRIO's WPILib artifacts (used by the tests) on the same version as the compile deps
+wpi.versions.wpilibVersion = wpilibVersion
 
-    // Test dependencies
+dependencies {
+    // WPILib dependencies. compileOnly: the robot project provides WPILib and quickbuf, so the
+    // published POM must not pin a WPILib version onto it.
+    compileOnly "org.wpilib.wpilibj:wpilibj-java:${wpilibVersion}"
+    compileOnly "org.wpilib.wpiutil:wpiutil-java:${wpilibVersion}"
+    compileOnly "org.wpilib.wpimath:wpimath-java:${wpilibVersion}"
+    compileOnly "org.wpilib.ntcore:ntcore-java:${wpilibVersion}"
+    compileOnly "org.wpilib.wpiunits:wpiunits-java:${wpilibVersion}"
+    compileOnly "us.hebi.quickbuf:quickbuf-runtime:1.4"
+
+    // Test dependencies: full WPILib Java stack plus the desktop JNI natives (HAL, ntcore)
+    testImplementation wpi.java.deps.wpilib()
+    nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
+    nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -73,6 +80,9 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+// Extracts the desktop JNI natives and puts them on the test JVM's library path
+wpi.java.configureTestTasks(test)
 
 javadoc {
     exclude '**/generated/**'
@@ -89,22 +99,25 @@ task generateVendorJson() {
     inputs.file vendorJsonInput
     inputs.property("version", version)
     inputs.property("versionType", versionType)
-    inputs.property("frcYear", frcYear)
+    inputs.property("wpilibYear", wpilibYear)
     outputs.file vendorJsonOutput
 
+    // Resolve everything at configuration time; touching project in doLast is deprecated
+    def repoType = isSnapshot ? "snapshots" : "releases"
+    def libVersion = version.toString()
+    def libWpilibYear = wpilibYear.toString()
+    def libVendorUuid = vendorUuid.toString()
+    def jsonUrl = "https://maven.questnav.gg/${repoType}/gg/questnav/questnavlib-json/${libVersion}/questnavlib-json-${libVersion}.json"
+
     doLast {
-        println "Generating vendor JSON ${version} to ${vendorJsonOutput}"
+        println "Generating vendor JSON ${libVersion} to ${vendorJsonOutput}"
 
         vendorJsonOutput.parentFile.mkdirs()
 
-        // Determine repository URL based on release type
-        def repoType = isSnapshot ? "snapshots" : "releases"
-        def jsonUrl = "https://maven.questnav.gg/${repoType}/gg/questnav/questnavlib-json/${version}/questnavlib-json-${version}.json"
-
         def content = vendorJsonInput.text
-                .replace('${questnav_version}', version)
-                .replace('${frc_year}', frcYear)
-                .replace('${questnav_uuid}', vendorUuid)
+                .replace('${questnav_version}', libVersion)
+                .replace('${wpilib_year}', libWpilibYear)
+                .replace('${questnav_uuid}', libVendorUuid)
                 .replace('${json_url}', jsonUrl)
 
         vendorJsonOutput.text = content
@@ -113,11 +126,8 @@ task generateVendorJson() {
     outputs.upToDateWhen { false }
 }
 
-// Create publishable artifact
-def vendorJsonArtifact = artifacts.add('archives', vendorJsonOutput) {
-    type = 'json'
-    builtBy generateVendorJson
-}
+// Ensure assemble runs the generator task
+assemble.dependsOn generateVendorJson
 
 // Publishing configuration
 publishing {
@@ -152,7 +162,10 @@ publishing {
             groupId = mavenGroupId
             artifactId = 'questnavlib-json'
 
-            artifact vendorJsonArtifact
+            artifact(vendorJsonOutput) {
+                builtBy generateVendorJson
+                extension = 'json'
+            }
 
             pom {
                 name = 'QuestNavLib Vendor JSON'
@@ -191,7 +204,16 @@ publishing {
             }
         }
 
-        // For local testing
+        // Opt-in: publish into a WPILib install's local maven, e.g.
+        // -PwpilibLocalMaven=C:/Users/Public/wpilib/2027_alpha7/maven
+        if (project.hasProperty('wpilibLocalMaven')) {
+            maven {
+                name = "WpilibLocal"
+                url = file(project.findProperty('wpilibLocalMaven'))
+            }
+        }
+
+        // For standard local testing
         mavenLocal()
     }
 }
@@ -215,28 +237,34 @@ task buildInfo {
     description = "Print build information"
     group = "QuestNavLib"
 
+    // Resolve everything at configuration time; touching project in doLast is deprecated
+    def repoType = isSnapshot ? 'snapshots' : 'releases'
+    def info = [
+        "Release Type: ${versionType}",
+        "Full Version: ${version}",
+        "WPILib Year: ${wpilibYear}",
+        "WPILib Version: ${wpilibVersion}",
+        "Group ID: ${mavenGroupId}",
+        "Artifact ID: ${artifactId}",
+        "UUID: ${vendorUuid}",
+        "Is Snapshot: ${isSnapshot}",
+        "Repository Type: ${repoType}",
+    ]
+    if (project.hasProperty('mavenRepoUrl')) {
+        info << "Repository: ${mavenRepoUrl}"
+    }
+    info << "Vendor JSON URL: https://maven.questnav.gg/${repoType}/gg/questnav/questnavlib-json/${version}/questnavlib-json-${version}.json"
+    def lines = info.collect { it.toString() }
+
     doLast {
         println "QuestNavLib Build Information:"
-        println "  Release Type: ${versionType}"
-        println "  Full Version: ${version}"
-        println "  FRC Year: ${frcYear}"
-        println "  WPILib Version: ${wpilibVersion}"
-        println "  Group ID: ${mavenGroupId}"
-        println "  Artifact ID: ${artifactId}"
-        println "  UUID: ${vendorUuid}"
-        println "  Is Snapshot: ${isSnapshot}"
-        println "  Repository Type: ${isSnapshot ? 'snapshots' : 'release'}"
-        if (project.hasProperty('mavenRepoUrl')) {
-            println "  Repository: ${mavenRepoUrl}"
-        }
-        def jsonUrl = "https://maven.questnav.gg/repository/${isSnapshot ? 'snapshots' : 'release'}/gg/questnav/questnavlib-json/${version}/questnavlib-json-${version}.json"
-        println "  Vendor JSON URL: ${jsonUrl}"
+        lines.each { println "  ${it}" }
     }
 }
 
 // Gradle wrapper task
 wrapper {
-    gradleVersion = '8.11'
+    gradleVersion = '9.4.1'
 }
 
 // Clean task to remove generated files
@@ -252,17 +280,17 @@ buildConfig {
 
     buildConfigField(String, 'APP_NAME', project.name)
     buildConfigField(String, "APP_VERSION", provider { version })
-    buildConfigField(String, "BUILD_TIMESTAMP", provider { new Date().format("yyyy-MM-dd HH:mm:ss") })
+    buildConfigField(String, "BUILD_TIMESTAMP", provider {
+        new Date().format("yyyy-MM-dd HH:mm:ss")
+    })
 }
 
 // Add manifest to JAR (does not get deployed to the robot.)
 jar {
     manifest {
-        attributes(
-                'Implementation-Title': project.name,
-                'Implementation-Version': version,
-                'Build-Timestamp': new Date().format("yyyy-MM-dd HH:mm:ss")
-                )
+        attributes 'Implementation-Title': project.name
+        attributes 'Implementation-Version': version
+        attributes 'Build-Timestamp': new Date().format("yyyy-MM-dd HH:mm:ss")
     }
 }
 
@@ -295,7 +323,7 @@ spotless {
             exclude "**/build/**", "**/build-*/**", "**/generated/**"
         }
         greclipse()
-        indentWithSpaces(4)
+        leadingTabsToSpaces(4)
         trimTrailingWhitespace()
         endWithNewline()
     }
@@ -312,7 +340,7 @@ spotless {
             exclude "**/build/**", "**/build-*/**", "**/generated/**"
         }
         trimTrailingWhitespace()
-        indentWithSpaces(4)
+        leadingTabsToSpaces(4)
         endWithNewline()
     }
 }

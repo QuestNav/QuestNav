@@ -8,7 +8,9 @@
 */
 package gg.questnav.questnav;
 
-import edu.wpi.first.math.geometry.Pose3d;
+import gg.questnav.questnav.protos.wpilib.FrameDataProto;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.util.protobuf.ProtobufSerializable;
 
 /**
  * Represents a single frame of pose tracking data received from the Quest headset.
@@ -39,8 +41,8 @@ import edu.wpi.first.math.geometry.Pose3d;
  * <p>Two timestamps are provided for different use cases:
  *
  * <ul>
- *   <li><strong>{@link #dataTimestamp()}:</strong> NetworkTables reception time - use this for pose
- *       estimation
+ *   <li><strong>{@link #dataTimestamp()}:</strong> When the pose was captured, in NetworkTables
+ *       server time - use this for pose estimation
  *   <li><strong>{@link #appTimestamp()}:</strong> Quest internal time - use only for
  *       debugging/diagnostics
  * </ul>
@@ -58,11 +60,12 @@ import edu.wpi.first.math.geometry.Pose3d;
  *
  * @param questPose3d The robot's pose on the field as measured by the Quest tracking system. This
  *     will only provide meaningful field-relative coordinates after {@link
- *     QuestNav#setPose(Pose2d)} has been called to establish the field reference frame.
- * @param dataTimestamp The NetworkTables timestamp indicating when this frame data was received by
- *     the robot. This timestamp should be used when adding vision measurements to pose estimators
- *     as it represents when the measurement was available to the robot code. Units: seconds since
- *     robot program start.
+ *     QuestNav#setPose(Pose3d)} has been called to establish the field reference frame.
+ * @param dataTimestamp When the Quest captured this frame, in the NetworkTables server time base
+ *     (on the robot, the same time base as {@link org.wpilib.system.Timer#getTimestamp()}). Use
+ *     this timestamp when adding vision measurements to pose estimators. If the QuestNav app does
+ *     not send a capture time, this is the time the robot received the frame instead. Units:
+ *     seconds.
  * @param appTimestamp The Quest application's internal timestamp indicating when this frame was
  *     generated. This is primarily useful for debugging timing issues and calculating Quest-side
  *     latency. For pose estimation, use {@link #dataTimestamp()} instead. Units: seconds since
@@ -72,9 +75,9 @@ import edu.wpi.first.math.geometry.Pose3d;
  *     rate. Resets to 0 when the Quest app restarts.
  * @param isTracking Indicates whether the Quest is currently tracking its position
  * @see QuestNav#getAllUnreadPoseFrames()
- * @see QuestNav#setPose(Pose2d)
- * @see edu.wpi.first.math.estimator.PoseEstimator
- * @see edu.wpi.first.math.geometry.Pose2d
+ * @see QuestNav#setPose(Pose3d)
+ * @see org.wpilib.math.estimator.PoseEstimator
+ * @see org.wpilib.math.geometry.Pose2d
  * @since 2025.1.0
  */
 public record PoseFrame(
@@ -82,4 +85,8 @@ public record PoseFrame(
     double dataTimestamp,
     double appTimestamp,
     int frameCount,
-    boolean isTracking) {}
+    boolean isTracking)
+    implements ProtobufSerializable {
+  /** Protobuf serializer for {@link PoseFrame} */
+  public static final FrameDataProto proto = new FrameDataProto();
+}

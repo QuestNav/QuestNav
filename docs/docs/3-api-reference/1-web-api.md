@@ -163,7 +163,7 @@ This document describes the HTTP endpoints exposed by ConfigServer for QuestNav.
     - networkConnected: `boolean`
     - ipAddress: `string`
     - teamNumber: `number`
-    - robotIpAddress: `string`
+    - robotIpAddress: `string` (address NetworkTables is connected to; while disconnected, the debug IP override or `10.TE.AM.2`)
     - fps: `number`
     - frameCount: `number`
     - connectedClients: `number`

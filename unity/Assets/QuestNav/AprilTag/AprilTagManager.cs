@@ -300,13 +300,12 @@ namespace QuestNav.QuestNav.AprilTag
 
         private void OnAprilTagDetectorModeChanged(Config.Config.AprilTagDetectorMode configuration)
         {
-            if (
-                configuration.Mode
-                == Config.Config.AprilTagDetectorMode.DetectionMode.ANCHOR_ENHANCED
-            )
+            // Only TRADITIONAL is implemented. Older builds could persist other modes, so
+            // fall back instead of throwing out of a config event.
+            if (configuration.Mode != Config.Config.AprilTagDetectorMode.DetectionMode.TRADITIONAL)
             {
-                throw new NotImplementedException(
-                    "ANCHOR_ENHANCED has not been implemented yet! Please check for a later release."
+                QueuedLogger.LogWarning(
+                    $"AprilTag detector mode {configuration.Mode} is not implemented; using TRADITIONAL."
                 );
             }
 

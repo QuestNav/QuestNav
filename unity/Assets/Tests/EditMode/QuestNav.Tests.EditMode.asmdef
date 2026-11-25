@@ -14,7 +14,8 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "nunit.framework.dll",
-        "Google.Protobuf.dll"
+        "Google.Protobuf.dll",
+        "SQLite-net.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

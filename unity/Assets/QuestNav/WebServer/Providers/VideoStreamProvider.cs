@@ -151,8 +151,10 @@ namespace QuestNav.WebServer
         {
             this.frameSource = frameSource;
 
-            // Frame source will poll this function to determine if it should be paused
-            frameSource.ShouldBePaused = () => connectedClients == 0;
+            // Frame source will poll this function to determine if it should be paused. It is
+            // null when the passthrough stream failed to start.
+            if (frameSource != null)
+                frameSource.ShouldBePaused = () => connectedClients == 0;
 
             Debug.Log("[VideoStreamProvider] Created");
         }

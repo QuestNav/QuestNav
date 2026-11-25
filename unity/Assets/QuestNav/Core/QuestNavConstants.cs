@@ -202,6 +202,11 @@ namespace QuestNav.Core
             /// Whether to enable CORS headers for development mode
             /// </summary>
             public const bool ENABLE_CORS_DEV_MODE = true;
+
+            /// <summary>
+            /// How long startup waits for the web server to start listening
+            /// </summary>
+            public const int START_TIMEOUT_SECONDS = 10;
         }
 
         /// <summary>

@@ -14,6 +14,10 @@ if ! [[ $expected =~ ^[a-f0-9]{64}$ ]]; then
 fi
 
 package=$("$tools/aapt2" dump badging "$apk")
+if grep -Fxq 'application-debuggable' <<< "$package"; then
+  echo 'Refusing to sign a debuggable release APK.' >&2
+  exit 1
+fi
 if [[ ${package%%$'\n'*} != "package: name='gg.QuestNav.QuestNav' versionCode='$RELEASE_CODE' versionName='$RELEASE_VERSION' "* ]]; then
   echo 'Candidate APK does not match the expected QuestNav package, version name, and version code.' >&2
   exit 1

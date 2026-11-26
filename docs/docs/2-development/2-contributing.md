@@ -95,11 +95,7 @@ Always test your changes before submitting a pull request!
 
 #### Build a development APK
 
-CI builds a development APK for qualifying pushes to `main` and pull requests from branches in `QuestNav/QuestNav` targeting `main`. Changes to CI, C#, Java, or the web UI qualify after the applicable C# formatting and documentation checks. The PR build uses the exact head commit and runs the Unity EditMode tests.
-
-For a fork PR or another reviewed revision, a maintainer can open **Actions → Build development APK → Run workflow**, select `main`, and enter the full commit SHA. The worker receives the job directly from GitHub.
-
-On success, download `questnav-dev-<full SHA>` from the run's **Artifacts** section within seven days. It contains the development APK, `editmode-results.xml` and `SHA256SUMS`. After extraction, run `sha256sum -c SHA256SUMS` on Linux or `shasum -a 256 -c SHA256SUMS` on macOS. If a test fails, look for the separate test-results artifact. These APKs use debug signing, and their signing certificates can differ between builds.
+To get an APK for headset testing, follow [Android builds and CI](#android-builds-and-ci).
 
 ### 7. Commit Your Changes
 
@@ -131,6 +127,18 @@ git rebase upstream/main
 - Fill out the pull request template with all required information
 - Link the related issue
 - Wait for review from maintainers
+
+## Android builds and CI
+
+The Android job calls Unity directly inside a licensed, self-hosted Docker container built from GameCI’s editor image. We tested GameCI’s packaged Android builder in that container and it stopped before producing an APK. A separate GitHub-hosted job uses GameCI for EditMode tests. You can review the project preparation and Unity build settings alongside the QuestNav source. [Preparation script](https://github.com/QuestNav/QuestNav/blob/f8c9c10f476704bb7b218760b146019d290ec81d/.github/scripts/prepare-unity-project.sh) · [Android build method](https://github.com/QuestNav/QuestNav/blob/f8c9c10f476704bb7b218760b146019d290ec81d/unity/Assets/Editor/CI/QuestNavAndroidBuild.cs)
+
+**Get a build.** Changes to CI, C#, Java, or the web UI qualify on pushes to `main` and on PRs from branches in `QuestNav/QuestNav` targeting `main`, subject to the applicable formatting and documentation checks. A PR build uses its exact head commit. For a fork PR, ask a maintainer to run **Actions → Build development APK → Run workflow** on `main` with the full reviewed commit SHA.
+
+**Read the logs.** Open **build-csharp / build** in the PR’s CI run, or **build** in a manual run. Expand **Build the APK and run EditMode tests** to follow preparation, Unity compilation, Android packaging, and testing. A quiet phase prints a heartbeat. This public example passed all 53 QuestNav tests. [Example build log](https://github.com/QuestNav/QuestNav/actions/runs/45739483134/job/139640723684)
+
+**Download the APK.** Open the run’s **Artifacts** section and download `questnav-dev-<full SHA>` within seven days. Extract the archive, then run `sha256sum -c SHA256SUMS` on Linux or `shasum -a 256 -c SHA256SUMS` on macOS. Both the APK and `editmode-results.xml` should report `OK`. Development APKs use debug signing, and certificates can differ between builds.
+
+**Troubleshoot a check.** For a skipped APK, read the CI summary. For a failure, open the annotation for the compiler location or failing test name. When available, use **Download build diagnostics** in the job summary to get the filtered log and any NUnit XML produced before the failure. If the runner appears stuck or offline, comment on the PR or open a [QuestNav issue](https://github.com/QuestNav/QuestNav/issues) with the run URL, attempt number, and commit SHA.
 
 ## Release Lines
 

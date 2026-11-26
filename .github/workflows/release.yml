@@ -27,16 +27,16 @@ jobs:
       web-ui-changed: ${{ steps.changes.outputs.web-ui }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
     
       - name: Get last release tag
         id: get-last-release
-        uses: WyriHaximus/github-action-get-previous-tag@v2
+        uses: WyriHaximus/github-action-get-previous-tag@83f26fea93bc7efcbca2eb5591f5eaaf66b8f206 # v2
 
       - name: Determine publishable changes
-        uses: dorny/paths-filter@v4
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
         id: changes
         with:
           filters: |
@@ -95,10 +95,6 @@ jobs:
     uses: ./.github/workflows/reusable-build-csharp.yml
     with:
       version: ${{ inputs.version }}
-    secrets:
-      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
   sign-apk:
     needs: build-apk
@@ -113,6 +109,11 @@ jobs:
         with:
           sparse-checkout: .github/scripts
           persist-credentials: false
+
+      - name: Require the runner's APK artifact
+        env:
+          ARTIFACT_ID: ${{ needs.build-apk.outputs.apk-artifact-id }}
+        run: '[[ "$ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]]'
 
       - name: Download this build's APK
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
@@ -166,9 +167,6 @@ jobs:
     uses: ./.github/workflows/reusable-publish-java.yml
     with:
       version: ${{ inputs.version }}
-    secrets:
-      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
 
   github-release:
     if: |
@@ -182,7 +180,7 @@ jobs:
     needs: [sign-apk, publish-docs, publish-java, determine-publishable-changes]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Determine Version
         id: version-info
@@ -199,20 +197,20 @@ jobs:
           [[ "$ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]] || { echo 'Missing signed APK artifact ID' >&2; exit 1; }
 
       - name: Download signed Android.apk
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           artifact-ids: ${{ needs.sign-apk.outputs.artifact-id }}
           merge-multiple: true
           path: release/apk
 
       - name: Download Vendor JSON
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: 'questnav-json-${{ steps.version-info.outputs.version }}'
           path: release/vendor
 
       - name: Release to GitHub Releases
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3
         with:
           generate_release_notes: true
           fail_on_unmatched_files: true

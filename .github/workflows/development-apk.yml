@@ -9,6 +9,14 @@ on:
         type: string
         required: true
   workflow_call:
+    inputs:
+      release-version:
+        type: string
+      release-version-code:
+        type: string
+    outputs:
+      artifact-id:
+        value: ${{ jobs.build.outputs.artifact-id }}
 
 permissions: {}
 
@@ -30,6 +38,9 @@ jobs:
         id: request
         shell: bash
         env:
+          RELEASE_VERSION: ${{ inputs.release-version }}
+          RELEASE_CODE: ${{ inputs.release-version-code }}
+          WORKFLOW_REF: ${{ github.workflow_ref }}
           EVENT: ${{ github.event_name }}
           MANUAL_SHA: ${{ inputs.source_sha }}
           PUSH_SHA: ${{ github.sha }}
@@ -37,19 +48,30 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          case "$EVENT" in
-            workflow_dispatch) source=manual; sha=$MANUAL_SHA ;;
-            push) source=main; sha=$PUSH_SHA ;;
-            pull_request)
-              [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]
-              source="pr-$PR_NUMBER"; sha=$PR_SHA ;;
-            *) exit 1 ;;
-          esac
+          if [[ -n "$RELEASE_VERSION" || -n "$RELEASE_CODE" ]]; then
+            [[ "$EVENT" == workflow_dispatch && "$GITHUB_REF" == refs/heads/main ]]
+            [[ "$WORKFLOW_REF" == QuestNav/QuestNav/.github/workflows/release.yml@refs/heads/main ]]
+            [[ "$RELEASE_VERSION" =~ ^[A-Za-z0-9][A-Za-z0-9.+_-]{0,63}$ ]]
+            [[ "$RELEASE_CODE" =~ ^[1-9][0-9]{0,9}$ ]] && (( RELEASE_CODE <= 2100000000 )) || exit 1
+            source=release
+            sha=$PUSH_SHA
+          else
+            case "$EVENT" in
+              workflow_dispatch) source=manual; sha=$MANUAL_SHA ;;
+              push) source=main; sha=$PUSH_SHA ;;
+              pull_request)
+                [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]
+                source="pr-$PR_NUMBER"; sha=$PR_SHA ;;
+              *) exit 1 ;;
+            esac
+          fi
           [[ "$sha" =~ ^[0-9a-f]{40}$ ]]
           printf 'source=%s\nsha=%s\n' "$source" "$sha" >> "$GITHUB_OUTPUT"
 
   build:
     needs: validate
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
     runs-on:
       group: questnav-apk
       labels: questnav-unity
@@ -60,34 +82,60 @@ jobs:
       - name: Build the APK and run EditMode tests
         shell: bash
         env:
+          RELEASE_VERSION: ${{ inputs.release-version }}
+          RELEASE_CODE: ${{ inputs.release-version-code }}
           SOURCE: ${{ needs.validate.outputs.source }}
           SOURCE_SHA: ${{ needs.validate.outputs.sha }}
         run: |
           set -euo pipefail
           test ! -S /var/run/docker.sock
-          /opt/questnav/request-build "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" "$SOURCE" "$SOURCE_SHA"
+          args=("$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" "$SOURCE" "$SOURCE_SHA")
+          if [[ "$SOURCE" == release ]]; then
+            args+=("$RELEASE_VERSION" "$RELEASE_CODE")
+          fi
+          /opt/questnav/request-build "${args[@]}"
+
+      - name: Verify APK and EditMode checksums
+        shell: bash
+        env:
+          SOURCE: ${{ needs.validate.outputs.source }}
+          SOURCE_SHA: ${{ needs.validate.outputs.sha }}
+        run: |
+          set -euo pipefail
+          apk="questnav-${SOURCE_SHA:0:7}-dev.apk"
+          if [[ "$SOURCE" == release ]]; then apk=Android.apk; fi
           cd "$DELIVERY"
-          test -s "questnav-${SOURCE_SHA:0:7}-dev.apk"
+          test -s "$apk"
           test -s editmode-results.xml
           sha256sum --check --strict SHA256SUMS
 
       - name: Upload APK, test results and checksums
+        id: upload
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: questnav-dev-${{ needs.validate.outputs.sha }}
+          name: ${{ needs.validate.outputs.source == 'release' && format('questnav-release-candidate-{0}-{1}', github.run_id, github.run_attempt) || format('questnav-dev-{0}', needs.validate.outputs.sha) }}
           path: |
             ${{ env.DELIVERY }}/*.apk
             ${{ env.DELIVERY }}/editmode-results.xml
             ${{ env.DELIVERY }}/SHA256SUMS
           if-no-files-found: error
           compression-level: 0
-          retention-days: 7
+          retention-days: ${{ needs.validate.outputs.source == 'release' && 1 || 7 }}
 
-      - name: Upload failing EditMode results
-        if: failure()
+      - name: Upload build diagnostics
+        id: diagnostics
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: questnav-failed-tests-${{ needs.validate.outputs.sha }}
-          path: ${{ env.DELIVERY }}/editmode-results.xml
-          if-no-files-found: ignore
+          name: questnav-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.DELIVERY }}/build.log
+            ${{ env.DELIVERY }}/editmode-results.xml
+          if-no-files-found: warn
           retention-days: 7
+
+      - name: Link build diagnostics
+        if: ${{ !cancelled() && steps.diagnostics.outputs.artifact-url != '' }}
+        env:
+          ARTIFACT_URL: ${{ steps.diagnostics.outputs.artifact-url }}
+        run: printf '\n[Download build diagnostics](%s)\n' "$ARTIFACT_URL" >> "$GITHUB_STEP_SUMMARY"

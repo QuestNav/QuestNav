@@ -30,11 +30,14 @@ runs:
     - name: Calculate Version Information
       id: version-info
       shell: bash
+      env:
+        VERSION_INPUT: ${{ inputs.version }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
       run: |
-        VERSION_INPUT="${{ inputs.version }}"
         
         if [ -n "$VERSION_INPUT" ]; then
           # Use provided version
+          [[ "$VERSION_INPUT" =~ ^[A-Za-z0-9][A-Za-z0-9.+_-]{0,63}$ ]] || { echo 'Invalid version' >&2; exit 1; }
           VERSION="$VERSION_INPUT"
           
           # Try to parse semantic version for version code
@@ -43,7 +46,7 @@ runs:
             MAJOR="${BASH_REMATCH[2]}"
             MINOR="${BASH_REMATCH[3]}"
             PATCH="${BASH_REMATCH[4]}"
-            TYPE="${BASH_REMATCH[6]}"
+            TYPE="${BASH_REMATCH[6]:-release}"
             
             TYPE_OFFSET=0
             case "$TYPE" in
@@ -57,6 +60,7 @@ runs:
             
             echo "strategy=semantic" >> $GITHUB_OUTPUT
           else
+            TYPE=dev
             # Non-semantic version, use commit count
             COMMIT_COUNT=$(git rev-list --count HEAD)
             VERSION_CODE=$(( 1000000 + $COMMIT_COUNT ))
@@ -69,8 +73,8 @@ runs:
           VERSION="${COMMIT_HASH}"
           
           # Append PR suffix if in PR context
-          if [ -n "${{ github.event.pull_request.number }}" ]; then
-            VERSION="${VERSION}-pr-${{ github.event.pull_request.number }}"
+          if [ -n "$PR_NUMBER" ]; then
+            VERSION="${VERSION}-pr-${PR_NUMBER}"
           fi
           
           # Add dev suffix

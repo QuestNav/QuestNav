@@ -93,6 +93,8 @@ Always test your changes before submitting a pull request!
 - Ensure there are no compiler errors or warnings
 - Verify that existing functionality still works
 
+For builds from the current development branch, see [Android builds and CI](/docs/next/development/contributing#android-builds-and-ci).
+
 ### 7. Commit Your Changes
 
 - Make small, focused commits with clear messages

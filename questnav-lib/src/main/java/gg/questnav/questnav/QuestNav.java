@@ -223,9 +223,10 @@ public class QuestNav {
 
   /**
    * Last sent command ID. Starts at a random value so a response left on the topic from an earlier
-   * robot program run is not taken for one of this run's commands.
+   * robot program run is not taken for one of this run's commands. It stays positive so it reads
+   * the same as the app's unsigned command ID.
    */
-  private int lastSentRequestId = ThreadLocalRandom.current().nextInt();
+  private int lastSentRequestId = ThreadLocalRandom.current().nextInt(1, 1 << 30);
 
   /** IDs of sent commands that have not had a response yet, oldest first */
   private final Set<Integer> pendingCommandIds = new LinkedHashSet<>();

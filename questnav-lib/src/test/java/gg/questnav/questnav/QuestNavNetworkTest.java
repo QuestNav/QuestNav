@@ -506,6 +506,39 @@ class QuestNavNetworkTest {
     }
   }
 
+  // Runs last: the QuestNav instances it makes leave a command on the request topic, which a later
+  // request subscriber would receive
+  @Test
+  @Order(Integer.MAX_VALUE)
+  void firstCommandIdIsPositive() {
+    try (ProtobufSubscriber<Commands.ProtobufQuestNavCommand> requests =
+        client
+            .getProtobufTopic(REQUEST_TOPIC, new CommandProto())
+            .subscribe(
+                Commands.ProtobufQuestNavCommand.newInstance(),
+                PubSubOption.SEND_ALL,
+                PubSubOption.pollStorage(20))) {
+      // One at a time: NT sends only the latest value of a topic each period. The subscriber may
+      // also get the request an earlier test left on the topic.
+      List<Integer> ids = new ArrayList<>();
+      for (int i = 0; i < 16; i++) {
+        int received = ids.size();
+        new QuestNav().setPose(new Pose3d());
+        waitFor(
+            () -> {
+              for (var request : requests.readQueueValues()) {
+                ids.add(request.getCommandId());
+              }
+              return ids.size() > received;
+            },
+            2.0,
+            "command request");
+      }
+      // The app's command ID is unsigned, so a negative one would be logged as another number
+      assertTrue(ids.stream().allMatch(id -> id > 0), ids.toString());
+    }
+  }
+
   /** Publishes the release version, as QuestNav apps from 2026-1.0.0 on do. */
   private static void publishVersion() {
     versionPublisher = client.getStringTopic(VERSION_TOPIC).publish();

@@ -778,15 +778,28 @@ namespace QuestNav.Tests
             sim.Align();
             var velocity = new Translation3d(2.0, 1.0, 0.0);
             sim.Step(velocity, 20);
-            var vioThen = sim.Vio;
-            double then = sim.Time;
+            var vioBefore = sim.Vio;
+            double then = sim.Time + Dt / 2;
+
+            // The robot turns 0.1 rad over the next VIO step
+            sim.Field = new Pose3d(
+                sim.Field.Translation,
+                sim.Field.Rotation.RotateBy(new Rotation3d(0, 0, 0.1))
+            );
+            sim.Step(velocity, 1);
+            var vioAfter = sim.Vio;
             sim.Step(velocity, 10);
 
-            Assert.IsTrue(
-                sim.Estimator.TryGetVioMotionSince(then + Dt / 2, out var atThen, out var latest)
+            // Halfway between the two snapshots
+            Assert.IsTrue(sim.Estimator.TryGetVioMotionSince(then, out var atThen, out var latest));
+            var midpoint =
+                vioBefore.Translation + (vioAfter.Translation - vioBefore.Translation) * 0.5;
+            Assert.AreEqual(0.0, atThen.Translation.GetDistance(midpoint), Tolerance);
+            Assert.AreEqual(
+                0.0,
+                AngleDiff(vioBefore.Rotation.Z + 0.05, atThen.Rotation.Z),
+                Tolerance
             );
-            Assert.AreEqual(0.0, atThen.Translation.GetDistance(vioThen.Translation), Tolerance);
-            Assert.AreEqual(0.0, AngleDiff(vioThen.Rotation.Z, atThen.Rotation.Z), Tolerance);
             Assert.AreEqual(0.0, latest.Translation.GetDistance(sim.Vio.Translation), Tolerance);
         }
 

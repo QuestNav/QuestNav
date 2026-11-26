@@ -68,10 +68,11 @@ namespace QuestNav.QuestNav.Estimation
 
         /// <summary>
         /// Gets the raw VIO pose at <paramref name="timestamp"/> and the latest raw VIO pose,
-        /// to latency-compensate a pose reset. The pose at the timestamp is the newest
-        /// snapshot at or before it; an older timestamp than the buffer gets the oldest
-        /// snapshot kept, and one from before the end of the last tracking outage gets the
-        /// first snapshot after it, since the jump across the outage is not motion. Returns
+        /// to latency-compensate a pose reset. The pose at the timestamp is interpolated
+        /// between the snapshots around it: position and yaw, with the pitch and roll of the
+        /// earlier one. An older timestamp than the buffer gets the oldest snapshot kept, and
+        /// one from before the end of the last tracking outage gets the first snapshot after
+        /// it, since the jump across the outage is not motion. Returns
         /// false when there is no consistent VIO history: before the first observation,
         /// while tracking is lost, or while a recenter is pending.
         /// </summary>
@@ -663,7 +664,19 @@ namespace QuestNav.QuestNav.Estimation
             // The jump across an outage is not motion since an earlier timestamp
             timestamp = Math.Max(timestamp, vioContinuousSince);
             var node = FindSnapshotAtOrBefore(timestamp) ?? snapshotBuffer.First;
-            vioAtTimestamp = new Pose3d(node.Value.Position, node.Value.Rotation);
+            var position = node.Value.Position;
+            var rotation = node.Value.Rotation;
+            var next = node.Next;
+            if (next != null && timestamp > node.Value.Timestamp)
+            {
+                double fraction =
+                    (timestamp - node.Value.Timestamp)
+                    / (next.Value.Timestamp - node.Value.Timestamp);
+                position += (next.Value.Position - position) * fraction;
+                double yawChange = NormalizeAngle(next.Value.Rotation.Z - rotation.Z);
+                rotation = rotation.RotateBy(new Rotation3d(0, 0, yawChange * fraction));
+            }
+            vioAtTimestamp = new Pose3d(position, rotation);
             latestVio = new Pose3d(previousVioPosition, latestRotation);
             return true;
         }

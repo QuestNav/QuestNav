@@ -125,12 +125,14 @@ jobs:
     permissions: {}
 
   test-csharp:
+    # Dependabot runs get no Actions secrets, so the Unity license can't activate.
     if: |
-      ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.actor != 'dependabot[bot]' &&
+      (((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository)) &&
       (needs.detect-changes.outputs.ci-changed == 'true' ||
-      needs.detect-changes.outputs.csharp-changed == 'true')
+      needs.detect-changes.outputs.csharp-changed == 'true'))
     needs: [detect-changes, build-proto-csharp, build-web-ui]
     uses: ./.github/workflows/reusable-test-csharp.yml
     permissions:

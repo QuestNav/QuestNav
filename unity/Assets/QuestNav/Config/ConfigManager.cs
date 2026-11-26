@@ -546,9 +546,11 @@ namespace QuestNav.Config
             );
             RaiseEvent(OnEnableAutoStartOnBootChanged, await GetEnableAutoStartOnBootAsync());
 
+            // High quality must fire before Enable. Enabling the stream picks its mode right
+            // away and drops modes above the low quality limit while high quality is off.
+            RaiseEvent(OnEnableHighQualityStreamsChanged, await GetEnableHighQualityStreamsAsync());
             RaiseEvent(OnEnablePassthroughStreamChanged, await GetEnablePassthroughStreamAsync());
             RaiseEvent(OnPassthroughStreamModeChanged, await GetPassthroughStreamModeAsync());
-            RaiseEvent(OnEnableHighQualityStreamsChanged, await GetEnableHighQualityStreamsAsync());
 
             // Mode MUST fire before Enable. AprilTagManager caches the requested
             // resolution from the Mode event and uses it when Enable triggers the

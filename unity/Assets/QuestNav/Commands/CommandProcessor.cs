@@ -4,6 +4,7 @@ using QuestNav.Config;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.QuestNav.Estimation;
+using QuestNav.QuestNav.Geometry;
 using QuestNav.Utils;
 using UnityEngine;
 
@@ -54,13 +55,15 @@ namespace QuestNav.Commands
         /// <param name="vrCameraRoot">Reference to the VR camera root transform</param>
         /// <param name="resetTransform">Reference to the reset position transform</param>
         /// <param name="configManager">Configuration manager for subscribing to setting changes</param>
+        /// <param name="field">Field size from the loaded layout, or null if unknown</param>
         public CommandProcessor(
             INetworkTableConnection networkTableConnection,
             IVioAprilTagPoseEstimator vioAprilTagPoseEstimator,
             Transform vrCamera,
             Transform vrCameraRoot,
             Transform resetTransform,
-            IConfigManager configManager
+            IConfigManager configManager,
+            Field2d field = null
         )
         {
             // Store network connection for command processing
@@ -78,9 +81,18 @@ namespace QuestNav.Commands
                 vrCamera,
                 vrCameraRoot,
                 resetTransform,
-                vioAprilTagPoseEstimator
+                vioAprilTagPoseEstimator,
+                field
             );
         }
+
+        /// <summary>
+        /// Gets the age in milliseconds of a value received at <paramref name="lastChangeNs"/>
+        /// </summary>
+        /// <param name="ntNowNs">Current NT local time in nanoseconds</param>
+        /// <param name="lastChangeNs">NT local time of the value's last change in nanoseconds</param>
+        public static long GetAgeMs(long ntNowNs, long lastChangeNs) =>
+            (ntNowNs - lastChangeNs) / 1_000_000;
 
         #region Event Subscribers
         private void OnAllowedPoseResetTimeoutMsChanged(int timeoutMs)
@@ -122,12 +134,10 @@ namespace QuestNav.Commands
                         }
                         else
                         {
-                            // Get the age of the command, in milliseconds
-                            var ageMs =
-                                (
-                                    networkTableConnection.NtNow
-                                    - receivedTimestampedCommand.LastChange
-                                ) / 1000;
+                            var ageMs = GetAgeMs(
+                                networkTableConnection.NtNow,
+                                receivedTimestampedCommand.LastChange
+                            );
 
                             // Check if the command is fresh
                             if (ageMs < cachedPoseResetTtlMs)

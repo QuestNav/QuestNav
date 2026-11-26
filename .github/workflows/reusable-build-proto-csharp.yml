@@ -39,7 +39,8 @@ jobs:
           mkdir -p unity/Assets/QuestNav/Generated
           protoc --proto_path=protos \
                  --csharp_out=unity/Assets/QuestNav/Generated \
-                 protos/*.proto
+                 protos/data.proto protos/commands.proto \
+                 protos/wpimath/protobuf/geometry3d.proto
 
       - name: Upload Generated Proto Files
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7

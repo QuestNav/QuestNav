@@ -20,6 +20,9 @@ outputs:
   version-code:
     description: 'Calculated version code for Android/numeric versioning'
     value: ${{ steps.version-info.outputs.version-code }}
+  year:
+    description: 'Year parsed from a semantic version (empty otherwise)'
+    value: ${{ steps.version-info.outputs.year }}
 
 runs:
   using: 'composite'
@@ -87,3 +90,4 @@ runs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "version-type=$TYPE" >> $GITHUB_OUTPUT
         echo "version-code=$VERSION_CODE" >> $GITHUB_OUTPUT
+        echo "year=$YEAR" >> $GITHUB_OUTPUT

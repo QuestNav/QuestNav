@@ -97,7 +97,7 @@ These libraries are included as precompiled DLLs in `Assets/Plugins/`:
 - **Protocol Buffers (protobuf)** - Binary serialization
   - Package: `Google.Protobuf.Tools.3.33.0` (NuGet, in `Packages/`)
   - Provides: Efficient binary serialization for pose data and commands
-  - Schema: `protos/*.proto` → Generated: `Assets/QuestNav/Protos/Generated/`
+  - Schema: `protos/**/*.proto` → Generated: `Assets/QuestNav/Protos/Generated/`
 
 - **EmbedIO** - Lightweight HTTP server (WebServer assembly)
   - Location: `Assets/NuGet/EmbedIO.dll`

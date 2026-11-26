@@ -14,37 +14,29 @@ namespace QuestNav.Native.NTCore
 
         public unsafe string Get(string defaultValue)
         {
-            byte[] valueUtf8 = defaultValue is not null
-                ? Encoding.UTF8.GetBytes(defaultValue)
-                : Array.Empty<byte>();
-
-            string result = null;
-            fixed (byte* ptr = valueUtf8)
+            Span<byte> scratch = stackalloc byte[Utf8Buffer.StackSize];
+            using var utf8 = new Utf8Buffer(defaultValue, scratch);
+            WpiString outValue = new WpiString();
+            fixed (byte* ptr = utf8.Bytes)
             {
-                WpiString defaultWpi = new WpiString { str = ptr, len = (UIntPtr)valueUtf8.Length };
-                WpiString outValue = new WpiString();
+                WpiString defaultWpi = new WpiString { str = ptr, len = (UIntPtr)utf8.Length };
                 NtCoreNatives.NT_GetString(handle, &defaultWpi, &outValue);
-
-                if (outValue.str == defaultWpi.str)
-                {
-                    // GetString returned our default value - no need to free.
-                    result = defaultValue;
-                }
-                else if (outValue.str != null)
-                {
-                    try
-                    {
-                        // Marshal string back to managed memory
-                        result = Encoding.UTF8.GetString(outValue.str, (int)outValue.len);
-                    }
-                    finally
-                    {
-                        NtCoreNatives.NT_FreeRaw(outValue.str);
-                    }
-                }
             }
 
-            return result;
+            // ntcore always returns a fresh copy (even of the default); empty comes back as null
+            if (outValue.str == null)
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                return Encoding.UTF8.GetString(outValue.str, (int)outValue.len);
+            }
+            finally
+            {
+                NtCoreNatives.NT_FreeRaw(outValue.str);
+            }
         }
     }
 }

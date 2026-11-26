@@ -8,8 +8,8 @@
 */
 package gg.questnav.questnav.protos.wpilib;
 
-import edu.wpi.first.util.protobuf.Protobuf;
 import gg.questnav.questnav.protos.generated.Commands;
+import org.wpilib.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors;
 
 /** WPILib Protobuf layer for CommandResponse Protobuf */
@@ -34,7 +34,9 @@ public class CommandResponseProto
   @Override
   public Commands.ProtobufQuestNavCommandResponse unpack(
       Commands.ProtobufQuestNavCommandResponse msg) {
-    return msg.clone();
+    // WPILib decodes into a reused message after clearQuick(), which keeps the values of fields
+    // a message leaves out (such as false or 0); copying only the fields it has drops them
+    return Commands.ProtobufQuestNavCommandResponse.newInstance().mergeFrom(msg);
   }
 
   @Override

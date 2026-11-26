@@ -56,7 +56,8 @@ jobs:
           --plugin=protoc-gen-doc=./protoc-gen-doc \
                  --doc_out=proto-docs \
                  --doc_opt=html,index.html \
-                 protos/*.proto
+                 protos/data.proto protos/commands.proto \
+                 protos/wpimath/protobuf/geometry3d.proto
 
       - name: Upload Proto Docs Artifact
         id: upload-proto-docs

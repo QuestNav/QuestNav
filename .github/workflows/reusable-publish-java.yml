@@ -20,6 +20,7 @@ jobs:
     outputs:
       name: ${{ steps.version-info.outputs.version }}
       type: ${{ steps.version-info.outputs.version-type }}
+      year: ${{ steps.version-info.outputs.year }}
       repository: ${{ steps.destination.outputs.repository }}
     steps:
       - name: Checkout Repository
@@ -76,6 +77,13 @@ jobs:
           version: ${{ needs.version.outputs.name }}
           working-directory: questnav-lib
           cache-key-prefix: gradle-publish
+
+      - name: Check Vendor JSON
+        uses: ./.github/actions/check-vendor-json
+        with:
+          version: ${{ needs.version.outputs.name }}
+          version-type: ${{ needs.version.outputs.type }}
+          year: ${{ needs.version.outputs.year }}
 
       - name: Publish to Maven
         env:

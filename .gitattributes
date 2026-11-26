@@ -4,3 +4,6 @@
 *.sh text eol=lf
 unity/Assets/Plugins/poselib/**/*.so filter=lfs diff=lfs merge=lfs -text
 unity/Assets/Plugins/poselib/**/*.dll filter=lfs diff=lfs merge=lfs -text
+unity/Assets/Plugins/ntcore/**/*.so filter=lfs diff=lfs merge=lfs -text
+unity/Assets/Plugins/ntcore/**/*.dll filter=lfs diff=lfs merge=lfs -text
+*.bin binary

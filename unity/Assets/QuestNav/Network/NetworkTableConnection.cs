@@ -43,9 +43,25 @@ namespace QuestNav.Network
         bool IsReadyToConnect { get; }
 
         /// <summary>
+        /// Gets the IP address of the NT server this client is connected to, or an empty string
+        /// while disconnected. With a team number ntcore tries several addresses, so this is the
+        /// only reliable record of which one it reached.
+        /// </summary>
+        string RobotIpAddress { get; }
+
+        /// <summary>
         /// Gets the current NT time
         /// </summary>
         long NtNow { get; }
+
+        /// <summary>
+        /// Gets the time offset between server time and local time. Add it to
+        /// <see cref="NtNow"/> to get the equivalent server time. The offset is only valid
+        /// once connected and time-synchronized with the server.
+        /// </summary>
+        /// <param name="offsetNs">Time offset in nanoseconds; only meaningful when this returns true</param>
+        /// <returns>True if the offset is valid</returns>
+        bool TryGetServerTimeOffset(out long offsetNs);
 
         /// <summary>
         /// Caches the last known IP address to detect changes
@@ -57,9 +73,16 @@ namespace QuestNav.Network
         /// </summary>
         /// <param name="frameCount">Current frame index</param>
         /// <param name="timeStamp">Current timestamp</param>
+        /// <param name="serverTimestamp">Current NT server time in nanoseconds, or 0 if unknown</param>
         /// <param name="pose">Current field-relative position of the Quest headset</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
-        void PublishFrameData(int frameCount, double timeStamp, Pose3d pose, bool isTracking);
+        void PublishFrameData(
+            int frameCount,
+            double timeStamp,
+            long serverTimestamp,
+            Pose3d pose,
+            bool isTracking
+        );
 
         /// <summary>
         /// Publishes device data to NetworkTables.
@@ -165,6 +188,11 @@ namespace QuestNav.Network
         /// Tracks previous connection state for change detection
         /// </summary>
         private bool wasConnected;
+
+        /// <summary>
+        /// Set when reading the NT4 connection threw, so it isn't retried on every poll
+        /// </summary>
+        private bool connectionLookupFailed;
         #endregion
 
         /// <summary>
@@ -186,6 +214,8 @@ namespace QuestNav.Network
         public NetworkTableConnection(IConfigManager configManager)
         {
             this.configManager = configManager;
+
+            QueuedLogger.Log($"ntcore {NtCoreNatives.ALLWPILIB_TAG} (timestamps in ns)");
 
             // Create NetworkTables instance with QuestNav namespace
             // This isolates QuestNav topics from other NetworkTables data
@@ -274,10 +304,17 @@ namespace QuestNav.Network
         /// </summary>
         public bool IsReadyToConnect => teamNumberSet || ipAddressSet;
 
+        /// <inheritdoc />
+        public string RobotIpAddress { get; private set; } = "";
+
         /// <summary>
         /// Gets the current NT time
         /// </summary>
         public long NtNow => ntInstance.Now();
+
+        /// <inheritdoc />
+        public bool TryGetServerTimeOffset(out long offsetNs) =>
+            ntInstance.TryGetServerTimeOffset(out offsetNs);
         #endregion
 
         #region Event Publishers
@@ -310,7 +347,10 @@ namespace QuestNav.Network
 
             // Standard mode: Use team number to resolve robot address
             QueuedLogger.Log($"Setting Team number to {teamNumber}");
-            ntInstance.SetTeamNumber(teamNumber, QuestNavConstants.Network.NT_SERVER_PORT);
+            ntInstance.SetTeamNumber(
+                teamNumber.ToString(),
+                QuestNavConstants.Network.NT_SERVER_PORT
+            );
             teamNumberSet = true;
             ipAddressSet = false;
         }
@@ -366,12 +406,20 @@ namespace QuestNav.Network
         /// </summary>
         /// <param name="frameCount">Unity frame count</param>
         /// <param name="timeStamp">Unity time stamp</param>
+        /// <param name="serverTimestamp">Current NT server time in nanoseconds, or 0 if unknown</param>
         /// <param name="pose">Current VR headset position</param>
         /// <param name="isTracking">Is the headset is currently tracking its position</param>
-        public void PublishFrameData(int frameCount, double timeStamp, Pose3d pose, bool isTracking)
+        public void PublishFrameData(
+            int frameCount,
+            double timeStamp,
+            long serverTimestamp,
+            Pose3d pose,
+            bool isTracking
+        )
         {
             frameData.FrameCount = frameCount;
             frameData.Timestamp = timeStamp;
+            frameData.ServerTimestamp = serverTimestamp;
             frameData.Pose3D = pose.ToProtobuf();
             frameData.IsTracking = isTracking;
 
@@ -528,17 +576,67 @@ namespace QuestNav.Network
             {
                 case true when !wasConnected:
                     // If we connected and weren't previously
-                    QueuedLogger.Log("Connected to NT4");
                     wasConnected = true;
+                    if (!UpdateRobotAddress())
+                        QueuedLogger.Log("Connected to NT4");
                     OnConnect?.Invoke();
+                    break;
+                case true:
+                    // The address can be unknown at the connect edge, and a reconnect to another
+                    // address (USB to Wi-Fi) can happen between two polls
+                    UpdateRobotAddress();
                     break;
                 case false when wasConnected:
                     // If we disconnected and were previously
                     QueuedLogger.Log("Disconnected from NT4");
+                    RobotIpAddress = "";
                     wasConnected = false;
                     OnDisconnect?.Invoke();
                     break;
             }
+        }
+
+        /// <summary>
+        /// Records which server the client reached, and logs it with the negotiated protocol
+        /// when it changes. The address is diagnostic only, so a failed lookup never stops
+        /// connection handling.
+        /// </summary>
+        /// <returns>Whether the server's address is known</returns>
+        private bool UpdateRobotAddress()
+        {
+            if (connectionLookupFailed)
+                return false;
+
+            NtConnectionInfo[] connections;
+            try
+            {
+                connections = ntInstance.GetConnections();
+            }
+            catch (Exception e)
+            {
+                connectionLookupFailed = true;
+                QueuedLogger.LogWarning(
+                    $"Can't read the NT4 connection, so the robot address is unknown: {e.Message}"
+                );
+                return false;
+            }
+
+            if (connections.Length == 0)
+            {
+                // Dropped again between NT_IsConnected and NT_GetConnections
+                return RobotIpAddress != "";
+            }
+
+            var connection = connections[0];
+            if (connection.RemoteIp == RobotIpAddress)
+                return true;
+
+            RobotIpAddress = connection.RemoteIp;
+            QueuedLogger.Log(
+                $"Connected to NT4 at {connection.RemoteIp}:{connection.RemotePort} "
+                    + $"(protocol {connection.ProtocolVersionString})"
+            );
+            return true;
         }
 
         /// <summary>

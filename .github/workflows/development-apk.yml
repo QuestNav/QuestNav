@@ -90,12 +90,20 @@ jobs:
           set -euo pipefail
           test ! -S /var/run/docker.sock
           args=("$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" "$SOURCE" "$SOURCE_SHA")
-          apk="questnav-${SOURCE_SHA:0:7}-dev.apk"
           if [[ "$SOURCE" == release ]]; then
             args+=("$RELEASE_VERSION" "$RELEASE_CODE")
-            apk=Android.apk
           fi
           /opt/questnav/request-build "${args[@]}"
+
+      - name: Verify APK and EditMode checksums
+        shell: bash
+        env:
+          SOURCE: ${{ needs.validate.outputs.source }}
+          SOURCE_SHA: ${{ needs.validate.outputs.sha }}
+        run: |
+          set -euo pipefail
+          apk="questnav-${SOURCE_SHA:0:7}-dev.apk"
+          if [[ "$SOURCE" == release ]]; then apk=Android.apk; fi
           cd "$DELIVERY"
           test -s "$apk"
           test -s editmode-results.xml
@@ -114,11 +122,20 @@ jobs:
           compression-level: 0
           retention-days: ${{ needs.validate.outputs.source == 'release' && 1 || 7 }}
 
-      - name: Upload failing EditMode results
-        if: failure()
+      - name: Upload build diagnostics
+        id: diagnostics
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: questnav-failed-tests-${{ needs.validate.outputs.sha }}
-          path: ${{ env.DELIVERY }}/editmode-results.xml
-          if-no-files-found: ignore
+          name: questnav-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.DELIVERY }}/build.log
+            ${{ env.DELIVERY }}/editmode-results.xml
+          if-no-files-found: warn
           retention-days: 7
+
+      - name: Link build diagnostics
+        if: ${{ !cancelled() && steps.diagnostics.outputs.artifact-url != '' }}
+        env:
+          ARTIFACT_URL: ${{ steps.diagnostics.outputs.artifact-url }}
+        run: printf '\n[Download build diagnostics](%s)\n' "$ARTIFACT_URL" >> "$GITHUB_STEP_SUMMARY"

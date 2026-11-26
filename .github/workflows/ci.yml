@@ -218,9 +218,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Generate CI Summary
+        env:
+          APK_RESULT: ${{ needs.build-csharp.result }}
+          INTERNAL: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+          APK_INPUTS_CHANGED: ${{ needs.detect-changes.outputs.ci-changed == 'true' || needs.detect-changes.outputs.csharp-changed == 'true' || needs.detect-changes.outputs.java-changed == 'true' || needs.detect-changes.outputs.web-ui-changed == 'true' }}
+          DETECTION: ${{ needs.detect-changes.result }}
+          FORMAT: ${{ needs.format-csharp.result }}
+          DOCS: ${{ needs.docs-csharp.result }}
         run: |
           {
             echo "# CI Pipeline Summary"
+            echo ""
+            echo "Development APK: **$APK_RESULT**"
+            if [[ "$APK_RESULT" == skipped ]]; then
+              if [[ "$INTERNAL" != true ]]; then
+                echo "Fork builds require a maintainer dispatch."
+              elif [[ "$DETECTION" != success ]]; then
+                echo "Change detection concluded $DETECTION."
+              elif [[ "$APK_INPUTS_CHANGED" != true ]]; then
+                echo "No qualifying build inputs changed."
+              else
+                echo "Upstream C# formatting: $FORMAT. Documentation: $DOCS."
+              fi
+            fi
             echo ""
             echo "## Changes Detected"
             echo "- CI configuration: \`${{ needs.detect-changes.outputs.ci-changed }}\`"

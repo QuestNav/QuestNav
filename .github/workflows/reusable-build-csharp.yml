@@ -66,10 +66,12 @@ jobs:
       - name: Build Unity APK
         uses: game-ci/unity-builder@v6
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
+          cliVersion: v0.1.76
           projectPath: unity
           targetPlatform: Android
           customParameters: -developmentBuild

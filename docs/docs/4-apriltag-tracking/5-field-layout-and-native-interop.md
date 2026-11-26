@@ -121,22 +121,25 @@ poselib_estimate_absolute_pose_simple(
 )
 ```
 
-**Camera intrinsics** come from `PassthroughCameraAccess.Intrinsics`:
+**Camera intrinsics** come from `PassthroughCameraAccess.Intrinsics`, which holds static values in sensor pixels:
 - Focal length: `Intrinsics.FocalLength` (fx, fy)
 - Principal point: `Intrinsics.PrincipalPoint` (cx, cy)
-- Image dimensions: `Intrinsics.SensorResolution` (not `RequestedResolution` — they may differ if the capture resolution is downscaled)
+- Sensor size: `Intrinsics.SensorResolution`
+
+Detections are in pixels of the captured frame (`CurrentResolution`), which the SDK produces by centre-cropping the sensor to the frame's aspect ratio and scaling the crop. `ImageIntrinsics.TryFromSensor` applies the same crop and scale to fx, fy, cx and cy, and `CurrentResolution` is passed as the image size. `AprilTagManager` recomputes them whenever `CurrentResolution` changes.
 
 ### Memory Management
 
 | Resource | Strategy |
 |----------|----------|
 | `ImageU8` | Static cached buffer; reallocated only on resolution change. Returned wrapper does not own the handle. |
-| `AprilTagDetectionResults` | Wraps a `zarray_t*`. Freed when `Detect()` is called again (libapriltag overwrites previous results). Not explicitly disposed in the coroutine. |
-| `AprilTagDetector` | `IDisposable`. Disposes all added families, clears, then destroys. |
+| `AprilTagDetectionResults` | `IDisposable`. Wraps the `zarray_t*` returned by `Detect()` and frees it and every detection in it. The coroutine disposes it with `using` each frame. |
+| `AprilTagDetection` | Non-owning view into its `AprilTagDetectionResults`. Not disposable; throws `ObjectDisposedException` once its results are disposed. |
+| `AprilTagDetector` | `IDisposable`. Owns the families added to it. Destroys the native detector first (which unregisters the families), then disposes the families. |
 | `AprilTagFamily` | `IDisposable` with a `Disposed` flag guard (safe for double-dispose). |
 
 :::caution
-`AprilTagDetectionResults` from `Detect()` is valid only until the next `Detect()` call. Do not hold references to detection objects across frames.
+An `AprilTagDetection` is valid only until its `AprilTagDetectionResults` is disposed. Do not hold references to detection objects across frames.
 :::
 
 ## WPILib Geometry Library

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -200,6 +201,25 @@ namespace QuestNav.Tests
             await manager.CloseAsync();
 
             Assert.AreEqual(new ConfigTables.Network().TeamNumber, received);
+        }
+
+        [Test]
+        public async Task InitialEventsArriveBeforeTheEnableThatUsesThem()
+        {
+            var manager = new ConfigManager(dbPath);
+            var order = new List<string>();
+            manager.OnEnableHighQualityStreamsChanged += _ => order.Add("streamHighQuality");
+            manager.OnEnablePassthroughStreamChanged += _ => order.Add("streamEnable");
+            manager.OnAprilTagDetectorModeChanged += _ => order.Add("aprilTagMode");
+            manager.OnEnableAprilTagDetectorChanged += _ => order.Add("aprilTagEnable");
+
+            await manager.InitializeAsync();
+            await manager.CloseAsync();
+
+            // Enabling the stream picks its mode at once, limited unless high quality is on
+            Assert.Less(order.IndexOf("streamHighQuality"), order.IndexOf("streamEnable"));
+            // Enabling AprilTag reserves the camera at the resolution from the mode event
+            Assert.Less(order.IndexOf("aprilTagMode"), order.IndexOf("aprilTagEnable"));
         }
 
         [Test]

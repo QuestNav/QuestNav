@@ -46,6 +46,7 @@ import org.wpilib.networktables.ProtobufSubscriber;
 import org.wpilib.networktables.PubSubOption;
 import org.wpilib.networktables.RawPublisher;
 import org.wpilib.networktables.RawSubscriber;
+import org.wpilib.networktables.StringPublisher;
 import org.wpilib.system.Timer;
 
 /**
@@ -57,6 +58,7 @@ class QuestNavNetworkTest {
   private static final String FRAME_TOPIC = "/QuestNav/frameData";
   private static final String DEVICE_TOPIC = "/QuestNav/deviceData";
   private static final String PROTOCOL_TOPIC = "/QuestNav/protocolVersion";
+  private static final String VERSION_TOPIC = "/QuestNav/version";
   private static final String REQUEST_TOPIC = "/QuestNav/request";
   private static final String RESPONSE_TOPIC = "/QuestNav/response";
 
@@ -65,6 +67,7 @@ class QuestNavNetworkTest {
   private static NetworkTableInstance server;
   private static NetworkTableInstance client;
   private static RawPublisher framePublisher;
+  private static StringPublisher versionPublisher;
   private static QuestNav questNav;
   private static int frameCount = 0;
 
@@ -85,10 +88,12 @@ class QuestNavNetworkTest {
         client
             .getRawTopic(FRAME_TOPIC)
             .publish(PoseFrame.proto.getTypeString(), PubSubOption.SEND_ALL);
+    publishVersion();
   }
 
   @AfterAll
   static void tearDown() {
+    versionPublisher.close();
     framePublisher.close();
     client.close();
     server.stopServer();
@@ -248,6 +253,55 @@ class QuestNavNetworkTest {
     } finally {
       questNav.warningReporter = reporter;
     }
+  }
+
+  @Test
+  void appWithoutVersionTopicIsReportedAsTooOld() {
+    // Apps older than 2026-1.0.0 publish neither the protocol version nor the release version
+    versionPublisher.close();
+    try {
+      waitFor(() -> !server.getTopic(VERSION_TOPIC).exists(), 2.0, "version topic removal");
+      List<String> warnings = new ArrayList<>();
+      var oldAppQuestNav = new QuestNav();
+      oldAppQuestNav.warningReporter = warnings::add;
+      waitFor(
+          () -> {
+            sendFrame(0);
+            oldAppQuestNav.commandPeriodic();
+            return oldAppQuestNav.getQuestNavProtocolVersion().equals(OptionalInt.of(1));
+          },
+          2.0,
+          "legacy protocol version");
+
+      // Not right away, since a 2026 app's version topic can follow its first frames
+      sendFramesFor(oldAppQuestNav, 0.5);
+      assertTrue(warnings.isEmpty(), warnings.toString());
+
+      waitFor(
+          () -> {
+            sendFrame(0);
+            oldAppQuestNav.commandPeriodic();
+            return !warnings.isEmpty();
+          },
+          2.0,
+          "too-old app warning");
+      sendFramesFor(oldAppQuestNav, 0.2);
+      assertEquals(1, warnings.size(), warnings.toString());
+      assertTrue(warnings.get(0).contains("older than 2026-1.0.0"), warnings.get(0));
+    } finally {
+      publishVersion();
+    }
+  }
+
+  @Test
+  void legacyAppWithVersionTopicIsNotReportedAsTooOld() {
+    List<String> warnings = new ArrayList<>();
+    var legacyQuestNav = new QuestNav();
+    legacyQuestNav.warningReporter = warnings::add;
+    waitFor(() -> server.getTopic(VERSION_TOPIC).exists(), 2.0, "version topic");
+    sendFramesFor(legacyQuestNav, 1.5);
+    assertEquals(OptionalInt.of(1), legacyQuestNav.getQuestNavProtocolVersion());
+    assertTrue(warnings.isEmpty(), warnings.toString());
   }
 
   @Test
@@ -449,6 +503,28 @@ class QuestNavNetworkTest {
     } finally {
       questNav.onCommandSuccess(null);
       questNav.onCommandFailure(null);
+    }
+  }
+
+  /** Publishes the release version, as QuestNav apps from 2026-1.0.0 on do. */
+  private static void publishVersion() {
+    versionPublisher = client.getStringTopic(VERSION_TOPIC).publish();
+    versionPublisher.set("2026-2.0.0");
+    client.flush();
+  }
+
+  /** Sends legacy frames and runs {@code commandPeriodic} on {@code target} for a while. */
+  private static void sendFramesFor(QuestNav target, double seconds) {
+    double end = Timer.getTimestamp() + seconds;
+    while (Timer.getTimestamp() < end) {
+      sendFrame(0);
+      target.commandPeriodic();
+      try {
+        Thread.sleep(10);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        fail("Interrupted sending frames");
+      }
     }
   }
 

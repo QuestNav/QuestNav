@@ -126,11 +126,21 @@ public class QuestNav {
    */
   public static final int PROTOCOL_VERSION = 2;
 
-  /** Oldest QuestNav app protocol version this library works with */
+  /**
+   * Oldest QuestNav app protocol version this library works with. Version 1 covers the 2026 apps
+   * that predate the {@code protocolVersion} topic; apps older than 2026-1.0.0 also read as version
+   * 1 but are not supported, and are reported once they are seen without a {@code version} topic.
+   */
   public static final int MIN_SUPPORTED_PROTOCOL_VERSION = 1;
 
   /** Protocol version of QuestNav apps that don't publish one */
   private static final int LEGACY_PROTOCOL_VERSION = 1;
+
+  /**
+   * How long an app must be seen without a {@code version} topic before it is reported as older
+   * than 2026-1.0.0, since NT can announce that topic a moment after the app's first frames
+   */
+  private static final double UNVERSIONED_APP_WARNING_DELAY_SECONDS = 1.0;
 
   /** Number of sent commands remembered while waiting for their responses */
   private static final int MAX_PENDING_COMMANDS = 32;
@@ -225,6 +235,9 @@ public class QuestNav {
 
   /** The app protocol version last checked, so each one is only reported once */
   private int lastCheckedProtocolVersion = -1;
+
+  /** When the app was first seen without a version topic, or NaN while it has one */
+  private double unversionedAppSinceSeconds = Double.NaN;
 
   /** Reports version warnings; replaced in tests */
   Consumer<String> warningReporter = message -> DriverStationErrors.reportWarning(message, false);
@@ -368,7 +381,8 @@ public class QuestNav {
    * Checks the QuestNav app's protocol version while connected, and reports a warning to the
    * DriverStation if this library doesn't support it. Each version is only reported once, so a
    * mismatch does not flood the console. The release versions are not compared, since the same app
-   * release is used with the QuestNavLib releases for different WPILib years.
+   * release is used with the QuestNavLib releases for different WPILib years, but an app that
+   * publishes no release version is older than 2026-1.0.0 and is reported as too old.
    *
    * @see #getQuestNavProtocolVersion()
    */
@@ -377,7 +391,32 @@ public class QuestNav {
       return;
     }
     var protocolVersion = getQuestNavProtocolVersion();
+    // Apps older than 2026-1.0.0 publish no version topic; they read as protocol version 1 but
+    // don't send what this library needs, such as the tracking state
+    boolean unversionedApp =
+        protocolVersion.equals(OptionalInt.of(LEGACY_PROTOCOL_VERSION))
+            && !versionSubscriber.exists();
+    if (!unversionedApp) {
+      unversionedAppSinceSeconds = Double.NaN;
+    }
     if (protocolVersion.isEmpty() || protocolVersion.getAsInt() == lastCheckedProtocolVersion) {
+      return;
+    }
+    if (unversionedApp) {
+      double now = Timer.getTimestamp();
+      if (Double.isNaN(unversionedAppSinceSeconds)) {
+        unversionedAppSinceSeconds = now;
+      }
+      if (now - unversionedAppSinceSeconds < UNVERSIONED_APP_WARNING_DELAY_SECONDS) {
+        return;
+      }
+      lastCheckedProtocolVersion = protocolVersion.getAsInt();
+      warningReporter.accept(
+          String.format(
+              "WARNING FROM QUESTNAV: The QuestNav app on your headset is older than 2026-1.0.0 "
+                  + "(it publishes no version). QuestNavLib %s may not read its tracking state or "
+                  + "pose correctly. Update the QuestNav app.",
+              getLibVersion()));
       return;
     }
     lastCheckedProtocolVersion = protocolVersion.getAsInt();
@@ -476,7 +515,7 @@ public class QuestNav {
   /**
    * Turns the version check on or off. When on, a warning is reported to the DriverStation once if
    * the QuestNav app's protocol version is older than this QuestNavLib supports or newer than it
-   * knows. Different release versions alone don't warn.
+   * knows, or if the app is older than 2026-1.0.0. Different release versions alone don't warn.
    *
    * @param enabled true to enable version checking, false to disable it. Default is true.
    * @see #getQuestNavProtocolVersion()
@@ -859,7 +898,9 @@ public class QuestNav {
 
   /**
    * Gets the wire-protocol version of the QuestNav app on the headset. Apps that don't publish one
-   * predate it and are version 1.
+   * predate it and are version 1. That includes apps older than 2026-1.0.0, which this library does
+   * not support even though their version is not below {@link #MIN_SUPPORTED_PROTOCOL_VERSION};
+   * they publish no {@link #getQuestNavVersion() version} either, and are reported as too old.
    *
    * @return The app's protocol version, or empty if the Quest is disconnected or its version is not
    *     known yet (or any more) while the app connects or disconnects

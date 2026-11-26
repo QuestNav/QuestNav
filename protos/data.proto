@@ -25,9 +25,12 @@
  * plain integer topic so it can be read even where these protobuf schemas can't be decoded.
  * The version only changes when the messages or topics change in a way robot code may
  * need to know about; new fields alone stay readable by older libraries.
- * - 1: Apps that predate the topic. NT announces and removes an app's topics one at a
- *      time, so the topic can be missing for a moment while a newer app connects or
+ * - 1: 2026 apps that predate the topic. NT announces and removes an app's topics one at
+ *      a time, so the topic can be missing for a moment while a newer app connects or
  *      disconnects; only frames without alignment_state and reset_epoch mean version 1.
+ *      Apps older than 2026-1.0.0 also lack the topic and read as version 1, but they
+ *      publish no /QuestNav/version and don't send isTracking, so QuestNavLib reports them
+ *      as unsupported.
  * - 2: Adds alignment_state and reset_epoch to frame data, and a failure response for
  *      command types the app does not know.
  */

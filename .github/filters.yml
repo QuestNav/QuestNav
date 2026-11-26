@@ -8,10 +8,11 @@ proto: &proto
   - 'protos/**'
 java:
   - *proto
-  - 'questnav-lib/**/*.java'
+  - 'questnav-lib/src/**'
   - 'questnav-lib/**/*.gradle'
   - 'questnav-lib/gradle.properties'
-  - 'questnav-lib/src/generate/**'
+  - 'questnav-lib/gradle/**'
+  - 'questnav-lib/gradlew*'
 csharp:
   - *proto
   # Any asset, package or project setting can change the APK.

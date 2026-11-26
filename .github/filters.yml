@@ -4,6 +4,7 @@ ci:
   - '.github/actions/**'
   - '.github/workflows/**'
   - '.github/filters.yml'
+  - '.csharpierrc.json'
 proto: &proto
   - 'protos/**'
 java:

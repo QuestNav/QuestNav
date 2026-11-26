@@ -85,8 +85,9 @@ publish it into the Maven folder of your WPILib 2027 install, which robot projec
    ```bash
    ./gradlew publishAllPublicationsToWpilibLocalRepository -PwpilibLocalMaven=<WPILib Maven folder>
    ```
-   The folder is `C:\Users\Public\wpilib\2027_alpha7\maven` on Windows and
-   `~/.local/share/wpilib/2027_alpha7/maven` on Linux and macOS.
+   The folder is `C:\Users\Public\wpilib\2027_alpha7\maven` on Windows, `$HOME/.wpilib/2027_alpha7/maven` on
+   macOS, and `$HOME/.local/share/wpilib/2027_alpha7/maven` on Linux (`$XDG_DATA_HOME/wpilib/2027_alpha7/maven` if
+   `XDG_DATA_HOME` is set). Write `$HOME`, not `~`: the shell doesn't expand `~` after `-PwpilibLocalMaven=`.
 3. Copy `questnav-lib/build/generated/vendordeps/questnavlib.json` into your robot project's `vendordeps` folder.
 
 This builds version `2027-1.0.0-dev`. Rebuild to update it, and switch to a release's `questnavlib.json` once one is

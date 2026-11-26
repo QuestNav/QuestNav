@@ -328,6 +328,9 @@ public class QuestNav {
    * Registers a callback that fires once when the Quest headset transitions from not-tracking to
    * actively tracking. The callback is evaluated each {@link #commandPeriodic()} call.
    *
+   * <p>It follows {@link #isTracking()}, which includes the connection, so it also fires when the
+   * Quest reconnects after a disconnect or a frame stall, even if the headset never lost tracking.
+   *
    * @param callback Runnable to invoke when tracking is acquired
    */
   public void onTrackingAcquired(Runnable callback) {
@@ -337,6 +340,10 @@ public class QuestNav {
   /**
    * Registers a callback that fires once when the Quest headset transitions from actively tracking
    * to not-tracking. The callback is evaluated each {@link #commandPeriodic()} call.
+   *
+   * <p>It follows {@link #isTracking()}, which includes the connection, so it also fires when the
+   * Quest disconnects or no frame has arrived for 120 ms, even if the headset never lost tracking.
+   * To react only to the headset losing its own tracking, watch {@link #getTrackingLostCounter()}.
    *
    * @param callback Runnable to invoke when tracking is lost
    */

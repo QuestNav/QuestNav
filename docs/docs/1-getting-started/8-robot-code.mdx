@@ -385,6 +385,10 @@ Use `onTrackingLost` to switch your robot to a fallback localization strategy (w
 until tracking is restored.
 :::
 
+These callbacks follow `isTracking()`, which is also false while the Quest is disconnected (no frame for 120 ms),
+so they fire when frames stall even if the headset itself kept tracking. Code that must react only to the headset
+losing its own tracking can watch `getTrackingLostCounter()` instead.
+
 #### Low Battery Callback
 
 Fires once when the Quest's battery level drops at or below a specified threshold. The callback will not fire again
@@ -470,7 +474,7 @@ public class QuestNavSubsystem extends SubsystemBase {
 |--------|---------|-------|
 | `onConnected(Runnable)` | Quest transitions disconnected → connected | Fires once per transition |
 | `onDisconnected(Runnable)` | Quest transitions connected → disconnected | Fires once per transition |
-| `onTrackingAcquired(Runnable)` | Quest transitions not-tracking → tracking | Fires once per transition |
+| `onTrackingAcquired(Runnable)` | Quest transitions not-tracking → tracking | Fires once per transition, including when the Quest reconnects |
 | `onTrackingLost(Runnable)` | Quest transitions tracking → not-tracking | Fires once per transition, including when the Quest disconnects |
 | `onLowBattery(int, IntConsumer)` | Battery drops at or below threshold % | Resets when battery rises above threshold |
 | `onCommandSuccess(Consumer)` | A command response arrives with `success == true` | Fires once per command this `QuestNav` sent |

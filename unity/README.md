@@ -556,7 +556,7 @@ private IEnumerator ExtractAndroidUIFiles(string targetPath)
 
 ### Web UI Development
 
-The built UI is served from the same origin as the API, so the server sends no CORS headers. For local UI work, `npm run dev` in `questnav-web-ui/` proxies `/api` to the headset set in `VITE_API_TARGET` and strips the `Origin` header, so dev requests pass the server's same-origin check.
+The built UI is served from the same origin as the API, so the server sends no CORS headers. For local UI work, `npm run dev` in `questnav-web-ui/` proxies `/api` and `/video` to the headset set in `VITE_API_TARGET`. On `/api` it strips the `Origin` header when it is the dev server's own origin, so dev requests pass the server's same-origin check while other sites' pages are still rejected.
 
 ### Web UI Type Safety
 

@@ -37,10 +37,18 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
         // The headset rejects state-changing requests whose Origin does not match its
-        // Host, and changeOrigin only rewrites Host
+        // Host, and changeOrigin only rewrites Host. Strip only this dev server's own
+        // Origin, so other sites' pages still get rejected.
         configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq) => proxyReq.removeHeader('origin'))
+          proxy.on('proxyReq', (proxyReq, req) => {
+            if (req.headers.origin === `http://${req.headers.host}`) proxyReq.removeHeader('origin')
+          })
         }
+      },
+      '/video': {
+        target: process.env.VITE_API_TARGET || 'http://192.168.1.100:5801',
+        changeOrigin: true,
+        secure: false
       },
       '/ws': {
         target: process.env.VITE_WS_TARGET || 'ws://192.168.1.100:5801',

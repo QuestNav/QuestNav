@@ -473,6 +473,8 @@ namespace QuestNav.QuestNav.AprilTag
                     continue;
                 }
 
+                // No yields inside this block: StopCoroutine (AprilTag disabled) never resumes
+                // the coroutine, so the results would never be disposed
                 using (results)
                 {
                     // Apply two filters before counting / solving:
@@ -508,20 +510,16 @@ namespace QuestNav.QuestNav.AprilTag
                                 + $"unknown-IDs dropped {unknownIdCount})"
                         );
 
-                        if (
-                            !isLensOffsetInitialized
-                            || actualW != cachedWidth
-                            || actualH != cachedHeight
-                        )
-                        {
-                            if (!UpdateCameraIntrinsics(actualW, actualH))
-                            {
-                                yield return new WaitForSeconds(frameDelaySeconds);
-                                continue;
-                            }
-                        }
+                        bool intrinsicsReady =
+                            (
+                                isLensOffsetInitialized
+                                && actualW == cachedWidth
+                                && actualH == cachedHeight
+                            ) || UpdateCameraIntrinsics(actualW, actualH);
 
-                        var poseLibResult = poseLibSolver.PoseLibSolve(kept);
+                        var poseLibResult = intrinsicsReady
+                            ? poseLibSolver.PoseLibSolve(kept)
+                            : null;
 
                         if (poseLibResult != null)
                         {
@@ -559,43 +557,43 @@ namespace QuestNav.QuestNav.AprilTag
                                     $"AprilTag observation rejected: avgTagDistance={avgTagDistance:F2}m "
                                         + $"> maxDistance={maxDistance:F2}m"
                                 );
-                                yield return new WaitForSeconds(frameDelaySeconds);
-                                continue;
                             }
+                            else
+                            {
+                                // Dynamic std devs: uncertainty scales with distance^2 and decreases with tag count.
+                                // The user-tunable noiseScale multiplier (0.5x = high trust, 2.0x = low trust)
+                                // applies on top of the base; smaller std-dev = the KF trusts the AprilTag
+                                // measurement more relative to VIO.
+                                double stdDevFactor =
+                                    (avgTagDistance * avgTagDistance) / Math.Max(1, tagCount);
+                                double linearStdDev =
+                                    VioAprilTagPoseEstimatorConstants.MULTI_TAG_LINEAR_STD_DEV_BASE
+                                    * noiseScale
+                                    * stdDevFactor;
+                                var dynamicStdDevs = DenseMatrix.OfArray(
+                                    new[,]
+                                    {
+                                        { linearStdDev },
+                                        { linearStdDev },
+                                        { linearStdDev * 2.0 },
+                                    }
+                                );
 
-                            // Dynamic std devs: uncertainty scales with distance^2 and decreases with tag count.
-                            // The user-tunable noiseScale multiplier (0.5x = high trust, 2.0x = low trust)
-                            // applies on top of the base; smaller std-dev = the KF trusts the AprilTag
-                            // measurement more relative to VIO.
-                            double stdDevFactor =
-                                (avgTagDistance * avgTagDistance) / Math.Max(1, tagCount);
-                            double linearStdDev =
-                                VioAprilTagPoseEstimatorConstants.MULTI_TAG_LINEAR_STD_DEV_BASE
-                                * noiseScale
-                                * stdDevFactor;
-                            var dynamicStdDevs = DenseMatrix.OfArray(
-                                new[,]
-                                {
-                                    { linearStdDev },
-                                    { linearStdDev },
-                                    { linearStdDev * 2.0 },
-                                }
-                            );
+                                vioAprilTagPoseEstimator.AddAprilTagObservation(
+                                    headsetPose.Translation,
+                                    headsetPose.Rotation,
+                                    captureTimestamp,
+                                    dynamicStdDevs,
+                                    tagCount,
+                                    inlierRatio
+                                );
 
-                            vioAprilTagPoseEstimator.AddAprilTagObservation(
-                                headsetPose.Translation,
-                                headsetPose.Rotation,
-                                captureTimestamp,
-                                dynamicStdDevs,
-                                tagCount,
-                                inlierRatio
-                            );
-
-                            QueuedLogger.Log(
-                                $"PoseLib estimate: Pos({headsetPose.X:F3}, {headsetPose.Y:F3}, {headsetPose.Z:F3}) "
-                                    + $"tags={tagCount} inliers={poseLibResult.AcceptedPoints}/{poseLibResult.TotalPoints} "
-                                    + $"ratio={inlierRatio:F2} dist={avgTagDistance:F2}m stdDev={linearStdDev:F4}"
-                            );
+                                QueuedLogger.Log(
+                                    $"PoseLib estimate: Pos({headsetPose.X:F3}, {headsetPose.Y:F3}, {headsetPose.Z:F3}) "
+                                        + $"tags={tagCount} inliers={poseLibResult.AcceptedPoints}/{poseLibResult.TotalPoints} "
+                                        + $"ratio={inlierRatio:F2} dist={avgTagDistance:F2}m stdDev={linearStdDev:F4}"
+                                );
+                            }
                         }
                     }
                 }

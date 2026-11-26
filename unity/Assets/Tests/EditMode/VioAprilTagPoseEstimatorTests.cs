@@ -685,6 +685,27 @@ namespace QuestNav.Tests
         }
 
         [Test]
+        public void TrackingOutage_JumpIsIntegratedWithoutTagAlignment()
+        {
+            // As after setPose with AprilTags off: VIO reports field coordinates directly
+            var sim = new Sim { VioYaw = 0.0, VioOffset = Translation3d.Zero };
+            sim.Estimator.ResetPosition(sim.Vio, sim.Time);
+            sim.Step(Translation3d.Zero, 10);
+
+            // No tags can re-align a held position, so the estimate follows the VIO
+            sim.Outage(Translation3d.Zero, 0.2);
+            sim.VioOffset += new Translation3d(2.0, -1.0, 0.0);
+            sim.Step(Translation3d.Zero, 1);
+
+            Assert.IsFalse(sim.Estimator.HasInitialAlignment);
+            Assert.AreEqual(
+                0.0,
+                sim.Estimator.EstimatedPose.Translation.GetDistance(sim.Vio.Translation),
+                Tolerance
+            );
+        }
+
+        [Test]
         public void TrackingOutage_RealignNeedsPresetQuality()
         {
             var sim = new Sim();

@@ -228,7 +228,10 @@ public class QuestNav {
    */
   private int lastSentRequestId = ThreadLocalRandom.current().nextInt(1, 1 << 30);
 
-  /** IDs of sent commands that have not had a response yet, oldest first */
+  /**
+   * IDs of sent commands that have not had a response yet, oldest first. Guarded by itself, since
+   * {@link #setPose(Pose3d)} and {@link #commandPeriodic()} may run on different threads.
+   */
   private final Set<Integer> pendingCommandIds = new LinkedHashSet<>();
 
   /** True to warn when the QuestNav app's protocol version is not supported */
@@ -581,10 +584,12 @@ public class QuestNav {
             .setCommandId(lastSentRequestId)
             .setPoseResetPayload(cachedPoseResetPayload.clear().setTargetPose(cachedProtoPose));
 
-    pendingCommandIds.add(lastSentRequestId);
-    if (pendingCommandIds.size() > MAX_PENDING_COMMANDS) {
-      // The oldest has most likely been answered while disconnected or dropped
-      pendingCommandIds.remove(pendingCommandIds.iterator().next());
+    synchronized (pendingCommandIds) {
+      pendingCommandIds.add(lastSentRequestId);
+      if (pendingCommandIds.size() > MAX_PENDING_COMMANDS) {
+        // The oldest has most likely been answered while disconnected or dropped
+        pendingCommandIds.remove(pendingCommandIds.iterator().next());
+      }
     }
     requestPublisher.set(requestToSend);
   }
@@ -861,7 +866,11 @@ public class QuestNav {
 
     for (Commands.ProtobufQuestNavCommandResponse response : responses) {
       // Responses to other commands: an earlier run's, a duplicate, or another client's
-      if (!pendingCommandIds.remove(response.getCommandId())) {
+      boolean pending;
+      synchronized (pendingCommandIds) {
+        pending = pendingCommandIds.remove(response.getCommandId());
+      }
+      if (!pending) {
         continue;
       }
       if (response.getSuccess()) {

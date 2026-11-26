@@ -209,6 +209,8 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
           tag_name: ${{ steps.version-info.outputs.version }}
+          # Tag the built commit when the draft is published, not main's HEAD at that time.
+          target_commitish: ${{ github.sha }}
           files: |
             release/apk/Android.apk
             release/vendor/*.json

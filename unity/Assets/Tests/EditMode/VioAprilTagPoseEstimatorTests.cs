@@ -705,6 +705,33 @@ namespace QuestNav.Tests
         }
 
         [Test]
+        public void TrackingOutage_RecenterDuringOutageRealigns()
+        {
+            var sim = new Sim();
+            sim.Align();
+
+            // The robot turns 90 deg while tracking is lost, then the VIO comes back recentered
+            sim.Outage(Translation3d.Zero, 1.0);
+            sim.Field = new Pose3d(
+                sim.Field.Translation,
+                sim.Field.Rotation.RotateBy(new Rotation3d(0, 0, Math.PI / 2))
+            );
+            sim.Recenter(0.7, new Translation3d(1.0, -0.5, 0.0));
+            sim.Step(Translation3d.Zero, 1);
+
+            Assert.IsFalse(sim.Estimator.HasInitialAlignment);
+
+            sim.ObserveTruth();
+            Assert.IsTrue(sim.Estimator.HasInitialAlignment);
+            Assert.AreEqual(
+                0.0,
+                AngleDiff(sim.Field.Rotation.Z, sim.Estimator.EstimatedPose.Rotation.Z),
+                Tolerance
+            );
+            Assert.AreEqual(0.0, sim.PositionError, Tolerance);
+        }
+
+        [Test]
         public void TrackingOutage_IgnoresAprilTagsUntilReacquired()
         {
             var sim = new Sim();

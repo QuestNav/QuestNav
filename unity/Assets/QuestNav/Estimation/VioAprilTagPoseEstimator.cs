@@ -49,7 +49,9 @@ namespace QuestNav.QuestNav.Estimation
         /// Handles a VIO origin recenter (e.g., Quest logo long-press). The next VIO
         /// observation is taken as the new baseline: its jump is not integrated, and the yaw
         /// offset is shifted so the published field heading and the direction of later
-        /// travel are unchanged. The KF state and alignment phase are kept.
+        /// travel are unchanged. The KF state and alignment phase are kept, unless tracking
+        /// is lost: the recenter then hides the motion over the outage, and it is handled
+        /// as a relocalization (see <see cref="HandleTrackingLost"/>).
         /// </summary>
         void HandleRecenter();
 
@@ -57,8 +59,9 @@ namespace QuestNav.QuestNav.Estimation
         /// Marks a VIO tracking outage; stop calling <see cref="AddVioObservation"/> until
         /// tracking is back. AprilTag observations are ignored until then. The jump to the
         /// first VIO observation after the outage is integrated when the robot could have
-        /// driven it in that time; a larger jump is a relocalization: it is not integrated,
-        /// and the estimator drops back to Phase 1 so the next tags re-anchor it.
+        /// driven it in that time; a larger jump, or a recenter during the outage, is a
+        /// relocalization: it is not integrated, and the estimator drops back to Phase 1 so
+        /// the next tags re-anchor it.
         /// </summary>
         void HandleTrackingLost();
 
@@ -377,6 +380,9 @@ namespace QuestNav.QuestNav.Estimation
                 return;
             }
 
+            // A recenter during an outage also hides the robot's motion over it, rotation
+            // included, so it is a relocalization rather than a plain re-base
+            bool recenterAcrossOutage = recenterPending && trackingLost;
             if (recenterPending)
             {
                 RebaseAfterRecenter(vioPose);
@@ -395,9 +401,18 @@ namespace QuestNav.QuestNav.Estimation
                 double maxJump =
                     VioAprilTagPoseEstimatorConstants.MAX_ROBOT_SPEED_MPS * Math.Max(dt, 0.0)
                     + VioAprilTagPoseEstimatorConstants.TRACKING_JUMP_MARGIN_METERS;
-                if (rawDisplacement.Norm > maxJump)
+                if (recenterAcrossOutage || rawDisplacement.Norm > maxJump)
                 {
-                    RebaseAfterRelocalization(vioPose, timestamp, dt, rawDisplacement.Norm);
+                    RebaseAfterRelocalization(
+                        vioPose,
+                        timestamp,
+                        dt,
+                        recenterAcrossOutage
+                            ? $"VIO recentered during a {dt:F2}s tracking outage, so the "
+                                + "motion over it is unknown"
+                            : $"VIO jumped {rawDisplacement.Norm:F2}m over a {dt:F2}s tracking "
+                                + "outage, more than the robot can drive; not integrating it"
+                    );
                     return;
                 }
             }
@@ -652,15 +667,16 @@ namespace QuestNav.QuestNav.Estimation
 
         /// <summary>
         /// Re-bases onto the first VIO pose after a tracking outage whose jump is too large
-        /// to be robot motion. The estimate holds its position instead of integrating the
-        /// jump, the history from before the jump is dropped, and an aligned estimator drops
-        /// back to Phase 1 so the next tags re-anchor position and heading.
+        /// to be robot motion, or that a recenter hid. The estimate holds its position instead
+        /// of integrating the jump, the history from before the jump is dropped, and an
+        /// aligned estimator drops back to Phase 1 so the next tags re-anchor position and
+        /// heading.
         /// </summary>
         private void RebaseAfterRelocalization(
             Pose3d newVioPose,
             double timestamp,
             double outageSeconds,
-            double jumpMeters
+            string reason
         )
         {
             filter.Predict(f, ProcessNoise(NoiseSeconds(outageSeconds, true)));
@@ -683,11 +699,7 @@ namespace QuestNav.QuestNav.Estimation
             }
             rejectionStreakCount = 0;
 
-            QueuedLogger.LogWarning(
-                $"VIO jumped {jumpMeters:F2}m over a {outageSeconds:F2}s tracking outage, "
-                    + "more than the robot can drive; not integrating it, re-aligning on the "
-                    + "next AprilTag observation"
-            );
+            QueuedLogger.LogWarning($"{reason}; re-aligning on the next AprilTag observation");
         }
 
         /// <summary>

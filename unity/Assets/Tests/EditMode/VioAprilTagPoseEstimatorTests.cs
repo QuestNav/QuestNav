@@ -809,6 +809,24 @@ namespace QuestNav.Tests
         }
 
         [Test]
+        public void VioMotionSince_DoesNotReachAcrossOutage()
+        {
+            var sim = new Sim();
+            sim.Align();
+            var velocity = new Translation3d(2.0, 0.0, 0.0);
+            sim.Step(velocity, 10);
+            sim.Outage(velocity, 0.3);
+            sim.Step(velocity, 1);
+
+            // The first frame after the outage starts the VIO history: none of the 0.6 m
+            // jump counts as motion since a time just before it
+            Assert.IsTrue(
+                sim.Estimator.TryGetVioMotionSince(sim.Time - 0.02, out var atThen, out var latest)
+            );
+            Assert.AreEqual(0.0, latest.Translation.GetDistance(atThen.Translation), Tolerance);
+        }
+
+        [Test]
         public void VioMotionSince_UnavailableWithoutConsistentHistory()
         {
             var sim = new Sim();

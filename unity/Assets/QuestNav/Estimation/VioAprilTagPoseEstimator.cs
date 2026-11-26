@@ -67,11 +67,13 @@ namespace QuestNav.QuestNav.Estimation
         void HandleTrackingLost();
 
         /// <summary>
-        /// Gets the raw VIO pose at <paramref name="timestamp"/> (the newest snapshot at or
-        /// before it, or the oldest one kept when it is older than the buffer) and the latest
-        /// raw VIO pose, to latency-compensate a pose reset. Returns false when there is no
-        /// consistent VIO history: before the first observation, while tracking is lost, or
-        /// while a recenter is pending.
+        /// Gets the raw VIO pose at <paramref name="timestamp"/> and the latest raw VIO pose,
+        /// to latency-compensate a pose reset. The pose at the timestamp is the newest
+        /// snapshot at or before it; an older timestamp than the buffer gets the oldest
+        /// snapshot kept, and one from before the end of the last tracking outage gets the
+        /// first snapshot after it, since the jump across the outage is not motion. Returns
+        /// false when there is no consistent VIO history: before the first observation,
+        /// while tracking is lost, or while a recenter is pending.
         /// </summary>
         bool TryGetVioMotionSince(
             double timestamp,
@@ -156,6 +158,10 @@ namespace QuestNav.QuestNav.Estimation
         private bool hasInitialAlignment;
         private bool recenterPending;
         private bool trackingLost;
+
+        // When the VIO history last restarted after a tracking outage; motion is only
+        // continuous since then
+        private double vioContinuousSince = double.NegativeInfinity;
 
         // Set when consistent gate rejections dropped back to Phase 1; the re-align then
         // needs a Phase-2 quality observation, since it also resets the heading.
@@ -399,6 +405,7 @@ namespace QuestNav.QuestNav.Estimation
             if (acrossOutage)
             {
                 trackingLost = false;
+                vioContinuousSince = timestamp;
                 double maxJump =
                     VioAprilTagPoseEstimatorConstants.MAX_ROBOT_SPEED_MPS * Math.Max(dt, 0.0)
                     + VioAprilTagPoseEstimatorConstants.TRACKING_JUMP_MARGIN_METERS;
@@ -653,6 +660,8 @@ namespace QuestNav.QuestNav.Estimation
             if (!initialized || trackingLost || recenterPending || !double.IsFinite(timestamp))
                 return false;
 
+            // The jump across an outage is not motion since an earlier timestamp
+            timestamp = Math.Max(timestamp, vioContinuousSince);
             var node = FindSnapshotAtOrBefore(timestamp) ?? snapshotBuffer.First;
             vioAtTimestamp = new Pose3d(node.Value.Position, node.Value.Rotation);
             latestVio = new Pose3d(previousVioPosition, latestRotation);

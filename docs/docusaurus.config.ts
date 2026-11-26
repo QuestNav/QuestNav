@@ -1,15 +1,8 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
-import * as fs from 'fs';
-import * as path from 'path';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
-
-const versions: string[] = JSON.parse(
-  fs.readFileSync(path.resolve(__dirname, 'versions.json'), 'utf-8')
-);
-const latestVersion = versions[0];
 
 // Newest QuestNavLib release for 2026 (roboRIO) robots. Update it when a new 2026 lib is published.
 const questnavLib2026Version = '2026-3.0.0-beta';
@@ -61,8 +54,6 @@ const config: Config = {
       month: 'short',
       day: 'numeric'
     }),
-    // Vendordep for the latest versioned docs
-    questnavLibJsonUrl: questnavLibJsonUrl(latestVersion),
     questnavLib2026Version,
     questnavLib2026JsonUrl: questnavLibJsonUrl(questnavLib2026Version),
   },

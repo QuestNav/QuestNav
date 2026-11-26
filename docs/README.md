@@ -20,7 +20,6 @@ npm run start
 
 ```
 npm run build      # fails on broken links
-npm run typecheck
 ```
 
 The generated Protocol Buffer, Java and C# API docs are not part of this build. CI adds them under

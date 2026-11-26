@@ -237,6 +237,14 @@ namespace QuestNav.WebServer
                 Time.frameCount
             );
 
+            // Report the running stream mode, which /video query parameters can change without saving
+            var frameSource = streamProvider.FrameSource;
+            bool streaming = frameSource is { IsAvailable: true };
+            statusProvider?.UpdateStreamStatus(
+                streaming ? frameSource.MaxFrameRate : null,
+                streaming ? frameSource.CompressionQuality : null
+            );
+
             BaseUrl = $"http://{ipAddress}:{QuestNavConstants.WebServer.SERVER_PORT}";
         }
         #endregion

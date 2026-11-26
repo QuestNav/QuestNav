@@ -121,6 +121,10 @@ export interface HeadsetStatus {
   // camera is producing, but the resolution dropdown is locked.
   passthroughResolutionLockedByAprilTag: boolean
   effectivePassthroughResolution: { width: number, height: number } | null
+  // Running stream framerate and JPEG quality, or null when the stream is off.
+  // /video query parameters change these without saving them to the config.
+  passthroughStreamFramerate: number | null
+  passthroughStreamQuality: number | null
 
   timestamp: number
 }

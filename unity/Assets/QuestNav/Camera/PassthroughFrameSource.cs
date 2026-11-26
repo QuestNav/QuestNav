@@ -103,6 +103,11 @@ namespace QuestNav.Camera
         public int MaxFrameRate => cameraSource.Mode.Fps;
 
         /// <summary>
+        /// JPEG compression quality (1-100) frames are currently encoded with
+        /// </summary>
+        public int CompressionQuality => compressionQuality;
+
+        /// <summary>
         /// Gets whether the frame source is currently available for streaming.
         /// </summary>
         public bool IsAvailable => isInitialized;

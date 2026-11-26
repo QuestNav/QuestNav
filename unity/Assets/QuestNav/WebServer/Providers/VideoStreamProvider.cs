@@ -52,6 +52,11 @@ namespace QuestNav.WebServer
             int MaxFrameRate { get; }
 
             /// <summary>
+            /// JPEG compression quality (1-100) frames are currently encoded with
+            /// </summary>
+            int CompressionQuality { get; }
+
+            /// <summary>
             /// The current frame
             /// </summary>
             EncodedFrame CurrentFrame { get; }

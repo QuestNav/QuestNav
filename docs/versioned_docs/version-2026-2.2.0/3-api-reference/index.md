@@ -8,7 +8,7 @@ Welcome to the QuestNav API Reference documentation. This section provides compr
 ## Available Documentation
 
 ### 📋 Protocol Buffers
-**[View Protocol Buffer Documentation →](/static/api/proto/)**
+**[View Protocol Buffer Documentation →](pathname:///static/api/proto/)**
 
 Complete documentation for all QuestNav protocol buffer definitions, including:
 - **Command System**: Messages for sending commands to the Quest device
@@ -19,7 +19,7 @@ Complete documentation for all QuestNav protocol buffer definitions, including:
 The protocol buffers define the communication interface between robot code and the Quest headset.
 
 ### ☕ Java API
-**[View Java API Documentation →](/static/api/java/)**
+**[View Java API Documentation →](pathname:///static/api/java/)**
 
 Javadoc documentation for the QuestNav Java library, including:
 - **QuestNav Class**: Main interface for communicating with Quest devices
@@ -30,7 +30,7 @@ Javadoc documentation for the QuestNav Java library, including:
 Use this library to integrate QuestNav into your FRC robot code.
 
 ### 🔷 C# API  
-**[View C# API Documentation →](/static/api/csharp/)**
+**[View C# API Documentation →](pathname:///static/api/csharp/)**
 
 DocFX documentation for the Unity C# components, including:
 - **Core Systems**: Quest tracking and pose estimation

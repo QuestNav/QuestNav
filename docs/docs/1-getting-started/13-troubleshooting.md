@@ -31,8 +31,10 @@ This guide covers common issues you might encounter when setting up and using Qu
     - Test the adapter with a computer to confirm functionality
 
 4. **Check Network Configuration**
-    - Verify the team number on the headset matches your team's number — the Quest connects to `10.TE.AM.2`
-    - Confirm the roboRIO has booted and NetworkTables is running on it
+    - Verify the team number on the headset matches your team's number — the Quest connects to `10.TE.AM.2` (on a SystemCore it also tries the USB and access point addresses; see [SystemCore and WPILib 2027](./14-systemcore-2027.md))
+    - Make sure no **Debug IP Override** is set (the web interface shows a **DEBUG MODE** badge); while one is set, the Quest connects only to that address
+    - Confirm the robot controller (roboRIO or SystemCore) has booted and robot code is running its NetworkTables server
+    - The **Status** tab of the Quest's web interface shows whether NetworkTables is connected and to which address
     - Try resetting the robot's network switch
 
 :::tip
@@ -43,7 +45,7 @@ Most connection issues are related to the adapter, its power, or the cable. Alwa
 
 **Symptoms:**
 - Quest web UI (`http://<Quest IP>:5801/api/status`) shows `networkConnected: false`
-- `QuestNav/Connected` stays `false` in the simulation GUI
+- No `QuestNav` table appears in the simulation GUI, and `questNav.isConnected()` stays `false`
 - The Quest headset is on the same network and has the correct Debug IP Override set
 
 **Cause:**
@@ -60,11 +62,11 @@ preventing the Quest from reaching the NetworkTables server.
 2. **Verify the correct JDK**: your simulation may use a different JDK than you expect. Check Task Manager
    while the simulation is running to see which `java.exe` is active.
 
-3. **Check for port conflicts**: if a previous simulation didn't exit cleanly, ports 1735 and 5810 may still be
-   in use. End any stale `java.exe` processes in Task Manager and restart.
+3. **Check for port conflicts**: if a previous simulation didn't exit cleanly, port 5810 (and 1735 on WPILib 2026) may
+   still be in use. End any stale `java.exe` processes in Task Manager and restart.
 
 :::info
-See the [Testing & Simulation](./simulation) page for more details on running QuestNav with WPILib desktop simulation.
+See the [Testing & Simulation](./7-simulation.md) page for more details on running QuestNav with WPILib desktop simulation.
 :::
 
 ### Intermittent Connection Drops
@@ -101,20 +103,25 @@ See the [Testing & Simulation](./simulation) page for more details on running Qu
 - Heading becomes increasingly inaccurate
 
 **Solutions:**
-1. **Reset to a Known Field Pose from Robot Code**
-    - Call `questNav.setPose(Pose3d)` at a known location (auto start position, AprilTag relocalization, driver-station override, etc.) — see [Robot Code Setup → Setting Robot Pose](./robot-code#setting-robot-pose)
-    - Implement periodic resets whenever you have a known field reference
+1. **Let AprilTags correct it**
+    - With the AprilTag detector on (the default) and the right field layout selected, the app corrects drift whenever it sees enough tags; see [AprilTag Tracking](../4-apriltag-tracking/1-apriltag-overview.md)
+    - Check the alignment state: `TAG_ALIGNED` means tags placed the headset; `UNALIGNED` or `POSE_RESET` mean tags haven't (2027 QuestNavLib: `questNav.getAlignmentState()`)
+    - With the 2026 QuestNavLib, check that the reported pose matches where the robot is. In the app's logs (see [Viewing Logs](#viewing-logs)), `AprilTag initial alignment accepted` appears when tags first place the headset but scrolls away within seconds while tags are in view; after it, rejected tag views read `AprilTag rejected (Phase 2)` rather than `(Phase 1)`
 
-2. **Environment Factors**
+2. **Reset to a Known Field Pose from Robot Code**
+    - Call `questNav.setPose(Pose3d)` at a known location (auto start position, a pose from another vision system, etc.) — see [Robot Code Setup → Setting Robot Pose](./8-robot-code.mdx#setting-robot-pose)
+    - Only the yaw of the pose's rotation is applied
+
+3. **Environment Factors**
     - Ensure adequate lighting in the environment
     - Add visual features if operating in sparse environments
     - Avoid highly reflective or uniform surfaces
 
-3. **Update QuestNav**
-    - Install the latest QuestNav app on the headset and the matching `questnavlib` vendordep on the robot
+4. **Update QuestNav**
+    - Install the latest QuestNav app on the headset and the latest QuestNavLib for your WPILib year on the robot
 
 :::info
-Some drift is normal over time as small tracking errors accumulate. Consider implementing automatic resets at known positions (such as game pieces or field elements) during a match. An upcoming release of QuestNav will include AprilTag detection that automates this.
+Some drift is normal over time as small tracking errors accumulate. Without tags in view, reset the pose at known positions.
 :::
 
 ### Sudden Position Jumps
@@ -125,7 +132,8 @@ Some drift is normal over time as small tracking errors accumulate. Consider imp
 
 **Common causes:**
 - **Loose mount**: any physical movement of the headset relative to the robot is interpreted as pose change.
-- **Tracking re-initialization / feature loss**: if the cameras lose enough features (low light, glare, uniform surfaces), the Quest can re-acquire tracking at an offset.
+- **Tracking re-initialization / feature loss**: if the cameras lose enough features (low light, glare, uniform surfaces), the Quest can re-acquire tracking at an offset. The app holds the position across a jump larger than the robot could have driven and waits for AprilTags to re-align it.
+- **AprilTag alignment**: the first tag alignment, a re-alignment, or a large Phase 2 correction (up to 2 m) moves the pose. See [AprilTag Tracking](../4-apriltag-tracking/1-apriltag-overview.md).
 - **"Double-tap to passthrough" gesture**: vibration on the headset can be misinterpreted as a double-tap, briefly switching the Quest to passthrough mode and producing a discontinuity in the reported pose. The only reliable workaround today is to mount the headset *rigidly* — flexible mounts or rubber dampening amplify the vibration enough to trigger the gesture. Meta is adding the ability to disable this gesture in a future Quest OS update (currently rolling out via the Public Test Channel), after which this should no longer be an issue.
 
 **Solutions:**
@@ -142,6 +150,7 @@ Some drift is normal over time as small tracking errors accumulate. Consider imp
 3. **Pose Validation in Robot Code**
     - Reject readings that are clearly outside the field — see [Field-Bounds Filtering](./robot-code#field-bounds-filtering)
     - Optionally add maximum-change constraints between consecutive frames to drop obvious jumps
+    - With the 2027 QuestNavLib, compare `PoseFrame.resetEpoch()` between frames: when it changes, the app re-placed the pose (a pose reset, an AprilTag alignment or a relocalization), and the change is not motion. See [Alignment State and Pose Jumps](./8-robot-code.mdx#alignment-state-and-pose-jumps)
 
 :::danger
 If pose data shows frequent large jumps, check the physical mount first. A loose or flexible mount cannot be compensated for in software.
@@ -155,12 +164,12 @@ If pose data shows frequent large jumps, check the physical mount first. A loose
 - Noticeable delay in pose updates
 
 **Baseline:**
-End-to-end latency over wired Ethernet directly to the roboRIO is typically **5–10 ms**. Connecting over Wi-Fi or running through debug tooling can significantly increase this.
+End-to-end latency over wired Ethernet to the robot controller is typically **5–10 ms**. Connecting over Wi-Fi or running through debug tooling can significantly increase this.
 
 **Solutions:**
 1. **Verify the connection path**
     - Confirm the Quest is reaching the robot over wired Ethernet, not Wi-Fi
-    - Confirm the `Debug IP Override` is empty when the Quest is mounted on a real robot (otherwise the Quest will keep trying to reach a dev machine instead of `10.TE.AM.2`)
+    - Confirm no `Debug IP Override` is set when the Quest is mounted on a real robot (otherwise the Quest will keep trying to reach a dev machine instead of the robot). Setting the team number clears it.
 
 2. **Network Optimization**
     - Reduce other traffic on the robot's Ethernet bus
@@ -221,12 +230,35 @@ If your Quest is losing charge during operation despite being connected to power
 
 ### Version Mismatch Warnings
 
+The warning, and what to do about it, depends on your QuestNavLib line. See
+[Version Checks](./8-robot-code.mdx#version-checks).
+
+#### 2026 QuestNavLib (roboRIO)
+
+**Symptoms:**
+- A warning in the console every 5 seconds while the Quest is connected:
+  `WARNING FROM QUESTNAV: QuestNavLib version (X.X.X) on your robot does not match QuestNav app version (Y.Y.Y) on your headset. ...`
+
+The 2026 library compares release version strings. The app is shared by the 2026 and 2027 libraries, so its release
+version usually won't match a 2026 library, and the warning is then expected.
+
+**Solutions:**
+1. **Install the latest of each**: the latest QuestNav APK on the headset and the latest 2026 `questnavlib.json`
+   vendordep on the robot.
+
+2. **Silence it**: if this is the only warning, you can turn the check off:
+    ```java
+    questNav.setVersionCheckEnabled(false);
+    ```
+
+#### 2027 QuestNavLib (SystemCore)
+
 **Symptoms:**
 - A warning in the console, once per headset app version:
   `WARNING FROM QUESTNAV: The QuestNav app on your headset (Y.Y.Y) uses protocol version N, ...`
 
-QuestNavLib compares the app's wire-protocol version, not its release version, so the same app release works with the
-QuestNavLib releases for different WPILib years. It only warns when the app is older than the library supports, or
+The 2027 library compares the app's wire-protocol version, not its release version, so the same app release works with
+the QuestNavLib releases for different WPILib years. It only warns when the app is older than the library supports, or
 newer than it knows.
 
 **Solutions:**
@@ -240,7 +272,8 @@ newer than it knows.
     ```
 
 :::warning
-Re-enable version checking before competition. Mismatched protocol versions can cause subtle compatibility issues.
+With the 2027 library, re-enable version checking before competition. Mismatched protocol versions can cause subtle
+compatibility issues.
 :::
 
 ### App Crashes
@@ -263,10 +296,6 @@ Re-enable version checking before competition. Mismatched protocol versions can 
 
 4. **Contact us**
     - On the [QuestNav Discord](https://discord.gg/CsRjKfn8Xa), include the logs from step 1, your Quest model and OS version, and the QuestNav APK version
-
-:::note
-If you compiled QuestNav from source (not the official release APK), the Unity project must have the **Development Build** flag enabled or the app will crash immediately at launch. Teams using the official APK from the GitHub Releases page do not need to worry about this.
-:::
 
 ### Black Screen or App Freezing
 
@@ -351,17 +380,18 @@ To read the current configuration:
 http://<Quest IP Address>:5801/api/config
 ```
 
-This shows the team number, debug IP override, auto-start setting, passthrough stream setting, and debug logging state.
+This shows every setting: team number, debug IP override, pose reset timeout, auto-start, stream and AprilTag
+settings, and debug logging.
 
-To update a setting (e.g. team number):
+To update a setting (e.g. team number), send only the fields you want to change:
 
 ```
 curl -X POST http://<Quest IP Address>:5801/api/config \
      -H "Content-Type: application/json" \
-     -d '{"path":"WebServerConstants/webConfigTeamNumber","value":1234}'
+     -d '{"teamNumber":1234}'
 ```
 
-See the [Web API Reference](/docs/api-reference/web-api) for the complete endpoint documentation.
+See the [Web API Reference](../3-api-reference/1-web-api.md) for the complete endpoint documentation.
 
 ### NetworkTables Analysis
 
@@ -371,13 +401,15 @@ For deeper diagnostics from the robot side:
 2. Check for missing updates or invalid values in the `QuestNav` table
 3. Compare timestamps to identify delays between the headset and robot code
 
-### Installing ADB on the RoboRIO (Optional)
+### Installing ADB on the roboRIO (Optional, 2026 robots)
 
 Installing ADB directly on your roboRIO lets you send commands to the Quest from the robot's network, without needing a USB connection to a laptop:
 
 1. Download the [ADB for RoboRIO fork](https://github.com/juchong/ADB-For-RoboRIO)
 2. Follow the installation instructions in the repository
 3. Connect to the roboRIO over your robot's network to issue ADB commands
+
+This fork is for the roboRIO; it has not been tried on a SystemCore.
 
 :::tip
 Useful for triggering app restarts, pulling logs, or kicking a stuck headset from the pits without taking the robot offline.
@@ -403,8 +435,12 @@ This usually indicates an incompatible Ethernet adapter. Refer to the [Adapters]
 When functioning properly:
 
 - `http://<Quest IP>:5801/api/status` returns `isTracking: true` and `networkConnected: true`
-- The `QuestNav` table appears in NetworkTables with `QuestNav/Connected = true` and `QuestNav/Tracking = true`
-- Pose data updates smoothly at the headset's tracking framerate (around 72–120 Hz depending on the Quest model)
+- The `QuestNav` table appears in NetworkTables, and robot code reports `questNav.isConnected()` and `questNav.isTracking()` as `true`
+- `QuestNav/frameData` updates smoothly, up to 120 times a second
+- With AprilTags in view, the alignment state reaches `TAG_ALIGNED` (2027 QuestNavLib). With the 2026 QuestNavLib,
+  the reported pose matches where the robot is, and rejected tag views are logged as `AprilTag rejected (Phase 2)`
+  rather than `(Phase 1)` (the one-time `AprilTag initial alignment accepted` line scrolls out of the log within
+  seconds while tags are in view)
 
 :::tip Compare against a known-good baseline
 If you suspect your integration code is the problem, deploy the [QuestNav Robot Sim Example](https://github.com/juchong/QuestNav-Robot-Sim-Example) (or run it in the WPILib simulator) against the same headset. If it connects and tracks correctly, the issue is in your robot project rather than the Quest or network.

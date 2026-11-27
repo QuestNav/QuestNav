@@ -169,7 +169,3 @@ Auto-start saves time during competition setup and ensures QuestNav is running a
 - **ADB connection fails**: Try a different USB-C cable (charging-only cables won't work), restart the headset, or try a different USB port on your laptop.
 - **APK won't install**: Verify Developer Mode is enabled, the USB connection is good, and the cable supports data transfer.
 - **App crashes on launch**: Check for adequate storage on the Quest, reinstall the app, or reboot the headset.
-
-:::note
-If you compiled QuestNav from source (not the official release APK), the Unity project must have the **Development Build** flag enabled or the app will crash immediately at launch. Teams using the official APK from the GitHub Releases page do not need to worry about this.
-:::

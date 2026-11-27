@@ -1,41 +1,31 @@
-# Website
+# QuestNav Docs
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+The [questnav.gg](https://questnav.gg) site, built with [Docusaurus](https://docusaurus.io/).
 
-### Installation
+## Layout
 
-```
-$ npm install
-```
+- `docs/`: the current ("Development") docs, served under `/docs/next/`
+- `versioned_docs/`, `versioned_sidebars/`, `versions.json`: docs frozen at each release; the first entry in `versions.json` is served under `/docs/`
+- `src/`: the landing page and React components used by the docs
+- `plugins/`: build-time loaders (awards CSV, GitHub release download counts)
 
-### Local Development
-
-```
-$ npm run start
-```
-
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-### Build
+## Local development
 
 ```
-$ npm run build
+npm ci
+npm run start
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-### Deployment
-
-Using SSH:
+## Checks
 
 ```
-$ USE_SSH=true npm run deploy
+npm run build      # fails on broken links
 ```
 
-Not using SSH:
+The generated Protocol Buffer, Java and C# API docs are not part of this build. CI adds them under
+`/static/api/` when it publishes the site, so link to them as `pathname:///static/api/...`.
 
-```
-$ GIT_USER=<Your GitHub username> npm run deploy
-```
+## Publishing
 
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+The release workflow builds the site and publishes it to GitHub Pages
+(`.github/workflows/reusable-publish-docs.yml`). Don't use `npm run deploy`.

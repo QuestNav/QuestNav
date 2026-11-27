@@ -5,13 +5,8 @@ title: Robot Code Setup
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import CodeBlock from '@theme/CodeBlock';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-
-export const VendorDepUrl = () => {
-    const {siteConfig} = useDocusaurusContext();
-    const v = siteConfig.customFields.questnavLibVersion;
-    return `https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/${v}/questnavlib-json-${v}.json`;
-};
+export const VendorDepUrl = () =>
+    'https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/2026-2.2.0/questnavlib-json-2026-2.2.0.json';
 
 export const VendorDepCodeBlock = () => {
     const url = VendorDepUrl();

@@ -20,15 +20,23 @@ This URL can be opened in any browser or embedded in an FRC dashboard.
 The webcam stream is **disabled by default**. To enable it:
 
 1. Open the Quest's web interface in a browser: `http://<Quest IP Address>:5801`
-2. Go to the **Settings** tab
-3. Enable **Passthrough Camera Stream**
+2. Go to the **Camera** tab
+3. Turn on the stream toggle (it reads **Stream Disabled** while off, **Stream Enabled** while on)
+
+:::note AprilTag detector has priority
+While the AprilTag detector is enabled (the default), it has priority over the camera. The stream is sent at the
+detector's resolution (1280x1280 by default) whether or not High Quality mode is on, and the Camera tab locks its
+resolution and FPS controls and the **Apply** button ("Resolution locked by AprilTag detector"). At that size the
+bandwidth warning below applies. For a small stream, turn off the AprilTag detector or lower its resolution in the
+**AprilTag** tab. See [`/video`](../3-api-reference/1-web-api.md#get-video) in the web API reference.
+:::
 
 ### High Quality Mode
 
-By default, the stream is limited to 640x480 at 30 fps. To unlock higher resolutions and framerates:
+While the AprilTag detector is off, the stream is limited to 640x480 at 30 fps by default. To unlock higher resolutions and framerates:
 
 1. In the **Settings** tab, enable **High Quality Passthrough Stream**
-2. Select the desired resolution and framerate from the available video modes
+2. In the **Camera** tab, select the desired resolution and framerate
 
 :::warning
 High quality streaming puts heavy load on the headset CPU. This may cause dropped tracking frames, increased battery drain, and bandwidth usage up to 100 Mbits/second, which far exceeds the bandwidth available during an FRC match. Use high quality mode for testing and practice only.
@@ -69,7 +77,7 @@ Most modern FRC dashboards allow you to adjust the requested stream quality. Que
 - The stream is automatically paused when no clients are connected, reducing CPU and battery usage
 - When a client connects, frame capture and compression resume automatically
 - The stream uses MJPEG encoding (sequence of JPEG frames), which is widely compatible but less efficient than H.264. Keep this in mind when estimating bandwidth usage.
-- For competition, a resolution of 320x240 or 640x480 at 15-30 fps with moderate compression is a reasonable starting point
+- For competition, a resolution of 320x240 or 640x480 at 15-30 fps with moderate compression is a reasonable starting point (these resolutions can only be selected while the AprilTag detector is off)
 
 ## Next Steps
 

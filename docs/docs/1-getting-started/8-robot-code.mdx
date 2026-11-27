@@ -9,8 +9,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 export const VendorDepUrl = () => {
     const {siteConfig} = useDocusaurusContext();
-    const v = siteConfig.customFields.questnavLibVersion;
-    return `https://maven.questnav.gg/snapshots/gg/questnav/questnavlib-json/${v}/questnavlib-json-${v}.json`;
+    return siteConfig.customFields.questnavLib2026JsonUrl;
 };
 
 export const VendorDepCodeBlock = () => {
@@ -33,6 +32,19 @@ This guide explains how to integrate QuestNav into your robot code to provide ac
 The [QuestNav Robot Sim Example](https://github.com/juchong/QuestNav-Robot-Sim-Example) is a runnable WPILib project that wires together everything on this page — mounting transform, pose-estimator fusion, all callbacks, field-bounds filtering, and pose seeding — in a single subsystem. Use it as a reference while reading the sections below.
 :::
 
+## Which Library Version?
+
+There is one QuestNav app for both seasons, but two lines of QuestNavLib, one per WPILib year:
+
+| Robot | WPILib | QuestNavLib |
+|---|---|---|
+| 2026 (roboRIO) | 2026, Java 17, `edu.wpi.first.*` | The latest `2026-*` release (the URL below) |
+| 2027 (SystemCore) | 2027, Java 25, `org.wpilib.*` | A 2027 release's `questnavlib.json`; see [SystemCore and WPILib 2027](./14-systemcore-2027.md) |
+
+The code on this page is the same for both apart from the WPILib imports; see
+[2026 and 2027 imports](#2026-and-2027-imports). The [alignment state and reset epoch](#alignment-state-and-pose-jumps)
+and the protocol version API need a library built for protocol version 2, which so far is only the 2027 line.
+
 ## Verifying Setup
 :::note
 Before proceeding with integration, it is **highly** recommended that you verify that QuestNav is correctly
@@ -45,9 +57,15 @@ Use AdvantageScope to verify that QuestNav data is being published to NetworkTab
 
 1. Launch AdvantageScope
 2. Connect to NetworkTables using your robot's IP address
-3. Look for the "QuestNav" table in the NetworkTables view
+3. Look for the `QuestNav` table: `frameData`, `deviceData`, `version` and `protocolVersion` should be there, and
+   `frameData` should update about 120 times a second
 
 If values are updating, QuestNav is successfully communicating with your robot.
+
+:::note
+On a 2026 robot a dashboard may fail to decode `frameData` and `deviceData`, even though they arrive and robot code
+reads them fine. See [SystemCore and WPILib 2027](./14-systemcore-2027.md#dashboards-on-2026-robots).
+:::
 
 ## Adding QuestNav to Your Project
 
@@ -66,18 +84,20 @@ The QuestNav library is provided as a vendor dependency that you can add to your
         2. Press `Ctrl+Shift+P` (`Cmd+Shift+P` on macOS) to open the command palette
         3. Select **WPILib: Manage Vendor Libraries**
         4. Select **Install new libraries (online)**
-        5. Paste the following URL and press Enter:
+        5. Paste the following URL (the newest 2026 QuestNavLib) and press Enter:
 
         <VendorDepCodeBlock />
 
         :::tip
-        You can find the latest JSON URL on the [QuestNav GitHub releases page](https://github.com/QuestNav/QuestNav/releases).
+        Each release on the [QuestNav GitHub releases page](https://github.com/QuestNav/QuestNav/releases) has its
+        `questnavlib.json` attached; its `jsonUrl` field is the URL to paste. For a 2027 robot use a 2027 release's
+        file (see [SystemCore and WPILib 2027](./14-systemcore-2027.md)).
         :::
 
     </TabItem>
     <TabItem value="gradlew" label="Command Line">
 
-        Run the following from your robot project directory:
+        Run the following from your robot project directory (2026 robots):
 
         <GradlewCodeBlock />
 
@@ -86,7 +106,7 @@ The QuestNav library is provided as a vendor dependency that you can add to your
     </TabItem>
     <TabItem value="manual" label="Manual">
 
-        1. Download the latest `questnavlib.json` from the [QuestNav GitHub releases page](https://github.com/QuestNav/QuestNav/releases)
+        1. Download `questnavlib.json` from the [QuestNav GitHub releases page](https://github.com/QuestNav/QuestNav/releases), from a release for your robot's WPILib year
         2. Copy the file into the `vendordeps` folder in your robot project
         3. Rebuild your project
 
@@ -108,6 +128,24 @@ Before diving into the code, here are a few terms you'll encounter throughout th
 - **Standard Deviations (Std Devs)**: When fusing QuestNav data with your drive pose estimator, standard deviations tell the estimator how much to trust QuestNav measurements. Smaller values = more trust. See [WPILib Pose Estimators](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html) for background.
 
 - **PoseFrame**: A single snapshot of pose data from QuestNav, including the headset position, timestamp, and tracking status.
+
+### 2026 and 2027 imports
+
+The examples use the 2026 (`edu.wpi.first`) package names. On a 2027 robot, change them as follows; the QuestNavLib
+classes (`gg.questnav.questnav.*`) keep their names.
+
+| 2026 | 2027 |
+|---|---|
+| `edu.wpi.first.math.geometry.*` (`Pose3d`, `Transform3d`, `Rotation3d`, ...) | `org.wpilib.math.geometry.*` |
+| `edu.wpi.first.math.Matrix`, `edu.wpi.first.math.VecBuilder` | `org.wpilib.math.linalg.Matrix`, `org.wpilib.math.linalg.VecBuilder` |
+| `edu.wpi.first.math.numbers.N1`, `N3` | `org.wpilib.math.numbers.N1`, `N3` |
+| `edu.wpi.first.math.estimator.SwerveDrivePoseEstimator` | `org.wpilib.math.estimator.SwerveDrivePoseEstimator` |
+| `edu.wpi.first.wpilibj.DriverStation.reportWarning` / `reportError` | `org.wpilib.driverstation.DriverStationErrors.reportWarning` / `reportError` |
+| `edu.wpi.first.wpilibj.Timer` | `org.wpilib.system.Timer` |
+| `edu.wpi.first.wpilibj.TimedRobot` | `org.wpilib.framework.TimedRobot` |
+
+For classes not listed here (the command framework, SmartDashboard, the AprilTag field layouts), use the package
+names from the WPILib 2027 documentation for your WPILib version.
 
 ## Basic Usage
 
@@ -208,14 +246,20 @@ for details
 
 ### Setting Robot Pose
 :::note
-An upcoming release of QuestNav will include AprilTag detection to periodically and automatically reset the pose to
-a field relative position, potentially making this method unnecessary. However, it may still be used to provide
-positional updates from other systems (auto start positions, [Limelight](https://limelightvision.io/), [PhotonVision](https://photonvision.org/), etc.)
+The QuestNav app aligns itself to the field with AprilTags and keeps correcting drift while it sees them (see
+[AprilTag Tracking](../4-apriltag-tracking/1-apriltag-overview.md)). `setPose()` is still useful without tags in
+view, for example to seed the auto start position, or to apply a pose from another system
+([Limelight](https://limelightvision.io/), [PhotonVision](https://photonvision.org/), etc.). After a `setPose()` the
+next good AprilTag view aligns the headset to the tags again.
 :::
 :::info
 QuestNav uses [Visual Inertial Odometry (VIO)](https://en.wikipedia.org/wiki/Visual_odometry) to estimate the headset's
-position. While VIO is highly accurate, it can drift over time, so it's important to reset the pose at an accurate, known
-location on the field (e.g. at the start of autonomous).
+position. While VIO is highly accurate, it can drift over time, so without AprilTags it's important to reset the pose at
+an accurate, known location on the field (e.g. at the start of autonomous).
+:::
+:::info Only yaw is applied
+`setPose()` places the headset at the pose's X, Y and Z, but takes only the **yaw** of its rotation. Pitch and roll
+always come from the headset's own gravity-aligned tracking, so a tilted mount stays tilted.
 :::
 Likewise, in order to set the pose of QuestNav, we need to transform that pose back from the robot centric pose to
 the frame of the Quest.
@@ -382,10 +426,11 @@ public QuestNavSubsystem() {
 
 :::tip
 Use `onTrackingLost` to switch your robot to a fallback localization strategy (wheel odometry, [Limelight](https://limelightvision.io/), [PhotonVision](https://photonvision.org/), etc.)
-until tracking is restored.
+until tracking is restored. With the 2026 library, also use `onDisconnected`: its `onTrackingLost` doesn't fire when
+the Quest disconnects.
 :::
 
-These callbacks follow `isTracking()`, which is also false while the Quest is disconnected (no frame for 120 ms),
+In the 2027 library these callbacks follow `isTracking()`, which is also false while the Quest is disconnected (no frame for 120 ms),
 so they fire when frames stall even if the headset itself kept tracking. Code that must react only to the headset
 losing its own tracking can watch `getTrackingLostCounter()` instead.
 
@@ -474,27 +519,42 @@ public class QuestNavSubsystem extends SubsystemBase {
 |--------|---------|-------|
 | `onConnected(Runnable)` | Quest transitions disconnected → connected | Fires once per transition |
 | `onDisconnected(Runnable)` | Quest transitions connected → disconnected | Fires once per transition |
-| `onTrackingAcquired(Runnable)` | Quest transitions not-tracking → tracking | Fires once per transition, including when the Quest reconnects |
-| `onTrackingLost(Runnable)` | Quest transitions tracking → not-tracking | Fires once per transition, including when the Quest disconnects |
+| `onTrackingAcquired(Runnable)` | Quest transitions not-tracking → tracking | Fires once per transition. The 2027 library also fires it when the Quest reconnects |
+| `onTrackingLost(Runnable)` | Quest transitions tracking → not-tracking | Fires once per transition. The 2027 library also fires it when the Quest disconnects; the 2026 library doesn't, so check `isConnected()` too |
 | `onLowBattery(int, IntConsumer)` | Battery drops at or below threshold % | Resets when battery rises above threshold |
-| `onCommandSuccess(Consumer)` | A command response arrives with `success == true` | Fires once per command this `QuestNav` sent |
-| `onCommandFailure(Consumer)` | A command response arrives with `success == false` | Fires once per command this `QuestNav` sent; also logged to DriverStation automatically |
+| `onCommandSuccess(Consumer)` | A command response arrives with `success == true` | 2027 library: fires once per command this `QuestNav` sent. 2026 library: fires for every response on the topic |
+| `onCommandFailure(Consumer)` | A command response arrives with `success == false` | 2027 library: fires once per command this `QuestNav` sent. 2026 library: fires for every response on the topic. Also logged to DriverStation automatically |
 
 ---
 
-### Suppressing Version Mismatch Warnings
+### Version Checks
 
-QuestNavLib warns once if the QuestNav app on the headset uses a wire-protocol version it doesn't support: older than
-it needs, or newer than it knows. Different release versions alone don't warn. To suppress the warning during
-development:
+The app publishes its release version on `/QuestNav/version` and its wire-protocol version (currently 2) on
+`/QuestNav/protocolVersion`. How the library checks them depends on its line:
+
+- **2027 QuestNavLib** (protocol version 2) warns once if the app's protocol version is newer than 2, which it can't
+  fully understand. Apps that predate the topic count as version 1 and are supported. Different release versions
+  alone don't warn.
+- **2026 QuestNavLib** compares release version strings and warns every 5 seconds while they differ. The app is
+  shared by both seasons, so its release version usually won't match a 2026 library, and the warning is then
+  expected.
+
+To suppress the warning:
 
 ```java
 questNav.setVersionCheckEnabled(false);
 ```
 
-:::warning
-Re-enable version checking for competition use. Protocol version mismatches can cause subtle compatibility issues.
-:::
+With the 2027 library, leave the check on for competition: a protocol mismatch means the app and library can't fully
+understand each other.
+
+The 2027 library also exposes the versions directly:
+
+| Method | Returns |
+|---|---|
+| `getLibVersion()` | The library's release version |
+| `getQuestNavVersion()` | The app's release version, from `/QuestNav/version` |
+| `getQuestNavProtocolVersion()` | The app's protocol version (`OptionalInt`; 1 for apps that predate the topic, empty while disconnected) |
 
 ### Field-Bounds Filtering
 
@@ -521,6 +581,10 @@ Use this in your pose processing loop to skip measurements that are clearly outs
 them to your pose estimator.
 
 ### Alignment State and Pose Jumps
+
+:::note
+Needs the 2027 QuestNavLib (protocol version 2). The 2026 library does not have these methods.
+:::
 
 Each `PoseFrame` says what its pose is referenced to (`alignmentState()`), and carries a `resetEpoch()` counter
 that changes whenever the Quest's pose is re-placed instead of following its motion: a pose reset, an AprilTag
@@ -549,7 +613,16 @@ for (PoseFrame frame : questNav.getAllUnreadPoseFrames()) {
 }
 ```
 
-`questNav.getAlignmentState()` and `questNav.getResetEpoch()` give the latest values.
+`questNav.getAlignmentState()` and `questNav.getResetEpoch()` give the latest values. Both report "unknown"
+(`AlignmentState.UNKNOWN`, an empty `OptionalInt`) while the Quest is disconnected.
+
+For example, to only feed the pose estimator once the tags have placed the headset:
+
+```java
+if (frame.isTracking() && frame.alignmentState() == AlignmentState.TAG_ALIGNED) {
+    // addVisionMeasurement(...)
+}
+```
 
 ## Complete Example
 

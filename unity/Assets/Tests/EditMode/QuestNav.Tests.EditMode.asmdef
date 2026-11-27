@@ -15,7 +15,9 @@
     "precompiledReferences": [
         "nunit.framework.dll",
         "Google.Protobuf.dll",
-        "SQLite-net.dll"
+        "SQLite-net.dll",
+        "MathNet.Numerics.dll",
+        "MathNet.Filtering.Kalman.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

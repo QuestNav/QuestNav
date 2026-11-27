@@ -385,6 +385,10 @@ Use `onTrackingLost` to switch your robot to a fallback localization strategy (w
 until tracking is restored.
 :::
 
+These callbacks follow `isTracking()`, which is also false while the Quest is disconnected (no frame for 120 ms),
+so they fire when frames stall even if the headset itself kept tracking. Code that must react only to the headset
+losing its own tracking can watch `getTrackingLostCounter()` instead.
+
 #### Low Battery Callback
 
 Fires once when the Quest's battery level drops at or below a specified threshold. The callback will not fire again
@@ -470,25 +474,26 @@ public class QuestNavSubsystem extends SubsystemBase {
 |--------|---------|-------|
 | `onConnected(Runnable)` | Quest transitions disconnected → connected | Fires once per transition |
 | `onDisconnected(Runnable)` | Quest transitions connected → disconnected | Fires once per transition |
-| `onTrackingAcquired(Runnable)` | Quest transitions not-tracking → tracking | Fires once per transition |
-| `onTrackingLost(Runnable)` | Quest transitions tracking → not-tracking | Fires once per transition |
+| `onTrackingAcquired(Runnable)` | Quest transitions not-tracking → tracking | Fires once per transition, including when the Quest reconnects |
+| `onTrackingLost(Runnable)` | Quest transitions tracking → not-tracking | Fires once per transition, including when the Quest disconnects |
 | `onLowBattery(int, IntConsumer)` | Battery drops at or below threshold % | Resets when battery rises above threshold |
-| `onCommandSuccess(Consumer)` | A command response arrives with `success == true` | Fires per response |
-| `onCommandFailure(Consumer)` | A command response arrives with `success == false` | Also logged to DriverStation automatically |
+| `onCommandSuccess(Consumer)` | A command response arrives with `success == true` | Fires once per command this `QuestNav` sent |
+| `onCommandFailure(Consumer)` | A command response arrives with `success == false` | Fires once per command this `QuestNav` sent; also logged to DriverStation automatically |
 
 ---
 
 ### Suppressing Version Mismatch Warnings
 
-During development, you may see repeated warnings if the QuestNav library version on the robot doesn't exactly match
-the QuestNav app version on the headset. To suppress these warnings:
+QuestNavLib warns once if the QuestNav app on the headset uses a wire-protocol version it doesn't support: older than
+it needs, or newer than it knows. Different release versions alone don't warn. To suppress the warning during
+development:
 
 ```java
 questNav.setVersionCheckEnabled(false);
 ```
 
 :::warning
-Re-enable version checking for competition use. Version mismatches can cause subtle compatibility issues.
+Re-enable version checking for competition use. Protocol version mismatches can cause subtle compatibility issues.
 :::
 
 ### Field-Bounds Filtering
@@ -514,6 +519,37 @@ private boolean shouldReject(Pose3d pose) {
 
 Use this in your pose processing loop to skip measurements that are clearly outside the field before feeding
 them to your pose estimator.
+
+### Alignment State and Pose Jumps
+
+Each `PoseFrame` says what its pose is referenced to (`alignmentState()`), and carries a `resetEpoch()` counter
+that changes whenever the Quest's pose is re-placed instead of following its motion: a pose reset, an AprilTag
+alignment or re-alignment, or a tracking relocalization. The change between two frames with different epochs is not
+motion. Within one epoch the pose follows the Quest's motion plus filtered AprilTag corrections: these are usually
+small, but one can step the pose by up to 2 m in a single frame (for example after a tracking outage), so don't treat
+same-epoch changes as pure odometry. Compare epochs for equality only: the counter starts at a random value whenever
+the app starts, so an app restart also shows up as a change, and it can be negative.
+
+| `AlignmentState` | Meaning |
+|------------------|---------|
+| `UNALIGNED` | Raw tracking: nothing has placed the pose on the field yet |
+| `POSE_RESET` | Placed by `setPose()` (or the web UI), not yet aligned by AprilTags |
+| `TAG_ALIGNED` | Aligned to the field by AprilTags |
+| `REALIGNING` | Was placed on the field (by tags or `setPose()`), but the tags disagree or tracking relocalized; waiting for the tags to re-align it |
+| `UNKNOWN` | The QuestNav app is too old to report it |
+
+```java
+private int lastResetEpoch = -1;
+
+for (PoseFrame frame : questNav.getAllUnreadPoseFrames()) {
+    if (frame.resetEpoch() != lastResetEpoch) {
+        // The Quest pose jumped: don't treat the change since the last frame as motion
+        lastResetEpoch = frame.resetEpoch();
+    }
+}
+```
+
+`questNav.getAlignmentState()` and `questNav.getResetEpoch()` give the latest values.
 
 ## Complete Example
 

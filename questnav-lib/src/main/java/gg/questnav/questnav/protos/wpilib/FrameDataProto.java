@@ -8,6 +8,7 @@
 */
 package gg.questnav.questnav.protos.wpilib;
 
+import gg.questnav.questnav.AlignmentState;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.protos.generated.Data;
 import org.wpilib.math.geometry.proto.Pose3dProto;
@@ -19,7 +20,8 @@ import us.hebi.quickbuf.Descriptors;
  * {@code ProtobufQuestNavFrameData} message before 2027).
  *
  * <p>{@code dataTimestamp} is carried as nanoseconds in the message's {@code server_timestamp}
- * field; 0 means the sender did not provide one.
+ * field; 0 means the sender did not provide one. An {@code alignment_state} this library doesn't
+ * know unpacks as {@link AlignmentState#UNKNOWN}.
  */
 public class FrameDataProto implements Protobuf<PoseFrame, Data.ProtobufQuestNavFrameData> {
 
@@ -51,7 +53,9 @@ public class FrameDataProto implements Protobuf<PoseFrame, Data.ProtobufQuestNav
         msg.getServerTimestamp() * 1e-9,
         msg.getTimestamp(),
         msg.getFrameCount(),
-        msg.getIsTracking());
+        msg.getIsTracking(),
+        toAlignmentState(msg.getAlignmentStateValue()),
+        msg.getResetEpoch());
   }
 
   @Override
@@ -61,6 +65,28 @@ public class FrameDataProto implements Protobuf<PoseFrame, Data.ProtobufQuestNav
     msg.setTimestamp(value.appTimestamp());
     msg.setFrameCount(value.frameCount());
     msg.setIsTracking(value.isTracking());
+    msg.setAlignmentStateValue(toProtoValue(value.alignmentState()));
+    msg.setResetEpoch(value.resetEpoch());
+  }
+
+  private static AlignmentState toAlignmentState(int protoValue) {
+    return switch (protoValue) {
+      case Data.AlignmentState.ALIGNMENT_STATE_UNALIGNED_VALUE -> AlignmentState.UNALIGNED;
+      case Data.AlignmentState.ALIGNMENT_STATE_POSE_RESET_VALUE -> AlignmentState.POSE_RESET;
+      case Data.AlignmentState.ALIGNMENT_STATE_TAG_ALIGNED_VALUE -> AlignmentState.TAG_ALIGNED;
+      case Data.AlignmentState.ALIGNMENT_STATE_REALIGNING_VALUE -> AlignmentState.REALIGNING;
+      default -> AlignmentState.UNKNOWN;
+    };
+  }
+
+  private static int toProtoValue(AlignmentState state) {
+    return switch (state) {
+      case UNKNOWN -> Data.AlignmentState.ALIGNMENT_STATE_UNSPECIFIED_VALUE;
+      case UNALIGNED -> Data.AlignmentState.ALIGNMENT_STATE_UNALIGNED_VALUE;
+      case POSE_RESET -> Data.AlignmentState.ALIGNMENT_STATE_POSE_RESET_VALUE;
+      case TAG_ALIGNED -> Data.AlignmentState.ALIGNMENT_STATE_TAG_ALIGNED_VALUE;
+      case REALIGNING -> Data.AlignmentState.ALIGNMENT_STATE_REALIGNING_VALUE;
+    };
   }
 
   @Override

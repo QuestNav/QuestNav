@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using QuestNav.Commands.Commands;
 using QuestNav.Config;
+using QuestNav.Core;
 using QuestNav.Network;
 using QuestNav.Protos.Generated;
 using QuestNav.QuestNav.Estimation;
@@ -45,6 +46,11 @@ namespace QuestNav.Commands
         /// Cached value of the allowed pose reset timeout, updated via config events
         /// </summary>
         private int cachedPoseResetTtlMs;
+
+        /// <summary>
+        /// NT time before which no further future-command warning is logged
+        /// </summary>
+        private long nextFutureCommandWarningNs;
 
         /// <summary>
         /// Initializes a new command processor with required dependencies
@@ -94,6 +100,24 @@ namespace QuestNav.Commands
         public static long GetAgeMs(long ntNowNs, long lastChangeNs) =>
             (ntNowNs - lastChangeNs) / 1_000_000;
 
+        /// <summary>
+        /// Warns that a command's timestamp is in the future, at most once per
+        /// <see cref="QuestNavConstants.Network.FUTURE_COMMAND_WARNING_INTERVAL_NS"/>
+        /// </summary>
+        private void WarnFutureCommand(uint commandId, long ageMs)
+        {
+            long now = networkTableConnection.NtNow;
+            if (now < nextFutureCommandWarningNs)
+                return;
+            nextFutureCommandWarningNs =
+                now + QuestNavConstants.Network.FUTURE_COMMAND_WARNING_INTERVAL_NS;
+            QueuedLogger.LogWarning(
+                $"Pose Reset Command timestamp is {-ageMs} ms in the future (ID: {commandId}); "
+                    + "NetworkTables time sync is off, so the reset is applied without latency "
+                    + "compensation"
+            );
+        }
+
         #region Event Subscribers
         private void OnAllowedPoseResetTimeoutMsChanged(int timeoutMs)
         {
@@ -119,6 +143,13 @@ namespace QuestNav.Commands
                 switch (receivedCommand.Type)
                 {
                     case QuestNavCommandType.CommandTypeUnspecified:
+                        QueuedLogger.LogWarning(
+                            $"Received command with no type. ID: {receivedCommand.CommandId}"
+                        );
+                        networkTableConnection.SendCommandErrorResponse(
+                            receivedCommand.CommandId,
+                            "Command type not set"
+                        );
                         break;
                     case QuestNavCommandType.PoseReset:
                         if (supersededPoseResetCommands.Contains(receivedTimestampedCommand))
@@ -139,7 +170,14 @@ namespace QuestNav.Commands
                                 receivedTimestampedCommand.LastChange
                             );
 
-                            // Check if the command is fresh
+                            if (ageMs < -QuestNavConstants.Network.MAX_COMMAND_CLOCK_SKEW_MS)
+                            {
+                                // Sent "in the future": NT measures the clock offset once per
+                                // connection, so clock drift grows into a negative age. The
+                                // age is unknown, but the reset itself is still wanted.
+                                WarnFutureCommand(receivedCommand.CommandId, ageMs);
+                            }
+
                             if (ageMs < cachedPoseResetTtlMs)
                             {
                                 // The command is fresh, process it
@@ -168,9 +206,16 @@ namespace QuestNav.Commands
                         }
                         break;
                     default:
-                        QueuedLogger.Log(
-                            $"Execute called with unknown command. ID: {receivedCommand.CommandId} Type: {receivedCommand.Type}",
-                            QueuedLogger.LogLevel.WARNING
+                        // A newer robot library may send commands this app predates; answer
+                        // so it does not wait for a response that never comes
+                        QueuedLogger.LogWarning(
+                            $"Received unknown command. ID: {receivedCommand.CommandId} Type: {(int)receivedCommand.Type}"
+                        );
+                        networkTableConnection.SendCommandErrorResponse(
+                            receivedCommand.CommandId,
+                            $"Unknown command type {(int)receivedCommand.Type}: this QuestNav app "
+                                + $"(protocol version {QuestNavConstants.Network.PROTOCOL_VERSION}) "
+                                + "does not support it. Update the QuestNav app."
                         );
                         break;
                 }

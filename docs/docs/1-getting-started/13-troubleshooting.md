@@ -222,12 +222,16 @@ If your Quest is losing charge during operation despite being connected to power
 ### Version Mismatch Warnings
 
 **Symptoms:**
-- Console is flooded with warnings every 5 seconds:
-  `WARNING FROM QUESTNAV: QuestNavLib version (X.X.X) on your robot does not match QuestNav app version (Y.Y.Y) on your headset.`
+- A warning in the console, once per headset app version:
+  `WARNING FROM QUESTNAV: The QuestNav app on your headset (Y.Y.Y) uses protocol version N, ...`
+
+QuestNavLib compares the app's wire-protocol version, not its release version, so the same app release works with the
+QuestNavLib releases for different WPILib years. It only warns when the app is older than the library supports, or
+newer than it knows.
 
 **Solutions:**
-1. **Update to matching versions**: ensure the `questnavlib.json` vendordep version matches the QuestNav APK
-   installed on the headset. Both should be the same release.
+1. **Update the out-of-date side**: the warning says which one. If the app is too old, install a newer QuestNav APK
+   on the headset; if it is newer than the library, update the `questnavlib.json` vendordep.
 
 2. **Suppress during development**: if you're intentionally running mismatched versions (e.g. testing a new library
    against an older headset app), you can suppress the warning:
@@ -236,7 +240,7 @@ If your Quest is losing charge during operation despite being connected to power
     ```
 
 :::warning
-Re-enable version checking before competition. Mismatched versions can cause subtle compatibility issues.
+Re-enable version checking before competition. Mismatched protocol versions can cause subtle compatibility issues.
 :::
 
 ### App Crashes

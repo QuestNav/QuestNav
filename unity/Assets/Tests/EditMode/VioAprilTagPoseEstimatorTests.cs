@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using NUnit.Framework;
+using QuestNav.Protos.Generated;
 using QuestNav.QuestNav.Estimation;
 using QuestNav.QuestNav.Geometry;
 
@@ -687,17 +689,19 @@ namespace QuestNav.Tests
         [Test]
         public void TrackingOutage_JumpIsIntegratedWithoutTagAlignment()
         {
-            // As after setPose with AprilTags off: VIO reports field coordinates directly
+            // Never placed on the field, so VIO is the only estimate. (After setPose the
+            // position is held instead: AlignmentState_RelocalizationAfterPoseResetIsRealigning)
             var sim = new Sim { VioYaw = 0.0, VioOffset = Translation3d.Zero };
-            sim.Estimator.ResetPosition(sim.Vio, sim.Time);
+            sim.Estimator.AddVioObservation(sim.Vio, sim.Time);
             sim.Step(Translation3d.Zero, 10);
+            uint epoch = sim.Estimator.ResetEpoch;
 
-            // No tags can re-align a held position, so the estimate follows the VIO
             sim.Outage(Translation3d.Zero, 0.2);
             sim.VioOffset += new Translation3d(2.0, -1.0, 0.0);
             sim.Step(Translation3d.Zero, 1);
 
             Assert.IsFalse(sim.Estimator.HasInitialAlignment);
+            Assert.AreEqual(epoch + 1, sim.Estimator.ResetEpoch);
             Assert.AreEqual(
                 0.0,
                 sim.Estimator.EstimatedPose.Translation.GetDistance(sim.Vio.Translation),
@@ -995,6 +999,198 @@ namespace QuestNav.Tests
 
             Assert.IsTrue(sim.Estimator.HasInitialAlignment);
             Assert.AreEqual(before, sim.Estimator.EstimatedPose);
+        }
+
+        [Test]
+        public void AlignmentState_TagAlignmentStartsNewEpoch()
+        {
+            var sim = new Sim();
+            Assert.AreEqual(AlignmentState.Unaligned, sim.Estimator.AlignmentState);
+            uint epoch = sim.Estimator.ResetEpoch;
+
+            // The first VIO pose replaces the zero pose published before it
+            sim.Estimator.AddVioObservation(sim.Vio, sim.Time);
+            sim.Step(Translation3d.Zero, 5);
+            Assert.AreEqual(AlignmentState.Unaligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 1, sim.Estimator.ResetEpoch);
+
+            sim.ObserveTruth();
+            Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 2, sim.Estimator.ResetEpoch);
+
+            // Phase-2 corrections, even ones that move the pose, keep the epoch
+            sim.Step(new Translation3d(1.0, 0.0, 0.0), 20);
+            sim.Observe(
+                new Pose3d(sim.Field.Translation + GainProbeOffset, sim.Field.Rotation),
+                sim.Time
+            );
+            Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 2, sim.Estimator.ResetEpoch);
+        }
+
+        [Test]
+        public void AlignmentState_PoseResetUntilTagsAlign()
+        {
+            var sim = new Sim();
+            sim.Align();
+            uint epoch = sim.Estimator.ResetEpoch;
+
+            sim.Estimator.ResetPosition(sim.Field, sim.Time);
+            Assert.AreEqual(AlignmentState.PoseReset, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 1, sim.Estimator.ResetEpoch);
+
+            // The next accepted tag alignment replaces the reset
+            sim.Step(Translation3d.Zero, 5);
+            sim.ObserveTruth();
+            Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 2, sim.Estimator.ResetEpoch);
+        }
+
+        [Test]
+        public void AlignmentState_PoseResetBeforeAnyTags()
+        {
+            var sim = new Sim();
+            uint epoch = sim.Estimator.ResetEpoch;
+            sim.Estimator.AddVioObservation(sim.Vio, sim.Time);
+
+            sim.Estimator.ResetPosition(sim.Field, sim.Time);
+
+            Assert.AreEqual(AlignmentState.PoseReset, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 2, sim.Estimator.ResetEpoch);
+        }
+
+        [Test]
+        public void ResetEpoch_StartsAtRandom()
+        {
+            // So a restarted app doesn't repeat the epoch robot code last saw
+            var epochs = new HashSet<uint>();
+            for (int i = 0; i < 4; i++)
+                epochs.Add(new VioAprilTagPoseEstimator().ResetEpoch);
+            Assert.Greater(epochs.Count, 1);
+        }
+
+        [Test]
+        public void AlignmentState_IgnoredResetKeepsEpoch()
+        {
+            var sim = new Sim();
+            sim.Align();
+            uint epoch = sim.Estimator.ResetEpoch;
+
+            sim.Estimator.ResetPosition(
+                new Pose3d(0.0, double.NaN, 0.0, Rotation3d.Zero),
+                sim.Time
+            );
+
+            Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch, sim.Estimator.ResetEpoch);
+        }
+
+        [Test]
+        public void AlignmentState_GateRealignStartsNewEpochWhenItSnaps()
+        {
+            var sim = new Sim();
+            sim.Align();
+            uint epoch = sim.Estimator.ResetEpoch;
+            sim.VioOffset += new Translation3d(0.0, 1.0, 0.0);
+            sim.Step(Translation3d.Zero, 1);
+
+            for (int i = 0; i < VioAprilTagPoseEstimatorConstants.REALIGN_REJECTION_COUNT; i++)
+            {
+                sim.ObserveTruth();
+                sim.Step(Translation3d.Zero, 4);
+            }
+
+            // Dropping back to Phase 1 doesn't move the pose
+            Assert.AreEqual(AlignmentState.Realigning, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch, sim.Estimator.ResetEpoch);
+
+            sim.ObserveTruth();
+            Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 1, sim.Estimator.ResetEpoch);
+        }
+
+        [Test]
+        public void AlignmentState_RelocalizationStartsNewEpoch()
+        {
+            var sim = new Sim();
+            sim.Align();
+            uint epoch = sim.Estimator.ResetEpoch;
+
+            sim.Outage(Translation3d.Zero, 0.2);
+            sim.VioOffset += new Translation3d(2.0, -1.0, 0.0);
+            sim.Step(Translation3d.Zero, 1);
+
+            Assert.AreEqual(AlignmentState.Realigning, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 1, sim.Estimator.ResetEpoch);
+        }
+
+        [Test]
+        public void AlignmentState_RelocalizationAfterPoseResetIsRealigning()
+        {
+            var sim = new Sim();
+            sim.Estimator.AddVioObservation(sim.Vio, sim.Time);
+            sim.Estimator.ResetPosition(sim.Field, sim.Time);
+            sim.Step(Translation3d.Zero, 5);
+            uint epoch = sim.Estimator.ResetEpoch;
+
+            sim.Outage(Translation3d.Zero, 0.2);
+            sim.VioOffset += new Translation3d(2.0, -1.0, 0.0);
+            sim.Step(Translation3d.Zero, 1);
+
+            Assert.AreEqual(AlignmentState.Realigning, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 1, sim.Estimator.ResetEpoch);
+
+            sim.Step(Translation3d.Zero, 5);
+            sim.ObserveTruth();
+            Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 2, sim.Estimator.ResetEpoch);
+        }
+
+        [Test]
+        public void AlignmentState_UnalignedRelocalizationStaysUnaligned()
+        {
+            var sim = new Sim();
+            sim.Estimator.AddVioObservation(sim.Vio, sim.Time);
+            sim.Step(Translation3d.Zero, 5);
+            uint epoch = sim.Estimator.ResetEpoch;
+
+            sim.Outage(Translation3d.Zero, 0.2);
+            sim.VioOffset += new Translation3d(2.0, -1.0, 0.0);
+            sim.Step(Translation3d.Zero, 1);
+
+            Assert.AreEqual(AlignmentState.Unaligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch + 1, sim.Estimator.ResetEpoch);
+        }
+
+        [Test]
+        public void AlignmentState_DrivableOutageKeepsEpoch()
+        {
+            var sim = new Sim();
+            sim.Align();
+            uint epoch = sim.Estimator.ResetEpoch;
+
+            sim.Outage(new Translation3d(1.0, 0.0, 0.0), 0.5);
+            sim.Step(Translation3d.Zero, 1);
+
+            Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch, sim.Estimator.ResetEpoch);
+        }
+
+        [Test]
+        public void AlignmentState_RecenterKeepsEpoch()
+        {
+            // A recenter keeps the field pose (Recenter_KeepsHeadingAndTravelDirection), so
+            // it is not a discontinuity
+            var sim = new Sim();
+            sim.Align();
+            uint epoch = sim.Estimator.ResetEpoch;
+
+            sim.Recenter(1.2, new Translation3d(3.0, -2.0, 0.0));
+            sim.Step(new Translation3d(1.0, 0.0, 0.0), 1);
+
+            Assert.AreEqual(AlignmentState.TagAligned, sim.Estimator.AlignmentState);
+            Assert.AreEqual(epoch, sim.Estimator.ResetEpoch);
+            Assert.Less(sim.PositionError, RecenterTolerance);
         }
     }
 }

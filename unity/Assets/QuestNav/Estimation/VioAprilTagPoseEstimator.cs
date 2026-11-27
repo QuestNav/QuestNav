@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using MathNet.Filtering.Kalman;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using QuestNav.Protos.Generated;
 using QuestNav.QuestNav.Geometry;
 using QuestNav.Utils;
 
@@ -17,9 +19,22 @@ namespace QuestNav.QuestNav.Estimation
         /// <summary>True after the first accepted AprilTag observation has aligned the VIO frame to FRC.</summary>
         bool HasInitialAlignment { get; }
 
+        /// <summary>What <see cref="EstimatedPose"/> is referenced to.</summary>
+        AlignmentState AlignmentState { get; }
+
+        /// <summary>
+        /// Changes whenever <see cref="EstimatedPose"/> is re-placed instead of following VIO
+        /// motion: a reset, an AprilTag alignment or re-alignment, or a relocalization that is
+        /// not integrated. Phase-2 AprilTag corrections keep it, though one can move the pose by
+        /// up to <see cref="VioAprilTagPoseEstimatorConstants.CORRECTION_MAX_POSITION_JUMP"/>.
+        /// A recenter keeps the field pose, so it does not change it. Starts at a random value
+        /// and wraps around.
+        /// </summary>
+        uint ResetEpoch { get; }
+
         /// <summary>
         /// Hard-resets the estimator to a known pose, clearing all history and returning to
-        /// Phase 1. A non-finite pose is ignored.
+        /// Phase 1 in the PoseReset alignment state. A non-finite pose is ignored.
         /// </summary>
         void ResetPosition(Pose3d pose, double timestamp);
 
@@ -59,10 +74,11 @@ namespace QuestNav.QuestNav.Estimation
         /// Marks a VIO tracking outage; stop calling <see cref="AddVioObservation"/> until
         /// tracking is back. AprilTag observations are ignored until then. The jump to the
         /// first VIO observation after the outage is integrated when the robot could have
-        /// driven it in that time. For a tag-aligned estimator a larger jump, or a recenter
-        /// during the outage, is a relocalization: it is not integrated, and the estimator
-        /// drops back to Phase 1 so the next tags re-anchor it. Without tag alignment the
-        /// VIO is the only estimate, so the jump is integrated either way.
+        /// driven it in that time. For an estimator placed on the field (by tags or a pose
+        /// reset) a larger jump, or a recenter during the outage, is a relocalization: it is
+        /// not integrated, and the estimator drops back to Phase 1 so the next tags re-anchor
+        /// it. An unplaced estimator has only the VIO, so it follows a larger jump, in a new
+        /// reset epoch.
         /// </summary>
         void HandleTrackingLost();
 
@@ -157,6 +173,8 @@ namespace QuestNav.QuestNav.Estimation
         private double yawOffset;
         private bool initialized;
         private bool hasInitialAlignment;
+        private bool placedByPoseReset;
+        private uint resetEpoch;
         private bool recenterPending;
         private bool trackingLost;
 
@@ -218,6 +236,12 @@ namespace QuestNav.QuestNav.Estimation
             yawOffset = 0.0;
             initialized = false;
             hasInitialAlignment = false;
+
+            // A random start, so a restarted app doesn't repeat the epoch robot code last saw
+            var epochBytes = new byte[sizeof(uint)];
+            using (var rng = RandomNumberGenerator.Create())
+                rng.GetBytes(epochBytes);
+            resetEpoch = BitConverter.ToUInt32(epochBytes, 0);
         }
 
         /// <inheritdoc/>
@@ -235,6 +259,22 @@ namespace QuestNav.QuestNav.Estimation
 
         /// <inheritdoc/>
         public bool HasInitialAlignment => hasInitialAlignment;
+
+        /// <inheritdoc/>
+        public AlignmentState AlignmentState
+        {
+            get
+            {
+                if (hasInitialAlignment)
+                    return AlignmentState.TagAligned;
+                if (realignPending)
+                    return AlignmentState.Realigning;
+                return placedByPoseReset ? AlignmentState.PoseReset : AlignmentState.Unaligned;
+            }
+        }
+
+        /// <inheritdoc/>
+        public uint ResetEpoch => resetEpoch;
 
         /// <summary>Converts a Translation3d to a 3x1 column matrix for the Kalman filter.</summary>
         private static Matrix<double> ToColumnVector(Translation3d t)
@@ -347,6 +387,13 @@ namespace QuestNav.QuestNav.Estimation
                 return;
             }
 
+            Reinitialize(pose, timestamp);
+            placedByPoseReset = true;
+        }
+
+        /// <summary>Restarts the filter and history at <paramref name="pose"/> in Phase 1.</summary>
+        private void Reinitialize(Pose3d pose, double timestamp)
+        {
             var x0 = ToColumnVector(pose.Translation);
             var p0 = DenseMatrix.CreateIdentity(3) * 0.001;
 
@@ -359,6 +406,7 @@ namespace QuestNav.QuestNav.Estimation
             recenterPending = false;
             realignPending = false;
             rejectionStreakCount = 0;
+            resetEpoch++;
 
             snapshotBuffer.Clear();
             snapshotBuffer.AddLast(
@@ -384,7 +432,7 @@ namespace QuestNav.QuestNav.Estimation
 
             if (!initialized)
             {
-                ResetPosition(vioPose, timestamp);
+                Reinitialize(vioPose, timestamp);
                 return;
             }
 
@@ -410,9 +458,11 @@ namespace QuestNav.QuestNav.Estimation
                 double maxJump =
                     VioAprilTagPoseEstimatorConstants.MAX_ROBOT_SPEED_MPS * Math.Max(dt, 0.0)
                     + VioAprilTagPoseEstimatorConstants.TRACKING_JUMP_MARGIN_METERS;
-                // Holding position only helps when tags can re-align it; without tag
-                // alignment the VIO is the only estimate, so the jump is integrated
-                if (hasInitialAlignment && (recenterAcrossOutage || rawDisplacement.Norm > maxJump))
+                // Holding position only helps an estimator placed on the field, which reports
+                // REALIGNING until tags re-place it; an unplaced one has only the VIO, so it
+                // follows the jump
+                bool jumped = rawDisplacement.Norm > maxJump;
+                if ((hasInitialAlignment || placedByPoseReset) && (recenterAcrossOutage || jumped))
                 {
                     RebaseAfterRelocalization(
                         vioPose,
@@ -425,6 +475,11 @@ namespace QuestNav.QuestNav.Estimation
                                 + "outage, more than the robot can drive; not integrating it"
                     );
                     return;
+                }
+                if (jumped)
+                {
+                    // Followed, but not motion: the robot must not take it for driving
+                    resetEpoch++;
                 }
             }
 
@@ -555,6 +610,7 @@ namespace QuestNav.QuestNav.Estimation
                 hasInitialAlignment = true;
                 realignPending = false;
                 rejectionStreakCount = 0;
+                resetEpoch++;
                 QueuedLogger.Log(
                     $"AprilTag initial alignment accepted: tags={tagCount}, inlierRatio={inlierRatio:F2}, "
                         + $"pos=({measuredPosition.X:F3}, {measuredPosition.Y:F3}, {measuredPosition.Z:F3})"
@@ -691,11 +747,11 @@ namespace QuestNav.QuestNav.Estimation
         }
 
         /// <summary>
-        /// Re-bases an aligned estimator onto the first VIO pose after a tracking outage
-        /// whose jump is too large to be robot motion, or that a recenter hid. The estimate
-        /// holds its position instead of integrating the jump, the history from before the
-        /// jump is dropped, and the estimator drops back to Phase 1 so the next tags
-        /// re-anchor position and heading.
+        /// Re-bases an estimator placed on the field (by tags or a pose reset) onto the first
+        /// VIO pose after a tracking outage whose jump is too large to be robot motion, or
+        /// that a recenter hid. The estimate holds its position instead of integrating the
+        /// jump, the history from before the jump is dropped, and the estimator drops back to
+        /// Phase 1 so the next tags re-anchor position and heading.
         /// </summary>
         private void RebaseAfterRelocalization(
             Pose3d newVioPose,
@@ -717,9 +773,13 @@ namespace QuestNav.QuestNav.Estimation
                 )
             );
 
+            // The held position and old heading no longer match the field, whether tags or a
+            // pose reset placed them
             hasInitialAlignment = false;
+            placedByPoseReset = false;
             realignPending = true;
             rejectionStreakCount = 0;
+            resetEpoch++;
 
             QueuedLogger.LogWarning($"{reason}; re-aligning on the next AprilTag observation");
         }

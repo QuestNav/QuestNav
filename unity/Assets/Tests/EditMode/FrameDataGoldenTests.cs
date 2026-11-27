@@ -32,10 +32,26 @@ namespace QuestNav.Tests
                 IsTracking = true,
             };
 
-            Assert.AreEqual(
-                GoldenHex,
-                BitConverter.ToString(frameData.ToByteArray()).Replace("-", "")
-            );
+            Assert.AreEqual(GoldenHex, ToHex(frameData));
         }
+
+        /// <summary>
+        /// Field numbers of the protocol version 2 fields; FrameDataProtoTest on the robot library
+        /// decodes the same bytes.
+        /// </summary>
+        [Test]
+        public void AlignmentFieldsEncodeToGoldenBytes()
+        {
+            var frameData = new ProtobufQuestNavFrameData
+            {
+                AlignmentState = AlignmentState.TagAligned,
+                ResetEpoch = 300,
+            };
+
+            Assert.AreEqual("300338AC02", ToHex(frameData));
+        }
+
+        private static string ToHex(ProtobufQuestNavFrameData frameData) =>
+            BitConverter.ToString(frameData.ToByteArray()).Replace("-", "");
     }
 }

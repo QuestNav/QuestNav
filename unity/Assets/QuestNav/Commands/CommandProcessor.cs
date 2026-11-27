@@ -48,6 +48,11 @@ namespace QuestNav.Commands
         private int cachedPoseResetTtlMs;
 
         /// <summary>
+        /// NT time before which no further future-command warning is logged
+        /// </summary>
+        private long nextFutureCommandWarningNs;
+
+        /// <summary>
         /// Initializes a new command processor with required dependencies
         /// </summary>
         /// <param name="networkTableConnection">Network connection for command communication</param>
@@ -94,6 +99,24 @@ namespace QuestNav.Commands
         /// <param name="lastChangeNs">NT local time of the value's last change in nanoseconds</param>
         public static long GetAgeMs(long ntNowNs, long lastChangeNs) =>
             (ntNowNs - lastChangeNs) / 1_000_000;
+
+        /// <summary>
+        /// Warns that a command's timestamp is in the future, at most once per
+        /// <see cref="QuestNavConstants.Network.FUTURE_COMMAND_WARNING_INTERVAL_NS"/>
+        /// </summary>
+        private void WarnFutureCommand(uint commandId, long ageMs)
+        {
+            long now = networkTableConnection.NtNow;
+            if (now < nextFutureCommandWarningNs)
+                return;
+            nextFutureCommandWarningNs =
+                now + QuestNavConstants.Network.FUTURE_COMMAND_WARNING_INTERVAL_NS;
+            QueuedLogger.LogWarning(
+                $"Pose Reset Command timestamp is {-ageMs} ms in the future (ID: {commandId}); "
+                    + "NetworkTables time sync is off, so the reset is applied without latency "
+                    + "compensation"
+            );
+        }
 
         #region Event Subscribers
         private void OnAllowedPoseResetTimeoutMsChanged(int timeoutMs)
@@ -149,19 +172,13 @@ namespace QuestNav.Commands
 
                             if (ageMs < -QuestNavConstants.Network.MAX_COMMAND_CLOCK_SKEW_MS)
                             {
-                                // Sent "in the future": the clocks disagree, so the age is unknown
-                                QueuedLogger.LogWarning(
-                                    $"Skipping Pose Reset Command from the future. ID: {receivedCommand.CommandId} "
-                                        + $"Age: {ageMs} ms"
-                                );
-                                networkTableConnection.SendCommandErrorResponse(
-                                    receivedCommand.CommandId,
-                                    $"Pose Reset Command timestamp is {-ageMs} ms in the future "
-                                        + $"(limit {QuestNavConstants.Network.MAX_COMMAND_CLOCK_SKEW_MS} ms); "
-                                        + "NetworkTables time sync may be off"
-                                );
+                                // Sent "in the future": NT measures the clock offset once per
+                                // connection, so clock drift grows into a negative age. The
+                                // age is unknown, but the reset itself is still wanted.
+                                WarnFutureCommand(receivedCommand.CommandId, ageMs);
                             }
-                            else if (ageMs < cachedPoseResetTtlMs)
+
+                            if (ageMs < cachedPoseResetTtlMs)
                             {
                                 // The command is fresh, process it
                                 QueuedLogger.Log(

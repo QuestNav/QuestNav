@@ -3,6 +3,10 @@ using QuestNav.Commands;
 using QuestNav.Core;
 using QuestNav.Native.NTCore;
 using QuestNav.Protos.Generated;
+using QuestNav.QuestNav.Estimation;
+using QuestNav.QuestNav.Geometry;
+using QuestNav.Utils;
+using UnityEngine;
 
 namespace QuestNav.Tests
 {
@@ -70,19 +74,44 @@ namespace QuestNav.Tests
         }
 
         [Test]
-        public void PoseResetFromTheFutureIsRejected()
+        public void PoseResetFromTheFutureIsExecuted()
         {
-            long ageMs = -QuestNavConstants.Network.MAX_COMMAND_CLOCK_SKEW_MS - 1;
-            connection.CommandRequests = new[] { PoseReset(7, ageMs) };
+            // NT measures the clock offset once per connection, so drift over a long
+            // connection puts commands well into the future; the reset must still apply
+            var root = new GameObject("root").transform;
+            var camera = new GameObject("camera").transform;
+            camera.SetParent(root, false);
+            try
+            {
+                var config = new FakeConfigManager();
+                var futureProcessor = new CommandProcessor(
+                    connection,
+                    new VioAprilTagPoseEstimator(),
+                    camera,
+                    root,
+                    null,
+                    config
+                );
+                config.RaiseAllowedPoseResetTimeoutMs(TtlMs);
+                var target = new Pose3d(4.0, 2.0, 0.0, new Rotation3d(0, 0, 0.5));
+                var command = PoseReset(7, -5000);
+                command.Value.PoseResetPayload = new ProtobufQuestNavPoseResetPayload
+                {
+                    TargetPose = target.ToProtobuf(),
+                };
+                connection.CommandRequests = new[] { command };
 
-            processor.ProcessCommands();
+                futureProcessor.ProcessCommands();
 
-            Assert.AreEqual(1, connection.ErrorResponses.Count);
-            Assert.AreEqual(7u, connection.ErrorResponses[0].CommandId);
-            StringAssert.StartsWith(
-                $"Pose Reset Command timestamp is {-ageMs} ms in the future",
-                connection.ErrorResponses[0].Message
-            );
+                Assert.IsEmpty(connection.ErrorResponses);
+                CollectionAssert.AreEqual(new[] { 7u }, connection.SuccessResponses);
+                var cameraPose = Conversions.UnityToFrc3d(camera.position, camera.rotation);
+                Assert.AreEqual(0.0, cameraPose.Translation.GetDistance(target.Translation), 1e-5);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root.gameObject);
+            }
         }
 
         [Test]

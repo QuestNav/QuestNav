@@ -90,7 +90,7 @@
          Phase-2 corrections (the Confidence Preset can raise it but cannot lower
          it below this value). See VioAprilTagPoseEstimator.SetMinimumTags. -->
     <ConfigField v-if="configStore.config?.enableAprilTagDetector" title="Minimum Tags Required"
-                 description="Minimum tags needed for a pose lock. The Confidence Preset (Advanced) may require more for ongoing corrections."
+                 description="Minimum tags in one frame needed to move the pose (never fewer than 2). The Confidence Preset (Advanced) may require more for ongoing corrections."
                  control-class="input-control">
       <template #badge>
         <span v-if="isMinTagsFieldDirty" class="dirty-badge">●</span>
@@ -148,10 +148,9 @@
         <div v-if="pendingMode.confidencePreset === 3" class="debug-warning">
           <span class="warning-icon">⚠️</span>
           <span>
-            <strong>Debug</strong> (1 tag, 60% inlier) applies corrections from a single
-            tag. Single-tag pose is geometrically ambiguous (left/right, depth) and may
-            snap the robot to incorrect positions. <strong>Benchtop testing only — do NOT
-            enable on a competition robot.</strong>
+            <strong>Debug</strong> (2 tags, 60% inlier) accepts noisy solves that the other
+            presets reject, and may snap the robot to incorrect positions.
+            <strong>Benchtop testing only — do NOT enable on a competition robot.</strong>
           </span>
         </div>
 
@@ -223,8 +222,9 @@ import ConfigField from './ConfigField.vue'
 import FieldLayoutManager from './FieldLayoutManager.vue'
 
 // Mirrors QuestNavConstants.AprilTag.MINIMUM_TAGS_OPTIONS on the server. Server-side
-// validation rejects values outside this set so keep these in sync.
-const MIN_TAGS_OPTIONS = [1, 2, 3, 4]
+// validation rejects values outside this set so keep these in sync. No 1: a single-tag
+// solve is ambiguous and never moves the pose.
+const MIN_TAGS_OPTIONS = [2, 3, 4]
 
 // Mirrors QuestNav.QuestNav.Estimation.ConfidencePreset on the server. Order and
 // values match the enum (0 = Permissive, 1 = Balanced, 2 = Strict, 3 = Debug).
@@ -236,7 +236,7 @@ const CONFIDENCE_PRESETS = [
   { value: 0, label: 'Permissive', summary: '2 tags, 75% inlier' },
   { value: 1, label: 'Balanced', summary: '3 tags, 80% inlier' },
   { value: 2, label: 'Strict', summary: '4 tags, 90% inlier' },
-  { value: 3, label: 'Debug', summary: '1 tag, 60% inlier' }
+  { value: 3, label: 'Debug', summary: '2 tags, 60% inlier' }
 ]
 
 // Use mock store if available (for testing), otherwise use real store

@@ -758,6 +758,7 @@ namespace QuestNav.Config
             var config = await GetAprilTagConfigAsync();
             var ignoredIds = await GetAprilTagIgnoredIdsAsync();
 
+            // AprilTagDetectorMode raises a stored 1 from older builds to the two-tag floor
             return new AprilTagDetectorMode(
                 (AprilTagDetectorMode.DetectionMode)config.AprilTagDetectorMode,
                 config.AprilTagDetectorWidth,

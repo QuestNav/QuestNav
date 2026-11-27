@@ -101,7 +101,7 @@ namespace QuestNav.QuestNav.Estimation
         /// <summary>
         /// Updates the Phase-2 correction confidence preset. Tighter presets reject more
         /// observations but produce a more conservative pose; looser presets are useful
-        /// when the default tuning never converges (e.g. only a single tag is visible).
+        /// when the default tuning never converges (e.g. only two tags are ever in view).
         /// The initial Phase-1 thresholds are not affected; a re-align after consistent
         /// gate rejections must meet both.
         /// </summary>
@@ -111,7 +111,9 @@ namespace QuestNav.QuestNav.Estimation
         /// Sets the user-supplied "Minimum Tags Required" floor used by both Phase-1
         /// alignment and Phase-2 corrections. Phase-2 takes the max of this and the
         /// preset's tag count, as does a re-align; the initial Phase-1 alignment uses this
-        /// value directly.
+        /// value directly. Values below
+        /// <see cref="VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE"/>
+        /// are raised to it.
         /// </summary>
         void SetMinimumTags(int minimumTags);
     }
@@ -125,7 +127,7 @@ namespace QuestNav.QuestNav.Estimation
     ///   bar to establish the yaw offset and initial position correction.
     /// - Phase 2 (Aligned): VIO is primary. Only high-confidence AprilTag corrections that pass
     ///   a Mahalanobis outlier gate are applied. The yaw offset is kept from Phase 1 and only
-    ///   re-based on a VIO recenter. A run of consistent rejected multi-tag observations drops
+    ///   re-based on a VIO recenter. A run of consistent gate-rejected observations drops
     ///   back to Phase 1 to re-align, which then needs an observation that also meets the
     ///   Phase-2 confidence preset.
     /// </summary>
@@ -186,7 +188,7 @@ namespace QuestNav.QuestNav.Estimation
         // needs a Phase-2 quality observation, since it also resets the heading.
         private bool realignPending;
 
-        // Consecutive gate-rejected multi-tag observations whose innovations agree with
+        // Consecutive gate-rejected observations whose innovations agree with
         // rejectionStreakInnovation, the first of the run.
         private int rejectionStreakCount;
         private Translation3d rejectionStreakInnovation;
@@ -559,11 +561,15 @@ namespace QuestNav.QuestNav.Estimation
             if (!hasInitialAlignment)
             {
                 // Phase-1 tag count uses the user's "Minimum Tags Required" setting
-                // (forwarded by AprilTagManager via SetMinimumTags). The inlier-ratio
-                // threshold is intentionally still hardcoded (INITIAL_ALIGNMENT_MIN_INLIER_RATIO)
-                // because a bad first observation mis-aligns the field origin for the
-                // whole session, so a quality safety floor is non-negotiable.
-                int alignMinTags = userMinimumTags;
+                // (forwarded by AprilTagManager via SetMinimumTags), never below the
+                // two-tag floor. The inlier-ratio threshold is intentionally still hardcoded
+                // (INITIAL_ALIGNMENT_MIN_INLIER_RATIO) because a bad first observation
+                // mis-aligns the field origin for the whole session, so a quality safety
+                // floor is non-negotiable. This also gates the first fix after a pose reset.
+                int alignMinTags = Math.Max(
+                    userMinimumTags,
+                    VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+                );
                 double alignMinInlierRatio =
                     VioAprilTagPoseEstimatorConstants.INITIAL_ALIGNMENT_MIN_INLIER_RATIO;
                 if (realignPending)
@@ -620,10 +626,13 @@ namespace QuestNav.QuestNav.Estimation
 
             // --- Phase 2: VIO-primary with selective corrections ---
 
-            // Phase-2 takes the max of the user's "Minimum Tags Required" and the
-            // confidence preset's tag count. The user's setting is a HARD FLOOR; the
-            // preset cannot loosen it below what the user explicitly chose.
-            int effectiveMinTags = Math.Max(userMinimumTags, correctionMinTags);
+            // Phase-2 takes the max of the user's "Minimum Tags Required", the confidence
+            // preset's tag count and the two-tag floor. Neither the user nor the preset can
+            // loosen it below the floor.
+            int effectiveMinTags = Math.Max(
+                VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE,
+                Math.Max(userMinimumTags, correctionMinTags)
+            );
             if (tagCount < effectiveMinTags || inlierRatio < correctionMinInlierRatio)
             {
                 QueuedLogger.Log(
@@ -638,7 +647,7 @@ namespace QuestNav.QuestNav.Estimation
                 !PassesOutlierGate(measuredPosition, stdDevs, captureNode.Value, out var innovation)
             )
             {
-                TrackGateRejection(innovation, tagCount);
+                TrackGateRejection(innovation);
                 return;
             }
 
@@ -684,8 +693,11 @@ namespace QuestNav.QuestNav.Estimation
         /// <inheritdoc/>
         public void SetMinimumTags(int minimumTags)
         {
-            // Refuse zero or negative; the estimator cannot work with no observations.
-            int sanitized = minimumTags < 1 ? 1 : minimumTags;
+            // A single-tag solve is ambiguous, so the floor is never below two
+            int sanitized = Math.Max(
+                minimumTags,
+                VioAprilTagPoseEstimatorConstants.MIN_TAGS_FOR_POSITION_UPDATE
+            );
             userMinimumTags = sanitized;
             QueuedLogger.Log(
                 $"AprilTag minimum tags set to {sanitized} "
@@ -859,15 +871,13 @@ namespace QuestNav.QuestNav.Estimation
         }
 
         /// <summary>
-        /// Counts consecutive gate rejections of multi-tag observations that agree with each
-        /// other. Enough of them mean the estimate, not the tags, is wrong, so the estimator
-        /// drops back to Phase 1 and re-aligns on the next accepted observation.
+        /// Counts consecutive gate rejections that agree with each other (the tag-count check
+        /// runs first, so each has at least two tags). Enough of them mean the estimate, not
+        /// the tags, is wrong, so the estimator drops back to Phase 1 and re-aligns on the
+        /// next accepted observation.
         /// </summary>
-        private void TrackGateRejection(Translation3d innovation, int tagCount)
+        private void TrackGateRejection(Translation3d innovation)
         {
-            if (tagCount < VioAprilTagPoseEstimatorConstants.REALIGN_MIN_TAGS)
-                return;
-
             if (
                 rejectionStreakCount == 0
                 || innovation.GetDistance(rejectionStreakInnovation)

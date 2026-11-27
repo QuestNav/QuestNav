@@ -119,10 +119,16 @@ const cacheBuster = ref(Date.now())
 
 const streamUrl = computed(() => `${videoApi.baseUrl}/video?t=${cacheBuster.value}`)
 
+// Prefer the running mode from /api/status: a /video request with query parameters
+// changes it without saving to the config
 const activeStreamSettings = computed(() => {
   const mode = configStore.config?.streamMode
-  if (!mode) return ''
-  return `${mode.width}x${mode.height}@${mode.framerate}fps Quality: ${mode.quality}`
+  const status = cameraStatus.value
+  const resolution = status?.effectivePassthroughResolution ?? mode
+  const framerate = status?.passthroughStreamFramerate ?? mode?.framerate
+  const quality = status?.passthroughStreamQuality ?? mode?.quality
+  if (!resolution || framerate == null || quality == null) return ''
+  return `${resolution.width}x${resolution.height}@${framerate}fps Quality: ${quality}`
 })
 
 function syncResolutionSelection() {

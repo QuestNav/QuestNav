@@ -103,6 +103,11 @@ namespace QuestNav.Camera
         public int MaxFrameRate => cameraSource.Mode.Fps;
 
         /// <summary>
+        /// JPEG compression quality (1-100) frames are currently encoded with
+        /// </summary>
+        public int CompressionQuality => compressionQuality;
+
+        /// <summary>
         /// Gets whether the frame source is currently available for streaming.
         /// </summary>
         public bool IsAvailable => isInitialized;
@@ -143,14 +148,38 @@ namespace QuestNav.Camera
         private Coroutine frameCaptureCoroutine;
 
         /// <summary>
-        /// Changes the video mode and compression quality based on requested parameters. The best matching mode that
-        /// meets or exceeds the requested parameters will be selected.
+        /// Applies video mode and compression quality requested by a stream's query string, without saving them to
+        /// config. All viewers share one camera mode and encoder, so this lasts until the next config change.
         /// </summary>
         /// <param name="width">Requested width, or null if not specified</param>
         /// <param name="height">Requested height, or null if not specified</param>
         /// <param name="fps">Requested FPS, or null if not specified</param>
         /// <param name="compression">Requested compression quality (1-100), or null if not specified</param>
-        public async Task SetModeAndCompression(int? width, int? height, int? fps, int? compression)
+        public void RequestModeAndCompression(int? width, int? height, int? fps, int? compression)
+        {
+            InvokeOnMainThread(() =>
+            {
+                if (isInitialized)
+                {
+                    ApplyModeAndCompression(width, height, fps, compression);
+                }
+            });
+        }
+
+        /// <summary>
+        /// Changes the video mode and compression quality based on requested parameters and saves them to config. The
+        /// best matching mode that meets or exceeds the requested parameters will be selected.
+        /// </summary>
+        /// <param name="width">Requested width, or null if not specified</param>
+        /// <param name="height">Requested height, or null if not specified</param>
+        /// <param name="fps">Requested FPS, or null if not specified</param>
+        /// <param name="compression">Requested compression quality (1-100), or null if not specified</param>
+        private async Task SetModeAndCompression(
+            int? width,
+            int? height,
+            int? fps,
+            int? compression
+        )
         {
             // Save the config, which will trigger the change event handler to apply the changes to the stream
             if (width.HasValue || height.HasValue || fps.HasValue || compression.HasValue)

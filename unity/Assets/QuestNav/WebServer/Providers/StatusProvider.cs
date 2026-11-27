@@ -90,6 +90,17 @@ namespace QuestNav.WebServer
         /// May differ from the passthrough stream's requested resolution when locked.
         /// </summary>
         private Vector2Int? effectivePassthroughResolution;
+
+        /// <summary>
+        /// Framerate the passthrough stream is running at, or null when it is not running.
+        /// May differ from the saved stream mode after a /video request with query parameters.
+        /// </summary>
+        private int? passthroughStreamFramerate;
+
+        /// <summary>
+        /// JPEG quality the passthrough stream is running at, or null when it is not running.
+        /// </summary>
+        private int? passthroughStreamQuality;
         #endregion
 
         #region Public Update Methods
@@ -167,6 +178,20 @@ namespace QuestNav.WebServer
                 this.effectivePassthroughResolution = effectiveResolution;
             }
         }
+
+        /// <summary>
+        /// Updates the framerate and JPEG quality the passthrough stream is running at.
+        /// </summary>
+        /// <param name="framerate">Running framerate, or null when the stream is not running.</param>
+        /// <param name="quality">Running JPEG quality, or null when the stream is not running.</param>
+        public void UpdateStreamStatus(int? framerate, int? quality)
+        {
+            lock (statusLock)
+            {
+                passthroughStreamFramerate = framerate;
+                passthroughStreamQuality = quality;
+            }
+        }
         #endregion
 
         #region Public Query Methods
@@ -242,6 +267,8 @@ namespace QuestNav.WebServer
                                 height = effectivePassthroughResolution.Value.y,
                             }
                         : null,
+                    passthroughStreamFramerate = passthroughStreamFramerate,
+                    passthroughStreamQuality = passthroughStreamQuality,
 
                     // Timestamp
                     timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds(),

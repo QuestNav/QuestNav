@@ -52,6 +52,11 @@ namespace QuestNav.WebServer
             int MaxFrameRate { get; }
 
             /// <summary>
+            /// JPEG compression quality (1-100) frames are currently encoded with
+            /// </summary>
+            int CompressionQuality { get; }
+
+            /// <summary>
             /// The current frame
             /// </summary>
             EncodedFrame CurrentFrame { get; }
@@ -63,13 +68,14 @@ namespace QuestNav.WebServer
             Network.VideoMode[] GetAvailableModes();
 
             /// <summary>
-            /// Called when stream starts with requested video parameters from query string.
+            /// Called when a stream starts with video parameters from its query string. The change
+            /// applies to every viewer until the next config change or restart, and is not saved.
             /// </summary>
             /// <param name="width">Requested width, or null if not specified</param>
             /// <param name="height">Requested height, or null if not specified</param>
             /// <param name="fps">Requested FPS, or null if not specified</param>
             /// <param name="compression">Requested compression quality (1-100), or null if not specified</param>
-            Task SetModeAndCompression(int? width, int? height, int? fps, int? compression);
+            void RequestModeAndCompression(int? width, int? height, int? fps, int? compression);
 
             /// <summary>
             /// Gets whether the frame source is currently available for streaming.
@@ -215,8 +221,13 @@ namespace QuestNav.WebServer
                 fps = parsedFps;
             }
 
-            // Notify frame source of stream start with requested parameters
-            await frameSource.SetModeAndCompression(width, height, fps, compression);
+            // Unauthenticated: any client, including an <img> on another site's page, can change
+            // the shared runtime mode. It is not saved, so the next stream config change or a
+            // restart restores the saved mode.
+            if (width.HasValue || height.HasValue || fps.HasValue || compression.HasValue)
+            {
+                frameSource.RequestModeAndCompression(width, height, fps, compression);
+            }
 
             try
             {

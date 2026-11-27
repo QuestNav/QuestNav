@@ -6,7 +6,8 @@ This document describes the HTTP endpoints exposed by ConfigServer for QuestNav.
 - Base URL: `http://<device-ip>:<port>/`
   - Default port is 5801 and is configurable via WebServerConstants.serverPort.
 - Content Type: application/json for all /api endpoints, unless otherwise noted.
-- CORS: When WebServerConstants.enableCORSDevMode is true, the server sets `Access-Control-Allow-Origin: *` and supports preflight with `OPTIONS` (responds 200).
+- Same origin only: the server sends no CORS headers. A POST, PATCH or DELETE whose `Origin` header does not match its `Host` header gets 403. Requests without an `Origin` header (curl, scripts) are allowed.
+- Request bodies: JSON bodies must be sent with `Content-Type: application/json` (otherwise 415) and are limited to 64 KB, or 1 MB for field-layout uploads (otherwise 413).
 - Errors: Unhandled exceptions return HTTP 500 with a JSON body `{ "success": false, "message": "..." }`.
 
 ## Common Models
@@ -98,7 +99,9 @@ This document describes the HTTP endpoints exposed by ConfigServer for QuestNav.
 
 ## POST /api/upload-database
 - Description: Uploads a new SQLite configuration database file.
-- Request: Body containing the SQLite database file.
+- Request:
+  - Headers: `Content-Type: application/octet-stream` (`application/vnd.sqlite3` and `application/x-sqlite3` are also accepted; anything else gets 415)
+  - Body: the SQLite database file, at most 4 MB (otherwise 413)
 - Responses:
 - 200 OK → SimpleResponse
 ```json
@@ -343,7 +346,7 @@ Content-Length: 12001
 - Notes: This endpoint is not JSON.
 
 Other behaviors
-- Preflight: Any /api endpoint accepts `OPTIONS` and returns 200 with CORS headers when enabled.
+- `OPTIONS` on any /api path returns 204 with an `Allow` header and no CORS headers.
 - Unknown routes under /api: 404 Not Found with JSON body `{ "success": false, "message": "Not found" }`.
 
 Examples

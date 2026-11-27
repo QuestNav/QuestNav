@@ -40,11 +40,7 @@ runs:
 
     - name: Install NuGetForUnity CLI
       shell: pwsh
-      run: dotnet tool install --global NuGetForUnity.Cli
-
-    - name: Install DocFX
-      shell: pwsh
-      run: dotnet tool install --global docfx
+      run: dotnet tool install --global NuGetForUnity.Cli --version 4.5.0
 
     - name: Restore NuGet Packages
       shell: pwsh

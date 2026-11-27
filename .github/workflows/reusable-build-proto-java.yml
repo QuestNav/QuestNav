@@ -33,30 +33,27 @@ jobs:
           version: ${{ inputs.version }}
 
       - name: Install Protoc
-        uses: arduino/setup-protoc@v3
+        uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3.0.0
         with:
+          version: '23.4'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # SHA-256 computed from Maven Central; its published .sha1 matches the same file.
       - name: Download QuickBuf plugin
-        id: download-quickbuf
-        uses: clausnz/github-action-download-maven-artifact@master
-        with:
-          url: 'https://repo1.maven.org'
-          repository: 'maven2'
-          groupId: 'us.hebi.quickbuf'
-          artifactId: 'protoc-gen-quickbuf'
-          version: '1.4'
-          extension: 'exe'
-          classifier: 'linux-x86_64'
-
-      - name: Setup QuickBuf
-        run: chmod +x ${{ steps.download-quickbuf.outputs.file }}
+        env:
+          QUICKBUF_URL: https://repo1.maven.org/maven2/us/hebi/quickbuf/protoc-gen-quickbuf/1.4/protoc-gen-quickbuf-1.4-linux-x86_64.exe
+          QUICKBUF_SHA256: 641f66130f048571ae44b7afb7756a46a69fa6d5c64c26bc39ce0cb385c2e8f8
+        run: |
+          mkdir -p "$RUNNER_TEMP/quickbuf"
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/quickbuf/protoc-gen-quickbuf" "$QUICKBUF_URL"
+          echo "$QUICKBUF_SHA256  $RUNNER_TEMP/quickbuf/protoc-gen-quickbuf" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/quickbuf/protoc-gen-quickbuf"
 
       - name: Generate Java QuickBuffers
         run: |
           protoc \
           --proto_path=protos \
-          --plugin=protoc-gen-quickbuf=${{ steps.download-quickbuf.outputs.file }} \
+          --plugin=protoc-gen-quickbuf="$RUNNER_TEMP/quickbuf/protoc-gen-quickbuf" \
           --quickbuf_out=gen_descriptors=true,indent=4:questnav-lib/src/main/java/ \
           protos/data.proto protos/commands.proto
 

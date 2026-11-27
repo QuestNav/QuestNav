@@ -1,0 +1,28 @@
+# dorny/paths-filter definitions shared by ci.yml and release.yml.
+# Generated proto code is not committed, so proto changes count as Java and C# changes.
+ci:
+  - '.github/actions/**'
+  - '.github/workflows/**'
+  - '.github/filters.yml'
+  - '.csharpierrc.json'
+proto: &proto
+  - 'protos/**'
+java:
+  - *proto
+  - 'questnav-lib/src/**'
+  - 'questnav-lib/**/*.gradle'
+  - 'questnav-lib/gradle.properties'
+  - 'questnav-lib/gradle/**'
+  - 'questnav-lib/gradlew*'
+csharp:
+  - *proto
+  # Any asset, package or project setting can change the APK.
+  - 'unity/Assets/**'
+  - 'unity/Packages/**'
+  - 'unity/ProjectSettings/**'
+  - 'unity/DocFX/**'
+docs:
+  - 'docs/**'
+web-ui:
+  - 'questnav-web-ui/**'
+  - 'unity/Assets/StreamingAssets/ui/**'

@@ -28,32 +28,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       
-      - uses: dorny/paths-filter@v4
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: changes
         with:
-          filters: |
-            ci:
-              - '.github/actions/**'
-              - '.github/workflows/**'
-            java:
-              - 'questnav-lib/**/*.java'
-              - 'questnav-lib/**/*.gradle'
-              - 'questnav-lib/gradle.properties'
-              - 'questnav-lib/src/generate/**'
-            csharp:
-              - 'unity/**/*.cs'
-              - 'unity/**/*.json'
-              - 'unity/**/*.unity'
-              - 'unity/**/*.meta'
-              - 'unity/**/*.asmdef'
-              - 'unity/Assets/Plugins/**'
-            proto:
-              - 'protos/**'
-            docs:
-              - 'docs/**'
-            web-ui:
-              - 'questnav-web-ui/**'
-              - 'unity/Assets/StreamingAssets/ui/**'
+          filters: .github/filters.yml
 
 
 # ----------------------- JAVA ----------------------- #
@@ -63,7 +41,8 @@ jobs:
       needs.detect-changes.outputs.proto-changed == 'true' ||
       needs.detect-changes.outputs.csharp-changed == 'true' ||
       needs.detect-changes.outputs.java-changed == 'true' ||
-      needs.detect-changes.outputs.web-ui-changed == 'true'
+      needs.detect-changes.outputs.web-ui-changed == 'true' ||
+      needs.detect-changes.outputs.docs-changed == 'true'
     needs: [detect-changes]
     uses: ./.github/workflows/reusable-build-proto-java.yml
 
@@ -83,19 +62,18 @@ jobs:
 
   build-java:
     if: |
-      always() &&
+      !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
       (needs.detect-changes.outputs.ci-changed == 'true' ||
       needs.detect-changes.outputs.java-changed == 'true' ||
       needs.detect-changes.outputs.csharp-changed == 'true' ||
-      needs.detect-changes.outputs.web-ui-changed == 'true') &&
-      (needs.format-java.result != 'failure' &&
-      needs.docs-java.result != 'failure')
-    needs: [detect-changes, format-java, docs-java]
+      needs.detect-changes.outputs.web-ui-changed == 'true')
+    needs: [detect-changes, build-proto-java, format-java, docs-java]
     uses: ./.github/workflows/reusable-build-java.yml
 
   publish-java:
     if: |
-      always() &&
+      !cancelled() &&
       needs.build-java.result == 'success' &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main'
@@ -112,7 +90,8 @@ jobs:
       needs.detect-changes.outputs.proto-changed == 'true' ||
       needs.detect-changes.outputs.csharp-changed == 'true' ||
       needs.detect-changes.outputs.java-changed == 'true' ||
-      needs.detect-changes.outputs.web-ui-changed == 'true'
+      needs.detect-changes.outputs.web-ui-changed == 'true' ||
+      needs.detect-changes.outputs.docs-changed == 'true'
     needs: [detect-changes]
     uses: ./.github/workflows/reusable-build-proto-csharp.yml
     
@@ -132,27 +111,28 @@ jobs:
 
   build-csharp:
     if: |
-      always() &&
+      !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
       ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository)) &&
       (needs.detect-changes.outputs.ci-changed == 'true' ||
       needs.detect-changes.outputs.csharp-changed == 'true' ||
       needs.detect-changes.outputs.java-changed == 'true' ||
-      needs.detect-changes.outputs.web-ui-changed == 'true') &&
-      (needs.format-csharp.result != 'failure' &&
-      needs.docs-csharp.result != 'failure')
+      needs.detect-changes.outputs.web-ui-changed == 'true')
     needs: [detect-changes, docs-csharp, format-csharp]
     uses: QuestNav/QuestNav/.github/workflows/development-apk.yml@main
     permissions: {}
 
   test-csharp:
+    # Dependabot runs get no Actions secrets, so the Unity license can't activate.
     if: |
-      ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.actor != 'dependabot[bot]' &&
+      (((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository)) &&
       (needs.detect-changes.outputs.ci-changed == 'true' ||
-      needs.detect-changes.outputs.csharp-changed == 'true')
+      needs.detect-changes.outputs.csharp-changed == 'true'))
     needs: [detect-changes, build-proto-csharp, build-web-ui]
     uses: ./.github/workflows/reusable-test-csharp.yml
     permissions:
@@ -169,7 +149,8 @@ jobs:
       needs.detect-changes.outputs.ci-changed == 'true' ||
       needs.detect-changes.outputs.web-ui-changed == 'true' ||
       needs.detect-changes.outputs.csharp-changed == 'true' ||
-      needs.detect-changes.outputs.java-changed == 'true'
+      needs.detect-changes.outputs.java-changed == 'true' ||
+      needs.detect-changes.outputs.docs-changed == 'true'
     needs: [detect-changes]
     uses: ./.github/workflows/reusable-build-web-ui.yml
 
@@ -193,6 +174,8 @@ jobs:
 
   publish-docs:
     if: |
+      !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
       needs.detect-changes.outputs.docs-changed == 'true' &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main'
@@ -220,9 +203,13 @@ jobs:
       - docs-proto
       - build-docs
       - build-web-ui
+      - publish-java
+      - publish-docs
     runs-on: ubuntu-latest
     steps:
       - name: Generate CI Summary
+        env:
+          NEEDS: ${{ toJSON(needs) }}
         run: |
           echo "# CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -232,3 +219,14 @@ jobs:
           echo "- C#: \`${{ needs.detect-changes.outputs.csharp-changed }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- Proto: \`${{ needs.detect-changes.outputs.proto-changed }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- Docs: \`${{ needs.detect-changes.outputs.docs-changed }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Web UI: \`${{ needs.detect-changes.outputs.web-ui-changed }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "$NEEDS" | jq -r 'to_entries[] | "- \(.key): `\(.value.result)`"' >> $GITHUB_STEP_SUMMARY
+
+      # Skipped jobs are fine; this makes ci-summary usable as the single required check.
+      - name: Fail on failed or cancelled jobs
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "One or more CI jobs failed or were cancelled."
+          exit 1

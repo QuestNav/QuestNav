@@ -33,32 +33,13 @@ jobs:
     
       - name: Get last release tag
         id: get-last-release
-        uses: WyriHaximus/github-action-get-previous-tag@v2
+        uses: WyriHaximus/github-action-get-previous-tag@83f26fea93bc7efcbca2eb5591f5eaaf66b8f206 # v2.1.0
 
       - name: Determine publishable changes
-        uses: dorny/paths-filter@v4
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: changes
         with:
-          filters: |
-            java:
-              - 'questnav-lib/**.java'
-              - 'questnav-lib/**.gradle'
-              - 'questnav-lib/gradle.properties'
-              - 'questnav-lib/src/generate/**'
-            csharp:
-              - 'unity/**.cs'
-              - 'unity/**.json'
-              - 'unity/**.unity'
-              - 'unity/**.meta'
-              - 'unity/**.asmdef'
-              - 'unity/Assets/Plugins/**'
-            proto:
-              - 'protos/**'
-            docs:
-              - 'docs/**'
-            web-ui:
-              - 'questnav-web-ui/**'
-              - 'unity/Assets/StreamingAssets/ui/**'
+          filters: .github/filters.yml
           base: ${{ steps.get-last-release.outputs.tag }}
 
   build-proto-java:
@@ -87,10 +68,12 @@ jobs:
 
   build-apk:
     if: |
-      (needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
+      !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      ((needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
       needs.determine-publishable-changes.outputs.java-changed == 'true' ||
       needs.determine-publishable-changes.outputs.web-ui-changed == 'true') ||
-      inputs.force-release
+      inputs.force-release)
     needs: [build-proto-csharp, build-web-ui, determine-publishable-changes]
     uses: ./.github/workflows/reusable-build-csharp.yml
     with:
@@ -146,8 +129,10 @@ jobs:
 
   publish-docs:
     if: |
-      (needs.determine-publishable-changes.outputs.docs-changed == 'true') ||
-      inputs.force-release
+      !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      (needs.determine-publishable-changes.outputs.docs-changed == 'true' ||
+      inputs.force-release)
     needs: [build-proto-java, build-proto-csharp, build-web-ui, determine-publishable-changes]
     uses: ./.github/workflows/reusable-publish-docs.yml
     permissions:
@@ -171,12 +156,18 @@ jobs:
       MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
       MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
 
+  # A skipped publish-docs (no docs changes) must not skip the release, but the
+  # signed APK and vendor JSON it uploads must exist.
   github-release:
     if: |
-      (needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
+      !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      needs.sign-apk.result == 'success' &&
+      needs.publish-java.result == 'success' &&
+      ((needs.determine-publishable-changes.outputs.csharp-changed == 'true' ||
       needs.determine-publishable-changes.outputs.java-changed == 'true' ||
       needs.determine-publishable-changes.outputs.web-ui-changed == 'true') ||
-      inputs.force-release
+      inputs.force-release)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -213,11 +204,13 @@ jobs:
           path: release/vendor
 
       - name: Release to GitHub Releases
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           generate_release_notes: true
           fail_on_unmatched_files: true
           tag_name: ${{ steps.version-info.outputs.version }}
+          # Tag the built commit when the draft is published, not main's HEAD at that time.
+          target_commitish: ${{ github.sha }}
           files: |
             release/apk/Android.apk
             release/vendor/*.json
